@@ -1373,7 +1373,7 @@ begin
 
     if (ConstValType in IntegerTypes) and (RightConstValType in RealTypes) then
     begin
-      Int2Float(ConstVal);
+      ConstVal := FromInt64(ConstVal);
       ConstValType := RightConstValType;
     end;
 
@@ -1400,61 +1400,36 @@ begin
       ConstValType := RightConstValType;
 
 
-    case Tok[j + 1].Kind of
+    case TokenAt(j + 1).Kind of
 
-      MULTOK: if ConstValType in RealTypes then
-        begin
-          move(ConstVal, ftmp, sizeof(ftmp));
-          move(RightConstVal, ftmp_, sizeof(ftmp_));
+      TTokenKind.MULTOK: ConstVal := Multiply(ConstValType, ConstVal, RightConstVal);
 
-          move(ftmp[1], fl, sizeof(fl));
-          move(ftmp_[1], fl_, sizeof(fl_));
-
-          fl := fl * fl_;
-
-          ftmp[0] := round(fl * TWOPOWERFRACBITS);
-          ftmp[1] := Integer(fl);
-
-          move(ftmp, ConstVal, sizeof(ftmp));
-        end
-        else
-          ConstVal := ConstVal * RightConstVal;
-
-      DIVTOK: begin
-        move(ConstVal, ftmp, sizeof(ftmp));
-        move(RightConstVal, ftmp_, sizeof(ftmp_));
-
-        move(ftmp[1], fl, sizeof(fl));
-        move(ftmp_[1], fl_, sizeof(fl_));
-
-        if fl_ = 0 then
+      TTokenKind.DIVTOK: begin
+        try
+          ConstVal := Divide(ConstValType, ConstVal, RightConstVal);
+        except
+          On EDivByZero do
         begin
           isError := False;
           isConst := False;
-          Error(i, 'Division by zero');
+            Error(i, TMessage.Create(TErrorCode.DivisionByZero, 'Division by zero'));
+          end;
         end;
-
-        fl := fl / fl_;
-
-        ftmp[0] := round(fl * TWOPOWERFRACBITS);
-        ftmp[1] := Integer(fl);
-
-        move(ftmp, ConstVal, sizeof(ftmp));
       end;
 
-      MODTOK: ConstVal := ConstVal mod RightConstVal;
-      IDIVTOK: ConstVal := ConstVal div RightConstVal;
-      SHLTOK: ConstVal := ConstVal shl RightConstVal;
-      SHRTOK: ConstVal := ConstVal shr RightConstVal;
-      ANDTOK: ConstVal := ConstVal and RightConstVal;
+      TTokenKind.MODTOK: ConstVal := ConstVal mod RightConstVal;
+      TTokenKind.IDIVTOK: ConstVal := ConstVal div RightConstVal;
+      TTokenKind.SHLTOK: ConstVal := ConstVal shl RightConstVal;
+      TTokenKind.SHRTOK: ConstVal := ConstVal shr RightConstVal;
+      TTokenKind.ANDTOK: ConstVal := ConstVal and RightConstVal;
     end;
 
     ConstValType := GetCommonType(j + 1, ConstValType, RightConstValType);
 
-    if not (ConstValType in RealTypes + [BOOLEANTOK]) then
+    if not (ConstValType in RealTypes + [TDataType.BOOLEANTOK]) then
       ConstValType := GetValueType(ConstVal);
 
-    CheckOperator(i, Tok[j + 1].Kind, ConstValType, RightConstValType);
+    CheckOperator(i, TokenAt(j + 1).Kind, ConstValType, RightConstValType);
 
     j := k;
   end;
@@ -1467,61 +1442,35 @@ end;  //CompileConstTerm
 // ----------------------------------------------------------------------------
 
 
-function CompileSimpleConstExpression(i: Integer; out ConstVal: Int64; out ConstValType: TDataType): Integer;
+function CompileSimpleConstExpression(const i: Integer; out ConstVal: Int64; out ConstValType: TDataType): Integer;
 var
   j, k: Integer;
   RightConstVal: Int64;
   RightConstValType: TDataType;
-  ftmp, ftmp_: TFloat;
-  fl, fl_: Single;
 
 begin
 
+  ConstVal := 0;
+  ConstValType := TDataType.UNTYPETOK;
   Result := i;
 
-  if Tok[i].Kind in [PLUSTOK, MINUSTOK] then j := i + 1
+  if TokenAt(i).Kind in [TTokenKind.PLUSTOK, TTokenKind.MINUSTOK] then j := i + 1
   else
     j := i;
   j := CompileConstTerm(j, ConstVal, ConstValType);
 
   if isError then exit;
 
-  ftmp := Default(TFloat);
-  ftmp_ := Default(TFloat);
 
-  fl := 0;
-  fl_ := 0;
-
-  if Tok[i].Kind = MINUSTOK then
+  if TokenAt(i).Kind = TTokenKind.MINUSTOK then
   begin
 
-    if ConstValType in RealTypes then
-    begin  // Unary minus (RealTypes)
-
-      move(ConstVal, ftmp, sizeof(ftmp));
-      move(ftmp[1], fl, sizeof(fl));
-
-      fl := -fl;
-
-      ftmp[0] := round(fl * TWOPOWERFRACBITS);
-      ftmp[1] := Integer(fl);
-
-      move(ftmp, ConstVal, sizeof(ftmp));
-
-    end
-    else
-    begin
-      ConstVal := -ConstVal;           // Unary minus (IntegerTypes)
-
-      if ConstValType in IntegerTypes then
-        ConstValType := GetValueType(ConstVal);
+    ConstVal := Negate(ConstValType, ConstVal);
 
     end;
 
-  end;
 
-
-  while Tok[j + 1].Kind in [PLUSTOK, MINUSTOK, ORTOK, XORTOK] do
+  while TokenAt(j + 1).Kind in [TTokenKind.PLUSTOK, TTokenKind.MINUSTOK, TTokenKind.ORTOK, TTokenKind.XORTOK] do
   begin
 
     k := CompileConstTerm(j + 2, RightConstVal, RightConstValType);
@@ -1534,71 +1483,38 @@ begin
 
     if (ConstValType in RealTypes) and (RightConstValType in IntegerTypes) then
     begin
-      Int2Float(RightConstVal);
+      RightConstVal := FromInt64(RightConstVal);
       RightConstValType := ConstValType;
     end;
 
     if (ConstValType in IntegerTypes) and (RightConstValType in RealTypes) then
     begin
-      Int2Float(ConstVal);
+      ConstVal := FromInt64(ConstVal);
       ConstValType := RightConstValType;
     end;
 
-    if (ConstValType in [SINGLETOK, HALFSINGLETOK]) and (RightConstValType in [SHORTREALTOK, REALTOK]) then
+    if (ConstValType in [TDataType.SINGLETOK, TDataType.HALFSINGLETOK]) and
+      (RightConstValType in [TDataType.SHORTREALTOK, TDataType.REALTOK]) then
       RightConstValType := ConstValType;
 
-    if (RightConstValType in [SINGLETOK, HALFSINGLETOK]) and (ConstValType in [SHORTREALTOK, REALTOK]) then
+    if (RightConstValType in [TDataType.SINGLETOK, TDataType.HALFSINGLETOK]) and
+      (ConstValType in [TDataType.SHORTREALTOK, TDataType.REALTOK]) then
       ConstValType := RightConstValType;
 
 
-    case Tok[j + 1].Kind of
-      PLUSTOK: if ConstValType in RealTypes then
-        begin
-          move(ConstVal, ftmp, sizeof(ftmp));
-          move(RightConstVal, ftmp_, sizeof(ftmp_));
-
-          move(ftmp[1], fl, sizeof(fl));
-          move(ftmp_[1], fl_, sizeof(fl_));
-
-          fl := fl + fl_;
-
-          ftmp[0] := round(fl * TWOPOWERFRACBITS);
-          ftmp[1] := Integer(fl);
-
-          move(ftmp, ConstVal, sizeof(ftmp));
-        end
-        else
-          ConstVal := ConstVal + RightConstVal;
-
-      MINUSTOK: if ConstValType in RealTypes then
-        begin
-          move(ConstVal, ftmp, sizeof(ftmp));
-          move(RightConstVal, ftmp_, sizeof(ftmp_));
-
-          move(ftmp[1], fl, sizeof(fl));
-          move(ftmp_[1], fl_, sizeof(fl_));
-
-          fl := fl - fl_;
-
-          ftmp[0] := round(fl * TWOPOWERFRACBITS);
-          ftmp[1] := Integer(fl);
-
-          move(ftmp, ConstVal, sizeof(ftmp));
-
-        end
-        else
-          ConstVal := ConstVal - RightConstVal;
-
-      ORTOK: ConstVal := ConstVal or RightConstVal;
-      XORTOK: ConstVal := ConstVal xor RightConstVal;
+    case TokenAt(j + 1).Kind of
+      TTokenKind.PLUSTOK: ConstVal := Add(ConstValType, ConstVal, RightConstVal);
+      TTokenKind.MINUSTOK: ConstVal := Subtract(ConstValType, ConstVal, RightConstVal);
+      TTokenKind.ORTOK: ConstVal := ConstVal or RightConstVal;
+      TTokenKind.XORTOK: ConstVal := ConstVal xor RightConstVal;
     end;
 
     ConstValType := GetCommonType(j + 1, ConstValType, RightConstValType);
 
-    if not (ConstValType in RealTypes + [BOOLEANTOK]) then
+    if not (ConstValType in RealTypes + [TTokenKind.BOOLEANTOK]) then
       ConstValType := GetValueType(ConstVal);
 
-    CheckOperator(i, Tok[j + 1].Kind, ConstValType, RightConstValType);
+    CheckOperator(i, TokenAt(j + 1).Kind, ConstValType, RightConstValType);
 
     j := k;
   end;
@@ -1612,7 +1528,7 @@ end;  //CompileSimpleConstExpression
 
 
 function CompileConstExpression(i: Integer; out ConstVal: Int64; out ConstValType: TDataType;
-  VarType: TDataType = TDataType.INTEGERTOK; Err: Boolean = False; War: Boolean = True): Integer;
+  const VarType: TDataType = TDataType.INTEGERTOK; const Err: Boolean = False; const War: Boolean = True): Integer;
 var
   j: Integer;
   RightConstVal: Int64;
@@ -1620,25 +1536,28 @@ var
   Yes: Boolean;
 begin
 
+  ConstVal := 0;
+  ConstValType := TDataType.UNTYPETOK;
   Result := i;
 
   i := CompileSimpleConstExpression(i, ConstVal, ConstValType);
 
   if isError then exit;
 
-  if Tok[i + 1].Kind in [TTokenKind.EQTOK, TTokenKind.NETOK, TTokenKind.LTTOK, TTokenKind.LETOK, TTokenKind.GTTOK, TTokenKind.GETOK] then
+  if TokenAt(i + 1).Kind in [TTokenKind.EQTOK, TTokenKind.NETOK, TTokenKind.LTTOK, TTokenKind.LETOK,
+    TTokenKind.GTTOK, TTokenKind.GETOK] then
   begin
 
     j := CompileSimpleConstExpression(i + 2, RightConstVal, RightConstValType);
-    //  CheckOperator(i, Tok[j + 1].Kind, ConstValType);
+    //  CheckOperator(i, TokenAt(j + 1].Kind, ConstValType);
 
-    case Tok[i + 1].Kind of
-      EQTOK: Yes := ConstVal = RightConstVal;
-      NETOK: Yes := ConstVal <> RightConstVal;
-      LTTOK: Yes := ConstVal < RightConstVal;
-      LETOK: Yes := ConstVal <= RightConstVal;
-      GTTOK: Yes := ConstVal > RightConstVal;
-      GETOK: Yes := ConstVal >= RightConstVal;
+    case TokenAt(i + 1).Kind of
+      TTokenKind.EQTOK: Yes := ConstVal = RightConstVal;
+      TTokenKind.NETOK: Yes := ConstVal <> RightConstVal;
+      TTokenKind.LTTOK: Yes := ConstVal < RightConstVal;
+      TTokenKind.LETOK: Yes := ConstVal <= RightConstVal;
+      TTokenKind.GTTOK: Yes := ConstVal > RightConstVal;
+      TTokenKind.GETOK: Yes := ConstVal >= RightConstVal;
       else
         yes := False;
     end;
@@ -1648,7 +1567,7 @@ begin
       ConstVal := 0;
     //  ConstValType := GetCommonType(j + 1, ConstValType, RightConstValType);
 
-    ConstValType := BOOLEANTOK;
+    ConstValType := TDataType.BOOLEANTOK;
 
     i := j;
   end;
@@ -1661,9 +1580,9 @@ begin
     begin
 
       case VarType of
-        SHORTINTTOK: Yes := (ConstVal < Low(Shortint)) or (ConstVal > High(Shortint));
-        SMALLINTTOK: Yes := (ConstVal < Low(Smallint)) or (ConstVal > High(Smallint));
-        INTEGERTOK: Yes := (ConstVal < Low(Integer)) or (ConstVal > High(Integer));
+        TDataType.SHORTINTTOK: Yes := (ConstVal < Low(Shortint)) or (ConstVal > High(Shortint));
+        TDataType.SMALLINTTOK: Yes := (ConstVal < Low(Smallint)) or (ConstVal > High(Smallint));
+        TDataType.INTEGERTOK: Yes := (ConstVal < Low(Integer)) or (ConstVal > High(Integer));
         else
           Yes := (abs(ConstVal) > $FFFFFFFF) or (GetDataSize(ConstValType) > GetDataSize(VarType)) or
             ((ConstValType in SignedOrdinalTypes) and (VarType in UnsignedOrdinalTypes));
@@ -1678,7 +1597,7 @@ begin
         end
         else
           if War then
-            if VarType <> BOOLEANTOK then
+            if VarType <> TDataType.BOOLEANTOK then
               WarningForRangeCheckError(i, ConstVal, VarType);
 
     end;
@@ -1690,84 +1609,103 @@ end;  //CompileConstExpression
 // ----------------------------------------------------------------------------
 
 
-procedure DefineIdent(ErrTokenIndex: Integer; Name: TString; Kind: TTokenKind; DataType: TDataType;
-  NumAllocElements: Cardinal; AllocElementType: TDataType; Data: Int64; IdType: TDataType = TDataType.IDENTTOK);
+procedure DefineIdent(const tokenIndex: TTokenIndex; Name: TIdentifierName; Kind: TTokenKind;
+  DataType: TDataType; NumAllocElements: TNumAllocElements; AllocElementType: TDataType;
+  Data: Int64; IdType: TDataType = TDataType.IDENTTOK);
 var
-  i: Integer;
+  identIndex: Integer;
+  identifier: TIdentifier;
   NumAllocElements_: Cardinal;
+  elementCount, elementSize: Integer;
 begin
 
-  i := GetIdent(Name);
+  identIndex := GetIdentIndex(Name);
 
-  if (i > 0) and (not (Ident[i].Kind in [PROCEDURETOK, FUNCTIONTOK, CONSTRUCTORTOK, DESTRUCTORTOK])) and
-    (Ident[i].Block = BlockStack[BlockStackTop]) and (Ident[i].isOverload = False) and
-    (Ident[i].UnitIndex = UnitNameIndex) then
-    Error(ErrTokenIndex, 'Identifier ' + Name + ' is already defined')
+  if (identIndex > 0) and (not (IdentifierAt(IdentIndex).Kind in [TTokenKind.PROCEDURETOK,
+    TTokenKind.FUNCTIONTOK, TTokenKind.CONSTRUCTORTOK, TTokenKind.DESTRUCTORTOK])) and
+    (IdentifierAt(IdentIndex).Block = BlockStack[BlockStackTop]) and
+    (IdentifierAt(IdentIndex).isOverload = False) and (IdentifierAt(identIndex).SourceFile = ActiveSourceFile) then
+    Error(tokenIndex, TMessage.Create(TErrorCode.IdentifierAlreadyDefined, 'Identifier {0} is already defined', Name))
   else
   begin
 
-    Inc(NumIdent);
+    Inc(NumIdent_);
+    identifier := IdentifierList.GetIdentifierAtIndex(NumIdent);
 
-    if NumIdent > High(Ident) then
-      Error(NumTok, 'Out of resources, IDENT');
+    // For debugging
 
-    Ident[NumIdent].Name := Name;
-    Ident[NumIdent].Kind := Kind;
-    Ident[NumIdent].DataType := DataType;
-    Ident[NumIdent].Block := BlockStack[BlockStackTop];
-    Ident[NumIdent].NumParams := 0;
-    Ident[NumIdent].isAbsolute := False;
-    Ident[NumIdent].PassMethod := TParameterPassingMethod.VALPASSING;
-    Ident[NumIdent].IsUnresolvedForward := False;
+    // Writeln('NumIdent=' + IntToStr(NumIdent) + ' tokenIndex=' + IntToStr(tokenIndex) + ' Name=' +
+    //  Name + ' Kind=' + GetTokenKindName(Kind) + ' DataType=' + IntToStr(Ord(DataType)) +
+    //  ' NumAllocElements=' + IntToStr(NumAllocElements) + ' AllocElementType=' + IntToStr(Ord(AllocElementType)));
 
-    Ident[NumIdent].ObjectVariable := False;
+    if NumIdent > MAXIDENTS then
+    begin
+      Error(NumTok, TMessage.Create(TErrorCode.OutOfResources, 'Out of resources, IDENT'));
+    end;
 
-    Ident[NumIdent].Section := PublicSection;
+    identifier.Name := Name;
+    identifier.Kind := Kind;
+    identifier.DataType := DataType;
+    identifier.Block := BlockStack[BlockStackTop];
+    identifier.NumParams := 0;
+    identifier.isAbsolute := False;
+    identifier.PassMethod := TParameterPassingMethod.VALPASSING;
+    identifier.IsUnresolvedForward := False;
 
-    Ident[NumIdent].UnitIndex := UnitNameIndex;
+    identifier.Section := PublicSection;
 
-    Ident[NumIdent].IdType := IdType;
+    identifier.SourceFile := ActiveSourceFile;
+
+    identifier.IdType := IdType;
 
     if (Kind = VARIABLE) and (Data <> 0) then
     begin
-      Ident[NumIdent].isAbsolute := True;
-      Ident[NumIdent].isInit := True;
+      identifier.isAbsolute := True;
+      identifier.isInit := True;
     end;
 
     NumAllocElements_ := NumAllocElements shr 16;    // , yy]
     NumAllocElements := NumAllocElements and $FFFF;    // [xx,
 
 
-    //   if name = 'CH_EOL' then writeln( Ident[NumIdent].Block ,',', Ident[NumIdent].unitindex, ',',  Ident[NumIdent].Section,',', Ident[NumIdent].idType);
+    //   if name = 'CH_EOL' then writeln( identifier.Block ,',', identifier.unitindex, ',',  identifier.Section,',', identifier.idType);
 
     if Name <> 'RESULT' then
-      if (NumIdent > NumPredefIdent + 1) and (UnitNameIndex = 1) and (Pass = TPass.CODE_GENERATION) then
-        if not ((Ident[NumIdent].Pass in [TPass.CALL_DETERMINATION, TPass.CODE_GENERATION]) or (Ident[NumIdent].IsNotDead)) then
-          Note(ErrTokenIndex, NumIdent);
+      if (NumIdent > NumPredefIdent + 1) and (ActiveSourceFile.UnitIndex = 1) and (pass = TPass.CODE_GENERATION) then
+        if not ((identifier.Pass in [TPass.CALL_DETERMINATION, TPass.CODE_GENERATION]) or
+          (identifier.IsNotDead)) then
+          NoteForIdentifierNotUsed(tokenIndex, NumIdent);
 
     case Kind of
 
-      PROCEDURETOK, FUNCTIONTOK, UNITTYPE, CONSTRUCTORTOK, DESTRUCTORTOK:
+      TTokenKind.PROCEDURETOK, TTokenKind.FUNCTIONTOK, TTokenKind.UNITTOK, TTokenKind.CONSTRUCTORTOK,
+      TTokenKind.DESTRUCTORTOK:
       begin
-        Ident[NumIdent].Value := CodeSize;      // Procedure entry point address
-        //      Ident[NumIdent].Section := true;
+        identifier.Value := CodeSize;      // Procedure entry point address
+        //      identifier.Section := true;
       end;
 
       VARIABLE:
       begin
 
-        if Ident[NumIdent].isAbsolute then
-          Ident[NumIdent].Value := Data - 1
+        if identifier.isAbsolute then
+        begin
+          identifier.Value := Data - 1;
+        end
         else
-          Ident[NumIdent].Value := DATAORIGIN + GetVarDataSize;  // Variable address
+        begin
+          identifier.Value := DATAORIGIN + _VarDataSize;  // Variable address
+        end;
 
         if not OutputDisabled then
-          IncVarDataSize(ErrTokenIndex, GetDataSize(DataType));
+        begin
+          IncVarDataSize(tokenIndex, GetDataSize(DataType));
+        end;
 
-        Ident[NumIdent].NumAllocElements := NumAllocElements;  // Number of array elements (0 for single variable)
-        Ident[NumIdent].NumAllocElements_ := NumAllocElements_;
+        identifier.NumAllocElements := NumAllocElements;  // Number of array elements (0 for single variable)
+        identifier.NumAllocElements_ := NumAllocElements_;
 
-        Ident[NumIdent].AllocElementType := AllocElementType;
+        identifier.AllocElementType := AllocElementType;
 
         if not OutputDisabled then
         begin
