@@ -2342,10 +2342,10 @@ var
     else
       Inc(_TypeArray[RecType].Size, GetDataSize(FieldType));
 
-    if pos('.', Types[RecType].Field[x].Name) > 0 then
-      Types[RecType].Field[x].ObjectVariable := Types[RecType].Field[0].ObjectVariable
+    if pos('.', GetTypeAtIndex(RecType).Field[x].Name) > 0 then
+      _TypeArray[RecType].Field[x].ObjectVariable := GetTypeAtIndex(RecType).Field[0].ObjectVariable
     else
-      Types[RecType].Field[x].ObjectVariable := False;
+      _TypeArray[RecType].Field[x].ObjectVariable := False;
 
   end;
 
