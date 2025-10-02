@@ -10136,7 +10136,6 @@ begin
                       // perl
                       i := CompileArrayIndex(i, IdentIndex, ValType);              // array[ ].field
 
-                      ValType := IdentifierAt(IdentIndex).AllocElementType;
 
                       if ValType = ARRAYTOK then
                       begin
@@ -10372,12 +10371,12 @@ begin
 
 
                       //    if ValType in IntegerTypes then
-                      //      if GetDataSize(ValType) > GetDataSize( TDataType.VarType] then ValType := VarType;     // skracaj typ danych    !!! niemozliwe skoro VarType = TDataType.INTEGERTOK
+                      //      if GetDataSize(ValType) > GetDataSize(VarType) then ValType := VarType;     // skracaj typ danych    !!! niemozliwe skoro VarType = TDataType.INTEGERTOK
 
 
                       if (IdentifierAt(IdentIndex).Kind = CONSTANT) then
                       begin
-                        if {(Ident[IdentIndex].Kind = CONSTANT) and} (ValType in Pointers) then
+                        if {(Ident[IdentIndex].Kind = TTokenKind.CONSTANT) and} (ValType in Pointers) then
                           ConstVal := IdentifierAt(IdentIndex).Value - CODEORIGIN
                         else
                           ConstVal := IdentifierAt(IdentIndex).Value;
@@ -10388,16 +10387,16 @@ begin
                           ConstVal := FromInt64(ConstVal);
 
                         if (VarType = TDataType.HALFSINGLETOK)
-                        {or (ValType = TDataType. TTokenKind.HALFSINGLETOK)} then
+                        {or (ValType = TDataType.HALFSINGLETOK)} then
                         begin
                           ConstVal := CastToHalfSingle(ConstVal);
-                          //ValType := TTokenKind.HALFSINGLETOK;
+                          //ValType := TDataType.HALFSINGLETOK;
                         end;
 
                         if (VarType = TDataType.SINGLETOK) then
                         begin
                           ConstVal := CastToSingle(ConstVal);
-                          //ValType := TTokenKind.SINGLETOK;
+                          //ValType := TDataType.SINGLETOK;
                         end;
 
                       end;
@@ -10446,7 +10445,7 @@ begin
                         else
                         begin
                           ConstVal := CastToSingle(ConstVal);
-                          ValType := TTokenKind.SINGLETOK;
+                          ValType := TDataType.SINGLETOK;
                         end;
 
                       end;
@@ -10503,14 +10502,14 @@ begin
 
       constVal := FromSingle(TokenAt(i).FracValue);
 
-      ValType := TTokenKind.REALTOK;
+      ValType := TDataType.REALTOK;
 
       if VarType in RealTypes then
       begin
 
         case VarType of
-          TTokenKind.SINGLETOK: ConstVal := CastToSingle(ConstVal);
-          TTokenKind.HALFSINGLETOK: ConstVal := CastToHalfSingle(ConstVal);
+          TDataType.SINGLETOK: ConstVal := CastToSingle(ConstVal);
+          TDataType.HALFSINGLETOK: ConstVal := CastToHalfSingle(ConstVal);
           else
             ConstVal := CastToReal(ConstVal);
         end;
@@ -11208,9 +11207,9 @@ begin
 
       if ValType in UnsignedOrdinalTypes then  // jesli odczytalismy typ bez znaku zamieniamy na 'ze znakiem'
         if ValType = TDataType.BYTETOK then
-          ValType := TTokenKind.SMALLINTTOK
+          ValType := TDataType.SMALLINTTOK
         else
-          ValType := TTokenKind.INTEGERTOK;
+          ValType := TDataType.INTEGERTOK;
 
     end;
 
@@ -11259,7 +11258,7 @@ begin
 
 
     if TokenAt(j + 1).Kind in [TTokenKind.PLUSTOK, TTokenKind.MINUSTOK] then
-    begin        // dla PLUSTOK,TTokenKind.MINUSTOK rozszerz typ wyniku
+    begin        // dla PLUSTOK, MINUSTOK rozszerz typ wyniku
 
       if (TokenAt(j + 1).Kind = TTokenKind.MINUSTOK) and (RightValType in UnsignedOrdinalTypes) and
         (VarType in SignedOrdinalTypes + [TDataType.BOOLEANTOK, TDataType.REALTOK,
@@ -11308,7 +11307,7 @@ begin
 
   ConstVal := 0;
 
-  isZero := TTokenKind.INTEGERTOK;
+    isZero := TDataType.INTEGERTOK;
 
   cRight := False;    // constantRight
 
@@ -11333,7 +11332,7 @@ begin
     if (ValType = TDataType.SINGLETOK) {or ((VarType = TDataType.SINGLETOK) and (ValType in RealTypes))} then
     begin
       ConstVal := CastToSingle(ConstVal);
-      ValType := TTokenKind.SINGLETOK; // Currently redundant
+      ValType := TDataType.SINGLETOK; // Currently redundant
     end;
 
     Push(ConstVal, ASVALUE, GetDataSize(ValType));
@@ -11384,9 +11383,9 @@ begin
           begin
 
             case ValType of
-              TTokenKind.SHORTINTTOK: ValType := TTokenKind.BYTETOK;
-              TTokenKind.SMALLINTTOK: ValType := TTokenKind.WORDTOK;
-              TTokenKind.INTEGERTOK: ValType := TTokenKind.CARDINALTOK;
+              TDataType.SHORTINTTOK: ValType := TDataTpye.BYTETOK;
+              TDataType.SMALLINTTOK: ValType := TDataTpye.WORDTOK;
+              TDataTpye.INTEGERTOK: ValType := TDataTpye.CARDINALTOK;
             end;
 
           end;
@@ -11449,12 +11448,12 @@ begin
       else
 
         case ValType of
-          TTokenKind.BYTETOK: yes := (ConstVal = High(Byte));  // > 255
-          TTokenKind.WORDTOK: yes := (ConstVal = High(Word));  // > 65535
-          TTokenKind.CARDINALTOK: yes := (ConstVal = High(Cardinal));  // > 4294967295
-          TTokenKind.SHORTINTTOK: yes := (ConstVal = High(Shortint));  // > 127
-          TTokenKind.SMALLINTTOK: yes := (ConstVal = High(Smallint));  // > 32767
-          TTokenKind.INTEGERTOK: yes := (ConstVal = High(Integer));  // > 2147483647
+          TDataType.BYTETOK: yes := (ConstVal = High(Byte));  // > 255
+          TDataType.WORDTOK: yes := (ConstVal = High(Word));  // > 65535
+          TDataType.CARDINALTOK: yes := (ConstVal = High(Cardinal));  // > 4294967295
+          TDataType.SHORTINTTOK: yes := (ConstVal = High(Shortint));  // > 127
+          TDataType.SMALLINTTOK: yes := (ConstVal = High(Smallint));  // > 32767
+          TDataType.INTEGERTOK: yes := (ConstVal = High(Integer));  // > 2147483647
         end;
 
       if yes then
@@ -11545,14 +11544,15 @@ begin
     if sLeft or sRight then
     begin
 
-      if sLeft and sRight then
-        GenerateRelationString(TokenAt(i + 1).Kind, TTokenKind.STRINGPOINTERTOK, TTokenKind.STRINGPOINTERTOK)
-      else
-        if ValType = TDataType.CHARTOK then
-          GenerateRelationString(TokenAt(i + 1).Kind, TTokenKind.CHARTOK, TTokenKind.STRINGPOINTERTOK)
-        else
-          if RightValType = TDataType.CHARTOK then
-            GenerateRelationString(TokenAt(i + 1).Kind, TTokenKind.STRINGPOINTERTOK, TTokenKind.CHARTOK)
+        if (ValType in [TDataType.CHARTOK, TDataType.STRINGPOINTERTOK, TDataType.POINTERTOK]) and (RightValType in
+          [TDataType.CHARTOK, TDataType.STRINGPOINTERTOK, TDataType.POINTERTOK]) then
+        begin
+
+          if (ValType = TDataType.POINTERTOK) or (RightValType = TDataType.POINTERTOK) then
+            Error(i, 'Can''t determine PCHAR length, consider using COMPAREMEM');
+
+          GenerateRelationString(TokenAt(i + 1).Kind, ValType, RightValType, sLeft, sRight);
+        end
           else
             GetCommonType(j, ValType, RightValType);
 
@@ -11730,7 +11730,7 @@ var
   oldPass: TPass;
   oldCodeSize: Integer;
   Param: TParamList;
-  IndirectionLevel: Byte;
+  IndirectionLevel: TIndirectionLevel;
   ExpressionType, ActualParamType, ConstValType, VarType, SelectorType: TDataType;
   Value, ConstVal, ConstVal2: Int64;
   Down, ExitLoop, yes, DEREFERENCE, ADDRESS: Boolean;        // To distinguish TO / DOWNTO loops
