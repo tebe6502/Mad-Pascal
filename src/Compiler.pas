@@ -139,7 +139,6 @@ begin
 
   lab := IdentifierAt(IdentIndex).Name;
 
-  //if (IdentifierAt(IdentIndex).SourceFile.UnitIndex > 1) and
   if (lab <> a) and (pos(IdentifierAt(IdentIndex).SourceFile.Name + '.', a) = 1) then
   begin
 
@@ -206,7 +205,7 @@ begin
     for IdentIndex := NumIdent downto 1 do
       if (IdentifierAt(IdentIndex).Kind in [TTokenKind.PROCEDURETOK, TTokenKind.FUNCTIONTOK,
         TTokenKind.CONSTRUCTORTOK, TTokenKind.DESTRUCTORTOK]) and
-        (IdentifierAt(IdentIndex).SourceFile = IdentifierAt(ProcIdentIndex).SourceFile) and
+        (IdentifierAt(IdentIndex).SourceFile.UnitIndex = IdentifierAt(ProcIdentIndex).SourceFile.UnitIndex) and
         (S = IdentifierAt(IdentIndex).Name) and (BlockStack[BlockStackIndex] = IdentifierAt(IdentIndex).Block) and
         (IdentifierAt(IdentIndex).NumParams = NumParams) then
       begin
@@ -472,7 +471,7 @@ var
   begin
 
     for i := High(ov) - 1 downto 0 do
-      if (ov[i].SourceFile = SourceFile) and (ov[i].b = Block) then
+      if (ov[i].SourceFile.UnitIndex = SourceFile.UnitIndex) and (ov[i].b = Block) then
       begin
 
         Inc(ov[i].i, Ord(ovr));
@@ -510,7 +509,7 @@ begin
 
         for k := 0 to High(l) - 1 do
           if (IdentifierAt(IdentIndex).NumParams = l[k].NumParams) and
-            (IdentifierAt(IdentIndex).SourceFile = l[k].SourceFile) and (IdentifierAt(IdentIndex).Block = l[k].b) then
+            (IdentifierAt(IdentIndex).SourceFile.UnitIndex = l[k].SourceFile.UnitIndex) and (IdentifierAt(IdentIndex).Block = l[k].b) then
           begin
 
             ok := True;
@@ -1394,8 +1393,9 @@ begin
         end;
       end;
 
-      if (IdentifierAt(IdentIndex).isAbsolute) and (IdentifierAt(IdentIndex).PassMethod <>
-        TParameterPassingMethod.VARPASSING) and (NumAllocElements = 0) then asm65('+');  // +lda
+        if (IdentifierAt(IdentIndex).isAbsolute) and (IdentifierAt(IdentIndex).PassMethod <> TParameterPassingMethod.VARPASSING) and
+          (NumAllocElements = 0) then
+          asm65('+');  // +lda
 
     end;
 
@@ -1413,8 +1413,9 @@ begin
           if (NumAllocElements > 256) or (NumAllocElements in [0, 1]) then
           begin
 
-            if (IdentifierAt(IdentIndex).isAbsolute) and (IdentifierAt(IdentIndex).PassMethod <>
-              TParameterPassingMethod.VARPASSING) and (NumAllocElements = 0) then asm65('+' + svar);  // +lda
+              if (IdentifierAt(IdentIndex).isAbsolute) and (IdentifierAt(IdentIndex).PassMethod <> TParameterPassingMethod.VARPASSING) and
+                (NumAllocElements = 0) then
+                asm65('+' + svar);  // +lda
 
             if (IdentifierAt(IdentIndex).isAbsolute) and (IdentifierAt(IdentIndex).idType =
               TDataType.ARRAYTOK) and (IdentifierAt(IdentIndex).Value >= 0) then
@@ -1467,8 +1468,9 @@ begin
 
               end;
 
-            if (IdentifierAt(IdentIndex).isAbsolute) and (IdentifierAt(IdentIndex).PassMethod <>
-              TParameterPassingMethod.VARPASSING) and (NumAllocElements = 0) then asm65('+');  // +lda
+              if (IdentifierAt(IdentIndex).isAbsolute) and (IdentifierAt(IdentIndex).PassMethod <> TParameterPassingMethod.VARPASSING) and
+                (NumAllocElements = 0) then
+                asm65('+');  // +lda
 
           end
           else
