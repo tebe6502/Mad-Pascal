@@ -597,20 +597,28 @@ writeln('_B: ', IdentifierAt(IdentIndex).Name);
 
 
   procedure TestIdentProc(x: Integer; S: TString);
-  var
-    IdentIndex, BlockStackIndex: Integer;
-    i, k, m: Integer;
-    ok: Boolean;
+type
+  TOV = record
+    i, j, b: Integer;
+    SourceFile: TSourceFile;
+  end;
 
-    ov: array of record
-    i, j, u, b: Integer;
-    end;
-
-    l: array of record
-    u, b: Integer;
+type
+  TL = record
+    SourceFile: TSourceFile;
+    b: Integer;
     Param: TParamList;
     NumParams: Word;
-    end;
+  end;
+
+  var
+    IdentIndex, BlockStackIndex: Integer;
+  k, m: Integer;
+    ok: Boolean;
+
+  ov: array of TOV;
+
+  l: array of TL;
 
 
   procedure addOverlay(SourceFile: TSourceFile; Block: Integer; ovr: Boolean);
@@ -657,7 +665,7 @@ writeln('_B: ', IdentifierAt(IdentIndex).Name);
 
           for k := 0 to High(l) - 1 do
             if (IdentifierAt(IdentIndex).NumParams = l[k].NumParams) and
-             (IdentifierAt(IdentIndex).UnitIndex = l[k].u) and (IdentifierAt(IdentIndex).Block = l[k].b) then
+            (IdentifierAt(IdentIndex).SourceFile.UnitIndex = l[k].SourceFile.UnitIndex) and (IdentifierAt(IdentIndex).Block = l[k].b) then
             begin
 
               ok := True;
@@ -1334,10 +1342,10 @@ procedure Push(Value: Int64; IndirectionLevel: Byte; Size: Byte; IdentIndex: Int
         asm65('; as Value $' + IntToHex(Value, 8) + ' (' + IntToStr(Value) + ')');
         asm65;
 
-        a65(__addBX);
+        a65(TCode65.addBX);
 
         Gen;
-        a65(__movaBX_Value, Value, Kind, Size, IdentIndex);
+        a65(TCode65.movaBX_Value, Value, Kind, Size, IdentIndex);
 
       end;
 
@@ -1349,7 +1357,7 @@ procedure Push(Value: Int64; IndirectionLevel: Byte; Size: Byte; IdentIndex: Int
 
         Gen;
 
-        a65(__addBX);
+        a65(TCode65.addBX);
 
         case Size of
 
@@ -1411,7 +1419,7 @@ procedure Push(Value: Int64; IndirectionLevel: Byte; Size: Byte; IdentIndex: Int
 
         Gen;
 
-        a65(__addBX);
+        a65(TCode65.addBX);
 
         if TestName(IdentIndex, svar) then
           asm65(#9'lda #' + svar + '-DATAORIGIN')
@@ -1445,7 +1453,7 @@ procedure Push(Value: Int64; IndirectionLevel: Byte; Size: Byte; IdentIndex: Int
 
         Gen;
 
-        a65(__addBX);
+        a65(TCode65.addBX);
 
       if (IdentifierAt(IdentIndex).isAbsolute) and (IdentifierAt(IdentIndex).PassMethod <>
         TParameterPassingMethod.VARPASSING) and (NumAllocElements = 0) then asm65('+' + svar);  // +lda
@@ -2146,8 +2154,8 @@ procedure Push(Value: Int64; IndirectionLevel: Byte; Size: Byte; IdentIndex: Int
 
         end;
 
-        //     a65(__subBX);
-        a65(__subBX);
+        //     a65(TCode65.subBX);
+        a65(TCode65.subBX);
 
       end;
 
@@ -2816,13 +2824,13 @@ procedure GenerateIncDec(IndirectionLevel: Byte; ExpressionType: TDataType; Down
 
         end;
 
-        a65(__subBX);
+        a65(TCode65.subBX);
 
       end;
 
     end;
 
-    a65(__subBX);
+    a65(TCode65.subBX);
   end;  //GenerateIncDec
 
 
@@ -3008,8 +3016,8 @@ procedure GenerateAssignment(IndirectionLevel: Byte; Size: Byte; IdentIndex: TId
 
         end;
 
-        a65(__subBX);
-        a65(__subBX);
+        a65(TCode65.subBX);
+        a65(TCode65.subBX);
 
       end;
 
@@ -3056,8 +3064,8 @@ procedure GenerateAssignment(IndirectionLevel: Byte; Size: Byte; IdentIndex: TId
 
         end;
 
-        a65(__subBX);
-        a65(__subBX);
+        a65(TCode65.subBX);
+        a65(TCode65.subBX);
 
       end;
 
@@ -3160,8 +3168,8 @@ procedure GenerateAssignment(IndirectionLevel: Byte; Size: Byte; IdentIndex: TId
 
             end;
 
-            a65(__subBX);
-            a65(__subBX);
+            a65(TCode65.subBX);
+            a65(TCode65.subBX);
           end;
 
           2: begin                    // PULL WORD
@@ -3264,8 +3272,8 @@ procedure GenerateAssignment(IndirectionLevel: Byte; Size: Byte; IdentIndex: TId
 
             end;
 
-            a65(__subBX);
-            a65(__subBX);
+            a65(TCode65.subBX);
+            a65(TCode65.subBX);
 
           end;
 
@@ -3401,8 +3409,8 @@ procedure GenerateAssignment(IndirectionLevel: Byte; Size: Byte; IdentIndex: TId
 
             end;
 
-            a65(__subBX);
-            a65(__subBX);
+            a65(TCode65.subBX);
+            a65(TCode65.subBX);
 
           end;
         end;
@@ -3481,8 +3489,8 @@ procedure GenerateAssignment(IndirectionLevel: Byte; Size: Byte; IdentIndex: TId
             asm65(#9'lda :STACKORIGIN,x');
             asm65(#9'sta (:bp2),y');
 
-            a65(__subBX);
-            a65(__subBX);
+            a65(TCode65.subBX);
+            a65(TCode65.subBX);
 
           end;
         end;
@@ -3590,8 +3598,8 @@ procedure GenerateAssignment(IndirectionLevel: Byte; Size: Byte; IdentIndex: TId
 
             end;
 
-            a65(__subBX);
-            a65(__subBX);
+            a65(TCode65.subBX);
+            a65(TCode65.subBX);
 
           end;
         end;
@@ -3649,8 +3657,8 @@ procedure GenerateAssignment(IndirectionLevel: Byte; Size: Byte; IdentIndex: TId
 
         asm65(#9'jsr @move');
 
-        a65(__subBX);
-        a65(__subBX);
+        a65(TCode65.subBX);
+        a65(TCode65.subBX);
 
       end;
 
@@ -3718,8 +3726,8 @@ procedure GenerateAssignment(IndirectionLevel: Byte; Size: Byte; IdentIndex: TId
 
         end;
 
-        a65(__subBX);
-        a65(__subBX);
+        a65(TCode65.subBX);
+        a65(TCode65.subBX);
 
       end;
 
@@ -3811,9 +3819,9 @@ procedure GenerateAssignment(IndirectionLevel: Byte; Size: Byte; IdentIndex: TId
 
         end;
 
-        a65(__subBX);
-        a65(__subBX);
-        a65(__subBX);
+        a65(TCode65.subBX);
+        a65(TCode65.subBX);
+        a65(TCode65.subBX);
 
       end;
 
@@ -3878,7 +3886,7 @@ procedure GenerateAssignment(IndirectionLevel: Byte; Size: Byte; IdentIndex: TId
         (IdentifierAt(IdentIndex).PassMethod <> TParameterPassingMethod.VARPASSING) and (NumAllocElements = 0) then
           asm65('-');  // -sta
 
-        a65(__subBX);
+        a65(TCode65.subBX);
 
       end;
 
@@ -3912,7 +3920,7 @@ procedure GenerateAssignment(IndirectionLevel: Byte; Size: Byte; IdentIndex: TId
           end;
         end;
 
-        a65(__subBX);
+        a65(TCode65.subBX);
 
       end;
 
@@ -3985,7 +3993,7 @@ procedure GenerateAssignment(IndirectionLevel: Byte; Size: Byte; IdentIndex: TId
     Gen;
     Gen;                // mov :eax, [bx]
 
-    a65(__subBX);
+    a65(TCode65.subBX);
 
     asm65(#9'lda :STACKORIGIN+1,x');
     asm65(#9'bne *+5');
@@ -4143,7 +4151,7 @@ procedure GenerateForToDoCondition(ValType: TDataType; Down: Boolean; IdentIndex
     Gen;
     Gen;            // mov :ecx, [bx]
 
-    a65(__subBX);
+    a65(TCode65.subBX);
 
     case CounterSize of
 
@@ -4911,28 +4919,28 @@ procedure GenerateWriteString(Address: Word; IndirectionLevel: Byte; ValueType: 
       begin
         asm65(#9'jsr @printBOOLEAN');
 
-        a65(__subBX);
+        a65(TCode65.subBX);
       end;
 
       ASCHAR:
       begin
         asm65(#9'@printCHAR');
 
-        a65(__subBX);
+        a65(TCode65.subBX);
       end;
 
       ASSHORTREAL:
       begin
         asm65(#9'jsr @printSHORTREAL');
 
-        a65(__subBX);
+        a65(TCode65.subBX);
       end;
 
       ASREAL:
       begin
         asm65(#9'jsr @printREAL');
 
-        a65(__subBX);
+        a65(TCode65.subBX);
       end;
 
       ASSINGLE:
@@ -4946,7 +4954,7 @@ procedure GenerateWriteString(Address: Word; IndirectionLevel: Byte; ValueType: 
         asm65(#9'lda :STACKORIGIN+STACKWIDTH*3,x');
         asm65(#9'sta @FTOA.I+3');
 
-        a65(__subBX);
+        a65(TCode65.subBX);
 
         asm65(#9'jsr @FTOA');
       end;
@@ -4960,7 +4968,7 @@ procedure GenerateWriteString(Address: Word; IndirectionLevel: Byte; ValueType: 
         asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
         asm65(#9'sta @F16_F2A.I+1');
 
-        a65(__subBX);
+        a65(TCode65.subBX);
 
         asm65(#9'jsr @F16_F2A');
       end;
@@ -4986,7 +4994,7 @@ procedure GenerateWriteString(Address: Word; IndirectionLevel: Byte; ValueType: 
               asm65(#9'jsr @printCARD');
         end;
 
-        a65(__subBX);
+        a65(TCode65.subBX);
       end;
 
       ASPOINTER:
@@ -4994,7 +5002,7 @@ procedure GenerateWriteString(Address: Word; IndirectionLevel: Byte; ValueType: 
 
         asm65(#9'@printSTRING #CODEORIGIN+$' + IntToHex(Address - CODEORIGIN, 4));
 
-        //    a65(__subBX);   !!!   bez DEX-a
+        //    a65(TCode65.subBX);   !!!   bez DEX-a
       end;
 
       ASPOINTERTOPOINTER:
@@ -5004,7 +5012,7 @@ procedure GenerateWriteString(Address: Word; IndirectionLevel: Byte; ValueType: 
         asm65(#9'ldy :STACKORIGIN+STACKWIDTH,x');
         asm65(#9'jsr @printSTRING');
 
-        a65(__subBX);
+        a65(TCode65.subBX);
       end;
 
 
@@ -5015,7 +5023,7 @@ procedure GenerateWriteString(Address: Word; IndirectionLevel: Byte; ValueType: 
         asm65(#9'ldy :STACKORIGIN+STACKWIDTH,x');
         asm65(#9'jsr @printPCHAR');
 
-        a65(__subBX);
+        a65(TCode65.subBX);
       end;
 
     end;
@@ -5135,7 +5143,7 @@ procedure GenerateWriteString(Address: Word; IndirectionLevel: Byte; ValueType: 
 
       if ValType = TDataType.BOOLEANTOK then
         begin
-          //     a65(__notBOOLEAN)
+          //     a65(TCode65.notBOOLEAN)
 
           asm65(#9'ldy #1');          // !!! wymagana konwencja
           asm65(#9'lda :STACKORIGIN,x');
@@ -5151,7 +5159,7 @@ procedure GenerateWriteString(Address: Word; IndirectionLevel: Byte; ValueType: 
 
         ExpandParam(TDataType.INTEGERTOK, ValType);
 
-          //     a65(__notaBX);
+          //     a65(TCode65.notaBX);
 
           asm65(#9'lda :STACKORIGIN,x');
           asm65(#9'eor #$FF');
@@ -5253,9 +5261,9 @@ procedure GenerateWriteString(Address: Word; IndirectionLevel: Byte; ValueType: 
           else
 
             case GetDataSize(ResultType) of
-              1: a65(__addAL_CL);
-              2: a65(__addAX_CX);
-              4: a65(__addEAX_ECX);
+              1: a65(TCode65.addAL_CL);
+              2: a65(TCode65.addAX_CX);
+              4: a65(TCode65.addEAX_ECX);
             end;
 
       end;
@@ -5322,9 +5330,9 @@ procedure GenerateWriteString(Address: Word; IndirectionLevel: Byte; ValueType: 
           else
 
             case GetDataSize(ResultType) of
-              1: a65(__subAL_CL);
-              2: a65(__subAX_CX);
-              4: a65(__subEAX_ECX);
+              1: a65(TCode65.subAL_CL);
+              2: a65(TCode65.subAX_CX);
+              4: a65(TCode65.subEAX_ECX);
             end;
 
       end;
@@ -5963,24 +5971,24 @@ procedure GenerateWriteString(Address: Word; IndirectionLevel: Byte; ValueType: 
 
             1: begin
               asm65(#9'jsr @expandToCARD1.SHORT');
-              a65(__shlEAX_CL);
+              a65(TCode65.shlEAX_CL);
             end;
 
             2: begin
               asm65(#9'jsr @expandToCARD1.SMALL');
-              a65(__shlEAX_CL);
+              a65(TCode65.shlEAX_CL);
             end;
 
-            4: a65(__shlEAX_CL);
+            4: a65(TCode65.shlEAX_CL);
 
           end;
 
         end
         else
           case GetDataSize(ResultType) of
-            1: a65(__shlAL_CL);
-            2: a65(__shlAX_CL);
-            4: a65(__shlEAX_CL);
+            1: a65(TCode65.shlAL_CL);
+            2: a65(TCode65.shlAX_CL);
+            4: a65(TCode65.shlEAX_CL);
           end;
 
       end;
@@ -5996,24 +6004,24 @@ procedure GenerateWriteString(Address: Word; IndirectionLevel: Byte; ValueType: 
 
             1: begin
               asm65(#9'jsr @expandToCARD1.SHORT');
-              a65(__shrEAX_CL);
+              a65(TCode65.shrEAX_CL);
             end;
 
             2: begin
               asm65(#9'jsr @expandToCARD1.SMALL');
-              a65(__shrEAX_CL);
+              a65(TCode65.shrEAX_CL);
             end;
 
-            4: a65(__shrEAX_CL);
+            4: a65(TCode65.shrEAX_CL);
 
           end;
 
         end
         else
           case GetDataSize(ResultType) of
-            1: a65(__shrAL_CL);
-            2: a65(__shrAX_CL);
-            4: a65(__shrEAX_CL);
+            1: a65(TCode65.shrAL_CL);
+            2: a65(TCode65.shrAX_CL);
+            4: a65(TCode65.shrEAX_CL);
           end;
 
       end;
@@ -6023,14 +6031,14 @@ procedure GenerateWriteString(Address: Word; IndirectionLevel: Byte; ValueType: 
       begin
 
         case GetDataSize(ResultType) of
-          1: //a65(__andAL_CL);
+          1: //a65(TCode65.andAL_CL);
           begin
             asm65(#9'lda :STACKORIGIN-1,x');
             asm65(#9'and :STACKORIGIN,x');
             asm65(#9'sta :STACKORIGIN-1,x');
           end;
 
-          2: //a65(__andAX_CX);
+          2: //a65(TCode65.andAX_CX);
           begin
             asm65(#9'lda :STACKORIGIN-1,x');
             asm65(#9'and :STACKORIGIN,x');
@@ -6041,7 +6049,7 @@ procedure GenerateWriteString(Address: Word; IndirectionLevel: Byte; ValueType: 
             asm65(#9'sta :STACKORIGIN-1+STACKWIDTH,x');
           end;
 
-          4: //a65(__andEAX_ECX)
+          4: //a65(TCode65.andEAX_ECX)
           begin
             asm65(#9'lda :STACKORIGIN-1,x');
             asm65(#9'and :STACKORIGIN,x');
@@ -6069,14 +6077,14 @@ procedure GenerateWriteString(Address: Word; IndirectionLevel: Byte; ValueType: 
       begin
 
         case GetDataSize(ResultType) of
-          1: //a65(__orAL_CL);
+          1: //a65(TCode65.orAL_CL);
           begin
             asm65(#9'lda :STACKORIGIN-1,x');
             asm65(#9'ora :STACKORIGIN,x');
             asm65(#9'sta :STACKORIGIN-1,x');
           end;
 
-          2: //a65(__orAX_CX);
+          2: //a65(TCode65.orAX_CX);
           begin
             asm65(#9'lda :STACKORIGIN-1,x');
             asm65(#9'ora :STACKORIGIN,x');
@@ -6087,7 +6095,7 @@ procedure GenerateWriteString(Address: Word; IndirectionLevel: Byte; ValueType: 
             asm65(#9'sta :STACKORIGIN-1+STACKWIDTH,x');
           end;
 
-          4: //a65(__orEAX_ECX)
+          4: //a65(TCode65.orEAX_ECX)
           begin
             asm65(#9'lda :STACKORIGIN-1,x');
             asm65(#9'ora :STACKORIGIN,x');
@@ -6115,14 +6123,14 @@ procedure GenerateWriteString(Address: Word; IndirectionLevel: Byte; ValueType: 
       begin
 
         case GetDataSize(ResultType) of
-          1: //a65(__xorAL_CL);
+          1: //a65(TCode65.xorAL_CL);
           begin
             asm65(#9'lda :STACKORIGIN-1,x');
             asm65(#9'eor :STACKORIGIN,x');
             asm65(#9'sta :STACKORIGIN-1,x');
           end;
 
-          2: //a65(__xorAX_CX);
+          2: //a65(TCode65.xorAX_CX);
           begin
             asm65(#9'lda :STACKORIGIN-1,x');
             asm65(#9'eor :STACKORIGIN,x');
@@ -6133,7 +6141,7 @@ procedure GenerateWriteString(Address: Word; IndirectionLevel: Byte; ValueType: 
             asm65(#9'sta :STACKORIGIN-1+STACKWIDTH,x');
           end;
 
-          4: //a65(__xorEAX_ECX)
+          4: //a65(TCode65.xorEAX_ECX)
           begin
             asm65(#9'lda :STACKORIGIN-1,x');
             asm65(#9'eor :STACKORIGIN,x');
@@ -6158,7 +6166,7 @@ procedure GenerateWriteString(Address: Word; IndirectionLevel: Byte; ValueType: 
 
     end;// case
 
-    a65(__subBX);
+    a65(TCode65.subBX);
 
   end;  //GenerateBinaryOperation
 
@@ -6230,7 +6238,7 @@ procedure GenerateRelationString(relation: TTokenKind; LeftValType, RightValType
 
     if (LeftValType = STRINGPOINTERTOK) and (RightValType = STRINGPOINTERTOK) then
     begin
-      //  a65(__cmpSTRING)          // STRING ? STRING
+      //  a65(TCode65.cmpSTRING)          // STRING ? STRING
 
       asm65(#9'lda :STACKORIGIN,x');
       asm65(#9'sta @cmpSTRING.B');
@@ -6248,7 +6256,7 @@ procedure GenerateRelationString(relation: TTokenKind; LeftValType, RightValType
     else
     if LeftValType = TDatatype.CHARTOK then
       begin
-        //  a65(__cmpCHAR2STRING)        // CHAR ? STRING
+        //  a65(TCode65.cmpCHAR2STRING)        // CHAR ? STRING
 
         asm65(#9'lda :STACKORIGIN,x');
         asm65(#9'sta @cmpCHAR2STRING.B');
@@ -6264,7 +6272,7 @@ procedure GenerateRelationString(relation: TTokenKind; LeftValType, RightValType
       else
       if RightValType = TDatatype.CHARTOK then
         begin
-          //  a65(__cmpSTRING2CHAR);        // STRING ? CHAR
+          //  a65(TCode65.cmpSTRING2CHAR);        // STRING ? CHAR
 
           asm65(#9'lda :STACKORIGIN,x');
           asm65(#9'sta @cmpSTRING2CHAR.B');
@@ -6286,7 +6294,7 @@ procedure GenerateRelationString(relation: TTokenKind; LeftValType, RightValType
     // asm65(#9'tya');      !!! ~
     asm65(#9'sty :STACKORIGIN-1,x');
 
-    a65(__subBX);
+    a65(TCode65.subBX);
 
   end;
 
@@ -6451,7 +6459,7 @@ procedure GenerateRelationString(relation: TTokenKind; LeftValType, RightValType
         end;
 
         SHORTINTTOK:
-        begin  //a65(__cmpSHORTINT);
+        begin  //a65(TCode65.cmpSHORTINT);
 
           asm65(#9'.LOCAL');
           asm65(#9'lda :STACKORIGIN-1,x');
@@ -6466,7 +6474,7 @@ procedure GenerateRelationString(relation: TTokenKind; LeftValType, RightValType
         end;
 
         SMALLINTTOK, SHORTREALTOK:
-        begin  //a65(__cmpSMALLINT);
+        begin  //a65(TCode65.cmpSMALLINT);
 
           asm65(#9'.LOCAL');
           asm65(#9'lda :STACKORIGIN-1+STACKWIDTH,x');
@@ -6490,7 +6498,7 @@ procedure GenerateRelationString(relation: TTokenKind; LeftValType, RightValType
         SINGLETOK: asm65(#9'jsr @FCMPL');
 
         REALTOK, INTEGERTOK:
-        begin  //a65(__cmpINT);
+        begin  //a65(TCode65.cmpINT);
 
           asm65(#9'.LOCAL');
           asm65(#9'lda :STACKORIGIN-1+STACKWIDTH*3,x');
@@ -6519,7 +6527,7 @@ procedure GenerateRelationString(relation: TTokenKind; LeftValType, RightValType
         end;
 
         WORDTOK, POINTERTOK, STRINGPOINTERTOK:
-        begin  //a65(__cmpAX_CX);
+        begin  //a65(TCode65.cmpAX_CX);
 
           asm65(#9'lda :STACKORIGIN-1+STACKWIDTH,x');
           asm65(#9'cmp :STACKORIGIN+STACKWIDTH,x');
@@ -6531,7 +6539,7 @@ procedure GenerateRelationString(relation: TTokenKind; LeftValType, RightValType
         end;
 
         else
-        begin  //a65(__cmpEAX_ECX);          // CARDINALTOK
+        begin  //a65(TCode65.cmpEAX_ECX);          // CARDINALTOK
 
           asm65(#9'lda :STACKORIGIN-1+STACKWIDTH*3,x');
           asm65(#9'cmp :STACKORIGIN+STACKWIDTH*3,x');
@@ -6559,7 +6567,7 @@ procedure GenerateRelationString(relation: TTokenKind; LeftValType, RightValType
       //asm65(#9'tya');      !!! ~
       asm65(#9'sty :STACKORIGIN-1,x');
 
-      a65(__subBX);
+      a65(TCode65.subBX);
 
     end; // if ValType = HALFSINGLETOK
 
@@ -6936,7 +6944,7 @@ end;
 
               if IdentifierAt(IdentIndex).isOverload then Name := Name + '.' + GetOverloadName(IdentIndex);
 
-              a65(__addBX);
+              a65(TCode65.addBX);
               asm65(#9'mva <' + Name + ' :STACKORIGIN,x');
               asm65(#9'mva >' + Name + ' :STACKORIGIN+STACKWIDTH,x');
 
@@ -8344,7 +8352,7 @@ end;
           asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
           asm65(#9'sta ' + svar + '.' + IdentifierAt(IdentIndex).Param[ParamIndex].Name + '+1');
 
-          a65(__subBX);
+          a65(TCode65.subBX);
         end
         else
           if (NumActualParams = 1) and (GetDataSize(ActualParamType) = 1) then
@@ -8354,13 +8362,13 @@ end;
             begin
               asm65(#9'lda :STACKORIGIN,x');
               asm65(#9'sta ' + svar + '.' + IdentifierAt(IdentIndex).Param[ParamIndex].Name);
-              a65(__subBX);
+              a65(TCode65.subBX);
             end
             else
             begin
               asm65(#9'lda :STACKORIGIN,x');
               asm65(#9'sta @PARAM?');
-              a65(__subBX);
+              a65(TCode65.subBX);
             end;
 
           end
@@ -8372,7 +8380,7 @@ end;
                 asm65(#9'lda :STACKORIGIN,x');
                 asm65(#9'sta ' + svar + '.' + IdentifierAt(IdentIndex).Param[ParamIndex].Name);
 
-                a65(__subBX);
+                a65(TCode65.subBX);
               end;
 
               WORDTOK, SMALLINTTOK, SHORTREALTOK, HALFSINGLETOK, POINTERTOK, STRINGPOINTERTOK, PCHARTOK:
@@ -8382,7 +8390,7 @@ end;
                 asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
                 asm65(#9'sta ' + svar + '.' + IdentifierAt(IdentIndex).Param[ParamIndex].Name + '+1');
 
-                a65(__subBX);
+                a65(TCode65.subBX);
               end;
 
               CARDINALTOK, INTEGERTOK, REALTOK, SINGLETOK:
@@ -8396,7 +8404,7 @@ end;
                 asm65(#9'lda :STACKORIGIN+STACKWIDTH*3,x');
                 asm65(#9'sta ' + svar + '.' + IdentifierAt(IdentIndex).Param[ParamIndex].Name + '+3');
 
-                a65(__subBX);
+                a65(TCode65.subBX);
               end;
 
               else
@@ -8676,7 +8684,7 @@ end;
 
         if IdentifierAt(IdentIndex).DataType = STRINGPOINTERTOK then
         begin
-          a65(__addBX);
+          a65(TCode65.addBX);
           asm65(#9'lda adr.' + GetLocalName(IdentIndex));
           asm65(#9'sta :STACKORIGIN,x');
 
@@ -8875,7 +8883,7 @@ end;
                     if (IdentTemp shr 16) = Ord(CHARTOK) then
                     begin
 
-                      a65(__subBX);
+                      a65(TCode65.subBX);
 
                       Push(1, ASVALUE, 1);
 
@@ -8913,7 +8921,7 @@ end;
 
                           i := CompileArrayIndex(i + 2, IdentIndex, ValType);
 
-                          a65(__addBX);
+                          a65(TCode65.addBX);
 
                           svar := GetLocalName(IdentIndex);
 
@@ -8950,7 +8958,7 @@ end;
 
                           end;
 
-                          a65(__subBX);
+                          a65(TCode65.subBX);
 
                           asm65(#9'lda (:bp),y');
                           asm65(#9'sta :STACKORIGIN,x');
@@ -8969,7 +8977,7 @@ end;
                           if (IdentifierAt(IdentIndex).PassMethod = TParameterPassingMethod.VARPASSING) or
                             (IdentifierAt(IdentIndex).NumAllocElements = 0) then
                           begin
-                            a65(__addBX);
+                            a65(TCode65.addBX);
 
                             svar := GetLocalName(IdentIndex);
 
@@ -9008,7 +9016,7 @@ end;
                           end
                           else
                           begin
-                            a65(__addBX);
+                            a65(TCode65.addBX);
 
                             asm65(#9'lda ' + GetLocalName(IdentIndex, 'adr.'));
                             asm65(#9'sta :STACKORIGIN,x');
@@ -12337,7 +12345,7 @@ end;
 
                 CompileActualParameters(i, IdentTemp, IdentIndex);
 
-                if IdentifierAt(IdentTemp).Kind = FUNCTIONTOK then a65(__subBX);
+                if IdentifierAt(IdentTemp).Kind = FUNCTIONTOK then a65(TCode65.subBX);
 
                 Result := i;
                 exit;
@@ -12796,7 +12804,7 @@ end;
                               '" expected "' + Types[IdentifierAt(IdentIndex).NumAllocElements].Field[0].Name + '"');
 
 
-                      a65(__subBX);
+                      a65(TCode65.subBX);
                       StopOptimization;
 
                       ResetOpty;
@@ -13063,7 +13071,7 @@ end;
                                   Error(i, TErrorCode.IncompatibleTypesArray, IdentTemp, -IdentIndex);
 
 {
-           a65(__subBX);
+           a65(TCode65.subBX);
         StopOptimization;
 
         ResetOpty;
@@ -13097,7 +13105,7 @@ end;
                                 end
                                 else
                                 begin
-                                  a65(__subBX);
+                                  a65(TCode65.subBX);
 
                                   asm65(#9'lda ' + GetLocalName(IdentIndex));
                                   asm65(#9'add :STACKORIGIN-1,x');
@@ -13115,8 +13123,8 @@ end;
 
                                 end;
 
-                                a65(__subBX);
-                                a65(__subBX);
+                                a65(TCode65.subBX);
+                                a65(TCode65.subBX);
                                 StopOptimization;
 
                                 ResetOpty;
@@ -13148,8 +13156,8 @@ end;
                                 asm65(#9'adc :STACKORIGIN-1+STACKWIDTH,x');
                                 asm65(#9'sta @move.src+1');
 
-                                a65(__subBX);
-                                a65(__subBX);
+                                a65(TCode65.subBX);
+                                a65(TCode65.subBX);
                                 StopOptimization;
 
                                 ResetOpty;
@@ -13169,7 +13177,7 @@ end;
                             else
                             begin
 
-                              a65(__subBX);
+                              a65(TCode65.subBX);
                               StopOptimization;
 
                               ResetOpty;
@@ -13240,7 +13248,7 @@ end;
 
               if IdentifierAt(IdentIndex).Kind = FUNCTIONTOK then
               begin
-                a65(__subBX);              // zmniejsz wskaznik stosu skoro nie odbierasz wartosci funkcji
+                a65(TCode65.subBX);              // zmniejsz wskaznik stosu skoro nie odbierasz wartosci funkcji
                 StartOptimization(i);
               end;
 
@@ -13781,7 +13789,7 @@ WHILETOK:
         Gen;
         Gen;                // mov :eax, [bx]
 
-        a65(__subBX);
+        a65(TCode65.subBX);
 
         asm65(#9'lda :STACKORIGIN+1,x');
         asm65(#9'jne l_' + IntToHex(CodePosStack[CodePosStackTop + 1], 4));
@@ -15011,7 +15019,7 @@ WHILETOK:
               if TokenAt(i).Kind = COLONTOK then      // pomijamy formatowanie wyniku value:x:x
                 repeat
                   i := CompileExpression(i + 1, ExpressionType);
-                  a65(__subBX);          // zdejmujemy ze stosu
+                  a65(TCode65.subBX);          // zdejmujemy ze stosu
                   Inc(i);
 
                   Inc(j);
@@ -15028,7 +15036,7 @@ WHILETOK:
 
         end; // if TokenAt(i + 1).Kind = SEMICOLONTOK
 
-        if yes then a65(__putEOL);
+        if yes then a65(TCode65.putEOL);
 
         StopOptimization;
 
@@ -15559,7 +15567,7 @@ WHILETOK:
           Ord(iDLI): begin
             asm65(#9'mva :STACKORIGIN,x VDSLST');
             asm65(#9'mva :STACKORIGIN+STACKWIDTH,x VDSLST+1');
-            a65(__subBX);
+            a65(TCode65.subBX);
           end;
 
           Ord(iVBLI): begin
@@ -15571,7 +15579,7 @@ WHILETOK:
             asm65(#9'sta VVBLKI');
             asm65(#9'ldy :STACKORIGIN+STACKWIDTH,x');
             asm65(#9'sty VVBLKI+1');
-            a65(__subBX);
+            a65(TCode65.subBX);
           end;
 
           Ord(iVBLD): begin
@@ -15583,14 +15591,14 @@ WHILETOK:
             asm65(#9'sta VVBLKD');
             asm65(#9'ldy :STACKORIGIN+STACKWIDTH,x');
             asm65(#9'sty VVBLKD+1');
-            a65(__subBX);
+            a65(TCode65.subBX);
           end;
 
           Ord(iTIM1): begin
             asm65(#9'sei');
             asm65(#9'mva :STACKORIGIN,x VTIMR1');
             asm65(#9'mva :STACKORIGIN+STACKWIDTH,x VTIMR1+1');
-            a65(__subBX);
+            a65(TCode65.subBX);
 
             if TokenAt(i + 1).Kind = COMMATOK then
             begin
@@ -15605,7 +15613,7 @@ WHILETOK:
               asm65(#9'sty SKCTL');
 
               asm65(#9'mva :STACKORIGIN,x AUDCTL');
-              a65(__subBX);
+              a65(TCode65.subBX);
 
               CheckTok(i + 1, COMMATOK);
 
@@ -15613,7 +15621,7 @@ WHILETOK:
               GetCommonType(i, BYTETOK, ActualParamType);
 
               asm65(#9'mva :STACKORIGIN,x AUDF1');
-              a65(__subBX);
+              a65(TCode65.subBX);
 
               asm65(#9'lda irqens');
               asm65(#9'ora #$01');
@@ -15639,7 +15647,7 @@ WHILETOK:
             asm65(#9'sei');
             asm65(#9'mva :STACKORIGIN,x VTIMR2');
             asm65(#9'mva :STACKORIGIN+STACKWIDTH,x VTIMR2+1');
-            a65(__subBX);
+            a65(TCode65.subBX);
 
             if TokenAt(i + 1).Kind = COMMATOK then
             begin
@@ -15654,7 +15662,7 @@ WHILETOK:
               asm65(#9'sty SKCTL');
 
               asm65(#9'mva :STACKORIGIN,x AUDCTL');
-              a65(__subBX);
+              a65(TCode65.subBX);
 
               CheckTok(i + 1, COMMATOK);
 
@@ -15662,7 +15670,7 @@ WHILETOK:
               GetCommonType(i, BYTETOK, ActualParamType);
 
               asm65(#9'mva :STACKORIGIN,x AUDF2');
-              a65(__subBX);
+              a65(TCode65.subBX);
 
               asm65(#9'lda irqens');
               asm65(#9'ora #$02');
@@ -15688,7 +15696,7 @@ WHILETOK:
             asm65(#9'sei');
             asm65(#9'mva :STACKORIGIN,x VTIMR4');
             asm65(#9'mva :STACKORIGIN+STACKWIDTH,x VTIMR4+1');
-            a65(__subBX);
+            a65(TCode65.subBX);
 
             if TokenAt(i + 1).Kind = COMMATOK then
             begin
@@ -15703,7 +15711,7 @@ WHILETOK:
               asm65(#9'sty SKCTL');
 
               asm65(#9'mva :STACKORIGIN,x AUDCTL');
-              a65(__subBX);
+              a65(TCode65.subBX);
 
               CheckTok(i + 1, COMMATOK);
 
@@ -15711,7 +15719,7 @@ WHILETOK:
               GetCommonType(i, BYTETOK, ActualParamType);
 
               asm65(#9'mva :STACKORIGIN,x AUDF4');
-              a65(__subBX);
+              a65(TCode65.subBX);
 
               asm65(#9'lda irqens');
               asm65(#9'ora #$04');
