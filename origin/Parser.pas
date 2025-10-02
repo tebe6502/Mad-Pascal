@@ -356,56 +356,47 @@ end;
       _DataSegment[index] := Byte(Value);
   end;
 
-  ftmp := Default(TFloat);
-
-  case ConstValType of
-
-    TDataType.SHORTINTTOK, TDataType.BYTETOK, TDataType.CHARTOK, TDataType.BOOLEANTOK:
-      DataSegment[ConstDataSize] := Byte(ConstVal);
-
-    TDataType.SMALLINTTOK, TDataType.WORDTOK, TDataType.SHORTREALTOK, TDataType.POINTERTOK, TDataType.STRINGPOINTERTOK, TDataType.PCHARTOK:
+    TDataType.SMALLINTTOK, TDataType.WORDTOK, TDataType.SHORTREALTOK, TDataType.POINTERTOK,
+    TDataType.STRINGPOINTERTOK, TDataType.PCHARTOK:
     begin
-      DataSegment[ConstDataSize] := Byte(ConstVal);
-      DataSegment[ConstDataSize + 1] := Byte(ConstVal shr 8);
+      _DataSegment[index] := Byte(Value);
+      _DataSegment[index + 1] := Byte(Value shr 8);
     end;
 
     TDataType.DATAORIGINOFFSET:
     begin
-      DataSegment[ConstDataSize] := Byte(ConstVal) or $8000;
-      DataSegment[ConstDataSize + 1] := Byte(ConstVal shr 8) or $4000;
+      _DataSegment[index] := Byte(Value) or $8000;
+      _DataSegment[index + 1] := Byte(Value shr 8) or $4000;
     end;
 
     TDataType.CODEORIGINOFFSET:
     begin
-      DataSegment[ConstDataSize] := Byte(ConstVal) or $2000;
-      DataSegment[ConstDataSize + 1] := Byte(ConstVal shr 8) or $1000;
+      _DataSegment[index] := Byte(Value) or $2000;
+      _DataSegment[index + 1] := Byte(Value shr 8) or $1000;
     end;
 
     TDataType.INTEGERTOK, TDataType.CARDINALTOK, TDataType.REALTOK:
     begin
-      DataSegment[ConstDataSize] := Byte(ConstVal);
-      DataSegment[ConstDataSize + 1] := Byte(ConstVal shr 8);
-      DataSegment[ConstDataSize + 2] := Byte(ConstVal shr 16);
-      DataSegment[ConstDataSize + 3] := Byte(ConstVal shr 24);
+      _DataSegment[index] := Byte(Value);
+      _DataSegment[index + 1] := Byte(Value shr 8);
+      _DataSegment[index + 2] := Byte(Value shr 16);
+      _DataSegment[index + 3] := Byte(Value shr 24);
     end;
 
     TDataType.SINGLETOK: begin
-      move(ConstVal, ftmp, sizeof(ftmp));
+      Value := CastToSingle(Value);
 
-      ConstVal := ftmp[1];
-
-      DataSegment[ConstDataSize] := Byte(ConstVal);
-      DataSegment[ConstDataSize + 1] := Byte(ConstVal shr 8);
-      DataSegment[ConstDataSize + 2] := Byte(ConstVal shr 16);
-      DataSegment[ConstDataSize + 3] := Byte(ConstVal shr 24);
+      _DataSegment[index] := Byte(Value);
+      _DataSegment[index + 1] := Byte(Value shr 8);
+      _DataSegment[index + 2] := Byte(Value shr 16);
+      _DataSegment[index + 3] := Byte(Value shr 24);
     end;
 
     TDataType.HALFSINGLETOK: begin
-      move(ConstVal, ftmp, sizeof(ftmp));
-      ConstVal := CardToHalf(ftmp[1]);
+      Value := CastToHalfSingle(Value);
 
-      DataSegment[ConstDataSize] := Byte(ConstVal);
-      DataSegment[ConstDataSize + 1] := Byte(ConstVal shr 8);
+      _DataSegment[index] := Byte(Value);
+      _DataSegment[index + 1] := Byte(Value shr 8);
     end;
 
   end;
@@ -489,8 +480,6 @@ var
   Kind: TTokenKind;
   ArrayIndexType: TDataType;
   ArrayIndex: Int64;
-  ftmp: TFloat;
-  fl: Single;
 
   function GetStaticValue(x: Byte): Int64;
   begin
@@ -502,14 +491,10 @@ var
 
 begin
 
-  Result := i;
-
-  ftmp := Default(TFloat);
-
   ConstVal := 0;
   ConstValType := TDataType.UNTYPETOK;
+  Result := i;
 
-  fl := 0;
   j := 0;
 
   // WRITELN(TokenAt(i).line, ',', TokenAt(i).kind);
@@ -766,13 +751,7 @@ begin
       if not (ConstValType in RealTypes) then
         ErrorIncompatibleTypes(i, ConstValType, TDataType.REALTOK);
 
-      CheckTok(i + 1, CPARTOK);
-
-      if ConstValType in [TDataType.HALFSINGLETOK, TDataType.SINGLETOK] then
-      begin
-
-        move(ConstVal, ftmp, sizeof(ftmp));
-        move(ftmp[1], fl, sizeof(fl));
+      CheckTok(i + 1, TDataType.CPARTOK);
 
         case Kind of
           INTTOK: fl := int(fl);
@@ -1070,9 +1049,10 @@ begin
             VARIABLE: if IdentifierAt(IdentIndex).isAbsolute then
               begin        // wyjatek gdy ABSOLUTE
 
-                if (abs(IdentifierAt(IdentIndex).Value) and $ff = 0) and (Byte(abs(IdentifierAt(IdentIndex).Value shr 24) and $7f) in
-                  [1..127]) or ((IdentifierAt(IdentIndex).DataType in Pointers) and
-                  (IdentifierAt(IdentIndex).AllocElementType <> TDataType.UNTYPETOK) and (IdentifierAt(IdentIndex).NumAllocElements in [0..1])) then
+                if (abs(IdentifierAt(IdentIndex).Value) and $ff = 0) and (Byte(abs(IdentifierAt(IdentIndex).Value shr 24) and $7f) in [1..127]) or
+                  ((IdentifierAt(IdentIndex).DataType in Pointers) and
+                  (IdentifierAt(IdentIndex).AllocElementType <> TDataType.UNTYPETOK) and
+                  (IdentifierAt(IdentIndex).NumAllocElements in [0..1])) then
                 begin
 
                   isError := True;
@@ -1255,7 +1235,8 @@ begin
     end;
 
 
-    SHORTREALTOK, REALTOK, SINGLETOK, HALFSINGLETOK:      // Q8.8 ; Q24.8 ; SINGLE 32bit ; FLOAT16
+    TTokenKind.SHORTREALTOK, TTokenKind.REALTOK, TTokenKind.SINGLETOK, TTokenKind.HALFSINGLETOK:
+      // Q8.8 ; Q24.8 ; SINGLE 32bit ; FLOAT16
     begin
 
       CheckTok(i + 1, TTokenKind.OPARTOK);
@@ -1275,8 +1256,9 @@ begin
     end;
 
 
-    INTEGERTOK, CARDINALTOK, SMALLINTTOK, WORDTOK, CHARTOK, PCHARTOK, SHORTINTTOK, BYTETOK,
-    BOOLEANTOK, POINTERTOK, STRINGPOINTERTOK:  // type conversion operations
+    TTokenKind.INTEGERTOK, TTokenKind.CARDINALTOK, TTokenKind.SMALLINTTOK, TTokenKind.WORDTOK,
+    TTokenKind.CHARTOK, TTokenKind.PCHARTOK, TTokenKind.SHORTINTTOK, TTokenKind.BYTETOK,
+    TTokenKind.BOOLEANTOK, TTokenKind.POINTERTOK, TTokenKind.STRINGPOINTERTOK:  // type conversion operations
     begin
 
       CheckTok(i + 1, TTokenKind.OPARTOK);
@@ -1341,23 +1323,18 @@ var
   j, k: Integer;
   RightConstVal: Int64;
   RightConstValType: TDataType;
-  ftmp, ftmp_: TFloat;
-  fl, fl_: Single;
 begin
 
+  ConstVal := 0;
+  ConstValType := TTokenKind.UNTILTOK;
   Result := i;
 
   j := CompileConstFactor(i, ConstVal, ConstValType);
 
   if isError then Exit;
 
-  ftmp := Default(TFloat);
-  ftmp_ := Default(TFloat);
-
-  fl := 0;
-  fl_ := 0;
-
-  while Tok[j + 1].Kind in [MULTOK, DIVTOK, MODTOK, IDIVTOK, SHLTOK, SHRTOK, ANDTOK] do
+  while TokenAt(j + 1).Kind in [TTokenKind.MULTOK, TTokenKind.DIVTOK, TTokenKind.MODTOK,
+      TTokenKind.IDIVTOK, TTokenKind.SHLTOK, TTokenKind.SHRTOK, TTokenKind.ANDTOK] do
   begin
 
     k := CompileConstFactor(j + 2, RightConstVal, RightConstValType);
@@ -1367,7 +1344,7 @@ begin
 
     if (ConstValType in RealTypes) and (RightConstValType in IntegerTypes) then
     begin
-      Int2Float(RightConstVal);
+      RightConstVal := FromInt64(RightConstVal);
       RightConstValType := ConstValType;
     end;
 
@@ -1710,31 +1687,34 @@ begin
         if not OutputDisabled then
         begin
 
-          if (DataType = POINTERTOK) and (AllocElementType in [RECORDTOK, OBJECTTOK]) and (NumAllocElements_ = 0) then
-            IncVarDataSize(ErrTokenIndex, GetDataSize(POINTERTOK))
+          if (DataType = TDataType.POINTERTOK) and (AllocElementType in [TDataType.RECORDTOK, TDataType.OBJECTTOK]) and
+            (NumAllocElements_ = 0) then
+            IncVarDataSize(tokenIndex, GetDataSize(TDataType.POINTERTOK))
           else
 
             if DataType in [ENUMTYPE] then
-              IncVarDataSize(ErrTokenIndex, 1)
+              IncVarDataSize(tokenIndex, 1)
             else
-              if (DataType in [RECORDTOK, OBJECTTOK]) and (NumAllocElements > 0) then
-                IncVarDataSize(ErrTokenIndex, 0)
+              if (DataType in [TDataType.RECORDTOK, TDataType.OBJECTTOK]) and (NumAllocElements > 0) then
+                IncVarDataSize(tokenIndex, 0)
               else
-                if (DataType in [FILETOK, TEXTFILETOK]) and (NumAllocElements > 0) then
-                  IncVarDataSize(ErrTokenIndex, 12)
+                if (DataType in [TDataType.FILETOK, TDataType.TEXTFILETOK]) and (NumAllocElements > 0) then
+                  IncVarDataSize(tokenIndex, 12)
                 else
                 begin
 
-                  if (Ident[NumIdent].idType = ARRAYTOK) and (Ident[NumIdent].isAbsolute = False) and
-                    (Elements(NumIdent) = 1) then  // [0..0] ; [0..0, 0..0]
-
+                  if (identifier.idType = TDataType.ARRAYTOK) and (identifier.isAbsolute = False) and
+                    (Elements(NumIdent) = 1) then
+                  begin
+                    // Empty array [0..0] ; [0..0, 0..0] foes not require spaces
+                  end
                   else
                     IncVarDataSize(ErrTokenIndex, Integer(Elements(NumIdent) *GetDataSize(AllocElementType)));
 
                 end;
 
 
-          if NumAllocElements > 0 then IncVarDataSize(ErrTokenIndex, - GetDataSize(DataType));
+          if NumAllocElements > 0 then IncVarDataSize(tokenIndex, -GetDataSize(DataType));
 
         end;
 
