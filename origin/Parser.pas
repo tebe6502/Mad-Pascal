@@ -344,17 +344,17 @@ begin
   // LogTrace(Format('SaveToDataSegment(index=%d, value=%d, valueDataType=%d', [index, value, valueDataType]));
 
   if (index < 0) or (index > $FFFF) then
-begin
+  begin
     writeln('SaveToDataSegment: Invalid segment index', index);
     RaiseHaltException(THaltException.COMPILING_ABORTED);
-end;
+  end;
 
   case valueDataType of
 
     TDataType.SHORTINTTOK, TDataType.BYTETOK, TDataType.CHARTOK, TDataType.BOOLEANTOK:
-  begin
+    begin
       _DataSegment[index] := Byte(Value);
-  end;
+    end;
 
     TDataType.SMALLINTTOK, TDataType.WORDTOK, TDataType.SHORTREALTOK, TDataType.POINTERTOK,
     TDataType.STRINGPOINTERTOK, TDataType.PCHARTOK:
@@ -598,7 +598,7 @@ begin
         if IdentifierAt(IdentIndex).Kind in [VARIABLE, CONSTANT, USERTYPE] then
         begin
 
-          if (IdentifierAt(IdentIndex).DataType = TDataType.STRINGPOINTERTOK) 
+          if (IdentifierAt(IdentIndex).DataType = TDataType.STRINGPOINTERTOK)
           or ((IdentifierAt(IdentIndex).DataType in Pointers) and (IdentifierAt(IdentIndex).NumAllocElements > 0)) then
           begin
 
@@ -615,7 +615,7 @@ begin
               //  writeln(IdentifierAt(IdentIndex).name,',',IdentifierAt(IdentIndex).DataType,',',IdentifierAt(IdentIndex).NumAllocElements,'/',IdentifierAt(IdentIndex).NumAllocElements_,',',IdentifierAt(IdentIndex).AllocElementType );
 
               if (IdentifierAt(IdentIndex).DataType = TDataType.POINTERTOK) and (IdentifierAt(IdentIndex).AllocElementType in
-                [TDataType.RECORDTOK, TDataType.OBJECTTOK]) then
+               [TDataType.RECORDTOK, TDataType.OBJECTTOK]) then
                 ConstVal := IdentifierAt(IdentIndex).NumAllocElements_
               else
                 ConstVal := IdentifierAt(IdentIndex).NumAllocElements;
@@ -753,29 +753,11 @@ begin
 
       CheckTok(i + 1, TDataType.CPARTOK);
 
-        case Kind of
-          INTTOK: fl := int(fl);
-          FRACTOK: fl := frac(fl);
-        end;
 
-        ftmp[0] := round(fl * TWOPOWERFRACBITS);
-        ftmp[1] := Integer(fl);
-
-        move(ftmp, ConstVal, sizeof(ftmp));
-
-      end
-      else
 
         case Kind of
-          INTTOK: if ConstVal < 0 then
-              ConstVal := -(abs(ConstVal) and $ffffffffffffff00)
-            else
-              ConstVal := ConstVal and $ffffffffffffff00;
-
-          FRACTOK: if ConstVal < 0 then
-              ConstVal := -(abs(ConstVal) and $ff)
-            else
-              ConstVal := ConstVal and $ff;
+        TDataType.INTTOK: ConstVal := Trunc(ConstValType, ConstVal);
+        TDataType.FRACTOK: ConstVal := Frac(ConstValType, ConstVal);
         end;
 
       //     ConstValType := REALTOK;
@@ -1041,7 +1023,7 @@ begin
 
           case IdentifierAt(IdentIndex).Kind of
             CONSTANT: if not ((IdentifierAt(IdentIndex).DataType in Pointers) and
-             (IdentifierAt(IdentIndex).NumAllocElements > 0)) then
+                (IdentifierAt(IdentIndex).NumAllocElements > 0)) then
                 Error(i + 1, TErrorCode.CantAdrConstantExp)
               else
                 ConstVal := IdentifierAt(IdentIndex).Value - CODEORIGIN;
@@ -1282,7 +1264,7 @@ begin
 
         if (IdentifierAt(IdentIndex).DataType in Pointers) and
           ((IdentifierAt(IdentIndex).NumAllocElements > 0) and
-           (IdentifierAt(IdentIndex).AllocElementType <> TDataType.RECORDTOK)) then
+          (IdentifierAt(IdentIndex).AllocElementType <> TDataType.RECORDTOK)) then
           if ((IdentifierAt(IdentIndex).AllocElementType <> TDataType.UNTYPETOK) and
             (IdentifierAt(IdentIndex).NumAllocElements in [0, 1])) or
             (IdentifierAt(IdentIndex).DataType = TDataType.STRINGPOINTERTOK) then
@@ -1386,9 +1368,9 @@ begin
           ConstVal := Divide(ConstValType, ConstVal, RightConstVal);
         except
           On EDivByZero do
-        begin
-          isError := False;
-          isConst := False;
+          begin
+            isError := False;
+            isConst := False;
             Error(i, TMessage.Create(TErrorCode.DivisionByZero, 'Division by zero'));
           end;
         end;
@@ -1444,7 +1426,7 @@ begin
 
     ConstVal := Negate(ConstValType, ConstVal);
 
-    end;
+  end;
 
 
   while TokenAt(j + 1).Kind in [TTokenKind.PLUSTOK, TTokenKind.MINUSTOK, TTokenKind.ORTOK, TTokenKind.XORTOK] do
@@ -1709,7 +1691,7 @@ begin
                     // Empty array [0..0] ; [0..0, 0..0] foes not require spaces
                   end
                   else
-                    IncVarDataSize(ErrTokenIndex, Integer(Elements(NumIdent) *GetDataSize(AllocElementType)));
+                    IncVarDataSize(tokenIndex, Integer(Elements(NumIdent) * GetDataSize(AllocElementType)));
 
                 end;
 
@@ -1782,7 +1764,7 @@ begin
   end
   else
   begin
-     DefineIdent(i, '@FN' + IntToHex(NumProc, 4), TTokenKind.FUNCTIONTOK, TDataType.UNTYPETOK,
+    DefineIdent(i, '@FN' + IntToHex(NumProc, 4), TTokenKind.FUNCTIONTOK, TDataType.UNTYPETOK,
       0, TDataType.UNTYPETOK, 0);
     IsNestedFunction := True;
   end;
@@ -2884,7 +2866,7 @@ begin
                     for FieldInListIndex := 1 to NumFieldsInList do
                     begin                // issue #92 fixed
                       DeclareField(FieldInListName[FieldInListIndex].Name, DataType,
-                       NumAllocElements, AllocElementType);
+                        NumAllocElements, AllocElementType);
 
                       if DataType = TDataType.RECORDTOK then
                         //for FieldInListIndex := 1 to NumFieldsInList do                //
