@@ -370,28 +370,30 @@ end;
 
 
           for i := 1 to NumParams do
-            if ((((IdentifierAt(IdentIndex).Param[i].DataType in UnsignedOrdinalTypes) and
+          if (((IdentifierAt(IdentIndex).Param[i].DataType in UnsignedOrdinalTypes) and
               (Param[i].DataType in UnsignedOrdinalTypes)) and
-              (GetDataSize(IdentifierAt(IdentIndex).Param[i].DataType) >= GetDataSize(Param[i].DataType))) or
-              (((IdentifierAt(IdentIndex).Param[i].DataType in SignedOrdinalTypes) and (Param[i].DataType in
-              SignedOrdinalTypes)) and (GetDataSize(IdentifierAt(IdentIndex).Param[i].DataType) >=
-              GetDataSize(Param[i].DataType))) or
-              (((IdentifierAt(IdentIndex).Param[i].DataType in SignedOrdinalTypes) and (Param[i].DataType in
-              UnsignedOrdinalTypes)) and  // smallint > byte
-              (GetDataSize(IdentifierAt(IdentIndex).Param[i].DataType) >= GetDataSize(Param[i].DataType))) or
-              ((IdentifierAt(IdentIndex).Param[i].DataType =
-              Param[i].DataType) {and (IdentifierAt(IdentIndex).Param[i].AllocElementType = Param[i].AllocElementType)})) or
+            (GetDataSize(IdentifierAt(IdentIndex).Param[i].DataType) >= GetDataSize(Param[i].DataType)))
+            // .
+            or (((IdentifierAt(IdentIndex).Param[i].DataType in SignedOrdinalTypes) and
+            (Param[i].DataType in SignedOrdinalTypes)) and
+            (GetDataSize(IdentifierAt(IdentIndex).Param[i].DataType) >= GetDataSize(Param[i].DataType)))
+            // .
+            or (((IdentifierAt(IdentIndex).Param[i].DataType in SignedOrdinalTypes) and
+            (Param[i].DataType in UnsignedOrdinalTypes)) and  // smallint > byte
+            (GetDataSize(IdentifierAt(IdentIndex).Param[i].DataType) >= GetDataSize(Param[i].DataType)))
+            // .
+            or ((IdentifierAt(IdentIndex).Param[i].DataType =
+            Param[i].DataType) {and (IdentifierAt(IdentIndex).Param[i].AllocElementType = Param[i].AllocElementType)})
+            // .
+            // or ( (IdentifierAt(IdentIndex).Param[i].AllocElementType = TDataType.PROCVARTOK) and (IdentifierAt(IdentIndex).Param[i].NumAllocElements shr 16 = Param[i].NumAllocElements shr 16) )
+            // .
+            or ((Param[i].DataType in Pointers) and (IdentifierAt(IdentIndex).Param[i].DataType =
+            Param[i].AllocElementType))    // dla parametru VAR
+            // .
+            or ((IdentifierAt(IdentIndex).Param[i].DataType = TDataType.UNTYPETOK) and
+            (IdentifierAt(IdentIndex).Param[i].PassMethod = TParameterPassingMethod.VARPASSING))
 
-              //( (IdentifierAt(IdentIndex).Param[i].AllocElementType = PROCVARTOK) and (IdentifierAt(IdentIndex).Param[i].NumAllocElements shr 16 = Param[i].NumAllocElements shr 16) ) or
-
-              ((Param[i].DataType in Pointers) and (IdentifierAt(IdentIndex).Param[i].DataType =
-              Param[i].AllocElementType)) or
-              // dla parametru VAR
-
-              ((IdentifierAt(IdentIndex).Param[i].DataType = TDataType.UNTYPETOK) and
-              (IdentifierAt(IdentIndex).Param[i].PassMethod = TParameterPassingMethod.VARPASSING)) //or
-
-            //    ( (IdentifierAt(IdentIndex).Param[i].DataType = UNTYPETOK) and (IdentifierAt(IdentIndex).Param[i].PassMethod = TParameterPassingMethod.VARPASSING) and (Param[i].DataType in OrdinalTypes {+ [POINTERTOK]} {IntegerTypes + [CHARTOK]}) )
+          // or ( (IdentifierAt(IdentIndex).Param[i].DataType = TDataType.UNTYPETOK) and (IdentifierAt(IdentIndex).Param[i].PassMethod = TParameterPassingMethod.VARPASSING) and (Param[i].DataType in OrdinalTypes {+ [POINTERTOK]} {IntegerTypes + [CHARTOK]}) )
 
             then
             begin
@@ -399,15 +401,19 @@ end;
               if (IdentifierAt(IdentIndex).Param[i].AllocElementType = TDataType.PROCVARTOK) then
               begin
 
-                //  writeln(IdentifierAt(IdentIndex).Name,',', IdentifierAt(GetIdent('@FN' + IntToHex(IdentifierAt(IdentIndex).Param[i].NumAllocElements shr 16, 4))].NumParams,',',Param[i].AllocElementType,' | ', IdentifierAt(IdentIndex).Param[i].DataType,',', Param[i].AllocElementType,',',IdentifierAt(GetIdent('@FN' + IntToHex(Param[i].NumAllocElements shr 16, 4))].NumParams);
+              //  writeln(IdentifierAt(IdentIndex).Name,',', IdentifierAt(GetIdentIndex('@FN' + IntToHex(IdentifierAt(IdentIndex).Param[i].NumAllocElements shr 16, 4))].NumParams,',',Param[i].AllocElementType,' | ', IdentifierAt(IdentIndex).Param[i].DataType,',', Param[i].AllocElementType,',',IdentifierAt(GetIdentIndex('@FN' + IntToHex(Param[i).NumAllocElements shr 16, 4))].NumParams);
 
                 case Param[i].AllocElementType of
 
                   TDataType.PROCEDURETOK, TDataType.FUNCTIONTOK:
-                    yes := IdentifierAt(GetIdent('@FN' + IntToHex(IdentifierAt(IdentIndex).Param[i].NumAllocElements shr 16, 4))).NumParams = IdentifierAt(GetIdent(Param[i].Name)).NumParams;
+                  yes := IdentifierAt(GetIdentIndex('@FN' + IntToHex(
+                    IdentifierAt(IdentIndex).Param[i].NumAllocElements shr 16, 4))).NumParams =
+                    IdentifierAt(GetIdentIndex(Param[i].Name)).NumParams;
 
                   TDataType.PROCVARTOK:
-                    yes := (IdentifierAt(GetIdent('@FN' + IntToHex(IdentifierAt(IdentIndex).Param[i].NumAllocElements shr 16, 4))).NumParams) = (IdentifierAt(GetIdent('@FN' + IntToHex(Param[i].NumAllocElements shr 16, 4))).NumParams);
+                  yes := (IdentifierAt(GetIdentIndex('@FN' + IntToHex(
+                    IdentifierAt(IdentIndex).Param[i].NumAllocElements shr 16, 4))).NumParams) =
+                    (IdentifierAt(GetIdentIndex('@FN' + IntToHex(Param[i].NumAllocElements shr 16, 4))).NumParams);
 
                   else
 
@@ -430,9 +436,10 @@ writeln('_C: ', IdentifierAt(IdentIndex).Name);
      writeln (IdentifierAt(IdentIndex).Param[i].NumAllocElements,',', Param[i].NumAllocElements);
 }
 
-              if (IdentifierAt(IdentIndex).Param[i].DataType = UNTYPETOK) and (Param[i].DataType = POINTERTOK) and
-                (IdentifierAt(IdentIndex).Param[i].AllocElementType = UNTYPETOK) and
-                (Param[i].AllocElementType <> UNTYPETOK) and (Param[i].NumAllocElements > 0)
+            if (IdentifierAt(IdentIndex).Param[i].DataType = TDataType.UNTYPETOK) and
+              (Param[i].DataType = TDataType.POINTERTOK) and
+              (IdentifierAt(IdentIndex).Param[i].AllocElementType = TDataType.UNTYPETOK) and
+              (Param[i].AllocElementType <> TDataType.UNTYPETOK) and (Param[i].NumAllocElements > 0)
               {and (IdentifierAt(IdentIndex).Param[i].NumAllocElements = Param[i].NumAllocElements)} then
               begin
 {
@@ -448,7 +455,8 @@ writeln('_A: ', IdentifierAt(IdentIndex).Name);
               end;
 
 
-              if (IdentifierAt(IdentIndex).Param[i].DataType in IntegerTypes) and (Param[i].DataType in IntegerTypes) then
+            if (IdentifierAt(IdentIndex).Param[i].DataType in IntegerTypes) and
+              (Param[i].DataType in IntegerTypes) then
               begin
 
                 if IdentifierAt(IdentIndex).Param[i].DataType in UnsignedOrdinalTypes then
@@ -475,7 +483,7 @@ writeln('_A: ', IdentifierAt(IdentIndex).Name);
                   b := GetDataSize(IdentifierAt(IdentIndex).Param[i].DataType);  // required parameter type
                   k := GetDataSize(Param[i].DataType);        // type of parameter passed
 
-                  if Param[i].DataType in [BYTETOK, WORDTOK] then Inc(k);  // -> signed
+                if Param[i].DataType in [TDataType.BYTETOK, TDataType.WORDTOK] then Inc(k);  // -> signed
 
                   //       writeln('- ',IdentifierAt(IdentIndex).Name,' - ',b,',',k,',',4 - abs(b-k),' / ',Param[i].DataType,' | ',IdentifierAt(IdentIndex).Param[i].DataType);
 
@@ -494,7 +502,7 @@ writeln('_A: ', IdentifierAt(IdentIndex).Name);
 
 
               if (IdentifierAt(IdentIndex).Param[i].DataType = Param[i].DataType) and
-                (IdentifierAt(IdentIndex).Param[i].AllocElementType <> UNTYPETOK) and
+              (IdentifierAt(IdentIndex).Param[i].AllocElementType <> TDataType.UNTYPETOK) and
                 (IdentifierAt(IdentIndex).Param[i].AllocElementType = Param[i].AllocElementType) then
 
               begin
@@ -513,11 +521,12 @@ writeln('_D: ', IdentifierAt(IdentIndex).Name);
 
               if (IdentifierAt(IdentIndex).Param[i].DataType = Param[i].DataType) and
                 ((IdentifierAt(IdentIndex).Param[i].AllocElementType = Param[i].AllocElementType) or
-                ((IdentifierAt(IdentIndex).Param[i].AllocElementType = UNTYPETOK) and
-                (Param[i].AllocElementType <> UNTYPETOK) and (IdentifierAt(IdentIndex).Param[i].NumAllocElements =
-                Param[i].NumAllocElements)) or ((IdentifierAt(IdentIndex).Param[i].AllocElementType <> UNTYPETOK) and
-                (Param[i].AllocElementType = UNTYPETOK) and (IdentifierAt(IdentIndex).Param[i].NumAllocElements =
-                Param[i].NumAllocElements))) then
+              ((IdentifierAt(IdentIndex).Param[i].AllocElementType = TDataType.UNTYPETOK) and
+              (Param[i].AllocElementType <> TDataType.UNTYPETOK) and
+              (IdentifierAt(IdentIndex).Param[i].NumAllocElements = Param[i].NumAllocElements)) or
+              ((IdentifierAt(IdentIndex).Param[i].AllocElementType <> TDataType.UNTYPETOK) and
+              (Param[i].AllocElementType = TDataType.UNTYPETOK) and
+              (IdentifierAt(IdentIndex).Param[i].NumAllocElements = Param[i].NumAllocElements))) then
               begin
 {
 writeln('_B: ', IdentifierAt(IdentIndex).Name);
@@ -1357,7 +1366,7 @@ procedure Push(Value: Int64; IndirectionLevel: Byte; Size: Byte; IdentIndex: Int
 
               lab := ExtractName(IdentIndex, svar);
 
-              if IdentifierAt(GetIdent(lab)).AllocElementType = RECORDTOK then
+            if IdentifierAt(GetIdentIndex(lab)).AllocElementType = TDataType.RECORDTOK then
               begin
                 asm65(#9'lda ' + lab);
                 asm65(#9'ldy ' + lab + '+1');
@@ -6237,7 +6246,7 @@ procedure GenerateRelationString(relation: TTokenKind; LeftValType, RightValType
 
     end
     else
-      if LeftValType = CHARTOK then
+    if LeftValType = TDatatype.CHARTOK then
       begin
         //  a65(__cmpCHAR2STRING)        // CHAR ? STRING
 
@@ -6253,7 +6262,7 @@ procedure GenerateRelationString(relation: TTokenKind; LeftValType, RightValType
 
       end
       else
-        if RightValType = CHARTOK then
+      if RightValType = TDatatype.CHARTOK then
         begin
           //  a65(__cmpSTRING2CHAR);        // STRING ? CHAR
 
@@ -6268,7 +6277,7 @@ procedure GenerateRelationString(relation: TTokenKind; LeftValType, RightValType
           asm65(#9'jsr @cmpSTRING2CHAR');
         end;
 
-    GenerateRelationOperation(relation, BYTETOK);
+  GenerateRelationOperation(relation, TDatatype.BYTETOK);
 
     Gen;
 
