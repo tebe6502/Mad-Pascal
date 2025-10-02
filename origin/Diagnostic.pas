@@ -12,7 +12,7 @@ procedure Diagnostics;
 
 implementation
 
-uses SysUtils, Common;
+uses SysUtils, Common, DataTypes, Tokens;
 
 // ----------------------------------------------------------------------------
 
@@ -34,20 +34,20 @@ begin
 
   for i := 1 to NumTok do
   begin
-    Write(DiagFile, i: 6, UnitName[Tok[i].UnitIndex].Name: 30, Tok[i].Line: 6, GetSpelling(i): 30);
-    if Tok[i].Kind = INTNUMBERTOK then
-      WriteLn(DiagFile, ' = ', Tok[i].Value)
-    else if Tok[i].Kind = FRACNUMBERTOK then
-        WriteLn(DiagFile, ' = ', Tok[i].FracValue: 8: 4)
-      else if Tok[i].Kind = IDENTTOK then
-          WriteLn(DiagFile, ' = ', Tok[i].Name^)
-        else if Tok[i].Kind = CHARLITERALTOK then
-            WriteLn(DiagFile, ' = ', Chr(Tok[i].Value))
-          else if Tok[i].Kind = STRINGLITERALTOK then
+    Write(DiagFile, i: 6, UnitName[TokenAt(i).UnitIndex].Name: 30, TokenAt(i).Line: 6, GetTokenSpelling(TokenAt(i).Kind): 30);
+    if TokenAt(i).Kind = INTNUMBERTOK then
+      WriteLn(DiagFile, ' = ', TokenAt(i).Value)
+    else if TokenAt(i).Kind = FRACNUMBERTOK then
+        WriteLn(DiagFile, ' = ', TokenAt(i).FracValue: 8: 4)
+      else if TokenAt(i).Kind = IDENTTOK then
+          WriteLn(DiagFile, ' = ', TokenAt(i).Name^)
+        else if TokenAt(i).Kind = CHARLITERALTOK then
+            WriteLn(DiagFile, ' = ', Chr(TokenAt(i).Value))
+          else if TokenAt(i).Kind = STRINGLITERALTOK then
             begin
               Write(DiagFile, ' = ');
-              for CharIndex := 1 to Tok[i].StrLength do
-                Write(DiagFile, StaticStringData[Tok[i].StrAddress - CODEORIGIN + (CharIndex - 1)]);
+              for CharIndex := 1 to TokenAt(i).StrLength do
+                Write(DiagFile, StaticStringData[TokenAt(i).StrAddress - CODEORIGIN + (CharIndex - 1)]);
               WriteLn(DiagFile);
             end
             else
@@ -63,8 +63,8 @@ begin
 
   for i := 1 to NumIdent do
   begin
-    Write(DiagFile, i: 6, Ident[i].Block: 6, Ident[i].Name: 30, Spelling[Ident[i].Kind]: 15);
-    if Ident[i].DataType <> 0 then Write(DiagFile, Spelling[Ident[i].DataType]: 15)
+    Write(DiagFile, i: 6, Ident[i].Block: 6, Ident[i].Name: 30, GetTokenSpelling(Ident[i].Kind): 15);
+    if Ident[i].DataType <> TDataType.UNTYPETOK then Write(DiagFile, GetTokenSpelling(Ident[i].DataType): 15)
     else
       Write(DiagFile, 'N/A': 15);
     Write(DiagFile, Ident[i].NumAllocElements: 15, IntToHex(Ident[i].Value, 8): 15);

@@ -22,8 +22,8 @@ procedure DefineIdent(ErrTokenIndex: Integer; Name: TString; Kind: TTokenKind; D
   NumAllocElements: Cardinal; AllocElementType: TDataType; Data: Int64; IdType: TDataType = TDataType.IDENTTOK);
 
 function DefineFunction(i, ForwardIdentIndex: Integer; out isForward, isInt, isInl, isOvr: Boolean;
-  var IsNestedFunction: Boolean; out NestedFunctionResultType: Byte; out NestedFunctionNumAllocElements: Cardinal;
-  out NestedFunctionAllocElementType: Byte): Integer;
+  var IsNestedFunction: Boolean; out NestedFunctionResultType: TDataType; out NestedFunctionNumAllocElements: Cardinal;
+  out NestedFunctionAllocElementType: TDataType): Integer;
 
 function Elements(IdentIndex: Integer): Cardinal;
 
@@ -2212,9 +2212,9 @@ begin
         until Tok[i].Kind <> COMMATOK;
 
 
-        VarType := 0;                // UNTYPED
+        VarType := TDataType.UNTYPETOK;
         NumAllocElements := 0;
-        AllocElementType := 0;
+        AllocElementType := TDataType.UNTYPETOK;        ;
 
         if (ListPassMethod in [TParameterPassingMethod.CONSTPASSING, TParameterPassingMethod.VARPASSING]) and (Tok[i].Kind <> COLONTOK) then
         begin
@@ -2271,9 +2271,9 @@ begin
     else
       i := i + 2;
 
-    NestedFunctionResultType := 0;
+    NestedFunctionResultType := TDataType.UNTYPETOK;
     NestedFunctionNumAllocElements := 0;
-    NestedFunctionAllocElementType := 0;
+    NestedFunctionAllocElementType := TDataType.UNTYPETOK;
 
     if IsNestedFunction then
     begin
@@ -2451,48 +2451,48 @@ end;  //DefineFunction
 // ----------------------------------------------------------------------------
 
 
-function CompileType(i: Integer; out DataType: Byte; out NumAllocElements: Cardinal;
-  out AllocElementType: Byte): Integer;
+function CompileType(i: Integer; out DataType: TDataType; out NumAllocElements: Cardinal;
+  out AllocElementType: TDataType): Integer;
 var
   NestedNumAllocElements, NestedFunctionNumAllocElements: Cardinal;
   LowerBound, UpperBound, ConstVal, IdentIndex: Int64;
   NumFieldsInList, FieldInListIndex, RecType, k, j: Integer;
   NestedDataType, ExpressionType, NestedAllocElementType, NestedFunctionAllocElementType,
-  NestedFunctionResultType: Byte;
+  NestedFunctionResultType: TDataType;
   FieldInListName: array [1..MAXFIELDS] of TField;
   ExitLoop, isForward, IsNestedFunction, isInt, isInl, isOvr: Boolean;
   Name: TString;
 
 
-  function BoundaryType: Byte;
+  function BoundaryType: TDataType;
   begin
 
     if (LowerBound < 0) or (UpperBound < 0) then
     begin
 
-      if (LowerBound >= Low(Shortint)) and (UpperBound <= High(Shortint)) then Result := SHORTINTTOK
+      if (LowerBound >= Low(Shortint)) and (UpperBound <= High(Shortint)) then Result := TDataType.SHORTINTTOK
       else
-        if (LowerBound >= Low(Smallint)) and (UpperBound <= High(Smallint)) then Result := SMALLINTTOK
+        if (LowerBound >= Low(Smallint)) and (UpperBound <= High(Smallint)) then Result := TDataType.SMALLINTTOK
         else
-          Result := INTEGERTOK;
+          Result := TDataType.INTEGERTOK;
 
     end
     else
     begin
 
-      if (LowerBound >= Low(Byte)) and (UpperBound <= High(Byte)) then Result := BYTETOK
+      if (LowerBound >= Low(Byte)) and (UpperBound <= High(Byte)) then Result := TDataType.BYTETOK
       else
-        if (LowerBound >= Low(Word)) and (UpperBound <= High(Word)) then Result := WORDTOK
+        if (LowerBound >= Low(Word)) and (UpperBound <= High(Word)) then Result := TDataType.WORDTOK
         else
-          Result := CARDINALTOK;
+          Result := TDataType.CARDINALTOK;
 
     end;
 
   end;
 
 
-  procedure DeclareField(const Name: TName; FieldType: Byte; NumAllocElements: Cardinal = 0;
-    AllocElementType: Byte = 0; Data: Int64 = 0);
+  procedure DeclareField(const Name: TName; FieldType: TDataType; NumAllocElements: Cardinal = 0;
+    AllocElementType: TDataType = TDataType.UNTYPETOK; Data: Int64 = 0);
   var
     x: Integer;
   begin
@@ -2512,8 +2512,8 @@ var
 
     if FieldType = DEREFERENCEARRAYTOK then
     begin
-      FieldType := POINTERTOK;
-      AllocElementType := 0;
+      FieldType := TDataType.POINTERTOK;
+      AllocElementType := TDataType.UNTYPETOK;     ;
       NumAllocElements := 0;
     end;
 
@@ -2532,33 +2532,33 @@ var
     if FieldType = ENUMTOK then FieldType := AllocElementType;
 
 
-    if not (FieldType in [RECORDTOK, OBJECTTOK]) then
+    if not (FieldType in [TDataType.RECORDTOK, TDataType.OBJECTTOK]) then
     begin
 
       if FieldType in Pointers then
       begin
 
-        if AllocElementType = RECORDTOK then
+        if AllocElementType = TDataType.RECORDTOK then
         begin
-          AllocElementType := POINTERTOK;
+          AllocElementType := TDataType.POINTERTOK;
           NumAllocElements := NumAllocElements shr 16;
         end;
 
-        if (FieldType = POINTERTOK) and (AllocElementType = FORWARDTYPE) then
-          Inc(Types[RecType].Size,GetDataSize(POINTERTOK])
+        if (FieldType = TDataType.POINTERTOK) and (AllocElementType = TDataType.FORWARDTYPE) then
+          Inc(Types[RecType].Size,GetDataSize(TDataType.POINTERTOK))
         else
           if NumAllocElements shr 16 > 0 then
-            Inc(Types[RecType].Size, (NumAllocElements shr 16) * (NumAllocElements and $FFFF) *GetDataSize(AllocElementType])
+            Inc(Types[RecType].Size, (NumAllocElements shr 16) * (NumAllocElements and $FFFF) *GetDataSize(AllocElementType))
           else
-            Inc(Types[RecType].Size, NumAllocElements *GetDataSize(AllocElementType]);
+            Inc(Types[RecType].Size, NumAllocElements *GetDataSize(AllocElementType));
 
       end
       else
-        Inc(Types[RecType].Size,GetDataSize(FieldType]);
+        Inc(Types[RecType].Size,GetDataSize(FieldType));
 
     end
     else
-      Inc(Types[RecType].Size,GetDataSize(FieldType]);
+      Inc(Types[RecType].Size,GetDataSize(FieldType));
 
 
     if pos('.', Types[RecType].Field[x].Name) > 0 then
@@ -2670,7 +2670,7 @@ begin
         begin
 
           if not (Tok[i + 1].Kind in OrdinalTypes + RealTypes + [POINTERTOK]) then
-            Error(i + 1, IdentifierExpected);
+            Error(i + 1, TErrorCode.IdentifierExpected);
 
           NumAllocElements := 0;
           AllocElementType := Tok[i + 1].Kind;
@@ -2754,8 +2754,8 @@ begin
 
         for FieldInListIndex := 1 to NumFieldsInList do
         begin
-          DefineIdent(i, FieldInListName[FieldInListIndex].Name, ENUMTYPE, DataType, 0, 0,
-            FieldInListName[FieldInListIndex].Value);
+          DefineIdent(i, FieldInListName[FieldInListIndex].Name, ENUMTYPE, DataType, 0,
+            TDataType.UNTYPETOK, FieldInListName[FieldInListIndex].Value);
 {
       DefineIdent(i, FieldInListName[FieldInListIndex].Name, CONSTANT, POINTERTOK, length(FieldInListName[FieldInListIndex].Name)+1, CHARTOK, NumStaticStrChars + CODEORIGIN + CODEORIGIN_BASE , IDENTTOK);
 
@@ -2769,7 +2769,8 @@ begin
           Ident[NumIdent].NumAllocElements := RecType;
           Ident[NumIdent].Pass := CALLDETERMPASS;
 
-          DeclareField(FieldInListName[FieldInListIndex].Name, DataType, 0, 0, FieldInListName[FieldInListIndex].Value);
+          DeclareField(FieldInListName[FieldInListIndex].Name, DataType, 0, TDataType.UNTYPETOK,
+            FieldInListName[FieldInListIndex].Value);
         end;
 
         Types[RecType].Block := BlockStack[BlockStackTop];
@@ -2813,7 +2814,7 @@ begin
               i := CompileType(i + 2, DataType, NumAllocElements, AllocElementType)
             else
             begin
-              AllocElementType := 0;//BYTETOK;
+              AllocElementType := TDataType.UNTYPETOK;//BYTETOK?
               NumAllocElements := 128;
             end;
 
@@ -3005,8 +3006,8 @@ begin
                 Types[RecType].Block := BlockStack[BlockStackTop];
 
                 DataType := OBJECTTOK;
-                NumAllocElements := RecType;      // indeks do tablicy Types
-                AllocElementType := 0;
+                NumAllocElements := RecType;      // Index to the Types array
+                AllocElementType := TDataType.UNTYPETOK;
 
                 Result := i;
               end
@@ -3098,9 +3099,9 @@ begin
 
                   Types[RecType].Block := BlockStack[BlockStackTop];
 
-                  DataType := RECORDTOK;
-                  NumAllocElements := RecType;      // indeks do tablicy Types
-                  AllocElementType := 0;
+                  DataType := TDataType.RECORDTOK;
+                  NumAllocElements := RecType;      // index to the Types array
+                  AllocElementType := TDataType.UNTYPETOK;
 
                   if Types[RecType].Size > 256 then
                     Error(i, 'Record size (' + IntToStr(Types[RecType].Size) + ') beyond the 256 bytes limit');
@@ -3159,7 +3160,7 @@ begin
                       NumAllocElements := UpperBound + 1;
 
                       if UpperBound > 255 then
-                        Error(i, SubrangeBounds);
+                        Error(i, TErrorCode.SubrangeBounds);
 
                     end// if STRINGTOK
                     else
@@ -3182,7 +3183,7 @@ begin
                       begin
                         DataType := Tok[i].Kind;
                         NumAllocElements := 0;
-                        AllocElementType := 0;
+                        AllocElementType := TDataType.UNTYPETOK;
 
                         Result := i;
                       end
@@ -3233,10 +3234,10 @@ begin
                               Error(i, 'Array upper bound must be integer');
 
                             if UpperBound < 0 then
-                              Error(i, UpperBoundOfRange);
+                              Error(i, TErrorCode.UpperBoundOfRange);
 
                             if UpperBound > High(Word) then
-                              Error(i, HighLimit);
+                              Error(i, TErrorCode.HighLimit);
 
                             NumAllocElements := UpperBound - LowerBound + 1;
 
@@ -3257,10 +3258,10 @@ begin
                                 Error(i, 'Array upper bound must be integer');
 
                               if UpperBound < 0 then
-                                Error(i, UpperBoundOfRange);
+                                Error(i, TErrorCode.UpperBoundOfRange);
 
                               if UpperBound > High(Word) then
-                                Error(i, HighLimit);
+                                Error(i, TErrorCode.HighLimit);
 
                               NumAllocElements := NumAllocElements or (UpperBound - LowerBound + 1) shl 16;
 
@@ -3288,7 +3289,7 @@ begin
                           end;
 
 
-                          if (NumAllocElements shr 16) * (NumAllocElements and $FFFF) *GetDataSize(NestedDataType] > 40960 - 1 then
+                          if (NumAllocElements shr 16) * (NumAllocElements and $FFFF) *GetDataSize(NestedDataType) > 40960 - 1 then
                             Error(i, 'Array [0..' + IntToStr(NumAllocElements and $FFFF - 1) + ', 0..' +
                               IntToStr(NumAllocElements shr 16 - 1) + '] size exceeds available RAM');
 
@@ -3358,7 +3359,7 @@ begin
                             IdentIndex := GetIdent(Tok[i].Name^);
 
                             if IdentIndex = 0 then
-                              Error(i, UnknownIdentifier);
+                              Error(i, TErrorCode.UnknownIdentifier);
 
                             if IdentifierAt(IdentIndex).Kind <> USERTYPE then
                               Error(i, 'Type expected but ' + Tok[i].Name^ + ' found');
@@ -3383,13 +3384,13 @@ begin
                             UpperBound := ConstVal;
 
                             if UpperBound < LowerBound then
-                              Error(i, UpperBoundOfRange);
+                              Error(i, TErrorCode.UpperBoundOfRange);
 
                             // Error(i, 'Error in type definition');
 
                             DataType := BoundaryType;
                             NumAllocElements := 0;
-                            AllocElementType := 0;
+                            AllocElementType := TDataType.UNTYPETOK;
                             Result := i;
 
                           end;

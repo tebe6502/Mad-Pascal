@@ -60,9 +60,10 @@ const
   CODEORIGIN = $100;
   DATAORIGIN = $8000;
 
-
   // Indirection levels
+type TIndirectionLevel = Byte;
 
+const
   ASVALUE = 0;
   ASPOINTER = 1;
   ASPOINTERTOPOINTER = 2;
@@ -147,8 +148,6 @@ type
     PassMethod: TParameterPassingMethod;
     i, i_: Integer;
   end;
-
-  TParamList = array [1..MAXPARAMS] of TParam;
 
 
   TIdentifierName = String;

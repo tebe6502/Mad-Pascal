@@ -35,9 +35,21 @@ procedure iError(ErrTokenIndex: Integer; err: TErrorCode; IdentIndex: Integer = 
 
 procedure ErrorIncompatibleTypes(const tokenIndex: TTokenIndex; const srcType: TDataType;
   const dstType: TDataType; const dstPointer: Boolean = False);
+
+procedure ErrorIncompatibleEnumTypeIdentifier(const tokenIndex: TTokenIndex; const srcType: TDataType;
+  dstEnumIndex: TIdentIndex);
+procedure ErrorIncompatibleEnumIdentifierType(const tokenIndex: TTokenIndex; const srcEnumIndex: TIdentIndex;
+  const dstType: TDataType);
+
 procedure ErrorIdentifierIllegalTypeConversion(const tokenIndex: TTokenIndex; const identIndex: TIdentIndex;
   const tokenKind: TTokenKind);
 procedure ErrorRangeCheckError(const tokenIndex: TTokenIndex; const Value: TInteger; const dstType: TDataType);
+
+procedure ErrorIdentifierIncompatibleTypesArray(const tokenIndex: TTokenIndex;
+  const identIndex: TIdentIndex; const tokenKind: TTokenKind);
+
+procedure ErrorIdentifierIncompatibleTypesArrayIdentifier(const tokenIndex: TTokenIndex;
+  const identIndex: TIdentIndex; const arrayIdentIndex: TIdentIndex);
 
 procedure newMsg(var msg: TArrayString; var a: String);
 
@@ -363,6 +375,18 @@ begin
   // Error(tokenIndex, TMessage.Create(TErrorCode.IncompatibleTypes, msg));
 end;
 
+procedure ErrorIncompatibleEnumTypeIdentifier(const tokenIndex: TTokenIndex; const srcType: TDataType;
+  dstEnumIndex: TIdentIndex);
+begin
+  // TODO
+end;
+
+procedure ErrorIncompatibleEnumIdentifierType(const tokenIndex: TTokenIndex; const srcEnumIndex: TIdentIndex;
+  const dstType: TDataType);
+begin
+  // TODO
+end;
+
 procedure ErrorIdentifierIllegalTypeConversion(const tokenIndex: TTokenIndex; const identIndex: TIdentIndex;
   const tokenKind: TTokenKind);
 begin
@@ -372,6 +396,17 @@ end;
 procedure ErrorRangeCheckError(const tokenIndex: TTokenIndex; const Value: TInteger; const dstType: TDataType);
 begin
 
+end;
+
+procedure ErrorIdentifierIncompatibleTypesArray(const tokenIndex: TTokenIndex;
+  const identIndex: TIdentIndex; const tokenKind: TTokenKind);
+begin
+  // TODO
+end;
+procedure ErrorIdentifierIncompatibleTypesArrayIdentifier(const tokenIndex: TTokenIndex;
+  const identIndex: TIdentIndex; const arrayIdentIndex: TIdentIndex);
+begin
+  // TODO
 end;
 
 // ----------------------------------------------------------------------------

@@ -109,7 +109,7 @@
 //move_1
 
 		     if Succ(Tok[i + 2].StrLength) > Ident[IdentIndex].NumAllocElements then begin
-		      Warning(i + 2, ShortStringLength);
+		      Warning(i + 2, TErrorCode.ShortStringLength);
 		      asm65(#9'mva #$'+IntToHex(NumCharacters,2)+' '+GetLocalName(IdentIndex, 'adr.'));    //adr.'+Ident[IdentIndex].Name);
 		     end;
 
@@ -173,7 +173,7 @@
 		     end;
 
 		 else
-		    GenerateAssignment(IndirectionLevel, DataSize[VarType], IdentIndex);
+		    GenerateAssignment(IndirectionLevel, GetDataSize(VarType), IdentIndex);
 
 		 end;// case IndirectionLevel
 
@@ -228,13 +228,13 @@
 		      end;
 
 		  else
-		   GenerateAssignment(IndirectionLevel, DataSize[VarType], IdentIndex);
+		   GenerateAssignment(IndirectionLevel, GetDataSize(VarType), IdentIndex);
 
 		  end;// case IndirectionLevel
 
 
 		end else
-		 Error(i, IncompatibleTypes, 0, ExpressionType, VarType);
+		 ErrorIncompatibleTypes(i, ExpressionType, VarType);
 
 		end;
 

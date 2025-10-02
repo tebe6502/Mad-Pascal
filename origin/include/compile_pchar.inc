@@ -188,7 +188,7 @@
 		     end;
 }
 		 else
-		    GenerateAssignment(IndirectionLevel, DataSize[VarType], IdentIndex);
+		    GenerateAssignment(IndirectionLevel, GetDataSize(VarType), IdentIndex);
 
 		 end;// case IndirectionLevel
 
@@ -231,13 +231,13 @@
 		      end;
 
 		  else
-		   GenerateAssignment(IndirectionLevel, DataSize[VarType], IdentIndex);
+		   GenerateAssignment(IndirectionLevel, GetDataSize(VarType), IdentIndex);
 
 		  end;// case IndirectionLevel
 
 
 		end else
-		 Error(i, IncompatibleTypes, 0, ExpressionType, VarType);
+		 ErrorIncompatibleTypes(i, ExpressionType, VarType);
 
 		end;
 

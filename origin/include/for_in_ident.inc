@@ -4,7 +4,7 @@
 // -----------------------------------------------------------------------------
 
   	    if Tok[j].Kind <> IDENTTOK then
-	      Error(j, IdentifierExpected);
+	      Error(j, TErrorCode.IdentifierExpected);
 
 	    IdentTemp := GetIdent(Tok[j].Name^);
 
@@ -13,7 +13,7 @@
 
 	    k := Elements(IdentTemp);
 
-	    if k * DataSize[VarType] > 256 then
+	    if k * GetDataSize(VarType) > 256 then
 	     Error(j, 'only arrays with a maximum of 256 bytes');
 
 // writeln(ActualParamType,',', VarType,',',Ident[IdentTemp].NumAllocElements,',',Ident[IdentTemp].NumAllocElements_,' | ',Ident[IdentTemp].IdType);
@@ -58,7 +58,7 @@
 
 	     end else begin
 
-	      case DataSize[VarType] of
+	      case GetDataSize(VarType) of
 
 	       1: begin
 	           asm65(#9'ldy #$00');

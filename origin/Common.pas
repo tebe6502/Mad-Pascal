@@ -307,34 +307,6 @@ const
 
 type
 
-  // Indirection levels
-
-  TIndirectionLevel = (
-
-    ASVALUE,  // Ord(Ident[IdentIndex].Kind = VARIABLE) -> 0 -> ASVALUE
-    ASPOINTER,  // Ord(Ident[IdentIndex].Kind = VARIABLE) -> 1 -> ASPOINTER
-
-    ASPOINTERTOPOINTER,
-    ASPOINTERTOARRAYORIGIN,  // + GenerateIndexShift
-    ASPOINTERTOARRAYORIGIN2,  // - GenerateIndexShift
-    ASPOINTERTORECORD,
-    ASPOINTERTOARRAYRECORD,
-    ASSTRINGPOINTERTOARRAYORIGIN,
-    ASSTRINGPOINTER1TOARRAYORIGIN,
-    ASPOINTERTODEREFERENCE,
-    ASPOINTERTORECORDARRAYORIGIN,
-    ASARRAYORIGINOFPOINTERTORECORDARRAYORIGIN,
-    ASPOINTERTOARRAYRECORDTOSTRING,
-
-    ASCHAR,  // GenerateWriteString
-    AsBoolean,
-    ASREAL,
-    ASSHORTREAL,
-    ASHALFSINGLE,
-    ASSINGLE,
-    ASPCHAR
-    );
-
   ModifierCode = (mKeep = $100, mOverload = $80, mInterrupt = $40, mRegister = $20, mAssembler =
     $10, mForward = $08, mPascal = $04, mStdCall = $02, mInline = $01);
 
@@ -441,8 +413,8 @@ type
     Pass: Byte;
 
     NestedNumAllocElements: Cardinal;
-    NestedAllocElementType: Byte;
-    NestedDataType: Byte;
+    NestedAllocElementType: TDataType;
+    NestedDataType: TDataType;
 
     NestedFunctionNumAllocElements: Cardinal;
     NestedFunctionAllocElementType: TDataType;
@@ -496,6 +468,7 @@ type
     Allow: array [1..MAXALLOWEDUNITS] of TString;
   end;
 
+  (*
   TResource = record
     resStream: Boolean;
     resName, resType, resFile: TString;
@@ -503,6 +476,7 @@ type
     resFullName: String;
     resPar: array [1..MAXPARAMS] of TString;
   end;
+  *)
 
   TCaseLabel = record
     left, right: Int64;
@@ -533,6 +507,8 @@ var
   LIBRARY_NAME: String;
 
   AsmBlock: array [0..4095] of String;
+
+  resArray: array of TResource;
 
   Data, DataSegment, StaticStringData: array [0..$FFFF] of Word;
 
@@ -573,8 +549,6 @@ var
   OutFile: TextFile;
 
   //AsmLabels: array of integer;
-
-  resArray: array of TResource;
 
   MainPath, FilePath, optyA, optyY, optyBP2, optyFOR0, optyFOR1, optyFOR2, optyFOR3, outTmp, outputFile: TString;
 
@@ -672,6 +646,8 @@ procedure IncVarDataSize(const tokenIndex: TTokenIndex; const size: Integer);
 function GetVarDataSize: Integer;
 procedure SetVarDataSize(const tokenIndex: TTokenIndex; const size: Integer);
 
+function GetTypeAtIndex(const typeIndex: TTypeIndex): TType;
+
 var
   TraceFile: TextFile;
 
@@ -726,6 +702,11 @@ end;
 procedure IncVarDataSize(const tokenIndex: TTokenIndex; const size: Integer);
 begin
   SetVarDataSize(tokenIndex, _VarDataSize + size);
+end;
+
+function GetTypeAtIndex(const typeIndex: TTypeIndex): TType;
+begin
+  Result := Types[typeIndex];
 end;
 
 // ----------------------------------------------------------------------------
