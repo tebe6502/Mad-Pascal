@@ -753,6 +753,8 @@ begin
 
       CheckTok(i + 1, TDataType.CPARTOK);
 
+
+
       case Kind of
         TDataType.INTTOK: ConstVal := Trunc(ConstValType, ConstVal);
         TDataType.FRACTOK: ConstVal := Frac(ConstValType, ConstVal);
@@ -1689,7 +1691,7 @@ begin
                     // Empty array [0..0] ; [0..0, 0..0] foes not require spaces
                   end
                   else
-                    IncVarDataSize(ErrTokenIndex, Integer(Elements(NumIdent) *GetDataSize(AllocElementType)));
+                    IncVarDataSize(tokenIndex, Integer(Elements(NumIdent) * GetDataSize(AllocElementType)));
 
                 end;
 
@@ -2340,10 +2342,10 @@ var
     else
       Inc(_TypeArray[RecType].Size, GetDataSize(FieldType));
 
-    if pos('.', Types[RecType].Field[x].Name) > 0 then
-      Types[RecType].Field[x].ObjectVariable := Types[RecType].Field[0].ObjectVariable
+    if pos('.', GetTypeAtIndex(RecType).Field[x].Name) > 0 then
+      _TypeArray[RecType].Field[x].ObjectVariable := GetTypeAtIndex(RecType).Field[0].ObjectVariable
     else
-      Types[RecType].Field[x].ObjectVariable := False;
+      _TypeArray[RecType].Field[x].ObjectVariable := False;
 
   end;
 
