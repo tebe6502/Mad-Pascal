@@ -8851,7 +8851,7 @@ begin
 
                         CheckTok(i + 2, TTokenKind.CPARTOK);
 
-                        ValType := TTokenKind.BYTETOK;
+                        ValType := TDataType.BYTETOK;
 
                         Result := i + 2;
                         exit;
@@ -8907,7 +8907,7 @@ begin
 
                         end;
 
-                      ValType := TTokenKind.BYTETOK;
+                      ValType := TDataType.BYTETOK;
 
                     end
                     else
@@ -8987,19 +8987,19 @@ begin
       CheckTok(i + 1, TTokenKind.OPARTOK);
 
       i := CompileExpression(i + 2, ActualParamType);
-      GetCommonConstType(i, TTokenKind.INTEGERTOK, ActualParamType);
+      GetCommonConstType(i, TDataType.INTEGERTOK, ActualParamType);
 
       if GetDataSize(ActualParamType) > 2 then WarningLoHi(i);
 
-      CheckTok(i + 1, TDataType.CPARTOK);
+      CheckTok(i + 1, TTokenKind.CPARTOK);
 
       // asm65;
       // asm65('; Hi(X)');
 
       case ActualParamType of
-        TTokenKind.SHORTINTTOK, TTokenKind.BYTETOK: asm65(#9'jsr @hiBYTE');
-        TTokenKind.SMALLINTTOK, TTokenKind.WORDTOK: asm65(#9'jsr @hiWORD');
-        TTokenKind.INTEGERTOK, TTokenKind.CARDINALTOK: asm65(#9'jsr @hiCARD');
+          TDataType.SHORTINTTOK, TDataType.BYTETOK: asm65(#9'jsr @hiBYTE');
+          TDataType.SMALLINTTOK, TDataType.WORDTOK: asm65(#9'jsr @hiWORD');
+          TDataType.INTEGERTOK, TDataType.CARDINALTOK: asm65(#9'jsr @hiCARD');
       end;
 
       if ActualParamType in [TDataType.INTEGERTOK, TDataType.CARDINALTOK] then
@@ -9016,8 +9016,8 @@ begin
 
       CheckTok(i + 1, TTokenKind.OPARTOK);
 
-      i := CompileExpression(i + 2, ActualParamType, TTokenKind.BYTETOK);
-      GetCommonConstType(i, TTokenKind.INTEGERTOK, ActualParamType);
+        i := CompileExpression(i + 2, ActualParamType, TDataType.BYTETOK);
+        GetCommonConstType(i, TDataType.INTEGERTOK, ActualParamType);
 
       CheckTok(i + 1, TTokenKind.CPARTOK);
 
@@ -9034,15 +9034,15 @@ begin
       i := CompileExpression(i + 2, ActualParamType);
 
       if not (ActualParamType in RealTypes) then
-        ErrorIncompatibleTypes(i + 2, ActualParamType, TTokenKind.REALTOK);
+          ErrorIncompatibleTypes(i + 2, ActualParamType, TDataType.REALTOK);
 
       CheckTok(i + 1, TTokenKind.CPARTOK);
 
       case ActualParamType of
 
-        TTokenKind.SHORTREALTOK: asm65(#9'jsr @INT_SHORT');
+        TDataType.SHORTREALTOK: asm65(#9'jsr @INT_SHORT');
 
-        TTokenKind.REALTOK: asm65(#9'jsr @INT');
+        TDataType.REALTOK: asm65(#9'jsr @INT');
 
         TDataType.HALFSINGLETOK:
         begin
@@ -9824,7 +9824,7 @@ begin
 
               yes := False;
 
-              if (IdentifierAt(IdentIndex).DataType in [TDatatype.RECORDTOK, TTokenKind.OBJECTTOK]) and
+              if (IdentifierAt(IdentIndex).DataType in [TDatatype.RECORDTOK, TDatatype.OBJECTTOK]) and
                 (TokenAt(j).Kind = TTokenKind.DEREFERENCETOK) then yes := True;
               if (IdentifierAt(IdentIndex).DataType = TDataType.POINTERTOK) and
                 (TokenAt(j + 2).Kind = TTokenKind.DEREFERENCETOK) then
@@ -9833,10 +9833,10 @@ begin
               //     yes := (TokenAt(j + 2).Kind = TTokenKind.DEREFERENCETOK);
 
 
-              //  writeln(IdentifierAt(IdentIndex).Name,',',IdentifierAt(IdentIndex).DataType,',',TokenAt(j ].Kind,',',TokenAt(j + 1].Kind,',',TokenAt(j + 2].Kind);
+                //  writeln(IdentifierAt(IdentIndex).Name,',',IdentifierAt(IdentIndex).DataType,',',TokenAt(j ].Kind,',',TokenAt(j + 1).Kind,',',TokenAt(j + 2).Kind);
 
-              if (IdentifierAt(IdentIndex).AllocElementType in [TDatatype.RECORDTOK, TTokenKind.OBJECTTOK]) or
-                (IdentifierAt(IdentIndex).DataType in [TDatatype.RECORDTOK, TTokenKind.OBJECTTOK]) then
+              if (IdentifierAt(IdentIndex).AllocElementType in [TDatatype.RECORDTOK, TDatatype.OBJECTTOK]) or
+                (IdentifierAt(IdentIndex).DataType in [TDatatype.RECORDTOK, TDatatype.OBJECTTOK]) then
               begin
 
                 if TokenAt(j + 2).Kind = TTokenKind.DEREFERENCETOK then Inc(j);
@@ -9966,7 +9966,7 @@ begin
 
             end;
 
-            ValType := TTokenKind.POINTERTOK;
+            ValType := TDataType.POINTERTOK;
 
             Result := i;
 
@@ -10038,7 +10038,7 @@ begin
 
                     if (IdentifierAt(IdentIndex).DataType = TDataType.STRINGPOINTERTOK) and
                       (IdentifierAt(IdentIndex).NumAllocElements = 0) then
-                      ValType := TTokenKind.STRINGPOINTERTOK
+                      ValType := TDataType.STRINGPOINTERTOK
                     else
                       ValType := IdentifierAt(IdentIndex).AllocElementType;
 
@@ -10047,7 +10047,7 @@ begin
                       TDataType.POINTERTOK) then
                     begin
 
-                      ValType := TTokenKind.POINTERTOK;
+                      ValType := TDataType.POINTERTOK;
 
                       Push(IdentifierAt(IdentIndex).Value, ASPOINTER, GetDataSize(ValType), IdentIndex);
 
@@ -10849,7 +10849,7 @@ begin
         else
         begin
 
-          if ValType in [TDataType.SHORTREALTOK, TTokenKind.REALTOK] then
+          if ValType in [TDataType.SHORTREALTOK, TDataType.REALTOK] then
             Error(i + 2, 'Illegal type conversion: "' + InfoAboutToken(ValType) + '" to "' +
               InfoAboutToken(TDataType.SINGLETOK) + '"');
 
@@ -10892,7 +10892,7 @@ begin
 
       CheckTok(j + 1, TTokenKind.CPARTOK);
 
-      ValType := TTokenKind.SINGLETOK;
+      ValType := TDataType.SINGLETOK;
 
       Result := j + 1;
 
@@ -10919,8 +10919,8 @@ begin
 
         if (IdentifierAt(IdentIndex).DataType in Pointers) and
           ((IdentifierAt(IdentIndex).NumAllocElements > 0) and
-          (IdentifierAt(IdentIndex).AllocElementType <> TTokenKind.RECORDTOK)) then
-          if ((IdentifierAt(IdentIndex).AllocElementType <> TTokenKind.UNTYPETOK) and
+          (IdentifierAt(IdentIndex).AllocElementType <> TDataType.RECORDTOK)) then
+          if ((IdentifierAt(IdentIndex).AllocElementType <> TDataType.UNTYPETOK) and
             (IdentifierAt(IdentIndex).NumAllocElements in [0, 1])) or
             (IdentifierAt(IdentIndex).DataType = TDataType.STRINGPOINTERTOK) then
 
@@ -10994,7 +10994,7 @@ begin
         if (ValType = TDataType.PCHARTOK) then
         begin
 
-          ValType := TTokenKind.CHARTOK;
+          ValType := TDataType.CHARTOK;
 
           Inc(j);
 
