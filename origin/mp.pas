@@ -233,6 +233,10 @@ const
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 
+procedure Initialize;
+begin
+
+end;
 
   function GetIdentResult(ProcAsBlock: Integer): Integer;
   var
@@ -272,13 +276,12 @@ const
   end;
 
 
-
   function GetLocalName(IdentIndex: Integer; a: String = ''): String;
   begin
 
-    if ((IdentifierAt(IdentIndex).UnitIndex > 1) and (IdentifierAt(IdentIndex).UnitIndex <> UnitNameIndex) and
-      IdentifierAt(IdentIndex).Section) then
-      Result := UnitName[IdentifierAt(IdentIndex).UnitIndex].Name + '.' + a + IdentifierAt(IdentIndex).Name
+    if ((IdentifierAt(IdentIndex).SourceFile.UnitIndex > 1) and (IdentifierAt(IdentIndex).SourceFile <>
+      ActiveSourceFile) and IdentifierAt(IdentIndex).Section) then
+      Result := IdentifierAt(IdentIndex).SourceFile.Name + '.' + a + IdentifierAt(IdentIndex).Name
     else
       Result := a + IdentifierAt(IdentIndex).Name;
 
@@ -292,15 +295,16 @@ const
 
     lab := IdentifierAt(IdentIndex).Name;
 
-    if (lab <> a) and (pos(UnitName[IdentifierAt(IdentIndex).UnitIndex].Name + '.', a) = 1) then
+  if (lab <> a) and (pos(IdentifierAt(IdentIndex).SourceFile.Name + '.', a) = 1) then
     begin
 
+    lab := IdentifierAt(IdentIndex).Name;
       if lab.IndexOf('.') > 0 then lab := copy(lab, 1, lab.LastIndexOf('.'));
 
-      if (pos(UnitName[IdentifierAt(IdentIndex).UnitIndex].Name + '.adr.', a) = 1) then
-        Result := UnitName[IdentifierAt(IdentIndex).UnitIndex].Name + '.adr.' + lab
+    if (pos(IdentifierAt(IdentIndex).SourceFile.Name + '.adr.', a) = 1) then
+      Result := IdentifierAt(IdentIndex).SourceFile.Name + '.adr.' + lab
       else
-        Result := UnitName[IdentifierAt(IdentIndex).UnitIndex].Name + '.' + lab;
+      Result := IdentifierAt(IdentIndex).SourceFile.Name + '.' + lab;
 
     end
     else
@@ -312,8 +316,11 @@ const
   function TestName(IdentIndex: Integer; a: String): Boolean;
   begin
 
-    if {(IdentifierAt(IdentIndex).UnitIndex > 1) and} (pos(UnitName[IdentifierAt(IdentIndex).UnitIndex].Name + '.', a) = 1) then
+  if (IdentIndex > 0) and (IdentifierAt(IdentIndex).SourceFile.UnitIndex > 1) and
+    (pos(IdentifierAt(IdentIndex).SourceFile.Name + '.', a) = 1) then
+  begin
       a := copy(a, a.IndexOf('.') + 2, length(a));
+  end;
 
     Result := pos('.', a) > 0;
 
@@ -346,10 +353,7 @@ const
 
     best := nil;
     SetLength(best, 1);
-
-    best[0].IdentIndex := 0;
-    best[0].b := 0;
-    best[0].hit := 0;
+    best[0] := Default(TBest);
 
     for BlockStackIndex := BlockStackTop downto 0 do
       // search all nesting levels from the current one to the most outer one
