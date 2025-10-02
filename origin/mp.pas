@@ -4034,11 +4034,11 @@ end;
   // ----------------------------------------------------------------------------
 
 
-  procedure GenerateRelationOperation(rel: TTokenKind; ValType: TDataType);
+procedure GenerateRelationOperation(relation: TTokenKind; ValType: TDataType);
   begin
 
-    case rel of
-      EQTOK:
+  case relation of
+    TTokenKind.EQTOK:
       begin
         Gen;
         Gen;                // je +3   =
@@ -4046,7 +4046,7 @@ end;
         asm65(#9'beq @+');
       end;
 
-      NETOK, UNTYPETOK:
+    TTokenKind.NETOK, TTokenKind.UNTYPETOK:
       begin
         Gen;
         Gen;                // jne +3  <>
@@ -4054,7 +4054,7 @@ end;
         asm65(#9'bne @+');
       end;
 
-      GTTOK:
+    TTokenKind.GTTOK:
       begin
         Gen;
         Gen;                // jg +3   >
@@ -4068,7 +4068,7 @@ end;
 
       end;
 
-      GETOK:
+    TTokenKind.GETOK:
       begin
         Gen;
         Gen;                // jge +3  >=
@@ -4080,7 +4080,7 @@ end;
 
       end;
 
-      LTTOK:
+    TTokenKind.LTTOK:
       begin
         Gen;
         Gen;                // jl +3   <
@@ -4092,7 +4092,7 @@ end;
 
       end;
 
-      LETOK:
+    TTokenKind.LETOK:
       begin
         Gen;
         Gen;                // jle +3  <=
@@ -4119,7 +4119,7 @@ end;
   // ----------------------------------------------------------------------------
 
 
-  procedure GenerateForToDoCondition(ValType: TDataType; Down: Boolean; IdentIndex: Integer);
+procedure GenerateForToDoCondition(ValType: TDataType; Down: Boolean; IdentIndex: TIdentIndex);
   var
     svar: String;
     CounterSize: Byte;
@@ -4141,7 +4141,7 @@ end;
       1: begin
         ExpandByte;
 
-        if ValType = SHORTINTTOK then
+      if ValType = TDataType.SHORTINTTOK then
         begin    // @cmpFor_SHORTINT
 
           asm65(#9'lda ' + svar);
@@ -4163,7 +4163,7 @@ end;
       2: begin
         ExpandWord;
 
-        if ValType = SMALLINTTOK then
+      if ValType = TDataType.SMALLINTTOK then
         begin    // @cmpFor_SMALLINT
 
           asm65(#9'.LOCAL');
@@ -4201,7 +4201,7 @@ end;
 
       4: begin
 
-        if ValType = INTEGERTOK then
+      if ValType = TDataType.INTEGERTOK then
         begin      // @cmpFor_INT
 
           asm65(#9'.LOCAL');
@@ -4259,7 +4259,7 @@ end;
     if Down then
     begin
 
-      if ValType in [SHORTINTTOK, SMALLINTTOK, INTEGERTOK] then
+    if ValType in [TDataType.SHORTINTTOK, TDataType.SMALLINTTOK, TDataType.INTEGERTOK] then
         asm65(#9'bpl *+5')
       else
         asm65(#9'bcs *+5');
@@ -4269,7 +4269,7 @@ end;
     else
     begin
 
-      if ValType in [SHORTINTTOK, SMALLINTTOK, INTEGERTOK] then
+    if ValType in [TDataType.SHORTINTTOK, TDataType.SMALLINTTOK, TDataType.INTEGERTOK] then
       begin
         asm65(#9'bmi *+7');
         asm65(#9'beq *+5');
@@ -4334,13 +4334,15 @@ end;
   // ----------------------------------------------------------------------------
 
 
-  procedure GenerateCaseRangeCheck(Value1, Value2: Int64; SelectorType: TDataType; Join: Boolean; CaseLocalCnt: Integer);
+procedure GenerateCaseRangeCheck(Value1, Value2: Int64; SelectorType: TDataType; Join: Boolean;
+  CaseLocalCnt: Integer);
   begin
 
     Gen;
     Gen;              // cmp :ecx, Value1
 
-    if (SelectorType in [TDataType.BYTETOK, TDataType.CHARTOK, ENUMTYPE]) and (Value1 >= 0) and (Value2 >= 0) then
+  if (SelectorType in [TDataType.BYTETOK, TDataType.CHARTOK, TDataType.ENUMTOK]) and
+    (Value1 >= 0) and (Value2 >= 0) then
     begin
 
       if (Value1 = 0) and (Value2 = 255) then
@@ -4418,7 +4420,7 @@ end;
 
       end;
 
-      GenerateRelationOperation(LTTOK, SelectorType);
+    GenerateRelationOperation(TTokenKind.LTTOK, SelectorType);
 
       case GetDataSize(SelectorType) of
         1: begin
@@ -4429,7 +4431,7 @@ end;
 
       end;
 
-      GenerateRelationOperation(GTTOK, SelectorType);
+    GenerateRelationOperation(TTokenKind.GTTOK, SelectorType);
 
       asm65(#9'jmp *+6');
       asm65('@');
@@ -4637,7 +4639,7 @@ end;
   // ----------------------------------------------------------------------------
 
 
-  procedure GenerateForToDoEpilog(ValType: TDataType; Down: Boolean; IdentIndex: Integer = 0;
+procedure GenerateForToDoEpilog(ValType: TDataType; Down: Boolean; IdentIndex: TIdentIndex = 0;
     Epilog: Boolean = True; forBPL: Byte = 0);
   var
     svar: String;
@@ -4730,7 +4732,7 @@ end;
     if Epilog then
     begin
 
-      if ValType in [SHORTINTTOK, SMALLINTTOK, INTEGERTOK] then
+    if ValType in [TDataType.SHORTINTTOK, TDataType.SMALLINTTOK, TDataType.INTEGERTOK] then
       begin
 
         case CounterSize of
@@ -4888,7 +4890,7 @@ end;
   // ----------------------------------------------------------------------------
 
 
-  procedure GenerateWriteString(Address: Word; IndirectionLevel: TIndirectionLevel; ValueType: TDataType = TDataType.INTEGERTOK);
+procedure GenerateWriteString(Address: Word; IndirectionLevel: Byte; ValueType: TDataType = TDataType.INTEGERTOK);
   begin
     //Gen; Gen;              // mov ah, 09h
 
@@ -4959,17 +4961,17 @@ end;
       begin
 
         case GetDataSize(ValueType) of
-          1: if ValueType = SHORTINTTOK then
+        1: if ValueType = TDataType.SHORTINTTOK then
               asm65(#9'jsr @printSHORTINT')
             else
               asm65(#9'jsr @printBYTE');
 
-          2: if ValueType = SMALLINTTOK then
+        2: if ValueType = TDataType.SMALLINTTOK then
               asm65(#9'jsr @printSMALLINT')
             else
               asm65(#9'jsr @printWORD');
 
-          4: if ValueType = INTEGERTOK then
+        4: if ValueType = TDataType.INTEGERTOK then
               asm65(#9'jsr @printINT')
             else
               asm65(#9'jsr @printCARD');
@@ -5021,17 +5023,17 @@ end;
 
     case op of
 
-      PLUSTOK:
+    TTokenKind.PLUSTOK:
       begin
       end;
 
-      MINUSTOK:
+    TTokenKind.MINUSTOK:
       begin
         Gen;
         Gen;
         Gen;            // neg dword ptr [bx]
 
-        if ValType = HALFSINGLETOK then
+      if ValType = TDataType.HALFSINGLETOK then
         begin
 
           asm65(#9'lda :STACKORIGIN,x');
@@ -5042,7 +5044,7 @@ end;
 
         end
         else
-          if ValType = SINGLETOK then
+        if ValType = TDataType.SINGLETOK then
           begin
 
             asm65(#9'lda :STACKORIGIN,x');
@@ -5116,13 +5118,13 @@ end;
 
       end;
 
-      NOTTOK:
+    TTokenKind.NOTTOK:
       begin
         Gen;
         Gen;
         Gen;            // not dword ptr [bx]
 
-        if ValType = BOOLEANTOK then
+      if ValType = TDataType.BOOLEANTOK then
         begin
           //     a65(__notBOOLEAN)
 
@@ -5138,7 +5140,7 @@ end;
         else
         begin
 
-          ExpandParam(INTEGERTOK, ValType);
+        ExpandParam(TDataType.INTEGERTOK, ValType);
 
           //     a65(__notaBX);
 
@@ -5180,10 +5182,10 @@ end;
 
     case op of
 
-      PLUSTOK:
+    TTokenKind.PLUSTOK:
       begin
 
-        if ResultType = HALFSINGLETOK then
+      if ResultType = TDataType.HALFSINGLETOK then
         begin
 
           asm65(#9'lda :STACKORIGIN,x');
@@ -5205,7 +5207,7 @@ end;
 
         end
         else
-          if ResultType = SINGLETOK then
+        if ResultType = TDataType.SINGLETOK then
           begin
             //       asm65(#9'jsr @FADD')
 
@@ -5249,10 +5251,10 @@ end;
 
       end;
 
-      MINUSTOK:
+    TTokenKind.MINUSTOK:
       begin
 
-        if ResultType = HALFSINGLETOK then
+      if ResultType = TDataType.HALFSINGLETOK then
         begin
 
           asm65(#9'lda :STACKORIGIN,x');
@@ -5274,7 +5276,7 @@ end;
 
         end
         else
-          if ResultType = SINGLETOK then
+        if ResultType = TDataType.SINGLETOK then
           begin
             //      asm65(#9'jsr @FSUB')
 
@@ -5318,7 +5320,7 @@ end;
 
       end;
 
-      MULTOK:
+    TTokenKind.MULTOK:
       begin
 
         if ResultType in RealTypes then
@@ -5326,7 +5328,7 @@ end;
 
           case ResultType of
 
-            SHORTREALTOK:          // Q8.8 fixed-point
+          TDataType.SHORTREALTOK:        // Q8.8 fixed-point
             begin
 
               asm65(#9'lda :STACKORIGIN,x');
@@ -5348,7 +5350,7 @@ end;
 
             end;
 
-            REALTOK:          // Q24.8 fixed-point
+          TDataType.REALTOK:        // Q24.8 fixed-point
             begin
 
               asm65(#9'lda :STACKORIGIN,x');
@@ -5382,7 +5384,7 @@ end;
 
             end;
 
-            SINGLETOK: //asm65(#9'jsr @FMUL');    // IEEE754 32bit
+          TDataType.SINGLETOK: //asm65(#9'jsr @FMUL');       // IEEE-754, 32-bit
             begin
 
               asm65(#9'lda :STACKORIGIN,x');
@@ -5416,7 +5418,7 @@ end;
 
             end;
 
-            HALFSINGLETOK:          // IEEE754 16bit
+          TDataType.HALFSINGLETOK:          // IEEE-754, 16-bit
             begin
 
               asm65(#9'lda :STACKORIGIN,x');
@@ -5448,9 +5450,9 @@ end;
           begin
 
             case ResultType of
-              SHORTINTTOK: asm65(#9'jsr mulSHORTINT');
-              SMALLINTTOK: asm65(#9'jsr mulSMALLINT');
-              INTEGERTOK: asm65(#9'jsr mulINTEGER');
+            TDataType.SHORTINTTOK: asm65(#9'jsr mulSHORTINT');
+            TDataType.SMALLINTTOK: asm65(#9'jsr mulSMALLINT');
+            TDataType.INTEGERTOK: asm65(#9'jsr mulINTEGER');
             end;
 
           end
@@ -5494,14 +5496,14 @@ end;
 
       end;
 
-      DIVTOK, IDIVTOK, MODTOK:
+    TTokenKind.DIVTOK, TTokenKind.IDIVTOK, TTokenKind.MODTOK:
       begin
 
         if ResultType in RealTypes then
         begin    // Real division
 
           case ResultType of
-            SHORTREALTOK:          // Q8.8 fixed-point
+          TDataType.SHORTREALTOK:          // Q8.8 fixed-point
             begin
 
               asm65(#9'lda :STACKORIGIN,x');
@@ -5523,7 +5525,7 @@ end;
 
             end;
 
-            REALTOK:          // Q24.8 fixed-point
+          TDataType.REALTOK:          // Q24.8 fixed-point
             begin
 
               asm65(#9'lda :STACKORIGIN,x');
@@ -5557,7 +5559,7 @@ end;
 
             end;
 
-            SINGLETOK:          // IEEE754 32bit
+          TDataType.SINGLETOK:          // IEEE-754, 32-bit
             begin
 
               asm65(#9'lda :STACKORIGIN,x');
@@ -5591,7 +5593,7 @@ end;
 
             end;
 
-            HALFSINGLETOK:          // IEEE754 16bit
+          TDataType.HALFSINGLETOK:          // IEEE-754, 16-bit
             begin
 
               asm65(#9'lda :STACKORIGIN,x');
@@ -5624,8 +5626,8 @@ end;
 
             case ResultType of
 
-              SHORTINTTOK:
-                if op = MODTOK then
+            TDataType.SHORTINTTOK:
+              if op = TTokenKind.MODTOK then
                 begin
                   //            asm65(#9'jsr SHORTINTTOK.MOD')
 
@@ -5659,8 +5661,8 @@ end;
                 end;
 
 
-              SMALLINTTOK:
-                if op = MODTOK then
+            TDataType.SMALLINTTOK:
+              if op = TTokenKind.MODTOK then
                 begin
                   //            asm65(#9'jsr @SMALLINT.MOD')
 
@@ -5705,8 +5707,8 @@ end;
 
                 end;
 
-              INTEGERTOK:
-                if op = MODTOK then
+            TDataType.INTEGERTOK:
+              if op = TTokenKind.MODTOK then
                 begin
                   //            asm65(#9'jsr @INTEGER.MOD')
 
@@ -5783,8 +5785,8 @@ end;
 
             case ResultType of
 
-              BYTETOK:
-                if op = MODTOK then
+            TDataType.BYTETOK:
+              if op = TTokenKind.MODTOK then
                 begin
                   //      asm65(#9'jsr @BYTE.MOD');
 
@@ -5817,8 +5819,8 @@ end;
 
                 end;
 
-              WORDTOK:
-                if op = MODTOK then
+            TDataType.WORDTOK:
+              if op = TTokenKind.MODTOK then
                 begin
                   //          asm65(#9'jsr @WORD.MOD');
 
@@ -5863,8 +5865,8 @@ end;
 
                 end;
 
-              CARDINALTOK:
-                if op = MODTOK then
+            TDataType.CARDINALTOK:
+              if op = TTokenKind.MODTOK then
                 begin
                   //         asm65(#9'jsr @CARDINAL.MOD');
 
@@ -5942,7 +5944,7 @@ end;
       end;
 
 
-      SHLTOK:
+    TTokenKind.SHLTOK:
       begin
 
         if ResultType in SignedOrdinalTypes then
@@ -5975,7 +5977,7 @@ end;
       end;
 
 
-      SHRTOK:
+    TTokenKind.SHRTOK:
       begin
 
         if ResultType in SignedOrdinalTypes then
@@ -6008,7 +6010,7 @@ end;
       end;
 
 
-      ANDTOK:
+    TTokenKind.ANDTOK:
       begin
 
         case GetDataSize(ResultType) of
@@ -6054,7 +6056,7 @@ end;
       end;
 
 
-      ORTOK:
+    TTokenKind.ORTOK:
       begin
 
         case GetDataSize(ResultType) of
@@ -6100,7 +6102,7 @@ end;
       end;
 
 
-      XORTOK:
+    TTokenKind.XORTOK:
       begin
 
         case GetDataSize(ResultType) of
@@ -6156,8 +6158,7 @@ end;
   // ----------------------------------------------------------------------------
 
 
-  procedure GenerateRelationString(relation: TTokenKind; LeftValType, RightValType: TDataType;
-    sLeft: Wordbool = False; sRight: Wordbool = False);
+procedure GenerateRelationString(relation: TTokenKind; LeftValType, RightValType: TDataType);
   begin
 
     // asm65;
