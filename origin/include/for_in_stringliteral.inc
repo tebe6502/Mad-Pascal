@@ -1,14 +1,14 @@
-
 // -----------------------------------------------------------------------------
 // ===				FOR ch IN 'stringliteral'
 // -----------------------------------------------------------------------------
 
 	StartOptimization(j);
 
-	k := Tok[j].StrLength;
+  k := TokenAt(j).StrLength;
 
 
-	if k <> 0 then begin
+  if k <> 0 then
+  begin
 
 	      asm65(#9'lda #-' + IntToStr(k));
    	      asm65(#9'sta l_' + IntToHex(CodeSize, 4) + '+1' );
@@ -25,18 +25,21 @@
 	      ResetOpty;				// !!!
 
 
-	if k <> 0 then begin
+  if k <> 0 then
+  begin
 
               asm65(#9'ldy #$00');
 
- 	      asm65(#9'lda $' + IntToHex(Tok[j].StrAddress - CODEORIGIN + CODEORIGIN_BASE + 1,4) + '+' + IntToStr(k) + '-256,y' );
+    asm65(#9'lda $' + IntToHex(TokenAt(j).StrAddress - CODEORIGIN + CODEORIGIN_BASE + 1, 4) +
+      '+' + IntToStr(k) + '-256,y');
 	      asm65(#9'sta ' + GetLocalName(IdentIndex));
 
-	end else
+  end
+  else
 	      asm65(#9'jmp l_' + IntToHex(CodePosStack[CodePosStackTop]+3, 4));
 
 
-	      CheckTok(j + 1, DOTOK);
+  CheckTok(j + 1, TTokenKind.DOTOK);
 
 	      Inc(CodePosStackTop);
 	      CodePosStack[CodePosStackTop] := CodeSize;
@@ -48,7 +51,8 @@
 
 	      if BreakPosStack[BreakPosStackTop].cnt then asm65('c_'+IntToHex(BreakPosStack[BreakPosStackTop].ptr, 4));
 
-	if k <> 0 then begin
+  if k <> 0 then
+  begin
 
 	      asm65(#9'inc l_' + IntToHex(CodePosStack[CodePosStackTop-1], 4) + '+1' );
 	      asm65(#9'seq');
