@@ -20,7 +20,7 @@ var
   ZPAGE_BASE: Integer = -1;
   STACK_BASE: Integer = -1;
 
-  OutFile: ITextFile;
+  OutFile: TextFile;
 
   PROGRAM_NAME: String = 'Program';
   LIBRARY_NAME: String;
