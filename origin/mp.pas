@@ -13436,6 +13436,7 @@ end;
 
         Inc(i, 2);
 
+        CaseLabelArray:=nil;
         SetLength(CaseLabelArray, 1);
 
         repeat  // Loop over all cases
@@ -17841,6 +17842,7 @@ WHILETOK:
 
         idx := i;
 
+        UnitList:=nil;
         SetLength(UnitList, 1);    // wstepny odczyt USES, sprawdzamy czy nie powtarzaja sie wpisy
 
         repeat
@@ -19915,8 +19917,6 @@ begin
   // ----------------------------------------------------------------------------
 
   NumStaticStrCharsTmp := NumStaticStrChars;
-
-begin
 
   // Initilize identifiers for predefined constants
   DefineIdent(1, 'BLOCKREAD', TDataType.FUNCTIONTOK, TDataType.INTEGERTOK, 0, TDataType.UNTYPETOK, $00000000);
