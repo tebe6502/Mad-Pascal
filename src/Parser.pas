@@ -2647,6 +2647,7 @@ begin
 
                 _TypeArray[RecType].NumFields := 0;
                 _TypeArray[RecType].Field[0].Name := Name;
+                _TypeArray[RecType].Field[0].ObjectVariable := True;
 
                 if (TokenAt(i).Kind in [TTokenKind.PROCEDURETOK, TTokenKind.FUNCTIONTOK,
                   TTokenKind.CONSTRUCTORTOK, TTokenKind.DESTRUCTORTOK]) then
@@ -2735,10 +2736,10 @@ begin
                             GetTypeAtIndex(NumAllocElements).Field[k].AllocElementType
                             );
 
-                          _TypeArray[RecType].Field[GetTypeAtIndex(RecType).NumFields].Kind :=
-                            TFieldKind.OBJECTVARIABLE;
+                          //          if DataType = OBJECTTOK then
+                          //      Types[RecType].Field[ Types[RecType].NumFields ].ObjectVariable := true;
 
-                          //  writeln('>> ',FieldInListName[FieldInListIndex].Name + '.' + Types[NumAllocElements).Field[k].Name,',', Types[NumAllocElements).Field[k].NumAllocElements);
+                          //  writeln('>> ',FieldInListName[FieldInListIndex].Name + '.' + Types[NumAllocElements].Field[k].Name,',', Types[NumAllocElements].Field[k].NumAllocElements,',',Types[RecType].Field[ Types[RecType].NumFields ].ObjectVariable);
                         end;
 
                     end;
