@@ -60,6 +60,7 @@ const
   CODEORIGIN = $100;
   DATAORIGIN = $8000;
 
+
   // Indirection levels
 type TIndirectionLevel = Byte;
 
@@ -148,6 +149,8 @@ type
     PassMethod: TParameterPassingMethod;
     i, i_: Integer;
   end;
+
+  TParamList = array [1..MAXPARAMS] of TParam;
 
 
   TIdentifierName = String;
@@ -273,7 +276,6 @@ type
 
   TIdentifierIndex = Integer;
 
-  (*
   TIdentifier = class
     Name: TIdentifierName;
     Value: Int64;             // Value for a constant, address for a variable, procedure or function
@@ -332,7 +334,6 @@ type
     identifierArray: TIdentifierArray;
 
   end;
-  *)
 
   TCallGraphNode = record
     ChildBlock: array [1..MAXBLOCKS] of Integer;
@@ -610,7 +611,6 @@ begin
   end;
 end;
 
-(*
 // ----------------------------------------------------------------------------
 // Class TIdentifierList
 // ----------------------------------------------------------------------------
@@ -677,8 +677,6 @@ begin
   end;
   Result := identifierArray[identifierIndex];
 end;
-
-*)
 
 // ----------------------------------------------------------------------------
 // Global procedures and functions.
