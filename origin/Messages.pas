@@ -1,41 +1,88 @@
 unit Messages;
 
-{$i Defines.inc}
+{$I Defines.inc}
 
 interface
 
-uses Common, CommonTypes, CompilerTypes, Datatypes, Tokens;
+uses Common, CompilerTypes, Datatypes, CommonTypes, Tokens;
 
 {$SCOPEDENUMS ON}
-
 type
   TErrorCode =
     (
     UnknownIdentifier, OParExpected, IdentifierExpected, IncompatibleTypeOf, UserDefined,
     IdNumExpExpected, IncompatibleTypes, IncompatibleEnum, OrdinalExpectedFOR, CantAdrConstantExp,
-    VariableExpected, WrongNumParameters, OrdinalExpExpected, RangeCheckError, RangeCheckError_,
+    VariableExpected, WrongNumberOfParameters, OrdinalExpExpected, RangeCheckError,
     VariableNotInit, ShortStringLength, StringTruncated, TypeMismatch, CantReadWrite,
     SubrangeBounds, TooManyParameters, CantDetermine, UpperBoundOfRange, HighLimit,
     IllegalTypeConversion, IncompatibleTypesArray, IllegalExpression, AlwaysTrue, AlwaysFalse,
-    UnreachableCode, IllegalQualifier, LoHi, StripedAllowed
+    UnreachableCode, IllegalQualifier, LoHi, StripedAllowed, FileNotFound, WrongParameterList,
+    OperatorNotOverloaded, OperationNotSupportedForTypes, NotAllDeclarationsOverloaded, SyntaxError,
+    CantAsignValuesToAnAddress, UndefinedResourceType, ResourceFileNotFound, DuplicateResource,
+    OutOfResources, WrongSwitchToggle, IllegalOptimizationSpecified, IllegalAlignmentDirective,
+    FilePathNotSpecified, ElseWithoutIf,
+    EndifWithoutIf, TooManyFormalParameters, DuplicateIdentifier, IllegalCompilerDirective,
+    UnexpectedCharacter, ConstantStringTooLong, ParameterMissing, UnitExpected, StringExceedsLine,
+    ConstantExpressionExpected, RecursionInMacro, InvalidVariableAddress,
+    ConstantExpected, CantTakeAddressOfIdentifier, DivisionByZero, IdentifierAlreadyDefined,
+    FormalParameterNameExpected, TypeIdentifierExpected, FileParameterMustBeVAR, ReservedWordUserAsIdentifier,
+    FunctionDirectiveForwardNotAllowedInInterfaceSection, ProcedureDirectiveForwardNotAllowedInInterfaceSection,
+    CannotCombineRegisterWithPascal, CannotCombineInlineWithPascal, CannotCombineInlineWithInterrupt,
+    CannotCombineInlineWithExternal, IllegalTypeDeclarationOfSetElements, FieldAfterMethodOrProperty,
+    RecordSizeExceedsLimit,
+    StringLengthNotInRange, InvalidTypeDefinition, ArrayLowerBoundNotInteger, ArrayLowerBoundNotZero,
+    ArrayUpperBoundNotInteger, InvalidArrayOfPointers, ArraySizeExceedsRAMSize,
+    MultiDimensionalArrayOfTypeNotSupported,
+    ArrayOfTypeNotSupported, OnlyArrayOfTypeSupported, IdentifierIdentsNoMember, Unassigned,
+    VariableConstantOrFunctionExpectedButProcedureFound, UnderConstruction, TypeIdentifierNotAllowed
     );
+
+(*
+// TODO Test for structured text constants
+type
+  TMessageDefinition = record
+    Text: String;
+  end;
+
+const
+  UnderConstruction2: TMessageDefinition = (Text: 'Under Construction');
+*)
+
+type
+  IMessage = interface
+    function GetErrorCode: TErrorCode;
+    function GetText: String;
+  end;
+
+type
+  TMessage = class(TInterfacedObject, IMessage)
+    constructor Create(const errorCode: TErrorCode; const Text: String; const variable0: String = '';
+      const variable1: String = ''; const variable2: String = ''; const variable3: String = '';
+      const variable4: String = ''; const variable5: String = ''; const variable6: String = '';
+      const variable7: String = ''; const variable8: String = ''; const variable9: String = '');
+    function GetErrorCode: TErrorCode;
+    function GetText: String;
+  private
+  var
+    ErrorCode: TErrorCode;
+    Text: String;
+  end;
 
 // ----------------------------------------------------------------------------
 
-procedure Error(tokenIndex: TTokenIndex; const msg: String); overload;
-procedure Error(const tokenIndex: TTokenIndex; const errorCode: TErrorCode; IdentIndex: Integer = 0;
-  SrcType: Int64 = 0; DstType: Int64 = 0); overload;
+procedure Initialize;
 
-function ErrorMessage(ErrTokenIndex: Integer; err: TErrorCode; IdentIndex: Integer = 0;
-  SrcType: Int64 = 0; DstType: Int64 = 0): String;
-
-procedure iError(ErrTokenIndex: Integer; err: TErrorCode; IdentIndex: Integer = 0;
-  SrcType: Int64 = 0; DstType: Int64 = 0);
-
+procedure Error(const tokenIndex: TTokenIndex; const msg: String); overload;
+procedure Error(const tokenIndex: TTokenIndex; const msg: IMessage); overload;
+procedure Error(const tokenIndex: TTokenIndex; const errorCode: TErrorCode); overload;
+procedure ErrorForIdentifier(const tokenIndex: TTokenIndex; const errorCode: TErrorCode;
+  const identIndex: TTokenIndex);
 
 procedure ErrorIncompatibleTypes(const tokenIndex: TTokenIndex; const srcType: TDataType;
   const dstType: TDataType; const dstPointer: Boolean = False);
 
+procedure ErrorIncompatibleEnumIdentifiers(const tokenIndex: TTokenIndex; const srcEnumIdent: TIdentIndex;
+  destEnumIdent: TIdentIndex);
 procedure ErrorIncompatibleEnumTypeIdentifier(const tokenIndex: TTokenIndex; const srcType: TDataType;
   dstEnumIndex: TIdentIndex);
 procedure ErrorIncompatibleEnumIdentifierType(const tokenIndex: TTokenIndex; const srcEnumIndex: TIdentIndex;
@@ -43,7 +90,6 @@ procedure ErrorIncompatibleEnumIdentifierType(const tokenIndex: TTokenIndex; con
 
 procedure ErrorIdentifierIllegalTypeConversion(const tokenIndex: TTokenIndex; const identIndex: TIdentIndex;
   const tokenKind: TTokenKind);
-procedure ErrorRangeCheckError(const tokenIndex: TTokenIndex; const Value: TInteger; const dstType: TDataType);
 
 procedure ErrorIdentifierIncompatibleTypesArray(const tokenIndex: TTokenIndex;
   const identIndex: TIdentIndex; const tokenKind: TTokenKind);
@@ -51,17 +97,22 @@ procedure ErrorIdentifierIncompatibleTypesArray(const tokenIndex: TTokenIndex;
 procedure ErrorIdentifierIncompatibleTypesArrayIdentifier(const tokenIndex: TTokenIndex;
   const identIndex: TIdentIndex; const arrayIdentIndex: TIdentIndex);
 
-procedure newMsg(var msg: TArrayString; var a: String);
+procedure ErrorRangeCheckError(const tokenIndex: TTokenIndex; const Value: TInteger; const dstType: TDataType);
 
-procedure Note(NoteTokenIndex: Integer; IdentIndex: Integer); overload;
+procedure Warning(const tokenIndex: TTokenIndex; const msg: IMessage);
 
-procedure Note(NoteTokenIndex: Integer; Msg: String); overload;
-
-procedure Warning(WarnTokenIndex: Integer; err: TErrorCode; IdentIndex: Integer = 0;
-  SrcType: Int64 = 0; DstType: Int64 = 0);
-
+procedure WarningAlwaysTrue(const tokenIndex: TTokenIndex);
+procedure WarningAlwaysFalse(const tokenIndex: TTokenIndex);
+procedure WarningUnreachableCode(const tokenIndex: TTokenIndex);
+procedure WarningLoHi(const tokenIndex: TTokenIndex);
+procedure WarningShortStringLength(const tokenIndex: TTokenIndex);
+procedure WarningStripedAllowed(const tokenIndex: TTokenIndex);
+procedure WarningUserDefined(const tokenIndex: TTokenIndex);
+procedure WarningVariableNotInitialized(const tokenIndex: TTokenIndex; const identIndex: TIdentIndex);
 procedure WarningForRangeCheckError(const tokenIndex: TTokenIndex; const Value: TInteger; const dstType: TDataType);
 
+procedure Note(tokenIndex: TTokenIndex; const msg: String);
+procedure NoteForIdentifierNotUsed(tokenIndex: TTokenIndex; const identIndex: TIdentIndex);
 
 procedure WritelnMsg;
 
@@ -69,10 +120,78 @@ procedure WritelnMsg;
 
 implementation
 
-uses Crt;
+uses Classes, SysUtils, TypInfo, Console, Utilities;
 
 // -----------------------------------------------------------------------------
+constructor TMessage.Create(const errorCode: TErrorCode; const Text: String; const variable0: String = '';
+  const variable1: String = ''; const variable2: String = ''; const variable3: String = '';
+  const variable4: String = ''; const variable5: String = ''; const variable6: String = '';
+  const variable7: String = ''; const variable8: String = ''; const variable9: String = '');
+var
+  l: Integer;
+  i: Integer;
+  c: Char;
+begin
+  Self.errorCode := errorCode;
+  Self.Text := '';
+  l := Length(Text);
+  i := 1;
+  repeat
 
+    c := Text[i];
+    if c = '{' then
+    begin
+      assert(i <= l - 2, 'Invalid string pattern, pattern ''' + Text + ''' is too short.');
+      Inc(i);
+      c := Text[i];
+      assert(c in ['0' .. '9'], 'Invalid string pattern, placeholder ''' + c + ''' at index ' +
+        IntToStr(i + 1) + ' of ''' + Text + ''' must be must a digit 0..9.');
+      Inc(i);
+      assert(Text[i] = '}', 'Invalid string pattern, missing } at index ' + IntToStr(i) + ' of ''' + Text + '''');
+      begin
+        case c of
+          '0': Self.Text := Self.Text + variable0;
+          '1': Self.Text := Self.Text + variable1;
+          '2': Self.Text := Self.Text + variable2;
+          '3': Self.Text := Self.Text + variable3;
+          '4': Self.Text := Self.Text + variable4;
+          '5': Self.Text := Self.Text + variable5;
+          '6': Self.Text := Self.Text + variable6;
+          '7': Self.Text := Self.Text + variable7;
+          '8': Self.Text := Self.Text + variable8;
+          '9': Self.Text := Self.Text + variable9;
+          else
+            Assert(False, 'Internal program error.');
+        end;
+      end;
+    end
+    else
+    begin
+      Self.Text := Self.Text + c;
+    end;
+    Inc(i);
+  until i > l;
+
+end;
+
+function TMessage.GetErrorCode: TErrorCode;
+begin
+  Result := ErrorCode;
+end;
+
+function TMessage.GetText: String;
+begin
+  Result := Text;
+end;
+
+// ----------------------------------------------------------------------------
+
+procedure Initialize;
+begin
+  msgLists.msgUser := TStringList.Create;
+  msgLists.msgWarning := TStringList.Create;
+  msgLists.msgNote := TStringList.Create;
+end;
 
 procedure WritelnMsg;
 var
@@ -81,11 +200,11 @@ begin
 
   TextColor(LIGHTGREEN);
 
-  for i := 0 to High(msgWarning) - 1 do writeln(msgWarning[i]);
+  for i := 0 to msgLists.msgWarning.Count - 1 do writeln(msgLists.msgWarning[i]);
 
   TextColor(LIGHTCYAN);
 
-  for i := 0 to High(msgNote) - 1 do writeln(msgNote[i]);
+  for i := 0 to msgLists.msgNote.Count - 1 do writeln(msgLists.msgNote[i]);
 
   NormVideo;
 
@@ -93,271 +212,256 @@ end;
 
 
 // ----------------------------------------------------------------------------
+
+function GetExpectedButTokenFound(const tokenIndex: TTokenIndex): String;
+begin
+
+  Result := ' expected but ''' + tokenList.GetTokenSpellingAtIndex(tokenIndex) + ''' found';
+
+end;
+
+
+function GetRangeCheckText(const tokenIndex: TTokenIndex; Value: TInteger; dstType: TDataType): String;
+var
+  msg: String;
+begin
+  msg := 'Range check error while evaluating constants. ' + IntToStr(Value) + ' must be between ' +
+    IntToStr(LowBound(tokenIndex, dstType)) + ' and ' + IntToStr(HighBound(tokenIndex, dstType)) + ')';
+  Result := msg;
+end;
+
+// ----------------------------------------------------------------------------
+// Private Method
 // ----------------------------------------------------------------------------
 
 
-function ErrorMessage(ErrTokenIndex: Integer; err: TErrorCode; IdentIndex: Integer = 0;
-  SrcType: Int64 = 0; DstType: Int64 = 0): String;
+function GetUserDefinedText(const tokenIndex: TTokenIndex): String;
+begin
+  Result := 'User defined: ' + msgLists.msgUser[TokenAt(tokenIndex).Value];
+end;
+
+function GetErrorMessage(const tokenIndex: TTokenIndex; const errorCode: TErrorCode;
+  identIndex: TIdentIndex = 0): String;
 begin
 
   Result := '';
 
-  case err of
+  case errorCode of
 
-    TErrorCode.UserDefined: Result := 'User defined: ' + msgUser[Tok[ErrTokenIndex].Value];
-
-    TErrorCode.UnknownIdentifier: if IdentIndex > 0 then
-        Result := 'Identifier not found ''' + Ident[IdentIndex].Alias + ''''
-      else
-        Result := 'Identifier not found ''' + Tok[ErrTokenIndex].Name^ + '''';
-
-    TErrorCode.IncompatibleTypeOf: Result := 'Incompatible type of ' + Ident[IdentIndex].Name;
-    TErrorCode.IncompatibleEnum: if DstType < 0 then
-        // JAC! TODO
-        Result := 'Incompatible types: got "' // + GetEnumName(SrcType) + '" expected "' + InfoAboutToken(abs(DstType)) + '"'
-      else
-        if SrcType < 0 then
-          Result := 'Incompatible types: got "' // + InfoAboutToken(abs(SrcType)) + '" expected "' + GetEnumName(DstType) + '"'
-        else
-          Result := 'Incompatible types: got "' + GetEnumName(SrcType) + '" expected "' + GetEnumName(DstType) + '"';
-
-    TErrorCode.WrongNumParameters: Result := 'Wrong number of parameters specified for call to "' + Ident[IdentIndex].Name + '"';
-
-    TErrorCode.CantAdrConstantExp: Result := 'Can''t take the address of constant expressions';
-
-    TErrorCode.OParExpected: Result := '''(''' + ErrTokenFound(ErrTokenIndex);
-
-    TErrorCode.IllegalExpression: Result := 'Illegal expression';
-    TErrorCode.VariableExpected: Result := 'Variable identifier expected';
-    TErrorCode.OrdinalExpExpected: Result := 'Ordinal expression expected';
-    TErrorCode.OrdinalExpectedFOR: Result := 'Ordinal expression expected as ''FOR'' loop counter value';
-
-    TErrorCode.IncompatibleTypes: begin
-      Result := 'Incompatible types: got "';
-
-      // JAC! TODO
-      (*
-      if SrcType < 0 then Result := Result + '^';
-
-      Result := Result + InfoAboutToken(abs(SrcType)) + '" expected "';
-
-      if DstType < 0 then Result := Result + '^';
-
-      Result := Result + InfoAboutToken(abs(DstType)) + '"';
-      *)
+    TErrorCode.UserDefined:
+    begin
+      Result := GetUserDefinedText(tokenIndex);
     end;
 
-    TErrorCode.IdentifierExpected: Result := 'Identifier' + ErrTokenFound(ErrTokenIndex);
-    TErrorCode.IdNumExpExpected: Result := 'Identifier, number or expression' + ErrTokenFound(ErrTokenIndex);
-
-    TErrorCode.LoHi: Result := 'lo/hi(dword/qword) returns the upper/lower word/dword';
-
-    TErrorCode.IllegalTypeConversion, TErrorCode.IncompatibleTypesArray:
+    TErrorCode.UnknownIdentifier:
     begin
+      if identIndex > 0 then
+        Result := 'Identifier not found ''' + IdentifierAt(identIndex).Alias + ''''
+      else
+        Result := 'Identifier not found ''' + TokenAt(tokenIndex).Name + '''';
+    end;
 
-      if err = TErrorCode.IllegalTypeConversion then
+    TErrorCode.IncompatibleTypeOf:
+    begin
+      Result := 'Incompatible type of ' + IdentifierAt(IdentIndex).Name;
+    end;
+
+    TErrorCode.WrongNumberOfParameters:
+    begin
+      Result := 'Wrong number of parameters specified for call to "' + IdentifierAt(IdentIndex).Name + '"';
+    end;
+
+    TErrorCode.CantAdrConstantExp:
+    begin
+      Result := 'Can''t take the address of constant expressions';
+    end;
+
+    TErrorCode.OParExpected:
+    begin
+      Result := '''(''' + GetExpectedButTokenFound(tokenIndex);
+    end;
+
+    TErrorCode.IllegalExpression:
+    begin
+      Result := 'Illegal expression';
+    end;
+
+    TErrorCode.VariableExpected: begin
+      Result := 'Variable identifier expected';
+    end;
+
+    TErrorCode.OrdinalExpExpected:
+    begin
+      Result := 'Ordinal expression expected';
+    end;
+
+    TErrorCode.OrdinalExpectedFOR:
+    begin
+      Result := 'Ordinal expression expected as ''FOR'' loop counter value';
+    end;
+
+    TErrorCode.IdentifierExpected:
+    begin
+      Result := 'Identifier' + GetExpectedButTokenFound(tokenIndex);
+    end;
+
+    TErrorCode.IdNumExpExpected: begin
+      Result := 'Identifier, number or expression' + GetExpectedButTokenFound(tokenIndex);
+    end;
+
+    TErrorCode.StringTruncated:
+    begin
+      Result := 'String constant truncated to fit STRING[' +
+        IntToStr(IdentifierAt(IdentIndex).NumAllocElements - 1) + ']';
+    end;
+
+    TErrorCode.CantReadWrite:
+    begin
+      Result := 'Can''t read or write variables of this type';
+    end;
+
+    TErrorCode.TypeMismatch: begin
+      Result := 'Type mismatch';
+    end;
+
+
+    TErrorCode.IllegalQualifier: begin
+      Result := 'Illegal qualifier';
+    end;
+
+    TErrorCode.SubrangeBounds: begin
+      Result := 'Constant expression violates subrange bounds';
+    end;
+
+    TErrorCode.TooManyParameters: begin
+      Result := 'Too many formal parameters in ' + IdentifierAt(IdentIndex).Name;
+    end;
+
+    TErrorCode.CantDetermine:
+    begin
+      Result := 'Can''t determine which overloaded function ''' + IdentifierAt(IdentIndex).Name + ''' to call';
+    end;
+
+    TErrorCode.UpperBoundOfRange:
+    begin
+      Result := 'Upper bound of range is less than lower bound';
+    end;
+
+    TErrorCode.HighLimit:
+    begin
+      Result := 'High range limit > ' + IntToStr(High(Word));
+    end;
+  end;
+
+end;
+
+// ----------------------------------------------------------------------------
+// Write the previous tokens before the error position to see the tokenized context.
+// ----------------------------------------------------------------------------
+
+procedure WritePreviousTokens(const tokenIndex: TTokenIndex);
+var
+  fromTokenIndex, toTokenIndex: TTokenIndex;
+  i: TTokenIndex;
+  token: TToken;
+begin
+  fromTokenIndex := tokenIndex - 20;
+  if fromTokenIndex < 1 then fromTokenIndex := 1;
+  toTokenIndex := tokenIndex;
+  for i := fromTokenIndex to toTokenIndex do
+  begin
+    token := TokenAt(i);
+    WriteLn(token.SourceLocation.SourceFile.Path + ' ( line ' + IntToStr(token.SourceLocation.Line) +
+      ', column ' + IntToStr(token.SourceLocation.Column) + '): kind=' + GetTokenKindName(token.Kind) +
+      ' name=' + token.Name + '.');
+  end;
+end;
+
+procedure Error(const tokenIndex: TTokenIndex; const errorCode: TErrorCode; identIndex: TIdentIndex); overload;
+var
+  msg: String;
+begin
+
+  if not isConst then
+  begin
+    msg := GetErrorMessage(tokenIndex, errorCode, identIndex);
+    Error(tokenIndex, msg);
+  end;
+end;
+
+
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+
+
+procedure Error(const tokenIndex: TTokenIndex; const msg: String); overload;
+var
+  effectiveTokenIndex: TTokenIndex;
+  token, previousToken: TToken;
+begin
+
+  if not isConst then
+  begin
+
+    //TokenAt(NumTok-1].Column := TokenAt(NumTok].Column + TokenAt(NumTok-1].Column;
+
+    if tokenIndex <= NumTok then effectiveTokenIndex := tokenIndex
+    else
+      effectiveTokenIndex := NumTok;
+
+    TextColor(LIGHTRED);
+    if tokenIndex > 0 then
+    begin
+      {$IFDEF DEBUG}
+      WritePreviousTokens(effectiveTokenIndex);
+      {$ENDIF}
+
+      token := TokenAt(effectiveTokenIndex);
+      if (effectiveTokenIndex > 1) then
       begin
-        Result := 'Illegal type conversion: ';
-
-        if Ident[IdentIndex].NumAllocElements > 0 then Result := Result + '"Array[0..';
+        previousToken := TokenAt(effectiveTokenIndex - 1);
+        WriteLn(token.SourceLocation.SourceFile.Path + ' (' + IntToStr(token.SourceLocation.Line) +
+          ',' + IntToStr(Succ(previousToken.SourceLocation.Column)) + ')' + ' Error: ' + msg);
       end
       else
       begin
-        Result := 'Incompatible types: got ';
-        if Ident[IdentIndex].NumAllocElements > 0 then Result := Result + '"Array[0..';
+        WriteLn(token.SourceLocation.SourceFile.Path + ' (' + IntToStr(token.SourceLocation.Line) +
+          ')' + ' Error: ' + msg);
       end;
-
-
-      if Ident[IdentIndex].NumAllocElements_ > 0 then
-        Result := Result + IntToStr(Ident[IdentIndex].NumAllocElements - 1) + '] Of Array[0..' +
-          IntToStr(Ident[IdentIndex].NumAllocElements_ - 1) + '] Of ' + InfoAboutToken(Ident[IdentIndex].AllocElementType) + '" '
-      else
-        if Ident[IdentIndex].NumAllocElements = 0 then
-        begin
-
-          if Ident[IdentIndex].AllocElementType <> UNTYPETOK then
-            Result := Result + '"^' + InfoAboutToken(Ident[IdentIndex].AllocElementType) + '" '
-          else
-            Result := Result + '"' + InfoAboutToken(POINTERTOK) + '" ';
-
-        end
-        else
-          Result := Result + IntToStr(Ident[IdentIndex].NumAllocElements - 1) + '] Of ' + InfoAboutToken(
-            Ident[IdentIndex].AllocElementType) + '" ';
-
-        (*
-        JAC! TODO
-      if err = TErrorCode.IllegalTypeConversion then
-        Result := Result + 'to "' + InfoAboutToken(SrcType) + '"'
-      else
-        if SrcType < 0 then
-        begin
-
-          Result := Result + 'expected ';
-
-          if Ident[abs(SrcType)].NumAllocElements_ > 0 then
-            Result := Result + '"Array[0..' + IntToStr(Ident[abs(SrcType)].NumAllocElements - 1) +
-              '] Of Array[0..' + IntToStr(Ident[abs(SrcType)].NumAllocElements_ - 1) + '] Of ' + InfoAboutToken(
-              Ident[IdentIndex].AllocElementType) + '"'
-          else
-            if Ident[abs(SrcType)].AllocElementType in [RECORDTOK, OBJECTTOK] then
-              Result := Result + '"^' + Types[Ident[abs(SrcType)].NumAllocElements].Field[0].Name + '"'
-            else
-            begin
-
-              if Ident[abs(SrcType)].DataType in [TTokenKind.RECORDTOK, TTokenKind.OBJECTTOK] then
-                Result := Result + '"' + Types[Ident[abs(SrcType)].NumAllocElements].Field[0].Name + '"'
-              else
-                Result := Result + '"Array[0..' + IntToStr(Ident[abs(SrcType)].NumAllocElements - 1) +
-                  '] Of ' + InfoAboutToken(Ident[abs(SrcType)].AllocElementType) + '"';
-
-            end;
-
-        end
-        else
-          Result := Result + 'expected "' + InfoAboutToken(SrcType) + '"';
-          *)
-
+    end
+    else
+    begin
+      WriteLn('Error: ' + msg);
     end;
 
-    TErrorCode.AlwaysTrue: Result := 'Comparison might be always true due to range of constant and expression';
-
-    TErrorCode.AlwaysFalse: Result := 'Comparison might be always false due to range of constant and expression';
-
-    TErrorCode.RangeCheckError: begin
-      Result := 'Range check error while evaluating constants (';
-      (* JAC! TODO
-      + IntToStr(SrcType) +
-        ' must be between ' + IntToStr(LowBound(ErrTokenIndex, DstType)) + ' and ';
-
-      if IdentIndex > 0 then
-        Result := Result + IntToStr(Ident[IdentIndex].NumAllocElements - 1) + ')'
-      else
-        Result := Result + IntToStr(HighBound(ErrTokenIndex, DstType)) + ')';
-        *)
-
-    end;
-
-    TErrorCode.RangeCheckError_: begin
-      Result := 'Range check error while evaluating constants (';
-      (* JAC! TODO + IntToStr(SrcType) +
-        ' must be between ' + IntToStr(LowBound(ErrTokenIndex, DstType)) + ' and ';
-
-      if IdentIndex > 0 then
-        Result := Result + IntToStr(Ident[IdentIndex].NumAllocElements_ - 1) + ')'
-      else
-        Result := Result + IntToStr(HighBound(ErrTokenIndex, DstType)) + ')';
-        *)
-
-    end;
-
-    TErrorCode.VariableNotInit: Result := 'Variable ''' + Ident[IdentIndex].Name + ''' does not seem to be initialized';
-    TErrorCode.ShortStringLength: Result := 'String literal has more characters than short string length';
-    TErrorCode.StringTruncated: Result := 'String constant truncated to fit STRING[' + IntToStr(
-        Ident[IdentIndex].NumAllocElements - 1) + ']';
-    TErrorCode.CantReadWrite: Result := 'Can''t read or write variables of this type';
-    TErrorCode.TypeMismatch: Result := 'Type mismatch';
-    TErrorCode.UnreachableCode: Result := 'unreachable code';
-    TErrorCode.IllegalQualifier: Result := 'Illegal qualifier';
-    TErrorCode.SubrangeBounds: Result := 'Constant expression violates subrange bounds';
-    TErrorCode.TooManyParameters: Result := 'Too many formal parameters in ' + Ident[IdentIndex].Name;
-    TErrorCode.CantDetermine: Result := 'Can''t determine which overloaded function ''' + Ident[IdentIndex].Name + ''' to call';
-    TErrorCode.UpperBoundOfRange: Result := 'Upper bound of range is less than lower bound';
-    TErrorCode.HighLimit: Result := 'High range limit > ' + IntToStr(High(Word));
 
 
-    TErrorCode.StripedAllowed: Result := 'Striped array is allowed for maximum [0..255] size';
+    NormVideo;
+
+    RaiseHaltException(THaltException.COMPILING_ABORTED);
+
   end;
+
+  isError := True;
 
 end;
 
-
-// ----------------------------------------------------------------------------
-// ----------------------------------------------------------------------------
-
-
-procedure iError(ErrTokenIndex: Integer; err: TErrorCode; IdentIndex: Integer = 0; SrcType: Int64 = 0;
-  DstType: Int64 = 0);
+procedure Error(const tokenIndex: TTokenIndex; const msg: IMessage); overload;
 var
-  Msg: String;
+  enumValue: Integer;
+  enumName: String;
 begin
-
-  if not isConst then
-  begin
-
-    //Tok[NumTok-1].Column := Tok[NumTok].Column + Tok[NumTok-1].Column;
-
-    WritelnMsg;
-
-    Msg := ErrorMessage(ErrTokenIndex, err, IdentIndex, SrcType, DstType);
-
-    if ErrTokenIndex > NumTok then ErrTokenIndex := NumTok;
-
-    TextColor(LIGHTRED);
-
-    WriteLn(UnitName[Tok[ErrTokenIndex].UnitIndex].Path + ' (' + IntToStr(Tok[ErrTokenIndex].Line) +
-      ',' + IntToStr(Succ(Tok[ErrTokenIndex - 1].Column)) + ')' + ' Error: ' + Msg);
-
-    NormVideo;
-
-    FreeTokens;
-
-    CloseFile(OutFile);
-    Erase(OutFile);
-
-    Halt(2);
-
-  end;
-
-  isError := True;
-
+  enumValue := Ord(msg.GetErrorCode());
+  WriteStr(enumName, msg.GetErrorCode());
+  Error(tokenIndex, 'E' + IntToStr(enumValue) + ' - ' + enumName + ': ' + msg.GetText());
 end;
 
 
-// ----------------------------------------------------------------------------
-// ----------------------------------------------------------------------------
-
-
-procedure Error(tokenIndex: TTokenIndex; const msg: String);
+procedure Error(const tokenIndex: TTokenIndex; const errorCode: TErrorCode); overload;
 begin
-
-  if not isConst then
-  begin
-
-    //Tok[NumTok-1].Column := Tok[NumTok].Column + Tok[NumTok-1].Column;
-
-    WritelnMsg;
-
-    if tokenIndex > NumTok then tokenIndex := NumTok;
-
-    TextColor(LIGHTRED);
-
-    WriteLn(UnitName[Tok[tokenIndex].UnitIndex].Path + ' (' + IntToStr(Tok[tokenIndex].Line) +
-      ',' + IntToStr(Succ(Tok[tokenIndex - 1].Column)) + ')' + ' Error: ' + Msg);
-
-    NormVideo;
-
-    FreeTokens;
-
-    CloseFile(OutFile);
-    Erase(OutFile);
-
-    Halt(2);
-
-  end;
-
-  isError := True;
-
+  ErrorForIdentifier(tokenIndex, errorCode, 0);
 end;
 
-procedure Error(const tokenIndex: TTokenIndex; const errorCode: TErrorCode;IdentIndex: Integer = 0;
-  SrcType: Int64 = 0; DstType: Int64 = 0); overload;
-begin
-  iError(tokenIndex, errorCode, IdentIndex, SrcType, DstType);
-end;
-
-// ----------------------------------------------------------------------------
-// ----------------------------------------------------------------------------
 procedure ErrorIncompatibleTypes(const tokenIndex: TTokenIndex; const srcType: TDataType;
   const dstType: TDataType; const dstPointer: Boolean);
 var
@@ -372,91 +476,233 @@ begin
 
   msg := msg + InfoAboutToken(DstType) + '"';
 
-  // Error(tokenIndex, TMessage.Create(TErrorCode.IncompatibleTypes, msg));
+  Error(tokenIndex, TMessage.Create(TErrorCode.IncompatibleTypes, msg));
+end;
+
+
+procedure ErrorIncompatibleEnumIdentifiers(const tokenIndex: TTokenIndex; const srcEnumIdent: TIdentIndex;
+  destEnumIdent: TIdentIndex);
+var
+  msg: String;
+begin
+  msg := 'Incompatible types: got "' + Common.GetEnumName(srcEnumIdent) + '" expected "' +
+    Common.GetEnumName(destEnumIdent) + '"';
+  Error(tokenIndex, TMessage.Create(TErrorCode.IncompatibleEnum, msg));
 end;
 
 procedure ErrorIncompatibleEnumTypeIdentifier(const tokenIndex: TTokenIndex; const srcType: TDataType;
   dstEnumIndex: TIdentIndex);
+var
+  msg: String;
 begin
-  // TODO
+
+  msg := 'Incompatible types: got "' + InfoAboutToken(srcType) + '" expected "' +
+    Common.GetEnumName(dstEnumIndex) + '"';
+
+  Error(tokenIndex, TMessage.Create(TErrorCode.IncompatibleEnum, msg));
 end;
 
 procedure ErrorIncompatibleEnumIdentifierType(const tokenIndex: TTokenIndex; const srcEnumIndex: TIdentIndex;
   const dstType: TDataType);
+var
+  msg: String;
 begin
-  // TODO
+
+  msg := 'Incompatible types: got "' + Common.GetEnumName(srcEnumIndex) + '" expected "' +
+    InfoAboutToken(DstType) + '"';
+
+  Error(tokenIndex, TMessage.Create(TErrorCode.IncompatibleEnum, msg));
+end;
+
+
+procedure ErrorIdentifierIllegalTypeConversionOrIncompatibleTypesArray(const tokenIndex: TTokenIndex;
+  errorCode: TErrorCode; identIndex: TIdentIndex; tokenKind: TTokenKind; arrayIdentIndex: TIdentIndex);
+var
+  identifier: TIdentifier;
+  arrayIdentifier: TIdentifier;
+  msg: String;
+begin
+
+  Assert((ErrorCode = TErrorCode.IllegalTypeConversion) or (ErrorCode = TErrorCode.IncompatibleTypesArray));
+
+  identifier := IdentifierAt(IdentIndex);
+  if errorCode = TErrorCode.IllegalTypeConversion then
+    msg := 'Illegal type conversion: "Array[0..'
+  else
+  begin
+    msg := 'Incompatible types: got ';
+    if identifier.NumAllocElements > 0 then msg := msg + '"Array[0..';
+  end;
+
+
+  if identifier.NumAllocElements_ > 0 then
+    msg := msg + IntToStr(identifier.NumAllocElements - 1) + '] Of Array[0..' +
+      IntToStr(identifier.NumAllocElements_ - 1) + '] Of ' + InfoAboutToken(identifier.AllocElementType) + '" '
+  else
+    if identifier.NumAllocElements = 0 then
+    begin
+
+      if identifier.AllocElementType <> TTokenKind.UNTYPETOK then
+        msg := msg + '"^' + InfoAboutToken(identifier.AllocElementType) + '" '
+      else
+        msg := msg + '"' + InfoAboutToken(TTokenKind.POINTERTOK) + '" ';
+
+    end
+    else
+    begin
+      msg := msg + IntToStr(identifier.NumAllocElements - 1) + '] Of ' +
+        InfoAboutToken(identifier.AllocElementType) + '" ';
+    end;
+
+  if errorCode = TErrorCode.IllegalTypeConversion then
+    msg := msg + 'to "' + InfoAboutToken(tokenKind) + '"'
+  else
+    if arrayIdentIndex > 0 then
+    begin
+      arrayIdentifier := IdentifierAt(arrayIdentIndex);
+      msg := msg + 'expected ';
+
+      if IdentifierAt(arrayIdentIndex).NumAllocElements_ > 0 then
+        msg := msg + '"Array[0..' + IntToStr(arrayIdentifier.NumAllocElements - 1) +
+          '] Of Array[0..' + IntToStr(arrayIdentifier.NumAllocElements_ - 1) + '] Of ' +
+          InfoAboutToken(identifier.AllocElementType) + '"'
+      else
+        if arrayIdentifier.AllocElementType in [TTokenKind.RECORDTOK, TTokenKind.OBJECTTOK] then
+          msg := msg + '"^' + GetTypeAtIndex(arrayIdentifier.NumAllocElements).Field[0].Name + '"'
+        else
+        begin
+
+          if arrayIdentifier.DataType in [TTokenKind.RECORDTOK, TTokenKind.OBJECTTOK] then
+            msg := msg + '"' + GetTypeAtIndex(arrayIdentifier.NumAllocElements).Field[0].Name + '"'
+          else
+            msg := msg + '"Array[0..' + IntToStr(arrayIdentifier.NumAllocElements - 1) +
+              '] Of ' + InfoAboutToken(arrayIdentifier.AllocElementType) + '"';
+
+        end;
+
+    end
+    else
+    begin
+      msg := msg + 'expected "' + InfoAboutToken(tokenKind) + '"';
+    end;
+
+  Error(tokenIndex, TMessage.Create(errorCode, msg));
 end;
 
 procedure ErrorIdentifierIllegalTypeConversion(const tokenIndex: TTokenIndex; const identIndex: TIdentIndex;
   const tokenKind: TTokenKind);
 begin
-  // TODO
-end;
-
-procedure ErrorRangeCheckError(const tokenIndex: TTokenIndex; const Value: TInteger; const dstType: TDataType);
-begin
-
+  ErrorIdentifierIllegalTypeConversionOrIncompatibleTypesArray(tokenIndex,
+    TErrorCode.IllegalTypeConversion, identIndex, tokenKind, 0);
 end;
 
 procedure ErrorIdentifierIncompatibleTypesArray(const tokenIndex: TTokenIndex;
   const identIndex: TIdentIndex; const tokenKind: TTokenKind);
 begin
-  // TODO
+  ErrorIdentifierIllegalTypeConversionOrIncompatibleTypesArray(tokenIndex,
+    TErrorCode.IncompatibleTypesArray, identIndex, tokenKind, 0);
 end;
+
 procedure ErrorIdentifierIncompatibleTypesArrayIdentifier(const tokenIndex: TTokenIndex;
   const identIndex: TIdentIndex; const arrayIdentIndex: TIdentIndex);
 begin
-  // TODO
+  ErrorIdentifierIllegalTypeConversionOrIncompatibleTypesArray(tokenIndex,
+    TErrorCode.IncompatibleTypesArray, identIndex, TTokenKind.UNTYPETOK, arrayIdentIndex);
 end;
 
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 
-
-procedure Warning(WarnTokenIndex: Integer; err: TErrorCode; IdentIndex: Integer = 0;
-  SrcType: Int64 = 0; DstType: Int64 = 0);
+procedure ErrorForIdentifier(const tokenIndex: TTokenIndex; const errorCode: TErrorCode;
+  const identIndex: TIdentIndex);
 var
-  i: Integer;
-  Msg, a: String;
+  msg: String;
 begin
 
-  if Pass = TPass.CODE_GENERATION then
+  if not isConst then
+  begin
+    msg := GetErrorMessage(tokenIndex, errorCode, identIndex);
+    Error(tokenIndex, msg);
+  end;
+end;
+
+
+procedure ErrorRangeCheckError(const tokenIndex: TTokenIndex; const Value: TInteger; const dstType: TDataType);
+begin
+  Warning(tokenIndex, TMessage.Create(TErrorCode.RangeCheckError, GetRangeCheckText(tokenIndex, Value, dstType)));
+end;
+
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+
+procedure Warning(const tokenIndex: TTokenIndex; const msg: IMessage);
+var
+  a: String;
+begin
+
+  if pass = TPass.CODE_GENERATION then
   begin
 
-    Msg := ErrorMessage(WarnTokenIndex, err, IdentIndex, SrcType, DstType);
+    a := TokenAt(tokenIndex).SourceLocation.SourceFile.Path + ' (' +
+      IntToStr(TokenAt(tokenIndex).SourceLocation.Line) + ')' + ' Warning: ' + msg.GetText();
 
-    a := UnitName[Tok[WarnTokenIndex].UnitIndex].Path + ' (' + IntToStr(Tok[WarnTokenIndex].Line) +
-      ')' + ' Warning: ' + Msg;
-
-    for i := High(msgWarning) - 1 downto 0 do
-      if msgWarning[i] = a then exit;
-
-    i := High(msgWarning);
-    msgWarning[i] := a;
-    SetLength(msgWarning, i + 2);
+    // Add warning only once.
+    if msgLists.msgWarning.IndexOf(a) < 0 then msgLists.msgWarning.Add(a);
 
   end;
 
 end;
 
+procedure WarningAlwaysTrue(const tokenIndex: TTokenIndex);
+begin
+  Warning(tokenIndex, TMessage.Create(TErrorCode.AlwaysTrue,
+    'Comparison might be always true due to range of constant and expression'));
+end;
 
-// ----------------------------------------------------------------------------
-// ----------------------------------------------------------------------------
+procedure WarningAlwaysFalse(const tokenIndex: TTokenIndex);
+begin
+  Warning(tokenIndex, TMessage.Create(TErrorCode.AlwaysFalse,
+    'Comparison might be always false due to range of constant and expression'));
+end;
+
+procedure WarningUnreachableCode(const tokenIndex: TTokenIndex);
+begin
+  Warning(tokenIndex, TMessage.Create(TErrorCode.UnreachableCode, 'Unreachable code'));
+end;
+
+procedure WarningLoHi(const tokenIndex: TTokenIndex);
+begin
+  Warning(tokenIndex, TMessage.Create(TErrorCode.LoHi, 'lo/hi(dword/qword) returns the upper/lower word/dword'));
+end;
+
+procedure WarningShortStringLength(const tokenIndex: TTokenIndex);
+begin
+  Warning(tokenIndex, TMessage.Create(TErrorCode.ShortStringLength,
+    'String literal has more characters than short string length'));
+end;
+
+procedure WarningStripedAllowed(const tokenIndex: TTokenIndex);
+begin
+  Warning(tokenIndex, TMessage.Create(TErrorCode.StripedAllowed,
+    'Striped array is only allowed for maximum size of [0..255]'));
+end;
+
+procedure WarningUserDefined(const tokenIndex: TTokenIndex);
+begin
+  Warning(tokenIndex, TMessage.Create(TErrorCode.UserDefined, 'User defined: ' +
+    msgLists.msgUser[TokenAt(tokenIndex).Value]));
+end;
+
+procedure WarningVariableNotInitialized(const tokenIndex: TTokenIndex; const identIndex: TIdentIndex);
+begin
+  Warning(tokenIndex, TMessage.Create(TErrorCode.VariableNotInit, 'Variable ''' +
+    IdentifierAt(IdentIndex).Name + ''' does not seem to be initialized'));
+end;
+
+
 procedure WarningForRangeCheckError(const tokenIndex: TTokenIndex; const Value: TInteger; const dstType: TDataType);
 begin
-
-end;
-
-procedure newMsg(var msg: TArrayString; var a: String);
-var
-  i: Integer;
-begin
-
-  i := High(msg);
-  msg[i] := a;
-
-  SetLength(msg, i + 2);
-
+  Warning(tokenIndex, TMessage.Create(TErrorCode.RangeCheckError, GetRangeCheckText(tokenIndex, Value, dstType)));
 end;
 
 
@@ -464,27 +710,26 @@ end;
 // ----------------------------------------------------------------------------
 
 
-procedure Note(NoteTokenIndex: Integer; IdentIndex: Integer); overload;
+procedure NoteForIdentifierNotUsed(tokenIndex: TTokenIndex; const identIndex: TIdentIndex);
 var
   a: String;
 begin
 
   if Pass = TPass.CODE_GENERATION then
-    if pos('.', Ident[IdentIndex].Name) = 0 then
+    if pos('.', IdentifierAt(IdentIndex).Name) = 0 then
     begin
 
-      a := UnitName[Tok[NoteTokenIndex].UnitIndex].Path + ' (' + IntToStr(Tok[NoteTokenIndex].Line) +
-        ')' + ' Note: Local ';
+      a := TokenAt(tokenIndex).GetSourceFileLineString + ' Note: Local ';
 
-      if Ident[IdentIndex].Kind <> UNITTYPE then
+      if IdentifierAt(IdentIndex).Kind <> UNITTYPE then
       begin
 
-        case Ident[IdentIndex].Kind of
-          CONSTTOK: a := a + 'const';
+        case IdentifierAt(IdentIndex).Kind of
+          CONSTANT: a := a + 'const';
           USERTYPE: a := a + 'type';
           LABELTYPE: a := a + 'label';
 
-          VARIABLE: if Ident[IdentIndex].isAbsolute then
+          VARIABLE: if IdentifierAt(IdentIndex).isAbsolute then
               a := a + 'absolutevar'
             else
               a := a + 'variable';
@@ -493,12 +738,12 @@ begin
           TTokenKind.FUNCTIONTOK: a := a + 'func';
         end;
 
-        a := a + ' ''' + Ident[IdentIndex].Name + '''' + ' not used';
+        a := a + ' ''' + IdentifierAt(IdentIndex).Name + '''' + ' not used';
 
-        if pos('@FN', Ident[IdentIndex].Name) = 1 then
+        if pos('@FN', IdentifierAt(IdentIndex).Name) = 1 then
 
         else
-          newMsg(msgNote, a);
+          msgLists.msgNote.Add(a);
 
       end;
 
@@ -511,7 +756,7 @@ end;
 // ----------------------------------------------------------------------------
 
 
-procedure Note(NoteTokenIndex: Integer; Msg: String); overload;
+procedure Note(tokenIndex: TTokenIndex; const msg: String);
 var
   a: String;
 begin
@@ -519,19 +764,13 @@ begin
   if Pass = TPass.CODE_GENERATION then
   begin
 
-    a := UnitName[Tok[NoteTokenIndex].UnitIndex].Path + ' (' + IntToStr(Tok[NoteTokenIndex].Line) + ')' + ' Note: ';
+    a := TokenAt(tokenIndex).GetSourceFileLineString + ' Note: ' + msg;
 
-    a := a + Msg;
-
-    newMsg(msgNote, a);
+    msgLists.msgNote.Add(a);
 
   end;
 
 end;
-
-
-// -----------------------------------------------------------------------------
-// -----------------------------------------------------------------------------
 
 
 end.

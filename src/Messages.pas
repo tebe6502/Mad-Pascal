@@ -1,8 +1,8 @@
 unit Messages;
 
-interface
-
 {$I Defines.inc}
+
+interface
 
 uses Common, CompilerTypes, Datatypes, CommonTypes, Tokens;
 
