@@ -1,6 +1,6 @@
 unit Scanner;
 
-{$i Defines.inc}
+{$I Defines.inc}
 
 interface
 
@@ -24,35 +24,35 @@ procedure omin_spacje(var i: Integer; var a: String);
 
 implementation
 
-uses SysUtils, Common, CompilerTypes, Datatypes, Messages, Optimize, SplitString, Tokens;
+uses SysUtils, Common, CompilerTypes, Datatypes, Messages, Optimize, StringUtilities, Tokens;
 
 // ----------------------------------------------------------------------------
 
 procedure ErrorOrdinalExpExpected(i: TTokenIndex);
 begin
-  Error(i, TErrorCode.OrdinalExpExpected);
+  Error(i, TMessage.Create(TErrorCode.OrdinalExpExpected, 'Ordinal expression expected.'));
 end;
 
-procedure TokenizeProgramInitialization;
+procedure TokenizeProgramInitialization(ProgramUnit: TSourceFile);
 var
   i: Integer;
 begin
 
-  NumTok := 0;
-  NumIdent := 0;
-  fillchar(Ident, sizeof(Ident), 0);
-  fillchar(DataSegment, sizeof(DataSegment), 0);
+  NumIdent_ := 0;
+  TokenList.Clear;
 
+
+  FastMul := -1;
+  DataSegmentUse := False;
+  LoopUnroll := False;
   PublicSection := True;
-  UnitNameIndex := 1;
+  ActiveSourceFile := ProgramUnit;
 
   SetLength(WithName, 1);
   SetLength(linkObj, 1);
   SetLength(resArray, 1);
-  
-  SetLength(msgUser, 1);
-  SetLength(msgWarning, 1);
-  SetLength(msgNote, 1);
+
+  Messages.Initialize;
 
   NumBlocks := 0;
   BlockStackTop := 0;
@@ -65,7 +65,7 @@ begin
   run_func := 0;
   NumProc := 0;
 
-  fillchar(StaticStringData, sizeof(StaticStringData), 0);
+  ClearWordMemory(StaticStringData);
   NumStaticStrChars := 0;
 
   IfdefLevel := 0;
@@ -82,183 +82,6 @@ begin
   optyFOR3 := '';
 
   for i := 0 to High(AsmBlock) do AsmBlock[i] := '';
-
-end;
-
-
-// ----------------------------------------------------------------------------
-// ----------------------------------------------------------------------------
-
-
-procedure omin_spacje(var i: Integer; var a: String);
-(*----------------------------------------------------------------------------*)
-(*  omijamy tzw. "biale spacje" czyli spacje, tabulatory          *)
-(*----------------------------------------------------------------------------*)
-begin
-
-  if a <> '' then
-    while (i <= length(a)) and (a[i] in AllowWhiteSpaces) do Inc(i);
-
-end;
-
-
-// ----------------------------------------------------------------------------
-// ----------------------------------------------------------------------------
-
-
-function get_digit(var i: Integer; var a: String): String;
-  (*----------------------------------------------------------------------------*)
-  (*  pobierz ciag zaczynajaca sie znakami '0'..'9','%','$'          *)
-  (*----------------------------------------------------------------------------*)
-begin
-  Result := '';
-
-  if a <> '' then
-  begin
-
-    omin_spacje(i, a);
-
-    if UpCase(a[i]) in AllowDigitFirstChars then
-    begin
-
-      Result := UpCase(a[i]);
-      Inc(i);
-
-      while UpCase(a[i]) in AllowDigitChars do
-      begin
-        Result := Result + UpCase(a[i]);
-        Inc(i);
-      end;
-
-    end;
-
-  end;
-
-end;
-
-
-// ----------------------------------------------------------------------------
-// ----------------------------------------------------------------------------
-
-
-function get_constant(var i: Integer; var a: String): String;
-  (*----------------------------------------------------------------------------*)
-  (*  pobierz etykiete zaczynajaca sie znakami 'A'..'Z','_'          *)
-  (*----------------------------------------------------------------------------*)
-begin
-
-  Result := '';
-
-  if a <> '' then
-  begin
-
-    omin_spacje(i, a);
-
-    if UpCase(a[i]) in AllowLabelFirstChars + ['.'] then
-      while UpCase(a[i]) in AllowLabelChars do
-      begin
-
-        Result := Result + UpCase(a[i]);
-
-        Inc(i);
-      end;
-
-  end;
-
-end;
-
-
-// ----------------------------------------------------------------------------
-// ----------------------------------------------------------------------------
-
-
-function get_label(var i: Integer; var a: String; up: Boolean = True): String;
-  (*----------------------------------------------------------------------------*)
-  (*  pobierz etykiete zaczynajaca sie znakami 'A'..'Z','_'          *)
-  (*----------------------------------------------------------------------------*)
-begin
-
-  Result := '';
-
-  if a <> '' then
-  begin
-
-    omin_spacje(i, a);
-
-    if UpCase(a[i]) in AllowLabelFirstChars + ['.'] then
-      while UpCase(a[i]) in AllowLabelChars + AllowDirectorySeparators do
-      begin
-
-        if up then
-          Result := Result + UpCase(a[i])
-        else
-          Result := Result + a[i];
-
-        Inc(i);
-      end;
-
-  end;
-
-end;
-
-
-// ----------------------------------------------------------------------------
-// ----------------------------------------------------------------------------
-
-
-function get_string(var i: Integer; var a: String; up: Boolean = True): String;
-  (*----------------------------------------------------------------------------*)
-  (*  pobiera ciag znakow, ograniczony znakami '' lub ""            *)
-  (*  podwojny '' oznacza literalne '                *)
-  (*  podwojny "" oznacza literalne "                *)
-  (*----------------------------------------------------------------------------*)
-var
-  len: Integer;
-  znak, gchr: Char;
-begin
-  Result := '';
-
-  omin_spacje(i, a);
-
-  if a[i] = '%' then
-  begin
-
-    while UpCase(a[i]) in ['A'..'Z', '%'] do
-    begin
-      Result := Result + Upcase(a[i]);
-      Inc(i);
-    end;
-
-  end
-  else
-    if not (a[i] in AllowQuotes) then
-    begin
-
-      Result := get_label(i, a, up);
-
-    end
-    else
-    begin
-
-      gchr := a[i];
-      len := length(a);
-
-      while i <= len do
-      begin
-        Inc(i);   // omijamy pierwszy znak ' lub "
-
-        znak := a[i];
-
-        if znak = gchr then
-        begin
-          Inc(i);
-          Break;
-        end;
-
-        Result := Result + znak;
-      end;
-
-    end;
 
 end;
 
@@ -348,43 +171,15 @@ end;  //AddResource
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 
-
-procedure AddToken(Kind: TTokenKind; UnitIndex, Line, Column: Integer; Value: Int64);
+procedure TScanner.AddToken_(Kind: TTokenKind; UnitIndex: TSourceFileIndex; Line, Column: Integer; Value: TInteger);
 begin
+  tokenList.AddToken(kind, SourceFileList.GetSourceFile(UnitIndex), line, Column, Value);
+end;
 
-  Inc(NumTok);
-
-  if NumTok > High(Tok) then
-    SetLength(Tok, NumTok + 1);
-
-  // if NumTok > MAXTOKENS then
-  //    Error(NumTok, 'Out of resources, TOK');
-
-  Tok[NumTok].UnitIndex := UnitIndex;
-  Tok[NumTok].Kind := Kind;
-  Tok[NumTok].Value := Value;
-
-  if NumTok = 1 then
-    Column := 1
-  else
-  begin
-
-    if Tok[NumTok - 1].Line <> Line then
-    //   Column := 1
-    else
-      Column := Column + Tok[NumTok - 1].Column;
-
-  end;
-
-  // if Tok[NumTok- 1].Line <> Line then writeln;
-
-  Tok[NumTok].Line := Line;
-  Tok[NumTok].Column := Column;
-
-  //if line=46 then  writeln(Kind,',',Column);
-
-end;  //AddToken
-
+procedure TScanner.AddToken(Kind: TTokenKind; SourceFile: TSourceFile; Line, Column: Integer; Value: TInteger);
+begin
+  tokenList.AddToken(kind, SourceFile, line, Column, Value);
+end;
 
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
