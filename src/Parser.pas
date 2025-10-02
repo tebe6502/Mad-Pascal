@@ -1383,7 +1383,7 @@ begin
 
     ConstValType := GetCommonType(j + 1, ConstValType, RightConstValType);
 
-    if not (ConstValType in RealTypes + [TTokenKind.BOOLEANTOK]) then
+    if not (ConstValType in RealTypes + [TDataType.BOOLEANTOK]) then
       ConstValType := GetValueType(ConstVal);
 
     CheckOperator(i, TokenAt(j + 1).Kind, ConstValType, RightConstValType);
@@ -1524,7 +1524,7 @@ begin
       ConstVal := 0;
     //  ConstValType := GetCommonType(j + 1, ConstValType, RightConstValType);
 
-    ConstValType := TTokenKind.BOOLEANTOK;
+    ConstValType := TDataType.BOOLEANTOK;
 
     i := j;
   end;
@@ -1689,15 +1689,7 @@ begin
                     // Empty array [0..0] ; [0..0, 0..0] foes not require spaces
                   end
                   else
-                  begin
-                    if Name = 'SS' then
-                    begin
-                      Writeln('TODO: SS defined in ' + identifier.SourceFile.Path);
-                    end;
-                    elementCount := Integer(Elements(NumIdent));
-                    elementSize := GetDataSize(AllocElementType);
-                    IncVarDataSize(tokenIndex, elementCount * elementSize);
-                  end;
+                    IncVarDataSize(ErrTokenIndex, Integer(Elements(NumIdent) *GetDataSize(AllocElementType)));
 
                 end;
 
@@ -1822,7 +1814,7 @@ begin
       until TokenAt(i).Kind <> TTokenKind.COMMATOK;
 
 
-      VarType := TDataType.UNTYPETOK;                // UNTYPED
+      VarType := TDataType.UNTYPETOK;
       NumAllocElements := 0;
       AllocElementType := TDataType.UNTYPETOK;
 
@@ -2316,11 +2308,20 @@ var
     //   writeln('>> ',Name,',',FieldType,',',AllocElementType,',',NumAllocElements);
 
 
+    if FieldType = ENUMTOK then FieldType := AllocElementType;
+
+
     if not (FieldType in [TDataType.RECORDTOK, TDataType.OBJECTTOK]) then
     begin
 
       if FieldType in Pointers then
       begin
+
+        if AllocElementType = TDataType.RECORDTOK then
+        begin
+          AllocElementType := TDataType.POINTERTOK;
+          NumAllocElements := NumAllocElements shr 16;
+        end;
 
         if (FieldType = TDataType.POINTERTOK) and (AllocElementType = TDataType.FORWARDTYPE) then
           Inc(_TypeArray[RecType].Size, GetDataSize(TDataType.POINTERTOK))
@@ -2339,7 +2340,10 @@ var
     else
       Inc(_TypeArray[RecType].Size, GetDataSize(FieldType));
 
-    _TypeArray[RecType].Field[x].Kind := TFieldKind.UNTYPETOK;
+    if pos('.', Types[RecType].Field[x].Name) > 0 then
+      Types[RecType].Field[x].ObjectVariable := Types[RecType].Field[0].ObjectVariable
+    else
+      Types[RecType].Field[x].ObjectVariable := False;
 
   end;
 
