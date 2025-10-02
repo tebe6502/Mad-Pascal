@@ -420,7 +420,7 @@ var
   Msg, a: String;
 begin
 
-  if Pass = CODEGENERATIONPASS then
+  if Pass = TPass.CODE_GENERATION then
   begin
 
     Msg := ErrorMessage(WarnTokenIndex, err, IdentIndex, SrcType, DstType);
@@ -469,7 +469,7 @@ var
   a: String;
 begin
 
-  if Pass = CODEGENERATIONPASS then
+  if Pass = TPass.CODE_GENERATION then
     if pos('.', Ident[IdentIndex].Name) = 0 then
     begin
 
@@ -516,7 +516,7 @@ var
   a: String;
 begin
 
-  if Pass = CODEGENERATIONPASS then
+  if Pass = TPass.CODE_GENERATION then
   begin
 
     a := UnitName[Tok[NoteTokenIndex].UnitIndex].Path + ' (' + IntToStr(Tok[NoteTokenIndex].Line) + ')' + ' Note: ';

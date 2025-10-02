@@ -1,8 +1,8 @@
 unit Optimize;
 
-interface
-
 {$i Defines.inc}
+
+interface
 
 // ----------------------------------------------------------------------------
 
@@ -20,7 +20,7 @@ procedure FlushTempBuf;
 
 implementation
 
-uses Crt, SysUtils, Common;
+uses Crt, SysUtils, Common, CompilerTypes;
 var
   TemporaryBuf: array [0..511] of String;
 
@@ -3829,7 +3829,7 @@ begin
 
   if not OutputDisabled then
 
-    if Pass = CODEGENERATIONPASS then
+    if Pass = TPass.CODE_GENERATION then
     begin
 
       if optimize_code and common.optimize.use then

@@ -4,7 +4,7 @@ var i, j: Integer;
     a, header: string;
 begin
 
-if Pass = CODEGENERATIONPASS then begin
+if Pass = TPass.CODE_GENERATION then begin
 
  tmp := common.optimize.use;
  common.optimize.use := false;

@@ -262,9 +262,6 @@ const
   CODEORIGIN = $100;
   DATAORIGIN = $8000;
 
-  CALLDETERMPASS = 1;
-  CODEGENERATIONPASS = 2;
-
 
   // Fixed-point 32-bit real number storage
 
@@ -410,7 +407,7 @@ type
     DataType: TDataType;
     IdType: TDataType;
     PassMethod: TParameterPassingMethod;
-    Pass: Byte;
+    Pass: TPass;
 
     NestedNumAllocElements: Cardinal;
     NestedAllocElementType: TDataType;
@@ -468,16 +465,6 @@ type
     Allow: array [1..MAXALLOWEDUNITS] of TString;
   end;
 
-  (*
-  TResource = record
-    resStream: Boolean;
-    resName, resType, resFile: TString;
-    resValue: Integer;
-    resFullName: String;
-    resPar: array [1..MAXPARAMS] of TString;
-  end;
-  *)
-
   TCaseLabel = record
     left, right: Int64;
     equality: Boolean;
@@ -528,8 +515,10 @@ var
   AddDefines: Integer = 1;
   NumDefines: Integer = 1;  // NumDefines = AddDefines
 
+  Pass: TPass;
+
   NumTok, NumIdent, NumTypes, NumPredefIdent, NumStaticStrChars, NumUnits, NumBlocks, NumProc,
-  BlockStackTop, CodeSize, CodePosStackTop, BreakPosStackTop, _VarDataSize, Pass, ShrShlCnt,
+  BlockStackTop, CodeSize, CodePosStackTop, BreakPosStackTop, _VarDataSize, ShrShlCnt,
   NumStaticStrCharsTmp, AsmBlockIndex, IfCnt, CaseCnt, IfdefLevel, run_func: Integer;
 
   iOut: Integer = -1;
