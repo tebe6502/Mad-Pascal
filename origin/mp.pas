@@ -19012,19 +19012,20 @@ function CompileBlock(i: TTokenIndex; BlockIdentIndex: Integer; NumParams: Integ
     end;// if TTokenKind.VARTOK
 
 
-      if TokenAt(i).Kind in [PROCEDURETOK, FUNCTIONTOK, CONSTRUCTORTOK, DESTRUCTORTOK] then
-        if TokenAt(i + 1).Kind <> IDENTTOK then
-          Error(i + 1, 'Procedure name expected but ' + GetTokenSpelling(TokenAt( i + 1).Kind) + ' found')
+    if TokenAt(i).Kind in [TTokenKind.PROCEDURETOK, TTokenKind.FUNCTIONTOK, TTokenKind.CONSTRUCTORTOK,
+      TTokenKind.DESTRUCTORTOK] then
+      if TokenAt(i + 1).Kind <> TTokenKind.IDENTTOK then
+        Error(i + 1, 'Procedure name expected but ' + tokenList.GetTokenSpellingAtIndex(i + 1) + ' found')
         else
         begin
 
-          IsNestedFunction := (TokenAt(i).Kind = FUNCTIONTOK);
+        IsNestedFunction := (TokenAt(i).Kind = TTokenKind.FUNCTIONTOK);
 
 
           if INTERFACETOK_USE then
             ForwardIdentIndex := 0
           else
-            ForwardIdentIndex := GetIdent(TokenAt(i + 1).Name^);
+          ForwardIdentIndex := GetIdentIndex(TokenAt(i + 1).Name);
 
 
           if (ForwardIdentIndex <> 0) and (IdentifierAt(ForwardIdentIndex).isOverload) then
@@ -19034,33 +19035,36 @@ function CompileBlock(i: TTokenIndex; BlockIdentIndex: Integer; NumParams: Integ
             FormalParameterList(j, ParamIndex, Param, TmpResult, IsNestedFunction, NestedFunctionResultType,
               NestedFunctionNumAllocElements, NestedFunctionAllocElementType);
 
-            ForwardIdentIndex := GetIdentProc(IdentifierAt(ForwardIdentIndex).Name, ForwardIdentIndex, Param, ParamIndex);
+          ForwardIdentIndex := GetIdentProc(IdentifierAt(ForwardIdentIndex).Name, ForwardIdentIndex,
+            Param, ParamIndex);
 
           end;
 
 
           if ForwardIdentIndex <> 0 then
-            if (IdentifierAt(ForwardIdentIndex).IsUnresolvedForward) and (IdentifierAt(ForwardIdentIndex).Block =
-              BlockStack[BlockStackTop]) then
+          if (IdentifierAt(ForwardIdentIndex).IsUnresolvedForward) and
+            (IdentifierAt(ForwardIdentIndex).Block = BlockStack[BlockStackTop]) then
               if TokenAt(i).Kind <> IdentifierAt(ForwardIdentIndex).Kind then
                 Error(i, 'Unresolved forward declaration of ' + IdentifierAt(ForwardIdentIndex).Name);
 
 
           if ForwardIdentIndex <> 0 then
-            if not IdentifierAt(ForwardIdentIndex).IsUnresolvedForward or (IdentifierAt(ForwardIdentIndex).Block <>
-              BlockStack[BlockStackTop]) or ((TokenAt(i).Kind = PROCEDURETOK) and
-              (IdentifierAt(ForwardIdentIndex).Kind <> PROCEDURETOK)) or
-              //   ((TokenAt(i).Kind = CONSTRUCTORTOK) and (IdentifierAt(ForwardIdentIndex].Kind <> CONSTRUCTORTOK)) or
-              //   ((TokenAt(i).Kind = DESTRUCTORTOK) and (IdentifierAt(ForwardIdentIndex].Kind <> DESTRUCTORTOK)) or
-              ((TokenAt(i).Kind = FUNCTIONTOK) and (IdentifierAt(ForwardIdentIndex).Kind <> FUNCTIONTOK)) then
+          if not IdentifierAt(ForwardIdentIndex).IsUnresolvedForward or
+            (IdentifierAt(ForwardIdentIndex).Block <> BlockStack[BlockStackTop]) or
+            ((TokenAt(i).Kind = TTokenKind.PROCEDURETOK) and (IdentifierAt(ForwardIdentIndex).Kind <>
+            TTokenKind.PROCEDURETOK)) or
+            //   ((TokenAt(i).Kind = TTokenKind.CONSTRUCTORTOK) and (IdentifierAt(ForwardIdentIndex).Kind <> TTokenKind.CONSTRUCTORTOK)) or
+            //   ((TokenAt(i).Kind = TTokenKind.DESTRUCTORTOK) and (IdentifierAt(ForwardIdentIndex).Kind <> TTokenKind.DESTRUCTORTOK)) or
+            ((TokenAt(i).Kind = TTokenKind.FUNCTIONTOK) and (IdentifierAt(ForwardIdentIndex).Kind <>
+            TTokenKind.FUNCTIONTOK)) then
               ForwardIdentIndex := 0;     // Found an identifier of another kind or scope, or it is already resolved
 
 
-          if (TokenAt(i).Kind in [CONSTRUCTORTOK, DESTRUCTORTOK]) and (ForwardIdentIndex = 0) then
+        if (TokenAt(i).Kind in [TTokenKind.CONSTRUCTORTOK, TTokenKind.DESTRUCTORTOK]) and (ForwardIdentIndex = 0) then
             Error(i, 'constructors, destructors operators must be methods');
 
 
-          //    writeln(ForwardIdentIndex,',',TokenAt(i).line,',',IdentifierAt(ForwardIdentIndex).isOverload,',',IdentifierAt(ForwardIdentIndex).IsUnresolvedForward,' / ',TokenAt(i).Kind = PROCEDURETOK,',',  ((TokenAt(i).Kind = PROCEDURETOK) and (IdentifierAt(ForwardIdentIndex).Kind <> PROC)));
+        //    writeln(ForwardIdentIndex,',',TokenAt(i).line,',',IdentifierAt(ForwardIdentIndex).isOverload,',',IdentifierAt(ForwardIdentIndex).IsUnresolvedForward,' / ',TokenAt(i).Kind = TTokenKind.PROCEDURETOK,',',  ((TokenAt(i).Kind = TTokenKind.PROCEDURETOK) and (IdentifierAt(ForwardIdentIndex).Kind <> PROC)));
 
           i := DefineFunction(i, ForwardIdentIndex, isForward, isInt, isInl, isOvr, IsNestedFunction,
             NestedFunctionResultType, NestedFunctionNumAllocElements, NestedFunctionAllocElementType);
@@ -19070,8 +19074,8 @@ function CompileBlock(i: TTokenIndex; BlockIdentIndex: Integer; NumParams: Integ
           if ((ForwardIdentIndex = 0) and isForward) or INTERFACETOK_USE then  // Forward declaration
           begin
             //      Inc(NumBlocks);
-            //      IdentifierAt(NumIdent].ProcAsBlock := NumBlocks;
-            Ident[NumIdent].IsUnresolvedForward := True;
+          //      IdentifierAt(NumIdent).ProcAsBlock := NumBlocks;
+          IdentifierAt(NumIdent).IsUnresolvedForward := True;
 
           end
           else
@@ -19115,7 +19119,7 @@ function CompileBlock(i: TTokenIndex; BlockIdentIndex: Integer; NumParams: Integ
                 OutputDisabled := True;
               end;
 
-              Ident[ForwardIdentIndex].Value := CodeSize;
+            IdentifierAt(ForwardIdentIndex).Value := CodeSize;
 
               FormalParameterList(i, ParamIndex, Param, TmpResult, IsNestedFunction, NestedFunctionResultType,
                 NestedFunctionNumAllocElements, NestedFunctionAllocElementType);
@@ -19147,18 +19151,19 @@ function CompileBlock(i: TTokenIndex; BlockIdentIndex: Integer; NumParams: Integ
 
               Tmp := 0;
 
-              if IdentifierAt(ForwardIdentIndex).isKeep then Tmp := Tmp or Ord(mKeep);
-              if IdentifierAt(ForwardIdentIndex).isOverload then Tmp := Tmp or Ord(mOverload);
-              if IdentifierAt(ForwardIdentIndex).isAsm then Tmp := Tmp or Ord(mAssembler);
-              if IdentifierAt(ForwardIdentIndex).isRegister then Tmp := Tmp or Ord(mRegister);
-              if IdentifierAt(ForwardIdentIndex).isInterrupt then Tmp := Tmp or Ord(mInterrupt);
-              if IdentifierAt(ForwardIdentIndex).isPascal then Tmp := Tmp or Ord(mPascal);
-              if IdentifierAt(ForwardIdentIndex).isStdCall then Tmp := Tmp or Ord(mStdCall);
-              if IdentifierAt(ForwardIdentIndex).isInline then Tmp := Tmp or Ord(mInline);
+            if IdentifierAt(ForwardIdentIndex).isKeep then SetModifierBit(TModifierCode.mKeep, tmp);
+            if IdentifierAt(ForwardIdentIndex).isOverload then SetModifierBit(TModifierCode.mOverload, tmp);
+            if IdentifierAt(ForwardIdentIndex).isAsm then SetModifierBit(TModifierCode.mAssembler, tmp);
+            if IdentifierAt(ForwardIdentIndex).isRegister then SetModifierBit(TModifierCode.mRegister, tmp);
+            if IdentifierAt(ForwardIdentIndex).isInterrupt then SetModifierBit(TModifierCode.mInterrupt, tmp);
+            if IdentifierAt(ForwardIdentIndex).isPascal then SetModifierBit(TModifierCode.mPascal, tmp);
+            if IdentifierAt(ForwardIdentIndex).isStdCall then SetModifierBit(TModifierCode.mStdCall, tmp);
+            if IdentifierAt(ForwardIdentIndex).isInline then SetModifierBit(TModifierCode.mInline, tmp);
 
               if Tmp <> TmpResult then
+              // TODO: List the difference in the modifiers
                 Error(i, 'Function header doesn''t match the previous declaration ''' +
-                  IdentifierAt(ForwardIdentIndex).Name + '''');
+                IdentifierAt(ForwardIdentIndex).Name + '''. Different modifiers.');
 
 
               if IsNestedFunction then
@@ -19169,7 +19174,7 @@ function CompileBlock(i: TTokenIndex; BlockIdentIndex: Integer; NumParams: Integ
                     IdentifierAt(ForwardIdentIndex).Name + '''');
 
 
-              CheckTok(i + 2, SEMICOLONTOK);
+            CheckTok(i + 2, TTokenKind.SEMICOLONTOK);
 
               iocheck_old := IOCheck;
               isInterrupt_old := isInterrupt;
@@ -19184,19 +19189,22 @@ function CompileBlock(i: TTokenIndex; BlockIdentIndex: Integer; NumParams: Integ
 
               i := j + 1;
 
-              GenerateReturn(IsNestedFunction, IdentifierAt(ForwardIdentIndex).isInterrupt, IdentifierAt(ForwardIdentIndex).isInline,
-                IdentifierAt(ForwardIdentIndex).isOverload);
+            GenerateReturn(IsNestedFunction,
+              IdentifierAt(ForwardIdentIndex).isInterrupt,
+              IdentifierAt(ForwardIdentIndex).isInline,
+              IdentifierAt(ForwardIdentIndex).isOverload
+              );
 
               if OutputDisabled then OutputDisabled := False;
 
-              Ident[ForwardIdentIndex].IsUnresolvedForward := False;
+            IdentifierAt(ForwardIdentIndex).IsUnresolvedForward := False;
 
             end;
 
           end;
 
 
-          CheckTok(i, SEMICOLONTOK);
+        CheckTok(i, TTokenKind.SEMICOLONTOK);
 
           Inc(i);
 
@@ -19214,13 +19222,13 @@ function CompileBlock(i: TTokenIndex; BlockIdentIndex: Integer; NumParams: Integ
     begin
       GenerateDeclarationEpilog;  // Make jump to block entry point
 
-      if not (TokenAt(i - 1).Kind in [PROCALIGNTOK, LOOPALIGNTOK, LINKALIGNTOK]) then
-        if LIBRARYTOK_USE and (TokenAt(i).Kind <> BEGINTOK) then
+    if not (TokenAt(i - 1).Kind in [TTokenKind.PROCALIGNTOK, TTokenKind.LOOPALIGNTOK, TTokenKind.LINKALIGNTOK]) then
+      if LIBRARYTOK_USE and (TokenAt(i).Kind <> TTokenKind.BEGINTOK) then
 
           Inc(i)
 
         else
-          CheckTok(i, BEGINTOK);
+        CheckTok(i, TTokenKind.BEGINTOK);
 
     end;
 
@@ -19232,9 +19240,9 @@ if BlockStack[BlockStackTop] = 1 then begin
   for IdentIndex := 1 to NumIdent do
     if (IdentifierAt(IdentIndex).Kind = VARIABLE) and (IdentifierAt(IdentIndex).DataType in Pointers) and (IdentifierAt(IdentIndex).NumAllocElements > 0) then
       begin
-//      Push(IdentifierAt(IdentIndex).Value + SizeOf(Int64), ASVALUE, GetDataSize(POINTERTOK], IdentifierAt(IdentIndex).Kind);     // Array starts immediately after the pointer to its origin
-//      GenerateAssignment(IdentifierAt(IdentIndex).Value, ASPOINTER, GetDataSize(POINTERTOK], IdentIndex);
-      asm65(#9'mwa #DATAORIGIN+$' + IntToHex(IdentifierAt(IdentIndex).Value - DATAORIGIN + GetDataSize(POINTERTOK], 4) + ' DATAORIGIN+$' + IntToHex(IdentifierAt(IdentIndex).Value - DATAORIGIN , 4), '; ' + IdentifierAt(IdentIndex).Name );
+//      Push(IdentifierAt(IdentIndex).Value + SizeOf(Int64), ASVALUE, GetDataSize(TDataType.POINTERTOK), IdentifierAt(IdentIndex).Kind);     // Array starts immediately after the pointer to its origin
+//      GenerateAssignment(IdentifierAt(IdentIndex).Value, ASPOINTER, GetDataSize(TDataType.POINTERTOK), IdentIndex);
+      asm65(#9'mwa #DATAORIGIN+$' + IntToHex(IdentifierAt(IdentIndex).Value - DATAORIGIN + GetDataSize(TDataType.POINTERTOK), 4) + ' DATAORIGIN+$' + IntToHex(IdentifierAt(IdentIndex).Value - DATAORIGIN , 4), '; ' + IdentifierAt(IdentIndex).Name );
 
       end;
 
@@ -19250,7 +19258,8 @@ end;
     while (j > 0) and (IdentifierAt(j).Block = BlockStack[BlockStackTop]) do
     begin
       // If procedure or function, delete parameters first
-      if IdentifierAt(j).Kind in [PROCEDURETOK, FUNCTIONTOK, CONSTRUCTORTOK, DESTRUCTORTOK] then
+    if IdentifierAt(j).Kind in [TTokenKind.PROCEDURETOK, TTokenKind.FUNCTIONTOK,
+      TTokenKind.CONSTRUCTORTOK, TTokenKind.DESTRUCTORTOK] then
         if IdentifierAt(j).IsUnresolvedForward and (IdentifierAt(j).isExternal = False) then
           Error(i, 'Unresolved forward declaration of ' + IdentifierAt(j).Name);
 
@@ -19263,7 +19272,7 @@ end;
     if IsFunction then
     begin
       // if FunctionNumAllocElements > 0 then
-      //  Push(IdentifierAt(GetIdent('RESULT')].Value, ASVALUE, GetDataSize(FunctionResultType], GetIdent('RESULT'))
+    //  Push(IdentifierAt(GetIdentIndex('RESULT')).Value, ASVALUE, GetDataSize( TDataType.FunctionResultType), GetIdentIndex('RESULT'))
       // else
       //  asm65;
       asm65('@exit');
@@ -19271,7 +19280,8 @@ end;
       if IdentifierAt(BlockIdentIndex).isStdCall or IdentifierAt(BlockIdentIndex).isRecursion then
       begin
 
-        Push(IdentifierAt(GetIdent('RESULT')).Value, ASPOINTER, GetDataSize(FunctionResultType), GetIdent('RESULT'));
+      Push(IdentifierAt(GetIdentIndex('RESULT')).Value, ASPOINTER, GetDataSize(FunctionResultType),
+        GetIdentIndex('RESULT'));
 
         asm65;
 
@@ -19290,7 +19300,8 @@ end;
 
     end;
 
-    if IdentifierAt(BlockIdentIndex).Kind in [PROCEDURETOK, FUNCTIONTOK, CONSTRUCTORTOK, DESTRUCTORTOK] then
+  if IdentifierAt(BlockIdentIndex).Kind in [TTokenKind.PROCEDURETOK, TTokenKind.FUNCTIONTOK,
+    TTokenKind.CONSTRUCTORTOK, TTokenKind.DESTRUCTORTOK] then
     begin
 
       if IdentifierAt(BlockIdentIndex).isInline then asm65(#9'.ENDM');
@@ -19302,7 +19313,7 @@ end;
     Dec(BlockStackTop);
 
 
-    if Pass = TPass.CALL_DETERMINATION then
+  if pass = TPass.CALL_DETERMINATION then
       if IdentifierAt(BlockIdentIndex).isKeep or IdentifierAt(BlockIdentIndex).isInterrupt or
         IdentifierAt(BlockIdentIndex).updateResolvedForward then
         AddCallGraphChild(BlockStack[BlockStackTop], IdentifierAt(BlockIdentIndex).ProcAsBlock);
@@ -19322,6 +19333,7 @@ end;
     i, j, DataSegmentSize, IdentIndex: Integer;
     tmp, a: String;
     yes: Boolean;
+    SourceFile: TSourceFile;
     res: TResource;
   begin
 
@@ -19346,17 +19358,18 @@ end;
     j := CompileBlock(1, NumIdent, 0, False, TDataType.UNTYPETOK);
 
 
-    if TokenAt(j).Kind = ENDTOK then CheckTok(j + 1, DOTTOK)
+  if TokenAt(j).Kind = TTokenKind.ENDTOK then CheckTok(j + 1, TTokenKind.DOTTOK)
     else
-      if TokenAt(NumTok).Kind = EOFTOK then
+    if TokenAt(NumTok).Kind = TTokenKind.EOFTOK then
         Error(NumTok, 'Unexpected end of file');
 
     j := NumIdent;
 
-    while (j > 0) and (IdentifierAt(j).UnitIndex = 1) do
+    while (j > 0) and (IdentifierAt(j).SourceFile.UnitIndex = 1) do
     begin
       // If procedure or function, delete parameters first
-      if IdentifierAt(j).Kind in [PROCEDURETOK, FUNCTIONTOK, CONSTRUCTORTOK, DESTRUCTORTOK] then
+    if IdentifierAt(j).Kind in [TTokenKind.PROCEDURETOK, TTokenKind.FUNCTIONTOK,
+      TTokenKind.CONSTRUCTORTOK, TTokenKind.DESTRUCTORTOK] then
         if (IdentifierAt(j).IsUnresolvedForward) and (IdentifierAt(j).isExternal = False) then
           Error(j, 'Unresolved forward declaration of ' + IdentifierAt(j).Name);
 
@@ -19373,7 +19386,7 @@ end;
 
     if LIBRARY_USE then asm65('@regX'#9'ldx #$00');
 
-    if target.id = ___a8 then
+    if target.id = TTargetID.A8 then
     begin
 
       if LIBRARY_USE = False then
@@ -19397,7 +19410,7 @@ if LIBRARY_USE = FALSE then begin
 
   asm65separator;
 
-  if target.id = ___a8 then begin
+  if target.id = TTargetID.A8 then begin
     asm65;
     asm65('IOCB@COPY'#9':16 brk');
   end;
@@ -19503,30 +19516,36 @@ end;
     asm65;
     asm65('.macro'#9'UNITINITIALIZATION');
 
-    for j := NumUnits downto 2 do
-      if UnitName[j].Name <> '' then
+  for j := SourceFileList.Size downto 2 do
+  begin
+    SourceFile := SourceFileList.GetSourceFile(j);
+    if SourceFile.IsRelevant then
       begin
 
         asm65;
-        asm65(#9'.ifdef MAIN.' + UnitName[j].Name + '.@UnitInit');
-        asm65(#9'jsr MAIN.' + UnitName[j].Name + '.@UnitInit');
+      asm65(#9'.ifdef MAIN.' + SourceFile.Name + '.@UnitInit');
+      asm65(#9'jsr MAIN.' + SourceFile.Name + '.@UnitInit');
         asm65(#9'.fi');
 
       end;
+  end;
 
     asm65('.endm');
 
     asm65separator;
 
-    for j := NumUnits downto 2 do
-      if UnitName[j].Name <> '' then
+  for j := SourceFileList.Size downto 2 do
+  begin
+    SourceFile := SourceFileList.GetSourceFile(j);
+    if SourceFile.IsRelevant then
       begin
         asm65;
-        asm65(#9'ift .SIZEOF(MAIN.' + UnitName[j].Name + ') > 0');
-        asm65(#9'.print ''' + UnitName[j].Name + ': ' + ''',MAIN.' + UnitName[j].Name + ',' +
-          '''..''' + ',' + 'MAIN.' + UnitName[j].Name + '+.SIZEOF(MAIN.' + UnitName[j].Name + ')-1');
+      asm65(#9'ift .SIZEOF(MAIN.' + SourceFile.Name + ') > 0');
+      asm65(#9'.print ''' + SourceFile.Name + ': ' + ''',MAIN.' + SourceFile.Name + ',' +
+        '''..''' + ',' + 'MAIN.' + SourceFile.Name + '+.SIZEOF(MAIN.' + SourceFile.Name + ')-1');
         asm65(#9'eif');
       end;
+  end;
 
 
     asm65;
@@ -19583,7 +19602,7 @@ end;
 
         if LIBRARYTOK_USE = False then
           for j := GetVarDataSize - 1 downto 0 do
-            if DataSegment[j] <> 0 then
+            if _DataSegment[j] <> 0 then
             begin
               DataSegmentSize := j + 1;
               Break;
@@ -19602,22 +19621,22 @@ end;
 
           if (j mod 8 = 0) then tmp := tmp + ' ';
 
-          if DataSegment[j] and $c000 = $8000 then
-            tmp := tmp + ' <[DATAORIGIN+$' + IntToHex(Byte(DataSegment[j]) or Byte(DataSegment[j + 1]) shl 8, 4) + ']'
+          if _DataSegment[j] and $c000 = $8000 then
+            tmp := tmp + ' <[DATAORIGIN+$' + IntToHex(Byte(_DataSegment[j]) or Byte(_DataSegment[j + 1]) shl 8, 4) + ']'
           else
-            if DataSegment[j] and $c000 = $4000 then
-              tmp := tmp + ' >[DATAORIGIN+$' + IntToHex(Byte(DataSegment[j - 1]) or
-                Byte(DataSegment[j]) shl 8, 4) + ']'
+            if _DataSegment[j] and $c000 = $4000 then
+              tmp := tmp + ' >[DATAORIGIN+$' + IntToHex(Byte(_DataSegment[j - 1]) or
+                Byte(_DataSegment[j]) shl 8, 4) + ']'
             else
-              if DataSegment[j] and $3000 = $2000 then
-                tmp := tmp + ' <[CODEORIGIN+$' + IntToHex(Byte(DataSegment[j]) or
-                  Byte(DataSegment[j + 1]) shl 8, 4) + ']'
+              if _DataSegment[j] and $3000 = $2000 then
+                tmp := tmp + ' <[CODEORIGIN+$' + IntToHex(Byte(_DataSegment[j]) or
+                  Byte(_DataSegment[j + 1]) shl 8, 4) + ']'
               else
-                if DataSegment[j] and $3000 = $1000 then
-                  tmp := tmp + ' >[CODEORIGIN+$' + IntToHex(Byte(DataSegment[j - 1]) or
-                    Byte(DataSegment[j]) shl 8, 4) + ']'
+                if _DataSegment[j] and $3000 = $1000 then
+                  tmp := tmp + ' >[CODEORIGIN+$' + IntToHex(Byte(_DataSegment[j - 1]) or
+                    Byte(_DataSegment[j]) shl 8, 4) + ']'
                 else
-                  tmp := tmp + ' $' + IntToHex(DataSegment[j], 2);
+                  tmp := tmp + ' $' + IntToHex(_DataSegment[j], 2);
 
         end;
 
@@ -19684,7 +19703,7 @@ end;
 
     end;
 
-    if target.id = ___a8 then
+  if target.id = TTargetID.A8 then
     begin
       asm65;
       asm65(#9'run START');
@@ -19735,7 +19754,7 @@ end;
     asm65('.endm');
 
 
-    if (High(resArray) > 0) and (target.id <> ___a8) then
+    if (High(resArray) > 0) and (target.id <> TTargetID.A8) then
     begin
 
       asm65;
@@ -19752,7 +19771,7 @@ end;
 
           j := NumIdent;
 
-          while (j > 0) and (IdentifierAt(j).UnitIndex = 1) do
+          while (j > 0) and (IdentifierAt(j).SourceFile.UnitIndex = 1) do
           begin
             if IdentifierAt(j).Name = resArray[i].resName then
             begin
@@ -19803,7 +19822,6 @@ end;
 //                                 Compiler Main
 // ----------------------------------------------------------------------------
 procedure InitializeIdentifiers;
-
 {$IFNDEF PAS2JS}
 const
   PI_VALUE: TNumber = $40490FDB00000324; // does not fit into 53 bits Javascript double  mantissa
@@ -19819,6 +19837,8 @@ const
   const INFINITY_VALUE: Int64 = $22222222;
   const NEGINFINITY_VALUE: Int64 = $33333333;
 {$ENDIF}
+begin
+end;
 
   // ----------------------------------------------------------------------------
   // ----------------------------------------------------------------------------
@@ -19830,6 +19850,9 @@ const
   // ----------------------------------------------------------------------------
   // ----------------------------------------------------------------------------
 
+var outputFile: String; // TODO
+var diagMode: Boolean; // TODO
+var inputFilePath: String; // TODO
 
   procedure ParseParam;
   var
@@ -20011,13 +20034,11 @@ const
       else
 
       begin
-        UnitName[1].Name := ParamStr(i);  //ChangeFileExt(ParamStr(i), '.pas');
-        UnitName[1].Path := UnitName[1].Name;
+        inputFilePath := ParamStr(i);
 
-        if not FileExists(UnitName[1].Name) then
+        if not FileExists(inputFilePath) then
         begin
-          writeln('Error: Can''t open file ''' + UnitName[1].Name + '''');
-          FreeTokens;
+          writeln('Error: Can''t open file ''' + inputFilePath + '''');
           Halt(3);
         end;
 
@@ -20045,19 +20066,19 @@ const
 
 
     if c <> '' then
-      if AnsiUpperCase(c) = '6502' then target.cpu := CPU_6502
+      if AnsiUpperCase(c) = '6502' then target.cpu := TCPU.CPU_6502
       else
-        if AnsiUpperCase(c) = '65C02' then target.cpu := CPU_65C02
+        if AnsiUpperCase(c) = '65C02' then target.cpu := TCPU.CPU_65C02
         else
-          if AnsiUpperCase(c) = '65816' then target.cpu := CPU_65816
+          if AnsiUpperCase(c) = '65816' then target.cpu := TCPU.CPU_65816
           else
             Syntax(3);
 
 
     case target.cpu of
-      CPU_6502: AddDefine('CPU_6502');
-      cpu_65c02: AddDefine('CPU_65C02');
-      cpu_65816: AddDefine('CPU_65816');
+      TCPU.CPU_6502: AddDefine('CPU_6502');
+      TCPU.cpu_65c02: AddDefine('CPU_65C02');
+      TCPU.cpu_65816: AddDefine('CPU_65816');
     end;
 
     AddDefines := NumDefines;
@@ -20066,8 +20087,11 @@ const
 
 
   // ----------------------------------------------------------------------------
-  //                                 Main program
+//                                 Compiler Main
   // ----------------------------------------------------------------------------
+
+var i: Integer;
+var MainPath: String;
 
 begin
 
@@ -20087,15 +20111,15 @@ begin
 
   SetLength(IFTmpPosStack, 1);
 
-  Tok[NumTok].Line := 0;
-  UnitName[1].Name := '';
+  // Tok[NumTok].Line := 0;
+  // UnitName[1].Name := '';
 
   MainPath := ExtractFilePath(ParamStr(0));
 
-  SetLength(UnitPath, 2);
+  // SetLength(UnitPath, 2);
 
   MainPath := IncludeTrailingPathDelimiter(MainPath);
-  UnitPath[0] := IncludeTrailingPathDelimiter(MainPath + 'lib');
+  unitPathList.AddFolder(Path(IncludeTrailingPathDelimiter(MainPath + 'lib');
 
   if (ParamCount = 0) then Syntax(3);
 
