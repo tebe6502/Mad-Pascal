@@ -20092,7 +20092,11 @@ var inputFilePath: String; // TODO
 
 var i: Integer;
 var MainPath: String;
-
+  var FilePath: String;
+  var Start_Time, end_time: Int64;
+var scanner: IScanner;
+    // Processing variables.
+var programUnit: TSourceFile;
 begin
 
 {$IFDEF WINDOWS}
@@ -20119,11 +20123,11 @@ begin
   // SetLength(UnitPath, 2);
 
   MainPath := IncludeTrailingPathDelimiter(MainPath);
-  unitPathList.AddFolder(Path(IncludeTrailingPathDelimiter(MainPath + 'lib');
+  unitPathList.AddFolder(IncludeTrailingPathDelimiter(MainPath + 'lib'));
 
   if (ParamCount = 0) then Syntax(3);
 
-  NumUnits := 1;           // !!! 1 !!!
+  // NumUnits := 1;           // !!! 1 !!!
 
 
   ParseParam;
@@ -20131,22 +20135,22 @@ begin
 
   Defines[1].Name := AnsiUpperCase(target.Name);
 
-  if (UnitName[1].Name = '') then Syntax(3);
+  if (inputFilePath = '') then Syntax(3);
 
-  if pos(MainPath, ExtractFilePath(UnitName[1].Name)) > 0 then
-    FilePath := ExtractFilePath(UnitName[1].Name)
+  if pos(MainPath, ExtractFilePath(inputFilePath) )> 0 then
+    FilePath := ExtractFilePath(inputFilePath)
   else
-    FilePath := MainPath + ExtractFilePath(UnitName[1].Name);
+    FilePath := MainPath + ExtractFilePath(inputFilePath);
 
   DefaultFormatSettings.DecimalSeparator := '.';
  {$IFDEF USEOPTFILE}
- AssignFile(OptFile, ChangeFileExt(UnitName[1].Name, '.opt') ); FileMode:=1; rewrite(OptFile);
+ AssignFile(OptFile, ChangeFileExt(inputFilePath, '.opt') ); FileMode:=1; rewrite(OptFile);
  {$ENDIF}
 
 
   if ExtractFileName(outputFile) = '' then
   begin
-    outputFile := ChangeFileExt(UnitName[1].Name, '.a65');
+    outputFile := ChangeFileExt(inputFilePath, '.a65');
   end;
 
   AssignFile(OutFile, outputFile);
@@ -20156,7 +20160,7 @@ begin
 
   TextColor(WHITE);
 
-  Writeln('Compiling ', UnitName[1].Name);
+  Writeln('Compiling ', inputFilePath);
 
   start_time := GetTickCount64;
 
@@ -20169,6 +20173,8 @@ begin
   // ----------------------------------------------------------------------------
   // Set defines for first pass;
   scanner := TScanner.Create;
+
+  programUnit := SourceFileList.AddUnit(TSourceFileType.PROGRAM_FILE, ExtractFilename(inputFilePath), inputFilePath);
 
   scanner.TokenizeProgram(programUnit, True);
 
