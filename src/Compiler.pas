@@ -12127,8 +12127,6 @@ begin
                       if not (IdentifierAt(IdentIndex).DataType in Pointers) then
                         ErrorForIdentifier(i + 2, TErrorCode.IncompatibleTypeOf, IdentIndex);
 
-                      VarType := IdentifierAt(GetIdentIndex(IdentifierAt(IdentIndex).Name +
-                        '.' + TokenAt(i + 3).Name)).AllocElementType;
                       par2 := '$' + IntToHex(IdentTemp and $ffff, 2);
 
                       IndirectionLevel := ASARRAYORIGINOFPOINTERTORECORDARRAYORIGIN;
@@ -13512,7 +13510,7 @@ begin
       IdentIndex := GetIdentIndex(TokenAt(i + 1).Name);
 
 
-      if (IdentifierAt(IdentIndex).Kind = TTokenKind.USERTYPE) and (IdentifierAt(IdentIndex).DataType in
+      if (IdentifierAt(IdentIndex).Kind = USERTYPE) and (IdentifierAt(IdentIndex).DataType in
         [TDataType.RECORDTOK, TDataType.OBJECTTOK]) then
 
       else
@@ -14523,7 +14521,7 @@ WHILETOK:
             CheckTok(i, TTokenKind.COMMATOK);
             CheckTok(i + 1, TTokenKind.IDENTTOK);
 
-            if IdentifierAt(GetIdentIndex(TokenAt(i + 1).Name)).DataType <> TTokenKind.STRINGPOINTERTOK then
+            if IdentifierAt(GetIdentIndex(TokenAt(i + 1).Name)).DataType <> TDataType.STRINGPOINTERTOK then
               Error(i + 1, TErrorCode.VariableExpected);
 
             IdentIndex := GetIdentIndex(TokenAt(i + 1).Name);
@@ -14543,7 +14541,7 @@ WHILETOK:
                 ErrorForIdentifier(i + 2, TErrorCode.IncompatibleTypeOf, IdentIndex)
               else
               begin
-                //      Push(IdentifierAt(IdentIndex).Value, ASVALUE, GetDataSize( TDataType.CHARTOK]);
+                //      Push(IdentifierAt(IdentIndex).Value, ASVALUE, GetDataSize( TDataType.CHARTOK));
 
                 GenerateRead;//(IdentifierAt(IdentIndex).Value);
 
@@ -15060,11 +15058,12 @@ WHILETOK:
 
       IndirectionLevel := ASPOINTER;
 
-      if IdentifierAt(IdentIndex).DataType = ENUMTOK then
+
+        if IdentifierAt(IdentIndex).DataType = ENUMTYPE then
         ExpressionType := IdentifierAt(IdentIndex).AllocElementType
       else
         if IdentifierAt(IdentIndex).DataType in Pointers then
-          ExpressionType := TTokenKind.WORDTOK
+          ExpressionType := TDataType.WORDTOK
         else
           ExpressionType := IdentifierAt(IdentIndex).DataType;
 
@@ -15105,8 +15104,6 @@ WHILETOK:
 
         if TokenAt(i + 1).Kind = TTokenKind.OBRACKETTOK then
         begin        // typed pointer: PByte[], Pword[] ...
-
-          ExpressionType := IdentifierAt(IdentIndex).AllocElementType;
 
           IndirectionLevel := ASPOINTERTOARRAYORIGIN;
 
@@ -15231,7 +15228,7 @@ WHILETOK:
             begin
               Push(GetDataSize(IdentifierAt(IdentIndex).AllocElementType), ASVALUE, 1);      // +/- DATASIZE
 
-              ExpandParam(ExpressionType, TTokenKind.BYTETOK);
+              ExpandParam(ExpressionType, TDataType.BYTETOK);
 
               Inc(NumActualParams);
             end;
@@ -15307,7 +15304,7 @@ WHILETOK:
         if (ActualParamType = TDataType.STRINGPOINTERTOK) and
           ((IdentifierAt(IdentIndex).DataType = TDataType.POINTERTOK) and
           (IdentifierAt(IdentIndex).NumAllocElements = 0)) then
-          ErrorIncompatibleTypes(i, ActualParamType, TTokenKind.PCHARTOK)
+            ErrorIncompatibleTypes(i, ActualParamType, TDataType.PCHARTOK)
         else
           GetCommonConstType(i, IdentifierAt(IdentIndex).DataType, ActualParamType);
 
@@ -15359,7 +15356,7 @@ WHILETOK:
       begin
 
         i := CompileConstExpression(i + 2, Value, ExpressionType);
-        GetCommonConstType(i, TTokenKind.BYTETOK, ExpressionType);
+        GetCommonConstType(i, TDataType.BYTETOK, ExpressionType);
 
         CheckTok(i + 1, TTokenKind.CPARTOK);
 
@@ -15463,7 +15460,7 @@ WHILETOK:
       CheckTok(i + 1, TTokenKind.OPARTOK);
 
       i := CompileConstExpression(i + 2, ConstVal, ActualParamType);
-      GetCommonType(i, TTokenKind.INTEGERTOK, ActualParamType);
+      GetCommonType(i, TDataType.INTEGERTOK, ActualParamType);
 
       CheckTok(i + 1, TTokenKind.COMMATOK);
 
@@ -15473,7 +15470,7 @@ WHILETOK:
         Error(i, 'Interrupt Number in [0..4]');
 
       i := CompileExpression(i + 2, ActualParamType);
-      GetCommonType(i, TTokenKind.POINTERTOK, ActualParamType);
+      GetCommonType(i, TDataType.POINTERTOK, ActualParamType);
 
       case ConstVal of
         Ord(TInterruptCode.DLI): begin
@@ -15530,7 +15527,7 @@ WHILETOK:
             CheckTok(i + 1, TTokenKind.COMMATOK);
 
             i := CompileExpression(i + 2, ActualParamType);
-            GetCommonType(i, TTokenKind.BYTETOK, ActualParamType);
+            GetCommonType(i, TDataType.BYTETOK, ActualParamType);
 
             asm65(#9'mva :STACKORIGIN,x AUDF1');
             a65(TCode65.subBX);
@@ -15565,7 +15562,7 @@ WHILETOK:
           begin
 
             i := CompileExpression(i + 2, ActualParamType);
-            GetCommonType(i, TTokenKind.BYTETOK, ActualParamType);
+            GetCommonType(i, TDataType.BYTETOK, ActualParamType);
 
             asm65(#9'lda #$00');
             asm65(#9'ldy #$03');
@@ -15579,7 +15576,7 @@ WHILETOK:
             CheckTok(i + 1, TTokenKind.COMMATOK);
 
             i := CompileExpression(i + 2, ActualParamType);
-            GetCommonType(i, TTokenKind.BYTETOK, ActualParamType);
+            GetCommonType(i, TDataType.BYTETOK, ActualParamType);
 
             asm65(#9'mva :STACKORIGIN,x AUDF2');
             a65(TCode65.subBX);
@@ -15614,7 +15611,7 @@ WHILETOK:
           begin
 
             i := CompileExpression(i + 2, ActualParamType);
-            GetCommonType(i, TTokenKind.BYTETOK, ActualParamType);
+            GetCommonType(i, TDataType.BYTETOK, ActualParamType);
 
             asm65(#9'lda #$00');
             asm65(#9'ldy #$03');
@@ -15628,7 +15625,7 @@ WHILETOK:
             CheckTok(i + 1, TTokenKind.COMMATOK);
 
             i := CompileExpression(i + 2, ActualParamType);
-            GetCommonType(i, TTokenKind.BYTETOK, ActualParamType);
+            GetCommonType(i, TDataType.BYTETOK, ActualParamType);
 
             asm65(#9'mva :STACKORIGIN,x AUDF4');
             a65(TCode65.subBX);
