@@ -12198,7 +12198,7 @@ function CompileBlockRead(var i: TTokenIndex; IdentIndex: TIdentIndex; IdentBloc
                       Error(i + 3, 'identifier idents no member ''' + TokenAt(i + 3).Name + '''');
 
 
-                        if TokenAt(i + 4).Kind = OBRACKETTOK then
+                    if TokenAt(i + 4).Kind = TTokenKind.OBRACKETTOK then
                         begin        // pp^.field[index] :=
 
                           if not (IdentifierAt(IdentIndex).DataType in Pointers) then
@@ -12288,7 +12288,7 @@ function CompileBlockRead(var i: TTokenIndex; IdentIndex: TIdentIndex; IdentBloc
                       end;
 
 
-                      //      writeln(IdentifierAt(IdentIndex).Name,',',vartype,',',IdentifierAt(IdentIndex).DataType,',',IdentifierAt(IdentIndex).AllocElementType,',',IdentifierAt(IdentIndex).NumAllocElements,',',IdentifierAt(IdentIndex).Kind);//+ '.' + TokenAt(i + 3).Name^);
+                  //      writeln(IdentifierAt(IdentIndex).Name,',',vartype,',',IdentifierAt(IdentIndex).DataType,',',IdentifierAt(IdentIndex).AllocElementType,',',IdentifierAt(IdentIndex).NumAllocElements,',',IdentifierAt(IdentIndex).Kind);//+ '.' + TokenAt(i + 3).Name);
 
                   if (VarType in [TDataType.RECORDTOK, TDataType.OBJECTTOK]) and
                     (TokenAt(i + 2).Kind = TTokenKind.DOTTOK) then
@@ -15869,18 +15869,15 @@ if (ExpressionType = TDataType.STRINGPOINTERTOK) or
       reg: array [1..3] of String = (':EDX', ':ECX', ':EAX');
       // !!! kolejnosc edx, ecx, eax !!! korzysta z tego memmove, memset !!!
     var
-      ftmp: TFloat;
       v: Int64;
     begin
 
-      ftmp := Default(TFloat);
-
-      move(IdentifierAt(IdentIndex).Value, ftmp, sizeof(ftmp));
+    v := IdentifierAt(IdentIndex).Value;
 
       case IdentifierAt(IdentIndex).DataType of
-        SHORTREALTOK, REALTOK: v := ftmp[0];
-        SINGLETOK: v := ftmp[1];
-        HALFSINGLETOK: v := CardToHalf(ftmp[1]);
+      TTokenKind.SHORTREALTOK, TTokenKind.REALTOK: v := CastToReal(v);
+      TTokenKind.SINGLETOK: v := CastToSingle(v);
+      TDataType.HALFSINGLETOK: v := CastToHalfSingle(v);
         else
           v := IdentifierAt(IdentIndex).Value;
       end;
@@ -15949,7 +15946,7 @@ if (ExpressionType = TDataType.STRINGPOINTERTOK) or
 
       Result := '';
 
-      if IdentifierAt(IdentIndex).AllocElementType in [BYTETOK..FORWARDTYPE] then
+    if IdentifierAt(IdentIndex).AllocElementType in [TDataType.BYTETOK..TDataType.FORWARDTYPE] then
       begin
 
         case GetDataSize(IdentifierAt(IdentIndex).AllocElementType) of
@@ -15985,7 +15982,7 @@ if (ExpressionType = TDataType.STRINGPOINTERTOK) or
 
         if hnam = rnam then
         begin
-          IdentTemp := GetIdent(resArray[i].resName);
+        IdentTemp := GetIdentIndex(resArray[i].resName);
 
           if IdentTemp > 0 then
           begin
@@ -16026,7 +16023,7 @@ if (ExpressionType = TDataType.STRINGPOINTERTOK) or
 
       for IdentIndex := 1 to NumIdent do
         if (IdentifierAt(IdentIndex).Block = IdentifierAt(BlockIdentIndex).ProcAsBlock) and
-          (IdentifierAt(IdentIndex).UnitIndex = UnitNameIndex) then
+        (IdentifierAt(IdentIndex).SourceFile.UnitIndex = ActiveSourceFile.UnitIndex) then
         begin
 
           if emptyLine then
@@ -16088,7 +16085,7 @@ if (ExpressionType = TDataType.STRINGPOINTERTOK) or
             end;
 
             if yes then
-              Error(IdentifierAt(IdentIndex).Libraries, TErrorCode.UnknownIdentifier, IdentIndex);
+            ErrorForIdentifier(IdentifierAt(IdentIndex).Libraries, TErrorCode.UnknownIdentifier, IdentIndex);
 
             CloseFile(HeaFile);
 
@@ -16109,43 +16106,45 @@ if (ExpressionType = TDataType.STRINGPOINTERTOK) or
                 begin    // ABSOLUTE = TRUE
 
                   if (IdentifierAt(IdentIndex).PassMethod <> TParameterPassingMethod.VARPASSING) and
-                    (IdentifierAt(IdentIndex).DataType in [RECORDTOK, OBJECTTOK] + Pointers) and
+                  (IdentifierAt(IdentIndex).DataType in [TDataType.RECORDTOK, TDataType.OBJECTTOK] + Pointers) and
                     (IdentifierAt(IdentIndex).NumAllocElements > 0) then
                   begin
 
                     asm65('adr.' + IdentifierAt(IdentIndex).Name + Value);
-                    asm65('.var ' + IdentifierAt(IdentIndex).Name + #9'= adr.' + IdentifierAt(IdentIndex).Name + ' .word');
+                  asm65('.var ' + IdentifierAt(IdentIndex).Name + #9'= adr.' +
+                    IdentifierAt(IdentIndex).Name + ' .word');
 
                     if size = 0 then varbegin := IdentifierAt(IdentIndex).Name;
                     IncSize(IdentifierAt(IdentIndex).NumAllocElements * GetDataSize(IdentifierAt(IdentIndex).AllocElementType));
 
                   end
                   else
-                    if IdentifierAt(IdentIndex).DataType = FILETOK then
+                  if IdentifierAt(IdentIndex).DataType = TDataType.FILETOK then
                       asm65('.var ' + IdentifierAt(IdentIndex).Name + Value + ' .word')
                     else
-                      if pos('@FORTMP_', IdentifierAt(IdentIndex).Name) = 0 then asm65(IdentifierAt(IdentIndex).Name + Value);
+                    if pos('@FORTMP_', IdentifierAt(IdentIndex).Name) = 0 then
+                      asm65(IdentifierAt(IdentIndex).Name + Value);
 
                 end
                 else            // ABSOLUTE = FALSE
 
                   if (IdentifierAt(IdentIndex).PassMethod <> TParameterPassingMethod.VARPASSING) and
-                    (IdentifierAt(IdentIndex).DataType in [RECORDTOK, OBJECTTOK] + Pointers) and
+                  (IdentifierAt(IdentIndex).DataType in [TDataType.RECORDTOK, TDataType.OBJECTTOK] + Pointers) and
                     (IdentifierAt(IdentIndex).NumAllocElements > 0) then
                   begin
 
                     //  writeln(IdentifierAt(IdentIndex).Name,',', IdentifierAt(IdentIndex).DataType,',',IdentifierAt(IdentIndex).AllocElementType,',',IdentifierAt(IdentIndex).NumAllocElements,',',IdentifierAt(IdentIndex).IdType);
 
-                    if ((IdentifierAt(IdentIndex).IdType <> ARRAYTOK) and
-                      (IdentifierAt(IdentIndex).AllocElementType in [RECORDTOK, OBJECTTOK])) or
-                      (IdentifierAt(IdentIndex).IdType = DATAORIGINOFFSET) then
+                  if ((IdentifierAt(IdentIndex).IdType <> TDataType.ARRAYTOK) and
+                    (IdentifierAt(IdentIndex).AllocElementType in [TDataType.RECORDTOK, TDataType.OBJECTTOK])) or
+                    (IdentifierAt(IdentIndex).IdType = TDataType.DATAORIGINOFFSET) then
 
                       asm65(IdentifierAt(IdentIndex).Name + Value(True))
 
                     else
                     begin
 
-                      if IdentifierAt(IdentIndex).DataType in [RECORDTOK, OBJECTTOK] then
+                    if IdentifierAt(IdentIndex).DataType in [TDataType.RECORDTOK, TDataType.OBJECTTOK] then
                         asm65('adr.' + IdentifierAt(IdentIndex).Name + Value(True) + #9'; [' +
                           IntToStr(RecordSize(IdentIndex)) + '] ' + InfoAboutToken(IdentifierAt(IdentIndex).DataType))
                       else
@@ -16156,7 +16155,8 @@ if (ExpressionType = TDataType.STRINGPOINTERTOK) or
                           //  writeln(IdentifierAt(IdentIndex).Name,' | ',Elements(IdentIndex),'/',IdentifierAt(IdentIndex).IdType,'/',IdentifierAt(IdentIndex).PassMethod ,' | ', IdentifierAt(IdentIndex).DataType,',',IdentifierAt(IdentIndex).AllocElementType,',',IdentifierAt(IdentIndex).NumAllocElements,',',IdentifierAt(IdentIndex).IdType);
 
                           if (IdentifierAt(IdentIndex).NumAllocElements_ > 0) and not
-                            (IdentifierAt(IdentIndex).AllocElementType in [RECORDTOK, OBJECTTOK]) then
+                          (IdentifierAt(IdentIndex).AllocElementType in [TDataType.RECORDTOK,
+                          TDataType.OBJECTTOK]) then
                             asm65('adr.' + IdentifierAt(IdentIndex).Name + Value(True, True) +
                               ' .array [' + IntToStr(IdentifierAt(IdentIndex).NumAllocElements) +
                               '] [' + IntToStr(IdentifierAt(IdentIndex).NumAllocElements_) + ']' + mads_data_size)
@@ -16168,17 +16168,19 @@ if (ExpressionType = TDataType.STRINGPOINTERTOK) or
                         else
                           asm65('adr.' + IdentifierAt(IdentIndex).Name + Value(True));
 
-                      asm65('.var ' + IdentifierAt(IdentIndex).Name + #9'= adr.' + IdentifierAt(IdentIndex).Name + ' .word');
+                    asm65('.var ' + IdentifierAt(IdentIndex).Name + #9'= adr.' +
+                      IdentifierAt(IdentIndex).Name + ' .word');
                       // !!!!
 
                     end;
 
                     if size = 0 then varbegin := IdentifierAt(IdentIndex).Name;
-                    IncSize(IdentifierAt(IdentIndex).NumAllocElements * GetDataSize(IdentifierAt(IdentIndex).AllocElementType));
+                  IncSize(GetIdentifierDataSize(IdentifierAt(IdentIndex)));
 
                   end
                   else
-                    if (IdentifierAt(IdentIndex).DataType = FILETOK) {and (IdentifierAt(IdentIndex).Block = 1)} then
+                  if (IdentifierAt(IdentIndex).DataType = TDataType.FILETOK)
+                  {and (IdentifierAt(IdentIndex).Block = 1)} then
                       asm65('.var ' + IdentifierAt(IdentIndex).Name + Value(True) + ' .word')  // tylko wskaznik
                     else
                     begin
@@ -16186,9 +16188,11 @@ if (ExpressionType = TDataType.STRINGPOINTERTOK) or
 
                       if size = 0 then varbegin := IdentifierAt(IdentIndex).Name;
 
-                      if IdentifierAt(IdentIndex).idType <> DATAORIGINOFFSET then      // indeksy do RECORD nie zliczaj
+                    if IdentifierAt(IdentIndex).idType <> TTokenKind.DATAORIGINOFFSET then
+                      // indeksy do RECORD nie zliczaj
 
-                        if (IdentifierAt(IdentIndex).Name = 'RESULT') and (IdentifierAt(BlockIdentIndex).Kind = FUNCTIONTOK) then
+                      if (IdentifierAt(IdentIndex).Name = 'RESULT') and
+                        (IdentifierAt(BlockIdentIndex).Kind = TTokenKind.FUNCTIONTOK) then
                         // RESULT nie zliczaj
 
                         else
@@ -16199,7 +16203,8 @@ if (ExpressionType = TDataType.STRINGPOINTERTOK) or
 
                     end;
 
-              CONSTANT: if (IdentifierAt(IdentIndex).DataType in Pointers) and (IdentifierAt(IdentIndex).NumAllocElements > 0) then
+              CONSTANT: if (IdentifierAt(IdentIndex).DataType in Pointers) and 
+              (IdentifierAt(IdentIndex).NumAllocElements > 0) then
                 begin
 
                   asm65('adr.' + IdentifierAt(IdentIndex).Name + Value);
@@ -16207,7 +16212,8 @@ if (ExpressionType = TDataType.STRINGPOINTERTOK) or
 
                 end
                 else
-                  if pos('@FORTMP_', IdentifierAt(IdentIndex).Name) = 0 then asm65(IdentifierAt(IdentIndex).Name + Value);
+                if pos('@FORTMP_', IdentifierAt(IdentIndex).Name) = 0 then
+                  asm65(IdentifierAt(IdentIndex).Name + Value);
             end;
 
         end;
@@ -16238,24 +16244,21 @@ if (ExpressionType = TDataType.STRINGPOINTERTOK) or
 
 
   procedure SaveToStaticDataSegment(ConstDataSize: Integer; ConstVal: Int64; ConstValType: TDataType);
-  var
-    ftmp: TFloat;
   begin
 
     if (ConstDataSize < 0) or (ConstDataSize > $FFFF) then
     begin
-      writeln('SaveToStaticDataSegment: ', ConstDataSize);
-      halt;
+    writeln('SaveToStaticDataSegment: ' + IntToStr(ConstDataSize));
+    RaiseHaltException(THaltException.COMPILING_ABORTED);
     end;
-
-    ftmp := Default(TFloat);
 
     case ConstValType of
 
-      TDataType.SHORTINTTOK,  TDataType.BYTETOK,  TDataType.CHARTOK,  TDataType.BOOLEANTOK:
+    TDataType.SHORTINTTOK, TDataType.BYTETOK, TDataType.CHARTOK, TDataType.BOOLEANTOK:
         StaticStringData[ConstDataSize] := Byte(ConstVal);
 
-       TDataType.SMALLINTTOK,  TDataType.WORDTOK,  TDataType.SHORTREALTOK,  TDataType.POINTERTOK,  TDataType.STRINGPOINTERTOK,  TDataType.PCHARTOK:
+    TDataType.SMALLINTTOK, TDataType.WORDTOK, TDataType.SHORTREALTOK, TDataType.POINTERTOK,
+    TDataType.STRINGPOINTERTOK, TDataType.PCHARTOK:
       begin
         StaticStringData[ConstDataSize] := Byte(ConstVal);
         StaticStringData[ConstDataSize + 1] := Byte(ConstVal shr 8);
@@ -16267,13 +16270,13 @@ if (ExpressionType = TDataType.STRINGPOINTERTOK) or
         StaticStringData[ConstDataSize + 1] := Byte(ConstVal shr 8) or $4000;
       end;
 
-      CODEORIGINOFFSET:
+    TDataType.CODEORIGINOFFSET:
       begin
         StaticStringData[ConstDataSize] := Byte(ConstVal) or $2000;
         StaticStringData[ConstDataSize + 1] := Byte(ConstVal shr 8) or $1000;
       end;
 
-      INTEGERTOK, CARDINALTOK, REALTOK:
+    TDataType.INTEGERTOK, TDataType.CARDINALTOK, TDataType.REALTOK:
       begin
         StaticStringData[ConstDataSize] := Byte(ConstVal);
         StaticStringData[ConstDataSize + 1] := Byte(ConstVal shr 8);
@@ -16281,10 +16284,8 @@ if (ExpressionType = TDataType.STRINGPOINTERTOK) or
         StaticStringData[ConstDataSize + 3] := Byte(ConstVal shr 24);
       end;
 
-      SINGLETOK: begin
-        move(ConstVal, ftmp, sizeof(ftmp));
-
-        ConstVal := ftmp[1];
+    TDataType.SINGLETOK: begin
+      ConstVal := CastToSingle(ConstVal);
 
         StaticStringData[ConstDataSize] := Byte(ConstVal);
         StaticStringData[ConstDataSize + 1] := Byte(ConstVal shr 8);
@@ -16292,9 +16293,8 @@ if (ExpressionType = TDataType.STRINGPOINTERTOK) or
         StaticStringData[ConstDataSize + 3] := Byte(ConstVal shr 24);
       end;
 
-      HALFSINGLETOK: begin
-        move(ConstVal, ftmp, sizeof(ftmp));
-        ConstVal := CardToHalf(ftmp[1]);
+    TDataType.HALFSINGLETOK: begin
+      ConstVal := CastToHalfSingle(ConstVal);
 
         StaticStringData[ConstDataSize] := Byte(ConstVal);
         StaticStringData[ConstDataSize + 1] := Byte(ConstVal shr 8);
@@ -16343,7 +16343,7 @@ if (ExpressionType = TDataType.STRINGPOINTERTOK) or
         i := CompileConstExpression(i + 1, ConstVal, ActualParamType, ConstValType);
 
 
-      if (ConstValType = STRINGPOINTERTOK) and (ActualParamType = CHARTOK) then
+    if (ConstValType = TDataType.STRINGPOINTERTOK) and (ActualParamType = TDataType.CHARTOK) then
       begin  // rejestrujemy CHAR jako STRING
 
         if StaticData then
@@ -16353,38 +16353,39 @@ if (ExpressionType = TDataType.STRINGPOINTERTOK) or
         DefineStaticString(i, chr(ch));
 
         ConstVal := TokenAt(i).StrAddress - CODEORIGIN + CODEORIGIN_BASE;
-        Tok[i].Value := ch;
+      TokenAt(i).Value := ch;
 
-        ActualParamType := STRINGPOINTERTOK;
+      ActualParamType := TDataType.STRINGPOINTERTOK;
 
       end;
 
 
-      if (ConstValType in StringTypes + [CHARTOK, STRINGPOINTERTOK]) and (ActualParamType in
-        IntegerTypes + RealTypes) then
+    if (ConstValType in StringTypes + [TDataType.CHARTOK, TDataType.STRINGPOINTERTOK]) and
+      (ActualParamType in IntegerTypes + RealTypes) then
         Error(i, TErrorCode.IllegalExpression);
 
 
-      if (ConstValType in StringTypes + [STRINGPOINTERTOK]) and (ActualParamType = CHARTOK) then
+    if (ConstValType in StringTypes + [TDataType.STRINGPOINTERTOK]) and (ActualParamType = TDataType.CHARTOK) then
         ErrorIncompatibleTypes(i,ActualParamType, ConstValType);
 
 
-      if (ConstValType in [SINGLETOK, HALFSINGLETOK]) and (ActualParamType = REALTOK) then
+    if (ConstValType in [TDataType.SINGLETOK, TDataType.HALFSINGLETOK]) and
+      (ActualParamType = TDataType.REALTOK) then
         ActualParamType := ConstValType;
 
       if (ConstValType in RealTypes) and (ActualParamType in IntegerTypes) then
       begin
-        Int2Float(ConstVal);
+      ConstVal := FromInt64(ConstVal);
         ActualParamType := ConstValType;
       end;
 
-      if (ConstValType = SHORTREALTOK) and (ActualParamType = REALTOK) then
-        ActualParamType := SHORTREALTOK;
+    if (ConstValType = TDataType.SHORTREALTOK) and (ActualParamType = TDataType.REALTOK) then
+      ActualParamType := TDataType.SHORTREALTOK;
 
 
-      if ActualParamType = DATAORIGINOFFSET then
+    if ActualParamType = TDataType.DATAORIGINOFFSET then
 
-        SaveDataSegment(DATAORIGINOFFSET)
+      SaveDataSegment(TDataType.DATAORIGINOFFSET)
 
       else
       begin
@@ -16414,7 +16415,7 @@ if (ExpressionType = TDataType.STRINGPOINTERTOK) or
   begin
 
 {
-  if (TokenAt(i).Kind = STRINGLITERALTOK) and (ConstValType = CHARTOK) then begin    // init char array by string -> array [0..15] of char = '0123456789ABCDEF';
+  if (TokenAt(i).Kind = TTokenKind.STRINGLITERALTOK) and (ConstValType = TDataType.CHARTOK) then begin    // init char array by string -> array [0..15] of char = '0123456789ABCDEF';
 
    if TokenAt(i).StrLength > NumAllocElements then
      Error(i, 'string length is larger than array of char length');
