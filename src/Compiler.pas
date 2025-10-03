@@ -60,7 +60,6 @@ var
 begin
 
   identTemp := Parser.GetIdentIndex(constantName);
-
   if identTemp > 0 then
   begin
 
@@ -11383,9 +11382,9 @@ begin
           begin
 
             case ValType of
-              TDataType.SHORTINTTOK: ValType := TDataTpye.BYTETOK;
-              TDataType.SMALLINTTOK: ValType := TDataTpye.WORDTOK;
-              TDataTpye.INTEGERTOK: ValType := TDataTpye.CARDINALTOK;
+              TDataType.SHORTINTTOK: ValType := TDataType.BYTETOK;
+              TDataType.SMALLINTTOK: ValType := TDataType.WORDTOK;
+              TDataType.INTEGERTOK: ValType := TDataType.CARDINALTOK;
             end;
 
           end;
@@ -11551,7 +11550,7 @@ begin
           if (ValType = TDataType.POINTERTOK) or (RightValType = TDataType.POINTERTOK) then
             Error(i, 'Can''t determine PCHAR length, consider using COMPAREMEM');
 
-          GenerateRelationString(TokenAt(i + 1).Kind, ValType, RightValType, sLeft, sRight);
+          GenerateRelationString(TokenAt(i + 1).Kind, ValType, RightValType);
         end
           else
             GetCommonType(j, ValType, RightValType);
@@ -11886,7 +11885,7 @@ begin
                 VarType := IdentifierAt(IdentIndex).DataType;
 
 
-              i := CompileExpression(i + 2, ExpressionType, TTokenKind.POINTERTOK);
+              i := CompileExpression(i + 2, ExpressionType, TDataType.POINTERTOK);
 
               CheckTok(i + 1, TTokenKind.CPARTOK);
 
@@ -11981,7 +11980,7 @@ begin
                 IndirectionLevel := ASPOINTERTOPOINTER;
 
 
-                //  writeln('= ',IdentifierAt(IdentIndex).name,',',VarTYpe,',',IdentifierAt(IdentIndex).DataType,',',IdentifierAt(IdentIndex).NumAllocElements);
+                    //  writeln('= ',IdentifierAt(IdentIndex).name,',',VarTYpe,',',IdentifierAt(IdentIndex).DataType,',',IdentifierAt(IdentIndex).NumAllocElements,'/',IdentifierAt(IdentIndex).NumAllocElements_,',',IdentifierAt(IdentIndex).PassMethod);
 
 
                 if TokenAt(i + 2).Kind = TTokenKind.OBRACKETTOK then
@@ -15815,6 +15814,7 @@ var
 
   end;
 
+// TODO Move to TIdentifier and use in all locations where the computation is redundant
   function GetIdentifierFullName(const identifier: TIdentifier): String;
   begin
     Result := identifier.SourceFile.Name + '.' + identifier.Name;
@@ -15911,8 +15911,7 @@ begin
               begin
                 yes := False;
 
-                asm65(IdentifierAt(IdentIndex).Name + copy(txt, 6 + length(IdentifierAt(IdentIndex).Alias),
-                  length(txt)));
+                  asm65(IdentifierAt(IdentIndex).Name + copy(txt, 6 + length(IdentifierAt(IdentIndex).Alias), length(txt)));
               end;
 
           end;
@@ -16008,7 +16007,7 @@ begin
                   end;
 
                   if size = 0 then varbegin := IdentifierAt(IdentIndex).Name;
-                  Incsize(GetIdentifierDataSize(IdentifierAt(IdentIndex)));
+                  IncSize(GetIdentifierDataSize(IdentifierAt(IdentIndex)));
 
                 end
                 else
@@ -16228,7 +16227,6 @@ var
 
         if GetCommonConstType(i, ConstValType, ActualParamType, (ActualParamType in RealTypes + Pointers)) then
           WarningForRangeCheckError(i, ConstVal, ConstValType);
-
       end
       else
         GetCommonConstType(i, ConstValType, ActualParamType);
@@ -16247,8 +16245,6 @@ var
   // ----------------------------------------------------------------------------
 
 begin
-
-  // yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy
 
 {
   if (TokenAt(i).Kind = TTokenKind.STRINGLITERALTOK) and (ConstValType = TDataType.CHARTOK) then begin    // init char array by string -> array [0..15] of char = '0123456789ABCDEF';
@@ -16417,9 +16413,9 @@ var
       ActualParamType := TTokenKind.SHORTREALTOK;
 
 
-    if ActualParamType = TTokenKind.DATAORIGINOFFSET then
+    if ActualParamType = TDataType.DATAORIGINOFFSET then
 
-      SaveDataSegment(TTokenKind.DATAORIGINOFFSET)
+      SaveDataSegment(TDataType.DATAORIGINOFFSET)
 
     else
     begin
@@ -16451,7 +16447,6 @@ var
 
 begin
 
-  // yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy
 {
   if (TokenAt(i).Kind = TTokenKind.STRINGLITERALTOK) and (ConstValType = TDataType.CHARTOK) then begin    // init char array by string -> array [0..15] of char = '0123456789ABCDEF';
 
@@ -16560,7 +16555,7 @@ procedure FormalParameterList(var i: Integer; var NumParams: Integer; var Param:
 var
   ListPassMethod: TParameterPassingMethod;
   NumVarOfSameType: Byte;
-  VarTYpe, AllocElementType: TDataType;
+    VarType, AllocElementType: TDataType;
   NumAllocElements: Cardinal;
   VarOfSameTypeIndex: Integer;
   VarOfSameType: TVariableList;
@@ -16818,7 +16813,6 @@ end;  //CheckForwardResolutions
 procedure CompileRecordDeclaration(i: Integer; var VarOfSameType: TVariableList;
   var tmpVarDataSize: Integer; var ConstVal: Int64; VarOfSameTypeIndex: Integer;
   VarType, AllocElementType: TDataType; NumAllocElements: Cardinal; isAbsolute: Boolean; var idx: Integer);
-
 var
   tmpVarDataSize_, ParamIndex: Integer;
 begin
@@ -16902,11 +16896,11 @@ begin
               [TDataType.RECORDTOK, TDataType.OBJECTTOK]) then
               // fixed https://forums.atariage.com/topic/240919-mad-pascal/?do=findComment&comment=5422587
               Inc(ConstVal, GetVarDataSize - tmpVarDataSize_);
-          //    GetDataSize( TDataType.GetTypeAtIndex(NumAllocElements).Field[ParamIndex].DataType]);
+          //    GetDataSize( GetTypeAtIndex(NumAllocElements).Field[ParamIndex].DataType]);
 
         end;
 
-end;
+  end;  //CompileRecordDeclaration
 
 
 // ----------------------------------------------------------------------------
@@ -16918,6 +16912,7 @@ function CompileBlock(i: TTokenIndex; BlockIdentIndex: Integer; NumParams: Integ
   FunctionAllocElementType: TDataType = TDataType.UNTYPETOK): Integer;
 var
   VarOfSameType: TVariableList;
+    VarPassMethod: TParameterPassingMethod;
   Param: TParamList;
   j, idx, NumVarOfSameType, VarOfSameTypeIndex, tmpVarDataSize, ParamIndex, ForwardIdentIndex,
   IdentIndex, external_libr: Integer;
@@ -16926,10 +16921,10 @@ var
   ImplementationUse, open_array, iocheck_old, isInterrupt_old, yes, Assignment,
   {pack,} IsNestedFunction, isAbsolute, isExternal, isForward, isVolatile, isStriped, isAsm,
   isReg, isInt, isInl, isOvr: Boolean;
+    VarType: TDataType;
   VarRegister: Byte;
-  VarType, NestedFunctionResultType, ConstValType, AllocElementType, ActualParamType,
+    NestedFunctionResultType, ConstValType, AllocElementType, ActualParamType,
   NestedFunctionAllocElementType, NestedDataType, NestedAllocElementType, IdType: TDataType;
-  varPassMethod: TParameterPassingMethod;
   Tmp, TmpResult: Word;
 
   external_name: TString;
@@ -16942,9 +16937,6 @@ begin
 
   //FillChar(VarOfSameType, sizeof(VarOfSameType), 0);
   VarOfSameType := Default(TVariableList);
-
-  // TODO Fuji
-  // WriteLn('Block=' + IntToStr(i) + '  BlockIdentIndex=' + IntToStr(BlockIdentIndex));
 
   j := 0;
   ConstVal := 0;
@@ -17122,7 +17114,7 @@ begin
           DefineIdent(i, Param[ParamIndex].Name, VARIABLE, Param[ParamIndex].DataType, 0,
             Param[ParamIndex].DataType, 0)
         else
-          DefineIdent(i, Param[ParamIndex].Name, VARIABLE, TTokenKind.POINTERTOK, 0, Param[ParamIndex].DataType, 0);
+          DefineIdent(i, Param[ParamIndex].Name, VARIABLE, TDataType.POINTERTOK, 0, Param[ParamIndex].DataType, 0);
 
 
       if (Param[ParamIndex].DataType in [TDataType.RECORDTOK, TDataType.OBJECTTOK]) then
@@ -17295,11 +17287,13 @@ begin
     // TODO: This can be written shorter
     if Param[1].DataType = ENUMTOK then
     begin
+
       if (yes = False) and (NumParams = 1) and (GetDataSize(Param[1].AllocElementType) = 1) and
         (Param[1].PassMethod <> TParameterPassingMethod.VARPASSING) then
         asm65(#9'sta ' + Param[1].Name);
     end
     else
+
       if (yes = False) and (NumParams = 1) and (GetDataSize(Param[1].DataType) = 1) and
         (Param[1].PassMethod <> TParameterPassingMethod.VARPASSING) then
         asm65(#9'sta ' + Param[1].Name);
@@ -17324,7 +17318,9 @@ begin
             GenerateAssignment(ASPOINTER, GetDataSize(Param[ParamIndex].AllocElementType), 0, Param[ParamIndex].Name)
           else
             GenerateAssignment(ASPOINTER, GetDataSize(Param[ParamIndex].DataType), 0, Param[ParamIndex].Name);
+
         end;
+
 
         if (Param[ParamIndex].PassMethod <> TParameterPassingMethod.VARPASSING) and
           (Param[ParamIndex].DataType in [TDataType.RECORDTOK, TDataType.OBJECTTOK] + Pointers) and
@@ -17384,10 +17380,12 @@ begin
             GenerateAssignment(ASPOINTER, GetDataSize(TDataType.POINTERTOK), 0, Param[ParamIndex].Name)
           else
           begin
+
             if Param[ParamIndex].DataType = ENUMTYPE then
               GenerateAssignment(ASPOINTER, GetDataSize(Param[ParamIndex].AllocElementType), 0, Param[ParamIndex].Name)
             else
               GenerateAssignment(ASPOINTER, GetDataSize(Param[ParamIndex].DataType), 0, Param[ParamIndex].Name);
+
           end;
       end;
 
@@ -17435,17 +17433,15 @@ begin
           GetTypeAtIndex(IdentifierAt(BlockIdentIndex).ObjectIndex).Field[ParamIndex].NumAllocElements,
           GetTypeAtIndex(IdentifierAt(BlockIdentIndex).ObjectIndex).Field[ParamIndex].DataType, 0);
 
-      IdentifierAt(NumIdent).PassMethod := TParameterPassingMethod.VARPASSING;
+      // IdentifierAt(NumIdent).PassMethod := TParameterPassingMethod.VARPASSING;
 
       SetVarDataSize(i, tmpVarDataSize + GetDataSize(TDataType.POINTERTOK));
 
-      if GetTypeAtIndex(IdentifierAt(BlockIdentIndex).ObjectIndex).Field[ParamIndex].Kind =
-        TFieldKind.OBJECTVARIABLE then
+      if GetTypeAtIndex(IdentifierAt(BlockIdentIndex).ObjectIndex).Field[ParamIndex].ObjectVariable then
       begin
         IdentifierAt(NumIdent).Value := ConstVal + DATAORIGIN;
 
-        Inc(ConstVal, GetDataSize(GetTypeAtIndex(IdentifierAt(BlockIdentIndex).ObjectIndex).Field[
-          ParamIndex].DataType));
+        Inc(ConstVal, GetDataSize(GetTypeAtIndex(IdentifierAt(BlockIdentIndex).ObjectIndex).Field[ParamIndex].DataType));
 
         SetVarDataSize(i, tmpVarDataSize);
       end;
@@ -17603,7 +17599,7 @@ begin
 
       j := NumIdent;
 
-      while (j > 0) and (IdentifierAt(j).SourceFile = ActiveSourceFile) do
+      while (j > 0) and (IdentifierAt(j).SourceFile.UnitIndex = ActiveSourceFile.UnitIndex) do
       begin
         // If procedure or function, delete parameters first
         if IdentifierAt(j).Kind in [TTokenKind.PROCEDURETOK, TTokenKind.FUNCTIONTOK,
@@ -17953,11 +17949,11 @@ begin
             begin
 
               if TokenAt(j).StrLength > 255 then
-                DefineIdent(i + 1, TokenAt(i + 1).Name, CONSTANT, TTokenKind.POINTERTOK, 0, TTokenKind.CHARTOK,
-                  ConstVal + CODEORIGIN, TTokenKind.PCHARTOK)
+                DefineIdent(i + 1, TokenAt(i + 1).Name, CONSTANT, TDataType.POINTERTOK, 0, TTokenKind.CHARTOK,
+                  ConstVal + CODEORIGIN, TDataType.PCHARTOK)
               else
                 DefineIdent(i + 1, TokenAt(i + 1).Name, CONSTANT, ConstValType, TokenAt(j).StrLength,
-                  TTokenKind.CHARTOK, ConstVal + CODEORIGIN, TokenAt(j).Kind);
+                  TDataType.CHARTOK, ConstVal + CODEORIGIN, TokenAt(j).Kind);
 
             end
             else
@@ -18001,7 +17997,7 @@ begin
                 begin
                   NumAllocElements := 1;
                   AllocElementType := VarType;
-                  VarType := TTokenKind.POINTERTOK;
+                  VarType := TDataType.POINTERTOK;
                 end;
 
                 if not (AllocElementType in [TDataType.RECORDTOK, TDataType.OBJECTTOK]) then open_array := True;
@@ -18019,7 +18015,7 @@ begin
 
 
               if (VarType in Pointers) and (NumAllocElements = 0) then
-                if AllocElementType <> TTokenKind.CHARTOK then Error(j, TErrorCode.IllegalExpression);
+                if AllocElementType <> TDataType.CHARTOK then Error(j, TErrorCode.IllegalExpression);
 
 
               CheckTok(j + 1, TTokenKind.EQTOK);
@@ -18030,11 +18026,11 @@ begin
                 j := CompileConstExpression(j + 2, ConstVal, ConstValType);
 
                 if TokenAt(i + 3).Kind = TTokenKind.PCHARTOK then
-                  DefineIdent(i + 1, TokenAt(i + 1).Name, CONSTANT, TTokenKind.POINTERTOK, 0, TTokenKind.CHARTOK,
-                    ConstVal + CODEORIGIN + 1, TTokenKind.PCHARTOK)
+                  DefineIdent(i + 1, TokenAt(i + 1).Name, CONSTANT, TDataType.POINTERTOK, 0, TTokenKind.CHARTOK,
+                    ConstVal + CODEORIGIN + 1, TDataType.PCHARTOK)
                 else
                   DefineIdent(i + 1, TokenAt(i + 1).Name, CONSTANT, ConstValType, TokenAt(j).StrLength,
-                    TTokenKind.CHARTOK, ConstVal + CODEORIGIN, TokenAt(j).Kind);
+                    TDataType.CHARTOK, ConstVal + CODEORIGIN, TokenAt(j).Kind);
 
               end
               else
@@ -18043,7 +18039,7 @@ begin
                 begin
 
                   DefineIdent(i + 1, TokenAt(i + 1).Name, CONSTANT, VarType, NumAllocElements,
-                    AllocElementType, NumStaticStrChars + CODEORIGIN + CODEORIGIN_BASE, TTokenKind.IDENTTOK);
+                    AllocElementType, NumStaticStrChars + CODEORIGIN + CODEORIGIN_BASE, TDataType.IDENTTOK);
 
                   if (IdentifierAt(NumIdent).NumAllocElements in [0, 1]) and (open_array = False) then
                     Error(i, TErrorCode.IllegalExpression)
@@ -18085,7 +18081,7 @@ begin
                           Error(j + 2, 'String length is larger than array of char length');
 
                         IdentifierAt(NumIdent).Value := TokenAt(j + 2).StrAddress + CODEORIGIN_BASE;
-                        if VarType <> TTokenKind.STRINGPOINTERTOK then Inc(IdentifierAt(NumIdent).Value);
+                        if VarType <> TDataType.STRINGPOINTERTOK then Inc(IdentifierAt(NumIdent).Value);
 
                         IdentifierAt(NumIdent).NumAllocElements := TokenAt(j + 2).StrLength;
 
@@ -18113,10 +18109,10 @@ begin
                   j := CompileConstExpression(j + 2, ConstVal, ConstValType, VarType, False);
 
 
-                  if (VarType in [TTokenKind.SINGLETOK, TDataType.HALFSINGLETOK]) and
-                    (ConstValType in [TTokenKind.SHORTREALTOK, TTokenKind.REALTOK]) then ConstValType := VarType;
+                  if (VarType in [TDataType.SINGLETOK, TDataType.HALFSINGLETOK]) and
+                    (ConstValType in [TDataType.SHORTREALTOK, TDataType.REALTOK]) then ConstValType := VarType;
                   if (VarType = TDataType.SHORTREALTOK) and (ConstValType = TDataType.REALTOK) then
-                    ConstValType := TTokenKind.SHORTREALTOK;
+                    ConstValType := TDataType.SHORTREALTOK;
 
 
                   if (VarType in RealTypes) and (ConstValType in IntegerTypes) then
@@ -18158,7 +18154,7 @@ begin
 
           CheckTok(i + 2, TTokenKind.EQTOK);
 
-          if (TokenAt(i + 3).Kind = TDataType.ARRAYTOK) and (TokenAt(i + 4).Kind <> TTokenKind.OBRACKETTOK) then
+          if (TokenAt(i + 3).Kind = TTokenKind.ARRAYTOK) and (TokenAt(i + 4).Kind <> TTokenKind.OBRACKETTOK) then
           begin
             j := CompileType(i + 5, VarType, NumAllocElements, AllocElementType);
 
@@ -18171,7 +18167,7 @@ begin
           begin
             j := CompileType(i + 3, VarType, NumAllocElements, AllocElementType);
 
-            if TokenAt(i + 3).Kind = TDataType.ARRAYTOK then
+            if TokenAt(i + 3).Kind = TTokenKind.ARRAYTOK then
               j := CompileType(j + 3, NestedDataType, NestedNumAllocElements, NestedAllocElementType);
 
             DefineIdent(i + 1, TokenAt(i + 1).Name, USERTYPE, VarType, NumAllocElements,
@@ -18206,7 +18202,7 @@ begin
       NestedNumAllocElements := 0;
 
       if (TokenAt(i + 1).Kind = TTokenKind.OBRACKETTOK) and (TokenAt(i + 2).Kind in
-        [TDataType.VOLATILETOK, TDataType.STRIPEDTOK]) then
+        [TTokenKind.VOLATILETOK, TTokenKind.STRIPEDTOK]) then
       begin
         CheckTok(i + 3, TTokenKind.CBRACKETTOK);
 
@@ -18512,7 +18508,7 @@ begin
 
                 for j := 0 to (NumAllocElements and $FFFF) * (NumAllocElements shr 16) - 1 do
                 begin
-                  SaveToDataSegment(idx, GetVarDataSize, TTokenKind.DATAORIGINOFFSET);
+                  SaveToDataSegment(idx, GetVarDataSize, TDataType.DATAORIGINOFFSET);
 
                   Inc(idx, 2);
                   IncVarDataSize(i, NestedNumAllocElements);
@@ -18524,7 +18520,7 @@ begin
 
                 for j := 0 to NumAllocElements - 1 do
                 begin
-                  SaveToDataSegment(idx, GetVarDataSize, TTokenKind.DATAORIGINOFFSET);
+                  SaveToDataSegment(idx, GetVarDataSize, TDataType.DATAORIGINOFFSET);
 
                   Inc(idx, 2);
                   IncVarDataSize(i, NestedNumAllocElements);
@@ -18537,8 +18533,8 @@ begin
           end;
 
 
-          CompileRecordDeclaration(i, VarOfSameType, tmpVarDataSize, ConstVal, VarOfSameTypeIndex, VarType,
-            AllocElementType, NumAllocElements, isAbsolute, idx);
+            CompileRecordDeclaration(i, VarOfSameType, tmpVarDataSize, ConstVal, VarOfSameTypeIndex,
+              VarType, AllocElementType, NumAllocElements, isAbsolute, idx);  // !!! idx !!!
 
         end;
 
@@ -18628,11 +18624,11 @@ begin
                         Error(i + 1, TErrorCode.CantAdrConstantExp)
                       else
                         SaveToDataSegment(idx, IdentifierAt(IdentIndex).Value - CODEORIGIN -
-                          CODEORIGIN_BASE, TTokenKind.CODEORIGINOFFSET);
+                          CODEORIGIN_BASE, TDataType.CODEORIGINOFFSET);
 
                     end
                     else
-                      SaveToDataSegment(idx, IdentifierAt(IdentIndex).Value - DATAORIGIN, TTokenKind.DATAORIGINOFFSET);
+                      SaveToDataSegment(idx, IdentifierAt(IdentIndex).Value - DATAORIGIN, TDataType.DATAORIGINOFFSET);
 
                     VarType := TTokenKind.POINTERTOK;
 
@@ -18677,7 +18673,7 @@ begin
 
 
      if (IdentifierAt(NumIdent).NumAllocElements = 0) then           // var label: pchar = ''
-      SaveToDataSegment(idx, TokenAt(i).StrAddress - CODEORIGIN + 1, TTokenKind.CODEORIGINOFFSET)
+      SaveToDataSegment(idx, TokenAt(i).StrAddress - CODEORIGIN + 1, TDataType.CODEORIGINOFFSET)
      else begin
 
        if (IdType = TDataType.ARRAYTOK) and (AllocElementType = TDataType.CHARTOK) then begin      // var label: array of char = ''
@@ -19050,7 +19046,7 @@ end;
   if IsFunction then
   begin
     // if FunctionNumAllocElements > 0 then
-    //  Push(IdentifierAt(GetIdentIndex('RESULT')).Value, ASVALUE, GetDataSize( TDataType.FunctionResultType], GetIdentIndex('RESULT'))
+    //  Push(IdentifierAt(GetIdentIndex('RESULT')).Value, ASVALUE, GetDataSize( TDataType.FunctionResultType), GetIdentIndex('RESULT'))
     // else
     //  asm65;
     asm65('@exit');
@@ -19353,12 +19349,12 @@ begin
 
   IOCheck := True;
 
+
   AsmBlockIndex := 0;
 
   //SetLength(AsmLabels, 1);
 
   DefineIdent(1, 'MAIN', TTokenKind.PROCEDURETOK, TDataType.UNTYPETOK, 0, TDataType.UNTYPETOK, 0);
-
 
   GenerateProgramProlog;
 
@@ -19417,7 +19413,7 @@ if LIBRARY_USE = FALSE then begin
 
   asm65separator;
 
-  if target.id = A8 then begin
+  if target.id = TTargetID.A8 then begin
     asm65;
     asm65('IOCB@COPY'#9':16 brk');
   end;
@@ -19641,12 +19637,10 @@ end;
 
 end;  //CompileProgram
 
-
 // ----------------------------------------------------------------------------
 //                                 Compiler Main
 // ----------------------------------------------------------------------------
 procedure InitializeIdentifiers;
-
 {$IFNDEF PAS2JS}
 const
   PI_VALUE: TNumber = $40490FDB00000324; // does not fit into 53 bits Javascript double  mantissa
