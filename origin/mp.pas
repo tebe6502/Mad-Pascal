@@ -202,8 +202,10 @@ uses
   CommonTypes,
   CompilerTypes,
   DataTypes,
+  FileIO,
   MathEvaluate,
   Messages,
+  Memory,
   Numbers,
   Scanner,
   StringUtilities,
@@ -19328,7 +19330,7 @@ end;
   // ----------------------------------------------------------------------------
 
 
-  procedure CompileProgram;
+procedure CompileProgram(const pass: TPass);
   var
     i, j, DataSegmentSize, IdentIndex: Integer;
     tmp, a: String;
@@ -20086,6 +20088,21 @@ var inputFilePath: String; // TODO
   end;  //ParseParam
 
 
+procedure Free;
+begin
+
+  TokenList.Free;
+  TokenList := nil;
+
+  IdentifierList.Free;
+  IdentifierList := nil;
+
+  SetLength(IFTmpPosStack, 0);
+  evaluationContext := nil;
+  unitPathList.Free;
+  unitPathList := nil;
+end;
+
   // ----------------------------------------------------------------------------
 //                                 Compiler Main
   // ----------------------------------------------------------------------------
@@ -20123,6 +20140,7 @@ begin
   // SetLength(UnitPath, 2);
 
   MainPath := IncludeTrailingPathDelimiter(MainPath);
+  unitPathList:=TPathList.Create;
   unitPathList.AddFolder(IncludeTrailingPathDelimiter(MainPath + 'lib'));
 
   if (ParamCount = 0) then Syntax(3);
@@ -20174,6 +20192,7 @@ begin
   // Set defines for first pass;
   scanner := TScanner.Create;
 
+  SourceFileList:=TSourceFileList.Create;
   programUnit := SourceFileList.AddUnit(TSourceFileType.PROGRAM_FILE, ExtractFilename(inputFilePath), inputFilePath);
 
   scanner.TokenizeProgram(programUnit, True);
@@ -20240,22 +20259,5 @@ begin
   SetLength(OptimizeBuf, 1);
 
   CompileProgram(TPass.CODE_GENERATION);
-
-end;
-
-procedure Free;
-begin
-
-  TokenList.Free;
-  TokenList := nil;
-
-  IdentifierList.Free;
-  IdentifierList := nil;
-
-  SetLength(IFTmpPosStack, 0);
-  evaluationContext := nil;
-  unitPathList.Free;
-  unitPathList := nil;
-end;
 
 end.
