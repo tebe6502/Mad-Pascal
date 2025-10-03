@@ -15710,13 +15710,13 @@ var
     end
     else
       if IdentifierAt(IdentIndex).isAbsolute and (IdentifierAt(IdentIndex).Kind = VARIABLE) and
-        (IdentifierAt(IdentIndex).Value and $ff = 0) and (Byte((IdentifierAt(IdentIndex).Value shr 24) and $7f) in
+        (abs(IdentifierAt(IdentIndex).Value) and $ff = 0) and (Byte((abs(IdentifierAt(IdentIndex).Value) shr 24) and $7f) in
         [1..127]) then
       begin
 
-        case Byte((IdentifierAt(IdentIndex).Value shr 24) and $7f) of
-          1..3: Result := #9'= ' + reg[(IdentifierAt(IdentIndex).Value shr 24) and $7f];
-          4..19: Result := #9'= :STACKORIGIN-' + IntToStr(Byte((IdentifierAt(IdentIndex).Value shr 24) and $7f) - 3);
+          case Byte(abs(IdentifierAt(IdentIndex).Value shr 24) and $7f) of
+            1..3: Result := #9'= ' + reg[abs(IdentifierAt(IdentIndex).Value shr 24) and $7f];
+            4..19: Result := #9'= :STACKORIGIN-' + IntToStr(Byte(abs(IdentifierAt(IdentIndex).Value shr 24) and $7f) - 3);
           else
             Result := #9'= ''out of resource'''
         end;
