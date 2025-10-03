@@ -1,16 +1,20 @@
 unit Optimize;
 
+{$I Defines.inc}
+
 interface
 
-{$i define.inc}
+uses CompilerTypes;
 
 // ----------------------------------------------------------------------------
+
+procedure Initialize;
 
 procedure ResetOpty;
 
 procedure asm65(a: String = ''; comment: String = '');      // OptimizeASM
 
-procedure OptimizeProgram(MainProcedureIndex: Integer);
+procedure OptimizeProgram(MainProcedureIndex: TIdentIndex);
 
 procedure WriteOut(a: String);            // OptimizeTemporaryBuf
 
@@ -20,13 +24,20 @@ procedure FlushTempBuf;
 
 implementation
 
-uses Crt, SysUtils, Common;
+uses SysUtils, Common, Console, StringUtilities, Targets, Utilities;
+
 var
   TemporaryBuf: array [0..511] of String;
 
-
 // ----------------------------------------------------------------------------
 
+
+procedure Initialize;
+var
+  i: Integer;
+begin
+  for i := Low(TemporaryBuf) to High(TemporaryBuf) do TemporaryBuf[i] := '';
+end;
 
 procedure ResetOpty;
 begin
@@ -42,19 +53,19 @@ end;
 // ----------------------------------------------------------------------------
 
 
-procedure OptimizeProgram(MainProcedureIndex: Integer);
+procedure OptimizeProgram(MainProcedureIndex: TIdentIndex);
 type
   TBooleanArray = array [1..MAXBLOCKS] of Boolean;
 
 var
   ProcAsBlock: TBooleanArray;          // issue #125 fixed
 
-  procedure MarkNotDead(IdentIndex: Integer);
+  procedure MarkNotDead(IdentIndex: TIdentIndex);
   var
     ChildIndex, ChildIdentIndex, ProcAsBlockIndex: Integer;
   begin
 
-    Ident[IdentIndex].IsNotDead := True;
+    IdentifierAt(IdentIndex).IsNotDead := True;
 
     ProcAsBlockIndex := IdentifierAt(IdentIndex).ProcAsBlock;
 
@@ -601,7 +612,7 @@ var
 
       TextColor(LIGHTRED);
 
-      WriteLn(UnitName[common.optimize.unitIndex].Path + ' (' + IntToStr(common.optimize.line) +
+      WriteLn(common.optimize.SourceFile.Path + ' (' + IntToStr(common.optimize.line) +
         ') Error: Illegal instruction in INTERRUPT block ''' + copy(listing[i], 2, 256) + '''');
 
       NormVideo;
@@ -1899,7 +1910,7 @@ end;
           Break;
         end;
 
-        if target.cpu <> CPU_6502 then
+        if target.cpu <> TCPU.CPU_6502 then
         begin
 
           if opt_STZ(i) = False then
@@ -2956,7 +2967,7 @@ begin        // OptimizeASM
                                           begin  // imulCARD, mulINTEGER
                                             t := '';
 
-                                            if (target.id = ___NEO) then
+                                            if (target.id = TTargetID.NEO) then
                                             begin
 
                                               listing[l] := #9'lda ' + GetARG(0, x);
@@ -3360,7 +3371,6 @@ begin        // OptimizeASM
                                                                       else
                                                                         if elf = $06FEACE2 then    // @cmpSTRING2CHAR  accepted
                                                                         else
-
                                                                           if elf = $044A824C then    // @FCMPL    accepted
                                                                           else
 
@@ -3635,13 +3645,14 @@ begin        // OptimizeASM
   if ((x = 0) and inxUse) then
   begin   // succesfull
 
-    if common.optimize.line <> common.optimize.old then
+    if common.optimize.line <> common.optimize.oldLine then
     begin
       WriteOut('');
-      WriteOut('; optimize OK (' + UnitName[common.optimize.unitIndex].Name + '), line = ' + IntToStr(common.optimize.line));
+      WriteOut('; optimize OK (' + common.optimize.SourceFile.Name + '), line = ' +
+        IntToStr(common.optimize.line));
       WriteOut('');
 
-      common.optimize.old := common.optimize.line;
+      common.optimize.oldLine := common.optimize.line;
     end;
 
 
@@ -3757,20 +3768,20 @@ begin        // OptimizeASM
       end;
 
 
-    if common.optimize.line <> common.optimize.old then
+    if common.optimize.line <> common.optimize.oldLine then
     begin
       WriteOut('');
 
       if x = 51 then
-        WriteOut('; optimize FAIL (' + '''' + arg0 + '''' + ', ' + UnitName[common.optimize.unitIndex].Name +
+        WriteOut('; optimize FAIL (' + '''' + arg0 + '''' + ', ' + common.optimize.SourceFile.Name +
           '), line = ' + IntToStr(common.optimize.line))
       else
-        WriteOut('; optimize FAIL (' + IntToStr(x) + ', ' + UnitName[common.optimize.unitIndex].Name +
+        WriteOut('; optimize FAIL (' + IntToStr(x) + ', ' + common.optimize.SourceFile.Name +
           '), line = ' + IntToStr(common.optimize.line));
 
       WriteOut('');
 
-      common.optimize.old := common.optimize.line;
+      common.optimize.oldLine := common.optimize.line;
     end;
 
 
@@ -3793,7 +3804,7 @@ begin        // OptimizeASM
     Writeln(OptFile, OptimizeBuf[i]);
 
  writeln(OptFile, StringOfChar('-', 32));
- writeln(OptFile, 'OPTIMIZE ',((x = 0) and inxUse),', x=',x,', ('+UnitName[common.optimize.unitIndex].Name+') line = ',common.optimize.line);
+ writeln(OptFile, 'OPTIMIZE ',((x = 0) and inxUse),', x=',x,', ('+common.optimize.SourceFile.Name+') line = ',common.optimize.line);
  writeln(OptFile, StringOfChar('-', 32));
 
   for i := 0 to l - 1 do
@@ -3829,7 +3840,7 @@ begin
 
   if not OutputDisabled then
 
-    if Pass = CODEGENERATIONPASS then
+    if pass = TPass.CODE_GENERATION then
     begin
 
       if optimize_code and common.optimize.use then

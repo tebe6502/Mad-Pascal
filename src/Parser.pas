@@ -260,9 +260,9 @@ begin
       if FieldType <> TDataType.RECORDTOK then
         if (FieldType in Pointers) and (NumAllocElements > 0) then
         begin
-          if AllocElementType = RECORDTOK then
+          if AllocElementType = TDataType.RECORDTOK then
           begin
-            AllocElementType := POINTERTOK;
+            AllocElementType := TDataType.POINTERTOK;
             NumAllocElements := _TypeArray[i].Field[j].NumAllocElements shr 16;
             NumAllocElements_ := 0;
           end;
@@ -309,9 +309,9 @@ begin
           if FieldType <> TDataType.RECORDTOK then
             if (FieldType in Pointers) and (NumAllocElements > 0) then
             begin
-              if AllocElementType = RECORDTOK then
+              if AllocElementType = TDataType.RECORDTOK then
               begin
-                AllocElementType := POINTERTOK;
+                AllocElementType := TDataType.POINTERTOK;
                 NumAllocElements := _TypeArray[i].Field[j].NumAllocElements shr 16;
                 NumAllocElements_ := 0;
               end;
@@ -595,15 +595,14 @@ begin
         if IdentIndex = 0 then
           Error(i + 2, TErrorCode.UnknownIdentifier);
 
-        if IdentifierAt(IdentIndex).Kind in [VARIABLE, CONSTANT] then
+        if IdentifierAt(IdentIndex).Kind in [VARIABLE, CONSTANT,USERTYPE] then
         begin
 
-          if (IdentifierAt(IdentIndex).DataType = TTokenKind.STRINGPOINTERTOK) or
-            ((IdentifierAt(IdentIndex).DataType in Pointers) and (IdentifierAt(IdentIndex).NumAllocElements > 0)) then
+          if (IdentifierAt(IdentIndex).DataType = TDataType.STRINGPOINTERTOK)
+          or ((IdentifierAt(IdentIndex).DataType in Pointers) and (IdentifierAt(IdentIndex).NumAllocElements > 0)) then
           begin
 
-            if (IdentifierAt(IdentIndex).DataType = TTokenKind.STRINGPOINTERTOK) or
-              (IdentifierAt(IdentIndex).AllocElementType = TTokenKind.CHARTOK) then
+            if (IdentifierAt(IdentIndex).DataType = TDataType.STRINGPOINTERTOK) or (IdentifierAt(IdentIndex).AllocElementType = TDataType.CHARTOK) then
             begin
 
               isError := True;
@@ -615,9 +614,9 @@ begin
 
               //  writeln(IdentifierAt(IdentIndex).name,',',IdentifierAt(IdentIndex).DataType,',',IdentifierAt(IdentIndex).NumAllocElements,'/',IdentifierAt(IdentIndex).NumAllocElements_,',',IdentifierAt(IdentIndex).AllocElementType );
 
-              if (IdentifierAt(IdentIndex).DataType = TTokenKind.POINTERTOK) and
-                (IdentifierAt(IdentIndex).AllocElementType in [TTokenKind.RECORDTOK, TTokenKind.OBJECTTOK]) then
-                ConstVal := IdentifierAt(IdentIndex).NumAllocElements_
+              if (IdentifierAt(IdentIndex).DataType = TDataType.POINTERTOK) and (IdentifierAt(IdentIndex).AllocElementType in
+               [TDataType.RECORDTOK, TDataType.OBJECTTOK]) then
+				ConstVal := IdentifierAt(IdentIndex).NumAllocElements_
               else
                 ConstVal := IdentifierAt(IdentIndex).NumAllocElements;
 
@@ -651,7 +650,7 @@ begin
       begin
 
         ConstVal := GetDataSize(TokenAt(i + 2).Kind);
-        ConstValType := TTokenKind.BYTETOK;
+        ConstValType := TDataType.BYTETOK;
 
         j := i + 2;
 
@@ -753,6 +752,8 @@ begin
         ErrorIncompatibleTypes(i, ConstValType, TDataType.REALTOK);
 
       CheckTok(i + 1, TDataType.CPARTOK);
+
+
 
       case Kind of
         TDataType.INTTOK: ConstVal := Trunc(ConstValType, ConstVal);
@@ -967,8 +968,7 @@ begin
                 case GetDataSize(ConstValType) of
                   1: ConstVal := GetStaticValue(0 + Ord(IdentifierAt(IdentIndex).idType = TDataType.PCHARTOK));
                   2: ConstVal := GetStaticValue(0) + GetStaticValue(1) shl 8;
-                  4: ConstVal := GetStaticValue(0) + GetStaticValue(1) shl 8 + GetStaticValue(2) shl
-                      16 + GetStaticValue(3) shl 24;
+                  4: ConstVal := GetStaticValue(0) + GetStaticValue(1) shl 8 + GetStaticValue(2) shl 16 + GetStaticValue(3) shl 24;
                 end;
 
                 if ConstValType in [TDataType.HALFSINGLETOK, TDataType.SINGLETOK] then ConstVal := ConstVal shl 32;
@@ -1031,8 +1031,7 @@ begin
             VARIABLE: if IdentifierAt(IdentIndex).isAbsolute then
               begin        // wyjatek gdy ABSOLUTE
 
-                if (IdentifierAt(IdentIndex).Value and $ff = 0) and (Byte(
-                  (IdentifierAt(IdentIndex).Value shr 24) and $7f) in [1..127]) or
+                if (abs(IdentifierAt(IdentIndex).Value) and $ff = 0) and (Byte(abs(IdentifierAt(IdentIndex).Value shr 24) and $7f) in [1..127]) or
                   ((IdentifierAt(IdentIndex).DataType in Pointers) and
                   (IdentifierAt(IdentIndex).AllocElementType <> TDataType.UNTYPETOK) and
                   (IdentifierAt(IdentIndex).NumAllocElements in [0..1])) then
@@ -1206,7 +1205,7 @@ begin
 
       if isError then Exit;
 
-      if ConstValType = TTokenKind.BOOLEANTOK then
+      if ConstValType = TDataType.BOOLEANTOK then
         ConstVal := Ord(not (ConstVal <> 0))
 
       else
@@ -1265,10 +1264,10 @@ begin
 
         if (IdentifierAt(IdentIndex).DataType in Pointers) and
           ((IdentifierAt(IdentIndex).NumAllocElements > 0) and
-          (IdentifierAt(IdentIndex).AllocElementType <> TTokenKind.RECORDTOK)) then
-          if ((IdentifierAt(IdentIndex).AllocElementType <> TTokenKind.UNTYPETOK) and
+          (IdentifierAt(IdentIndex).AllocElementType <> TDataType.RECORDTOK)) then
+          if ((IdentifierAt(IdentIndex).AllocElementType <> TDataType.UNTYPETOK) and
             (IdentifierAt(IdentIndex).NumAllocElements in [0, 1])) or
-            (IdentifierAt(IdentIndex).DataType = TTokenKind.STRINGPOINTERTOK) then
+            (IdentifierAt(IdentIndex).DataType = TDataType.STRINGPOINTERTOK) then
           begin
 
           end
@@ -1386,7 +1385,7 @@ begin
 
     ConstValType := GetCommonType(j + 1, ConstValType, RightConstValType);
 
-    if not (ConstValType in RealTypes + [TTokenKind.BOOLEANTOK]) then
+    if not (ConstValType in RealTypes + [TDataType.BOOLEANTOK]) then
       ConstValType := GetValueType(ConstVal);
 
     CheckOperator(i, TokenAt(j + 1).Kind, ConstValType, RightConstValType);
@@ -1527,7 +1526,7 @@ begin
       ConstVal := 0;
     //  ConstValType := GetCommonType(j + 1, ConstValType, RightConstValType);
 
-    ConstValType := TTokenKind.BOOLEANTOK;
+    ConstValType := TDataType.BOOLEANTOK;
 
     i := j;
   end;
@@ -1692,15 +1691,7 @@ begin
                     // Empty array [0..0] ; [0..0, 0..0] foes not require spaces
                   end
                   else
-                  begin
-                    if Name = 'SS' then
-                    begin
-                      Writeln('TODO: SS defined in ' + identifier.SourceFile.Path);
-                    end;
-                    elementCount := Integer(Elements(NumIdent));
-                    elementSize := GetDataSize(AllocElementType);
-                    IncVarDataSize(tokenIndex, elementCount * elementSize);
-                  end;
+                    IncVarDataSize(tokenIndex, Integer(Elements(NumIdent) * GetDataSize(AllocElementType)));
 
                 end;
 
@@ -1752,8 +1743,8 @@ end;  //DefineIdent
 function DeclareFunction(i: Integer; out ProcVarIndex: Cardinal): Integer;
 var
   VarOfSameType: TVariableList;
-  NumVarOfSameType, VarOfSameTypeIndex, x: Integer;
   ListPassMethod: TParameterPassingMethod;
+  NumVarOfSameType, VarOfSameTypeIndex, x: Integer;
   VarType, AllocElementType: TDataType;
   NumAllocElements: Cardinal;
   IsNestedFunction: Boolean;
@@ -1825,7 +1816,7 @@ begin
       until TokenAt(i).Kind <> TTokenKind.COMMATOK;
 
 
-      VarType := TDataType.UNTYPETOK;                // UNTYPED
+      VarType := TDataType.UNTYPETOK;
       NumAllocElements := 0;
       AllocElementType := TDataType.UNTYPETOK;
 
@@ -2319,11 +2310,20 @@ var
     //   writeln('>> ',Name,',',FieldType,',',AllocElementType,',',NumAllocElements);
 
 
+    if FieldType = ENUMTOK then FieldType := AllocElementType;
+
+
     if not (FieldType in [TDataType.RECORDTOK, TDataType.OBJECTTOK]) then
     begin
 
       if FieldType in Pointers then
       begin
+
+        if AllocElementType = TDataType.RECORDTOK then
+        begin
+          AllocElementType := TDataType.POINTERTOK;
+          NumAllocElements := NumAllocElements shr 16;
+        end;
 
         if (FieldType = TDataType.POINTERTOK) and (AllocElementType = TDataType.FORWARDTYPE) then
           Inc(_TypeArray[RecType].Size, GetDataSize(TDataType.POINTERTOK))
@@ -2342,7 +2342,10 @@ var
     else
       Inc(_TypeArray[RecType].Size, GetDataSize(FieldType));
 
-    _TypeArray[RecType].Field[x].Kind := TFieldKind.UNTYPETOK;
+    if pos('.', GetTypeAtIndex(RecType).Field[x].Name) > 0 then
+      _TypeArray[RecType].Field[x].ObjectVariable := GetTypeAtIndex(RecType).Field[0].ObjectVariable
+    else
+      _TypeArray[RecType].Field[x].ObjectVariable := False;
 
   end;
 
@@ -2646,6 +2649,7 @@ begin
 
                 _TypeArray[RecType].NumFields := 0;
                 _TypeArray[RecType].Field[0].Name := Name;
+                _TypeArray[RecType].Field[0].ObjectVariable := True;
 
                 if (TokenAt(i).Kind in [TTokenKind.PROCEDURETOK, TTokenKind.FUNCTIONTOK,
                   TTokenKind.CONSTRUCTORTOK, TTokenKind.DESTRUCTORTOK]) then
@@ -2734,10 +2738,10 @@ begin
                             GetTypeAtIndex(NumAllocElements).Field[k].AllocElementType
                             );
 
-                          _TypeArray[RecType].Field[GetTypeAtIndex(RecType).NumFields].Kind :=
-                            TFieldKind.OBJECTVARIABLE;
+                          //          if DataType = OBJECTTOK then
+                          //      Types[RecType].Field[ Types[RecType].NumFields ].ObjectVariable := true;
 
-                          //  writeln('>> ',FieldInListName[FieldInListIndex].Name + '.' + Types[NumAllocElements).Field[k].Name,',', Types[NumAllocElements).Field[k].NumAllocElements);
+                          //  writeln('>> ',FieldInListName[FieldInListIndex].Name + '.' + Types[NumAllocElements].Field[k].Name,',', Types[NumAllocElements].Field[k].NumAllocElements,',',Types[RecType].Field[ Types[RecType].NumFields ].ObjectVariable);
                         end;
 
                     end;
@@ -2796,7 +2800,7 @@ begin
                 _TypeArray[RecType].Block := BlockStack[BlockStackTop];
 
                 DataType := TDataType.OBJECTTOK;
-                NumAllocElements := RecType;      // ndex to the Types array
+                NumAllocElements := RecType;      // Index to the Types array
                 AllocElementType := TDataType.UNTYPETOK;
 
                 Result := i;

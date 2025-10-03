@@ -1,34 +1,34 @@
-
 // -----------------------------------------------------------------------------
 // ===		 		 FOR ch IN ident
 // -----------------------------------------------------------------------------
 
-  	    if Tok[j].Kind <> IDENTTOK then
-	      Error(j, IdentifierExpected);
+  if TokenAt(j).Kind <> TTokenKind.IDENTTOK then
+	      Error(j, TErrorCode.IdentifierExpected);
 
-	    IdentTemp := GetIdent(Tok[j].Name^);
+  IdentTemp := GetIdentIndex(TokenAt(j).Name);
 
-	    ActualParamType := Ident[IdentTemp].DataType;
-	    VarType := Ident[IdentTemp].AllocElementType;
+  ActualParamType := IdentifierAt(IdentTemp).DataType;
+  VarType := IdentifierAt(IdentTemp).AllocElementType;
 
 	    k := Elements(IdentTemp);
 
-	    if k * DataSize[VarType] > 256 then
+	    if k * GetDataSize(VarType) > 256 then
 	     Error(j, 'only arrays with a maximum of 256 bytes');
 
-// writeln(ActualParamType,',', VarType,',',Ident[IdentTemp].NumAllocElements,',',Ident[IdentTemp].NumAllocElements_,' | ',Ident[IdentTemp].IdType);
+  // writeln(ActualParamType,',', VarType,',',IdentifierAt(IdentTemp).NumAllocElements,',',IdentifierAt(IdentTemp).NumAllocElements_,' | ',IdentifierAt(IdentTemp).IdType);
 
-	    if (ActualParamType <> STRINGPOINTERTOK) and not (Ident[IdentTemp].IdType in [ARRAYTOK, STRINGTOK, STRINGLITERALTOK]) then
+  if (ActualParamType <> TDataType.STRINGPOINTERTOK) and not (IdentifierAt(IdentTemp).IdType in
+    [TDataType.ARRAYTOK, TDataType.STRINGTOK, TDataType.STRINGLITERALTOK]) then
 	      Error(j, 'for-in statement cannot operate on collection type ''' + InfoAboutToken(ActualParamType) + '''');
 
-	    if (VarType in [RECORDTOK]) and (Ident[IdentIndex].DataType = POINTERTOK) then
+  if (VarType in [TDataType.RECORDTOK]) and (IdentifierAt(IdentIndex).DataType = TDataType.POINTERTOK) then
 		// ok
 	    else
-	     GetCommonType(i, Ident[IdentIndex].DataType, VarType);
+    GetCommonType(i, IdentifierAt(IdentIndex).DataType, VarType);
 
 	    StartOptimization(j);
 
-	    if ActualParamType = STRINGPOINTERTOK then
+  if ActualParamType = TDataType.STRINGPOINTERTOK then
              asm65(#9'lda #$00')
 	    else
              asm65(#9'lda #-' + IntToStr(k));
@@ -47,7 +47,8 @@
 	     ResetOpty;				// !!!
 
 
-	     if ActualParamType = STRINGPOINTERTOK then begin
+  if ActualParamType = TDataType.STRINGPOINTERTOK then
+  begin
 
 	      asm65(#9'ldy #$00');
 	      asm65(#9'cpy adr.' + GetLocalName(IdentTemp) );
@@ -56,9 +57,11 @@
  	      asm65(#9'lda adr.' + GetLocalName(IdentTemp) + '+1,y' );
 	      asm65(#9'sta ' + GetLocalName(IdentIndex));
 
-	     end else begin
+  end
+  else
+  begin
 
-	      case DataSize[VarType] of
+	      case GetDataSize(VarType) of
 
 	       1: begin
 	           asm65(#9'ldy #$00');
@@ -107,7 +110,7 @@
 	     end;
 
 
-	       CheckTok(j + 1, DOTOK);
+  CheckTok(j + 1, TTokenKind.DOTOK);
 
 
 		Inc(CodePosStackTop);
@@ -127,3 +130,4 @@
 		RestoreBreakAddress;
 
 		Result := j;
+
