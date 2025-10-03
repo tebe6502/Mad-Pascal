@@ -16001,6 +16001,23 @@ if (ExpressionType = TDataType.STRINGPOINTERTOK) or
 
     end;
 
+// TODO Move to TIdentifier and use in all locations where the computation is redundant
+  function GetIdentifierFullName(const identifier: TIdentifier): String;
+  begin
+    Result := identifier.SourceFile.Name + '.' + identifier.Name;
+  end;
+
+  function GetIdentifierDataSize(const identifier: TIdentifier): Integer;
+  var
+    dataSize: Byte;
+  begin
+    dataSize := GetDataSize(identifier.AllocElementType);
+    Result := identifier.NumAllocElements * dataSize;
+    // LogTrace(Format('Identifier %s has %d element of size %d = %d',
+    //  [GetIdentifierFullName(identifier), identifier.NumAllocElements, dataSize, Result]));
+  end;
+
+
     // ----------------------------------------------------------------------------
 
     procedure IncSize(bytes: Integer);
@@ -16249,7 +16266,7 @@ if (ExpressionType = TDataType.STRINGPOINTERTOK) or
     if (ConstDataSize < 0) or (ConstDataSize > $FFFF) then
     begin
     writeln('SaveToStaticDataSegment: ' + IntToStr(ConstDataSize));
-    RaiseHaltException(THaltException.COMPILING_ABORTED);
+    Halt(2);
     end;
 
     case ConstValType of
