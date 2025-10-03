@@ -12018,8 +12018,6 @@ begin
                       if not (IdentifierAt(IdentIndex).DataType in Pointers) then
                         ErrorForIdentifier(i + 2, TErrorCode.IncompatibleTypeOf, IdentIndex);
 
-                      VarType := IdentifierAt(GetIdentIndex(IdentifierAt(IdentIndex).Name +
-                        '.' + TokenAt(i + 3).Name)).AllocElementType;
                       par2 := '$' + IntToHex(IdentTemp and $ffff, 2);
 
                       IndirectionLevel := ASPOINTERTORECORDARRAYORIGIN;
@@ -15842,7 +15840,6 @@ var
   end;
 
   // ----------------------------------------------------------------------------
-
 begin
 
   if Pass = TPass.CODE_GENERATION then
@@ -15856,7 +15853,7 @@ begin
 
     for IdentIndex := 1 to NumIdent do
       if (IdentifierAt(IdentIndex).Block = IdentifierAt(BlockIdentIndex).ProcAsBlock) and
-        (IdentifierAt(IdentIndex).SourceFile = ActiveSourceFile) then
+        (IdentifierAt(IdentIndex).SourceFile.UnitIndex = ActiveSourceFile.UnitIndex) then
       begin
 
         if emptyLine then
@@ -15951,7 +15948,7 @@ begin
                     IdentifierAt(IdentIndex).Name + ' .word');
 
                   if size = 0 then varbegin := IdentifierAt(IdentIndex).Name;
-                  Incsize(GetIdentifierDataSize(IdentifierAt(IdentIndex)));
+                    IncSize(IdentifierAt(IdentIndex).NumAllocElements * GetDataSize(IdentifierAt(IdentIndex).AllocElementType));
 
                 end
                 else
@@ -16032,11 +16029,11 @@ begin
                       // RESULT nie zliczaj
 
                       else
-
                         if IdentifierAt(IdentIndex).DataType = ENUMTYPE then
                           IncSize(GetDataSize(IdentifierAt(IdentIndex).AllocElementType))
                         else
                           IncSize(GetDataSize(IdentifierAt(IdentIndex).DataType));
+
                   end;
 
             CONSTANT: if (IdentifierAt(IdentIndex).DataType in Pointers) and
@@ -16090,29 +16087,29 @@ begin
 
   case ConstValType of
 
-    TTokenKind.SHORTINTTOK, TTokenKind.BYTETOK, TTokenKind.CHARTOK, TTokenKind.BOOLEANTOK:
+    TDataType.SHORTINTTOK, TDataType.BYTETOK, TDataType.CHARTOK, TDataType.BOOLEANTOK:
       StaticStringData[ConstDataSize] := Byte(ConstVal);
 
-    TTokenKind.SMALLINTTOK, TTokenKind.WORDTOK, TTokenKind.SHORTREALTOK, TTokenKind.POINTERTOK,
-    TTokenKind.STRINGPOINTERTOK, TTokenKind.PCHARTOK:
+    TDataType.SMALLINTTOK, TDataType.WORDTOK, TDataType.SHORTREALTOK, TDataType.POINTERTOK,
+    TDataType.STRINGPOINTERTOK, TDataType.PCHARTOK:
     begin
       StaticStringData[ConstDataSize] := Byte(ConstVal);
       StaticStringData[ConstDataSize + 1] := Byte(ConstVal shr 8);
     end;
 
-    TTokenKind.DATAORIGINOFFSET:
+    TDataType.DATAORIGINOFFSET:
     begin
       StaticStringData[ConstDataSize] := Byte(ConstVal) or $8000;
       StaticStringData[ConstDataSize + 1] := Byte(ConstVal shr 8) or $4000;
     end;
 
-    TTokenKind.CODEORIGINOFFSET:
+    TDataType.CODEORIGINOFFSET:
     begin
       StaticStringData[ConstDataSize] := Byte(ConstVal) or $2000;
       StaticStringData[ConstDataSize + 1] := Byte(ConstVal shr 8) or $1000;
     end;
 
-    TTokenKind.INTEGERTOK, TTokenKind.CARDINALTOK, TTokenKind.REALTOK:
+    TDataType.INTEGERTOK, TDataType.CARDINALTOK, TDataType.REALTOK:
     begin
       StaticStringData[ConstDataSize] := Byte(ConstVal);
       StaticStringData[ConstDataSize + 1] := Byte(ConstVal shr 8);
@@ -16120,7 +16117,7 @@ begin
       StaticStringData[ConstDataSize + 3] := Byte(ConstVal shr 24);
     end;
 
-    TTokenKind.SINGLETOK: begin
+    TDataType.SINGLETOK: begin
       ConstVal := CastToSingle(ConstVal);
 
       StaticStringData[ConstDataSize] := Byte(ConstVal);
@@ -16129,7 +16126,7 @@ begin
       StaticStringData[ConstDataSize + 3] := Byte(ConstVal shr 24);
     end;
 
-    TTokenKind.HALFSINGLETOK: begin
+    TDataType.HALFSINGLETOK: begin
       ConstVal := CastToHalfSingle(ConstVal);
 
       StaticStringData[ConstDataSize] := Byte(ConstVal);
@@ -16162,7 +16159,7 @@ var
     else
       SaveToDataSegment(ConstDataSize, ConstVal + Ord(Add), DataType);
 
-    if DataType = TTokenKind.DATAORIGINOFFSET then
+    if DataType = TDataType.DATAORIGINOFFSET then
       Inc(ConstDataSize, GetDataSize(TDataType.POINTERTOK))
     else
       Inc(ConstDataSize, GetDataSize(DataType));
@@ -16191,7 +16188,7 @@ var
       ConstVal := TokenAt(i).StrAddress - CODEORIGIN + CODEORIGIN_BASE;
       TokenAt(i).Value := ch;
 
-      ActualParamType := TTokenKind.STRINGPOINTERTOK;
+      ActualParamType := TDataType.STRINGPOINTERTOK;
 
     end;
 
@@ -16216,12 +16213,12 @@ var
     end;
 
     if (ConstValType = TDataType.SHORTREALTOK) and (ActualParamType = TDataType.REALTOK) then
-      ActualParamType := TTokenKind.SHORTREALTOK;
+      ActualParamType := TDataType.SHORTREALTOK;
 
 
-    if ActualParamType = TTokenKind.DATAORIGINOFFSET then
+    if ActualParamType = TDataType.DATAORIGINOFFSET then
 
-      SaveDataSegment(TTokenKind.DATAORIGINOFFSET)
+      SaveDataSegment(TDataType.DATAORIGINOFFSET)
 
     else
     begin
