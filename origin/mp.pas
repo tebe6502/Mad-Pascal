@@ -213,7 +213,45 @@ uses
   Tokens,
   Diagnostic;
 
+// Temporarily own variable, because main program is no class yet.
+var
+  evaluationContext: IEvaluationContext;
 
+type
+  TEvaluationContext = class(TInterfacedObject, IEvaluationContext)
+  public
+    constructor Create;
+    function GetConstantName(const expression: String; var index: TStringIndex): String;
+    function GetConstantValue(const constantName: String; var constantValue: TInteger): Boolean;
+  end;
+
+constructor TEvaluationContext.Create;
+begin
+end;
+
+function TEvaluationContext.GetConstantName(const expression: String; var index: TStringIndex): String;
+begin
+  Result := GetConstantUpperCase(expression, index);
+end;
+
+function TEvaluationContext.GetConstantValue(const constantName: String; var constantValue: TInteger): Boolean;
+var
+  identTemp: Integer;
+begin
+
+  identTemp := Parser.GetIdentIndex(constantName);
+ if identTemp > 0 then
+  begin
+
+    constantValue := IdentifierAt(IdentTemp).Value;
+    Result := True;
+  end
+  else
+  begin
+    constantValue := 0;
+    Result := False;
+  end;
+end;
 
 {$IFNDEF PAS2JS}
 const
