@@ -373,7 +373,7 @@ end;
   if TemporaryBuf[0].IndexOf('#asm:') = 0 then
   begin
 
-    writeln(OutFile, AsmBlock[StrToInt(copy(TemporaryBuf[0], 6, 256))]);
+    OutFile.WriteLn(AsmBlock[StrToInt(copy(TemporaryBuf[0], 6, 256))]);
 
     TemporaryBuf[0] := '~';
 
@@ -492,7 +492,7 @@ begin
 
     if TemporaryBuf[0] <> '~' then
     begin
-      if (TemporaryBuf[0] <> '') or (outTmp <> TemporaryBuf[0]) then writeln(OutFile, TemporaryBuf[0]);
+      if (TemporaryBuf[0] <> '') or (outTmp <> TemporaryBuf[0]) then OutFile.WriteLn(TemporaryBuf[0]);
 
       outTmp := TemporaryBuf[0];
     end;
@@ -3705,7 +3705,7 @@ begin        // OptimizeASM
     if l > High(listing) then
     begin
       WriteLn('Out of resources, LISTING');
-      halt;
+      RaiseHaltException(THaltException.COMPILING_ABORTED);
     end;
 
     for i := 0 to l - 1 do
@@ -3796,23 +3796,27 @@ begin        // OptimizeASM
 
 {$IFDEF USEOPTFILE}
 
- writeln(OptFile, StringOfChar('-', 32));
- writeln(OptFile, 'SOURCE');
- writeln(OptFile, StringOfChar('-', 32));
+ OptFile.writeln(StringOfChar('-', 32));
+ OptFile.writeln( 'SOURCE');
+ OptFile.writeln( StringOfChar('-', 32));
 
   for i := 0 to High(OptimizeBuf) - 1 do
-    Writeln(OptFile, OptimizeBuf[i]);
+  begin
+    OptFile.writeln( OptimizeBuf[i]);
+  end;
 
- writeln(OptFile, StringOfChar('-', 32));
- writeln(OptFile, 'OPTIMIZE ',((x = 0) and inxUse),', x=',x,', ('+common.optimize.SourceFile.Name+') line = ',common.optimize.line);
- writeln(OptFile, StringOfChar('-', 32));
+ OptFile.writeln( StringOfChar('-', 32));
+ OptFile.writeln( 'OPTIMIZE '+BoolToStr((x = 0) and inxUse)+', x='+IntToStr(x)+', ('+common.optimize.SourceFile.Name+') line = ',IntToStr(common.optimize.line));
+ OptFile.writeln( StringOfChar('-', 32));
 
   for i := 0 to l - 1 do
-    Writeln(OptFile, listing[i]);
+  begin
+    OptFile.writeln( listing[i]);
+  end;
 
- writeln(OptFile);
- writeln(OptFile, StringOfChar('-', 64));
- writeln(OptFile);
+ OptFile.writeln();
+ OptFile.writeln( StringOfChar('-', 64));
+ OptFile.writeln();
 
 {$ENDIF}
 
