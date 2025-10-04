@@ -19160,6 +19160,9 @@ end;
 
   end;  //CompileBlock
 
+// ----------------------------------------------------------------------------
+// Subroutines of CompileProgram
+// ----------------------------------------------------------------------------
 
   // ----------------------------------------------------------------------------
   // ----------------------------------------------------------------------------
@@ -19174,6 +19177,8 @@ procedure CompileProgram(const pass: TPass);
     res: TResource;
   begin
 
+  WriteLn('Pass ' + IntToStr(Ord(pass)) + '.');
+  Common.pass := pass;
     ResetOpty;
 
     common.optimize.use := False;
@@ -19923,31 +19928,20 @@ var inputFilePath: String; // TODO
   end;  //ParseParam
 
 
-procedure Free;
-begin
 
-  TokenList.Free;
-  TokenList := nil;
-
-  IdentifierList.Free;
-  IdentifierList := nil;
-
-  SetLength(IFTmpPosStack, 0);
-  evaluationContext := nil;
-  unitPathList.Free;
-  unitPathList := nil;
-end;
 
   // ----------------------------------------------------------------------------
 //                                 Compiler Main
   // ----------------------------------------------------------------------------
+procedure Main(const programUnit: TSourceFile; const unitPathList: TPathList);
+var
+  scanner: IScanner;
+  i: Integer;
 
-var i: Integer;
 var MainPath: String;
   var FilePath: String;
   var Start_Time, end_time: Int64;
-var scanner: IScanner;
-    // Processing variables.
+  // Processing variables.
 var programUnit: TSourceFile;
 begin
 
@@ -20095,4 +20089,19 @@ begin
 
   CompileProgram(TPass.CODE_GENERATION);
 
-end.
+end;
+
+procedure Free;
+begin
+
+  TokenList.Free;
+  TokenList := nil;
+
+  IdentifierList.Free;
+  IdentifierList := nil;
+
+  SetLength(IFTmpPosStack, 0);
+  evaluationContext := nil;
+  unitPathList.Free;
+  unitPathList := nil;
+end;
