@@ -7008,11 +7008,12 @@ begin
                         ((IdentifierAt(IdentIndex).DataType in Pointers) and
                         (IdentifierAt(IdentIndex).AllocElementType in [RECORDTOK, OBJECTTOK]) and
                         (IdentifierAt(IdentIndex).NumAllocElements_ = 0)) or
-                        ((IdentifierAt(IdentIndex).DataType in Pointers) and (IdentifierAt(IdentIndex).idType =
-                        DATAORIGINOFFSET)) or ((IdentifierAt(IdentIndex).DataType in Pointers) and
-                        not (IdentifierAt(IdentIndex).AllocElementType in
-                        [UNTYPETOK, RECORDTOK, OBJECTTOK, PROCVARTOK]) and (IdentifierAt(
-                        IdentIndex).NumAllocElements > 0)) or ((IdentifierAt(IdentIndex).DataType in Pointers) and
+                        ((IdentifierAt(IdentIndex).DataType in Pointers) and
+                        (IdentifierAt(IdentIndex).idType = DATAORIGINOFFSET)) or
+                        ((IdentifierAt(IdentIndex).DataType in Pointers) and not
+                        (IdentifierAt(IdentIndex).AllocElementType in [UNTYPETOK, RECORDTOK,
+                        OBJECTTOK, PROCVARTOK]) and (IdentifierAt(IdentIndex).NumAllocElements > 0)) or
+                        ((IdentifierAt(IdentIndex).DataType in Pointers) and
                         (IdentifierAt(IdentIndex).PassMethod = TParameterPassingMethod.VARPASSING)) then
                         Push(IdentifierAt(IdentIndex).Value, ASPOINTER, GetDataSize(TTokenKind.POINTERTOK), IdentIndex)
                       else
@@ -11914,8 +11915,8 @@ begin
 
               //      writeln(ExpressionType,',',VarTYpe,',',Elements(GetIdent(TokenAt(j + 2).Name^)));
 
-              if GetDataSize(VarType) <> Elements(IdentIndex) *
-                GetDataSize(IdentifierAt(IdentIndex).AllocElementType) then
+              if GetDataSize(VarType) <> Elements(IdentIndex) * GetDataSize(
+                IdentifierAt(IdentIndex).AllocElementType) then
                 if VarType = UNTYPETOK then
                   Error(j + 2, 'Illegal type conversion: "POINTER" to "Array[0..' +
                     IntToStr(Elements(IdentIndex) - 1) + '] Of ' +
@@ -11959,8 +11960,8 @@ begin
 
                 //  writeln('= ',IdentifierAt(IdentIndex).Name,',',IdentifierAt(IdentIndex).Kind,',',IdentifierAt(IdentIndex).DataType,',',IdentifierAt(IdentIndex).AllocElementType);
 
-                if not (IdentifierAt(IdentIndex).DataType in [TDataType.POINTERTOK, TDataType.RECORDTOK,
-                  TDataType.OBJECTTOK]) then
+                if not (IdentifierAt(IdentIndex).DataType in [TDataType.POINTERTOK,
+                  TDataType.RECORDTOK, TDataType.OBJECTTOK]) then
                   Error(i, TErrorCode.IllegalExpression);
 
                 if IdentifierAt(IdentIndex).DataType = TDataType.POINTERTOK then
@@ -12227,7 +12228,8 @@ begin
                         if GetIdentIndex(IdentifierAt(IdentIndex).Name + '.' + TokenAt(i + 3).Name) > 0 then
                           IdentIndex := GetIdentIndex(IdentifierAt(IdentIndex).Name + '.' + TokenAt(i + 3).Name);
 
-                        if VarType = TDataType.STRINGPOINTERTOK then IndirectionLevel := ASPOINTERTOARRAYRECORDTOSTRING;
+                        if VarType = TDataType.STRINGPOINTERTOK then
+                          IndirectionLevel := ASPOINTERTOARRAYRECORDTOSTRING;
 
                         Inc(i, 2);
 
@@ -19883,3 +19885,6 @@ begin
   unitPathList.Free;
   unitPathList := nil;
 end;
+
+end.
+

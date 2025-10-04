@@ -1575,7 +1575,6 @@ var
   identIndex: Integer;
   identifier: TIdentifier;
   NumAllocElements_: Cardinal;
-  elementCount, elementSize: Integer;
 begin
 
   identIndex := GetIdentIndex(Name);
