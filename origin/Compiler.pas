@@ -830,8 +830,7 @@ end;  //ExpandParam_m1
 // ----------------------------------------------------------------------------
 
 
-procedure ExpandExpression(var ValType: TDataType; RightValType, VarType: TDataType;
-  ForceMinusSign: Boolean = False);
+procedure ExpandExpression(var ValType: TDataType; RightValType, VarType: TDataType; ForceMinusSign: Boolean = False);
 var
   m: Byte;
   sign: Boolean;
@@ -6686,8 +6685,7 @@ begin
       //        ArrayIndexType := WORDTOK;
       //      end;
 
-      if IdentifierAt(IdentIndex).isStriped = False then
-        GenerateIndexShift(IdentifierAt(IdentIndex).AllocElementType);
+      if IdentifierAt(IdentIndex).isStriped = False then GenerateIndexShift(IdentifierAt(IdentIndex).AllocElementType);
 
     end;
 
@@ -7852,8 +7850,7 @@ begin
           if (IdentifierAt(IdentIndex).Param[NumActualParams].DataType = TDatatype.POINTERTOK) then
             GetCommonType(i, IdentifierAt(IdentIndex).Param[NumActualParams].DataType, ActualParamType);
 
-          if (TokenAt(i).Kind = IDENTTOK) and (IdentifierAt(IdentIndex).Param[NumActualParams].DataType =
-            ENUMTOK) then
+          if (TokenAt(i).Kind = IDENTTOK) and (IdentifierAt(IdentIndex).Param[NumActualParams].DataType = ENUMTOK) then
           begin
             IdentTemp := GetIdentIndex(TokenAt(i).Name);
 
@@ -10244,8 +10241,7 @@ begin
                                 Push(0, ASPOINTERTOARRAYRECORDTOSTRING, GetDataSize(ValType),
                                   IdentIndex, IdentTemp and $ffff)
                               else
-                                Push(0, ASPOINTERTOARRAYRECORD, GetDataSize(ValType),
-                                  IdentIndex, IdentTemp and $ffff);
+                                Push(0, ASPOINTERTOARRAYRECORD, GetDataSize(ValType), IdentIndex, IdentTemp and $ffff);
 
                           end
                           else
@@ -12558,8 +12554,7 @@ begin
                         if (IdentTemp > 0) and (IdentifierAt(IdentTemp).Kind = TDataType.ENUMTOK) then
                         begin
 
-                          if IdentifierAt(IdentTemp).NumAllocElements <>
-                            IdentifierAt(IdentIndex).NumAllocElements then
+                          if IdentifierAt(IdentTemp).NumAllocElements <> IdentifierAt(IdentIndex).NumAllocElements then
                             ErrorIncompatibleEnumIdentifiers(i, IdentTemp, IdentIndex);
 
                         end
@@ -14023,8 +14018,8 @@ WHILETOK:
                   asm65('; --- ForToDoCondition');
 
 
-                  if (ActualParamType = ExpressionType) and
-                    (GetDataSize(IdentifierAt(IdentTemp).DataType) > GetDataSize(ActualParamType)) then
+                  if (ActualParamType = ExpressionType) and (GetDataSize(IdentifierAt(IdentTemp).DataType) >
+                    GetDataSize(ActualParamType)) then
                     Note(j, 'FOR loop counter variable type is of larger size than required');
 
 
@@ -14768,8 +14763,7 @@ WHILETOK:
             TTokenKind.STRINGLITERALTOK:            // 'text'
             begin
               asm65(#9'ldy #$00');
-              asm65(#9'mva:rne CODEORIGIN+$' + IntToHex(TokenAt(i + 1).StrAddress - CODEORIGIN + 1, 4) +
-                ',y @buf,y+');
+              asm65(#9'mva:rne CODEORIGIN+$' + IntToHex(TokenAt(i + 1).StrAddress - CODEORIGIN + 1, 4) + ',y @buf,y+');
 
               if yes then
               begin                 // WRITELN
@@ -14978,8 +14972,9 @@ WHILETOK:
 
                                 end
                                 else
-                                  if (ExpressionType = TDataType.STRINGPOINTERTOK) or (IdentifierAt(IdentIndex).Kind =
-                                    TTokenKind.FUNCTIONTOK) or ((ExpressionType = TDataType.POINTERTOK) and
+                                  if (ExpressionType = TDataType.STRINGPOINTERTOK) or
+                                    (IdentifierAt(IdentIndex).Kind = TTokenKind.FUNCTIONTOK) or
+                                    ((ExpressionType = TDataType.POINTERTOK) and
                                     (IdentifierAt(IdentIndex).DataType = TDataType.STRINGPOINTERTOK)) then
                                     GenerateWriteString(IdentifierAt(IdentIndex).Value, ASPOINTERTOPOINTER,
                                       IdentifierAt(IdentIndex).DataType)
@@ -15252,9 +15247,9 @@ WHILETOK:
 
           end
           else
-            if (IdentifierAt(IdentIndex).DataType in Pointers) and
-              (IdentifierAt(IdentIndex).NumAllocElements = 0) and (IdentifierAt(IdentIndex).AllocElementType in
-              OrdinalTypes) and (IndirectionLevel <> ASPOINTERTOPOINTER) then
+            if (IdentifierAt(IdentIndex).DataType in Pointers) and (IdentifierAt(IdentIndex).NumAllocElements = 0) and
+              (IdentifierAt(IdentIndex).AllocElementType in OrdinalTypes) and
+              (IndirectionLevel <> ASPOINTERTOPOINTER) then
             begin      // zwieksz o N * DATASIZE jesli to wskaznik ale nie tablica
 
               if yes then
@@ -15834,8 +15829,7 @@ var
           else
 
             if IdentifierAt(IdentIndex).NumAllocElements > 0 then
-              Result := #9'= CODEORIGIN+$' + IntToHex(IdentifierAt(IdentIndex).Value -
-                CODEORIGIN_BASE - CODEORIGIN, 4)
+              Result := #9'= CODEORIGIN+$' + IntToHex(IdentifierAt(IdentIndex).Value - CODEORIGIN_BASE - CODEORIGIN, 4)
             else
               if abs(v) < 256 then
                 Result := #9'= $' + IntToHex(Byte(v), 2)
@@ -16134,8 +16128,7 @@ begin
               begin
 
                 asm65('adr.' + IdentifierAt(IdentIndex).Name + Value);
-                asm65('.var ' + IdentifierAt(IdentIndex).Name + #9'= adr.' +
-                  IdentifierAt(IdentIndex).Name + ' .word');
+                asm65('.var ' + IdentifierAt(IdentIndex).Name + #9'= adr.' + IdentifierAt(IdentIndex).Name + ' .word');
 
               end
               else
@@ -17477,8 +17470,7 @@ begin
           begin
 
             if Param[ParamIndex].DataType = ENUMTYPE then
-              GenerateAssignment(ASPOINTER, GetDataSize(Param[ParamIndex].AllocElementType),
-                0, Param[ParamIndex].Name)
+              GenerateAssignment(ASPOINTER, GetDataSize(Param[ParamIndex].AllocElementType), 0, Param[ParamIndex].Name)
             else
               GenerateAssignment(ASPOINTER, GetDataSize(Param[ParamIndex].DataType), 0, Param[ParamIndex].Name);
 
@@ -18845,9 +18837,8 @@ begin
                         end
                         else
                           i := ReadDataArray(i, idx, IdentifierAt(NumIdent).AllocElementType,
-                            IdentifierAt(NumIdent).NumAllocElements or
-                            IdentifierAt(NumIdent).NumAllocElements_ shl 16, False,
-                            TokenAt(i - 2).Kind = TTokenKind.PCHARTOK);
+                            IdentifierAt(NumIdent).NumAllocElements or IdentifierAt(NumIdent).NumAllocElements_ shl
+                            16, False, TokenAt(i - 2).Kind = TTokenKind.PCHARTOK);
 
                       end;
 
@@ -19014,8 +19005,7 @@ begin
                     ' <> ' + Param[ParamIndex].Name);
 
               for ParamIndex := 1 to IdentifierAt(ForwardIdentIndex).NumParams do
-                if (IdentifierAt(ForwardIdentIndex).Param[ParamIndex].PassMethod <>
-                  Param[ParamIndex].PassMethod) then
+                if (IdentifierAt(ForwardIdentIndex).Param[ParamIndex].PassMethod <> Param[ParamIndex].PassMethod) then
                   Error(i, 'Function header doesn''t match the previous declaration ''' +
                     IdentifierAt(ForwardIdentIndex).Name + '''');
 
@@ -19041,8 +19031,7 @@ begin
             if IsNestedFunction then
               if (IdentifierAt(ForwardIdentIndex).DataType <> NestedFunctionResultType) or
                 (IdentifierAt(ForwardIdentIndex).NestedFunctionNumAllocElements <> NestedFunctionNumAllocElements) or
-                (IdentifierAt(ForwardIdentIndex).NestedFunctionAllocElementType <>
-                NestedFunctionAllocElementType) then
+                (IdentifierAt(ForwardIdentIndex).NestedFunctionAllocElementType <> NestedFunctionAllocElementType) then
                 Error(i, 'Function header doesn''t match the previous declaration ''' +
                   IdentifierAt(ForwardIdentIndex).Name + '''');
 
@@ -19897,5 +19886,3 @@ begin
   unitPathList.Free;
   unitPathList := nil;
 end;
-
-end.
