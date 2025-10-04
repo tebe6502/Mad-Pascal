@@ -463,163 +463,209 @@ uses
 
   end;  //ParseParam
 
-
-
-  // ----------------------------------------------------------------------------
-//                                 Compiler Main
-  // ----------------------------------------------------------------------------
-
-var i: Integer;
-var MainPath: String;
-  var FilePath: String;
-  var Start_Time, end_time: Int64;
-var scanner: IScanner;
-    // Processing variables.
-var programUnit: TSourceFile;
+    // Main
 begin
 
+    Result := 0;
 {$IFDEF WINDOWS}
- if GetFileType(GetStdHandle(STD_OUTPUT_HANDLE)) = 3 then begin
-  System.Assign(Output, ''); FileMode:=1; Rewrite(Output);
+   if Windows.GetFileType(Windows.GetStdHandle(STD_OUTPUT_HANDLE)) = Windows.FILE_TYPE_PIPE then
+   begin
+    System.Assign(Output, ''); FileMode:=1; System.Rewrite(Output);
  end;
 {$ENDIF}
 
   //WriteLn('Sub-Pascal 32-bit real mode compiler v. 2.0 by Vasiliy Tereshkov, 2009');
 
-  WriteLn(CompilerTitle);
+    WriteLn(Compiler.CompilerTitle);
   
-  TokenList := TTokenList.Create;
-  IdentifierList := TIdentifierList.Create;
-  for i := 1 to MAXIDENTS do IdentifierList.AddIdentifier;
 
-  SetLength(IFTmpPosStack, 1);
+    // By default the executable is in 'bin/<os>'.
+    libFolderPath := ExtractFileDir(ParamStr(0));
+    libFolderPath := ExtractFileDir(libFolderPath);
+    libFolderPath := ExtractFileDir(libFolderPath);
+    libFolderPath := IncludeTrailingPathDelimiter(libFolderPath) + 'lib';
 
-  // Tok[NumTok].Line := 0;
-  // UnitName[1].Name := '';
+    unitPathList := TPathList.Create;
+    if TFileSystem.FolderExists(libFolderPath) then
+    begin
+      unitPathList.AddFolder(libFolderPath);
+    end;
 
-  MainPath := ExtractFilePath(ParamStr(0));
+    SourceFileList := TSourceFileList.Create();
 
-  // SetLength(UnitPath, 2);
+    try
 
-  MainPath := IncludeTrailingPathDelimiter(MainPath);
-  unitPathList:=TPathList.Create;
-  unitPathList.AddFolder(IncludeTrailingPathDelimiter(MainPath + 'lib'));
+      if (TEnvironment.GetParameterCount = 0) then Syntax(THaltException.COMPILING_NOT_STARTED);
 
-  if (ParamCount = 0) then Syntax(3);
+      ParseParam();
+      // The main program is the first unit.
 
-  // NumUnits := 1;           // !!! 1 !!!
+      if (inputFilePath = '') then Syntax(THaltException.COMPILING_NOT_STARTED);
+    except
+      on e: THaltException do
+      begin
+        Result := e.GetExitCode();
+        Exit;
+      end;
+    end;
+
+    programUnit := SourceFileList.AddUnit(TSourceFileType.PROGRAM_FILE, ExtractFilename(inputFilePath), inputFilePath);
+
+    {$IFDEF USEOPTFILE} // TODO Make command line option
+
+    OptFile := TFileSystem.CreateTextFile();
+    OptFile.Assign(ChangeFileExt(programUnit.Name, '.opt'));
+    try
+      OptFile.Rewrite();
+
+    except
+      on e: EInOutError do
+      begin
+      Console.TextColor(Console.LightRed);
+        WriteLn(Format('ERROR: Cannot open optimization file "%s" for writing. %s.', [OptFile.GetAbsoluteFilePath(), e.Message]));
+        Console.NormVideo;
+        Result := THaltException.COMPILING_NOT_STARTED;
+        Exit();
+      end;
+    end;
 
 
-  ParseParam;
-
-
-  Defines[1].Name := AnsiUpperCase(target.Name);
-
-  if (inputFilePath = '') then Syntax(3);
-
-  if pos(MainPath, ExtractFilePath(inputFilePath) )> 0 then
-    FilePath := ExtractFilePath(inputFilePath)
-  else
-    FilePath := MainPath + ExtractFilePath(inputFilePath);
-
-  DefaultFormatSettings.DecimalSeparator := '.';
- {$IFDEF USEOPTFILE}
- AssignFile(OptFile, ChangeFileExt(inputFilePath, '.opt') ); FileMode:=1; rewrite(OptFile);
  {$ENDIF}
 
+    OutFile := TFileSystem.CreateTextFile;
 
-  if ExtractFileName(outputFile) = '' then
+    if ExtractFileName(outputFilePath) = '' then
   begin
-    outputFile := ChangeFileExt(inputFilePath, '.a65');
+      outputFilePath := ChangeFileExt(programUnit.Name, '.a65');
   end;
 
-  AssignFile(OutFile, outputFile);
+    OutFile.Assign(outputFilePath);
+    try
+      OutFile.Rewrite;
 
-  FileMode := 1;
-  Rewrite(OutFile);
+    except
+      on e: EInOutError do
+      begin
+        Console.TextColor(Console.LightRed);
+        WriteLn(Format('ERROR: Cannot open output file "%s" for writing. %s.',
+          [OutFile.GetAbsoluteFilePath(), e.Message]));
+        Console.NormVideo;
+        Result := THaltException.COMPILING_NOT_STARTED;
+        Exit();
+      end;
+    end;
 
-  TextColor(WHITE);
+    {$IFDEF USETRACEFILE}
+    traceFile := TFileSystem.CreateTextFile;
+    traceFile.Assign(ChangeFileExt(outputFilePath, '.log'));
+    try
+      traceFile.Rewrite();
+    except
+      on e: EInOutError do
+      begin
+        Console.TextColor(Console.LightRed);
+        WriteLn(Format('ERROR: Cannot open trace file file "%s" for writing. %s.',
+          [traceFile.GetAbsoluteFilePath(), e.Message]));
+        Console.NormVideo;
+        Result := THaltException.COMPILING_NOT_STARTED;
+        Exit();
+      end;
+    end;
+    {$ENDIF}
 
-  Writeln('Compiling ', inputFilePath);
+    StartTime := GetTickCount64;
 
-  start_time := GetTickCount64;
+    try
+      Compiler.Main(programUnit, unitPathList);
+      OutFile.Flush;
+      OutFile.Close;
+    except
+      on e: THaltException do
+      begin
+        Result := e.GetExitCode();
+        OutFile.Close;
+        OutFile.Erase;
+      end;
+    end;
 
  {$IFDEF USETRACEFILE}
- System.Assign(traceFile, ChangeFileExt( outputFile, '.log'));
- FileMode:=1;
- Rewrite(traceFile);
+    TraceFile.Close;
  {$ENDIF}
 
-  // ----------------------------------------------------------------------------
-  // Set defines for first pass;
-  scanner := TScanner.Create;
-
-  SourceFileList:=TSourceFileList.Create;
-  programUnit := SourceFileList.AddUnit(TSourceFileType.PROGRAM_FILE, ExtractFilename(inputFilePath), inputFilePath);
-
-  scanner.TokenizeProgram(programUnit, True);
-
-  if NumTok = 0 then Error(1, '');
-
-  // Add default unit 'system.pas'
-  SourceFileList.AddUnit(TSourceFileType.UNIT_FILE, 'SYSTEM', FindFile('system.pas', 'unit'));
-
-  scanner.TokenizeProgram(programUnit, False);
-
-  // ----------------------------------------------------------------------------
-
-  NumStaticStrCharsTmp := NumStaticStrChars;
-
-  InitializeIdentifiers;
-
-  // First pass: compile the program and build call graph
-  NumPredefIdent := NumIdent;
+    {$IFDEF USEOPTFILE}
+    OptFile.Close;
+    {$ENDIF}
 
 
-  CompileProgram(TPass.CALL_DETERMINATION);
+    // Diagnostics
+    if DiagMode then Diagnostics(programUnit);
 
 
-  // Visit call graph nodes and mark all procedures that are called as not dead
-  OptimizeProgram(GetIdentIndex('MAIN'));
+    WritelnMsg;
 
+    TextColor(WHITE);
+    seconds := (GetTickCount64 - StartTime + 500) / 1000;
+{$IFNDEF PAS2JS}
+    Writeln(TokenAt(NumTok).SourceLocation.Line, ' lines compiled, ', seconds: 2: 2, ' sec, ',
+      NumTok, ' tokens, ', NumIdent, ' idents, ', NumBlocks, ' blocks, ', NumTypes, ' types');
+{$ELSE}
+   Writeln(IntToStr(TokenAt(NumTok).SourceLocation.Line) + ' lines compiled, ' + FloatToStr(seconds) + ' sec, '
+ 	   + IntToStr(NumTok) + ' tokens        , ' + IntToStr(NumIdent) + ' idents, '
+	   + IntToStr(NumBlocks) + ' blocks, ' +  IntToStr(NumTypes) + ' types');
+{$ENDIF}
 
-  // Second pass: compile the program and generate output (IsNotDead fields are preserved since the first pass)
-  NumIdent_ := NumPredefIdent;
-  ClearWordMemory(_DataSegment);
+    Compiler.Free;
 
-  SourceFileList.ClearAllowedUnitNames;
+    TextColor(LIGHTGRAY);
 
-  NumBlocks := 0;
-  BlockStackTop := 0;
-  CodeSize := 0;
-  CodePosStackTop := 0;
-  CaseCnt := 0;
-  IfCnt := 0;
-  ShrShlCnt := 0;
-  NumTypes := 0;
-  run_func := 0;
-  NumProc := 0;
+    if msgLists.msgWarning.Count > 0 then Writeln(IntToStr(msgLists.msgWarning.Count) + ' warning(s) issued');
+    if msgLists.msgNote.Count > 0 then Writeln(IntToStr(msgLists.msgNote.Count) + ' note(s) issued');
 
-  NumStaticStrChars := NumStaticStrCharsTmp;
+    NormVideo;
+  end;
 
-  ResetOpty;
-  optyFOR0 := '';
-  optyFOR1 := '';
-  optyFOR2 := '';
-  optyFOR3 := '';
+  function CallMain: TExitCode;
+  var
+    exitCode: TExitCode;
+   {$IFDEF SIMULATED_FILE_IO}
+    fileMap: TFileMap;
+    fileMapEntry: TFileMapEntry;
+    content: String;
+   {$ENDIF}
+  begin
 
-  LIBRARY_USE := LIBRARYTOK_USE;
+    exitCode := Main();
+    if (exitCode <> 0) then
+    begin
+      WriteLn('Program ended with exit code ' + IntToStr(exitCode));
+    end;
 
-  LIBRARYTOK_USE := False;
-  PROGRAMTOK_USE := False;
-  INTERFACETOK_USE := False;
-  PublicSection := True;
+  {$IFDEF SIMULATED_FILE_IO}
+  fileMap:=TFileSystem.GetFileMap();
+  fileMapEntry:=fileMap.GetEntry('Output.a65');
+  if fileMapEntry<>nil then
+  begin
+    content:=fileMapEntry.content;
+    WriteLn(content);
+  end;
+  {$ENDIF}
 
-  iOut := -1;
-  outTmp := '';
+    Result := exitCode;
+  end;
 
-  SetLength(OptimizeBuf, 1);
+var
+  exitCode: TExitCode;
+begin
+  exitCode := CallMain;
+  {$IFDEF DEBUG}
+  //exitCode := CallMain; // TODO until 2nd call works
+  {$ENDIF}
 
-  CompileProgram(TPass.CODE_GENERATION);
+  {$IFDEF DEBUG}
+  Console.WaitForKeyPressed;
+  {$ENDIF}
 
+  {$IFNDEF PAS2JS}
+  Halt(exitCode);
+  {$ENDIF}
 end.
