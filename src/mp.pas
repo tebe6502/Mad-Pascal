@@ -220,11 +220,7 @@ uses
 
 
 // ----------------------------------------------------------------------------
-// ----------------------------------------------------------------------------
-
-
-// ----------------------------------------------------------------------------
-//                                 Main program
+//                                 Main Program
 // ----------------------------------------------------------------------------
 
   function Main: TExitCode;
@@ -331,7 +327,6 @@ uses
                           Inc(i);
                           parameterValue := TEnvironment.GetParameterStringUpperCase(i);
                           AddDefine(parameterValue);
-                          AddDefines := NumDefines;
                           AddDefines := NumDefines;
 
                         end
