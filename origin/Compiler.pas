@@ -11094,6 +11094,8 @@ function CompileFactor(i: Integer; out isZero: Boolean; out ValType: TDataType;
         if (ValType in RealTypes) and (RightValType = VarType) then ValType := VarType;
       end;
 
+    if TokenAt(j + 1).Kind = TTokenKind.DIVTOK then
+    begin
       if VarType in RealTypes then
       begin
         CastRealType := VarType;
@@ -11115,7 +11117,8 @@ function CompileFactor(i: Integer; out isZero: Boolean; out ValType: TDataType;
 
       CheckOperator(i, TokenAt(j + 1).Kind, ValType, RightValType);
 
-      if not (TokenAt(j + 1).Kind in [TTokenKind.SHLTOK, TTokenKind.SHRTOK]) then        // dla SHR, SHL nie wyrownuj typow parametrow
+    if not (TokenAt(j + 1).Kind in [TTokenKind.SHLTOK, TTokenKind.SHRTOK]) then
+      // dla SHR, SHL nie wyrownuj typow parametrow
         ExpandExpression(ValType, RightValType, TDataType.UNTYPETOK);
 
     if TokenAt(j + 1).Kind = TTokenKind.MULTOK then
@@ -19430,6 +19433,8 @@ end;
 
     end;
 
+
+procedure CompileDataOrigin;
     asm65;
     asm65('DATAORIGIN');
 
@@ -19519,6 +19524,7 @@ end;
 
     asm65;
     asm65(#9'ert DATAORIGIN<@end,''DATA memory overlap''');
+    end;
 
     if FastMul > 0 then
     begin
@@ -19553,6 +19559,7 @@ end;
 
     asm65separator;
 
+procedure CompileStaticData;
     asm65;
     asm65('.macro'#9'STATICDATA');
 
@@ -19594,7 +19601,9 @@ end;
     if tmp <> '' then asm65(tmp);
 
     asm65('.endm');
+end;
 
+procedure CompileResources;
 
     if (High(resArray) > 0) and (target.id <> TTargetID.A8) then
     begin
@@ -19941,8 +19950,6 @@ var
 var MainPath: String;
   var FilePath: String;
   var Start_Time, end_time: Int64;
-  // Processing variables.
-var programUnit: TSourceFile;
 begin
 
 {$IFDEF WINDOWS}
