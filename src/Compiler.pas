@@ -8107,15 +8107,15 @@ begin
             begin
               asm65(#9'ldy #$00');
               ;
-              asm65(#9'mva:rne (:bp2),y ' + svar + '.adr.' + IdentifierAt(
-                IdentIndex).Param[NumActualParams].Name + ',y+');
+              asm65(#9'mva:rne (:bp2),y ' + svar + '.adr.' +
+                IdentifierAt(IdentIndex).Param[NumActualParams].Name + ',y+');
             end
             else
               if j <= 128 then
               begin
                 asm65(#9'ldy #$' + IntToHex(j - 1, 2));
-                asm65(#9'mva:rpl (:bp2),y ' + svar + '.adr.' + IdentifierAt(
-                  IdentIndex).Param[NumActualParams].Name + ',y-');
+                asm65(#9'mva:rpl (:bp2),y ' + svar + '.adr.' +
+                  IdentifierAt(IdentIndex).Param[NumActualParams].Name + ',y-');
               end
               else
                 asm65(#9'@move ":bp2" #' + svar + '.adr.' + IdentifierAt(IdentIndex).Param[NumActualParams].Name +
@@ -15796,8 +15796,8 @@ var
 
         case Byte(abs(IdentifierAt(IdentIndex).Value shr 24) and $7f) of
           1..3: Result := #9'= ' + reg[abs(IdentifierAt(IdentIndex).Value shr 24) and $7f];
-          4..19: Result := #9'= :STACKORIGIN-' + IntToStr(
-              Byte(abs(IdentifierAt(IdentIndex).Value shr 24) and $7f) - 3);
+          4..19: Result := #9'= :STACKORIGIN-' +
+              IntToStr(Byte(abs(IdentifierAt(IdentIndex).Value shr 24) and $7f) - 3);
           else
             Result := #9'= ''out of resource'''
         end;
@@ -17009,8 +17009,8 @@ var
   isReg, isInt, isInl, isOvr: Boolean;
   VarType: TDataType;
   VarRegister: Byte;
-  NestedFunctionResultType, ConstValType, AllocElementType, ActualParamType, NestedFunctionAllocElementType,
-  NestedDataType, NestedAllocElementType, IdType: TDataType;
+  NestedFunctionResultType, ConstValType, AllocElementType, ActualParamType,
+  NestedFunctionAllocElementType, NestedDataType, NestedAllocElementType, IdType: TDataType;
   Tmp, TmpResult: Word;
 
   external_name: TString;
@@ -19881,3 +19881,6 @@ begin
   unitPathList.Free;
   unitPathList := nil;
 end;
+
+end.
+
