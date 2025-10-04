@@ -63,9 +63,6 @@ var
 
   OldConstValType: TDataType;
 
-  // TODO: Global "i" is dangerous.
-  i: Integer;
-
   NumPredefIdent, NumStaticStrChars, NumBlocks, run_func, NumProc, CodeSize, NumStaticStrCharsTmp,
   IfCnt, CaseCnt, IfdefLevel: Integer;
 
