@@ -45,7 +45,7 @@ Contributors:
 + David Schmenk :
   - IEEE-754 (32bit) Single[Float]
 
-+ Daniel Kozminski :
++ Daniel Koźmiński :
   - unit STRINGUTILS
   - unit CIO
 
@@ -78,10 +78,10 @@ Contributors:
   - unit XBIOS: BLIBS library
   - unit LZ4: unLZ4
 
-+ Krzysztof Swiecicki :
++ Krzysztof Święcicki :
   - unit PP
 
-+ Marcin Zukowski :
++ Marcin Żukowski :
   - unit FASTGRAPH: fLine
 
 + Michael Jaskula :
@@ -128,7 +128,7 @@ Contributors:
   - unit LZJB
   - unit RC4
 
-+ Wojciech Bocianski (http://bocianu.atari.pl/) :
++ Wojciech Bociański (http://bocianu.atari.pl/) :
   - library BLIBS: B_CRT, B_DL, B_PMG, B_SYSTEM, B_UTILS, XBIOS
   - MADSTRAP
   - PASDOC
@@ -170,7 +170,7 @@ Contributors:
 # indeks dla dwuwymiarowej tablicy [0..x, 0..y] = a * ((y+1) * GetDataSize(AllocElementType)) + b * GetDataSize(AllocElementType)
 
 # dla typu OBJECT przekazywany jest poczatkowy adres alokacji danych pamieci (HI = regY, LO = regA), potem sa obliczane kolejne adresy w naglowku procedury/funkcji
-# zaleca sie uzywania typow prostych, wskazniki do tablic w OBJECT marnuja duzo zasobow CPU
+# zaleca się uzywania typow prostych, wskazniki do tablic w OBJECT marnuja duzo zasobow CPU
 
 # podczas wartosciowania wyrazen typy sa roszerzane, w przypadku operacji '-' promowane do SIGNEDORDINALTYPES (BYTE -> TTokenKind.SMALLINTTOK ; WORD -> TTokenKind.INTEGERTOK)
 
@@ -178,14 +178,14 @@ Contributors:
 # (TokenAt( ].Kind = ASMTOK + TokenAt( ].Value = 1) wersja bez { }
 
 # --------------------------------------------------------------------------------------------------------------
-#                          |      DataType      |  AllocElementType  |  NumAllocElements  |  NumAllocElements_ |
+#                          |      DataType                |  AllocElementType   |  NumAllocElements  |  NumAllocElements_ |
 # --------------------------------------------------------------------------------------------------------------
-# VAR RECORD               | TTokenKind.RECORDTOK          | 0                  | RecType            | 0                  |
-# VAR ^RECORD              | TTokenKind.POINTERTOK         | TTokenKind.RECORDTOK          | RecType            | 0                  |
-# ARRAY [0..X]             | TTokenKind.POINTERTOK         | Type               | X Array Size       | 0                  |
-# ARRAY [0..X, 0..Y]       | TTokenKind.POINTERTOK         | Type               | X Array Size       | Y Array Size       |
-# ARRAY [0..X] OF ^RECORD  | TTokenKind.POINTERTOK         | TTokenKind.RECORDTOK          | RecType            | X Array Size       |
-# ARRAY [0..X] OF ^OBJECT  | TTokenKind.POINTERTOK         | TTokenKind.OBJECTTOK          | RecType            | X Array Size       |
+# VAR RECORD               | RECORDTOK          | 0                  | RecType            | 0                  |
+# VAR ^RECORD              | POINTERTOK         | RECORDTOK          | RecType            | 0                  |
+# ARRAY [0..X]             | POINTERTOK         | Type               | X Array Size       | 0                  |
+# ARRAY [0..X, 0..Y]       | POINTERTOK         | Type               | X Array Size       | Y Array Size       |
+# ARRAY [0..X] OF ^RECORD  | POINTERTOK         | RECORDTOK          | RecType            | X Array Size       |
+# ARRAY [0..X] OF ^OBJECT  | POINTERTOK         | OBJECTTOK          | RecType            | X Array Size       |
 # --------------------------------------------------------------------------------------------------------------
 
 *)
