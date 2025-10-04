@@ -19723,11 +19723,8 @@ end;
 
   flushTempBuf;      // flush TemporaryBuf
 
-end;  //CompileProgram
+end;
 
-// ----------------------------------------------------------------------------
-//                                 Compiler Main
-// ----------------------------------------------------------------------------
 procedure InitializeIdentifiers;
 {$IFNDEF PAS2JS}
 const

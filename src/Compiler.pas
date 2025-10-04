@@ -7008,11 +7008,12 @@ begin
                         ((IdentifierAt(IdentIndex).DataType in Pointers) and
                         (IdentifierAt(IdentIndex).AllocElementType in [RECORDTOK, OBJECTTOK]) and
                         (IdentifierAt(IdentIndex).NumAllocElements_ = 0)) or
-                        ((IdentifierAt(IdentIndex).DataType in Pointers) and (IdentifierAt(IdentIndex).idType =
-                        DATAORIGINOFFSET)) or ((IdentifierAt(IdentIndex).DataType in Pointers) and
-                        not (IdentifierAt(IdentIndex).AllocElementType in
-                        [UNTYPETOK, RECORDTOK, OBJECTTOK, PROCVARTOK]) and (IdentifierAt(
-                        IdentIndex).NumAllocElements > 0)) or ((IdentifierAt(IdentIndex).DataType in Pointers) and
+                        ((IdentifierAt(IdentIndex).DataType in Pointers) and
+                        (IdentifierAt(IdentIndex).idType = DATAORIGINOFFSET)) or
+                        ((IdentifierAt(IdentIndex).DataType in Pointers) and not
+                        (IdentifierAt(IdentIndex).AllocElementType in [UNTYPETOK, RECORDTOK,
+                        OBJECTTOK, PROCVARTOK]) and (IdentifierAt(IdentIndex).NumAllocElements > 0)) or
+                        ((IdentifierAt(IdentIndex).DataType in Pointers) and
                         (IdentifierAt(IdentIndex).PassMethod = TParameterPassingMethod.VARPASSING)) then
                         Push(IdentifierAt(IdentIndex).Value, ASPOINTER, GetDataSize(TTokenKind.POINTERTOK), IdentIndex)
                       else
@@ -8106,15 +8107,15 @@ begin
             begin
               asm65(#9'ldy #$00');
               ;
-              asm65(#9'mva:rne (:bp2),y ' + svar + '.adr.' +
-                IdentifierAt(IdentIndex).Param[NumActualParams].Name + ',y+');
+              asm65(#9'mva:rne (:bp2),y ' + svar + '.adr.' + IdentifierAt(
+                IdentIndex).Param[NumActualParams].Name + ',y+');
             end
             else
               if j <= 128 then
               begin
                 asm65(#9'ldy #$' + IntToHex(j - 1, 2));
-                asm65(#9'mva:rpl (:bp2),y ' + svar + '.adr.' +
-                  IdentifierAt(IdentIndex).Param[NumActualParams].Name + ',y-');
+                asm65(#9'mva:rpl (:bp2),y ' + svar + '.adr.' + IdentifierAt(
+                  IdentIndex).Param[NumActualParams].Name + ',y-');
               end
               else
                 asm65(#9'@move ":bp2" #' + svar + '.adr.' + IdentifierAt(IdentIndex).Param[NumActualParams].Name +
@@ -11910,8 +11911,8 @@ begin
 
               //      writeln(ExpressionType,',',VarTYpe,',',Elements(GetIdent(TokenAt(j + 2).Name^)));
 
-              if GetDataSize(VarType) <> Elements(IdentIndex) *
-                GetDataSize(IdentifierAt(IdentIndex).AllocElementType) then
+              if GetDataSize(VarType) <> Elements(IdentIndex) * GetDataSize(
+                IdentifierAt(IdentIndex).AllocElementType) then
                 if VarType = UNTYPETOK then
                   Error(j + 2, 'Illegal type conversion: "POINTER" to "Array[0..' +
                     IntToStr(Elements(IdentIndex) - 1) + '] Of ' +
@@ -11955,8 +11956,8 @@ begin
 
                 //  writeln('= ',IdentifierAt(IdentIndex).Name,',',IdentifierAt(IdentIndex).Kind,',',IdentifierAt(IdentIndex).DataType,',',IdentifierAt(IdentIndex).AllocElementType);
 
-                if not (IdentifierAt(IdentIndex).DataType in [TDataType.POINTERTOK, TDataType.RECORDTOK,
-                  TDataType.OBJECTTOK]) then
+                if not (IdentifierAt(IdentIndex).DataType in [TDataType.POINTERTOK,
+                  TDataType.RECORDTOK, TDataType.OBJECTTOK]) then
                   Error(i, TErrorCode.IllegalExpression);
 
                 if IdentifierAt(IdentIndex).DataType = TDataType.POINTERTOK then
@@ -12223,7 +12224,8 @@ begin
                         if GetIdentIndex(IdentifierAt(IdentIndex).Name + '.' + TokenAt(i + 3).Name) > 0 then
                           IdentIndex := GetIdentIndex(IdentifierAt(IdentIndex).Name + '.' + TokenAt(i + 3).Name);
 
-                        if VarType = TDataType.STRINGPOINTERTOK then IndirectionLevel := ASPOINTERTOARRAYRECORDTOSTRING;
+                        if VarType = TDataType.STRINGPOINTERTOK then
+                          IndirectionLevel := ASPOINTERTOARRAYRECORDTOSTRING;
 
                         Inc(i, 2);
 
@@ -15794,8 +15796,8 @@ var
 
         case Byte(abs(IdentifierAt(IdentIndex).Value shr 24) and $7f) of
           1..3: Result := #9'= ' + reg[abs(IdentifierAt(IdentIndex).Value shr 24) and $7f];
-          4..19: Result := #9'= :STACKORIGIN-' +
-              IntToStr(Byte(abs(IdentifierAt(IdentIndex).Value shr 24) and $7f) - 3);
+          4..19: Result := #9'= :STACKORIGIN-' + IntToStr(
+              Byte(abs(IdentifierAt(IdentIndex).Value shr 24) and $7f) - 3);
           else
             Result := #9'= ''out of resource'''
         end;
@@ -17007,8 +17009,8 @@ var
   isReg, isInt, isInl, isOvr: Boolean;
   VarType: TDataType;
   VarRegister: Byte;
-  NestedFunctionResultType, ConstValType, AllocElementType, ActualParamType,
-  NestedFunctionAllocElementType, NestedDataType, NestedAllocElementType, IdType: TDataType;
+  NestedFunctionResultType, ConstValType, AllocElementType, ActualParamType, NestedFunctionAllocElementType,
+  NestedDataType, NestedAllocElementType, IdType: TDataType;
   Tmp, TmpResult: Word;
 
   external_name: TString;
@@ -19719,11 +19721,8 @@ end;
 
   flushTempBuf;      // flush TemporaryBuf
 
-end;  //CompileProgram
+end;
 
-// ----------------------------------------------------------------------------
-//                                 Compiler Main
-// ----------------------------------------------------------------------------
 procedure InitializeIdentifiers;
 {$IFNDEF PAS2JS}
 const
