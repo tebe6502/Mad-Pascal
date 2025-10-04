@@ -19167,6 +19167,205 @@ end;
 // Subroutines of CompileProgram
 // ----------------------------------------------------------------------------
 
+
+procedure CompileResources;
+
+    if (High(resArray) > 0) and (target.id <> TTargetID.A8) then
+    begin
+
+      asm65;
+      asm65('.local'#9'RESOURCE');
+
+      asm65(#9'icl ''' + AnsiLowerCase(target.Name) + '\resource.asm''');
+
+      asm65;
+
+
+      for i := 0 to High(resArray) - 1 do
+        if resArray[i].resStream = False then
+        begin
+
+          j := NumIdent;
+
+          while (j > 0) and (IdentifierAt(j).SourceFile.UnitIndex = 1) do
+          begin
+            if IdentifierAt(j).Name = resArray[i].resName then
+            begin
+              resArray[i].resValue := IdentifierAt(j).Value;
+              Break;
+            end;
+            Dec(j);
+          end;
+
+        end;
+
+
+      for i := 0 to High(resArray) - 1 do
+        for j := 0 to High(resArray) - 1 do
+          if resArray[i].resValue < resArray[j].resValue then
+          begin
+            res := resArray[j];
+            resArray[j] := resArray[i];
+            resArray[i] := res;
+          end;
+
+
+      for i := 0 to High(resArray) - 1 do
+        if resArray[i].resStream = False then
+        begin
+
+          a := #9 + resArray[i].resType + ' ''' + resArray[i].resFile + '''' + ' ';
+
+          a := a + resArray[i].resFullName;
+
+          for j := 1 to MAXPARAMS do a := a + ' ' + resArray[i].resPar[j];
+
+          asm65(a);
+        end;
+
+      asm65('.endl');
+    end;
+end;
+
+
+procedure CompileStaticData;
+    asm65;
+    asm65('.macro'#9'STATICDATA');
+
+    tmp := '';
+    for i := 0 to NumStaticStrChars - 1 do
+    begin
+
+      if (i mod 24 = 0) then
+      begin
+
+        if i > 0 then asm65(tmp);
+
+        tmp := '.by ';
+
+      end
+      else
+        if (i > 0) and (i mod 8 = 0) then tmp := tmp + ' ';
+
+      if StaticStringData[i] and $c000 = $8000 then
+        tmp := tmp + ' <[DATAORIGIN+$' + IntToHex(Byte(StaticStringData[i]) or
+          Byte(StaticStringData[i + 1]) shl 8, 4) + ']'
+      else
+        if StaticStringData[i] and $c000 = $4000 then
+          tmp := tmp + ' >[DATAORIGIN+$' + IntToHex(Byte(StaticStringData[i - 1]) or
+            Byte(StaticStringData[i]) shl 8, 4) + ']'
+        else
+          if StaticStringData[i] and $3000 = $2000 then
+            tmp := tmp + ' <[CODEORIGIN+$' + IntToHex(Byte(StaticStringData[i]) or
+              Byte(StaticStringData[i + 1]) shl 8, 4) + ']'
+          else
+            if StaticStringData[i] and $3000 = $1000 then
+              tmp := tmp + ' >[CODEORIGIN+$' + IntToHex(Byte(StaticStringData[i - 1]) or
+                Byte(StaticStringData[i]) shl 8, 4) + ']'
+            else
+              tmp := tmp + ' $' + IntToHex(StaticStringData[i], 2);
+
+    end;
+
+    if tmp <> '' then asm65(tmp);
+
+    asm65('.endm');
+end;
+
+// ----------------------------------------------------------------------------
+
+procedure CompileDataOrigin;
+    asm65;
+    asm65('DATAORIGIN');
+
+    if DataSegmentUse then
+    begin
+      if Pass = TPass.CODE_GENERATION then
+      begin
+
+      // !!! I have to save everything, including 'zeros' !!! For example, for TextAtr to wor
+
+        DataSegmentSize := GetVarDataSize;
+
+        if LIBRARYTOK_USE = False then
+          for j := GetVarDataSize - 1 downto 0 do
+            if _DataSegment[j] <> 0 then
+            begin
+              DataSegmentSize := j + 1;
+              Break;
+            end;
+
+        tmp := '';
+
+        for j := 0 to DataSegmentSize - 1 do
+        begin
+
+          if (j mod 24 = 0) then
+          begin
+            if tmp <> '' then asm65(tmp);
+            tmp := '.by';
+          end;
+
+          if (j mod 8 = 0) then tmp := tmp + ' ';
+
+          if _DataSegment[j] and $c000 = $8000 then
+            tmp := tmp + ' <[DATAORIGIN+$' + IntToHex(Byte(_DataSegment[j]) or Byte(_DataSegment[j + 1]) shl 8, 4) + ']'
+          else
+            if _DataSegment[j] and $c000 = $4000 then
+              tmp := tmp + ' >[DATAORIGIN+$' + IntToHex(Byte(_DataSegment[j - 1]) or
+                Byte(_DataSegment[j]) shl 8, 4) + ']'
+            else
+              if _DataSegment[j] and $3000 = $2000 then
+                tmp := tmp + ' <[CODEORIGIN+$' + IntToHex(Byte(_DataSegment[j]) or
+                  Byte(_DataSegment[j + 1]) shl 8, 4) + ']'
+              else
+                if _DataSegment[j] and $3000 = $1000 then
+                  tmp := tmp + ' >[CODEORIGIN+$' + IntToHex(Byte(_DataSegment[j - 1]) or
+                    Byte(_DataSegment[j]) shl 8, 4) + ']'
+                else
+                  tmp := tmp + ' $' + IntToHex(_DataSegment[j], 2);
+
+        end;
+
+        if tmp <> '' then asm65(tmp);
+
+        // asm65;
+
+        //  asm65(#13#10#9'.print ''DATA: '',DATAORIGIN,''..'',*');
+
+      end;
+
+    end;{ else
+ asm65(#13#10#9'.print ''DATA: '',DATAORIGIN,''..'',DATAORIGIN+'+IntToStr(VarDataSize));
+}
+
+
+    if LIBRARYTOK_USE then
+    begin
+
+      asm65;
+      asm65('PROGRAMSTACK');
+
+    end
+    else
+    begin
+
+      asm65;
+      asm65('VARINITSIZE'#9'= *-DATAORIGIN');
+      asm65('VARDATASIZE'#9'= ' + IntToStr(GetVarDataSize));
+
+      asm65;
+      asm65('PROGRAMSTACK'#9'= DATAORIGIN+VARDATASIZE');
+
+    end;
+
+    asm65;
+    asm65(#9'.print ''DATA: '',DATAORIGIN,''..'',PROGRAMSTACK');
+
+    asm65;
+    asm65(#9'ert DATAORIGIN<@end,''DATA memory overlap''');
+    end;
+
   // ----------------------------------------------------------------------------
   // ----------------------------------------------------------------------------
 
@@ -19432,99 +19631,8 @@ end;
       asm65(#9'?old_adr = *');
 
     end;
+CompileDataOrigin;
 
-
-procedure CompileDataOrigin;
-    asm65;
-    asm65('DATAORIGIN');
-
-    if DataSegmentUse then
-    begin
-      if Pass = TPass.CODE_GENERATION then
-      begin
-
-        // !!! I need to save everything, including the 'zeros'!!! For example, for TextAtr to work
-
-        DataSegmentSize := GetVarDataSize;
-
-        if LIBRARYTOK_USE = False then
-          for j := GetVarDataSize - 1 downto 0 do
-            if _DataSegment[j] <> 0 then
-            begin
-              DataSegmentSize := j + 1;
-              Break;
-            end;
-
-        tmp := '';
-
-        for j := 0 to DataSegmentSize - 1 do
-        begin
-
-          if (j mod 24 = 0) then
-          begin
-            if tmp <> '' then asm65(tmp);
-            tmp := '.by';
-          end;
-
-          if (j mod 8 = 0) then tmp := tmp + ' ';
-
-          if _DataSegment[j] and $c000 = $8000 then
-            tmp := tmp + ' <[DATAORIGIN+$' + IntToHex(Byte(_DataSegment[j]) or Byte(_DataSegment[j + 1]) shl 8, 4) + ']'
-          else
-            if _DataSegment[j] and $c000 = $4000 then
-              tmp := tmp + ' >[DATAORIGIN+$' + IntToHex(Byte(_DataSegment[j - 1]) or
-                Byte(_DataSegment[j]) shl 8, 4) + ']'
-            else
-              if _DataSegment[j] and $3000 = $2000 then
-                tmp := tmp + ' <[CODEORIGIN+$' + IntToHex(Byte(_DataSegment[j]) or
-                  Byte(_DataSegment[j + 1]) shl 8, 4) + ']'
-              else
-                if _DataSegment[j] and $3000 = $1000 then
-                  tmp := tmp + ' >[CODEORIGIN+$' + IntToHex(Byte(_DataSegment[j - 1]) or
-                    Byte(_DataSegment[j]) shl 8, 4) + ']'
-                else
-                  tmp := tmp + ' $' + IntToHex(_DataSegment[j], 2);
-
-        end;
-
-        if tmp <> '' then asm65(tmp);
-
-        // asm65;
-
-        //  asm65(#13#10#9'.print ''DATA: '',DATAORIGIN,''..'',*');
-
-      end;
-
-    end;{ else
- asm65(#13#10#9'.print ''DATA: '',DATAORIGIN,''..'',DATAORIGIN+'+IntToStr(VarDataSize));
-}
-
-
-    if LIBRARYTOK_USE then
-    begin
-
-      asm65;
-      asm65('PROGRAMSTACK');
-
-    end
-    else
-    begin
-
-      asm65;
-      asm65('VARINITSIZE'#9'= *-DATAORIGIN');
-      asm65('VARDATASIZE'#9'= ' + IntToStr(GetVarDataSize));
-
-      asm65;
-      asm65('PROGRAMSTACK'#9'= DATAORIGIN+VARDATASIZE');
-
-    end;
-
-    asm65;
-    asm65(#9'.print ''DATA: '',DATAORIGIN,''..'',PROGRAMSTACK');
-
-    asm65;
-    asm65(#9'ert DATAORIGIN<@end,''DATA memory overlap''');
-    end;
 
     if FastMul > 0 then
     begin
@@ -19559,108 +19667,9 @@ procedure CompileDataOrigin;
 
     asm65separator;
 
-procedure CompileStaticData;
-    asm65;
-    asm65('.macro'#9'STATICDATA');
+    CompileStaticData;
 
-    tmp := '';
-    for i := 0 to NumStaticStrChars - 1 do
-    begin
-
-      if (i mod 24 = 0) then
-      begin
-
-        if i > 0 then asm65(tmp);
-
-        tmp := '.by ';
-
-      end
-      else
-        if (i > 0) and (i mod 8 = 0) then tmp := tmp + ' ';
-
-      if StaticStringData[i] and $c000 = $8000 then
-        tmp := tmp + ' <[DATAORIGIN+$' + IntToHex(Byte(StaticStringData[i]) or
-          Byte(StaticStringData[i + 1]) shl 8, 4) + ']'
-      else
-        if StaticStringData[i] and $c000 = $4000 then
-          tmp := tmp + ' >[DATAORIGIN+$' + IntToHex(Byte(StaticStringData[i - 1]) or
-            Byte(StaticStringData[i]) shl 8, 4) + ']'
-        else
-          if StaticStringData[i] and $3000 = $2000 then
-            tmp := tmp + ' <[CODEORIGIN+$' + IntToHex(Byte(StaticStringData[i]) or
-              Byte(StaticStringData[i + 1]) shl 8, 4) + ']'
-          else
-            if StaticStringData[i] and $3000 = $1000 then
-              tmp := tmp + ' >[CODEORIGIN+$' + IntToHex(Byte(StaticStringData[i - 1]) or
-                Byte(StaticStringData[i]) shl 8, 4) + ']'
-            else
-              tmp := tmp + ' $' + IntToHex(StaticStringData[i], 2);
-
-    end;
-
-    if tmp <> '' then asm65(tmp);
-
-    asm65('.endm');
-end;
-
-procedure CompileResources;
-
-    if (High(resArray) > 0) and (target.id <> TTargetID.A8) then
-    begin
-
-      asm65;
-      asm65('.local'#9'RESOURCE');
-
-      asm65(#9'icl ''' + AnsiLowerCase(target.Name) + '\resource.asm''');
-
-      asm65;
-
-
-      for i := 0 to High(resArray) - 1 do
-        if resArray[i].resStream = False then
-        begin
-
-          j := NumIdent;
-
-          while (j > 0) and (IdentifierAt(j).SourceFile.UnitIndex = 1) do
-          begin
-            if IdentifierAt(j).Name = resArray[i].resName then
-            begin
-              resArray[i].resValue := IdentifierAt(j).Value;
-              Break;
-            end;
-            Dec(j);
-          end;
-
-        end;
-
-
-      for i := 0 to High(resArray) - 1 do
-        for j := 0 to High(resArray) - 1 do
-          if resArray[i].resValue < resArray[j].resValue then
-          begin
-            res := resArray[j];
-            resArray[j] := resArray[i];
-            resArray[i] := res;
-          end;
-
-
-      for i := 0 to High(resArray) - 1 do
-        if resArray[i].resStream = False then
-        begin
-
-          a := #9 + resArray[i].resType + ' ''' + resArray[i].resFile + '''' + ' ';
-
-          a := a + resArray[i].resFullName;
-
-          for j := 1 to MAXPARAMS do a := a + ' ' + resArray[i].resPar[j];
-
-          asm65(a);
-        end;
-
-      asm65('.endl');
-    end;
-
+    CompileResources;
 
     asm65;
     asm65(#9'end');
@@ -19688,256 +19697,6 @@ const
   const INFINITY_VALUE: Int64 = $22222222;
   const NEGINFINITY_VALUE: Int64 = $33333333;
 {$ENDIF}
-begin
-end;
-
-  // ----------------------------------------------------------------------------
-  // ----------------------------------------------------------------------------
-
-
-{$i include/syntax.inc}
-
-
-  // ----------------------------------------------------------------------------
-  // ----------------------------------------------------------------------------
-
-var outputFile: String; // TODO
-var diagMode: Boolean; // TODO
-var inputFilePath: String; // TODO
-
-  procedure ParseParam;
-  var
-    i, err: Integer;
-    s: String;
-    t, c: String[32];
-  begin
-
-    t := 'A8';    // target
-    c := '';    // cpu
-
-    i := 1;
-    while i <= ParamCount do
-    begin
-
-      if ParamStr(i)[1] = '-' then
-      begin
-
-        if AnsiUpperCase(ParamStr(i)) = '-O' then
-        begin
-
-          outputFile := ParamStr(i + 1);
-          Inc(i);
-          if outputFile = '' then Syntax(3);
-
-        end
-        else
-          if pos('-O:', AnsiUpperCase(ParamStr(i))) = 1 then
-          begin
-
-            outputFile := copy(ParamStr(i), 4, 255);
-
-            if outputFile = '' then Syntax(3);
-
-          end
-          else
-            if AnsiUpperCase(ParamStr(i)) = '-DIAG' then
-              DiagMode := True
-            else
-
-              if (AnsiUpperCase(ParamStr(i)) = '-IPATH') or (AnsiUpperCase(ParamStr(i)) = '-I') then
-              begin
-
-                AddPath(ParamStr(i + 1));
-                Inc(i);
-
-              end
-              else
-                if pos('-IPATH:', AnsiUpperCase(ParamStr(i))) = 1 then
-                begin
-
-                  s := copy(ParamStr(i), 8, 255);
-                  AddPath(s);
-
-                end
-                else
-                  if (AnsiUpperCase(ParamStr(i)) = '-CPU') then
-                  begin
-
-                    c := AnsiUpperCase(ParamStr(i + 1));
-                    Inc(i);
-
-                  end
-                  else
-                    if pos('-CPU:', AnsiUpperCase(ParamStr(i))) = 1 then
-                    begin
-
-                      c := copy(ParamStr(i), 6, 255);
-
-                    end
-                    else
-                      if (AnsiUpperCase(ParamStr(i)) = '-DEFINE') or (AnsiUpperCase(ParamStr(i)) = '-DEF') then
-                      begin
-
-                        AddDefine(AnsiUpperCase(ParamStr(i + 1)));
-                        Inc(i);
-                        AddDefines := NumDefines;
-
-                      end
-                      else
-                        if pos('-DEFINE:', AnsiUpperCase(ParamStr(i))) = 1 then
-                        begin
-
-                          s := copy(ParamStr(i), 9, 255);
-                          AddDefine(AnsiUpperCase(s));
-                          AddDefines := NumDefines;
-
-                        end
-                        else
-                          if (AnsiUpperCase(ParamStr(i)) = '-CODE') or (AnsiUpperCase(ParamStr(i)) = '-C') then
-                          begin
-
-                            val('$' + ParamStr(i + 1), CODEORIGIN_BASE, err);
-                            Inc(i);
-                            if err <> 0 then Syntax(3);
-
-                          end
-                          else
-                            if pos('-CODE:', AnsiUpperCase(ParamStr(i))) = 1 then
-                            begin
-
-                              val('$' + copy(ParamStr(i), 7, 255), CODEORIGIN_BASE, err);
-                              if err <> 0 then Syntax(3);
-
-                            end
-                            else
-                              if (AnsiUpperCase(ParamStr(i)) = '-DATA') or (AnsiUpperCase(ParamStr(i)) = '-D') then
-                              begin
-
-                                val('$' + ParamStr(i + 1), DATA_BASE, err);
-                                Inc(i);
-                                if err <> 0 then Syntax(3);
-
-                              end
-                              else
-                                if pos('-DATA:', AnsiUpperCase(ParamStr(i))) = 1 then
-                                begin
-
-                                  val('$' + copy(ParamStr(i), 7, 255), DATA_BASE, err);
-                                  if err <> 0 then Syntax(3);
-
-                                end
-                                else
-                                  if (AnsiUpperCase(ParamStr(i)) = '-STACK') or
-                                    (AnsiUpperCase(ParamStr(i)) = '-S') then
-                                  begin
-
-                                    val('$' + ParamStr(i + 1), STACK_BASE, err);
-                                    Inc(i);
-                                    if err <> 0 then Syntax(3);
-
-                                  end
-                                  else
-                                    if pos('-STACK:', AnsiUpperCase(ParamStr(i))) = 1 then
-                                    begin
-
-                                      val('$' + copy(ParamStr(i), 8, 255), STACK_BASE, err);
-                                      if err <> 0 then Syntax(3);
-
-                                    end
-                                    else
-                                      if (AnsiUpperCase(ParamStr(i)) = '-ZPAGE') or
-                                        (AnsiUpperCase(ParamStr(i)) = '-Z') then
-                                      begin
-
-                                        val('$' + ParamStr(i + 1), ZPAGE_BASE, err);
-                                        Inc(i);
-                                        if err <> 0 then Syntax(3);
-
-                                      end
-                                      else
-                                        if pos('-ZPAGE:', AnsiUpperCase(ParamStr(i))) = 1 then
-                                        begin
-
-                                          val('$' + copy(ParamStr(i), 8, 255), ZPAGE_BASE, err);
-                                          if err <> 0 then Syntax(3);
-
-                                        end
-                                        else
-                                          if (AnsiUpperCase(ParamStr(i)) = '-TARGET') or
-                                            (AnsiUpperCase(ParamStr(i)) = '-T') then
-                                          begin
-
-                                            t := AnsiUpperCase(ParamStr(i + 1));
-                                            Inc(i);
-
-                                          end
-                                          else
-                                            if pos('-TARGET:', AnsiUpperCase(ParamStr(i))) = 1 then
-                                            begin
-
-                                              t := AnsiUpperCase(copy(ParamStr(i), 9, 255));
-
-                                            end
-                                            else
-                                              Syntax(3);
-
-      end
-      else
-
-      begin
-        inputFilePath := ParamStr(i);
-
-        if not FileExists(inputFilePath) then
-        begin
-          writeln('Error: Can''t open file ''' + inputFilePath + '''');
-          Halt(3);
-        end;
-
-      end;
-
-      Inc(i);
-    end;
-
-
-{$i targets/parse_param.inc}
-
-{$i targets/init.inc}
-
-
-    if CODEORIGIN_BASE < 0 then
-      CODEORIGIN_BASE := target.codeorigin
-    else
-      target.codeorigin := CODEORIGIN_BASE;
-
-
-    if ZPAGE_BASE < 0 then
-      ZPAGE_BASE := target.zpage
-    else
-      target.zpage := ZPAGE_BASE;
-
-
-    if c <> '' then
-      if AnsiUpperCase(c) = '6502' then target.cpu := TCPU.CPU_6502
-      else
-        if AnsiUpperCase(c) = '65C02' then target.cpu := TCPU.CPU_65C02
-        else
-          if AnsiUpperCase(c) = '65816' then target.cpu := TCPU.CPU_65816
-          else
-            Syntax(3);
-
-
-    case target.cpu of
-      TCPU.CPU_6502: AddDefine('CPU_6502');
-      TCPU.cpu_65c02: AddDefine('CPU_65C02');
-      TCPU.cpu_65816: AddDefine('CPU_65816');
-    end;
-
-    AddDefines := NumDefines;
-
-  end;  //ParseParam
-
-
-
 
   // ----------------------------------------------------------------------------
 //                                 Compiler Main
@@ -19951,16 +19710,6 @@ var MainPath: String;
   var FilePath: String;
   var Start_Time, end_time: Int64;
 begin
-
-{$IFDEF WINDOWS}
- if GetFileType(GetStdHandle(STD_OUTPUT_HANDLE)) = 3 then begin
-  System.Assign(Output, ''); FileMode:=1; Rewrite(Output);
- end;
-{$ENDIF}
-
-  //WriteLn('Sub-Pascal 32-bit real mode compiler v. 2.0 by Vasiliy Tereshkov, 2009');
-
-  WriteLn(CompilerTitle);
   
   TokenList := TTokenList.Create;
   IdentifierList := TIdentifierList.Create;
