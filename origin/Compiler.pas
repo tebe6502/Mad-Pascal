@@ -306,7 +306,7 @@ writeln('_A: ', IdentifierAt(IdentIndex).Name);
               begin
 
                 b := GetDataSize(IdentifierAt(IdentIndex).Param[i].DataType);  // required parameter type
-                k := GetDataSize(Param[i].DataType);      // type of parameter passed
+                k := GetDataSize(Param[i].DataType);        // type of parameter passed
 
                 //       writeln('+ ',IdentifierAt(IdentIndex).Name,' - ',b,',',k,',',4 - abs(b-k),' / ',Param[i].DataType,' | ',IdentifierAt(IdentIndex).Param[i].DataType);
 
@@ -324,7 +324,7 @@ writeln('_A: ', IdentifierAt(IdentIndex).Name);
               begin            // signed
 
                 b := GetDataSize(IdentifierAt(IdentIndex).Param[i].DataType);  // required parameter type
-                k := GetDataSize(Param[i].DataType);      // type of parameter passed
+                k := GetDataSize(Param[i].DataType);        // type of parameter passed
 
                 if Param[i].DataType in [TDataType.BYTETOK, TDataType.WORDTOK] then Inc(k);  // -> signed
 
@@ -647,12 +647,12 @@ begin
     TCode65.shrAX_CL: asm65(#9'jsr @shrAX_CL');
     TCode65.shrEAX_CL: asm65(#9'jsr @shrEAX_CL');
 
-    // TCode65.je: asm65(#9'beq *+5');          // =
-    // TCode65.jne: asm65(#9'bne *+5');          // <>
-    // TCode65.jg: begin asm65(#9'seq'); asm65(#9'bcs *+5') end;  // >
-    // TCode65.jge: asm65(#9'bcs *+5');          // >=
-    // TCode65.jl: asm65(#9'bcc *+5');          // <
-    // TCode65.jle: begin asm65(#9'bcc *+7'); asm65(#9'beq *+5') end;  // <=
+    //       TCode65.je: asm65(#9'beq *+5');          // =
+    //      TCode65.jne: asm65(#9'bne *+5');          // <>
+    //       TCode65.jg: begin asm65(#9'seq'); asm65(#9'bcs *+5') end;  // >
+    //      TCode65.jge: asm65(#9'bcs *+5');          // >=
+    //       TCode65.jl: asm65(#9'bcc *+5');          // <
+    //      TCode65.jle: begin asm65(#9'bcc *+7'); asm65(#9'beq *+5') end;  // <=
 
     TCode65.addBX: asm65(#9'inx');
     TCode65.subBX: asm65(#9'dex');
@@ -2200,8 +2200,8 @@ begin
 
   if Down then
   begin
-    // asm65;
-    // asm65('; Dec(var X [ ; N: int ] ) -> ' + InfoAboutToken(ExpressionType));
+    //asm65;
+    //asm65('; Dec(var X [ ; N: int ] ) -> ' + InfoAboutToken(ExpressionType));
 
     //  a:='sbb';
     b := 'sub';
@@ -2210,8 +2210,8 @@ begin
   end
   else
   begin
-    // asm65;
-    // asm65('; Inc(var X [ ; N: int ] ) -> ' + InfoAboutToken(ExpressionType));
+    //asm65;
+    //asm65('; Inc(var X [ ; N: int ] ) -> ' + InfoAboutToken(ExpressionType));
 
     //  a:='adb';
     b := 'add';
@@ -5035,8 +5035,8 @@ end;
 procedure GenerateBinaryOperation(op: TTokenKind; ResultType: TDataType);
 begin
 
-  // asm65;
-  // asm65('; Generate Binary Operation for ' + InfoAboutToken(ResultType));
+  //asm65;
+  //asm65('; Generate Binary Operation for ' + InfoAboutToken(ResultType));
 
   Gen;
   Gen;
@@ -6829,7 +6829,7 @@ begin
                 rec := (IdentifierAt(GetIdentIndex(lab)).AllocElementType = TDataType.RECORDTOK);
               end;
 
-              //AllocElementType := IdentifierAt(IdentIndex).AllocElementType;
+              //  AllocElementType := IdentifierAt(IdentIndex).AllocElementType;
 
               //  WritelLn(IdentifierAt(IdentIndex).name,',',IdentifierAt(IdentIndex).DataType,',',IdentifierAt(IdentIndex).AllocElementType,',',IdentifierAt(IdentIndex).NumAllocElements,',',IdentifierAt(IdentIndex).PassMethod,',',VarPass ,',',rec,',',IdentifierAt(IdentIndex).idType);
 
@@ -8067,7 +8067,7 @@ begin
 
                 end;
 
-                // GetCommonType(i, IdentifierAt(IdentIndex).Param[NumActualParams].DataType, ActualParamType);
+                //GetCommonType(i, IdentifierAt(IdentIndex).Param[NumActualParams].DataType, ActualParamType);
 
               end;
 
@@ -8108,7 +8108,7 @@ begin
               asm65(#9'ldy #$00');
               ;
               asm65(#9'mva:rne (:bp2),y ' + svar + '.adr.' +
-               IdentifierAt(IdentIndex).Param[NumActualParams].Name + ',y+');
+                IdentifierAt(IdentIndex).Param[NumActualParams].Name + ',y+');
             end
             else
               if j <= 128 then
@@ -8972,8 +8972,8 @@ begin
 
       CheckTok(i + 1, TTokenKind.CPARTOK);
 
-      // asm65;
-      // asm65('; Lo(X)');
+      //asm65;
+      //asm65('; Lo(X)');
 
       case ActualParamType of
         TTokenKind.SHORTINTTOK, TTokenKind.BYTETOK:
@@ -9005,8 +9005,8 @@ begin
 
       CheckTok(i + 1, TTokenKind.CPARTOK);
 
-      // asm65;
-      // asm65('; Hi(X)');
+      //asm65;
+      //asm65('; Hi(X)');
 
       case ActualParamType of
         TDataType.SHORTINTTOK, TDataType.BYTETOK: asm65(#9'jsr @hiBYTE');
@@ -11371,12 +11371,12 @@ begin
 
 
   if (TokenAt(i).Kind = TTokenKind.STRINGLITERALTOK) or (ValType = TDataType.STRINGPOINTERTOK)
-   then sLeft := True
+   then sLeft := Wordbool(1)
   else
     if (ValType in Pointers) and (TokenAt(i).Kind = TTokenKind.IDENTTOK) then
       if (IdentifierAt(GetIdentIndex(TokenAt(i).Name)).AllocElementType = TDataType.CHARTOK) and
-        (Elements(GetIdentIndex(TokenAt(i).Name)) > 0)
-         then sLeft := True;
+        (Elements(GetIdentIndex(TokenAt(i).Name)) in [1..255]) 
+        then sLeft := Wordbool(1 or Elements(GetIdentIndex(TokenAt(i).Name)) shl 8);
 
 
   if TokenAt(i + 1).Kind = TTokenKind.INTOK then writeln('IN');        // not yet programmed
@@ -11428,11 +11428,13 @@ begin
 
 
     if (TokenAt(i + 2).Kind = TTokenKind.STRINGLITERALTOK) or (RightValType = TDataType.STRINGPOINTERTOK) then
-      sRight := True
+      sRight := Wordbool(1)
     else
       if (RightValType in Pointers) and (TokenAt(i + 2).Kind = TTokenKind.IDENTTOK) then
         if (IdentifierAt(GetIdentIndex(TokenAt(i + 2).Name)).AllocElementType = TDataType.CHARTOK) and
-          (Elements(GetIdentIndex(TokenAt(i + 2).Name)) > 0) then sRight := True;
+          (Elements(GetIdentIndex(TokenAt(i + 2).Name)) in [1..255]) then
+          sRight := Wordbool(1 or Elements(GetIdentIndex(TokenAt(i + 2).Name)) shl 8);
+
 
     //  if (ValType in [SHORTREALTOK, TDataType.REALTOK]) and (RightValType in [TDataType.SHORTREALTOK, TDataType.TTokenKind.REALTOK]) then
     //    RightValType := ValType;
@@ -11782,7 +11784,7 @@ var
 
 begin
   // JAC!
-  LogToken(i);
+  // LogToken(i);
 
   Result := i;
 
@@ -12198,7 +12200,7 @@ begin
                         if IdentTemp < 0 then
                           Error(i + 3, 'identifier idents no member ''' + svar + '''');
 
-                        par2 := '$' + IntToHex(IdentTemp and $ffff, 2);  // offset to record field -> 'svar'
+                        par2 := '$' + IntToHex(IdentTemp and $ffff, 2);      // offset to record field -> 'svar'
 
                       end;
 
@@ -13650,24 +13652,24 @@ WHILETOK:
     begin
 //    writeln(codesize,',',CodePosStackTop);
 
-    inc(CodeSize);				// !!! aby dzialaly zagniezdzone WHILE
+      inc(CodeSize);				// !!! aby dzialaly zagniezdzone WHILE
 
-    asm65;
-    asm65('; --- WhileProlog');
+      asm65;
+      asm65('; --- WhileProlog');
 
-    ResetOpty;
+      ResetOpty;
 
-    GenerateRepeatUntilProlog;			// Save return address used by GenerateWhileDoEpilog
+      GenerateRepeatUntilProlog;		// Save return address used by GenerateWhileDoEpilog
 
-    SaveBreakAddress;
-
-
-    StartOptimization(i + 1);
-
-    j := CompileExpression(i + 1, ExpressionType);
+      SaveBreakAddress;
 
 
-    GetCommonType(j, TDataType.BOOLEANTOK, ExpressionType);
+      StartOptimization(i + 1);
+
+      j := CompileExpression(i + 1, ExpressionType);
+
+
+      GetCommonType(j, TDataType.BOOLEANTOK, ExpressionType);
 
     CheckTok(j + 1, TTokenKind.DOTOK);
 
@@ -13960,7 +13962,7 @@ WHILETOK:
 
 	      if SafeCompileConstExpression(j, ConstVal, ExpressionType, IdentifierAt(IdentIndex).DataType, true) then begin
 
-		Push(ConstVal, ASVALUE, GetDataSize( IdentifierAt(IdentIndex).DataType));
+		Push(ConstVal, ASVALUE, GetDataSize(IdentifierAt(IdentIndex).DataType));
 		DefineIdent(j, '@FORTMP_'+IntToHex(CodeSize, 4), CONSTANT, IdentifierAt(IdentIndex).DataType, IdentifierAt(IdentIndex).NumAllocElements, IdentifierAt(IdentIndex).AllocElementType, ConstVal, TokenAt(j).Kind);
 
 	        forLoop.end_value := ConstVal;
@@ -15241,7 +15243,7 @@ WHILETOK:
         yes := False;
 
         if SafeCompileConstExpression(j, ConstVal, ActualParamType,
-          { IdentifierAt(IdentIndex).DataType } ExpressionType, True) then
+          {IdentifierAt(IdentIndex).DataType} ExpressionType, True) then
           yes := True
         else
           j := CompileExpression(j, ActualParamType);
@@ -15349,14 +15351,14 @@ WHILETOK:
       if (NumActualParams = 0) then
       begin
 {
-        asm65;
+    asm65;
 
-        if Down then
-          asm65('; Dec(var X) -> ' + InfoAboutToken(ExpressionType))
-        else
-          asm65('; Inc(var X) -> ' + InfoAboutToken(ExpressionType));
+    if Down then
+     asm65('; Dec(var X) -> ' + InfoAboutToken(ExpressionType))
+    else
+     asm65('; Inc(var X) -> ' + InfoAboutToken(ExpressionType));
 
-        asm65;
+    asm65;
 }
         GenerateForToDoEpilog(ExpressionType, Down, IdentIndex, False, 0);    // +1, -1
       end
@@ -15820,7 +15822,7 @@ var
         case Byte(abs(IdentifierAt(IdentIndex).Value shr 24) and $7f) of
           1..3: Result := #9'= ' + reg[abs(IdentifierAt(IdentIndex).Value shr 24) and $7f];
           4..19: Result := #9'= :STACKORIGIN-' +
-             IntToStr(Byte(abs(IdentifierAt(IdentIndex).Value shr 24) and $7f) - 3);
+              IntToStr(Byte(abs(IdentifierAt(IdentIndex).Value shr 24) and $7f) - 3);
           else
             Result := #9'= ''out of resource'''
         end;
@@ -19328,23 +19330,23 @@ begin
 
     CompileMemoryWord(StaticStringData, i, tmp);
   (*
-    if StaticStringData[i] and $c000 = $8000 then
-      tmp := tmp + ' <[DATAORIGIN+$' + IntToHex(Byte(StaticStringData[i]) or
-        Byte(StaticStringData[i + 1]) shl 8, 4) + ']'
-    else
-      if StaticStringData[i] and $c000 = $4000 then
-        tmp := tmp + ' >[DATAORIGIN+$' + IntToHex(Byte(StaticStringData[i - 1]) or
-          Byte(StaticStringData[i]) shl 8, 4) + ']'
+      if StaticStringData[i] and $c000 = $8000 then
+        tmp := tmp + ' <[DATAORIGIN+$' + IntToHex(Byte(StaticStringData[i]) or
+          Byte(StaticStringData[i + 1]) shl 8, 4) + ']'
       else
-        if StaticStringData[i] and $3000 = $2000 then
-          tmp := tmp + ' <[CODEORIGIN+$' + IntToHex(Byte(StaticStringData[i]) or
-            Byte(StaticStringData[i + 1]) shl 8, 4) + ']'
+        if StaticStringData[i] and $c000 = $4000 then
+          tmp := tmp + ' >[DATAORIGIN+$' + IntToHex(Byte(StaticStringData[i - 1]) or
+            Byte(StaticStringData[i]) shl 8, 4) + ']'
         else
-          if StaticStringData[i] and $3000 = $1000 then
-            tmp := tmp + ' >[CODEORIGIN+$' + IntToHex(Byte(StaticStringData[i - 1]) or
-              Byte(StaticStringData[i]) shl 8, 4) + ']'
+          if StaticStringData[i] and $3000 = $2000 then
+            tmp := tmp + ' <[CODEORIGIN+$' + IntToHex(Byte(StaticStringData[i]) or
+              Byte(StaticStringData[i + 1]) shl 8, 4) + ']'
           else
-            tmp := tmp + ' $' + IntToHex(StaticStringData[i], 2);
+            if StaticStringData[i] and $3000 = $1000 then
+              tmp := tmp + ' >[CODEORIGIN+$' + IntToHex(Byte(StaticStringData[i - 1]) or
+                Byte(StaticStringData[i]) shl 8, 4) + ']'
+            else
+              tmp := tmp + ' $' + IntToHex(StaticStringData[i], 2);
      *)
   end;
 
@@ -19817,7 +19819,7 @@ begin
 
   {$IFNDEF PAS2JS}
   DefaultFormatSettings.DecimalSeparator := '.';
-  {$ENDIF}
+ {$ENDIF}
 
   TextColor(WHITE);
 

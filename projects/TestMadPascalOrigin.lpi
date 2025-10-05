@@ -26,8 +26,8 @@
       <Modes>
         <Mode Name="default">
           <local>
-            <CommandLineParams Value="-iPath:C:\jac\system\Atari800\Programming\Repositories\Mad-Pascal\lib enum_proc_arg.pas -o:enum_proc_arg-Reference.a65"/>
-            <WorkingDirectory Value="C:\jac\system\Atari800\Programming\Repositories\Mad-Pascal\samples\tests\tests-enum\"/>
+            <CommandLineParams Value="-iPath:C:\jac\system\Atari800\Programming\Repositories\Mad-Pascal\lib test_ansi.pas"/>
+            <WorkingDirectory Value="C:\jac\system\Atari800\Programming\Repositories\Mad-Pascal\samples\a8\graph_vbxe_ansi"/>
           </local>
         </Mode>
         <Mode Name="samples">
@@ -159,6 +159,10 @@
       </Unit>
       <Unit>
         <Filename Value="..\origin\FileIO.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\origin\Compiler.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit>
     </Units>

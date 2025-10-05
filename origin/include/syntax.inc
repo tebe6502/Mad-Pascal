@@ -15,6 +15,83 @@ begin
   Writeln('-o:<outputfile>    Specify the output file path (default <inputfile>.a65)');
   WriteLn('-diag              Activate diagnostics mode');
 
-  Halt(ExitCode);
+  RaiseHaltException(ExitCode);
 
+end;
+
+procedure ParameterError(const index: Longint; const message: String);
+var
+  i: Longint;
+begin
+
+  Write('Options: ');
+  for i := 1 to TEnvironment.GetParameterCount do
+  begin
+
+    if i < index then
+    begin
+      Console.TextColor(Console.LightGreen);
+    end
+    else if i = index then
+    begin
+      Console.TextColor(Console.LightRed);
+    end
+    else
+    begin
+      Console.NormVideo;
+    end;
+
+    Write(TEnvironment.GetParameterString(i));
+    Write(' ');
+  end;
+  Writeln('');
+
+
+  Console.TextColor(Console.LightRed);
+  WriteLn('ERROR: Check option number ' + IntToStr(index) + '. ' + message);
+  Console.NormVideo;
+  Syntax(THaltException.COMPILING_NOT_STARTED);
+end;
+
+procedure ParameterValueError(index: Longint; parameterValue: String; message: String);
+begin
+  ParameterError(index, 'Invalid parameter value ''' + parameterValue + '''. ' + message);
+end;
+
+function ParseHexParameter(const index: Longint; const parameterValue: String): Integer;
+var
+  err: Integer;
+begin
+  val('$' + parameterValue, Result, err);
+  if (err <> 0) then ParameterValueError(index, parameterValue, 'Value is no hexadeciment number.');
+  if (Result < 0) or (Result > $10000) then
+    ParameterValueError(index, parameterValue, 'Value must be between $0000-$FFFF.');
+end;
+
+function ParseCPUParameter(const index: Longint; const parameterValue: String): TCPU;
+begin
+Result := TCPU.NONE;
+if parameterValue <> '' then
+  if parameterValue = '6502' then Result:= TCPU.CPU_6502
+  else
+    if parameterValue = '65C02' then Result:= TCPU.CPU_65C02
+    else
+      if parameterValue = '65816' then Result:= TCPU.CPU_65816
+      else
+            ParameterError(index, 'Invalid CPU ''' +
+              parameterValue + '''. Use on of ''6502, 65C02, 65816''.');
+end;
+
+function ParseTargetParameter(const index: Longint; const parameterValue: String): TTargetID;
+begin
+Result := TTargetID.NONE;
+if parameterValue = 'A8' then Result := TTargetID.A8
+else if parameterValue = 'C64' then Result := TTargetID.C64
+  else if parameterValue = 'C4P' then Result := TTargetID.C4P
+    else if parameterValue = 'NEO' then Result := TTargetID.NEO
+      else if parameterValue = 'RAW' then Result := TTargetID.RAW
+        else if parameterValue = 'X16' then Result := TTargetID.X16
+          else
+            ParameterError(index, 'Invalid target ''' +
+              parameterValue + '''. Use on of ''A8, C64, C4P, NEO, RAW, X16''.');
 end;

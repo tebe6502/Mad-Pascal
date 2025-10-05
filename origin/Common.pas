@@ -20,7 +20,7 @@ var
   ZPAGE_BASE: Integer = -1;
   STACK_BASE: Integer = -1;
 
-  OutFile: TextFile;
+  OutFile: ITextFile;
 
   PROGRAM_NAME: String = 'Program';
   LIBRARY_NAME: String;
@@ -116,7 +116,7 @@ var
   PublicSection: Boolean;  // Initialized in Scanner.TokenizeProgramInitialization
 {$IFDEF USEOPTFILE}
 
-  OptFile: TextFile;
+  OptFile: ITextFile;
 
 {$ENDIF}
 
@@ -169,7 +169,7 @@ procedure IncVarDataSize(const tokenIndex: TTokenIndex; const size: Integer);
 function GetTypeAtIndex(const typeIndex: TTypeIndex): TType;
 
 var
-  TraceFile: TextFile;
+  TraceFile: ITextFile;
 
 procedure LogTrace(message: String);
 
@@ -182,7 +182,7 @@ uses Messages, Utilities;
 procedure LogTrace(message: String);
 begin
 {$IFDEF USETRACEFILE}
-     Writeln(traceFile, message);
+       traceFile.Writeln(message);
 {$ENDIF}
 end;
 

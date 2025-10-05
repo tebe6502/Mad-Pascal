@@ -141,6 +141,9 @@ begin
 
   if S = '' then exit(-1);
 
+  // JAC!
+  // if S = 'VBXE_ANSIFRE' then LogTrace('GetIdentIndex');
+
   // Check if it can be found in the current WITH context
   if High(WithName) > 0 then
     for TempIndex := 0 to High(WithName) do
@@ -174,7 +177,7 @@ begin
 
   end;
 
-end;  //GetIdent
+end;  //GetIdentIndex
 
 
 // ----------------------------------------------------------------------------
@@ -894,6 +897,7 @@ begin
     begin
       IdentIndex := GetIdentIndex(TokenAt(i).Name);
 
+      // TODO JAC!! Missing UnknownIdentiefer Message
       if IdentIndex > 0 then
 
         if (IdentifierAt(IdentIndex).Kind = USERTYPE) and (TokenAt(i + 1).Kind = TDataType.OPARTOK) then
@@ -1031,7 +1035,8 @@ begin
             VARIABLE: if IdentifierAt(IdentIndex).isAbsolute then
               begin        // wyjatek gdy ABSOLUTE
 
-                if (abs(IdentifierAt(IdentIndex).Value) and $ff = 0) and (Byte(abs(IdentifierAt(IdentIndex).Value shr 24) and $7f) in [1..127]) or
+                if (abs(IdentifierAt(IdentIndex).Value) and $ff = 0) 
+                and (Byte(abs(IdentifierAt(IdentIndex).Value shr 24) and $7f) in [1..127]) or
                   ((IdentifierAt(IdentIndex).DataType in Pointers) and
                   (IdentifierAt(IdentIndex).AllocElementType <> TDataType.UNTYPETOK) and
                   (IdentifierAt(IdentIndex).NumAllocElements in [0..1])) then
@@ -1575,7 +1580,6 @@ var
   identIndex: Integer;
   identifier: TIdentifier;
   NumAllocElements_: Cardinal;
-  elementCount, elementSize: Integer;
 begin
 
   identIndex := GetIdentIndex(Name);
@@ -1592,11 +1596,14 @@ begin
     identifier := IdentifierList.GetIdentifierAtIndex(NumIdent);
 
     // For debugging
-
-    // Writeln('NumIdent=' + IntToStr(NumIdent) + ' tokenIndex=' + IntToStr(tokenIndex) + ' Name=' +
-    //  Name + ' Kind=' + GetTokenKindName(Kind) + ' DataType=' + IntToStr(Ord(DataType)) +
-    //  ' NumAllocElements=' + IntToStr(NumAllocElements) + ' AllocElementType=' + IntToStr(Ord(AllocElementType)));
-
+    (*
+    if Name = 'TABLEFULL' then
+    begin
+      Writeln('NumIdent=' + IntToStr(NumIdent) + ' tokenIndex=' + IntToStr(tokenIndex) +
+        ' Name=' + Name + ' Kind=' + GetTokenKindName(Kind) + ' DataType=' + IntToStr(Ord(DataType)) +
+        ' NumAllocElements=' + IntToStr(NumAllocElements) + ' AllocElementType=' + IntToStr(Ord(AllocElementType)));
+    end;
+    *)
     if NumIdent > MAXIDENTS then
     begin
       Error(NumTok, TMessage.Create(TErrorCode.OutOfResources, 'Out of resources, IDENT'));

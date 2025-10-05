@@ -1,5 +1,7 @@
 program mic2shp;
 
+{$IFDEF FPC}
+
 {$APPTYPE CONSOLE}
 
 uses
@@ -256,3 +258,8 @@ begin
  SetLength(pmg, 1);
 
 end.
+
+{$ELSE}
+begin
+end.
+{$ENDIF}
