@@ -36,7 +36,7 @@
         </Mode>
         <Mode Name="all">
           <local>
-            <CommandLineParams Value="-allThreads -allFiles -compileReference -compile -compare -openResults -waitForKey -inputFilePattern bracket"/>
+            <CommandLineParams Value="-allThreads -allFiles -compileReference -compile -compare -openResults -waitForKey -inputFilePattern suite"/>
           </local>
         </Mode>
       </Modes>
@@ -127,15 +127,19 @@
     <Exceptions>
       <Item>
         <Name Value="EAbort"/>
+        <Enabled Value="False"/>
       </Item>
       <Item>
         <Name Value="ECodetoolError"/>
+        <Enabled Value="False"/>
       </Item>
       <Item>
         <Name Value="EFOpenError"/>
+        <Enabled Value="False"/>
       </Item>
       <Item>
         <Name Value="THaltException"/>
+        <Enabled Value="False"/>
       </Item>
       <Item>
         <Name Value="ERangeError"/>
@@ -143,12 +147,15 @@
       </Item>
       <Item>
         <Name Value="RunError(201)"/>
+        <Enabled Value="False"/>
       </Item>
       <Item>
         <Name Value="EEValuationException"/>
+        <Enabled Value="False"/>
       </Item>
       <Item>
         <Name Value="EProcess"/>
+        <Enabled Value="False"/>
       </Item>
     </Exceptions>
   </Debugging>
