@@ -8442,7 +8442,7 @@ begin
     asm65(#9'inx');
 
     ActualParamType := IdentifierAt(IdentIndex).DataType;
-    if ActualParamType = TDataType.ENUMTOK then ActualParamType := IdentifierAt(IdentIndex).AllocElementType;
+    if ActualParamType = TDataType.ENUMTOK then ActualParamType := IdentifierAt(IdentIndex).NestedFunctionAllocElementType;
 
     case GetDataSize(ActualParamType) of
 
@@ -10032,7 +10032,7 @@ begin
                 CompileActualParameters(i, IdentIndex);
 
                 ValType := IdentifierAt(IdentIndex).DataType;
-                if ValType = TDataType.ENUMTOK then ValType := IdentifierAt(IdentIndex).NestedFunctionAllocElementType;
+                if (ValType = TDataType.ENUMTOK) then ValType := IdentifierAt(IdentIndex).NestedFunctionAllocElementType;
 
                 Dec(run_func);
 
@@ -11375,7 +11375,7 @@ begin
   else
     if (ValType in Pointers) and (TokenAt(i).Kind = TTokenKind.IDENTTOK) then
       if (IdentifierAt(GetIdentIndex(TokenAt(i).Name)).AllocElementType = TDataType.CHARTOK) and
-        (Elements(GetIdentIndex(TokenAt(i).Name)) in [1..255]) 
+        (Elements(GetIdentIndex(TokenAt(i).Name)) in [1..255])
         then sLeft := Wordbool(1 or Elements(GetIdentIndex(TokenAt(i).Name)) shl 8);
 
 
@@ -13387,8 +13387,12 @@ begin
       i := CompileExpression(i + 1, SelectorType);
 
 
-      if (SelectorType = TDatatype.ENUMTOK) and (TokenAt(j).Kind = TTokenKind.IDENTTOK) and
-        (IdentifierAt(GetIdentIndex(TokenAt(j).Name)).Kind = TTokenKind.FUNCTIONTOK) then
+      if (TokenAt(j).Kind = TTokenKind.IDENTTOK) and
+         (IdentifierAt(GetIdentIndex(TokenAt(j).Name)).Kind = TTokenKind.FUNCTIONTOK) and
+	 (IdentifierAt(GetIdentIndex(TokenAt(j).Name)).DataType = TDatatype.ENUMTOK) then
+
+//      if (SelectorType = TDatatype.ENUMTOK) and (TokenAt(j).Kind = TTokenKind.IDENTTOK) and
+//        (IdentifierAt(GetIdentIndex(TokenAt(j).Name)).Kind = TTokenKind.FUNCTIONTOK) then
       begin
 
         IdentTemp := GetIdentIndex(TokenAt(j).Name);
@@ -17349,7 +17353,7 @@ begin
 
     tmpVarDataSize := GetVarDataSize;
 
-    //  writeln(IdentifierAt(BlockIdentIndex).name,',',FunctionResultType,',',FunctionNumAllocElements,',',FunctionAllocElementType);
+//      writeln(IdentifierAt(BlockIdentIndex).name,',',FunctionResultType,',',FunctionNumAllocElements,',',FunctionAllocElementType);
 
     DefineIdent(i, 'RESULT', VARIABLE, FunctionResultType, FunctionNumAllocElements, FunctionAllocElementType, 0);
 
