@@ -465,7 +465,11 @@ begin
     TDataType.BOOLEANTOK: Result := Ord(High(Boolean));
     TDataType.BYTETOK: Result := High(Byte);
     TDataType.WORDTOK: Result := High(Word);
+    {$IFNDEF PAS2JS}
     TDataType.CARDINALTOK: Result := High(Cardinal);
+    {$ELSE}
+    TDataType.CARDINALTOK: Result := 2147483647 ; // JAC!  Workaround until we can use BigInt instead of Integer
+    {$ENDIF}
     TDataType.STRINGTOK: Result := 255;
     TDataType.POINTERTOK: Result := High(Word);
 

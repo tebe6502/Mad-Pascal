@@ -2,10 +2,16 @@
 
 SRC = mp.pas \
 	Common.pas \
+  CommonTypes.pas \
+  CompilerTypes.pas \
+  Compiler.pas \
+  DataTypes.pas \
+  Debugger.pas \
 	Diagnostic.pas \
 	FileIO.pas \
 	MathEvaluate.pas \
 	Messages.pas \
+  Memory.pas \
 	Numbers.pas \
 	Optimize.pas \
 	Parser.pas \
