@@ -3,7 +3,7 @@ rem
 rem Windows Makefile for PAS2JS and verification of regression tests during refactorings.
 rem
 rem Set %WUDSN_TOOLS_FOLDER% to the folder with the latest https://github.com/wudsn/wudsn-ide-tools
-re, The script will use the FPC, MP, and MADS versions from there as a reference.
+rem The script will use the FPC, MP, and MADS versions from there as a reference.
 rem
 rem The script compiles "Test-0.pas" with FPC vs. the new MP.
 rem The script compiles a set of reference examples with the released and the new MP and validates that there are no differences in the binary output.
