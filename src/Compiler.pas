@@ -1140,7 +1140,8 @@ end;  //LoadBP2
 // ----------------------------------------------------------------------------
 
 
-procedure Push(Value: Int64; IndirectionLevel: Byte; Size: Byte; IdentIndex: Integer = 0; par: Byte = 0);
+procedure Push(Value: Int64; IndirectionLevel: TIndirectionLevel; Size: Byte;
+  IdentIndex: TIdentifierIndex = 0; par: Byte = 0);
 var
   Kind: TTokenKind;
   NumAllocElements: Cardinal;
@@ -8443,7 +8444,8 @@ begin
     asm65(#9'inx');
 
     ActualParamType := IdentifierAt(IdentIndex).DataType;
-    if ActualParamType = TDataType.ENUMTOK then ActualParamType := IdentifierAt(IdentIndex).NestedFunctionAllocElementType;
+    if ActualParamType = TDataType.ENUMTOK then
+      ActualParamType := IdentifierAt(IdentIndex).NestedFunctionAllocElementType;
 
     case GetDataSize(ActualParamType) of
 
@@ -10033,7 +10035,8 @@ begin
                 CompileActualParameters(i, IdentIndex);
 
                 ValType := IdentifierAt(IdentIndex).DataType;
-                if (ValType = TDataType.ENUMTOK) then ValType := IdentifierAt(IdentIndex).NestedFunctionAllocElementType;
+                if (ValType = TDataType.ENUMTOK) then
+                  ValType := IdentifierAt(IdentIndex).NestedFunctionAllocElementType;
 
                 Dec(run_func);
 
@@ -10322,8 +10325,11 @@ begin
                                 if GetDataSize(ValType) > GetDataSize(VarType) then ValType := VarType;
                               end;
 
-                              Push(IdentifierAt(IdentIndex).Value, IndirectionLevel, GetDataSize(ValType),
-                                IdentIndex, IdentTemp and $ffff);
+                              Push(IdentifierAt(IdentIndex).Value, IndirectionLevel,
+                                GetDataSize(ValType), IdentIndex, IdentTemp and $ff);
+// TODO: To be checked by tebe
+//                              Push(IdentifierAt(IdentIndex).Value, IndirectionLevel,
+//                              GetDataSize(ValType), IdentIndex, IdentTemp and $ffff);
 
                               CheckTok(i + 1, TTokenKind.CBRACKETTOK);
 
@@ -13364,12 +13370,11 @@ begin
       i := CompileExpression(i + 1, SelectorType);
 
 
-      if (TokenAt(j).Kind = TTokenKind.IDENTTOK) and
-         (IdentifierAt(GetIdentIndex(TokenAt(j).Name)).Kind = TTokenKind.FUNCTIONTOK) and
-	 (IdentifierAt(GetIdentIndex(TokenAt(j).Name)).DataType = TDatatype.ENUMTOK) then
+      if (TokenAt(j).Kind = TTokenKind.IDENTTOK) and (IdentifierAt(GetIdentIndex(TokenAt(j).Name)).Kind =
+        TTokenKind.FUNCTIONTOK) and (IdentifierAt(GetIdentIndex(TokenAt(j).Name)).DataType = TDatatype.ENUMTOK) then
 
-//      if (SelectorType = TDatatype.ENUMTOK) and (TokenAt(j).Kind = TTokenKind.IDENTTOK) and
-//      (IdentifierAt(GetIdentIndex(TokenAt(j).Name)).Kind = TTokenKind.FUNCTIONTOK) then
+        //      if (SelectorType = TDatatype.ENUMTOK) and (TokenAt(j).Kind = TTokenKind.IDENTTOK) and
+        //      (IdentifierAt(GetIdentIndex(TokenAt(j).Name)).Kind = TTokenKind.FUNCTIONTOK) then
       begin
 
         IdentTemp := GetIdentIndex(TokenAt(j).Name);
