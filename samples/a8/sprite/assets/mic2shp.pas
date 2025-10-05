@@ -1,6 +1,8 @@
 program mic2shp;
 
+{$IFDEF FPC}
 {$APPTYPE CONSOLE}
+{$ENDIF}
 
 uses
   SysUtils;
