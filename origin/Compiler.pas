@@ -12591,13 +12591,16 @@ begin
 
                           end
                           else
+			  if (IdentifierAt(IdentIndex).DataType = TDataType.ENUMTOK) and (ExpressionType in UnsignedOrdinalTypes + [TDataType.ENUMTOK]) then
+
+			  else
                             ErrorIncompatibleEnumTypeIdentifier(i, ExpressionType, IdentIndex);
 
                     end
                     else
                     begin
 
-                      if (TokenAt(k).Kind = TTokenKind.IDENTTOK) then
+                      if (TokenAt(k).Kind = TTokenKind.IDENTTOK) and (TokenAt(k + 1).Kind = TTokenKind.SEMICOLONTOK) then
                         IdentTemp := GetIdentIndex(TokenAt(k).Name)
                       else
                         IdentTemp := 0;
@@ -12616,9 +12619,9 @@ begin
                 IdentifierAt(IdentIndex).isInit := True;
 
 
-                //  writeln(vartype,',',ExpressionType,',',IdentifierAt(IdentIndex).Name);
+//                writeln(vartype,',',ExpressionType,',',IdentifierAt(IdentIndex).Name);
 
-                //       writeln('0> ',IdentifierAt(IdentIndex).Name,',',VarType,',',IdentifierAt(IdentIndex).DataType,',',IdentifierAt(IdentIndex).AllocElementType,',',IdentifierAt(IdentIndex).NumAllocElements,' | ', ExpressionType,',',IndirectionLevel);
+//                writeln('0> ',IdentifierAt(IdentIndex).Name,',',VarType,',',IdentifierAt(IdentIndex).DataType,',',IdentifierAt(IdentIndex).AllocElementType,',',IdentifierAt(IdentIndex).NumAllocElements,' | ', ExpressionType,',',IndirectionLevel);
 
 
                 if (IdentifierAt(IdentIndex).PassMethod <> TParameterPassingMethod.VARPASSING) and
