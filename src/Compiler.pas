@@ -11191,19 +11191,19 @@ begin
       ValType := VarType;
     end;
 
-    if VarType in RealTypes then ValType := VarType;
-
+    if VarType in RealTypes then
+    begin
+      ValType := VarType;
+    end;
 
     if TokenAt(i).Kind = TTokenKind.MINUSTOK then
+    begin
       ConstVal := Negate(ValType, ConstVal);
+    end;
 
     if ValType = TDataType.SINGLETOK then
     begin
-      ConstVal := -ConstVal;         // Unary minus (IntegerTypes)
-
-      if ValType in IntegerTypes then
-        ValType := GetValueType(ConstVal);
-
+      ConstVal := CastToSingle(ConstVal);
     end;
 
     if ValType = TDataType.HALFSINGLETOK then
