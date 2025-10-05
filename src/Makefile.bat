@@ -1,4 +1,4 @@
-@echo on
+@echo off
 rem
 rem Windows Makefile for PAS2JS and verification of regression tests during refactorings.
 rem
