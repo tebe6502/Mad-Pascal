@@ -647,7 +647,8 @@
 	for p:=i-1 downto 0 do
 	 if listing[p] = tmp then begin
 
-	  if (listing[p-3] = listing[i]) and				// mwy   :bp2			; -3
+	  if (p >= 3) and
+             (listing[p-3] = listing[i]) and				// mwy   :bp2			; -3
 	     (listing[p-2] = listing[i+1]) and				// ldy				; -2
 	     lda_bp2_y(p-1) and						// lda (:bp2),y			; -1
 	     iny(p+1) and						// sta :STACKORIGIN+9		; 0

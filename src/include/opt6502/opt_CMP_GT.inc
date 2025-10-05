@@ -60,7 +60,7 @@ begin
        lda_a(i+9) and										// lda W		; 9
        cmp_im(i+10) then									// cmp #$00		; 10
       begin
-       c:=GetByte(i+10) + GetByte(i+7) shl 8 + GetByte(i+4) shl 16 + GetByte(i+1) shl 24;
+       c := GetDWORD(i+10, i+7, i+4, i+1);
 
        if c = 0 then begin
         listing[i+1] := '';

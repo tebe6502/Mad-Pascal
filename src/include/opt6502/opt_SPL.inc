@@ -18,6 +18,7 @@ begin
 //       spl(i+2) and										// spl					; 2
        dey(i+3) then										// dey					; 3
      begin
+        err:=0;
 	val(copy(listing[i+1], 7, 256), p, err);
 
 	listing[i+2] := '';
