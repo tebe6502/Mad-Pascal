@@ -138,7 +138,7 @@ function imulCL_opt: Boolean;
 // --------------------------------------------------------------------------
 
 
-  if (k in [3, 5, 6, 7, 10, 40, 64, 96, 128, 255]) and					// lda #				; 2
+  if (k in [3, 5, 6, 7, 10, 24, 40, 64, 96, 128, 255]) and				// lda #				; 2
 
      (lda_im(m) = false) and								// lda var				; 0
      sta_ecx(m+1) and									// sta :ecx				; 1
@@ -251,39 +251,32 @@ function imulCL_opt: Boolean;
 	listing[m+2] := #9'lda ' + GetARG(1, x-1);
 	listing[m+3] := #9'sta ' + GetARG(1, x-1);
 
-	listing[m+4] := #9'lda ' + GetARG(2, x-1);
-	listing[m+5] := #9'sta ' + GetARG(2, x-1);
-	listing[m+6] := #9'lda ' + GetARG(3, x-1);
-	listing[m+7] := #9'sta ' + GetARG(3, x-1);	
-
 	if lda_val(m) then
-	 listing[m+8] := listing[m]
+	 listing[m+4] := listing[m]
 	else
-	 listing[m+8] := #9'lda ' + GetARG(0, x-1);
+	 listing[m+4] := #9'lda ' + GetARG(0, x-1);
+
+	listing[m+5] := #9'asl @';
+	listing[m+6] := #9'rol ' + GetARG(1, x-1);
+	listing[m+7] := #9'sta ' + GetARG(0, x-1);
+
+	listing[m+8] := #9'ldy ' + GetARG(1, x-1);
 
 	listing[m+9] := #9'asl @';
 	listing[m+10]:= #9'rol ' + GetARG(1, x-1);
-	listing[m+11]:= #9'sta ' + GetARG(0, x-1);
-	listing[m+12]:= #9'sta ' + GetARG(2, x-1);
-	listing[m+13]:= #9'lda ' + GetARG(1, x-1);	
-	listing[m+14]:= #9'sta ' + GetARG(3, x-1);
 
-	listing[m+15]:= #9'lda ' + GetARG(0, x-1);
-	listing[m+16]:= #9'asl @';
-	listing[m+17]:= #9'rol ' + GetARG(1, x-1);
+	listing[m+11]:= #9'add ' + GetARG(0, x-1);
+	listing[m+12]:= #9'sta ' + GetARG(0, x-1);
+	listing[m+13]:= #9'tya';
+	listing[m+14]:= #9'adc ' + GetARG(1, x-1);
+	listing[m+15]:= #9'sta ' + GetARG(1, x-1);
 
-	listing[m+18]:= #9'add ' + GetARG(2, x-1);
-	listing[m+19]:= #9'sta ' + GetARG(0, x-1);
-	listing[m+20]:= #9'lda ' + GetARG(1, x-1);
-	listing[m+21]:= #9'adc ' + GetARG(3, x-1);
-	listing[m+22]:= #9'sta ' + GetARG(1, x-1);
+	listing[m+16]:= #9'lda ' + GetARG(0, x-1);
+	listing[m+17]:= #9'sta :eax';
+	listing[m+18]:= #9'lda ' + GetARG(1, x-1);
+	listing[m+19]:= #9'sta :eax+1';
 
-	listing[m+23]:= #9'lda ' + GetARG(0, x-1);
-	listing[m+24]:= #9'sta :eax';
-	listing[m+25]:= #9'lda ' + GetARG(1, x-1);
-	listing[m+26]:= #9'sta :eax+1';
-
-	l := m + 27;
+	l := m + 20;
 	exit(false);
 
        end;
@@ -367,6 +360,55 @@ function imulCL_opt: Boolean;
 	listing[m+19]:= #9'sta :eax+1';
 
 	l := m + 20;
+	exit(false);
+
+       end;
+
+
+   24: begin
+
+       	s[x-1][1] := #9'lda #$00';
+
+	if lda_val(m) then
+	 s[x-1][0] := #9'lda #$00'
+	else
+	 s[x-1][0] := '';
+
+	listing[m+1] := #9'sta ' + GetARG(0, x-1);
+
+	listing[m+2] := #9'lda ' + GetARG(1, x-1);
+	listing[m+3] := #9'sta ' + GetARG(1, x-1);
+
+	if lda_val(m) then
+	 listing[m+4] := listing[m]
+	else
+	 listing[m+4] := #9'lda ' + GetARG(0, x-1);
+
+	listing[m+5] := #9'asl @';
+	listing[m+6] := #9'rol ' + GetARG(1, x-1);
+	listing[m+7] := #9'asl @';
+	listing[m+8] := #9'rol ' + GetARG(1, x-1);
+	listing[m+9] := #9'asl @';
+	listing[m+10]:= #9'rol ' + GetARG(1, x-1);
+
+	listing[m+11]:= #9'sta ' + GetARG(0, x-1);
+	listing[m+12]:= #9'ldy ' + GetARG(1, x-1);
+
+	listing[m+13]:= #9'asl @';
+	listing[m+14]:= #9'rol ' + GetARG(1, x-1);
+
+	listing[m+15]:= #9'add ' + GetARG(0, x-1);
+	listing[m+16]:= #9'sta ' + GetARG(0, x-1);
+	listing[m+17]:= #9'tya';
+	listing[m+18]:= #9'adc ' + GetARG(1, x-1);
+	listing[m+19]:= #9'sta ' + GetARG(1, x-1);
+
+	listing[m+20]:= #9'lda ' + GetARG(0, x-1);
+	listing[m+21]:= #9'sta :eax';
+	listing[m+22]:= #9'lda ' + GetARG(1, x-1);
+	listing[m+23]:= #9'sta :eax+1';
+
+	l := m + 24;
 	exit(false);
 
        end;
