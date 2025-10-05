@@ -8442,7 +8442,7 @@ begin
     asm65(#9'inx');
 
     ActualParamType := IdentifierAt(IdentIndex).DataType;
-    if ActualParamType = TDataType.ENUMTOK then ActualParamType := IdentifierAt(IdentIndex).AllocElementType;
+    if ActualParamType = TDataType.ENUMTOK then ActualParamType := IdentifierAt(IdentIndex).NestedFunctionAllocElementType;
 
     case GetDataSize(ActualParamType) of
 
@@ -11375,7 +11375,7 @@ begin
   else
     if (ValType in Pointers) and (TokenAt(i).Kind = TTokenKind.IDENTTOK) then
       if (IdentifierAt(GetIdentIndex(TokenAt(i).Name)).AllocElementType = TDataType.CHARTOK) and
-        (Elements(GetIdentIndex(TokenAt(i).Name)) in [1..255]) 
+        (Elements(GetIdentIndex(TokenAt(i).Name)) in [1..255])
         then sLeft := Wordbool(1 or Elements(GetIdentIndex(TokenAt(i).Name)) shl 8);
 
 
@@ -17349,7 +17349,7 @@ begin
 
     tmpVarDataSize := GetVarDataSize;
 
-    //  writeln(IdentifierAt(BlockIdentIndex).name,',',FunctionResultType,',',FunctionNumAllocElements,',',FunctionAllocElementType);
+//      writeln(IdentifierAt(BlockIdentIndex).name,',',FunctionResultType,',',FunctionNumAllocElements,',',FunctionAllocElementType);
 
     DefineIdent(i, 'RESULT', VARIABLE, FunctionResultType, FunctionNumAllocElements, FunctionAllocElementType, 0);
 
