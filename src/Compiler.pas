@@ -8107,15 +8107,15 @@ begin
             begin
               asm65(#9'ldy #$00');
               ;
-              asm65(#9'mva:rne (:bp2),y ' + svar + '.adr.' +
-                IdentifierAt(IdentIndex).Param[NumActualParams].Name + ',y+');
+              asm65(#9'mva:rne (:bp2),y ' + svar + '.adr.' + IdentifierAt(
+                IdentIndex).Param[NumActualParams].Name + ',y+');
             end
             else
               if j <= 128 then
               begin
                 asm65(#9'ldy #$' + IntToHex(j - 1, 2));
-                asm65(#9'mva:rpl (:bp2),y ' + svar + '.adr.' +
-                  IdentifierAt(IdentIndex).Param[NumActualParams].Name + ',y-');
+                asm65(#9'mva:rpl (:bp2),y ' + svar + '.adr.' + IdentifierAt(
+                  IdentIndex).Param[NumActualParams].Name + ',y-');
               end
               else
                 asm65(#9'@move ":bp2" #' + svar + '.adr.' + IdentifierAt(IdentIndex).Param[NumActualParams].Name +
@@ -11505,6 +11505,8 @@ begin
 
 
     //  writeln(ValType,',',RightValType,' / ',ConstValRight);
+    // JAC!
+    // if j=19695 then writeln('Debug');
 
     if sLeft or sRight then
     else
@@ -11518,7 +11520,7 @@ begin
     end;
 
 
-    // !!! wyjatek !!! porownanie typow tego samego rozmiaru, ale z roznymi znakami
+    // !!! exception !!! comparison of types of the same size but with different signs
 
     if ((ValType in SignedOrdinalTypes) and (RightValType in UnsignedOrdinalTypes)) or
       ((ValType in UnsignedOrdinalTypes) and (RightValType in SignedOrdinalTypes)) then
@@ -11529,7 +11531,7 @@ begin
           1: begin
 
             if cRight and ((ConstValRight >= Low(Shortint)) and (ConstValRight <= High(Shortint))) then
-              // gdy nie przekracza zakresu dla typu SHORTINT
+              // when it does not exceed the range for the SHORTINT type
               RightValType := ValType
             else
             begin
@@ -11544,7 +11546,7 @@ begin
           2: begin
 
             if cRight and ((ConstValRight >= Low(Smallint)) and (ConstValRight <= High(Smallint))) then
-              // gdy nie przekracza zakresu dla typu SMALLINT
+              // when it does not exceed the range for the SMALLINT type
               RightValType := ValType
             else
             begin
@@ -11743,6 +11745,22 @@ end;
 // ----------------------------------------------------------------------------
 
 
+procedure LogToken(tokenIndex: TTokenIndex);
+var
+  token: TToken;
+  line: String;
+  IdentIndex: TIdentifierIndex;
+begin
+  token := TokenAt(tokenIndex);
+  line := token.GetSpelling() + ' ' + token.Name;
+
+  IdentIndex := GetIdentIndex(token.Name);
+  if (IdentIndex > 0) then  line := line + ' ' + GetTokenKindName(IdentifierAt(IdentIndex).DataType);
+  LogTrace(Format('Token %d: %s  %s (%d,%d), index=%d', [tokenIndex, line, token.SourceLocation.SourceFile.Name,
+    token.SourceLocation.Line, token.SourceLocation.Column, IdentIndex]));
+
+end;
+
 function CompileStatement(i: Integer; isAsm: Boolean = False): Integer;
 var
   j, k, IdentIndex, IdentTemp, NumActualParams, NumCharacters, IfLocalCnt, CaseLocalCnt,
@@ -11759,7 +11777,10 @@ var
   forLoop: TForLoop;
   Name, EnumName, svar, par1, par2: String;
   forBPL: Byte;
+
 begin
+  // JAC!
+  LogToken(i);
 
   Result := i;
 
@@ -12350,7 +12371,7 @@ begin
                     if IdentifierAt(IdentIndex).AllocElementType = TDataType.UNTYPETOK then
                       ErrorIncompatibleTypes(i + 1, TTokenKind.STRINGPOINTERTOK, TTokenKind.POINTERTOK)
                     else
-                      GetCommonType(i + 1, IdentifierAt(IdentIndex).AllocElementType, TTokenKind.STRINGPOINTERTOK);
+                      GetCommonType(i + 1, IdentifierAt(IdentIndex).AllocElementType, TDataType.STRINGPOINTERTOK);
 
                 end;
 
@@ -15796,8 +15817,8 @@ var
 
         case Byte(abs(IdentifierAt(IdentIndex).Value shr 24) and $7f) of
           1..3: Result := #9'= ' + reg[abs(IdentifierAt(IdentIndex).Value shr 24) and $7f];
-          4..19: Result := #9'= :STACKORIGIN-' +
-              IntToStr(Byte(abs(IdentifierAt(IdentIndex).Value shr 24) and $7f) - 3);
+          4..19: Result := #9'= :STACKORIGIN-' + IntToStr(
+              Byte(abs(IdentifierAt(IdentIndex).Value shr 24) and $7f) - 3);
           else
             Result := #9'= ''out of resource'''
         end;
@@ -17009,8 +17030,8 @@ var
   isReg, isInt, isInl, isOvr: Boolean;
   VarType: TDataType;
   VarRegister: Byte;
-  NestedFunctionResultType, ConstValType, AllocElementType, ActualParamType,
-  NestedFunctionAllocElementType, NestedDataType, NestedAllocElementType, IdType: TDataType;
+  NestedFunctionResultType, ConstValType, AllocElementType, ActualParamType, NestedFunctionAllocElementType,
+  NestedDataType, NestedAllocElementType, IdType: TDataType;
   Tmp, TmpResult: Word;
 
   external_name: TString;
@@ -17091,7 +17112,7 @@ begin
   end;
 
 
-  NumAllocElements := 0;
+
 
   if IdentifierAt(BlockIdentIndex).ObjectIndex > 0 then
   begin
@@ -17106,8 +17127,10 @@ begin
     IdentifierAt(NumIdent).AllocElementType := TTokenKind.WORDTOK;
     //  end;
 
+    NumAllocElements := 0;
+
     for ParamIndex := 1 to GetTypeAtIndex(IdentifierAt(BlockIdentIndex).ObjectIndex).NumFields do
-      if GetTypeAtIndex(IdentifierAt(BlockIdentIndex).ObjectIndex).Field[ParamIndex].Kind = TFieldKind.UNTYPETOK then
+      if GetTypeAtIndex(IdentifierAt(BlockIdentIndex).ObjectIndex).Field[ParamIndex].ObjectVariable = False then
       begin
 
         if NumAllocElements > 0 then
@@ -17519,6 +17542,8 @@ begin
           GetTypeAtIndex(IdentifierAt(BlockIdentIndex).ObjectIndex).Field[ParamIndex].NumAllocElements,
           GetTypeAtIndex(IdentifierAt(BlockIdentIndex).ObjectIndex).Field[ParamIndex].DataType, 0);
 
+      IdentifierAt(NumIdent).PassMethod := TParameterPassingMethod.VARPASSING;
+      IdentifierAt(NumIdent).ObjectVariable := True;
 
       SetVarDataSize(i, tmpVarDataSize + GetDataSize(TDataType.POINTERTOK));
 
@@ -19883,4 +19908,3 @@ begin
 end;
 
 end.
-
