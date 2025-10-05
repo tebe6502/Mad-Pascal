@@ -11325,7 +11325,7 @@ var
 
 begin
 
-  Debugger.debugger.CompileExpression(i, ValType, VarType);
+//  Debugger.debugger.CompileExpression(i, ValType, VarType);
 
   ConstVal := 0;
 
