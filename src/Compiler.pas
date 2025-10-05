@@ -8443,7 +8443,7 @@ begin
     asm65(#9'inx');
 
     ActualParamType := IdentifierAt(IdentIndex).DataType;
-    if ActualParamType = TDataType.ENUMTOK then ActualParamType := IdentifierAt(IdentIndex).AllocElementType;
+    if ActualParamType = TDataType.ENUMTOK then ActualParamType := IdentifierAt(IdentIndex).NestedFunctionAllocElementType;
 
     case GetDataSize(ActualParamType) of
 
@@ -10033,7 +10033,7 @@ begin
                 CompileActualParameters(i, IdentIndex);
 
                 ValType := IdentifierAt(IdentIndex).DataType;
-                if ValType = TDataType.ENUMTOK then ValType := IdentifierAt(IdentIndex).NestedFunctionAllocElementType;
+                if (ValType = TDataType.ENUMTOK) then ValType := IdentifierAt(IdentIndex).NestedFunctionAllocElementType;
 
                 Dec(run_func);
 
@@ -11316,7 +11316,6 @@ end;  //CompileSimpleExpression
 // ----------------------------------------------------------------------------
 
 function CompileExpression(i: Integer; out ValType: TDataType; VarType: TDataType = TDataType.INTEGERTOK): Integer;
-
 var
   j, k: Integer;
   RightValType, ConstValType: TDataType;
@@ -13365,8 +13364,12 @@ begin
       i := CompileExpression(i + 1, SelectorType);
 
 
-      if (SelectorType = TDatatype.ENUMTOK) and (TokenAt(j).Kind = TTokenKind.IDENTTOK) and
-        (IdentifierAt(GetIdentIndex(TokenAt(j).Name)).Kind = TTokenKind.FUNCTIONTOK) then
+      if (TokenAt(j).Kind = TTokenKind.IDENTTOK) and
+         (IdentifierAt(GetIdentIndex(TokenAt(j).Name)).Kind = TTokenKind.FUNCTIONTOK) and
+	 (IdentifierAt(GetIdentIndex(TokenAt(j).Name)).DataType = TDatatype.ENUMTOK) then
+
+//      if (SelectorType = TDatatype.ENUMTOK) and (TokenAt(j).Kind = TTokenKind.IDENTTOK) and
+//      (IdentifierAt(GetIdentIndex(TokenAt(j).Name)).Kind = TTokenKind.FUNCTIONTOK) then
       begin
 
         IdentTemp := GetIdentIndex(TokenAt(j).Name);
