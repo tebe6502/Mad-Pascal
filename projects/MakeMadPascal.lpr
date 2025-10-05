@@ -594,7 +594,7 @@ type
       if (Lines.Count < 3) then
       begin
         Log(fileResult, Format('ERROR: %s', [a65FilePath]));
-        Log(fileResult, 'ERROR: Not enough lines in output.');
+        Log(fileResult, 'ERROR: There are not enough lines in the output file.');
         EXIT(False);
       end;
 

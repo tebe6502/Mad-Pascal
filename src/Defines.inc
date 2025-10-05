@@ -1,8 +1,5 @@
 {$ASSERTIONS ON}
-
-// TODO: There are still cases where ranges need to be ignored, e.g. TFloat conversions
-//{$RANGECHECKS ON}
-{$RANGECHECKS OFF}
+{$RANGECHECKS ON}
 
 //{$DEFINE WHILEDO}
 

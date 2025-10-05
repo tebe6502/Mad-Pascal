@@ -44,7 +44,11 @@ end;
 
 function TDebugger.isActive: Boolean;
 begin
+  {$IFDEF DEBUG}
   Result := True;
+  {$ELSE}
+  Result := False;
+  {$ENDIF}
 end;
 
 procedure TDebugger.LogDebug(const message: String);
