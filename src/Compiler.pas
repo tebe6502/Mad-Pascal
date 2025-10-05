@@ -10327,9 +10327,6 @@ begin
 
                               Push(IdentifierAt(IdentIndex).Value, IndirectionLevel,
                                 GetDataSize(ValType), IdentIndex, IdentTemp and $ff);
-// TODO: To be checked by tebe
-//                              Push(IdentifierAt(IdentIndex).Value, IndirectionLevel,
-//                              GetDataSize(ValType), IdentIndex, IdentTemp and $ffff);
 
                               CheckTok(i + 1, TTokenKind.CBRACKETTOK);
 
