@@ -8107,15 +8107,15 @@ begin
             begin
               asm65(#9'ldy #$00');
               ;
-              asm65(#9'mva:rne (:bp2),y ' + svar + '.adr.' + IdentifierAt(
-                IdentIndex).Param[NumActualParams].Name + ',y+');
+              asm65(#9'mva:rne (:bp2),y ' + svar + '.adr.' +
+               IdentifierAt(IdentIndex).Param[NumActualParams].Name + ',y+');
             end
             else
               if j <= 128 then
               begin
                 asm65(#9'ldy #$' + IntToHex(j - 1, 2));
-                asm65(#9'mva:rpl (:bp2),y ' + svar + '.adr.' + IdentifierAt(
-                  IdentIndex).Param[NumActualParams].Name + ',y-');
+                asm65(#9'mva:rpl (:bp2),y ' + svar + '.adr.' +
+                  IdentifierAt(IdentIndex).Param[NumActualParams].Name + ',y-');
               end
               else
                 asm65(#9'@move ":bp2" #' + svar + '.adr.' + IdentifierAt(IdentIndex).Param[NumActualParams].Name +
@@ -11370,11 +11370,13 @@ begin
   i := CompileSimpleExpression(i, ValType, VarType);
 
 
-  if (TokenAt(i).Kind = TTokenKind.STRINGLITERALTOK) or (ValType = TDataType.STRINGPOINTERTOK) then sLeft := True
+  if (TokenAt(i).Kind = TTokenKind.STRINGLITERALTOK) or (ValType = TDataType.STRINGPOINTERTOK)
+   then sLeft := True
   else
     if (ValType in Pointers) and (TokenAt(i).Kind = TTokenKind.IDENTTOK) then
       if (IdentifierAt(GetIdentIndex(TokenAt(i).Name)).AllocElementType = TDataType.CHARTOK) and
-        (Elements(GetIdentIndex(TokenAt(i).Name)) > 0) then sLeft := True;
+        (Elements(GetIdentIndex(TokenAt(i).Name)) > 0)
+         then sLeft := True;
 
 
   if TokenAt(i + 1).Kind = TTokenKind.INTOK then writeln('IN');        // not yet programmed
@@ -15817,8 +15819,8 @@ var
 
         case Byte(abs(IdentifierAt(IdentIndex).Value shr 24) and $7f) of
           1..3: Result := #9'= ' + reg[abs(IdentifierAt(IdentIndex).Value shr 24) and $7f];
-          4..19: Result := #9'= :STACKORIGIN-' + IntToStr(
-              Byte(abs(IdentifierAt(IdentIndex).Value shr 24) and $7f) - 3);
+          4..19: Result := #9'= :STACKORIGIN-' +
+             IntToStr(Byte(abs(IdentifierAt(IdentIndex).Value shr 24) and $7f) - 3);
           else
             Result := #9'= ''out of resource'''
         end;
@@ -17030,8 +17032,8 @@ var
   isReg, isInt, isInl, isOvr: Boolean;
   VarType: TDataType;
   VarRegister: Byte;
-  NestedFunctionResultType, ConstValType, AllocElementType, ActualParamType, NestedFunctionAllocElementType,
-  NestedDataType, NestedAllocElementType, IdType: TDataType;
+  NestedFunctionResultType, ConstValType, AllocElementType, ActualParamType,
+  NestedFunctionAllocElementType, NestedDataType, NestedAllocElementType, IdType: TDataType;
   Tmp, TmpResult: Word;
 
   external_name: TString;
