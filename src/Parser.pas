@@ -141,6 +141,9 @@ begin
 
   if S = '' then exit(-1);
 
+  // JAC!
+  if S = 'VBXE_ANSIFRE' then LogTrace('GetIdentIndex');
+
   // Check if it can be found in the current WITH context
   if High(WithName) > 0 then
     for TempIndex := 0 to High(WithName) do
@@ -174,7 +177,7 @@ begin
 
   end;
 
-end;  //GetIdent
+end;  //GetIdentIndex
 
 
 // ----------------------------------------------------------------------------
@@ -595,14 +598,15 @@ begin
         if IdentIndex = 0 then
           Error(i + 2, TErrorCode.UnknownIdentifier);
 
-        if IdentifierAt(IdentIndex).Kind in [VARIABLE, CONSTANT,USERTYPE] then
+        if IdentifierAt(IdentIndex).Kind in [VARIABLE, CONSTANT, USERTYPE] then
         begin
 
-          if (IdentifierAt(IdentIndex).DataType = TDataType.STRINGPOINTERTOK)
-          or ((IdentifierAt(IdentIndex).DataType in Pointers) and (IdentifierAt(IdentIndex).NumAllocElements > 0)) then
+          if (IdentifierAt(IdentIndex).DataType = TDataType.STRINGPOINTERTOK) or
+            ((IdentifierAt(IdentIndex).DataType in Pointers) and (IdentifierAt(IdentIndex).NumAllocElements > 0)) then
           begin
 
-            if (IdentifierAt(IdentIndex).DataType = TDataType.STRINGPOINTERTOK) or (IdentifierAt(IdentIndex).AllocElementType = TDataType.CHARTOK) then
+            if (IdentifierAt(IdentIndex).DataType = TDataType.STRINGPOINTERTOK) or
+              (IdentifierAt(IdentIndex).AllocElementType = TDataType.CHARTOK) then
             begin
 
               isError := True;
@@ -614,9 +618,9 @@ begin
 
               //  writeln(IdentifierAt(IdentIndex).name,',',IdentifierAt(IdentIndex).DataType,',',IdentifierAt(IdentIndex).NumAllocElements,'/',IdentifierAt(IdentIndex).NumAllocElements_,',',IdentifierAt(IdentIndex).AllocElementType );
 
-              if (IdentifierAt(IdentIndex).DataType = TDataType.POINTERTOK) and (IdentifierAt(IdentIndex).AllocElementType in
-               [TDataType.RECORDTOK, TDataType.OBJECTTOK]) then
-				ConstVal := IdentifierAt(IdentIndex).NumAllocElements_
+              if (IdentifierAt(IdentIndex).DataType = TDataType.POINTERTOK) and
+                (IdentifierAt(IdentIndex).AllocElementType in [TDataType.RECORDTOK, TDataType.OBJECTTOK]) then
+                ConstVal := IdentifierAt(IdentIndex).NumAllocElements_
               else
                 ConstVal := IdentifierAt(IdentIndex).NumAllocElements;
 
@@ -894,6 +898,7 @@ begin
     begin
       IdentIndex := GetIdentIndex(TokenAt(i).Name);
 
+      // TODO JAC!!
       if IdentIndex > 0 then
 
         if (IdentifierAt(IdentIndex).Kind = USERTYPE) and (TokenAt(i + 1).Kind = TDataType.OPARTOK) then
@@ -968,7 +973,8 @@ begin
                 case GetDataSize(ConstValType) of
                   1: ConstVal := GetStaticValue(0 + Ord(IdentifierAt(IdentIndex).idType = TDataType.PCHARTOK));
                   2: ConstVal := GetStaticValue(0) + GetStaticValue(1) shl 8;
-                  4: ConstVal := GetStaticValue(0) + GetStaticValue(1) shl 8 + GetStaticValue(2) shl 16 + GetStaticValue(3) shl 24;
+                  4: ConstVal := GetStaticValue(0) + GetStaticValue(1) shl 8 + GetStaticValue(2) shl
+                      16 + GetStaticValue(3) shl 24;
                 end;
 
                 if ConstValType in [TDataType.HALFSINGLETOK, TDataType.SINGLETOK] then ConstVal := ConstVal shl 32;
@@ -1031,7 +1037,8 @@ begin
             VARIABLE: if IdentifierAt(IdentIndex).isAbsolute then
               begin        // wyjatek gdy ABSOLUTE
 
-                if (abs(IdentifierAt(IdentIndex).Value) and $ff = 0) and (Byte(abs(IdentifierAt(IdentIndex).Value shr 24) and $7f) in [1..127]) or
+                if (abs(IdentifierAt(IdentIndex).Value) and $ff = 0) and
+                  (Byte(abs(IdentifierAt(IdentIndex).Value shr 24) and $7f) in [1..127]) or
                   ((IdentifierAt(IdentIndex).DataType in Pointers) and
                   (IdentifierAt(IdentIndex).AllocElementType <> TDataType.UNTYPETOK) and
                   (IdentifierAt(IdentIndex).NumAllocElements in [0..1])) then
@@ -1591,11 +1598,14 @@ begin
     identifier := IdentifierList.GetIdentifierAtIndex(NumIdent);
 
     // For debugging
-
-    // Writeln('NumIdent=' + IntToStr(NumIdent) + ' tokenIndex=' + IntToStr(tokenIndex) + ' Name=' +
-    //  Name + ' Kind=' + GetTokenKindName(Kind) + ' DataType=' + IntToStr(Ord(DataType)) +
-    //  ' NumAllocElements=' + IntToStr(NumAllocElements) + ' AllocElementType=' + IntToStr(Ord(AllocElementType)));
-
+    (**)
+    if Name = 'TABLEFULL' then
+    begin
+      Writeln('NumIdent=' + IntToStr(NumIdent) + ' tokenIndex=' + IntToStr(tokenIndex) +
+        ' Name=' + Name + ' Kind=' + GetTokenKindName(Kind) + ' DataType=' + IntToStr(Ord(DataType)) +
+        ' NumAllocElements=' + IntToStr(NumAllocElements) + ' AllocElementType=' + IntToStr(Ord(AllocElementType)));
+    end;
+    (**)
     if NumIdent > MAXIDENTS then
     begin
       Error(NumTok, TMessage.Create(TErrorCode.OutOfResources, 'Out of resources, IDENT'));

@@ -230,7 +230,7 @@ var
   StrParams: TStringArray;
 
 
-  procedure TokenizeUnit(a: TSourceFile; tesTSourceFile: Boolean = False); forward;
+  procedure TokenizeUnit(a: TSourceFile; testSourceFile: Boolean = False); forward;
 
 
   procedure Tokenize(filePath: TFilePath; testSourceFile: Boolean = False);

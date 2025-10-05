@@ -4,7 +4,7 @@ rem Replace .pas ^ .pas ^
 rem Replace -inputFilePattern IdentifierAt(IdentIndex)   -inputFilePattern
 MakeMadPascal.exe -allThreads -allFiles -mpFolderPath .\.. -compileReference -compile -compare -openResults ^
 -referenceMPExePath C:\jac\system\Atari800\Programming\Repositories\Mad-Pascal\bin\windows_x86_64\origin\mp.exe ^
--mpExePath C:\jac\system\Atari800\Programming\Repositories\Mad-Pascal\origin\mp.exe  ^
+-mpExePath C:\jac\system\Atari800\Programming\Repositories\Mad-Pascal\bin\windows_x86_64\mp.exe  ^
 -inputFilePattern samples\a8\compression\apl\unapl_stream.pas ^
 -inputFilePattern samples\a8\compression\apl\unapl.pas ^
 -inputFilePattern samples\a8\compression\lzw_unit\lzw_test.pas ^
