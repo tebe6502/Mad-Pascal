@@ -11388,7 +11388,6 @@ begin
 
     if ValType in RealTypes + [TDataType.ENUMTOK] then VarType := ValType;
 
-
     j := CompileSimpleExpression(i + 2, RightValType, VarType);
 
 
@@ -11507,8 +11506,6 @@ begin
 
 
     //  writeln(ValType,',',RightValType,' / ',ConstValRight);
-    // JAC!
-    // if j=19695 then writeln('Debug');
 
     if sLeft or sRight then
     else
