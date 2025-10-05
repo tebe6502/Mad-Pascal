@@ -624,6 +624,9 @@ begin
     msg := GetErrorMessage(tokenIndex, errorCode, identIndex);
     Error(tokenIndex, msg);
   end;
+
+  // Error flag must always be set.
+  isError := True;
 end;
 
 
