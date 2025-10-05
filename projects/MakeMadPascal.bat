@@ -4,7 +4,7 @@ rem Replace .WinMerge .pas ^
 rem Replace C:\jac\system\Atari800\Programming\Repositories\Mad-Pascal\ -inputFilePattern
 MakeMadPascal.exe -allThreads -allFiles -mpFolderPath .\.. -compileReference -compile -compare -openResults ^
 -referenceMPExePath C:\jac\system\Atari800\Programming\Repositories\Mad-Pascal\bin\windows_x86_64\origin\mp.exe ^
--mpExePath C:\jac\system\Atari800\Programming\Repositories\Mad-Pascal\projects\TestMadPascal.exe ^
+-mpExePath C:\jac\system\Atari800\Programming\Repositories\Mad-Pascal\bin\windows_x86_64\mp.exe ^
 -inputFilePattern samples\a8\compression\apl\unapl.pas ^
 -inputFilePattern samples\a8\compression\deflate\undef.pas ^
 -inputFilePattern samples\a8\compression\lz4\unlz4.pas ^
