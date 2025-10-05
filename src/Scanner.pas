@@ -61,7 +61,7 @@ begin
   SetLength(WithName, 1);
   SetLength(linkObj, 1);
   SetLength(resArray, 1);
-  
+
   Messages.Initialize;
 
   NumBlocks := 0;
@@ -154,10 +154,17 @@ begin
         for j := 1 to MAXPARAMS do
         begin
 
-          if s[i] in ['''', '"'] then
-            tmp := GetStringUpperCase(s, i)
+          if i <= Length(s) then
+          begin
+            if s[i] in ['''', '"'] then
+              tmp := GetStringUpperCase(s, i)
+            else
+              tmp := GetNumber(s, i);
+          end
           else
-            tmp := GetNumber(s, i);
+          begin
+            tmp := '';
+          end;
 
           if tmp = '' then tmp := '0';
 
@@ -2075,7 +2082,7 @@ begin
   while i <= length(a) do
   begin
 
-    while a[i] in AllowWhiteSpaces do
+    while (i <= length(a)) and (a[i] in AllowWhiteSpaces) do
     begin
 
       if a[i] = LF then
@@ -2084,210 +2091,200 @@ begin
         Spaces := 0;
       end
       else
+      begin
         Inc(Spaces);
+      end;
 
       Inc(i);
     end;
 
-    ch := UpCase(a[i]);
-    Inc(i);
-
-
-    Num := '';
-    if ch in ['0'..'9', '$', '%'] then ReadNumber;
-
-    if Length(Num) > 0 then      // Number found
+    if i <= length(a) then
     begin
-      AddToken_(TTokenKind.INTNUMBERTOK, 1, Line, length(Num) + Spaces, StrToInt(Num));
-      Spaces := 0;
 
-      if ch = '.' then      // Fractional part expected
-      begin
+      ch := UpCase(a[i]);
+      Inc(i);
 
-        ch := a[i];
-        Inc(i);
-
-        if ch = '.' then
-          Dec(i)        // Range ('..') token
-        else
-        begin        // Fractional part found
-          Frac := ReadFractionalPart(a, i, ch);
-
-          TokenAt(NumTok).Kind := TTokenKind.FRACNUMBERTOK;
-          TokenAt(NumTok).FracValue := StrToFloat(Num + Frac);
-          TokenAt(NumTok).SourceLocation.Column :=
-            TokenAt(NumTok - 1).SourceLocation.Column + length(Num) + length(Frac) + Spaces;
-          Spaces := 0;
-        end;
-      end;
 
       Num := '';
-      Frac := '';
-    end;
+      if ch in ['0'..'9', '$', '%'] then ReadNumber;
 
-
-    if ch in ['A'..'Z', '_'] then    // Keyword or identifier expected
-    begin
-
-      Text := '';
-
-      err := 0;
-
-      TextPos := i - 1;
-
-      while ch in ['A'..'Z', '_', '0'..'9', '.'] do
+      if Length(Num) > 0 then      // Number found
       begin
-        Text := Text + ch;
-        Inc(err);
+        AddToken_(TTokenKind.INTNUMBERTOK, 1, Line, length(Num) + Spaces, StrToInt(Num));
+        Spaces := 0;
 
-        ch := UpCase(a[i]);
-        Inc(i);
+        if ch = '.' then      // Fractional part expected
+        begin
+
+          ch := a[i];
+          Inc(i);
+
+          if ch = '.' then
+            Dec(i)        // Range ('..') token
+          else
+          begin        // Fractional part found
+            Frac := ReadFractionalPart(a, i, ch);
+
+            TokenAt(NumTok).Kind := TTokenKind.FRACNUMBERTOK;
+            TokenAt(NumTok).FracValue := StrToFloat(Num + Frac);
+            TokenAt(NumTok).SourceLocation.Column :=
+              TokenAt(NumTok - 1).SourceLocation.Column + length(Num) + length(Frac) + Spaces;
+            Spaces := 0;
+          end;
+        end;
+
+        Num := '';
+        Frac := '';
       end;
 
 
-      if err > 255 then
-        Error(NumTok, TMessage.Create(TErrorCode.ConstantStringTooLong,
-          'Constant strings can''t be longer than 255 chars'));
-
-      if Length(Text) > 0 then
+      if ch in ['A'..'Z', '_'] then    // Keyword or identifier expected
       begin
 
-        CurToken := GetStandardToken(Text);
+        Text := '';
 
-        im := SearchDefine(Text);
+        err := 0;
 
-        if (im > 0) and (Defines[im].Macro <> '') then
+        TextPos := i - 1;
+
+        while ch in ['A'..'Z', '_', '0'..'9', '.'] do
         begin
+          Text := Text + ch;
+          Inc(err);
 
-          ch := #0;
-
-          i := TextPos;
-
-          if Defines[im].Macro = copy(a, i, length(Text)) then
-            Error(NumTok, TMessage.Create(TErrorCode.RecursionInMacro, 'Recursion in macros is not allowed'));
-
-          Delete(a, i, length(Text));
-          insert(Defines[im].Macro, a, i);
-
-          CurToken := TTokenKind.MACRORELEASE;
-
-        end
-        else
-        begin
-
-          if CurToken = TTokenKind.TEXTTOK then CurToken := TTokenKind.TEXTFILETOK;
-          if CurToken = TTokenKind.FLOATTOK then CurToken := TTokenKind.SINGLETOK;
-          if CurToken = TTokenKind.FLOAT16TOK then CurToken := TTokenKind.HALFSINGLETOK;
-          if CurToken = TTokenKind.SHORTSTRINGTOK then CurToken := TTokenKind.STRINGTOK;
-
-          AddToken_(TTokenKind.UNTYPETOK, 1, Line, length(Text) + Spaces, 0);
-          Spaces := 0;
-
+          ch := UpCase(a[i]);
+          Inc(i);
         end;
 
-        if CurToken <> TTokenKind.MACRORELEASE then
 
-          if CurToken <> TTokenKind.UNTYPETOK then
-          begin    // Keyword found
+        if err > 255 then
+          Error(NumTok, TMessage.Create(TErrorCode.ConstantStringTooLong,
+            'Constant strings can''t be longer than 255 chars'));
 
-            TokenAt(NumTok).Kind := CurToken;
+        if Length(Text) > 0 then
+        begin
+
+          CurToken := GetStandardToken(Text);
+
+          im := SearchDefine(Text);
+
+          if (im > 0) and (Defines[im].Macro <> '') then
+          begin
+
+            ch := #0;
+
+            i := TextPos;
+
+            if Defines[im].Macro = copy(a, i, length(Text)) then
+              Error(NumTok, TMessage.Create(TErrorCode.RecursionInMacro, 'Recursion in macros is not allowed'));
+
+            Delete(a, i, length(Text));
+            insert(Defines[im].Macro, a, i);
+
+            CurToken := TTokenKind.MACRORELEASE;
 
           end
           else
-          begin        // Identifier found
-            TokenAt(NumTok).Kind := TTokenKind.IDENTTOK;
-            TokenAt(NumTok).Name := Text;
+          begin
+
+            if CurToken = TTokenKind.TEXTTOK then CurToken := TTokenKind.TEXTFILETOK;
+            if CurToken = TTokenKind.FLOATTOK then CurToken := TTokenKind.SINGLETOK;
+            if CurToken = TTokenKind.FLOAT16TOK then CurToken := TTokenKind.HALFSINGLETOK;
+            if CurToken = TTokenKind.SHORTSTRINGTOK then CurToken := TTokenKind.STRINGTOK;
+
+            AddToken_(TTokenKind.UNTYPETOK, 1, Line, length(Text) + Spaces, 0);
+            Spaces := 0;
+
           end;
 
+          if CurToken <> TTokenKind.MACRORELEASE then
+
+            if CurToken <> TTokenKind.UNTYPETOK then
+            begin    // Keyword found
+
+              TokenAt(NumTok).Kind := CurToken;
+
+            end
+            else
+            begin        // Identifier found
+              TokenAt(NumTok).Kind := TTokenKind.IDENTTOK;
+              TokenAt(NumTok).Name := Text;
+            end;
+
+        end;
+
+        Text := '';
       end;
 
-      Text := '';
-    end;
 
+      if ch in ['''', '#'] then
+      begin
 
-    if ch in ['''', '#'] then
-    begin
+        Text := '';
+        yes := True;
 
-      Text := '';
-      yes := True;
+        repeat
 
-      repeat
+          case ch of
 
-        case ch of
+            '''': begin
 
-          '''': begin
-
-            if yes then
-            begin
-              TextPos := Length(Text) + 1;
-              yes := False;
-            end;
-
-            Inc(Spaces);
-
-            repeat
-              ch := a[i];
-              Inc(i);
-
-              if ch = LF then  //Inc(Line);
-                Error(NumTok, TMessage.Create(TErrorCode.StringExceedsLine, 'String exceeds line'));
-
-              if not (ch in ['''', CR, LF]) then
-                Text := Text + ch
-              else
+              if yes then
               begin
+                TextPos := Length(Text) + 1;
+                yes := False;
+              end;
 
-                ch2 := a[i];
+              Inc(Spaces);
+
+              repeat
+                ch := a[i];
                 Inc(i);
 
-                if ch2 = '''' then
-                begin
-                  Text := Text + '''';
-                  ch := #0;
-                end
+                if ch = LF then  //Inc(Line);
+                  Error(NumTok, TMessage.Create(TErrorCode.StringExceedsLine, 'String exceeds line'));
+
+                if not (ch in ['''', CR, LF]) then
+                  Text := Text + ch
                 else
-                  Dec(i);
+                begin
 
-              end;
+                  ch2 := a[i];
+                  Inc(i);
 
-            until ch = '''';
+                  if ch2 = '''' then
+                  begin
+                    Text := Text + '''';
+                    ch := #0;
+                  end
+                  else
+                    Dec(i);
 
-            Inc(Spaces);
+                end;
 
-            ch := a[i];
-            Inc(i);
+              until ch = '''';
 
-            if ch in [' ', TAB] then
-            begin
-              ch2 := ch;
-              Err := i;
-              while ch2 in [' ', TAB] do
+              Inc(Spaces);
+
+              ch := a[i];
+              Inc(i);
+
+              if ch in [' ', TAB] then
               begin
-                ch2 := a[i];
-                Inc(i);
+                ch2 := ch;
+                Err := i;
+                while ch2 in [' ', TAB] do
+                begin
+                  ch2 := a[i];
+                  Inc(i);
+                end;
+
+                if ch2 in ['*', '~', '+'] then
+                  ch := ch2
+                else
+                  i := Err;
               end;
 
-              if ch2 in ['*', '~', '+'] then
-                ch := ch2
-              else
-                i := Err;
-            end;
-
-
-            if ch = '*' then
-            begin
-              Inc(Spaces);
-              TextInvers(TextPos);
-              ch := a[i];
-              Inc(i);
-            end;
-
-            if ch = '~' then
-            begin
-              Inc(Spaces);
-              TextInternal(TextPos);
-              ch := a[i];
-              Inc(i);
 
               if ch = '*' then
               begin
@@ -2297,154 +2294,169 @@ begin
                 Inc(i);
               end;
 
-            end;
-
-            if ch in [' ', TAB] then
-            begin
-              ch2 := ch;
-              Err := i;
-              while ch2 in [' ', TAB] do
+              if ch = '~' then
               begin
-                ch2 := a[i];
+                Inc(Spaces);
+                TextInternal(TextPos);
+                ch := a[i];
                 Inc(i);
+
+                if ch = '*' then
+                begin
+                  Inc(Spaces);
+                  TextInvers(TextPos);
+                  ch := a[i];
+                  Inc(i);
+                end;
+
               end;
 
-              if ch2 in ['''', '+'] then
-                ch := ch2
+              if ch in [' ', TAB] then
+              begin
+                ch2 := ch;
+                Err := i;
+                while ch2 in [' ', TAB] do
+                begin
+                  ch2 := a[i];
+                  Inc(i);
+                end;
+
+                if ch2 in ['''', '+'] then
+                  ch := ch2
+                else
+                  i := Err;
+              end;
+
+
+              if ch = '+' then
+              begin
+                yes := True;
+                Inc(Spaces);
+                SkipWhiteSpace;
+              end;
+
+            end;
+
+            '#': begin
+              ch := a[i];
+              Inc(i);
+
+              Num := '';
+              ReadNumber;
+
+              if Length(Num) > 0 then
+                Text := Text + chr(StrToInt(Num))
               else
-                i := Err;
+                Error(NumTok, TMessage.Create(TErrorCode.ConstantExpressionExpected, 'Constant expression expected'));
+
+              if ch in [' ', TAB] then
+              begin
+                ch2 := ch;
+                Err := i;
+                while ch2 in [' ', TAB] do
+                begin
+                  ch2 := a[i];
+                  Inc(i);
+                end;
+
+                if ch2 in ['''', '+'] then
+                  ch := ch2
+                else
+                  i := Err;
+              end;
+
+              if ch = '+' then
+              begin
+                Inc(Spaces);
+                SkipWhiteSpace;
+              end;
+
             end;
-
-
-            if ch = '+' then
-            begin
-              yes := True;
-              Inc(Spaces);
-              SkipWhiteSpace;
-            end;
-
           end;
 
-          '#': begin
+        until not (ch in ['#', '''']);
+
+        case ch of
+          '*': begin
+            TextInvers(TextPos);
             ch := a[i];
             Inc(i);
-
-            Num := '';
-            ReadNumber;
-
-            if Length(Num) > 0 then
-              Text := Text + chr(StrToInt(Num))
-            else
-              Error(NumTok, TMessage.Create(TErrorCode.ConstantExpressionExpected, 'Constant expression expected'));
-
-            if ch in [' ', TAB] then
-            begin
-              ch2 := ch;
-              Err := i;
-              while ch2 in [' ', TAB] do
-              begin
-                ch2 := a[i];
-                Inc(i);
-              end;
-
-              if ch2 in ['''', '+'] then
-                ch := ch2
-              else
-                i := Err;
-            end;
-
-            if ch = '+' then
-            begin
-              Inc(Spaces);
-              SkipWhiteSpace;
-            end;
-
-          end;
+          end;      // Invers
+          '~': begin
+            TextInternal(TextPos);
+            ch := a[i];
+            Inc(i);
+          end;    // Antic
         end;
 
-      until not (ch in ['#', '''']);
-
-      case ch of
-        '*': begin
-          TextInvers(TextPos);
-          ch := a[i];
-          Inc(i);
-        end;      // Invers
-        '~': begin
-          TextInternal(TextPos);
-          ch := a[i];
-          Inc(i);
-        end;    // Antic
-      end;
-
-      // if Length(Text) > 0 then
-      if Length(Text) = 1 then
-      begin
-        AddToken_(TTokenKind.CHARLITERALTOK, 1, Line, 1 + Spaces, Ord(Text[1]));
-        Spaces := 0;
-      end
-      else
-      begin
-        AddToken_(TTokenKind.STRINGLITERALTOK, 1, Line, length(Text) + Spaces, 0);
-        Spaces := 0;
-        DefineStaticString(NumTok, Text);
-      end;
-
-      Text := '';
-
-    end;
-
-
-    if ch in ['=', ',', ';', '(', ')', '*', '/', '+', '-', '^', '@', '[', ']'] then
-    begin
-      AddToken_(GetStandardToken(ch), 1, Line, 1 + Spaces, 0);
-      Spaces := 0;
-    end;
-
-
-    if ch in [':', '>', '<', '.'] then          // Double-character token expected
-    begin
-
-      Line2 := Line;
-
-      ch2 := a[i];
-      Inc(i);
-
-      if (ch2 = '=') or ((ch = '<') and (ch2 = '>')) or ((ch = '.') and (ch2 = '.')) then
-      begin        // Double-character token found
-        AddToken_(GetStandardToken(ch + ch2), 1, Line, 2 + Spaces, 0);
-        Spaces := 0;
-      end
-      else
-        if (ch = '.') and (ch2 in ['0'..'9']) then
+        // if Length(Text) > 0 then
+        if Length(Text) = 1 then
         begin
-
-          AddToken_(TTokenKind.INTNUMBERTOK, 1, Line, 0, 0);
-          Frac := ReadFractionalPart(a, i, ch2);
-
-          TokenAt(NumTok).Kind := TTokenKind.FRACNUMBERTOK;
-          TokenAt(NumTok).FracValue := StrToFloat('0' + Frac);
-          TokenAt(NumTok).SourceLocation.Column := TokenAt(NumTok - 1).SourceLocation.Column + length(Frac) + Spaces;
+          AddToken_(TTokenKind.CHARLITERALTOK, 1, Line, 1 + Spaces, Ord(Text[1]));
           Spaces := 0;
-
-          Frac := '';
-
-          Dec(i);
-
         end
         else
         begin
-          Dec(i);
-          Line := Line2;
-
-          if ch in [':', '>', '<', '.'] then
-          begin        // Single-character token found
-            AddToken_(GetStandardToken(ch), 1, Line, 1 + Spaces, 0);
-            Spaces := 0;
-          end;
-
+          AddToken_(TTokenKind.STRINGLITERALTOK, 1, Line, length(Text) + Spaces, 0);
+          Spaces := 0;
+          DefineStaticString(NumTok, Text);
         end;
 
+        Text := '';
+
+      end;
+
+
+      if ch in ['=', ',', ';', '(', ')', '*', '/', '+', '-', '^', '@', '[', ']'] then
+      begin
+        AddToken_(GetStandardToken(ch), 1, Line, 1 + Spaces, 0);
+        Spaces := 0;
+      end;
+
+
+      if ch in [':', '>', '<', '.'] then          // Double-character token expected
+      begin
+
+        Line2 := Line;
+
+        ch2 := a[i];
+        Inc(i);
+
+        if (ch2 = '=') or ((ch = '<') and (ch2 = '>')) or ((ch = '.') and (ch2 = '.')) then
+        begin        // Double-character token found
+          AddToken_(GetStandardToken(ch + ch2), 1, Line, 2 + Spaces, 0);
+          Spaces := 0;
+        end
+        else
+          if (ch = '.') and (ch2 in ['0'..'9']) then
+          begin
+
+            AddToken_(TTokenKind.INTNUMBERTOK, 1, Line, 0, 0);
+            Frac := ReadFractionalPart(a, i, ch2);
+
+            TokenAt(NumTok).Kind := TTokenKind.FRACNUMBERTOK;
+            TokenAt(NumTok).FracValue := StrToFloat('0' + Frac);
+            TokenAt(NumTok).SourceLocation.Column := TokenAt(NumTok - 1).SourceLocation.Column + length(Frac) + Spaces;
+            Spaces := 0;
+
+            Frac := '';
+
+            Dec(i);
+
+          end
+          else
+          begin
+            Dec(i);
+            Line := Line2;
+
+            if ch in [':', '>', '<', '.'] then
+            begin        // Single-character token found
+              AddToken_(GetStandardToken(ch), 1, Line, 1 + Spaces, 0);
+              Spaces := 0;
+            end;
+
+          end;
+      end;
     end;
 
   end;

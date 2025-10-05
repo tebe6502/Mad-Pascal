@@ -51,7 +51,9 @@ end;
 
 function ToTFloat(const s: Single): TFloat; overload;
 begin
+  {$RANGECHECKS OFF}
   Result[0] := round(s * TWOPOWERFRACBITS);
+  {$RANGECHECKS ON}
   {$IFNDEF PAS2JS}
   Result[1] := Integer(s);
   {$ENDIF}
@@ -221,7 +223,9 @@ function CardToHalf(const ftmp: TFloat): Word; overload;
 var
   Value: Uint32;
 begin
+{$RANGECHECKS OFF}
   Value := ftmp[1];
+{$RANGECHECKS ON}
   Result := CardToHalf32(Value);
 end;
 

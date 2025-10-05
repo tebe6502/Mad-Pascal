@@ -157,8 +157,8 @@ begin
 
     SkipWhitespaces(a, i);
 
-    if UpCase(a[i]) in AllowLabelFirstChars + ['.'] then
-      while UpCase(a[i]) in AllowLabelChars + AllowDirectorySeparators do
+    if (i <= length(a)) and (UpCase(a[i]) in AllowLabelFirstChars + ['.']) then
+      while (i <= length(a)) and (UpCase(a[i]) in (AllowLabelChars + AllowDirectorySeparators)) do
       begin
 
         if upperCase then
@@ -190,52 +190,54 @@ end;
 (*----------------------------------------------------------------------------*)
 function GetString(const a: String; const upperCase: Boolean; var i: TStringIndex): String;
 var
-  len: Integer;
   znak, gchr: Char;
 begin
   Result := '';
 
   SkipWhitespaces(a, i);
 
-  if a[i] = '%' then
+  if (i <= length(a)) then
   begin
 
-    while UpCase(a[i]) in ['A'..'Z', '%'] do
-    begin
-      Result := Result + Upcase(a[i]);
-      Inc(i);
-    end;
-
-  end
-  else
-    if not (a[i] in AllowQuotes) then
+    if a[i] = '%' then
     begin
 
-      Result := GetLabel(a, upperCase, i);
+      while (i <= length(a)) and (UpCase(a[i]) in ['A'..'Z', '%']) do
+      begin
+        Result := Result + Upcase(a[i]);
+        Inc(i);
+      end;
 
     end
     else
-    begin
-
-      gchr := a[i];
-      len := length(a);
-
-      while i <= len do
+      if not (a[i] in AllowQuotes) then
       begin
-        Inc(i);   // we skip the first character ' or "
 
-        znak := a[i];
+        Result := GetLabel(a, upperCase, i);
 
-        if znak = gchr then
+      end
+      else
+      begin
+
+        gchr := a[i];
+
+        while (i <= length(a)) do
         begin
-          Inc(i);
-          Break;
+          Inc(i);   // we skip the first character ' or "
+
+          znak := a[i];
+
+          if znak = gchr then
+          begin
+            Inc(i);
+            Break;
+          end;
+
+          Result := Result + znak;
         end;
 
-        Result := Result + znak;
       end;
-
-    end;
+  end;
 
 end;
 
