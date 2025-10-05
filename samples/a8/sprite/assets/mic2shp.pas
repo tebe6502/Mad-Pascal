@@ -1,8 +1,8 @@
 program mic2shp;
 
 {$IFDEF FPC}
+
 {$APPTYPE CONSOLE}
-{$ENDIF}
 
 uses
   SysUtils;
@@ -258,3 +258,8 @@ begin
  SetLength(pmg, 1);
 
 end.
+
+{$ELSE}
+begin
+end.
+{$ENDIF}
