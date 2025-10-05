@@ -40,7 +40,7 @@ procedure SaveToDataSegment(index: Integer; Value: Int64; valueDataType: TDataTy
 
 implementation
 
-uses SysUtils, Messages, Utilities;
+uses SysUtils, Debugger, Messages, Utilities;
 
 // ----------------------------------------------------------------------------
 
@@ -140,9 +140,6 @@ var
 begin
 
   if S = '' then exit(-1);
-
-  // JAC!
-  // if S = 'VBXE_ANSIFRE' then LogTrace('GetIdentIndex');
 
   // Check if it can be found in the current WITH context
   if High(WithName) > 0 then
@@ -897,7 +894,6 @@ begin
     begin
       IdentIndex := GetIdentIndex(TokenAt(i).Name);
 
-      // TODO JAC!! Missing UnknownIdentiefer Message
       if IdentIndex > 0 then
 
         if (IdentifierAt(IdentIndex).Kind = USERTYPE) and (TokenAt(i + 1).Kind = TDataType.OPARTOK) then
@@ -1581,6 +1577,8 @@ var
   identifier: TIdentifier;
   NumAllocElements_: Cardinal;
 begin
+
+  Debugger.debugger.DefineIdent(tokenIndex, Name, Kind, DataType, NumAllocElements, AllocElementType, Data, IdType);
 
   identIndex := GetIdentIndex(Name);
 
