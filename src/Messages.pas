@@ -371,9 +371,9 @@ begin
   for i := fromTokenIndex to toTokenIndex do
   begin
     token := TokenAt(i);
-    WriteLn(token.SourceLocation.SourceFile.Path + ' ( line ' + IntToStr(token.SourceLocation.Line) +
-      ', column ' + IntToStr(token.SourceLocation.Column) + '): kind=' + GetTokenKindName(token.Kind) +
-      ' name=' + token.Name + '.');
+    WriteLn(Format('%s (line %d, column %d): kind=%s name=%s.',
+      [token.SourceLocation.SourceFile.Path, token.SourceLocation.Line, token.SourceLocation.Column,
+      GetTokenKindName(token.Kind), token.Name]));
   end;
 end;
 
@@ -420,13 +420,13 @@ begin
       if (effectiveTokenIndex > 1) then
       begin
         previousToken := TokenAt(effectiveTokenIndex - 1);
-        WriteLn(token.SourceLocation.SourceFile.Path + ' (' + IntToStr(token.SourceLocation.Line) +
-          ',' + IntToStr(Succ(previousToken.SourceLocation.Column)) + ')' + ' Error: ' + msg);
+        WriteLn(Format('%s (line %d, column %d): Error: %s', [token.SourceLocation.SourceFile.Path,
+          token.SourceLocation.Line, Succ(previousToken.SourceLocation.Column), msg]));
       end
       else
       begin
-        WriteLn(token.SourceLocation.SourceFile.Path + ' (' + IntToStr(token.SourceLocation.Line) +
-          ')' + ' Error: ' + msg);
+        WriteLn(Format('%s (line %d): Error: %s', [token.SourceLocation.SourceFile.Path,
+          token.SourceLocation.Line, msg]));
       end;
     end
     else
