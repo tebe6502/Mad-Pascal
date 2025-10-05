@@ -21,6 +21,7 @@ uses
   CommonTypes,
   Console,
   Datatypes,
+  Debugger,
   MathEvaluate,
   Memory,
   Messages,
@@ -6425,7 +6426,7 @@ end;  //GenerateRelation
 // The following functions implement recursive descent parser in accordance with Sub-Pascal EBNF
 // Parameter i is the index of the first token of the current EBNF symbol, result is the index of the last one
 
-function CompileExpression(i: Integer; out ValType: TTokenKind; VarType: TTokenKind = TTokenKind.INTEGERTOK): Integer;
+function CompileExpression(i: Integer; out ValType: TDataType; VarType: TDataType = TDataType.INTEGERTOK): Integer;
   forward;
 
 
@@ -8107,15 +8108,15 @@ begin
             begin
               asm65(#9'ldy #$00');
               ;
-              asm65(#9'mva:rne (:bp2),y ' + svar + '.adr.' +
-                IdentifierAt(IdentIndex).Param[NumActualParams].Name + ',y+');
+              asm65(#9'mva:rne (:bp2),y ' + svar + '.adr.' + IdentifierAt(
+                IdentIndex).Param[NumActualParams].Name + ',y+');
             end
             else
               if j <= 128 then
               begin
                 asm65(#9'ldy #$' + IntToHex(j - 1, 2));
-                asm65(#9'mva:rpl (:bp2),y ' + svar + '.adr.' +
-                  IdentifierAt(IdentIndex).Param[NumActualParams].Name + ',y-');
+                asm65(#9'mva:rpl (:bp2),y ' + svar + '.adr.' + IdentifierAt(
+                  IdentIndex).Param[NumActualParams].Name + ',y-');
               end
               else
                 asm65(#9'@move ":bp2" #' + svar + '.adr.' + IdentifierAt(IdentIndex).Param[NumActualParams].Name +
@@ -11314,7 +11315,6 @@ end;  //CompileSimpleExpression
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 
-
 function CompileExpression(i: Integer; out ValType: TDataType; VarType: TDataType = TDataType.INTEGERTOK): Integer;
 var
   j, k: Integer;
@@ -11324,6 +11324,8 @@ var
   ConstVal, ConstValRight: Int64;
 
 begin
+
+  Debugger.debugger.CompileExpression(i, ValType, VarType);
 
   ConstVal := 0;
 
@@ -11387,7 +11389,6 @@ begin
   begin
 
     if ValType in RealTypes + [TDataType.ENUMTOK] then VarType := ValType;
-
 
     j := CompileSimpleExpression(i + 2, RightValType, VarType);
 
@@ -11509,8 +11510,6 @@ begin
 
 
     //  writeln(ValType,',',RightValType,' / ',ConstValRight);
-    // JAC!
-    // if j=19695 then writeln('Debug');
 
     if sLeft or sRight then
     else
@@ -11748,24 +11747,7 @@ end;
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 
-
-procedure LogToken(tokenIndex: TTokenIndex);
-var
-  token: TToken;
-  line: String;
-  IdentIndex: TIdentifierIndex;
-begin
-  token := TokenAt(tokenIndex);
-  line := token.GetSpelling() + ' ' + token.Name;
-
-  IdentIndex := GetIdentIndex(token.Name);
-  if (IdentIndex > 0) then  line := line + ' ' + GetTokenKindName(IdentifierAt(IdentIndex).DataType);
-  LogTrace(Format('Token %d: %s  %s (%d,%d), index=%d', [tokenIndex, line, token.SourceLocation.SourceFile.Name,
-    token.SourceLocation.Line, token.SourceLocation.Column, IdentIndex]));
-
-end;
-
-function CompileStatement(i: Integer; isAsm: Boolean = False): Integer;
+function CompileStatement(i: TTokenIndex; isAsm: Boolean = False): Integer;
 var
   j, k, IdentIndex, IdentTemp, NumActualParams, NumCharacters, IfLocalCnt, CaseLocalCnt,
   NumCaseStatements, vlen: Integer;
@@ -11783,8 +11765,7 @@ var
   forBPL: Byte;
 
 begin
-  // JAC!
-  // LogToken(i);
+  Debugger.debugger.CompileStatement(i, isAsm);
 
   Result := i;
 
@@ -15825,8 +15806,8 @@ var
 
         case Byte(abs(IdentifierAt(IdentIndex).Value shr 24) and $7f) of
           1..3: Result := #9'= ' + reg[abs(IdentifierAt(IdentIndex).Value shr 24) and $7f];
-          4..19: Result := #9'= :STACKORIGIN-' +
-              IntToStr(Byte(abs(IdentifierAt(IdentIndex).Value shr 24) and $7f) - 3);
+          4..19: Result := #9'= :STACKORIGIN-' + IntToStr(
+              Byte(abs(IdentifierAt(IdentIndex).Value shr 24) and $7f) - 3);
           else
             Result := #9'= ''out of resource'''
         end;
@@ -17038,8 +17019,8 @@ var
   isReg, isInt, isInl, isOvr: Boolean;
   VarType: TDataType;
   VarRegister: Byte;
-  NestedFunctionResultType, ConstValType, AllocElementType, ActualParamType,
-  NestedFunctionAllocElementType, NestedDataType, NestedAllocElementType, IdType: TDataType;
+  NestedFunctionResultType, ConstValType, AllocElementType, ActualParamType, NestedFunctionAllocElementType,
+  NestedDataType, NestedAllocElementType, IdType: TDataType;
   Tmp, TmpResult: Word;
 
   external_name: TString;
@@ -19812,6 +19793,7 @@ begin
 
   Common.unitPathList := unitPathList;
   evaluationContext := TEvaluationContext.Create;
+  debugger.debugger := TDebugger.Create;
 
   TokenList := TTokenList.Create;
   IdentifierList := TIdentifierList.Create;
@@ -19910,6 +19892,7 @@ begin
   IdentifierList := nil;
 
   SetLength(IFTmpPosStack, 0);
+  Debugger.debugger := nil;
   evaluationContext := nil;
   unitPathList.Free;
   unitPathList := nil;
