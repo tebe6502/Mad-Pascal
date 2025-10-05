@@ -11191,19 +11191,19 @@ begin
       ValType := VarType;
     end;
 
-    if VarType in RealTypes then ValType := VarType;
-
+    if VarType in RealTypes then
+    begin
+      ValType := VarType;
+    end;
 
     if TokenAt(i).Kind = TTokenKind.MINUSTOK then
+    begin
       ConstVal := Negate(ValType, ConstVal);
+    end;
 
     if ValType = TDataType.SINGLETOK then
     begin
-      ConstVal := -ConstVal;         // Unary minus (IntegerTypes)
-
-      if ValType in IntegerTypes then
-        ValType := GetValueType(ConstVal);
-
+      ConstVal := CastToSingle(ConstVal);
     end;
 
     if ValType = TDataType.HALFSINGLETOK then
@@ -11370,13 +11370,13 @@ begin
   i := CompileSimpleExpression(i, ValType, VarType);
 
 
-  if (TokenAt(i).Kind = TTokenKind.STRINGLITERALTOK) or (ValType = TDataType.STRINGPOINTERTOK) then
-    sLeft := Wordbool(1)
+  if (TokenAt(i).Kind = TTokenKind.STRINGLITERALTOK) or (ValType = TDataType.STRINGPOINTERTOK)
+   then sLeft := Wordbool(1)
   else
     if (ValType in Pointers) and (TokenAt(i).Kind = TTokenKind.IDENTTOK) then
       if (IdentifierAt(GetIdentIndex(TokenAt(i).Name)).AllocElementType = TDataType.CHARTOK) and
-        (Elements(GetIdentIndex(TokenAt(i).Name)) in [1..255]) then
-        sLeft := Wordbool(1 or Elements(GetIdentIndex(TokenAt(i).Name)) shl 8);
+        (Elements(GetIdentIndex(TokenAt(i).Name)) in [1..255]) 
+        then sLeft := Wordbool(1 or Elements(GetIdentIndex(TokenAt(i).Name)) shl 8);
 
 
   if TokenAt(i + 1).Kind = TTokenKind.INTOK then writeln('IN');        // not yet programmed
@@ -11509,6 +11509,8 @@ begin
 
 
     //  writeln(ValType,',',RightValType,' / ',ConstValRight);
+    // JAC!
+    // if j=19695 then writeln('Debug');
 
     if sLeft or sRight then
     else
@@ -11522,7 +11524,7 @@ begin
     end;
 
 
-    // !!! wyjatek !!! porownanie typow tego samego rozmiaru, ale z roznymi znakami
+    // !!! exception !!! comparison of types of the same size but with different signs
 
     if ((ValType in SignedOrdinalTypes) and (RightValType in UnsignedOrdinalTypes)) or
       ((ValType in UnsignedOrdinalTypes) and (RightValType in SignedOrdinalTypes)) then
@@ -11533,7 +11535,7 @@ begin
           1: begin
 
             if cRight and ((ConstValRight >= Low(Shortint)) and (ConstValRight <= High(Shortint))) then
-              // gdy nie przekracza zakresu dla typu SHORTINT
+              // when it does not exceed the range for the SHORTINT type
               RightValType := ValType
             else
             begin
@@ -11548,7 +11550,7 @@ begin
           2: begin
 
             if cRight and ((ConstValRight >= Low(Smallint)) and (ConstValRight <= High(Smallint))) then
-              // gdy nie przekracza zakresu dla typu SMALLINT
+              // when it does not exceed the range for the SMALLINT type
               RightValType := ValType
             else
             begin
@@ -11747,6 +11749,22 @@ end;
 // ----------------------------------------------------------------------------
 
 
+procedure LogToken(tokenIndex: TTokenIndex);
+var
+  token: TToken;
+  line: String;
+  IdentIndex: TIdentifierIndex;
+begin
+  token := TokenAt(tokenIndex);
+  line := token.GetSpelling() + ' ' + token.Name;
+
+  IdentIndex := GetIdentIndex(token.Name);
+  if (IdentIndex > 0) then  line := line + ' ' + GetTokenKindName(IdentifierAt(IdentIndex).DataType);
+  LogTrace(Format('Token %d: %s  %s (%d,%d), index=%d', [tokenIndex, line, token.SourceLocation.SourceFile.Name,
+    token.SourceLocation.Line, token.SourceLocation.Column, IdentIndex]));
+
+end;
+
 function CompileStatement(i: Integer; isAsm: Boolean = False): Integer;
 var
   j, k, IdentIndex, IdentTemp, NumActualParams, NumCharacters, IfLocalCnt, CaseLocalCnt,
@@ -11763,7 +11781,10 @@ var
   forLoop: TForLoop;
   Name, EnumName, svar, par1, par2: String;
   forBPL: Byte;
+
 begin
+  // JAC!
+  // LogToken(i);
 
   Result := i;
 
@@ -12354,7 +12375,7 @@ begin
                     if IdentifierAt(IdentIndex).AllocElementType = TDataType.UNTYPETOK then
                       ErrorIncompatibleTypes(i + 1, TTokenKind.STRINGPOINTERTOK, TTokenKind.POINTERTOK)
                     else
-                      GetCommonType(i + 1, IdentifierAt(IdentIndex).AllocElementType, TTokenKind.STRINGPOINTERTOK);
+                      GetCommonType(i + 1, IdentifierAt(IdentIndex).AllocElementType, TDataType.STRINGPOINTERTOK);
 
                 end;
 
@@ -17095,7 +17116,7 @@ begin
   end;
 
 
-  NumAllocElements := 0;
+
 
   if IdentifierAt(BlockIdentIndex).ObjectIndex > 0 then
   begin
@@ -17110,8 +17131,10 @@ begin
     IdentifierAt(NumIdent).AllocElementType := TTokenKind.WORDTOK;
     //  end;
 
+    NumAllocElements := 0;
+
     for ParamIndex := 1 to GetTypeAtIndex(IdentifierAt(BlockIdentIndex).ObjectIndex).NumFields do
-      if GetTypeAtIndex(IdentifierAt(BlockIdentIndex).ObjectIndex).Field[ParamIndex].Kind = TFieldKind.UNTYPETOK then
+      if GetTypeAtIndex(IdentifierAt(BlockIdentIndex).ObjectIndex).Field[ParamIndex].ObjectVariable = False then
       begin
 
         if NumAllocElements > 0 then
@@ -17523,6 +17546,8 @@ begin
           GetTypeAtIndex(IdentifierAt(BlockIdentIndex).ObjectIndex).Field[ParamIndex].NumAllocElements,
           GetTypeAtIndex(IdentifierAt(BlockIdentIndex).ObjectIndex).Field[ParamIndex].DataType, 0);
 
+      IdentifierAt(NumIdent).PassMethod := TParameterPassingMethod.VARPASSING;
+      IdentifierAt(NumIdent).ObjectVariable := True;
 
       SetVarDataSize(i, tmpVarDataSize + GetDataSize(TDataType.POINTERTOK));
 
@@ -19887,4 +19912,3 @@ begin
 end;
 
 end.
-
