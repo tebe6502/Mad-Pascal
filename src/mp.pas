@@ -198,9 +198,9 @@ uses
   SysUtils,
  {$IFDEF WINDOWS}
   Windows,
-                                                    {$ENDIF} {$IFDEF SIMULATED_CONSOLE}
+  {$ENDIF} {$IFDEF SIMULATED_CONSOLE}
   browserconsole,
-                                                    {$ENDIF}
+  {$ENDIF}
   Common,
   Compiler,
   CompilerTypes,
@@ -427,7 +427,7 @@ uses
 
           if not TFileSystem.FileExists_(inputFilePath) then
           begin
-            ParameterError(i, 'Error: Cannot open input file ''' + ExpandFileName(inputFilePath) + ''' for reading.');
+            ParameterError(i, 'Error: Cannot open input file ''' + TFileSystem.GetAbsolutePath(inputFilePath) + ''' for reading.');
           end;
         end;
 
