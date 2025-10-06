@@ -12570,14 +12570,16 @@ begin
                               ErrorIncompatibleEnumIdentifiers(i, IdentTemp, IdentIndex);
 
                           end
-                          else
-                            ErrorIncompatibleEnumTypeIdentifier(i, ExpressionType, IdentIndex);
+			  else
+			  if (IdentifierAt(IdentIndex).DataType = TDataType.ENUMTOK) and (ExpressionType in UnsignedOrdinalTypes + [TDataType.ENUMTOK]) then
 
+			  else
+                            ErrorIncompatibleEnumTypeIdentifier(i, ExpressionType, IdentIndex);
                     end
                     else
                     begin
 
-                      if (TokenAt(k).Kind = TTokenKind.IDENTTOK) then
+                      if (TokenAt(k).Kind = TTokenKind.IDENTTOK) and (TokenAt(k + 1).Kind = TTokenKind.SEMICOLONTOK) then
                         IdentTemp := GetIdentIndex(TokenAt(k).Name)
                       else
                         IdentTemp := 0;
@@ -13367,8 +13369,9 @@ begin
       i := CompileExpression(i + 1, SelectorType);
 
 
-      if (TokenAt(j).Kind = TTokenKind.IDENTTOK) and (IdentifierAt(GetIdentIndex(TokenAt(j).Name)).Kind =
-        TTokenKind.FUNCTIONTOK) and (IdentifierAt(GetIdentIndex(TokenAt(j).Name)).DataType = TDatatype.ENUMTOK) then
+      if (TokenAt(j).Kind = TTokenKind.IDENTTOK) and 
+         (IdentifierAt(GetIdentIndex(TokenAt(j).Name)).Kind = TTokenKind.FUNCTIONTOK) and
+	 (IdentifierAt(GetIdentIndex(TokenAt(j).Name)).DataType = TDatatype.ENUMTOK) then
 
         //      if (SelectorType = TDatatype.ENUMTOK) and (TokenAt(j).Kind = TTokenKind.IDENTTOK) and
         //      (IdentifierAt(GetIdentIndex(TokenAt(j).Name)).Kind = TTokenKind.FUNCTIONTOK) then
