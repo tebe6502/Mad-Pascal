@@ -1,3 +1,7 @@
+06.10.2025
+- fix CASE FUNCTION:ENUM
+- fix ENUM SUCC/PRED; (ENUM = ENUM)
+
 29.09.2025
 - bugfixes and optimizations
 
