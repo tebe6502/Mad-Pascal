@@ -155,7 +155,7 @@ var
 	LastArcCoords: TLastArcCoords;
 
 
-{$i '../src/targets/graphh.inc'}
+{$i './targets/graphh.inc'}
 
 
 	procedure Arc(X, Y, StAngle, EndAngle, Radius: Word);
@@ -237,7 +237,7 @@ begin
 end;
 
 
-{$i '../src/targets/graph.inc'}
+{$i './targets/graph.inc'}
 
 
 procedure MoveTo(x, y: smallint); assembler;

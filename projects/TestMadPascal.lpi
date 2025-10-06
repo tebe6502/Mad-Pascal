@@ -26,8 +26,8 @@
       <Modes>
         <Mode Name="default">
           <local>
-            <CommandLineParams Value="-iPath:C:\jac\system\Atari800\Programming\Repositories\Mad-Pascal\lib -iPath:C:\jac\system\Atari800\Programming\Repositories\Mad-Pascal\blibs while_lteq.pas"/>
-            <WorkingDirectory Value="C:\jac\system\Atari800\Programming\Repositories\Mad-Pascal\samples\tests\tests-while\"/>
+            <CommandLineParams Value="-iPath:C:\jac\system\Atari800\Programming\Repositories\Mad-Pascal\lib -iPath:C:\jac\system\Atari800\Programming\Repositories\Mad-Pascal\blibs wrathchild_0.pas"/>
+            <WorkingDirectory Value="C:\jac\system\Atari800\Programming\Repositories\Mad-Pascal\samples\tests\tests-enum"/>
           </local>
         </Mode>
         <Mode Name="samples">
