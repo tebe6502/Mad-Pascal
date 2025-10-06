@@ -6561,7 +6561,7 @@ begin
 
     case ArrayIndexType of
       TDataType.SHORTINTTOK: ArrayIndexType := TDataType.BYTETOK;
-      TDataType,SMALLINTTOK: ArrayIndexType := TDataType.WORDTOK;
+      TDataType.SMALLINTTOK: ArrayIndexType := TDataType.WORDTOK;
       TDataType.INTEGERTOK: ArrayIndexType := TDataType.CARDINALTOK;
     end;
 
@@ -6579,12 +6579,12 @@ begin
       //      ArrayIndexType := WORDTOK;
     end
     else
-      ArrayIndexType := WORDTOK;
+      ArrayIndexType := TDataType.WORDTOK;
 
     if (Size > 1) or (Elements(IdentIndex) > 256) or (Elements(IdentIndex) in [0, 1]) {or (NumAllocElements_ > 0)} then
     begin
       //        ExpandParam(WORDTOK, ArrayIndexType);
-      ArrayIndexType := WORDTOK;
+      ArrayIndexType := TDataType.WORDTOK;
     end;
 
 
@@ -6615,9 +6615,9 @@ begin
 
       Push(0, ASVALUE, GetDataSize(ArrayIndexType));
 
-      GenerateBinaryOperation(PLUSTOK, WORDTOK);
+      GenerateBinaryOperation(PLUSTOK, TDataType.WORDTOK);
 
-      VarType := ARRAYTOK;
+      VarType := TDataType.ARRAYTOK;
     end
     else
       if TokenAt(i + 1).Kind = CBRACKETTOK then
@@ -6661,9 +6661,9 @@ begin
       GetCommonType(i, ActualParamType, ArrayIndexType);
 
       case ArrayIndexType of
-        SHORTINTTOK: ArrayIndexType := TDatatype.BYTETOK;
-        SMALLINTTOK: ArrayIndexType := TDatatype.WORDTOK;
-        INTEGERTOK: ArrayIndexType := TDatatype.CARDINALTOK;
+        TDataType.SHORTINTTOK: ArrayIndexType := TDatatype.BYTETOK;
+        TDataType.SMALLINTTOK: ArrayIndexType := TDatatype.WORDTOK;
+        TDataType.INTEGERTOK: ArrayIndexType := TDatatype.CARDINALTOK;
       end;
 
       if GetDataSize(ArrayIndexType) = 4 then
@@ -6731,7 +6731,7 @@ begin
 
   address := False;
 
-  AllocElementType := TTokenKind.UNTYPETOK;
+  AllocElementType := TDataType.UNTYPETOK;
 
 
   if TokenAt(i + 1).Kind = TTokenKind.ADDRESSTOK then
@@ -6749,7 +6749,7 @@ begin
   if (TokenAt(i + 1).Kind = TTokenKind.PCHARTOK) and (TokenAt(i + 2).Kind = TTokenKind.OPARTOK) then
   begin
 
-    j := CompileExpression(i + 3, ValType, TTokenKind.POINTERTOK);
+    j := CompileExpression(i + 3, ValType, TDataType.POINTERTOK);
 
     CheckTok(j + 1, TTokenKind.CPARTOK);
 
@@ -6771,13 +6771,13 @@ begin
       if IdentIndex > 0 then
       begin
 
-        if not (IdentifierAt(IdentIndex).Kind in [CONSTANT, VARIABLE, TTokenKind.PROCEDURETOK,
+        if not (IdentifierAt(IdentIndex).Kind in [TTokenKind.CONSTTOK, TTokenKind.VARTOK, TTokenKind.PROCEDURETOK,
           TTokenKind.FUNCTIONTOK, TTokenKind.CONSTRUCTORTOK, TTokenKind.DESTRUCTORTOK, TTokenKind.ADDRESSTOK]) then
           Error(i + 1, TErrorCode.VariableExpected)
         else
         begin
 
-          if IdentifierAt(IdentIndex).Kind = CONSTANT then
+          if IdentifierAt(IdentIndex).Kind = TTokenKind.CONSTTOK then
             if not ((IdentifierAt(IdentIndex).DataType in Pointers) and
               (IdentifierAt(IdentIndex).NumAllocElements > 0)) then
               Error(i + 1, TErrorCode.CantAdrConstantExp);
@@ -6887,7 +6887,7 @@ begin
 
             end
             else
-              if (IdentifierAt(IdentIndex).DataType in [TTokenKind.FILETOK, TTokenKind.TEXTFILETOK,
+              if (IdentifierAt(IdentIndex).DataType in [TDataType.FILETOK, TDataType.TEXTFILETOK,
                 TTokenKind.RECORDTOK, TTokenKind.OBJECTTOK] {+ Pointers}) or
                 ((IdentifierAt(IdentIndex).DataType in Pointers) and
                 (IdentifierAt(IdentIndex).AllocElementType <> TDataType.UNTYPETOK) and
