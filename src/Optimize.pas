@@ -541,10 +541,10 @@ end;
 
 
 procedure OptimizeASM;
-(* -------------------------------------------------------------------------- *)
-(* optymalizacja powiodla sie jesli na wyjsciu X=0
-(* peephole optimization
-(* -------------------------------------------------------------------------- *)
+(* --------------------------------------------------------------------------
+  optymalizacja powiodla sie jesli na wyjsciu X=0
+  peephole optimization
+  -------------------------------------------------------------------------- *)
 type
   TListing = array [0..1023] of String;
   TListing_tmp = array [0..127] of String;

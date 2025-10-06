@@ -22,9 +22,8 @@ PAS2JS = pas2js.exe -Jc -Jirtl.js -Tbrowser
 $(BIN): clean $(SRC)
 	echo "Compiling $(SRC)"
 
-	which pas2js
-	pause
-	$(PAS2JS) --help
+#	which pas2js
+#	$(PAS2JS) --help
 
 #       Use "-v" for verbose, and "-va" for verbose all
 	$(PAS2JS) -Mdelphi -v mp.pas -o$(BIN)

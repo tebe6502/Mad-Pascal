@@ -609,7 +609,6 @@ begin
   for i := 0 to High(linkObj) - 1 do
     if linkObj[i] = StrValue then
     begin
-      // TODO
       TokenAt(tokenIndex).Value := i;
       exit;
     end;

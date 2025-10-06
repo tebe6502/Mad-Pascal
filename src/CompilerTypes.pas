@@ -160,6 +160,7 @@ type
 
   TFieldKind = (UNTYPETOK, OBJECTVARIABLE, RECORDVARIABLE);
 
+  // Lower 16 bit encode the size of the 1st array dimension.
   // Upper 16 bits encode the size of the 2nd array dimension.
   TNumAllocElements = Cardinal;
 
@@ -198,7 +199,6 @@ type
     AllowedUnitNames: array [1..MAXALLOWEDUNITS] of TSourceFileName;
 
     function IsRelevant: Boolean;
-
 
   end;
 

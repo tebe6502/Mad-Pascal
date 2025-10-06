@@ -222,8 +222,8 @@ type
     EOFTOK
     );
 
-function GetTokenKindName(tokenKind: TTokenKind): String; // TODO Needed public?
-function GetTokenSpelling(tokenKind: TTokenKind): String; // TODO Needed public?
+function GetTokenKindName(tokenKind: TTokenKind): String;
+function GetTokenSpelling(tokenKind: TTokenKind): String;
 function GetHumanReadbleTokenSpelling(tokenKind: TTokenKind): String;
 function InfoAboutToken(t: TTokenKind): String; // TODO: What's the difference to GetTokenSpelling
 function GetStandardToken(S: String): TTokenKind;

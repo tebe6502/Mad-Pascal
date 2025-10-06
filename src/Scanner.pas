@@ -195,15 +195,17 @@ end;  //AddResource
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 
-procedure TScanner.AddToken_(Kind: TTokenKind; UnitIndex: TSourceFileIndex; Line, Column: Integer; Value: TInteger);
-begin
-  tokenList.AddToken(kind, SourceFileList.GetSourceFile(UnitIndex), line, Column, Value);
-end;
-
 procedure TScanner.AddToken(Kind: TTokenKind; SourceFile: TSourceFile; Line, Column: Integer; Value: TInteger);
 begin
   tokenList.AddToken(kind, SourceFile, line, Column, Value);
 end;
+
+procedure TScanner.AddToken_(Kind: TTokenKind; UnitIndex: TSourceFileIndex; Line, Column: Integer; Value: TInteger);
+begin
+  AddToken(kind, SourceFileList.GetSourceFile(UnitIndex), line, Column, Value);
+end;
+
+
 
 
 // ----------------------------------------------------------------------------
