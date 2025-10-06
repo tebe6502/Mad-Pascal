@@ -6888,7 +6888,7 @@ begin
             end
             else
               if (IdentifierAt(IdentIndex).DataType in [TDataType.FILETOK, TDataType.TEXTFILETOK,
-                TTokenKind.RECORDTOK, TTokenKind.OBJECTTOK] {+ Pointers}) or
+                TDataType.RECORDTOK, TDataType.OBJECTTOK] {+ Pointers}) or
                 ((IdentifierAt(IdentIndex).DataType in Pointers) and
                 (IdentifierAt(IdentIndex).AllocElementType <> TDataType.UNTYPETOK) and
                 (IdentifierAt(IdentIndex).NumAllocElements > 0)) or
@@ -6908,7 +6908,7 @@ begin
                   (IdentifierAt(IdentIndex).idType = TDataType.DATAORIGINOFFSET) then
                 begin
 
-                  Push(IdentifierAt(IdentIndex).Value, ASPOINTERTORECORD, GetDataSize(TTokenKind.POINTERTOK),
+                  Push(IdentifierAt(IdentIndex).Value, ASPOINTERTORECORD, GetDataSize(TDataType.POINTERTOK),
                     IdentIndex);
                 end
                 else
@@ -6960,7 +6960,7 @@ begin
                         begin
 
                           if IdentifierAt(IdentIndex).AllocElementType in
-                            [TTokenKind.RECORDTOK, TTokenKind.OBJECTTOK] then
+                            [TDataType.RECORDTOK, TDataType.OBJECTTOK] then
                           begin
 
                             if IdentifierAt(IdentIndex).NumAllocElements_ = 0 then

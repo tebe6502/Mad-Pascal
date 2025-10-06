@@ -612,7 +612,7 @@
         <ShowHintsForUnusedUnitsInMainSrc Value="True"/>
       </Verbosity>
       <ConfigFile>
-        <StopAfterErrCount Value="100"/>
+        <StopAfterErrCount Value="200"/>
       </ConfigFile>
       <CustomOptions Value="-dDEBUG
 -dSIMULATED_COMMAND_LINE2
