@@ -1,10 +1,20 @@
-@echo on
+@echo off
+rem
+rem This script compiles all available/all known problematic samples with the current and the reference version of MadPascal.
+rem The current version must have been built using src\Makefile.bat
+rem To convert the output of "samples\MakeMadPascal-COMPARE.log":
+rem - Replace ".WinMerge"with ".pas ^"
+rem - Replace "C:\jac\system\Atari800\Programming\Repositories\Mad-Pascal\" with "-inputFilePattern "
+
 cd %~dp0
-rem Replace .WinMerge .pas ^
-rem Replace C:\jac\system\Atari800\Programming\Repositories\Mad-Pascal\ -inputFilePattern
+setlocal
+set MP_FOLDER=C:\jac\system\Atari800\Programming\Repositories\Mad-Pascal
+set MP_REFERECE_FOLDER=C:\jac\system\Atari800\Programming\Repositories\Mad-Pascal-Reference
+rem This script compiles
+
 MakeMadPascal.exe -allThreads -allFiles -mpFolderPath .\.. -compileReference -compile -compare -openResults ^
--referenceMPExePath C:\jac\system\Atari800\Programming\Repositories\Mad-Pascal\bin\windows_x86_64\origin\mp.exe ^
--mpExePath C:\jac\system\Atari800\Programming\Repositories\Mad-Pascal\bin\windows_x86_64\mp.exe ^
+-referenceMPExePath %MP_REFERECE_FOLDER%\bin\windows_x86_64\mp.exe ^
+-mpExePath          %MP_FOLDER%\bin\windows_x86_64\mp.exe ^
 -inputFilePattern samples\a8\compression\apl\unapl.pas ^
 -inputFilePattern samples\a8\compression\deflate\undef.pas ^
 -inputFilePattern samples\a8\compression\lz4\unlz4.pas ^
