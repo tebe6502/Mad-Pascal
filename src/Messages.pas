@@ -470,11 +470,11 @@ begin
 
   msg := 'Incompatible types: got "';
 
-  msg := msg + InfoAboutToken(srcType) + '" expected "';
+  msg := msg + InfoAboutDataType(srcType) + '" expected "';
 
   if dstPointer then msg := msg + '^';
 
-  msg := msg + InfoAboutToken(DstType) + '"';
+  msg := msg + InfoAboutDataType(DstType) + '"';
 
   Error(tokenIndex, TMessage.Create(TErrorCode.IncompatibleTypes, msg));
 end;
@@ -496,7 +496,7 @@ var
   msg: String;
 begin
 
-  msg := 'Incompatible types: got "' + InfoAboutToken(srcType) + '" expected "' +
+  msg := 'Incompatible types: got "' + InfoAboutDataType(srcType) + '" expected "' +
     Common.GetEnumName(dstEnumIndex) + '"';
 
   Error(tokenIndex, TMessage.Create(TErrorCode.IncompatibleEnum, msg));
@@ -509,7 +509,7 @@ var
 begin
 
   msg := 'Incompatible types: got "' + Common.GetEnumName(srcEnumIndex) + '" expected "' +
-    InfoAboutToken(DstType) + '"';
+    InfoAboutDataType(DstType) + '"';
 
   Error(tokenIndex, TMessage.Create(TErrorCode.IncompatibleEnum, msg));
 end;
@@ -537,21 +537,21 @@ begin
 
   if identifier.NumAllocElements_ > 0 then
     msg := msg + IntToStr(identifier.NumAllocElements - 1) + '] Of Array[0..' +
-      IntToStr(identifier.NumAllocElements_ - 1) + '] Of ' + InfoAboutToken(identifier.AllocElementType) + '" '
+      IntToStr(identifier.NumAllocElements_ - 1) + '] Of ' + InfoAboutDataType(identifier.AllocElementType) + '" '
   else
     if identifier.NumAllocElements = 0 then
     begin
 
-      if identifier.AllocElementType <> TTokenKind.UNTYPETOK then
-        msg := msg + '"^' + InfoAboutToken(identifier.AllocElementType) + '" '
+      if identifier.AllocElementType <> TDataType.UNTYPETOK then
+        msg := msg + '"^' + InfoAboutDataType(identifier.AllocElementType) + '" '
       else
-        msg := msg + '"' + InfoAboutToken(TTokenKind.POINTERTOK) + '" ';
+        msg := msg + '"' + InfoAboutDataType(TDataType.POINTERTOK) + '" ';
 
     end
     else
     begin
       msg := msg + IntToStr(identifier.NumAllocElements - 1) + '] Of ' +
-        InfoAboutToken(identifier.AllocElementType) + '" ';
+        InfoAboutDataType(identifier.AllocElementType) + '" ';
     end;
 
   if errorCode = TErrorCode.IllegalTypeConversion then
@@ -565,18 +565,18 @@ begin
       if IdentifierAt(arrayIdentIndex).NumAllocElements_ > 0 then
         msg := msg + '"Array[0..' + IntToStr(arrayIdentifier.NumAllocElements - 1) +
           '] Of Array[0..' + IntToStr(arrayIdentifier.NumAllocElements_ - 1) + '] Of ' +
-          InfoAboutToken(identifier.AllocElementType) + '"'
+          InfoAboutDataType(identifier.AllocElementType) + '"'
       else
-        if arrayIdentifier.AllocElementType in [TTokenKind.RECORDTOK, TTokenKind.OBJECTTOK] then
+        if arrayIdentifier.AllocElementType in [TDataType.RECORDTOK, TDataType.OBJECTTOK] then
           msg := msg + '"^' + GetTypeAtIndex(arrayIdentifier.NumAllocElements).Field[0].Name + '"'
         else
         begin
 
-          if arrayIdentifier.DataType in [TTokenKind.RECORDTOK, TTokenKind.OBJECTTOK] then
+          if arrayIdentifier.DataType in [TDataType.RECORDTOK, TDataType.OBJECTTOK] then
             msg := msg + '"' + GetTypeAtIndex(arrayIdentifier.NumAllocElements).Field[0].Name + '"'
           else
             msg := msg + '"Array[0..' + IntToStr(arrayIdentifier.NumAllocElements - 1) +
-              '] Of ' + InfoAboutToken(arrayIdentifier.AllocElementType) + '"';
+              '] Of ' + InfoAboutDataType(arrayIdentifier.AllocElementType) + '"';
 
         end;
 
@@ -724,15 +724,15 @@ begin
 
       a := TokenAt(tokenIndex).GetSourceFileLineString + ' Note: Local ';
 
-      if IdentifierAt(IdentIndex).Kind <> UNITTYPE then
+      if IdentifierAt(IdentIndex).Kind <> TTokenKind.UNITTOK then
       begin
 
         case IdentifierAt(IdentIndex).Kind of
-          CONSTANT: a := a + 'const';
-          USERTYPE: a := a + 'type';
-          LABELTYPE: a := a + 'label';
+          TTokenKind.CONSTTOK: a := a + 'const';
+          TTokenKind.TYPETOK: a := a + 'type';
+          TTokenKind.LABELTOK: a := a + 'label';
 
-          VARIABLE: if IdentifierAt(IdentIndex).isAbsolute then
+          TTokenKind.VARTOK: if IdentifierAt(IdentIndex).isAbsolute then
               a := a + 'absolutevar'
             else
               a := a + 'variable';

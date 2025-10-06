@@ -6,16 +6,16 @@ interface
 
 uses SysUtils, CommonTypes, Datatypes, FileIO, Tokens, Utilities;
 
-// ----------------------------------------------------------------------------
+  // ----------------------------------------------------------------------------
 
 
-// Passes
+  // Passes
   {$SCOPEDENUMS ON}
 type
   TPass = (NONE, CALL_DETERMINATION, CODE_GENERATION);
 
 
-// Parameter passing
+  // Parameter passing
 type
   TParameterPassingMethod = (
     UNDEFINED,
@@ -31,15 +31,15 @@ const
 
   // Identifier kind codes
 
-  CONSTANT = TTokenKind.CONSTTOK;
-  USERTYPE = TTokenKind.TYPETOK;
-  VARIABLE = TTokenKind.VARTOK;
+  CONSTANT = TDataType.CONSTTOK;
+  USERTYPE = TDataType.TYPETOK;
+  VARIABLE = TDataType.VARTOK;
   //  PROC      = TTokenKind.PROCEDURETOK;
   //  FUNC      = TTokenKind.FUNCTIONTOK;
-  LABELTYPE = TTokenKind.LABELTOK;
-  UNITTYPE = TTokenKind.UNITTOK;
+  LABELTYPE = TDataType.LABELTOK;
+  UNITTYPE = TDataType.UNITTOK;
 
-  ENUMTYPE = TTokenKind.ENUMTOK;
+  ENUMTYPE = TDataType.ENUMTOK;
 
   // Compiler parameters
 
@@ -62,7 +62,8 @@ const
 
 
   // Indirection levels
-type TIndirectionLevel = Byte;
+type
+  TIndirectionLevel = Byte;
 
 const
   ASVALUE = 0;
@@ -250,6 +251,8 @@ type
     function GetSourceFileLineString: String;
     function GetSourceFileLocationString: String;
 
+    function GetDataType: TDataType;
+
     function GetSpelling: TString;
 
   end;
@@ -285,7 +288,7 @@ type
     Alias: TString;           // EXTERNAL alias 'libraries'
     Libraries: Integer;       // EXTERNAL alias 'libraries'
     DataType: TDataType;
-    IdType: TTokenKind;       // TODO Have TIdenfierType
+    IdType: TDataType;       // TODO Have TIdenfierType
     PassMethod: TParameterPassingMethod;
     Pass: TPass;
 
@@ -424,7 +427,6 @@ end;
 
 
 function TSourceFileList.AddUnit(SourceFileType: TSourceFileType; Name: TSourceFileName; Path: TFilePath): TSourceFile;
-
 begin
   Assert(IsValidIdent(path) = False, 'Name ''' + Name + ''' is not a valid identifier.');
   Assert(Length(path) >= 0, 'Path not specified.');
@@ -485,6 +487,11 @@ begin
     Result := SourceLocation.SourceFile.Path + ' ( line ' + IntToStr(SourceLocation.Line) +
       ', column ' + IntToStr(SourceLocation.Column) + ')';
   end;
+end;
+
+function TToken.GetDataType: TDataType;
+begin
+  Result := GetTokenDataType(kind);
 end;
 
 function TToken.GetSpelling: TString;

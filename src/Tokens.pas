@@ -3,230 +3,28 @@ unit Tokens;
 
 interface
 
+uses DataTypes;
+
 // The RESERVED_... values are placeholders for compatibility with previous versions.
 // This ensures the existing values are stable when new constants are defined for the existing logical blocks.
 // It is important to have 100% the same output in the A65 files.
 type
   TTokenKind = (
-    UNTYPETOK,
-
-    CONSTTOK, // 1
-    TYPETOK,
-    VARTOK,
-    PROCEDURETOK,
-    FUNCTIONTOK,
-    LABELTOK,
-    UNITTOK,
-
-    RESERVED_8,
-    RESERVED_9,
-
-    GETINTVECTOK, // 10
-    SETINTVECTOK,
-    CASETOK,
-    BEGINTOK,
-    ENDTOK,
-    IFTOK,
-    THENTOK,
-    ELSETOK,
-    WHILETOK,
-    DOTOK,
-    REPEATTOK,
-    UNTILTOK,
-    FORTOK,
-    TOTOK,
-    DOWNTOTOK,
-    ASSIGNTOK,
-    WRITETOK,
-    READLNTOK,
-    HALTTOK,
-    USESTOK,
-    ARRAYTOK,
-    OFTOK,
-    STRINGTOK,
-    INCTOK,
-    DECTOK,
-    ORDTOK,
-    CHRTOK,
-    ASMTOK,
-    ABSOLUTETOK,
-    BREAKTOK,
-    CONTINUETOK,
-    EXITTOK,
-    RANGETOK,
-
-    EQTOK, // 43
-    NETOK,
-    LTTOK,
-    LETOK,
-    GTTOK,
-    GETOK,
-    LOTOK,
-    HITOK,
-
-    DOTTOK, // 51
-    COMMATOK,
-    SEMICOLONTOK,
-    OPARTOK,
-    CPARTOK,
-    DEREFERENCETOK,
-    ADDRESSTOK,
-    OBRACKETTOK,
-    CBRACKETTOK,
-    COLONTOK,
-
-    PLUSTOK,  // 61
-    MINUSTOK,
-    MULTOK,
-    DIVTOK,
-    IDIVTOK,
-    MODTOK,
-    SHLTOK,
-    SHRTOK,
-    ORTOK,
-    XORTOK,
-    ANDTOK,
-    NOTTOK,
-
-    ASSIGNFILETOK, // 73
-    RESETTOK,
-    REWRITETOK,
-    APPENDTOK,
-    BLOCKREADTOK,
-    BLOCKWRITETOK,
-    CLOSEFILETOK,
-    GETRESOURCEHANDLETOK,
-    SIZEOFRESOURCETOK,
-
-    WRITELNTOK, // 82
-    SIZEOFTOK,
-    LENGTHTOK,
-    HIGHTOK,
-    LOWTOK,
-    INTTOK,
-    FRACTOK,
-    TRUNCTOK,
-    ROUNDTOK,
-    ODDTOK,
-
-    PROGRAMTOK, // 92
-    LIBRARYTOK,
-    EXPORTSTOK,
-    EXTERNALTOK,
-    INTERFACETOK,
-    IMPLEMENTATIONTOK,
-    INITIALIZATIONTOK,
-    CONSTRUCTORTOK,
-    DESTRUCTORTOK,
-    OVERLOADTOK,
-    ASSEMBLERTOK,
-    FORWARDTOK,
-    REGISTERTOK,
-    INTERRUPTTOK,
-    PASCALTOK,
-    STDCALLTOK,
-    INLINETOK,
-    KEEPTOK,
-
-    SUCCTOK, // 110
-    PREDTOK,
-    PACKEDTOK,
-    GOTOTOK,
-    INTOK,
-    VOLATILETOK,
-    STRIPEDTOK,
-    WITHTOK,
-
-    RESERVED_118,
-    RESERVED_119,
-    RESERVED_120,
-    RESERVED_121,
-    RESERVED_122,
-    RESERVED_123,
-    RESERVED_124,
-    RESERVED_125,
-    RESERVED_126,
-
-    SETTOK,            // 127 Size = 32 SET OF
-
-    BYTETOK,           // Size = 1 BYTE
-    WORDTOK,           // Size = 2 WORD
-    CARDINALTOK,       // Size = 4 CARDINAL
-    SHORTINTTOK,       // Size = 1 SHORTINT
-    SMALLINTTOK,       // Size = 2 SMALLINT
-    INTEGERTOK,        // Size = 4 INTEGER
-    CHARTOK,           // Size = 1 CHAR
-    BOOLEANTOK,        // Size = 1 BOOLEAN
-    POINTERTOK,        // Size = 2 POINTER
-    STRINGPOINTERTOK,  // Size = 2 POINTER to STRING
-    FILETOK,           // Size = 2/12 FILE
-    RECORDTOK,         // Size = 2/???
-    OBJECTTOK,         // Size = 2/???
-    SHORTREALTOK,      // Size = 2 SHORTREAL      Fixed-Point Q8.8
-    REALTOK,           // Size = 4 REAL      Fixed-Point Q24.8
-    SINGLETOK,         // Size = 4 SINGLE / FLOAT    IEEE-754 32-bit
-    HALFSINGLETOK,     // Size = 2 HALFSINGLE / FLOAT16  IEEE-754 16-bit
-    PCHARTOK,          // Size = 2 POINTER TO ARRAY OF CHAR
-    ENUMTOK,           // Size = AllocElementType (4)
-    PROCVARTOK,        // Size = 2
-    TEXTFILETOK,       // Size = 2/12 TEXTFILE
-    FORWARDTYPE,       // Size = 2
-
-    SHORTSTRINGTOK,    // We change into STRINGTOK
-    FLOATTOK,          // We change into SINGLETOK
-    FLOAT16TOK,        // We change into HALFSINGLETOK
-    TEXTTOK,           // We change into TEXTFILETOK
-
-    DEREFERENCEARRAYTOK, // For ARRAY pointers
-
-    RESERVED_155,
-    RESERVED_156,
-    RESERVED_157,
-    RESERVED_158,
-    RESERVED_159,
-
-    DATAORIGINOFFSET, // 160
-    CODEORIGINOFFSET,
-
-    IDENTTOK, // 170
-    INTNUMBERTOK,
-    FRACNUMBERTOK,
-    CHARLITERALTOK,
-    STRINGLITERALTOK,
-
-    RESERVED_175,
-    RESERVED_176,
-    RESERVED_177,
-    RESERVED_178,
-    RESERVED_179,
-    RESERVED_180,
-    RESERVED_181,
-    RESERVED_182,
-    RESERVED_183,
-
-    EVALTOK, // 184
-    LOOPUNROLLTOK,
-    NOLOOPUNROLLTOK,
-    LINKTOK,
-    MACRORELEASE,
-    PROCALIGNTOK,
-    LOOPALIGNTOK,
-    LINKALIGNTOK,
-    INFOTOK,
-    WARNINGTOK,
-    ERRORTOK,
-    UNITBEGINTOK,
-    UNITENDTOK,
-    IOCHECKON,
-    IOCHECKOFF,
-    EOFTOK
+      {$I 'Tokens.inc'}
     );
 
 function GetTokenKindName(tokenKind: TTokenKind): String;
 function GetTokenSpelling(tokenKind: TTokenKind): String;
 function GetHumanReadbleTokenSpelling(tokenKind: TTokenKind): String;
+function GetTokenDataType(tokenKind: TTokenKind): TDataType;
+
 function InfoAboutToken(t: TTokenKind): String; // TODO: What's the difference to GetTokenSpelling
+function InfoAboutDataType(dataType: TDataType): String;
+
 function GetStandardToken(S: String): TTokenKind;
+
+
+
 
 implementation
 
@@ -439,6 +237,11 @@ begin
     Result := 'unknown token';
 end;
 
+function GetTokenDataType(tokenKind: TTokenKind): TDataType;
+begin
+  Result:=TDataType(Ord(  tokenKind));
+end;
+
 function InfoAboutToken(t: TTokenKind): String;
 begin
 
@@ -528,6 +331,12 @@ begin
       Result := 'UNTYPED'
   end;
 
+end;
+
+
+function InfoAboutDataType(dataType: TDataType): String;
+begin
+  result:=InfoAboutToken(TTokenKind(Ord(dataType)));
 end;
 
 function GetStandardToken(S: String): TTokenKind;

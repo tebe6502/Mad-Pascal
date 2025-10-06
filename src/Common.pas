@@ -140,7 +140,7 @@ procedure CheckArrayIndex_(i: TTokenIndex; IdentIndex: TIdentIndex; ArrayIndex: 
   ArrayIndexType: TDataType);
 
 procedure CheckOperator(ErrTokenIndex: TTokenIndex; op: TTokenKind; DataType: TDataType;
-  RightType: TDataType = TTokenKind.UNTYPETOK);
+  RightType: TDataType = TDataType.UNTYPETOK);
 
 procedure CheckTok(i: TTokenIndex; ExpectedTokenCode: TTokenKind);
 
@@ -244,7 +244,7 @@ begin
     else
     begin
       msg := TMessage.Create(TErrorCode.FileNotFound,
-        'Cannnot find {0} ''{1}'' used by program ''{2}'' in {3}.', ftyp, FileName, PROGRAM_NAME, unitPathText);
+        'Cannot find {0} ''{1}'' used by program ''{2}'' in {3}.', ftyp, FileName, PROGRAM_NAME, unitPathText);
     end;
     Error(NumTok, msg);
   end;
@@ -342,7 +342,7 @@ end;  //GetEnumName
 // ----------------------------------------------------------------------------
 
 procedure CheckOperator(ErrTokenIndex: TTokenIndex; op: TTokenKind; DataType: TDataType;
-  RightType: TDataType = TTokenKind.UNTYPETOK);
+  RightType: TDataType = TDataType.UNTYPETOK);
 begin
 
   //writeln(TokenAt(ErrTokenIndex].Name,',', op,',',DataType);
@@ -358,10 +358,10 @@ begin
     TTokenKind.MINUSTOK, TTokenKind.ORTOK, TTokenKind.XORTOK, TTokenKind.NOTTOK, TTokenKind.GTTOK,
     TTokenKind.GETOK, TTokenKind.EQTOK, TTokenKind.NETOK, TTokenKind.LETOK, TTokenKind.LTTOK, TTokenKind.INTOK]))
     // Operators for Char
-    or ((DataType = TTokenKind.CHARTOK) and not (op in [TTokenKind.GTTOK, TTokenKind.GETOK,
+    or ((DataType = TDataType.CHARTOK) and not (op in [TTokenKind.GTTOK, TTokenKind.GETOK,
     TTokenKind.EQTOK, TTokenKind.NETOK, TTokenKind.LETOK, TTokenKind.LTTOK, TTokenKind.INTOK]))
     // Operators for Boolean
-    or ((DataType = TTokenKind.BOOLEANTOK) and not (op in [TTokenKind.ANDTOK, TTokenKind.ORTOK,
+    or ((DataType = TDataType.BOOLEANTOK) and not (op in [TTokenKind.ANDTOK, TTokenKind.ORTOK,
     TTokenKind.XORTOK, TTokenKind.NOTTOK, TTokenKind.GTTOK, TTokenKind.GETOK, TTokenKind.EQTOK,
     TTokenKind.NETOK, TTokenKind.LETOK, TTokenKind.LTTOK]))
     // Operators for Pointers
@@ -371,11 +371,11 @@ begin
   begin
     if DataType = RightType then
       Error(ErrTokenIndex, TMessage.Create(TErrorCode.OperatorNotOverloaded, 'Operator is not overloaded: ' +
-        '"' + InfoAboutToken(DataType) + '" ' + InfoAboutToken(op) + ' "' + InfoAboutToken(RightType) + '"'))
+        '"' + InfoAboutDataType(DataType) + '" ' + InfoAboutToken(op) + ' "' + InfoAboutDataType(RightType) + '"'))
     else
       Error(ErrTokenIndex, TMessage.Create(TErrorCode.OperationNotSupportedForTypes,
-        'Operation "' + InfoAboutToken(op) + '" not supported for types "' + InfoAboutToken(DataType) +
-        '" and "' + InfoAboutToken(RightType) + '"'));
+        'Operation "' + InfoAboutToken(op) + '" not supported for types "' + InfoAboutDataType(DataType) +
+        '" and "' + InfoAboutDataType(RightType) + '"'));
   end;
 
 end;
@@ -389,9 +389,9 @@ procedure CheckArrayIndex(i: TTokenIndex; IdentIndex: Integer; ArrayIndex: TArra
 begin
 
   if (IdentifierAt(IdentIndex).NumAllocElements > 0) and (IdentifierAt(IdentIndex).AllocElementType <>
-    TTokenKind.RECORDTOK) then
+    TDataType.RECORDTOK) then
     if (ArrayIndex < 0) or (ArrayIndex > IdentifierAt(IdentIndex).NumAllocElements - 1 +
-      Ord(IdentifierAt(IdentIndex).DataType = TTokenKind.STRINGPOINTERTOK)) then
+      Ord(IdentifierAt(IdentIndex).DataType = TDataType.STRINGPOINTERTOK)) then
       if IdentifierAt(IdentIndex).NumAllocElements <> 1 then WarningForRangeCheckError(i, ArrayIndex, ArrayIndexType);
 
 end;

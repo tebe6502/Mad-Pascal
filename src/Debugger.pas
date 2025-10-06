@@ -67,7 +67,7 @@ begin
 
   identifierIndex := GetIdentIndex(token.Name);
   if (identifierIndex > 0) then  lineString :=
-      Format('%s: %s (identifierIndex=%d)', [lineString, GetTokenKindName(IdentifierAt(identifierIndex).DataType),
+      Format('%s: %s (identifierIndex=%d)', [lineString, InfoAboutDataType(IdentifierAt(identifierIndex).DataType),
       identifierIndex]);
 
   Result := Format('%d=%s', [tokenIndex, lineString]);
@@ -98,7 +98,7 @@ begin
   if isActive then
   begin
     LogDebug(Format('CompileExpression(tokenIndex: %s; out ValType: %s; VarType: %s) in %s',
-      [TokenToStr(tokenIndex), GetTokenSpelling(ValType), GetTokenSpelling(VarType), TokenLocationToStr(tokenIndex)]));
+      [TokenToStr(tokenIndex), InfoAboutDataType(ValType), InfoAboutDataType(VarType), TokenLocationToStr(tokenIndex)]));
   end;
 end;
 
@@ -110,8 +110,8 @@ begin
   begin
     LogDebug(Format(
       'DefineIdent      (tokenIndex: %s; Name: %s; Kind: %s; DataType: %s; NumAllocElements: %d; AllocElementType: %s; Data: %X; IdType: %s) in %s',
-      [TokenToStr(tokenIndex), Name, GetTokenSpelling(Kind), GetTokenSpelling(DataType),
-      NumAllocElements, GetTokenSpelling(AllocElementType), Data, GetTokenSpelling(IdType),
+      [TokenToStr(tokenIndex), Name, GetTokenSpelling(Kind), InfoAboutDataType(DataType),
+      NumAllocElements, InfoAboutDataType(AllocElementType), Data, InfoAboutDataType(IdType),
       TokenLocationToStr(tokenIndex)]));
   end;
 end;
