@@ -12565,8 +12565,7 @@ begin
                           if (IdentTemp > 0) and (IdentifierAt(IdentTemp).DataType = TDataType.ENUMTOK) then
                           begin
 
-                            if IdentifierAt(IdentTemp).NumAllocElements <>
-                              IdentifierAt(IdentIndex).NumAllocElements then
+                            if (IdentifierAt(IdentTemp).NumAllocElements <> IdentifierAt(IdentIndex).NumAllocElements) then
                               ErrorIncompatibleEnumIdentifiers(i, IdentTemp, IdentIndex);
 
                           end
@@ -12584,10 +12583,16 @@ begin
                       else
                         IdentTemp := 0;
 
-                      if (IdentTemp > 0) and ((IdentifierAt(IdentTemp).Kind = TTokenKind.ENUMTOK) or
-                        (IdentifierAt(IdentTemp).DataType = TDataType.ENUMTOK)) then
-                        ErrorIncompatibleEnumIdentifierType(i, IdentTemp, ExpressionType)
-                      else
+                      if (IdentTemp > 0) and 
+		         ((IdentifierAt(IdentTemp).Kind = TTokenKind.ENUMTOK) or (IdentifierAt(IdentTemp).DataType = TDataType.ENUMTOK)) 
+		      then 
+		      begin
+
+			if (IdentifierAt(IdentIndex).NumAllocElements <> IdentifierAt(IdentTemp).NumAllocElements) then
+                          ErrorIncompatibleEnumIdentifierType(i, IdentTemp, ExpressionType);
+
+                      end
+		      else
                         GetCommonType(i + 1, IdentifierAt(IdentIndex).DataType, ExpressionType);
 
                     end;
