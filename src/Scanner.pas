@@ -698,7 +698,7 @@ var
                               if Err > 0 then
                                 ErrorOrdinalExpExpected(NumTok);
 
-                              GetCommonConstType(NumTok, TTokenKind.WORDTOK, GetValueType(v));
+                              GetCommonConstType(NumTok, TDataType.WORDTOK, GetValueType(v));
 
                               TokenAt(NumTok).Value := v;
 
@@ -813,7 +813,7 @@ var
                                         AddDefine('FASTMUL');
                                         AddDefines := NumDefines;
 
-                                        GetCommonConstType(NumTok, TTokenKind.BYTETOK, GetValueType(FastMul));
+                                        GetCommonConstType(NumTok, TDataType.BYTETOK, GetValueType(FastMul));
 
                                         tokenList.RemoveToken;
                                       end
