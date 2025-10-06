@@ -39,7 +39,6 @@ The available features are:
 * Recursion
 
 ## Compile
-    origin\
 	src\
 
 	fpc -MDelphi -vh -O3 mp.pas
