@@ -89,10 +89,10 @@ procedure ErrorIncompatibleEnumIdentifierType(const tokenIndex: TTokenIndex; con
   const dstType: TDataType);
 
 procedure ErrorIdentifierIllegalTypeConversion(const tokenIndex: TTokenIndex; const identIndex: TIdentIndex;
-  const tokenKind: TTokenKind);
+ const dataType: TDataType);
 
 procedure ErrorIdentifierIncompatibleTypesArray(const tokenIndex: TTokenIndex;
-  const identIndex: TIdentIndex; const tokenKind: TTokenKind);
+  const identIndex: TIdentIndex; const dataType: TDataType);
 
 procedure ErrorIdentifierIncompatibleTypesArrayIdentifier(const tokenIndex: TTokenIndex;
   const identIndex: TIdentIndex; const arrayIdentIndex: TIdentIndex);
@@ -516,7 +516,7 @@ end;
 
 
 procedure ErrorIdentifierIllegalTypeConversionOrIncompatibleTypesArray(const tokenIndex: TTokenIndex;
-  errorCode: TErrorCode; identIndex: TIdentIndex; tokenKind: TTokenKind; arrayIdentIndex: TIdentIndex);
+  errorCode: TErrorCode; identIndex: TIdentIndex; dataType: TDataType; arrayIdentIndex: TIdentIndex);
 var
   identifier: TIdentifier;
   arrayIdentifier: TIdentifier;
@@ -555,7 +555,7 @@ begin
     end;
 
   if errorCode = TErrorCode.IllegalTypeConversion then
-    msg := msg + 'to "' + InfoAboutToken(tokenKind) + '"'
+    msg := msg + 'to "' + InfoAboutDataType(dataType) + '"'
   else
     if arrayIdentIndex > 0 then
     begin
@@ -583,31 +583,31 @@ begin
     end
     else
     begin
-      msg := msg + 'expected "' + InfoAboutToken(tokenKind) + '"';
+      msg := msg + 'expected "' + InfoAboutDataType(dataType) + '"';
     end;
 
   Error(tokenIndex, TMessage.Create(errorCode, msg));
 end;
 
 procedure ErrorIdentifierIllegalTypeConversion(const tokenIndex: TTokenIndex; const identIndex: TIdentIndex;
-  const tokenKind: TTokenKind);
+  const dataType: TDataType);
 begin
   ErrorIdentifierIllegalTypeConversionOrIncompatibleTypesArray(tokenIndex,
-    TErrorCode.IllegalTypeConversion, identIndex, tokenKind, 0);
+    TErrorCode.IllegalTypeConversion, identIndex, dataType, 0);
 end;
 
 procedure ErrorIdentifierIncompatibleTypesArray(const tokenIndex: TTokenIndex;
-  const identIndex: TIdentIndex; const tokenKind: TTokenKind);
+  const identIndex: TIdentIndex; const dataType: TDataType);
 begin
   ErrorIdentifierIllegalTypeConversionOrIncompatibleTypesArray(tokenIndex,
-    TErrorCode.IncompatibleTypesArray, identIndex, tokenKind, 0);
+    TErrorCode.IncompatibleTypesArray, identIndex, dataType, 0);
 end;
 
 procedure ErrorIdentifierIncompatibleTypesArrayIdentifier(const tokenIndex: TTokenIndex;
   const identIndex: TIdentIndex; const arrayIdentIndex: TIdentIndex);
 begin
   ErrorIdentifierIllegalTypeConversionOrIncompatibleTypesArray(tokenIndex,
-    TErrorCode.IncompatibleTypesArray, identIndex, TTokenKind.UNTYPETOK, arrayIdentIndex);
+    TErrorCode.IncompatibleTypesArray, identIndex, TDataType.UNTYPETOK, arrayIdentIndex);
 end;
 
 // ----------------------------------------------------------------------------

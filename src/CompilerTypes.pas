@@ -251,6 +251,8 @@ type
     function GetSourceFileLineString: String;
     function GetSourceFileLocationString: String;
 
+    // TODO: Check all IF statements of the for IF TokenAt(i).GetDataType = or in []
+    // They should be rewritten as "HasDataDataType"
     function GetDataType: TDataType;
 
     function GetSpelling: TString;
