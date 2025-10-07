@@ -206,7 +206,7 @@ const
 	D_PI_180= pi/180;
 
 
-{$i '../src/targets/systemh.inc'}
+{$i './targets/systemh.inc'}
 
 var
 	mem: array [0..0] of byte absolute $0000;
@@ -2212,7 +2212,7 @@ _toct2	lsr Value+3
 end;
 
 
-{$i '../src/targets/system.inc'}
+{$i 'targets/system.inc'}
 
 
 procedure Delete(var s: string; index, count: byte);

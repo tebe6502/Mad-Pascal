@@ -160,7 +160,7 @@ begin
     //    writeln(S,',',IdentifierAt(TempIndex).Kind,' - ', IdentifierAt(TempIndex).DataType, ' / ',IdentifierAt(TempIndex).AllocElementType);
 
     if TempIndex > 0 then
-      if (IdentifierAt(TempIndex).Kind = UNITTYPE) or (IdentifierAt(TempIndex).DataType = ENUMTYPE) then
+      if (IdentifierAt(TempIndex).Kind = TTokenKind.UNITTOK) or (IdentifierAt(TempIndex).DataType = ENUMTYPE) then
         Result := SearchCurrenTSourceFile(copy(S, pos('.', S) + 1, length(S)), IdentifierAt(TempIndex).SourceFile)
       else
         if IdentifierAt(TempIndex).DataType = TDataType.OBJECTTOK then
@@ -423,7 +423,7 @@ begin
       Result := GetDataSize(IdentifierAt(IdentIndex).AllocElementType);
 
     TDataType.RECORDTOK:
-      if (IdentifierAt(IdentIndex).DataType = TDataType.POINTERTOK) and (TokenAt(i + 3).Kind = TDataType.CPARTOK) then
+      if (IdentifierAt(IdentIndex).DataType = TDataType.POINTERTOK) and (TokenAt(i + 3).Kind = TTokenKind.CPARTOK) then
         Result := GetDataSize(TDataType.POINTERTOK)
       else
         Result := RecordSize(IdentIndex);
@@ -437,7 +437,7 @@ begin
         if IdentifierAt(IdentIndex).NumAllocElements_ > 0 then
         begin
 
-          if TokenAt(i + 3).Kind = TDataType.OBRACKETTOK then
+          if TokenAt(i + 3).Kind = TTokenKind.OBRACKETTOK then
             Result := GetDataSize(TDataType.POINTERTOK)
           else
             Result := IdentifierAt(IdentIndex).NumAllocElements_ * 2;
@@ -505,10 +505,10 @@ begin
     begin
       CheckTok(i + 1, TTokenKind.OPARTOK);
 
-      if TokenAt(i + 2).Kind in AllTypes {+ [TTokenKind.STRINGTOK]} then
+      if TokenAt(i + 2).GetDataType in AllTypes {+ [TTokenKind.STRINGTOK]} then
       begin
 
-        ConstValType := TokenAt(i + 2).Kind;
+        ConstValType := TokenAt(i + 2).GetDataType;
 
         Inc(i, 2);
 
@@ -540,10 +540,10 @@ begin
     begin
       CheckTok(i + 1, TTokenKind.OPARTOK);
 
-      if TokenAt(i + 2).Kind in AllTypes {+ [STRINGTOK]} then
+      if TokenAt(i + 2).GetDataType in AllTypes {+ [TDataType.STRINGTOK]} then
       begin
 
-        ConstValType := TokenAt(i + 2).Kind;
+        ConstValType := TokenAt(i + 2).GetDataType;
 
         Inc(i, 2);
 
@@ -561,7 +561,7 @@ begin
       begin
         IdentIndex := GetIdentIndex(TokenAt(i).Name);
 
-        if IdentifierAt(IdentIndex).AllocElementType in [TTokenKind.RECORDTOK, TTokenKind.OBJECTTOK] then
+        if IdentifierAt(IdentIndex).AllocElementType in [TDataType.RECORDTOK, TDataType.OBJECTTOK] then
           ConstVal := IdentifierAt(IdentIndex).NumAllocElements_ - 1
         else
           if IdentifierAt(IdentIndex).NumAllocElements > 0 then
@@ -595,7 +595,7 @@ begin
         if IdentIndex = 0 then
           Error(i + 2, TErrorCode.UnknownIdentifier);
 
-        if IdentifierAt(IdentIndex).Kind in [VARIABLE, CONSTANT, USERTYPE] then
+        if IdentifierAt(IdentIndex).Kind in [TTokenKind.VARTOK, TTokenKind.CONSTTOK, TTokenKind.TYPETOK] then
         begin
 
           if (IdentifierAt(IdentIndex).DataType = TDataType.STRINGPOINTERTOK)
@@ -646,10 +646,10 @@ begin
     begin
       CheckTok(i + 1, TTokenKind.OPARTOK);
 
-      if TokenAt(i + 2).Kind in OrdinalTypes + RealTypes + [TTokenKind.POINTERTOK] then
+      if TokenAt(i + 2).GetDataType in OrdinalTypes + RealTypes + [TDataType.POINTERTOK] then
       begin
 
-        ConstVal := GetDataSize(TokenAt(i + 2).Kind);
+        ConstVal := GetDataSize(TokenAt(i + 2).GetDataType);
         ConstValType := TDataType.BYTETOK;
 
         j := i + 2;
@@ -689,12 +689,12 @@ begin
       if isError then Exit;
 
       // TODO: But here OldConstValType=TDataType.UNTYPETOK always?
-      if OldConstValType in [TTokenKind.DATAORIGINOFFSET, TTokenKind.CODEORIGINOFFSET] then
+      if OldConstValType in [TDataType.DATAORIGINOFFSET, TDataType.CODEORIGINOFFSET] then
         Error(i, TMessage.Create(TErrorCode.InvalidVariableAddress, 'Can''t take the address of variable'));
 
       GetCommonConstType(i, TDataType.INTEGERTOK, ConstValType);
 
-      CheckTok(i + 1, TDataType.CPARTOK);
+      CheckTok(i + 1, TTokenKind.CPARTOK);
 
       case ConstValType of
         TDataType.INTEGERTOK, TDataType.CARDINALTOK: ConstVal := ConstVal and $0000FFFF;
@@ -708,10 +708,10 @@ begin
     end;
 
 
-    TDataType.HITOK:
+    TTokenKind.HITOK:
     begin
 
-      CheckTok(i + 1, TDataType.OPARTOK);
+      CheckTok(i + 1, TTokenKind.OPARTOK);
 
       OldConstValType := TDataType.UNTYPETOK;
 
@@ -724,7 +724,7 @@ begin
 
       GetCommonConstType(i, TDataType.INTEGERTOK, ConstValType);
 
-      CheckTok(i + 1, TDataType.CPARTOK);
+      CheckTok(i + 1, TTokenKind.CPARTOK);
 
       case ConstValType of
         TDataType.INTEGERTOK, TDataType.CARDINALTOK: ConstVal := ConstVal shr 16;
@@ -737,12 +737,12 @@ begin
     end;
 
 
-    TDataType.INTTOK, TDataType.FRACTOK:
+    TTokenKind.INTTOK, TTokenKind.FRACTOK:
     begin
 
       Kind := TokenAt(i).Kind;
 
-      CheckTok(i + 1, TDataType.OPARTOK);
+      CheckTok(i + 1, TTokenKind.OPARTOK);
 
       i := CompileConstExpression(i + 2, ConstVal, ConstValType);
 
@@ -751,13 +751,13 @@ begin
       if not (ConstValType in RealTypes) then
         ErrorIncompatibleTypes(i, ConstValType, TDataType.REALTOK);
 
-      CheckTok(i + 1, TDataType.CPARTOK);
+      CheckTok(i + 1, TTokenKind.CPARTOK);
 
 
 
       case Kind of
-        TDataType.INTTOK: ConstVal := Trunc(ConstValType, ConstVal);
-        TDataType.FRACTOK: ConstVal := Frac(ConstValType, ConstVal);
+        TTokenKind.INTTOK: ConstVal := Trunc(ConstValType, ConstVal);
+        TTokenKind.FRACTOK: ConstVal := Frac(ConstValType, ConstVal);
       end;
 
       //     ConstValType := REALTOK;
@@ -765,12 +765,12 @@ begin
     end;
 
 
-    TDataType.ROUNDTOK, TDataType.TRUNCTOK:
+    TTokenKind.ROUNDTOK, TTokenKind.TRUNCTOK:
     begin
 
       Kind := TokenAt(i).Kind;
 
-      CheckTok(i + 1, TDataType.OPARTOK);
+      CheckTok(i + 1, TTokenKind.OPARTOK);
 
       i := CompileConstExpression(i + 2, ConstVal, ConstValType);
 
@@ -778,17 +778,17 @@ begin
 
       GetCommonConstType(i, TDataType.REALTOK, ConstValType);
 
-      CheckTok(i + 1, TDataType.CPARTOK);
+      CheckTok(i + 1, TTokenKind.CPARTOK);
 
       ConstVal := Integer(ConstVal);
 
       case Kind of
-        TDataType.ROUNDTOK: if ConstVal < 0 then
+        TTokenKind.ROUNDTOK: if ConstVal < 0 then
             ConstVal := -(abs(ConstVal) shr 8 + Ord(abs(ConstVal) and $ff > 127))
           else
             ConstVal := ConstVal shr 8 + Ord(abs(ConstVal) and $ff > 127);
 
-        TDataType.TRUNCTOK: if ConstVal < 0 then
+        TTokenKind.TRUNCTOK: if ConstVal < 0 then
             ConstVal := -(abs(ConstVal) shr 8)
           else
             ConstVal := ConstVal shr 8;
@@ -800,12 +800,12 @@ begin
     end;
 
 
-    TDataType.ODDTOK:
+    TTokenKind.ODDTOK:
     begin
 
       //      Kind := TokenAt(i).Kind;
 
-      CheckTok(i + 1, TDataType.OPARTOK);
+      CheckTok(i + 1, TTokenKind.OPARTOK);
 
       i := CompileConstExpression(i + 2, ConstVal, ConstValType);
 
@@ -813,7 +813,7 @@ begin
 
       GetCommonConstType(i, TDataType.CARDINALTOK, ConstValType);
 
-      CheckTok(i + 1, TDataType.CPARTOK);
+      CheckTok(i + 1, TTokenKind.CPARTOK);
 
       ConstVal := Ord(odd(ConstVal));
 
@@ -823,10 +823,10 @@ begin
     end;
 
 
-    TDataType.CHRTOK:
+    TTokenKind.CHRTOK:
     begin
 
-      CheckTok(i + 1, TDataType.OPARTOK);
+      CheckTok(i + 1, TTokenKind.OPARTOK);
 
       i := CompileConstExpression(i + 2, ConstVal, ConstValType, TDataType.BYTETOK);
 
@@ -834,16 +834,16 @@ begin
 
       GetCommonConstType(i, TDataType.INTEGERTOK, ConstValType);
 
-      CheckTok(i + 1, TDataType.CPARTOK);
+      CheckTok(i + 1, TTokenKind.CPARTOK);
 
       ConstValType := TDataType.CHARTOK;
       Result := i + 1;
     end;
 
 
-    TDataType.ORDTOK:
+    TTokenKind.ORDTOK:
     begin
-      CheckTok(i + 1, TDataType.OPARTOK);
+      CheckTok(i + 1, TTokenKind.OPARTOK);
 
       j := i + 2;
 
@@ -854,7 +854,7 @@ begin
 
       if isError then Exit;
 
-      CheckTok(i + 1, TDataType.CPARTOK);
+      CheckTok(i + 1, TTokenKind.CPARTOK);
 
       if ConstValType in [TDataType.CHARTOK, TDataType.BOOLEANTOK, TDataType.ENUMTOK] then
         ConstValType := TDataType.BYTETOK;
@@ -863,11 +863,11 @@ begin
     end;
 
 
-    TDataType.PREDTOK, TDataType.SUCCTOK:
+    TTokenKind.PREDTOK, TTokenKind.SUCCTOK:
     begin
       Kind := TokenAt(i).Kind;
 
-      CheckTok(i + 1, TDataType.OPARTOK);
+      CheckTok(i + 1, TTokenKind.OPARTOK);
 
       i := CompileConstExpression(i + 2, ConstVal, ConstValType);
 
@@ -876,9 +876,9 @@ begin
 
       if isError then Exit;
 
-      CheckTok(i + 1, TDataType.CPARTOK);
+      CheckTok(i + 1, TTokenKind.CPARTOK);
 
-      if Kind = TDataType.PREDTOK then
+      if Kind = TTokenKind.PREDTOK then
         Dec(ConstVal)
       else
         Inc(ConstVal);
@@ -890,16 +890,16 @@ begin
     end;
 
 
-    TDataType.IDENTTOK:
+    TTokenKind.IDENTTOK:
     begin
       IdentIndex := GetIdentIndex(TokenAt(i).Name);
 
       if IdentIndex > 0 then
 
-        if (IdentifierAt(IdentIndex).Kind = USERTYPE) and (TokenAt(i + 1).Kind = TDataType.OPARTOK) then
+        if (IdentifierAt(IdentIndex).Kind = TTokenKind.TYPETOK) and (TokenAt(i + 1).Kind = TTokenKind.OPARTOK) then
         begin
 
-          CheckTok(i + 1, TDataType.OPARTOK);
+          CheckTok(i + 1, TTokenKind.OPARTOK);
 
           j := CompileConstExpression(i + 2, ConstVal, ConstValType);
 
@@ -917,26 +917,26 @@ begin
             if IdentifierAt(IdentIndex).DataType in Pointers then
             begin
               Error(j, TMessage.Create(TErrorCode.IllegalTypeConversion, 'Illegal type conversion: "' +
-                InfoAboutToken(ConstValType) + '" to "' + TokenAt(i).Name + '"'));
+                InfoAboutDataType(ConstValType) + '" to "' + TokenAt(i).Name + '"'));
             end;
 
           ConstValType := IdentifierAt(GetIdentIndex(TokenAt(i).Name)).DataType;
           if ConstValType = ENUMTYPE then ConstValType := IdentifierAt(IdentIndex).AllocElementType;
 
-          CheckTok(j + 1, TDataType.CPARTOK);
+          CheckTok(j + 1, TTokenKind.CPARTOK);
 
           i := j + 1;
 
         end
         else
 
-          if not (IdentifierAt(IdentIndex).Kind in [CONSTANT, USERTYPE, ENUMTYPE]) then
+          if not (IdentifierAt(IdentIndex).Kind in [TTokenKind.CONSTTOK, TTokenKind.TYPETOK, TTokenKind.ENUMTOK]) then
           begin
             Error(i, TMessage.Create(TErrorCode.ConstantExpected, 'Constant expected but {0} found',
               IdentifierAt(IdentIndex).Name));
           end
           else
-            if TokenAt(i + 1).Kind = TDataType.OBRACKETTOK then          // Array element access
+            if TokenAt(i + 1).Kind = TTokenKind.OBRACKETTOK then          // Array element access
               if not (IdentifierAt(IdentIndex).DataType in Pointers) then
                 ErrorForIdentifier(i, TErrorCode.IncompatibleTypeOf, IdentIndex)
               else
@@ -953,9 +953,9 @@ begin
                   Error(i, TErrorCode.SubrangeBounds);
                 end;
 
-                CheckTok(j + 1, TDataType.CBRACKETTOK);
+                CheckTok(j + 1, TTokenKind.CBRACKETTOK);
 
-                if TokenAt(j + 2).Kind = TDataType.OBRACKETTOK then
+                if TokenAt(j + 2).Kind = TTokenKind.OBRACKETTOK then
                 begin
                   isError := True;
                   exit;
@@ -998,7 +998,7 @@ begin
 
                 CheckTok(j + 1, TTokenKind.CPARTOK);
 
-                ConstValType := TokenAt(i).Kind;
+                ConstValType := TokenAt(i).GetDataType;
 
                 i := j + 1;
               end;
@@ -1022,13 +1022,13 @@ begin
         begin
 
           case IdentifierAt(IdentIndex).Kind of
-            CONSTANT: if not ((IdentifierAt(IdentIndex).DataType in Pointers) and
+            TTokenKind.CONSTTOK: if not ((IdentifierAt(IdentIndex).DataType in Pointers) and
                 (IdentifierAt(IdentIndex).NumAllocElements > 0)) then
                 Error(i + 1, TErrorCode.CantAdrConstantExp)
               else
                 ConstVal := IdentifierAt(IdentIndex).Value - CODEORIGIN;
 
-            VARIABLE: if IdentifierAt(IdentIndex).isAbsolute then
+            TTokenKind.VARTOK: if IdentifierAt(IdentIndex).isAbsolute then
               begin        // wyjatek gdy ABSOLUTE
 
                 if (abs(IdentifierAt(IdentIndex).Value) and $ff = 0)
@@ -1142,7 +1142,7 @@ begin
             CheckTok(i + 1, TTokenKind.CBRACKETTOK);
           end;
 
-          ConstValType := TTokenKind.POINTERTOK;
+          ConstValType := TDataType.POINTERTOK;
 
         end
         else
@@ -1164,7 +1164,7 @@ begin
     TTokenKind.FRACNUMBERTOK:
     begin
       ConstVal := FromSingle(TokenAt(i).FracValue);
-      ConstValType := TTokenKind.REALTOK;
+      ConstValType := TDataType.REALTOK;
 
       Result := i;
     end;
@@ -1173,7 +1173,7 @@ begin
     TTokenKind.STRINGLITERALTOK:
     begin
       ConstVal := TokenAt(i).StrAddress - CODEORIGIN + CODEORIGIN_BASE;
-      ConstValType := TTokenKind.STRINGPOINTERTOK;
+      ConstValType := TDataType.STRINGPOINTERTOK;
 
       Result := i;
     end;
@@ -1182,7 +1182,7 @@ begin
     TTokenKind.CHARLITERALTOK:
     begin
       ConstVal := TokenAt(i).Value;
-      ConstValType := TTokenKind.CHARTOK;
+      ConstValType := TDataType.CHARTOK;
 
       Result := i;
     end;
@@ -1232,7 +1232,7 @@ begin
 
       CheckTok(j + 1, TTokenKind.CPARTOK);
 
-      ConstValType := TokenAt(i).Kind;
+      ConstValType := TokenAt(i).GetDataType;
 
       Result := j + 1;
 
@@ -1280,10 +1280,10 @@ begin
 
       CheckTok(j + 1, TTokenKind.CPARTOK);
 
-      if ConstValType in [TTokenKind.DATAORIGINOFFSET, TTokenKind.CODEORIGINOFFSET] then
+      if ConstValType in [TDataType.DATAORIGINOFFSET, TDataType.CODEORIGINOFFSET] then
         OldConstValType := ConstValType;
 
-      ConstValType := TokenAt(i).Kind;
+      ConstValType := TokenAt(i).GetDataType;
 
       Result := j + 1;
     end;
@@ -1309,7 +1309,7 @@ var
 begin
 
   ConstVal := 0;
-  ConstValType := TTokenKind.UNTILTOK;
+  ConstValType := TDataType.UNTILTOK;
   Result := i;
 
   j := CompileConstFactor(i, ConstVal, ConstValType);
@@ -1471,7 +1471,7 @@ begin
 
     ConstValType := GetCommonType(j + 1, ConstValType, RightConstValType);
 
-    if not (ConstValType in RealTypes + [TTokenKind.BOOLEANTOK]) then
+    if not (ConstValType in RealTypes + [TDataType.BOOLEANTOK]) then
       ConstValType := GetValueType(ConstVal);
 
     CheckOperator(i, TokenAt(j + 1).Kind, ConstValType, RightConstValType);
@@ -1622,7 +1622,7 @@ begin
 
     identifier.IdType := IdType;
 
-    if (Kind = VARIABLE) and (Data <> 0) then
+    if (Kind = TTokenKind.VARTOK) and (Data <> 0) then
     begin
       identifier.isAbsolute := True;
       identifier.isInit := True;
@@ -1649,7 +1649,7 @@ begin
         //      identifier.Section := true;
       end;
 
-      VARIABLE:
+      TTokenKind.VARTOK:
       begin
 
         if identifier.isAbsolute then
@@ -1707,7 +1707,7 @@ begin
 
       end;
 
-      CONSTANT, ENUMTYPE:
+      TTokenKind.CONSTTOK, TTokenKind.ENUMTOK:
       begin
         identifier.Value := Data;        // Constant value
 
@@ -1722,7 +1722,7 @@ begin
         identifier.isInit := True;
       end;
 
-      USERTYPE:
+      TTokenKind.TYPETOK:
       begin
         identifier.NumAllocElements := NumAllocElements;
         identifier.NumAllocElements_ := NumAllocElements_;
@@ -1730,7 +1730,7 @@ begin
         identifier.AllocElementType := AllocElementType;
       end;
 
-      LABELTYPE:
+      TTokenKind.LABELTOK:
       begin
         identifier.isInit := False;
       end;
@@ -1843,7 +1843,7 @@ begin
 
         i := CompileType(i + 1, VarType, NumAllocElements, AllocElementType);
 
-        if (VarType = TTokenKind.FILETOK) and (ListPassMethod <> TParameterPassingMethod.VARPASSING) then
+        if (VarType = TDataType.FILETOK) and (ListPassMethod <> TParameterPassingMethod.VARPASSING) then
           Error(i, TMessage.Create(TErrorCode.FileParameterMustBeVAR, 'File parameters must be var parameters'));
 
       end;
@@ -2011,7 +2011,7 @@ begin
 
           i := CompileType(i + 1, VarType, NumAllocElements, AllocElementType);
 
-          if (VarType = TTokenKind.FILETOK) and (ListPassMethod <> TParameterPassingMethod.VARPASSING) then
+          if (VarType = TDataType.FILETOK) and (ListPassMethod <> TParameterPassingMethod.VARPASSING) then
             Error(i, TMessage.Create(TErrorCode.FileParameterMustBeVar, 'File parameters must be var parameters'));
 
         end;
@@ -2315,7 +2315,7 @@ var
     //   writeln('>> ',Name,',',FieldType,',',AllocElementType,',',NumAllocElements);
 
 
-    if FieldType = ENUMTOK then FieldType := AllocElementType;
+    if FieldType = TDataType.ENUMTOK then FieldType := AllocElementType;
 
 
     if not (FieldType in [TDataType.RECORDTOK, TDataType.OBJECTTOK]) then
@@ -2458,11 +2458,11 @@ begin
         else
         begin
 
-          if not (TokenAt(i + 1).Kind in OrdinalTypes + RealTypes + [TDataType.POINTERTOK]) then
+          if not (TokenAt(i + 1).GetDataType in OrdinalTypes + RealTypes + [TDataType.POINTERTOK]) then
             Error(i + 1, TErrorCode.IdentifierExpected);
 
           NumAllocElements := 0;
-          AllocElementType := TokenAt(i + 1).Kind;
+          AllocElementType := TokenAt(i + 1).GetDataType;
 
         end;
 
@@ -2543,7 +2543,7 @@ begin
 
         for FieldInListIndex := 1 to NumFieldsInList do
         begin
-          DefineIdent(i, FieldInListName[FieldInListIndex].Name, ENUMTYPE, DataType, 0,
+          DefineIdent(i, FieldInListName[FieldInListIndex].Name, TTokenKind.ENUMTOK, DataType, 0,
             TDataType.UNTYPETOK, FieldInListName[FieldInListIndex].Value);
 {
       DefineIdent(i, FieldInListName[FieldInListIndex].Name, CONSTANT, POINTERTOK, length(FieldInListName[FieldInListIndex].Name)+1, CHARTOK, NumStaticStrChars + CODEORIGIN + CODEORIGIN_BASE , IDENTTOK);
@@ -2628,7 +2628,7 @@ begin
 
               DataType := TDataType.POINTERTOK;
               NumAllocElements := 32;
-              AllocElementType := TokenAt(i + 2).Kind;
+              AllocElementType := TokenAt(i + 2).GetDataType;
 
               Result := i + 2;
 
@@ -2984,9 +2984,9 @@ begin
                     //      OrdinalTypes + RealTypes + Pointers
                     // -----------------------------------------------------------------------------
 
-                      if TokenAt(i).Kind in AllTypes then
+                      if TokenAt(i).GetDataType in AllTypes then
                       begin
-                        DataType := TokenAt(i).Kind;
+                        DataType := TokenAt(i).GetDataType;
                         NumAllocElements := 0;
                         AllocElementType := TDataType.UNTYPETOK;
 
@@ -3009,7 +3009,7 @@ begin
 
                           CheckTok(i + 1, TTokenKind.OBRACKETTOK);
 
-                          if TokenAt(i + 2).Kind in AllTypes + StringTypes then
+                          if TokenAt(i + 2).GetDataType in AllTypes + StringTypes then
                           begin
 
                             if TokenAt(i + 2).Kind = TTokenKind.BYTETOK then
@@ -3087,7 +3087,7 @@ begin
                           CheckTok(i + 2, TTokenKind.OFTOK);
 
 
-                          if TokenAt(i + 3).Kind in [TDataType.RECORDTOK, TDataType.OBJECTTOK] then
+                          if TokenAt(i + 3).GetDataType in [TDataType.RECORDTOK, TDataType.OBJECTTOK] then
                             Error(i, TMessage.Create(TErrorCode.InvalidArrayOfPointers,
                               'Only arrays of ^{0} are supported.', InfoAboutToken(TokenAt(i + 3).Kind)));
 
@@ -3126,17 +3126,17 @@ begin
                               if NumAllocElements shr 16 > 0 then
                                 Error(i, TMessage.Create(TErrorCode.MultiDimensionalArrayOfTypeNotSupported,
                                   'Multidimensional arrays of element type {0} are not supported.',
-                                  InfoAboutToken(NestedDataType)));
+                                  InfoAboutDataType(NestedDataType)));
 
                               //    if NestedDataType = RECORDTOK then
                               //    else
                               if NestedDataType in [TDataType.RECORDTOK, TDataType.OBJECTTOK] then
                                 Error(i, TMessage.Create(TErrorCode.OnlyArrayOfTypeSupported,
                                   'Only Array [0..{0}] of ^{1} supported', IntToStr(NumAllocElements - 1),
-                                  InfoAboutToken(NestedDataType)))
+                                  InfoAboutDataType(NestedDataType)))
                               else
                                 Error(i, TMessage.Create(TErrorCode.ArrayOfTypeNotSupported,
-                                  'Arrays of type {0} are not supported.', InfoAboutToken(NestedDataType)));
+                                  'Arrays of type {0} are not supported.', InfoAboutDataType(NestedDataType)));
 
                               //    NumAllocElements := NestedNumAllocElements;
                               //    NestedAllocElementType := NestedDataType;
@@ -3156,7 +3156,7 @@ begin
                                   TDataType.OBJECTTOK, TDataType.PROCVARTOK]) and (NumAllocElements shr 16 > 0) then
                                   Error(i, TMessage.Create(TErrorCode.MultiDimensionalArrayOfTypeNotSupported,
                                     'Multidimensional arrays of element type {0} are not supported.',
-                                    InfoAboutToken(NestedAllocElementType)));
+                                    InfoAboutDataType(NestedAllocElementType)));
 
                                 NestedDataType := NestedAllocElementType;
 
@@ -3183,14 +3183,14 @@ begin
                         // -----------------------------------------------------------------------------
 
                           if (TokenAt(i).Kind = TTokenKind.IDENTTOK) and
-                            (IdentifierAt(GetIdentIndex(TokenAt(i).Name)).Kind = USERTYPE) then
+                            (IdentifierAt(GetIdentIndex(TokenAt(i).Name)).Kind = TTokenKind.TYPETOK) then
                           begin
                             IdentIndex := GetIdentIndex(TokenAt(i).Name);
 
                             if IdentIndex = 0 then
                               Error(i, TErrorCode.UnknownIdentifier);
 
-                            if IdentifierAt(IdentIndex).Kind <> USERTYPE then
+                            if IdentifierAt(IdentIndex).Kind <> TTokenKind.TYPETOK then
                               Error(i, TMessage.Create(TErrorCode.TypeIdentifierExpected,
                                 'Type identifier expected but {0} found', TokenAt(i).Name));
 

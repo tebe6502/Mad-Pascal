@@ -1,41 +1,29 @@
 # Experimental: JAC!
-# Example usage: FPC installed in "C:\jac\system\Windows\Tools\PAS\PAS2JS\pas2js-win64-x86_64-3.0.1"
+# Example usage: PAS2JS installed in "C:\jac\system\Windows\Tools\PAS\PAS2JS\pas2js-win64-x86_64-3.2.0"
 #
-# Start Bash Shell
+# Start Git Bash Shell
 #   cd /c/jac/system/Atari800/Programming/Repositories/Mad-Pascal/src 
-#   export PATH=/c/jac/system/Windows/Tools/PAS/PAS2JS/pas2js-win64-x86_64-3.0.1/bin/:$PATH
+#   export PATH=/c/jac/system/Windows/Tools/PAS/PAS2JS/pas2js-win64-x86_64-3.2.0/bin/:$PATH
 #   make -f Makefile.pas2js
 #   start C:\jac\system\Atari800\Programming\Repositories\Mad-Pascal\bin\javascript\mp.html
 # 
 
-SRC = mp.pas \
-  Common.pas \
-  Diagnostic.pas \
-  FileIO.pas \
-  MathEvaluate.pas \
-  Messages.pas \
-  Numbers.pas \
-  Optimize.pas \
-  Parser.pas \
-  Scanner.pas \
-  StringUtilities.pas \
-  TestUnits.pas \
-  Utilities.pas \
-  include/*.inc \
-  include/opt6502/*.inc \
-  include/opt65c02/*.inc \
-  targets/*.inc
+SRC = mp.pas 
 
-BINDIR = ../bin/javascript
+BINBASEDIR = ../bin
+BINDIR = $(BINBASEDIR)/javascript
 BIN = $(BINDIR)/mp.js
 
-TEST_SRC = Test-0.pas
-TEST_BIN = $(BINDIR)/Test-0.js
+TEST_SRC = TestUnits.pas
+TEST_BIN = $(BINDIR)/TestUnits.js
 
 PAS2JS = pas2js.exe -Jc -Jirtl.js -Tbrowser
 
 $(BIN): clean $(SRC)
 	echo "Compiling $(SRC)"
+
+#	which pas2js
+#	$(PAS2JS) --help
 
 #       Use "-v" for verbose, and "-va" for verbose all
 	$(PAS2JS) -Mdelphi -v mp.pas -o$(BIN)

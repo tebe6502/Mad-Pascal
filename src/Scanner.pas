@@ -195,15 +195,17 @@ end;  //AddResource
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 
-procedure TScanner.AddToken_(Kind: TTokenKind; UnitIndex: TSourceFileIndex; Line, Column: Integer; Value: TInteger);
-begin
-  tokenList.AddToken(kind, SourceFileList.GetSourceFile(UnitIndex), line, Column, Value);
-end;
-
 procedure TScanner.AddToken(Kind: TTokenKind; SourceFile: TSourceFile; Line, Column: Integer; Value: TInteger);
 begin
   tokenList.AddToken(kind, SourceFile, line, Column, Value);
 end;
+
+procedure TScanner.AddToken_(Kind: TTokenKind; UnitIndex: TSourceFileIndex; Line, Column: Integer; Value: TInteger);
+begin
+  AddToken(kind, SourceFileList.GetSourceFile(UnitIndex), line, Column, Value);
+end;
+
+
 
 
 // ----------------------------------------------------------------------------
@@ -696,7 +698,7 @@ var
                               if Err > 0 then
                                 ErrorOrdinalExpExpected(NumTok);
 
-                              GetCommonConstType(NumTok, TTokenKind.WORDTOK, GetValueType(v));
+                              GetCommonConstType(NumTok, TDataType.WORDTOK, GetValueType(v));
 
                               TokenAt(NumTok).Value := v;
 
@@ -811,7 +813,7 @@ var
                                         AddDefine('FASTMUL');
                                         AddDefines := NumDefines;
 
-                                        GetCommonConstType(NumTok, TTokenKind.BYTETOK, GetValueType(FastMul));
+                                        GetCommonConstType(NumTok, TDataType.BYTETOK, GetValueType(FastMul));
 
                                         tokenList.RemoveToken;
                                       end

@@ -35,7 +35,7 @@ WhereY
 interface
 
 
-{$i '../src/targets/crth.inc'}
+{$i './targets/crth.inc'}
 
 
 const
@@ -83,7 +83,7 @@ uses atari;
 {$ENDIF}
 
 
-{$i '../src/targets/crt.inc'}
+{$i './targets/crt.inc'}
 
 
 end.

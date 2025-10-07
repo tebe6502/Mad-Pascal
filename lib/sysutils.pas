@@ -117,7 +117,7 @@ implementation
 uses DOS, StrUtils;
 
 
-{$i '../src/targets/sysutils.inc'}
+{$i './targets/sysutils.inc'}
 
 
 function ByteToStr(a: byte): TString; assembler;

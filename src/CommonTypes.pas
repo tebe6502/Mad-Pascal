@@ -1,4 +1,4 @@
-// The unit is caled "CommonTypes" to prevent conflicts with the general system unit "Types".
+// The unit is called "CommonTypes" to prevent conflicts with the general system unit "Types".
 
 unit CommonTypes;
 
@@ -14,7 +14,7 @@ interface
 type
   TInteger = Int64;
 {$ELSE}
-type TInteger = Integer;
+type TInteger = Int64;
 {$ENDIF}
 
 

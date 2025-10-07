@@ -26,8 +26,8 @@
       <Modes>
         <Mode Name="default">
           <local>
-            <CommandLineParams Value="-iPath:C:\jac\system\Atari800\Programming\Repositories\Mad-Pascal\lib -iPath:C:\jac\system\Atari800\Programming\Repositories\Mad-Pascal\blibs while_lteq.pas"/>
-            <WorkingDirectory Value="C:\jac\system\Atari800\Programming\Repositories\Mad-Pascal\samples\tests\tests-while\"/>
+            <CommandLineParams Value="-iPath:C:\jac\system\Atari800\Programming\Repositories\Mad-Pascal\lib -iPath:C:\jac\system\Atari800\Programming\Repositories\Mad-Pascal\blibs wrathchild_0.pas"/>
+            <WorkingDirectory Value="C:\jac\system\Atari800\Programming\Repositories\Mad-Pascal\samples\tests\tests-enum"/>
           </local>
         </Mode>
         <Mode Name="samples">
@@ -526,34 +526,6 @@
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="..\src\targets\crt.inc"/>
-        <IsPartOfProject Value="True"/>
-      </Unit>
-      <Unit>
-        <Filename Value="..\src\targets\crth.inc"/>
-        <IsPartOfProject Value="True"/>
-      </Unit>
-      <Unit>
-        <Filename Value="..\src\targets\graph.inc"/>
-        <IsPartOfProject Value="True"/>
-      </Unit>
-      <Unit>
-        <Filename Value="..\src\targets\graphh.inc"/>
-        <IsPartOfProject Value="True"/>
-      </Unit>
-      <Unit>
-        <Filename Value="..\src\targets\system.inc"/>
-        <IsPartOfProject Value="True"/>
-      </Unit>
-      <Unit>
-        <Filename Value="..\src\targets\systemh.inc"/>
-        <IsPartOfProject Value="True"/>
-      </Unit>
-      <Unit>
-        <Filename Value="..\src\targets\sysutils.inc"/>
-        <IsPartOfProject Value="True"/>
-      </Unit>
-      <Unit>
         <Filename Value="..\src\Targets.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit>
@@ -591,6 +563,10 @@
       </Unit>
       <Unit>
         <Filename Value="..\src\Debugger.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\src\Tokens.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit>
     </Units>
@@ -632,11 +608,11 @@
     </Linking>
     <Other>
       <Verbosity>
-        <ShoLineNum Value="True"/>
+        <ShowLineNum Value="True"/>
         <ShowHintsForUnusedUnitsInMainSrc Value="True"/>
       </Verbosity>
       <ConfigFile>
-        <StopAfterErrCount Value="100"/>
+        <StopAfterErrCount Value="200"/>
       </ConfigFile>
       <CustomOptions Value="-dDEBUG
 -dSIMULATED_COMMAND_LINE2

@@ -1,36 +1,43 @@
-unit Datatypes;
+unit Datatypes; // TODO: Should be DataTypes
 
 interface
 
 uses CommonTypes, Tokens;
 
+// TDataType uses the same constant names, but is a different enum type.
 type
   TDataType = TTokenKind;
+  function GetTokenDataType(tokenKind: TTokenKind): TDataType;
+  function InfoAboutDataType(dataType: TDataType): String;
+(*
+  TDataType = (
+      {$I 'Tokens.inc'}
+    );
+*)
 
 const
-  UnsignedOrdinalTypes = [TTokenKind.BYTETOK, TTokenKind.WORDTOK, TTokenKind.CARDINALTOK];
-  SignedOrdinalTypes = [TTokenKind.SHORTINTTOK, TTokenKind.SMALLINTTOK, TTokenKind.INTEGERTOK];
-  RealTypes = [TTokenKind.SHORTREALTOK, TTokenKind.REALTOK, TTokenKind.SINGLETOK, TTokenKind.HALFSINGLETOK];
+  UnsignedOrdinalTypes = [TDataType.BYTETOK, TDataType.WORDTOK, TDataType.CARDINALTOK];
+  SignedOrdinalTypes = [TDataType.SHORTINTTOK, TDataType.SMALLINTTOK, TDataType.INTEGERTOK];
+  RealTypes = [TDataType.SHORTREALTOK, TDataType.REALTOK, TDataType.SINGLETOK, TDataType.HALFSINGLETOK];
 
   IntegerTypes = UnsignedOrdinalTypes + SignedOrdinalTypes;
-  OrdinalTypes = IntegerTypes + [TTokenKind.CHARTOK, TTokenKind.BOOLEANTOK, TTokenKind.ENUMTOK];
+  OrdinalTypes = IntegerTypes + [TDataType.CHARTOK, TDataType.BOOLEANTOK, TDataType.ENUMTOK];
 
-  Pointers = [TTokenKind.POINTERTOK, TTokenKind.PROCVARTOK, TTokenKind.STRINGPOINTERTOK, TTokenKind.PCHARTOK];
+  Pointers = [TDataType.POINTERTOK, TDataType.PROCVARTOK, TDataType.STRINGPOINTERTOK, TDataType.PCHARTOK];
 
   AllTypes = OrdinalTypes + RealTypes + Pointers;
 
-  StringTypes = [TTokenKind.STRINGPOINTERTOK, TTokenKind.STRINGLITERALTOK, TTokenKind.PCHARTOK];
+  StringTypes = [TDataType.STRINGPOINTERTOK, TDataType.STRINGLITERALTOK, TDataType.PCHARTOK];
 
 function GetDataSize(const dataType: TDataType): Byte;
 function GetValueType(Value: TInteger): TDataType;
-
 
 implementation
 
 
 // Data type sizes
 const
-  _DataSize: array [Ord(TTokenKind.BYTETOK)..Ord(TTokenKind.FORWARDTYPE)] of Byte = (
+  _DataSize: array [Ord(TDataType.BYTETOK)..Ord(TDataType.FORWARDTYPE)] of Byte = (
     1,  // Size = 1 BYTE
     2,  // Size = 2 WORD
     4,  // Size = 4 CARDINAL
@@ -72,7 +79,7 @@ begin
     else
     begin
       Result := 0;
-      Assert(False);
+      Assert(False);  // TODO: Check why this still happens
     end;
 
 end;
@@ -101,6 +108,18 @@ begin
         Result := TDataType.CARDINALTOK
     end;
 
+end;
+
+
+
+function GetTokenDataType(tokenKind: TTokenKind): TDataType;
+begin
+  Result:=TDataType(Ord(  tokenKind));
+end;
+
+function InfoAboutDataType(dataType: TDataType): String;
+begin
+  result:=InfoAboutToken(TTokenKind(Ord(dataType)));
 end;
 
 end.

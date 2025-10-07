@@ -109,7 +109,8 @@ type
     class function CreateTextFile: ITextFile; static;
     class function FileExists_(filePath: TFilePath): Boolean;
     class function FolderExists(folderPath: TFolderPath): Boolean;
-    class function NormalizePath(filePath: TFilePath): String;
+    class function NormalizePath(filePath: TFilePath): TFilePath;
+    class function GetAbsolutePath(filePath: TFilePath): TFilePath;
 
   {$IFDEF SIMULATED_FILE_IO}
     class function GetFileMap: TFileMap;
@@ -131,8 +132,8 @@ type
   public
   type TFileMode = (Read, Write);
     constructor Create;
-    function GetFilePath(): String;
-    function GetAbsoluteFilePath(): String;
+    function GetFilePath(): TFilePath;
+    function GetAbsoluteFilePath(): TFilePath;
     procedure Assign(filePath: TFilePath); virtual; abstract;
     procedure Close; virtual; abstract;
     procedure Erase(); virtual; abstract;
@@ -291,14 +292,14 @@ begin
   filePath := '';
 end;
 
-function TFile.GetFilePath(): String;
+function TFile.GetFilePath(): TFilePath;
 begin
   Result := filePath;
 end;
 
-function TFile.GetAbsoluteFilePath(): String;
+function TFile.GetAbsoluteFilePath(): TFilePath;
 begin
-  Result := ExpandFileName(filePath);
+  Result := TFileSystem.GetAbsolutePath(filePath);
 end;
 
 // ----------------------------------------------------------------------------
@@ -696,7 +697,7 @@ begin
   {$IFNDEF SIMULATED_FILE_IO}
   Result := DirectoryExists(folderPath);
   {$ELSE}
-  Result := fileMap.GetEntry(filePath) <> nil;
+  Result := fileMap.GetEntry(folderPath) <> nil;
   {$ENDIF}
 end;
 
@@ -722,6 +723,16 @@ begin
 
   {$ENDIF}
 
+end;
+
+
+class function TFileSystem.GetAbsolutePath(filePath: TFilePath): TFilePath;
+begin
+  {$IFNDEF SIMULATED_FILE_IO}
+  Result := ExpandFileName(filePath);
+  {$ELSE}
+  Result := filePath;
+  {$ENDIF}
 end;
 
 {$IFDEF SIMULATED_FILE_IO}
