@@ -1,3 +1,6 @@
+07.10.2025
+- add type SUBRANGETYPE (low..high)
+
 06.10.2025
 - fix CASE FUNCTION:ENUM
 - fix ENUM SUCC/PRED; (ENUM = ENUM)

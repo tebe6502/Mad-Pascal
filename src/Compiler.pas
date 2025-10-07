@@ -12583,9 +12583,9 @@ begin
                       else
                         IdentTemp := 0;
 
-                      if (IdentTemp > 0) and 
-		         ((IdentifierAt(IdentTemp).Kind = TTokenKind.ENUMTOK) or (IdentifierAt(IdentTemp).DataType = TDataType.ENUMTOK)) 
-		      then 
+                      if (IdentTemp > 0) and
+		         ((IdentifierAt(IdentTemp).Kind = TTokenKind.ENUMTOK) or (IdentifierAt(IdentTemp).DataType = TDataType.ENUMTOK))
+		      then
 		      begin
 
 			if (IdentifierAt(IdentIndex).NumAllocElements <> IdentifierAt(IdentTemp).NumAllocElements) then
@@ -13374,7 +13374,7 @@ begin
       i := CompileExpression(i + 1, SelectorType);
 
 
-      if (TokenAt(j).Kind = TTokenKind.IDENTTOK) and 
+      if (TokenAt(j).Kind = TTokenKind.IDENTTOK) and
          (IdentifierAt(GetIdentIndex(TokenAt(j).Name)).Kind = TTokenKind.FUNCTIONTOK) and
 	 (IdentifierAt(GetIdentIndex(TokenAt(j).Name)).DataType = TDatatype.ENUMTOK) then
 

@@ -315,6 +315,8 @@ begin
     TTokenKind.TEXTFILETOK: Result := 'TEXTFILE';
     TTokenKind.PCHARTOK: Result := 'PCHAR';
 
+    TTokenKind.SUBRANGETYPE: Result := 'SUBRANGE';
+
     TTokenKind.REGISTERTOK: Result := 'REGISTER';
     TTokenKind.PASCALTOK: Result := 'PASCAL';
     TTokenKind.STDCALLTOK: Result := 'STDCALL';

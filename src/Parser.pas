@@ -505,6 +505,22 @@ begin
     begin
       CheckTok(i + 1, TTokenKind.OPARTOK);
 
+      if TokenAt(i + 2).Kind = IDENTTOK then
+      begin
+
+	IdentIndex := GetIdentIndex(TokenAt(i + 2).Name);
+
+	if IdentifierAt(IdentIndex).DataType = TDataType.SUBRANGETYPE then begin
+
+	 ConstVal := GetTypeAtIndex(IdentifierAt(IdentIndex).NumAllocElements).Field[1].Value;
+	 ConstValType := TDataType.SUBRANGETYPE;
+
+         Inc(i, 2);
+
+	end;
+
+      end else
+
       if TokenAt(i + 2).GetDataType in AllTypes {+ [TTokenKind.STRINGTOK]} then
       begin
 
@@ -523,6 +539,9 @@ begin
       end;
 
 
+      if ConstValType = TDataType.SUBRANGETYPE then
+
+      else
       if ConstValType in Pointers then
         ConstVal := 0
       else
@@ -540,6 +559,21 @@ begin
     begin
       CheckTok(i + 1, TTokenKind.OPARTOK);
 
+      if TokenAt(i + 2).Kind = IDENTTOK then
+      begin
+
+	IdentIndex := GetIdentIndex(TokenAt(i + 2).Name);
+
+	if IdentifierAt(IdentIndex).DataType = TDataType.SUBRANGETYPE then begin
+
+	 ConstVal := GetTypeAtIndex(IdentifierAt(IdentIndex).NumAllocElements).Field[2].Value;
+	 ConstValType := TDataType.SUBRANGETYPE;
+
+         Inc(i, 2);
+
+	end;
+
+      end else
       if TokenAt(i + 2).GetDataType in AllTypes {+ [TDataType.STRINGTOK]} then
       begin
 
@@ -557,6 +591,9 @@ begin
 
       end;
 
+      if ConstValType = TDataType.SUBRANGETYPE then
+
+      else
       if ConstValType in Pointers then
       begin
         IdentIndex := GetIdentIndex(TokenAt(i).Name);
@@ -2971,8 +3008,6 @@ begin
                     else
 
 
-
-
                     // -----------------------------------------------------------------------------
                     // this place is for new types
                     // -----------------------------------------------------------------------------
@@ -3008,6 +3043,45 @@ begin
                           if TokenAt(i).Kind = TTokenKind.PACKEDTOK then Inc(i);
 
                           CheckTok(i + 1, TTokenKind.OBRACKETTOK);
+
+			  if (TokenAt(i + 2).Kind = TTokenKind.IDENTTOK) and
+                            (IdentifierAt(GetIdentIndex(TokenAt(i + 2).Name)).Kind = TTokenKind.TYPETOK) then
+			  begin
+
+                            IdentIndex := GetIdentIndex(TokenAt(i + 2).Name);
+
+                            if IdentIndex = 0 then
+                              Error(i, TErrorCode.UnknownIdentifier);
+
+                            Inc(i, 2);
+
+                            if IdentifierAt(IdentIndex).DataType = TDataType.SUBRANGETYPE then
+			    begin
+
+                              LowerBound := GetTypeAtIndex(IdentifierAt(IdentIndex).NumAllocElements).Field[1].Value;
+                              UpperBound := GetTypeAtIndex(IdentifierAt(IdentIndex).NumAllocElements).Field[2].Value;
+
+			      if LowerBound <> 0 then
+                                Error(i, TMessage.Create(TErrorCode.ArrayLowerBoundNotZero, 'Array lower bound is not zero.'));
+
+                              if UpperBound > High(Word) then
+                                Error(i, TErrorCode.HighLimit);
+
+                              NumAllocElements := UpperBound - LowerBound + 1;
+
+			    end else
+                            if IdentifierAt(IdentIndex).DataType = TDataType.BYTETOK then
+                            begin
+                              LowerBound := 0;
+                              UpperBound := 255;
+
+                              NumAllocElements := 256;
+                            end
+                            else
+                              Error(i, TMessage.Create(TErrorCode.InvalidTypeDefinition, 'Invalid type definition.'));
+
+
+			  end else
 
                           if TokenAt(i + 2).GetDataType in AllTypes + StringTypes then
                           begin
@@ -3195,10 +3269,21 @@ begin
                                 'Type identifier expected but {0} found', TokenAt(i).Name));
 
                             DataType := IdentifierAt(IdentIndex).DataType;
-                            NumAllocElements :=
-                              IdentifierAt(IdentIndex).NumAllocElements or
-                              (IdentifierAt(IdentIndex).NumAllocElements_ shl 16);
-                            AllocElementType := IdentifierAt(IdentIndex).AllocElementType;
+
+			    if DataType = TDataType.SUBRANGETYPE then
+			    begin
+
+			      DataType := GetTypeAtIndex(IdentifierAt(IdentIndex).NumAllocElements).Field[0].AllocElementType;
+                              NumAllocElements := 0;
+                              AllocElementType := TDataType.UNTYPETOK;
+
+			    end else
+			    begin
+
+                              NumAllocElements := IdentifierAt(IdentIndex).NumAllocElements or (IdentifierAt(IdentIndex).NumAllocElements_ shl 16);
+                              AllocElementType := IdentifierAt(IdentIndex).AllocElementType;
+
+			    end;
 
                             //  writeln('> ',IdentifierAt(IdentIndex).Name,',',DataType,',',AllocElementType,',',NumAllocElements,',',IdentifierAt(IdentIndex).NumAllocElements_);
 
@@ -3206,6 +3291,8 @@ begin
                           end // if IDENTTOK
                           else
                           begin
+
+            		    Name := TokenAt(i - 2).Name;
 
                             i := CompileConstExpression(i, ConstVal, ExpressionType);
                             LowerBound := ConstVal;
@@ -3220,9 +3307,26 @@ begin
 
                             // Error(i, 'Error in type definition');
 
-                            DataType := BoundaryType;
-                            NumAllocElements := 0;
-                            AllocElementType := TDataType.UNTYPETOK;
+
+		            Inc(NumTypes);
+                	    RecType := NumTypes;
+
+                	    if NumTypes > MAXTYPES then
+                  	      Error(i, TMessage.Create(TErrorCode.OutOfResources, 'Out of resources, MAXTYPES'));
+
+	                    _TypeArray[RecType].NumFields := 2;
+ 	                    _TypeArray[RecType].Field[0].AllocElementType := BoundaryType;
+            		    _TypeArray[RecType].Field[0].Name := Name;
+
+            		    _TypeArray[RecType].Field[1].Value := LowerBound;
+            		    _TypeArray[RecType].Field[2].Value := UpperBound;
+
+                  	    _TypeArray[RecType].Block := BlockStack[BlockStackTop];
+
+                  	    DataType := TDataType.SUBRANGETYPE;
+                  	    NumAllocElements := RecType;      // index to the Types array
+                     	    AllocElementType := TDataType.UNTYPETOK;
+
                             Result := i;
 
                           end;
