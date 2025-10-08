@@ -6,12 +6,6 @@ uses CommonTypes;
 
 // TDataType uses the same constant names, but is a different enum type.
 type
-(*
-  TDataType = TTokenKind;
-  function GetTokenDataType(tokenKind: TTokenKind): TDataType;
-  function InfoAboutDataType(dataType: TDataType): String;
-*)
-
   TDataType = (
       {$I 'Tokens.inc'}
     );
@@ -110,18 +104,5 @@ begin
     end;
 
 end;
-
-
-(*
-function GetTokenDataType(tokenKind: TTokenKind): TDataType;
-begin
-  Result:=TDataType(Ord(  tokenKind));
-end;
-
-function InfoAboutDataType(dataType: TDataType): String;
-begin
-  result:=InfoAboutToken(TTokenKind(Ord(dataType)));
-end;
-*)
 
 end.

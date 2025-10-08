@@ -15168,7 +15168,7 @@ WHILETOK:
       IndirectionLevel := ASPOINTER;
 
 
-      if IdentifierAt(IdentIndex).DataType = ENUMTYPE then
+      if IdentifierAt(IdentIndex).DataType = TDataType.ENUMTOK then
         ExpressionType := IdentifierAt(IdentIndex).AllocElementType
       else
         if IdentifierAt(IdentIndex).DataType in Pointers then
@@ -16143,7 +16143,7 @@ begin
                       // RESULT nie zliczaj
 
                       else
-                        if IdentifierAt(IdentIndex).DataType = ENUMTYPE then
+                        if IdentifierAt(IdentIndex).DataType = TDataType.ENUMTOK then
                           IncSize(GetDataSize(IdentifierAt(IdentIndex).AllocElementType))
                         else
                           IncSize(GetDataSize(IdentifierAt(IdentIndex).DataType));
@@ -17495,7 +17495,7 @@ begin
           else
           begin
 
-            if Param[ParamIndex].DataType = ENUMTYPE then
+            if Param[ParamIndex].DataType = TDataType.ENUMTOK then
               GenerateAssignment(ASPOINTER, GetDataSize(Param[ParamIndex].AllocElementType), 0, Param[ParamIndex].Name)
             else
               GenerateAssignment(ASPOINTER, GetDataSize(Param[ParamIndex].DataType), 0, Param[ParamIndex].Name);

@@ -1,6 +1,5 @@
 unit Tokens;
 
-
 interface
 
 uses DataTypes;
@@ -378,7 +377,8 @@ end;
 
 function GetTokenDataType(tokenKind: TTokenKind): TDataType;
 begin
-  Result:=TDataType(Ord(  tokenKind));
+  // TODO: Vadliate that is actually can be cast.
+  Result:=TDataType(Ord(tokenKind));
 end;
 
 function InfoAboutDataType(dataType: TDataType): String;

@@ -29,20 +29,7 @@ type
 
 const
 
-  // Identifier kind codes
-
-  CONSTANT = TDataType.CONSTTOK;
-  USERTYPE = TDataType.TYPETOK;
-  VARIABLE = TDataType.VARTOK;
-  //  PROC      = TTokenKind.PROCEDURETOK;
-  //  FUNC      = TTokenKind.FUNCTIONTOK;
-  LABELTYPE = TDataType.LABELTOK;
-  UNITTYPE = TDataType.UNITTOK;
-
-  ENUMTYPE = TDataType.ENUMTOK;
-
   // Compiler parameters
-
   MAXNAMELENGTH = 32;
   MAXTOKENNAMES = 200;
   MAXSTRLENGTH = 255;

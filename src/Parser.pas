@@ -160,7 +160,7 @@ begin
     //    writeln(S,',',IdentifierAt(TempIndex).Kind,' - ', IdentifierAt(TempIndex).DataType, ' / ',IdentifierAt(TempIndex).AllocElementType);
 
     if TempIndex > 0 then
-      if (IdentifierAt(TempIndex).Kind = TTokenKind.UNITTOK) or (IdentifierAt(TempIndex).DataType = ENUMTYPE) then
+      if (IdentifierAt(TempIndex).Kind = TTokenKind.UNITTOK) or (IdentifierAt(TempIndex).DataType = TDataType.ENUMTOK) then
         Result := SearchCurrenTSourceFile(copy(S, pos('.', S) + 1, length(S)), IdentifierAt(TempIndex).SourceFile)
       else
         if IdentifierAt(TempIndex).DataType = TDataType.OBJECTTOK then
@@ -419,7 +419,7 @@ begin
 
   case ValType of
 
-    ENUMTYPE:
+    TDataType.ENUMTOK:
       Result := GetDataSize(IdentifierAt(IdentIndex).AllocElementType);
 
     TDataType.RECORDTOK:
@@ -849,7 +849,7 @@ begin
 
       i := CompileConstExpression(i + 2, ConstVal, ConstValType, TDataType.BYTETOK);
 
-      if not (ConstValType in OrdinalTypes + [ENUMTYPE]) then
+      if not (ConstValType in OrdinalTypes + [TDataType.ENUMTOK]) then
         Error(i, TErrorCode.OrdinalExpExpected);
 
       if isError then Exit;
@@ -921,7 +921,7 @@ begin
             end;
 
           ConstValType := IdentifierAt(GetIdentIndex(TokenAt(i).Name)).DataType;
-          if ConstValType = ENUMTYPE then ConstValType := IdentifierAt(IdentIndex).AllocElementType;
+          if ConstValType = TDataType.ENUMTOK then ConstValType := IdentifierAt(IdentIndex).AllocElementType;
 
           CheckTok(j + 1, TTokenKind.CPARTOK);
 
@@ -988,7 +988,7 @@ begin
 
               // Writeln(IdentifierAt(identindex).name,',',ConstValType,',',IdentifierAt(identindex).kind)
 
-              if ConstValType = ENUMTYPE then
+              if ConstValType = TDataType.ENUMTOK then
               begin
                 CheckTok(i + 1, TTokenKind.OPARTOK);
 
@@ -1679,7 +1679,7 @@ begin
             IncVarDataSize(tokenIndex, GetDataSize(TDataType.POINTERTOK))
           else
 
-            if DataType in [ENUMTYPE] then
+            if DataType in [TDataType.ENUMTOK] then
               IncVarDataSize(tokenIndex, 1)
             else
               if (DataType in [TDataType.RECORDTOK, TDataType.OBJECTTOK]) and (NumAllocElements > 0) then
@@ -2566,7 +2566,7 @@ begin
 
         AllocElementType := DataType;
 
-        DataType := ENUMTYPE;
+        DataType := TDataType.ENUMTOK;
         NumAllocElements := RecType;      // indeks do tablicy Types
 
         Result := i;
