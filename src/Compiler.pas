@@ -443,6 +443,7 @@ type
     i, j, b: Integer;
     SourceFile: TSourceFile;
   end;
+
 type
   TL = record
     SourceFile: TSourceFile;
@@ -450,6 +451,7 @@ type
     Param: TParamList;
     NumParams: Word;
   end;
+
 var
   IdentIndex, BlockStackIndex: Integer;
   i, k, m: Integer;

@@ -54,6 +54,7 @@ const
     4,  // Size = 4 ENUM
     2,  // Size = 2 PROCVAR
     2,  // Size = 2 TEXTFILE
+    0,  // Size = 0 SUBRANGE
     2   // Size = 2 FORWARD
     );
 

@@ -160,6 +160,7 @@
    ENUMTOK,           // Size = AllocElementType (4)
    PROCVARTOK,        // Size = 2
    TEXTFILETOK,       // Size = 2/12 TEXTFILE
+   SUBRANGETYPE,      // Size = 0
    FORWARDTYPE,       // Size = 2
 
    SHORTSTRINGTOK,    // We change into STRINGTOK
