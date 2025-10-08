@@ -88,7 +88,7 @@ const
   ASSINGLE = 11;
   ASPCHAR = 12;
 
-  fBlockRead_ParamType: array [1..3] of TTokenKind = (TTokenKind.UNTYPETOK, TTokenKind.WORDTOK, TTokenKind.POINTERTOK);
+  fBlockRead_ParamType: array [1..3] of TDataType = (TDataType.UNTYPETOK, TDataType.WORDTOK, TDataType.POINTERTOK);
 
 
 type
@@ -320,6 +320,8 @@ type
     NumAllocElements, NumAllocElements_: Cardinal;
     AllocElementType: TDataType;
     ObjectVariable: Boolean;   // TODO Not yet filled
+
+    function CastKindToDataType: TDataType;
   end;
 
   // An identifier list owns identifier instances.
@@ -619,6 +621,15 @@ begin
     kind := tokenArray[tokenIndex].Kind;
     GetHumanReadbleTokenSpelling(kind);
   end;
+end;
+
+// ----------------------------------------------------------------------------
+// Class TIdentifier
+// ----------------------------------------------------------------------------
+function TIdentifier.CastKindToDataType: TDataType;
+begin
+  // TODO Check that this can really be converted to a data type.
+  Result := GetTokenDataType(kind);
 end;
 
 // ----------------------------------------------------------------------------

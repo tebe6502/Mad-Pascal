@@ -19,7 +19,7 @@
 
   if (ActualParamType <> TDataType.STRINGPOINTERTOK) and not (IdentifierAt(IdentTemp).IdType in
     [TDataType.ARRAYTOK, TDataType.STRINGTOK, TDataType.STRINGLITERALTOK]) then
-    Error(j, 'for-in statement cannot operate on collection type ''' + InfoAboutToken(ActualParamType) + '''');
+    Error(j, 'for-in statement cannot operate on collection type ''' + InfoAboutDataType(ActualParamType) + '''');
 
   if (VarType in [TDataType.RECORDTOK]) and (IdentifierAt(IdentIndex).DataType = TDataType.POINTERTOK) then
   // ok
