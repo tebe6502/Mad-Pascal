@@ -3,7 +3,7 @@ unit Tokens;
 
 interface
 
-// uses DataTypes;
+uses DataTypes;
 
 // The RESERVED_... values are placeholders for compatibility with previous versions.
 // This ensures the existing values are stable when new constants are defined for the existing logical blocks.
@@ -16,10 +16,10 @@ type
 function GetTokenKindName(tokenKind: TTokenKind): String;
 function GetTokenSpelling(tokenKind: TTokenKind): String;
 function GetHumanReadbleTokenSpelling(tokenKind: TTokenKind): String;
-// function GetTokenDataType(tokenKind: TTokenKind): TDataType;
+function GetTokenDataType(tokenKind: TTokenKind): TDataType;
 
 function InfoAboutToken(t: TTokenKind): String; // TODO: What's the difference to GetTokenSpelling
-// function InfoAboutDataType(dataType: TDataType): String;
+function InfoAboutDataType(dataType: TDataType): String;
 
 function GetStandardToken(S: String): TTokenKind;
 
@@ -373,6 +373,17 @@ begin
   AssertTokenOrd(TTokenKind.LABELTOK, 6);
   AssertTokenOrd(TTokenKind.UNITTOK, 7);
 
+end;
+
+
+function GetTokenDataType(tokenKind: TTokenKind): TDataType;
+begin
+  Result:=TDataType(Ord(  tokenKind));
+end;
+
+function InfoAboutDataType(dataType: TDataType): String;
+begin
+  result:=InfoAboutToken(TTokenKind(Ord(dataType)));
 end;
 
 initialization
