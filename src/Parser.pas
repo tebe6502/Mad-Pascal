@@ -160,7 +160,7 @@ begin
     //    writeln(S,',',IdentifierAt(TempIndex).Kind,' - ', IdentifierAt(TempIndex).DataType, ' / ',IdentifierAt(TempIndex).AllocElementType);
 
     if TempIndex > 0 then
-      if (IdentifierAt(TempIndex).Kind = TTokenKind.UNITTOK) or (IdentifierAt(TempIndex).DataType = TDataType.ENUMTOK) then
+      if (IdentifierAt(TempIndex).Kind = TTokenKind.UNITTOK) or (IdentifierAt(TempIndex).DataType = ENUMTYPE) then
         Result := SearchCurrenTSourceFile(copy(S, pos('.', S) + 1, length(S)), IdentifierAt(TempIndex).SourceFile)
       else
         if IdentifierAt(TempIndex).DataType = TDataType.OBJECTTOK then
@@ -419,7 +419,7 @@ begin
 
   case ValType of
 
-    TDataType.ENUMTOK:
+    ENUMTYPE:
       Result := GetDataSize(IdentifierAt(IdentIndex).AllocElementType);
 
     TDataType.RECORDTOK:
@@ -886,7 +886,7 @@ begin
 
       i := CompileConstExpression(i + 2, ConstVal, ConstValType, TDataType.BYTETOK);
 
-      if not (ConstValType in OrdinalTypes + [TDataType.ENUMTOK]) then
+      if not (ConstValType in OrdinalTypes + [ENUMTYPE]) then
         Error(i, TErrorCode.OrdinalExpExpected);
 
       if isError then Exit;
@@ -958,7 +958,7 @@ begin
             end;
 
           ConstValType := IdentifierAt(GetIdentIndex(TokenAt(i).Name)).DataType;
-          if ConstValType = TDataType.ENUMTOK then ConstValType := IdentifierAt(IdentIndex).AllocElementType;
+          if ConstValType = ENUMTYPE then ConstValType := IdentifierAt(IdentIndex).AllocElementType;
 
           CheckTok(j + 1, TTokenKind.CPARTOK);
 
@@ -1025,7 +1025,7 @@ begin
 
               // Writeln(IdentifierAt(identindex).name,',',ConstValType,',',IdentifierAt(identindex).kind)
 
-              if ConstValType = TDataType.ENUMTOK then
+              if ConstValType = ENUMTYPE then
               begin
                 CheckTok(i + 1, TTokenKind.OPARTOK);
 
@@ -1310,7 +1310,7 @@ begin
 
           end
           else
-            ErrorIdentifierIllegalTypeConversion(i + 2, IdentIndex, TokenAt(i).GetDataType);
+            ErrorIdentifierIllegalTypeConversion(i + 2, IdentIndex, TokenAt(i).Kind);
 
       end;
 
@@ -1716,7 +1716,7 @@ begin
             IncVarDataSize(tokenIndex, GetDataSize(TDataType.POINTERTOK))
           else
 
-            if DataType in [TDataType.ENUMTOK] then
+            if DataType in [ENUMTYPE] then
               IncVarDataSize(tokenIndex, 1)
             else
               if (DataType in [TDataType.RECORDTOK, TDataType.OBJECTTOK]) and (NumAllocElements > 0) then
@@ -2603,7 +2603,7 @@ begin
 
         AllocElementType := DataType;
 
-        DataType := TDataType.ENUMTOK;
+        DataType := ENUMTYPE;
         NumAllocElements := RecType;      // indeks do tablicy Types
 
         Result := i;
@@ -3281,7 +3281,7 @@ begin
 			    begin
 
                               NumAllocElements := IdentifierAt(IdentIndex).NumAllocElements or (IdentifierAt(IdentIndex).NumAllocElements_ shl 16);
-                            AllocElementType := IdentifierAt(IdentIndex).AllocElementType;
+                              AllocElementType := IdentifierAt(IdentIndex).AllocElementType;
 
 			    end;
 
@@ -3325,7 +3325,7 @@ begin
 
                   	    DataType := TDataType.SUBRANGETYPE;
                   	    NumAllocElements := RecType;      // index to the Types array
-                            AllocElementType := TDataType.UNTYPETOK;
+                     	    AllocElementType := TDataType.UNTYPETOK;
 
                             Result := i;
 
