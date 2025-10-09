@@ -140,6 +140,7 @@ type
 
   TParamList = array [1..MAXPARAMS] of TParam;
 
+  TBlockIndex = Integer;
 
   TIdentifierName = String;
 
@@ -166,7 +167,7 @@ type
   TTypeIndex = Integer;
 
   TType = record
-    Block: Integer;
+    Block: TBlockIndex;
     NumFields: Integer;
     Size: Integer;
     Field: array [0..MAXTYPES] of TField;
@@ -272,7 +273,7 @@ type
   TIdentifier = class
     Name: TIdentifierName;
     Value: Int64;             // Value for a constant, address for a variable, procedure or function
-    Block: Integer;           // Index of a block in which the identifier is defined
+    Block: TBlockIndex;           // Index of a block in which the identifier is defined
     SourceFile: TSourceFile;
     Alias: TString;           // EXTERNAL alias 'libraries'
     Libraries: Integer;       // EXTERNAL alias 'libraries'
@@ -296,7 +297,7 @@ type
     //  For kind=PROCEDURETOK, FUNCTIONTOK:
     NumParams: Word;
     Param: TParamList;
-    ProcAsBlock: Integer;
+    ProcAsBlock: Integer;   // ? TBlockIndex
     ObjectIndex: Integer;
 
     IsUnresolvedForward, updateResolvedForward, isOverload, isRegister, isInterrupt,
@@ -306,7 +307,7 @@ type
     //  For kind=VARIABLE, USERTYPE:
     NumAllocElements, NumAllocElements_: Cardinal;
     AllocElementType: TDataType;
-    ObjectVariable: Boolean;   // TODO Not yet filled
+    IsObjectVariable: Boolean;
 
     function CastKindToDataType: TDataType;
   end;
@@ -331,7 +332,7 @@ type
   end;
 
   TCallGraphNode = record
-    ChildBlock: array [1..MAXBLOCKS] of Integer;
+    ChildBlock: array [1..MAXBLOCKS] of TBlockIndex;
     NumChildren: Word;
   end;
 

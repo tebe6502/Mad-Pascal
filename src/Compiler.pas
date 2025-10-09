@@ -451,7 +451,8 @@ type
     NumParams: Word;
   end;
 var
-  IdentIndex, BlockStackIndex: Integer;
+  IdentIndex: TIdentIndex;
+  BlockStackIndex: Integer;
   i, k, m: Integer;
   ok: Boolean;
 
@@ -1402,7 +1403,7 @@ begin
             else
             begin
 
-              if IdentifierAt(IdentIndex).ObjectVariable and (IdentifierAt(IdentIndex).PassMethod =
+              if IdentifierAt(IdentIndex).IsObjectVariable and (IdentifierAt(IdentIndex).PassMethod =
                 TParameterPassingMethod.VARPASSING) then
               begin
 
@@ -2942,7 +2943,7 @@ begin
             else
             begin
 
-              if IdentifierAt(IdentIndex).ObjectVariable and (IdentifierAt(IdentIndex).PassMethod =
+              if IdentifierAt(IdentIndex).IsObjectVariable and (IdentifierAt(IdentIndex).PassMethod =
                 TParameterPassingMethod.VARPASSING) then
               begin
 
@@ -6711,7 +6712,7 @@ end;  //CompileArrayIndex
 // ----------------------------------------------------------------------------
 
 
-function CompileAddress(i: Integer; out ValType, AllocElementType: TDataType; VarPass: Boolean = False): Integer;
+function CompileAddress(i: TTokenIndex; out ValType, AllocElementType: TDataType; VarPass: Boolean = False): TTokenIndex;
 var
   IdentIndex, IdentTemp, j: Integer;
   Name, svar, lab: String;
@@ -6972,7 +6973,7 @@ begin
 
                         end;
                         //trs
-                        if IdentifierAt(IdentIndex).ObjectVariable and
+                        if IdentifierAt(IdentIndex).IsObjectVariable and
                           (IdentifierAt(IdentIndex).PassMethod = TParameterPassingMethod.VARPASSING) then
                           Push(IdentifierAt(IdentIndex).Value, ASPOINTERTOPOINTER,
                             GetDataSize(TDataType.POINTERTOK), IdentIndex)
@@ -11066,7 +11067,7 @@ end;
 // ----------------------------------------------------------------------------
 
 
-function CompileTerm(i: Integer; out ValType: TDataType; VarType: TDataType = TDataType.INTEGERTOK): Integer;
+function CompileTerm(i: TTokenIndex; out ValType: TDataType; VarType: TDataType = TDataType.INTEGERTOK): TTokenIndex;
 var
   j, k, oldCodeSize: Integer;
   RightValType: TDataType;
@@ -11744,7 +11745,7 @@ end;
 // ----------------------------------------------------------------------------
 
 
-procedure CheckAssignment(i: Integer; IdentIndex: Integer);
+procedure CheckAssignment(i: TTokenIndex; IdentIndex: TIdentIndex);
 begin
 
   if IdentifierAt(IdentIndex).PassMethod = TParameterPassingMethod.CONSTPASSING then
@@ -16940,7 +16941,7 @@ end;  //CheckForwardResolutions
 // ----------------------------------------------------------------------------
 
 
-procedure CompileRecordDeclaration(i: Integer; var VarOfSameType: TVariableList;
+procedure CompileRecordDeclaration(i: TTokenIndex; var VarOfSameType: TVariableList;
   var tmpVarDataSize: Integer; var ConstVal: Int64; VarOfSameTypeIndex: Integer;
   VarType, AllocElementType: TDataType; NumAllocElements: Cardinal; isAbsolute: Boolean; var idx: Integer);
 var
@@ -17568,7 +17569,7 @@ begin
           GetTypeAtIndex(IdentifierAt(BlockIdentIndex).ObjectIndex).Field[ParamIndex].DataType, 0);
 
       IdentifierAt(NumIdent).PassMethod := TParameterPassingMethod.VARPASSING;
-      IdentifierAt(NumIdent).ObjectVariable := True;
+      IdentifierAt(NumIdent).IsObjectVariable := True;
 
       SetVarDataSize(i, tmpVarDataSize + GetDataSize(TDataType.POINTERTOK));
 
