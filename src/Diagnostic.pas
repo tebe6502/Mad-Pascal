@@ -73,7 +73,7 @@ begin
       GetTokenSpelling(identifier.Kind), 15);
     if identifier.DataType <> TDataType.UNTYPETOK then
     begin
-      DiagFile.Write(GetTokenSpelling(identifier.DataType), 15);
+      DiagFile.Write(InfoAboutDataType(identifier.DataType), 15);
     end
     else
     begin

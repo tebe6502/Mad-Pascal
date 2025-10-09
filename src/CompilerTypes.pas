@@ -29,20 +29,7 @@ type
 
 const
 
-  // Identifier kind codes
-
-  CONSTANT = TDataType.CONSTTOK;
-  USERTYPE = TDataType.TYPETOK;
-  VARIABLE = TDataType.VARTOK;
-  //  PROC      = TTokenKind.PROCEDURETOK;
-  //  FUNC      = TTokenKind.FUNCTIONTOK;
-  LABELTYPE = TDataType.LABELTOK;
-  UNITTYPE = TDataType.UNITTOK;
-
-  ENUMTYPE = TDataType.ENUMTOK;
-
   // Compiler parameters
-
   MAXNAMELENGTH = 32;
   MAXTOKENNAMES = 200;
   MAXSTRLENGTH = 255;
@@ -88,7 +75,7 @@ const
   ASSINGLE = 11;
   ASPCHAR = 12;
 
-  fBlockRead_ParamType: array [1..3] of TTokenKind = (TTokenKind.UNTYPETOK, TTokenKind.WORDTOK, TTokenKind.POINTERTOK);
+  fBlockRead_ParamType: array [1..3] of TDataType = (TDataType.UNTYPETOK, TDataType.WORDTOK, TDataType.POINTERTOK);
 
 
 type
@@ -251,6 +238,8 @@ type
     function GetSourceFileLineString: String;
     function GetSourceFileLocationString: String;
 
+    // TODO: Check all IF statements of the for IF TokenAt(i).GetDataType = or in []
+    // They should be rewritten as "HasDataDataType"
     function GetDataType: TDataType;
 
     function GetSpelling: TString;
@@ -318,6 +307,8 @@ type
     NumAllocElements, NumAllocElements_: Cardinal;
     AllocElementType: TDataType;
     ObjectVariable: Boolean;   // TODO Not yet filled
+
+    function CastKindToDataType: TDataType;
   end;
 
   // An identifier list owns identifier instances.
@@ -617,6 +608,15 @@ begin
     kind := tokenArray[tokenIndex].Kind;
     GetHumanReadbleTokenSpelling(kind);
   end;
+end;
+
+// ----------------------------------------------------------------------------
+// Class TIdentifier
+// ----------------------------------------------------------------------------
+function TIdentifier.CastKindToDataType: TDataType;
+begin
+  // TODO Check that this can really be converted to a data type.
+  Result := GetTokenDataType(kind);
 end;
 
 // ----------------------------------------------------------------------------

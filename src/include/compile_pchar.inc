@@ -109,7 +109,7 @@
 
             asm65(#9'mwy ' + svar + ' :bp2');
 
-            if IdentifierAt(IdentIndex).DataType = TTokenKind.POINTERTOK then
+            if IdentifierAt(IdentIndex).DataType = TDataType.POINTERTOK then
               k := TokenAt(i + 2).StrAddress - CODEORIGIN + 1
             else
               k := TokenAt(i + 2).StrAddress - CODEORIGIN;
@@ -147,7 +147,7 @@
 
       //  writeln(IdentifierAt(IdentIndex).Name,',',IdentifierAt(IdentIndex).DataType,',',IdentifierAt(IdentIndex).AllocElementType,',',IdentifierAt(IdentIndex).PassMethod,' | ',VarType,',',ExpressionType,',',IndirectionLevel);
 
-      if ExpressionType = TTokenKind.CHARTOK then
+      if ExpressionType = TDataType.CHARTOK then
       begin
 
         case IndirectionLevel of
@@ -221,7 +221,7 @@
             if (ExpressionType = TDataType.PCHARTOK) and (IdentifierAt(IdentIndex).DataType = TDataType.STRINGPOINTERTOK) then
               asm65(#9'@movePCHAR ' + svar + ' #' + IntToStr(IdentifierAt(IdentIndex).NumAllocElements - 1))
             else
-            if IdentifierAt(IdentIndex).DataType = TTokenKind.POINTERTOK then
+            if IdentifierAt(IdentIndex).DataType = TDataType.POINTERTOK then
               asm65(#9'@moveSTRING_P ' + svar)
             else
               asm65(#9'@moveSTRING ' + svar + ' #' + IntToStr(IdentifierAt(IdentIndex).NumAllocElements - 1));

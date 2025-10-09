@@ -311,7 +311,7 @@ var
     // Search all nesting levels from the current one to the most outer one
     for BlockStackIndex := BlockStackTop downto 0 do
       for IdentIndex := 1 to NumIdent do
-        if (IdentifierAt(IdentIndex).DataType = ENUMTYPE) and (IdentifierAt(IdentIndex).NumAllocElements = Num) and
+        if (IdentifierAt(IdentIndex).DataType = TDataType.ENUMTOK) and (IdentifierAt(IdentIndex).NumAllocElements = Num) and
           (BlockStack[BlockStackIndex] = IdentifierAt(IdentIndex).Block) then
           exit(IdentIndex);
   end;
@@ -328,7 +328,7 @@ begin
       Result := IdentifierAt(IdentTemp).Name;
   end
   else
-    if IdentifierAt(IdentIndex).DataType = ENUMTYPE then
+    if IdentifierAt(IdentIndex).DataType = TDataType.ENUMTOK then
     begin
       IdentTemp := Search(IdentifierAt(IdentIndex).NumAllocElements);
 
