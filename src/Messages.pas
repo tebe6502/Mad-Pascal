@@ -37,17 +37,6 @@ type
     VariableConstantOrFunctionExpectedButProcedureFound, UnderConstruction, TypeIdentifierNotAllowed
     );
 
-(*
-// TODO Test for structured text constants
-type
-  TMessageDefinition = record
-    Text: String;
-  end;
-
-const
-  UnderConstruction2: TMessageDefinition = (Text: 'Under Construction');
-*)
-
 type
   IMessage = interface
     function GetErrorCode: TErrorCode;
@@ -76,7 +65,7 @@ procedure Error(const tokenIndex: TTokenIndex; const msg: String); overload;
 procedure Error(const tokenIndex: TTokenIndex; const msg: IMessage); overload;
 procedure Error(const tokenIndex: TTokenIndex; const errorCode: TErrorCode); overload;
 procedure ErrorForIdentifier(const tokenIndex: TTokenIndex; const errorCode: TErrorCode;
-  const identIndex: TTokenIndex);
+  const identIndex: TIdentIndex);
 
 procedure ErrorIncompatibleTypes(const tokenIndex: TTokenIndex; const srcType: TDataType;
   const dstType: TDataType; const dstPointer: Boolean = False);
@@ -111,8 +100,8 @@ procedure WarningUserDefined(const tokenIndex: TTokenIndex);
 procedure WarningVariableNotInitialized(const tokenIndex: TTokenIndex; const identIndex: TIdentIndex);
 procedure WarningForRangeCheckError(const tokenIndex: TTokenIndex; const Value: TInteger; const dstType: TDataType);
 
-procedure Note(tokenIndex: TTokenIndex; const msg: String);
-procedure NoteForIdentifierNotUsed(tokenIndex: TTokenIndex; const identIndex: TIdentIndex);
+procedure Note(const tokenIndex: TTokenIndex; const msg: String);
+procedure NoteForIdentifierNotUsed(const tokenIndex: TTokenIndex; const identIndex: TIdentIndex);
 
 procedure WritelnMsg;
 
@@ -438,7 +427,7 @@ begin
 
     NormVideo;
 
-    RaiseHaltException(THaltException.COMPILING_ABORTED);
+    RaiseHaltException(EHaltException.COMPILING_ABORTED);
 
   end;
 
@@ -713,7 +702,7 @@ end;
 // ----------------------------------------------------------------------------
 
 
-procedure NoteForIdentifierNotUsed(tokenIndex: TTokenIndex; const identIndex: TIdentIndex);
+procedure NoteForIdentifierNotUsed(const tokenIndex: TTokenIndex; const identIndex: TIdentIndex);
 var
   a: String;
 begin
@@ -759,7 +748,7 @@ end;
 // ----------------------------------------------------------------------------
 
 
-procedure Note(tokenIndex: TTokenIndex; const msg: String);
+procedure Note(const tokenIndex: TTokenIndex; const msg: String);
 var
   a: String;
 begin

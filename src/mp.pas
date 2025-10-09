@@ -495,14 +495,14 @@ uses
 
     try
 
-      if (TEnvironment.GetParameterCount = 0) then Syntax(THaltException.COMPILING_NOT_STARTED);
+      if (TEnvironment.GetParameterCount = 0) then Syntax(EHaltException.COMPILING_NOT_STARTED);
 
       ParseParam();
       // The main program is the first unit.
 
-      if (inputFilePath = '') then Syntax(THaltException.COMPILING_NOT_STARTED);
+      if (inputFilePath = '') then Syntax(EHaltException.COMPILING_NOT_STARTED);
     except
-      on e: THaltException do
+      on e: EHaltException do
       begin
         Result := e.GetExitCode();
         Exit;
@@ -524,7 +524,7 @@ uses
       Console.TextColor(Console.LightRed);
         WriteLn(Format('ERROR: Cannot open optimization file "%s" for writing. %s.', [OptFile.GetAbsoluteFilePath(), e.Message]));
         Console.NormVideo;
-        Result := THaltException.COMPILING_NOT_STARTED;
+        Result := EHaltException.COMPILING_NOT_STARTED;
         Exit();
       end;
     end;
@@ -550,7 +550,7 @@ uses
         WriteLn(Format('ERROR: Cannot open output file "%s" for writing. %s.',
           [OutFile.GetAbsoluteFilePath(), e.Message]));
         Console.NormVideo;
-        Result := THaltException.COMPILING_NOT_STARTED;
+        Result := EHaltException.COMPILING_NOT_STARTED;
         Exit();
       end;
     end;
@@ -567,7 +567,7 @@ uses
         WriteLn(Format('ERROR: Cannot open trace file file "%s" for writing. %s.',
           [traceFile.GetAbsoluteFilePath(), e.Message]));
         Console.NormVideo;
-        Result := THaltException.COMPILING_NOT_STARTED;
+        Result := EHaltException.COMPILING_NOT_STARTED;
         Exit();
       end;
     end;
@@ -580,7 +580,7 @@ uses
       OutFile.Flush;
       OutFile.Close;
     except
-      on e: THaltException do
+      on e: EHaltException do
       begin
         Result := e.GetExitCode();
         OutFile.Close;

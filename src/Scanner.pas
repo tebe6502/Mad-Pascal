@@ -1521,7 +1521,7 @@ var
               if AsmBlockIndex > High(AsmBlock) then
               begin
                 Error(NumTok, TMessage.Create(TErrorCode.OutOfResources, 'Out of resources, ASMBLOCK'));
-                RaiseHaltException(THaltException.COMPILING_ABORTED);
+                RaiseHaltException(EHaltException.COMPILING_ABORTED);
               end;
 
             end
@@ -1810,7 +1810,7 @@ var
       end;// while
 
     except
-      on e: THaltException do
+      on e: EHaltException do
       begin
         RaiseHaltException(e.GetExitCode());
       end;

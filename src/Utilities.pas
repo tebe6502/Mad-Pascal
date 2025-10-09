@@ -17,7 +17,7 @@ type
   end;
 
 type
-  THaltException = class(Exception)   // TODO: EHaltException
+  EHaltException = class(Exception)
 
   const
     // No errors occurred, the output files were created correctly
@@ -76,19 +76,19 @@ end;
 
 // ----------------------------------------------------------------------------
 
-constructor THaltException.Create(exitCode: Longint);
+constructor EHaltException.Create(exitCode: Longint);
 begin
   Self.exitCode := exitCode;
 end;
 
-function THaltException.GetExitCode: Longint;
+function EHaltException.GetExitCode: Longint;
 begin
   Result := exitCode;
 end;
 
 procedure RaiseHaltException(errnum: Longint);
 begin
-  raise THaltException.Create(errnum);
+  raise EHaltException.Create(errnum);
 end;
 
 {$IFDEF PAS2JS}

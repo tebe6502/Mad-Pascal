@@ -7,7 +7,7 @@ uses SysUtils, Common, CompilerTypes, Datatypes, Parser, Tokens;
 type
   IDebugger = interface
     procedure CompileStatement(const tokenIndex: TTokenIndex; const isAsm: Boolean);
-    procedure CompileExpression(const tokenIndex: Integer; const ValType: TDataType; const VarType: TDataType);
+    procedure CompileExpression(const tokenIndex: TTokenIndex; const ValType: TDataType; const VarType: TDataType);
     procedure DefineIdent(const tokenIndex: TTokenIndex; const Name: TIdentifierName;
       const Kind: TTokenKind; const DataType: TDataType; const NumAllocElements: TNumAllocElements;
       const AllocElementType: TDataType; const Data: Int64; const IdType: TDataType);

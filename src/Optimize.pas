@@ -625,7 +625,7 @@ var
 
       NormVideo;
 
-      // RaiseHaltException(THaltException.COMPILING_ABORTED);
+      // RaiseHaltException(EHaltException.COMPILING_ABORTED);
     end;
 
     WriteOut(listing[i]);
@@ -3763,7 +3763,7 @@ begin        // OptimizeASM
     if l > High(listing) then
     begin
       WriteLn('Out of resources, LISTING');
-      RaiseHaltException(THaltException.COMPILING_ABORTED);
+      RaiseHaltException(EHaltException.COMPILING_ABORTED);
     end;
 
     for i := 0 to l - 1 do

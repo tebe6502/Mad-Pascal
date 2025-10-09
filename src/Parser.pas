@@ -346,7 +346,7 @@ begin
   if (index < 0) or (index > $FFFF) then
   begin
     writeln('SaveToDataSegment: Invalid segment index', index);
-    RaiseHaltException(THaltException.COMPILING_ABORTED);
+    RaiseHaltException(EHaltException.COMPILING_ABORTED);
   end;
 
   case valueDataType of
@@ -1338,7 +1338,7 @@ end;  //CompileConstFactor
 // ----------------------------------------------------------------------------
 
 
-function CompileConstTerm(i: Integer; out ConstVal: Int64; out ConstValType: TDataType): Integer;
+function CompileConstTerm(i: TTokenIndex; out ConstVal: Int64; out ConstValType: TDataType): TTokenIndex;
 var
   j, k: Integer;
   RightConstVal: Int64;
@@ -1524,8 +1524,8 @@ end;  //CompileSimpleConstExpression
 // ----------------------------------------------------------------------------
 
 
-function CompileConstExpression(i: Integer; out ConstVal: Int64; out ConstValType: TDataType;
-  const VarType: TDataType = TDataType.INTEGERTOK; const Err: Boolean = False; const War: Boolean = True): Integer;
+function CompileConstExpression(i: TTokenIndex; out ConstVal: Int64; out ConstValType: TDataType;
+  const VarType: TDataType = TDataType.INTEGERTOK; const Err: Boolean = False; const War: Boolean = True): TTokenIndex;
 var
   j: Integer;
   RightConstVal: Int64;
