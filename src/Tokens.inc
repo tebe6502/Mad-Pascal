@@ -161,14 +161,13 @@
    PROCVARTOK,        // Size = 2
    TEXTFILETOK,       // Size = 2/12 TEXTFILE
    SUBRANGETYPE,      // Size = 0
+   DEREFERENCEARRAYTOK, // For ARRAY pointers
    FORWARDTYPE,       // Size = 2
 
    SHORTSTRINGTOK,    // We change into STRINGTOK
    FLOATTOK,          // We change into SINGLETOK
    FLOAT16TOK,        // We change into HALFSINGLETOK
    TEXTTOK,           // We change into TEXTFILETOK
-
-   DEREFERENCEARRAYTOK, // For ARRAY pointers
 
    RESERVED_155,
    RESERVED_156,
