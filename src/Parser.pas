@@ -3104,19 +3104,16 @@ begin
 
                             i := CompileConstExpression(i + 2, LowerBound, ExpressionType);
                             if not (ExpressionType in IntegerTypes) then
-                              Error(i, TMessage.Create(TErrorCode.ArrayLowerBoundNotInteger,
-                                'Array lower bound must be an integer value.'));
+                              Error(i, TMessage.Create(TErrorCode.ArrayLowerBoundNotInteger, 'Array lower bound must be an integer value.'));
 
                             if LowerBound <> 0 then
-                              Error(i, TMessage.Create(TErrorCode.ArrayLowerBoundNotZero,
-                                'Array lower bound is not zero.'));
+                              Error(i, TMessage.Create(TErrorCode.ArrayLowerBoundNotZero, 'Array lower bound is not zero.'));
 
                             CheckTok(i + 1, TTokenKind.RANGETOK);
 
                             i := CompileConstExpression(i + 2, UpperBound, ExpressionType);
                             if not (ExpressionType in IntegerTypes) then
-                              Error(i, TMessage.Create(TErrorCode.ArrayUpperBoundNotInteger,
-                                'Array upper bound must be integer value.'));
+                              Error(i, TMessage.Create(TErrorCode.ArrayUpperBoundNotInteger, 'Array upper bound must be integer value.'));
 
                             if UpperBound < 0 then
                               Error(i, TErrorCode.UpperBoundOfRange);
@@ -3131,19 +3128,16 @@ begin
 
                               i := CompileConstExpression(i + 2, LowerBound, ExpressionType);
                               if not (ExpressionType in IntegerTypes) then
-                                Error(i, TMessage.Create(TErrorCode.ArrayLowerBoundNotInteger,
-                                  'Array lower bound must be an integer value.'));
+                                Error(i, TMessage.Create(TErrorCode.ArrayLowerBoundNotInteger, 'Array lower bound must be an integer value.'));
 
                               if LowerBound <> 0 then
-                                Error(i, TMessage.Create(TErrorCode.ArrayLowerBoundNotZero,
-                                  'Array lower bound is not zero.'));
+                                Error(i, TMessage.Create(TErrorCode.ArrayLowerBoundNotZero, 'Array lower bound is not zero.'));
 
                               CheckTok(i + 1, TTokenKind.RANGETOK);
 
                               i := CompileConstExpression(i + 2, UpperBound, ExpressionType);
                               if not (ExpressionType in IntegerTypes) then
-                                Error(i, TMessage.Create(TErrorCode.ArrayUpperBoundNotInteger,
-                                  'Array upper bound must be an integer value.'));
+                                Error(i, TMessage.Create(TErrorCode.ArrayUpperBoundNotInteger, 'Array upper bound must be an integer value.'));
 
                               if UpperBound < 0 then
                                 Error(i, TErrorCode.UpperBoundOfRange);
@@ -3162,8 +3156,7 @@ begin
 
 
                           if TokenAt(i + 3).GetDataType in [TDataType.RECORDTOK, TDataType.OBJECTTOK] then
-                            Error(i, TMessage.Create(TErrorCode.InvalidArrayOfPointers,
-                              'Only arrays of ^{0} are supported.', InfoAboutToken(TokenAt(i + 3).Kind)));
+                            Error(i, TMessage.Create(TErrorCode.InvalidArrayOfPointers, 'Only arrays of ^{0} are supported.', InfoAboutToken(TokenAt(i + 3).Kind)));
 
 
                           if TokenAt(i + 3).Kind = TTokenKind.ARRAYTOK then
@@ -3176,6 +3169,14 @@ begin
                             Result := i;
                             i := CompileType(i + 3, NestedDataType, NestedNumAllocElements, NestedAllocElementType);
                           end;
+
+
+			  if NestedDataType = TDataType.SUBRANGETYPE then begin
+			    NestedDataType := GetTypeAtIndex(NestedNumAllocElements).Field[0].AllocElementType;
+			    NestedNumAllocElements := 0;
+			    NestedAllocElementType := TDataType.UNTYPETOK;
+			  end;
+
 
                           // TODO: Have Constant for 40960
                           if (NumAllocElements shr 16) * (NumAllocElements and $FFFF) *
@@ -3198,19 +3199,14 @@ begin
                             begin // !!! dla RECORD, OBJECT tablice nie zadzialaja !!!
 
                               if NumAllocElements shr 16 > 0 then
-                                Error(i, TMessage.Create(TErrorCode.MultiDimensionalArrayOfTypeNotSupported,
-                                  'Multidimensional arrays of element type {0} are not supported.',
-                                  InfoAboutDataType(NestedDataType)));
+                                Error(i, TMessage.Create(TErrorCode.MultiDimensionalArrayOfTypeNotSupported, 'Multidimensional arrays of element type {0} are not supported.', InfoAboutDataType(NestedDataType)));
 
                               //    if NestedDataType = RECORDTOK then
                               //    else
                               if NestedDataType in [TDataType.RECORDTOK, TDataType.OBJECTTOK] then
-                                Error(i, TMessage.Create(TErrorCode.OnlyArrayOfTypeSupported,
-                                  'Only Array [0..{0}] of ^{1} supported', IntToStr(NumAllocElements - 1),
-                                  InfoAboutDataType(NestedDataType)))
+                                Error(i, TMessage.Create(TErrorCode.OnlyArrayOfTypeSupported, 'Only Array [0..{0}] of ^{1} supported', IntToStr(NumAllocElements - 1), InfoAboutDataType(NestedDataType)))
                               else
-                                Error(i, TMessage.Create(TErrorCode.ArrayOfTypeNotSupported,
-                                  'Arrays of type {0} are not supported.', InfoAboutDataType(NestedDataType)));
+                                Error(i, TMessage.Create(TErrorCode.ArrayOfTypeNotSupported, 'Arrays of type {0} are not supported.', InfoAboutDataType(NestedDataType)));
 
                               //    NumAllocElements := NestedNumAllocElements;
                               //    NestedAllocElementType := NestedDataType;
@@ -3228,9 +3224,7 @@ begin
 
                                 if (NestedAllocElementType in [TDataType.RECORDTOK,
                                   TDataType.OBJECTTOK, TDataType.PROCVARTOK]) and (NumAllocElements shr 16 > 0) then
-                                  Error(i, TMessage.Create(TErrorCode.MultiDimensionalArrayOfTypeNotSupported,
-                                    'Multidimensional arrays of element type {0} are not supported.',
-                                    InfoAboutDataType(NestedAllocElementType)));
+                                  Error(i, TMessage.Create(TErrorCode.MultiDimensionalArrayOfTypeNotSupported, 'Multidimensional arrays of element type {0} are not supported.', InfoAboutDataType(NestedAllocElementType)));
 
                                 NestedDataType := NestedAllocElementType;
 
@@ -3265,8 +3259,7 @@ begin
                               Error(i, TErrorCode.UnknownIdentifier);
 
                             if IdentifierAt(IdentIndex).Kind <> TTokenKind.TYPETOK then
-                              Error(i, TMessage.Create(TErrorCode.TypeIdentifierExpected,
-                                'Type identifier expected but {0} found', TokenAt(i).Name));
+                              Error(i, TMessage.Create(TErrorCode.TypeIdentifierExpected, 'Type identifier expected but {0} found', TokenAt(i).Name));
 
                             DataType := IdentifierAt(IdentIndex).DataType;
 
