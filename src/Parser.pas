@@ -346,7 +346,7 @@ begin
   if (index < 0) or (index > $FFFF) then
   begin
     writeln('SaveToDataSegment: Invalid segment index', index);
-    RaiseHaltException(THaltException.COMPILING_ABORTED);
+    RaiseHaltException(EHaltException.COMPILING_ABORTED);
   end;
 
   case valueDataType of

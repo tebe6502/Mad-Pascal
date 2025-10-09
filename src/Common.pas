@@ -643,7 +643,7 @@ begin
   if (NumStaticStrChars + len > $FFFF) then
   begin
     writeln('DefineStaticString: ' + IntToStr(len));
-    RaiseHaltException(THaltException.COMPILING_ABORTED);
+    RaiseHaltException(EHaltException.COMPILING_ABORTED);
   end;
 
   // Writeln('DefineStaticString:  NumStaticStrChars=' + IntToStr(NumStaticStrChars) + ' Length=' +

@@ -427,7 +427,7 @@ begin
 
     NormVideo;
 
-    RaiseHaltException(THaltException.COMPILING_ABORTED);
+    RaiseHaltException(EHaltException.COMPILING_ABORTED);
 
   end;
 

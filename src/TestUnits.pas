@@ -191,9 +191,9 @@ uses
     try
       filePath := FindFile('TestUnit', 'unit');
     except
-      on  ex: THaltException do
+      on  ex: EHaltException do
       begin
-        Assert(ex.GetExitCode = THaltException.COMPILING_ABORTED);
+        Assert(ex.GetExitCode = EHaltException.COMPILING_ABORTED);
       end;
     end;
     Assert(filePath = '', 'Non-existing TestUnit found');

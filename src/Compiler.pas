@@ -16214,7 +16214,7 @@ begin
   if (ConstDataSize < 0) or (ConstDataSize > $FFFF) then
   begin
     writeln('SaveToStaticDataSegment: ' + IntToStr(ConstDataSize));
-    RaiseHaltException(THaltException.COMPILING_ABORTED);
+    RaiseHaltException(EHaltException.COMPILING_ABORTED);
   end;
 
   case ConstValType of

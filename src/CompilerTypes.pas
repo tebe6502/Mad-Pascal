@@ -586,13 +586,13 @@ begin
   if (tokenIndex < Low(tokenArray)) then
   begin
     Writeln('ERROR: Array index ', tokenIndex, ' is smaller than the lower bound ', Low(tokenArray));
-    RaiseHaltException(THaltException.COMPILING_ABORTED);
+    RaiseHaltException(EHaltException.COMPILING_ABORTED);
   end;
 
   if (tokenIndex > High(tokenArray)) then
   begin
     Writeln('ERROR: Array index ', tokenIndex, ' is greater than the upper bound ', High(tokenArray));
-    RaiseHaltException(THaltException.COMPILING_ABORTED);
+    RaiseHaltException(EHaltException.COMPILING_ABORTED);
   end;
   Result := tokenArray[tokenIndex];
 end;
@@ -676,13 +676,13 @@ begin
   if (identifierIndex < Low(identifierArray)) then
   begin
     Writeln('ERROR: Array index ', identifierIndex, ' is smaller than the lower bound ', Low(identifierArray));
-    RaiseHaltException(THaltException.COMPILING_ABORTED);
+    RaiseHaltException(eHaltException.COMPILING_ABORTED);
   end;
 
   if (identifierIndex > High(identifierArray)) then
   begin
     Writeln('ERROR: Array index ', identifierIndex, ' is greater than the upper bound ', High(identifierArray));
-    RaiseHaltException(THaltException.COMPILING_ABORTED);
+    RaiseHaltException(EHaltException.COMPILING_ABORTED);
   end;
   Result := identifierArray[identifierIndex];
 end;

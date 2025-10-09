@@ -50,7 +50,7 @@ begin
   Console.TextColor(Console.LightRed);
   WriteLn('ERROR: Check option number ' + IntToStr(index) + '. ' + message);
   Console.NormVideo;
-  Syntax(THaltException.COMPILING_NOT_STARTED);
+  Syntax(EHaltException.COMPILING_NOT_STARTED);
 end;
 
 procedure ParameterValueError(index: Longint; parameterValue: String; message: String);
