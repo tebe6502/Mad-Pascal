@@ -6767,24 +6767,20 @@ begin
       if IdentIndex > 0 then
       begin
 
-        if not (IdentifierAt(IdentIndex).Kind in [TTokenKind.CONSTTOK, TTokenKind.VARTOK,
-          TTokenKind.PROCEDURETOK, TTokenKind.FUNCTIONTOK, TTokenKind.CONSTRUCTORTOK,
-          TTokenKind.DESTRUCTORTOK, TTokenKind.ADDRESSTOK]) then
+        if not (IdentifierAt(IdentIndex).Kind in [TTokenKind.CONSTTOK, TTokenKind.VARTOK, TTokenKind.PROCEDURETOK, TTokenKind.FUNCTIONTOK, TTokenKind.CONSTRUCTORTOK, TTokenKind.DESTRUCTORTOK, TTokenKind.ADDRESSTOK]) then
           Error(i + 1, TErrorCode.VariableExpected)
         else
         begin
 
           if IdentifierAt(IdentIndex).Kind = TTokenKind.CONSTTOK then
-            if not ((IdentifierAt(IdentIndex).DataType in Pointers) and
-              (IdentifierAt(IdentIndex).NumAllocElements > 0)) then
+            if not ((IdentifierAt(IdentIndex).DataType in Pointers) and (IdentifierAt(IdentIndex).NumAllocElements > 0)) then
               Error(i + 1, TErrorCode.CantAdrConstantExp);
 
 
           //  writeln(IdentifierAt(IdentIndex).nAME,' = ',IdentifierAt(IdentIndex).DataType,',',IdentifierAt(IdentIndex).AllocElementType,',',IdentifierAt(IdentIndex).NumAllocElements,',',IdentifierAt(IdentIndex).PassMethod );
 
 
-          if IdentifierAt(IdentIndex).Kind in [TTokenKind.PROCEDURETOK, TTokenKind.FUNCTIONTOK,
-            TTokenKind.CONSTRUCTORTOK, TTokenKind.DESTRUCTORTOK] then
+          if IdentifierAt(IdentIndex).Kind in [TTokenKind.PROCEDURETOK, TTokenKind.FUNCTIONTOK, TTokenKind.CONSTRUCTORTOK, TTokenKind.DESTRUCTORTOK] then
           begin
 
             Name := GetLocalName(IdentIndex);
@@ -6884,8 +6880,7 @@ begin
 
             end
             else
-              if (IdentifierAt(IdentIndex).DataType in [TDataType.FILETOK, TDataType.TEXTFILETOK,
-                TDataType.RECORDTOK, TDataType.OBJECTTOK] {+ Pointers}) or
+              if (IdentifierAt(IdentIndex).DataType in [TDataType.FILETOK, TDataType.TEXTFILETOK, TDataType.RECORDTOK, TDataType.OBJECTTOK] {+ Pointers}) or
                 ((IdentifierAt(IdentIndex).DataType in Pointers) and
                 (IdentifierAt(IdentIndex).AllocElementType <> TDataType.UNTYPETOK) and
                 (IdentifierAt(IdentIndex).NumAllocElements > 0)) or
@@ -6905,8 +6900,7 @@ begin
                   (IdentifierAt(IdentIndex).idType = TDataType.DATAORIGINOFFSET) then
                 begin
 
-                  Push(IdentifierAt(IdentIndex).Value, ASPOINTERTORECORD, GetDataSize(TDataType.POINTERTOK),
-                    IdentIndex);
+                  Push(IdentifierAt(IdentIndex).Value, ASPOINTERTORECORD, GetDataSize(TDataType.POINTERTOK), IdentIndex);
                 end
                 else
                   if DEREFERENCE then
@@ -6955,8 +6949,7 @@ begin
                           (IdentifierAt(IdentIndex).NumAllocElements > 0) then
                         begin
 
-                          if IdentifierAt(IdentIndex).AllocElementType in
-                            [TDataType.RECORDTOK, TDataType.OBJECTTOK] then
+                          if IdentifierAt(IdentIndex).AllocElementType in [TDataType.RECORDTOK, TDataType.OBJECTTOK] then
                           begin
 
                             if IdentifierAt(IdentIndex).NumAllocElements_ = 0 then
@@ -6966,7 +6959,8 @@ begin
 
                           end
                           else
-                            Error(i + 4, TErrorCode.IllegalQualifier);  // array
+			   if IdentifierAt(IdentIndex).idType <> TDataType.DEREFERENCEARRAYTOK then
+                             Error(i + 4, TErrorCode.IllegalQualifier);  // array
 
                         end;
                         //trs
