@@ -11840,18 +11840,15 @@ begin
 
               //      writeln(ExpressionType,',',VarTYpe,',',Elements(GetIdent(TokenAt(j + 2).Name^)));
 
-              if GetDataSize(VarType) <> Elements(IdentIndex) * GetDataSize(
-                IdentifierAt(IdentIndex).AllocElementType) then
+              if GetDataSize(VarType) <> Elements(IdentIndex) * GetDataSize(IdentifierAt(IdentIndex).AllocElementType) then
                 if VarType = TDataType.UNTYPETOK then
                   Error(j + 2, 'Illegal type conversion: "POINTER" to "Array[0..' +
-                    IntToStr(Elements(IdentIndex) - 1) + '] Of ' +
-                    InfoAboutDataType(IdentifierAt(IdentIndex).AllocElementType) + '"')
+                    IntToStr(Elements(IdentIndex) - 1) + '] Of ' + InfoAboutDataType(IdentifierAt(IdentIndex).AllocElementType) + '"')
                 else
                   if Elements(GetIdentIndex(TokenAt(j + 2).Name)) = 0 then
                     Error(j + 2, 'Illegal type conversion: "' + InfoAboutDataType(VarType) + '" to "' + IdentifierAt(IdentIndex).Name + '"')
                   else
-                    Error(j + 2, 'Illegal type conversion: "Array[0..' +
-                      IntToStr(Elements(GetIdentIndex(TokenAt(j + 2).Name)) - 1) + '] Of ' + InfoAboutDataType(VarType) + '" to "' + IdentifierAt(IdentIndex).Name + '"');
+                    Error(j + 2, 'Illegal type conversion: "Array[0..' + IntToStr(Elements(GetIdentIndex(TokenAt(j + 2).Name)) - 1) + '] Of ' + InfoAboutDataType(VarType) + '" to "' + IdentifierAt(IdentIndex).Name + '"');
 
               // perl
               CheckTok(i + 1, CPARTOK);
@@ -11883,8 +11880,7 @@ begin
 
                 //  writeln('= ',IdentifierAt(IdentIndex).Name,',',IdentifierAt(IdentIndex).Kind,',',IdentifierAt(IdentIndex).DataType,',',IdentifierAt(IdentIndex).AllocElementType);
 
-                if not (IdentifierAt(IdentIndex).DataType in [TDataType.POINTERTOK,
-                  TDataType.RECORDTOK, TDataType.OBJECTTOK]) then
+                if not (IdentifierAt(IdentIndex).DataType in [TDataType.POINTERTOK, TDataType.RECORDTOK, TDataType.OBJECTTOK]) then
                   Error(i, TErrorCode.IllegalExpression);
 
                 if IdentifierAt(IdentIndex).DataType = TDataType.POINTERTOK then
@@ -12092,8 +12088,7 @@ begin
                       begin
                         IndirectionLevel := ASPOINTERTORECORDARRAYORIGIN;
 
-                        svar := copy(IdentifierAt(IdentIndex).Name, pos('.', IdentifierAt(IdentIndex).Name) +
-                          1, length(IdentifierAt(IdentIndex).Name));
+                        svar := copy(IdentifierAt(IdentIndex).Name, pos('.', IdentifierAt(IdentIndex).Name) + 1, length(IdentifierAt(IdentIndex).Name));
 
                         IdentIndex := IdentTemp;
 
@@ -12136,8 +12131,7 @@ begin
 
                         IndirectionLevel := ASARRAYORIGINOFPOINTERTORECORDARRAYORIGIN;
 
-                        i := CompileArrayIndex(i + 3, GetIdentIndex(IdentifierAt(IdentIndex).Name +
-                          '.' + TokenAt(i + 3).Name), VarType);
+                        i := CompileArrayIndex(i + 3, GetIdentIndex(IdentifierAt(IdentIndex).Name + '.' + TokenAt(i + 3).Name), VarType);
 
                         CheckTok(i + 1, TTokenKind.CBRACKETTOK);
 
@@ -12216,9 +12210,8 @@ begin
 
 
             if (IdentifierAt(IdentIndex).DataType = TDataType.PCHARTOK) and
-              //         ( (IndirectionLevel in [ASPOINTER, ASPOINTERTOPOINTER]) or ((IndirectionLevel = ASPOINTERTOARRAYORIGIN) and (IdentifierAt(IdentIndex).PassMethod = TParameterPassingMethod.VARPASSING)) ) and
-              (IndirectionLevel = ASPOINTER) and (TokenAt(i + 2).Kind in
-              [TTokenKind.STRINGLITERALTOK, TTokenKind.CHARLITERALTOK, TTokenKind.IDENTTOK]) then
+               (IndirectionLevel = ASPOINTER) and 
+	       (TokenAt(i + 2).Kind in [TTokenKind.STRINGLITERALTOK, TTokenKind.CHARLITERALTOK, TTokenKind.IDENTTOK]) then
             begin
 
               {$i include/compile_pchar.inc}
@@ -13766,18 +13759,15 @@ WHILETOK:
 
         if IdentIndex > 0 then
           if not ((IdentifierAt(IdentIndex).Kind = TTokenKind.VARTOK) and
-            (IdentifierAt(IdentIndex).DataType in OrdinalTypes +
-            Pointers) {and (IdentifierAt(IdentIndex).AllocElementType = TDataType.UNTYPETOK)}) then
+            (IdentifierAt(IdentIndex).DataType in OrdinalTypes + Pointers + [TDataType.SUBRANGETYPE]) ) then
             Error(i + 1, 'Ordinal variable expected as ''FOR'' loop counter')
           else
-            if (IdentifierAt(IdentIndex).isInitialized) or (IdentifierAt(IdentIndex).PassMethod <>
-              TParameterPassingMethod.VALPASSING) then
+            if (IdentifierAt(IdentIndex).isInitialized) or (IdentifierAt(IdentIndex).PassMethod <> TParameterPassingMethod.VALPASSING) then
               Error(i + 1, 'Simple local variable expected as FOR loop counter')
             else
             begin
 
               IdentifierAt(IdentIndex).LoopVariable := True;
-
 
               if codealign.loop > 0 then
               begin
@@ -13825,10 +13815,15 @@ WHILETOK:
 
                 forBPL := 0;
 
-                if SafeCompileConstExpression(j, ConstVal, ExpressionType,
-                  IdentifierAt(IdentIndex).DataType, True) then
+		VarType := IdentifierAt(IdentIndex).DataType;
+
+		if VarType = TDataType.SUBRANGETYPE then 
+		  VarType := GetTypeAtIndex(IdentifierAt(IdentIndex).NumAllocElements).Field[0].AllocElementType;
+
+
+                if SafeCompileConstExpression(j, ConstVal, ExpressionType, VarType, True) then
                 begin
-                  Push(ConstVal, ASVALUE, GetDataSize(IdentifierAt(IdentIndex).DataType));
+                  Push(ConstVal, ASVALUE, GetDataSize(VarType));
 
                   forLoop.begin_value := ConstVal;
                   forLoop.begin_const := True;
@@ -13838,9 +13833,9 @@ WHILETOK:
                 end
                 else
                 begin
-                  j := CompileExpression(j, ExpressionType, IdentifierAt(IdentIndex).DataType);
+                  j := CompileExpression(j, ExpressionType, VarType);
 
-                  ExpandParam(IdentifierAt(IdentIndex).DataType, ExpressionType);
+                  ExpandParam(VarType, ExpressionType);
                 end;
 
                 if not (ExpressionType in OrdinalTypes) then
@@ -13849,7 +13844,7 @@ WHILETOK:
                 ActualParamType := ExpressionType;
 
 
-                GenerateAssignment(ASPOINTER, GetDataSize(IdentifierAt(IdentIndex).DataType), IdentIndex);  //!!!!!
+                GenerateAssignment(ASPOINTER, GetDataSize(VarType), IdentIndex);  //!!!!!
 
                 if not (TokenAt(j + 1).Kind in [TTokenKind.TOTOK, TTokenKind.DOWNTOTOK]) then
                   Error(j + 1, '''TO'' or ''DOWNTO'' expected but ' + TokenList.GetTokenSpellingAtIndex(j + 1) + ' found')
@@ -13867,13 +13862,11 @@ WHILETOK:
 
                   {$IFDEF OPTIMIZECODE}
 
-                  if SafeCompileConstExpression(j, ConstVal, ExpressionType,
-                    IdentifierAt(IdentIndex).DataType, True) then
+                  if SafeCompileConstExpression(j, ConstVal, ExpressionType, VarType, True) then
                   begin
 
-                    Push(ConstVal, ASVALUE, GetDataSize(IdentifierAt(IdentIndex).DataType));
-                    DefineIdent(j, '@FORTMP_' + IntToHex(CodeSize, 4), TTokenKind.CONSTTOK,
-                      IdentifierAt(IdentIndex).DataType,
+                    Push(ConstVal, ASVALUE, GetDataSize(VarType));
+                    DefineIdent(j, '@FORTMP_' + IntToHex(CodeSize, 4), TTokenKind.CONSTTOK, VarType,
                       IdentifierAt(IdentIndex).NumAllocElements, IdentifierAt(IdentIndex).AllocElementType,
                       ConstVal, TokenAt(j).GetDataType);
 
@@ -13896,26 +13889,25 @@ WHILETOK:
                       else
                         IdentTemp := GetIdentIndex(TokenAt(j + 1).Name);
 
-                      j := CompileExpression(j, ExpressionType, IdentifierAt(IdentIndex).DataType);
-                      ExpandParam(IdentifierAt(IdentIndex).DataType, ExpressionType);
+                      j := CompileExpression(j, ExpressionType, VarType);
+                      ExpandParam(VarType, ExpressionType);
 
                     end
                     else
                     begin
-                      j := CompileExpression(j, ExpressionType, IdentifierAt(IdentIndex).DataType);
-                      ExpandParam(IdentifierAt(IdentIndex).DataType, ExpressionType);
+                      j := CompileExpression(j, ExpressionType, VarType);
+                      ExpandParam(VarType, ExpressionType);
                       DefineIdent(j, '@FORTMP_' + IntToHex(CodeSize, 4), TTokenKind.VARTOK,
-                        IdentifierAt(IdentIndex).DataType,
-                        IdentifierAt(IdentIndex).NumAllocElements, IdentifierAt(IdentIndex).AllocElementType, 1);
+                        VarType, IdentifierAt(IdentIndex).NumAllocElements, IdentifierAt(IdentIndex).AllocElementType, 1);
                     end;
 
                   end;
 
                   {$ELSE}
 
-                  j := CompileExpression(j, ExpressionType, IdentifierAt(IdentIndex).DataType);
-                  ExpandParam(IdentifierAt(IdentIndex).DataType, ExpressionType);
-                  DefineIdent(j, '@FORTMP_' + IntToHex(CodeSize, 4), TTokenKind.VARTOK, IdentifierAt(IdentIndex).DataType,
+                  j := CompileExpression(j, ExpressionType, VarType);
+                  ExpandParam(VarType, ExpressionType);
+                  DefineIdent(j, '@FORTMP_' + IntToHex(CodeSize, 4), TTokenKind.VARTOK, VarType,
                     IdentifierAt(IdentIndex).NumAllocElements, IdentifierAt(IdentIndex).AllocElementType, 0);
 
                   {$ENDIF}
@@ -13924,28 +13916,26 @@ WHILETOK:
                     Error(j, TErrorCode.OrdinalExpectedFOR);
 
 
-                  //    if GetDataSize( TDataType.ExpressionType] > GetDataSize( IdentifierAt(IdentIndex).DataType) then
-                  //      Error(i, 'FOR loop counter variable type (' + InfoAboutToken(IdentifierAt(IdentIndex).DataType) + ') is smaller than the type of the maximum range (' + InfoAboutToken(ExpressionType) +')' );
+                  //    if GetDataSize( TDataType.ExpressionType] > GetDataSize(VarType) then
+                  //      Error(i, 'FOR loop counter variable type (' + InfoAboutToken(VarType) + ') is smaller than the type of the maximum range (' + InfoAboutToken(ExpressionType) +')' );
 
 
                   if ((ActualParamType in UnsignedOrdinalTypes) and (ExpressionType in UnsignedOrdinalTypes)) or
                     ((ActualParamType in SignedOrdinalTypes) and (ExpressionType in SignedOrdinalTypes)) then
                   begin
 
-                    if GetDataSize(ExpressionType) > GetDataSize(ActualParamType) then
-                      ActualParamType := ExpressionType;
-                    if GetDataSize(ActualParamType) > GetDataSize(IdentifierAt(IdentIndex).DataType) then
-                      ActualParamType := IdentifierAt(IdentIndex).DataType;
+                    if GetDataSize(ExpressionType) > GetDataSize(ActualParamType) then ActualParamType := ExpressionType;
+
+                    if GetDataSize(ActualParamType) > GetDataSize(VarType) then ActualParamType := VarType;
 
                   end
                   else
-                    ActualParamType := IdentifierAt(IdentIndex).DataType;
+                    ActualParamType := VarType;
 
 
                   if IdentTemp < 0 then IdentTemp := GetIdentIndex('@FORTMP_' + IntToHex(CodeSize, 4));
 
-                  GenerateAssignment(ASPOINTER, {GetDataSize( TDataType.IdentifierAt(IdentTemp).DataType]} GetDataSize(
-                    ActualParamType), IdentTemp);
+                  GenerateAssignment(ASPOINTER, GetDataSize(ActualParamType), IdentTemp);
 
                   asm65;    // ; --- To
 
@@ -13961,8 +13951,8 @@ WHILETOK:
                   asm65('; --- ForToDoCondition');
 
 
-                  if (ActualParamType = ExpressionType) and (GetDataSize(IdentifierAt(IdentTemp).DataType) >
-                    GetDataSize(ActualParamType)) then
+                  if (ActualParamType = ExpressionType) and 
+		     (GetDataSize(IdentifierAt(IdentTemp).DataType) > GetDataSize(ActualParamType)) then
                     Note(j, 'FOR loop counter variable type is of larger size than required');
 
 
@@ -17938,7 +17928,7 @@ begin
     end;
 
     // -----------------------------------------------------------------------------
-    //           LABEL
+    //        LABEL
     // -----------------------------------------------------------------------------
 
     if TokenAt(i).Kind = TTokenKind.LABELTOK then
@@ -17962,7 +17952,7 @@ begin
     end;  // if TTokenKind.LABELTOK
 
     // -----------------------------------------------------------------------------
-    //           CONST
+    //        CONST
     // -----------------------------------------------------------------------------
 
     if TokenAt(i).Kind = TTokenKind.CONSTTOK then
@@ -18222,7 +18212,7 @@ begin
       i := i + 1;
     end;  // if TTokenKind.TYPETOK
     // -----------------------------------------------------------------------------
-    //          VAR
+    //        VAR
     // -----------------------------------------------------------------------------
 
     if TokenAt(i).Kind = TTokenKind.VARTOK then
@@ -18235,8 +18225,7 @@ begin
       NestedAllocElementType := TDataType.UNTYPETOK;
       NestedNumAllocElements := 0;
 
-      if (TokenAt(i + 1).Kind = TTokenKind.OBRACKETTOK) and (TokenAt(i + 2).Kind in
-        [TTokenKind.VOLATILETOK, TTokenKind.STRIPEDTOK]) then
+      if (TokenAt(i + 1).Kind = TTokenKind.OBRACKETTOK) and (TokenAt(i + 2).Kind in [TTokenKind.VOLATILETOK, TTokenKind.STRIPEDTOK]) then
       begin
         CheckTok(i + 3, TTokenKind.CBRACKETTOK);
 
@@ -18300,6 +18289,13 @@ begin
 
           i := CompileType(i + 3, VarType, NumAllocElements, AllocElementType);
 
+          if VarType = TDataType.SUBRANGETYPE then 
+	  begin
+	    VarType := GetTypeAtIndex(NumAllocElements).Field[0].AllocElementType;
+	    NumAllocElements := 0;
+	    AllocElementType := TDataType.UNTYPETOK;
+	  end;
+
           if VarType in [TDataType.RECORDTOK, TDataType.OBJECTTOK] then
             Error(i, 'Only Array of ^' + InfoAboutDataType(VarType) + ' supported')
           else
@@ -18334,6 +18330,13 @@ begin
         begin
 
           i := CompileType(i + 1, VarType, NumAllocElements, AllocElementType);
+
+          if VarType = TDataType.SUBRANGETYPE then 
+	  begin
+	    VarType := GetTypeAtIndex(NumAllocElements).Field[0].AllocElementType;
+	    NumAllocElements := 0;
+	    AllocElementType := TDataType.UNTYPETOK;
+	  end;
 
           if IdType = TDataType.ARRAYTOK then
             i := CompileType(i + 3, NestedDataType, NestedNumAllocElements, NestedAllocElementType);
