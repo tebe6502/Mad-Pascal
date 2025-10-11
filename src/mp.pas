@@ -258,6 +258,8 @@ uses
       STACK_BASE := -1;
       outputFilePath := '';
 
+      DiagMode := false;
+
       i := 1;
       while i <= TEnvironment.GetParameterCount() do
       begin
