@@ -20,7 +20,7 @@ set MP_PAS=%MP_SRC_FOLDER%\mp.pas
 set MP_BIN_FOLDER=%MP_FOLDER%\bin\windows_x86_64
 set MP_EXE=%MP_BIN_FOLDER%\mp.exe
 
-set REFERENCE_MP_EXE=%MP_BIN_FOLDER%-origin\bin\windows\mp.exe
+set REFERENCE_MP_EXE=%MP_FOLDER%\..\Mad-Pascal-Reference\bin\windows_x86_64\mp.exe
 
 set TEST_PAS=%MP_SRC_FOLDER%\TestUnits.pas
 rem set TEST_EXE=%MP_SRC_FOLDER%\TestUnits.exe
@@ -54,8 +54,13 @@ if not "%MP_EXE%"=="" (
   )
 )
 
+cd %MP_FOLDER%\samples\a8\math\AES-Rijndael
+%REFERENCE_MP_EXE% -ipath %MP_FOLDER%\lib rijndael-test.pas
+%MP_EXE% -ipath %MP_FOLDER%\lib rijndael-test.pas
+
 rem Regression test with standard MP.
-call %MP_FOLDER%\projects\MakeMadPascal.bat
+rem call %MP_FOLDER%\projects\MakeMadPascal.bat
+
 goto :eof
 
 
