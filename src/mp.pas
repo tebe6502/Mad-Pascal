@@ -210,7 +210,7 @@ uses
   Messages,
   Targets,
   Tokens,
-  Utilities;
+  Utilities, Profiler;
 
 
 // ----------------------------------------------------------------------------
