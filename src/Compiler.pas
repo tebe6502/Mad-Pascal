@@ -19744,6 +19744,7 @@ begin
   // Set defines for first pass;
   scanner := TScanner.Create;
 
+  Profiler.profiler.BeginSection('scanner.TokenizeProgram');
   Profiler.profiler.BeginSection('scanner.TokenizeProgram(programUnit, True)');
   scanner.TokenizeProgram(programUnit, True);
   Profiler.profiler.EndSection();
@@ -19757,6 +19758,7 @@ begin
   scanner.TokenizeProgram(programUnit, False);
   Profiler.profiler.EndSection();
 
+  Profiler.profiler.EndSection();
   // ----------------------------------------------------------------------------
 
   NumStaticStrCharsTmp := NumStaticStrChars;

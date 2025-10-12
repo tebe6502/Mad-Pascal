@@ -1,5 +1,8 @@
 unit Profiler;
 
+(* https://wiki.freepascal.org/LazProfiler *)
+(* https://forum.lazarus.freepascal.org/index.php?topic=72466.msg567367#msg567367 *)
+
 interface
 
 
@@ -64,15 +67,15 @@ end;
 
 procedure TProfiler.EndSection();
 var
-  seconds: Integer;
+  seconds: Real;
   entryPtr: ^TEntry;
   message: String;
 begin
   assert(Level > 0);
   entryPtr := Addr(EntryArray[level]);
   entryPtr^.endTime := GetTickCount64();
-  seconds := Trunc((entryPtr^.EndTime - entryPtr^.StartTime + 500) / 1000);
-  message:=Format('Profiler level %d section %s ended after %d seconds.', [entryPtr^.level, entryPtr^.Name, seconds]);
+  seconds := (entryPtr^.EndTime - entryPtr^.StartTime + 500) / 1000;
+  message:=Format('Profiler level %d section %s ended after %.2f seconds.', [entryPtr^.level, entryPtr^.Name, seconds]);
   LogTrace(message);
   writeln(message);
 

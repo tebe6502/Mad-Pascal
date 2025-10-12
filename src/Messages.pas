@@ -401,9 +401,7 @@ begin
     TextColor(LIGHTRED);
     if tokenIndex > 0 then
     begin
-      {$IFDEF DEBUG}
-      WritePreviousTokens(effectiveTokenIndex);
-      {$ENDIF}
+      if DiagMode then WritePreviousTokens(effectiveTokenIndex);
 
       token := TokenAt(effectiveTokenIndex);
       if (effectiveTokenIndex > 1) then

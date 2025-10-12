@@ -258,10 +258,10 @@ type
     procedure Clear;
     function AddToken(Kind: TTokenKind; SourceFile: TSourceFile; Line, Column: Integer; Value: TInteger): TToken;
     procedure RemoveToken;
-    function GetTokenAtIndex(const tokenIndex: TTokenIndex): TToken;
+    function GetTokenAtIndex(const tokenIndex: TTokenIndex): TToken; inline;
     function GetTokenSpellingAtIndex(const tokenIndex: TTokenIndex): TString;
 
-  private
+  // private
   type TTokenArray = array of TToken;
   var
     tokenArray: TTokenArray;
@@ -581,8 +581,9 @@ begin
 
 end;
 
-function TTokenList.GetTokenAtIndex(const tokenIndex: TTokenIndex): TToken;
+function TTokenList.GetTokenAtIndex(const tokenIndex: TTokenIndex): TToken; inline;
 begin
+{$IFDEF ASSERT_ARRAY_BOUNDARIES}
   if (tokenIndex < Low(tokenArray)) then
   begin
     Writeln('ERROR: Array index ', tokenIndex, ' is smaller than the lower bound ', Low(tokenArray));
@@ -594,6 +595,7 @@ begin
     Writeln('ERROR: Array index ', tokenIndex, ' is greater than the upper bound ', High(tokenArray));
     RaiseHaltException(EHaltException.COMPILING_ABORTED);
   end;
+{$ENDIF}
   Result := tokenArray[tokenIndex];
 end;
 
@@ -673,6 +675,7 @@ end;
 
 function TIdentifierList.GetIdentifierAtIndex(const identifierIndex: TIdentifierIndex): TIdentifier;
 begin
+  {$IFDEF   ASSERT_ARRAY_BOUNDARIES}
   if (identifierIndex < Low(identifierArray)) then
   begin
     Writeln('ERROR: Array index ', identifierIndex, ' is smaller than the lower bound ', Low(identifierArray));
@@ -684,6 +687,7 @@ begin
     Writeln('ERROR: Array index ', identifierIndex, ' is greater than the upper bound ', High(identifierArray));
     RaiseHaltException(EHaltException.COMPILING_ABORTED);
   end;
+  {$ENDIF}
   Result := identifierArray[identifierIndex];
 end;
 
