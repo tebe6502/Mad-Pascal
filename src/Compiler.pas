@@ -12210,7 +12210,7 @@ begin
 
 
             if (IdentifierAt(IdentIndex).DataType = TDataType.PCHARTOK) and
-               (IndirectionLevel = ASPOINTER) and 
+               (IndirectionLevel = ASPOINTER) and
 	       (TokenAt(i + 2).Kind in [TTokenKind.STRINGLITERALTOK, TTokenKind.CHARLITERALTOK, TTokenKind.IDENTTOK]) then
             begin
 
@@ -13817,7 +13817,7 @@ WHILETOK:
 
 		VarType := IdentifierAt(IdentIndex).DataType;
 
-		if VarType = TDataType.SUBRANGETYPE then 
+		if VarType = TDataType.SUBRANGETYPE then
 		  VarType := GetTypeAtIndex(IdentifierAt(IdentIndex).NumAllocElements).Field[0].AllocElementType;
 
 
@@ -13951,7 +13951,7 @@ WHILETOK:
                   asm65('; --- ForToDoCondition');
 
 
-                  if (ActualParamType = ExpressionType) and 
+                  if (ActualParamType = ExpressionType) and
 		     (GetDataSize(IdentifierAt(IdentTemp).DataType) > GetDataSize(ActualParamType)) then
                     Note(j, 'FOR loop counter variable type is of larger size than required');
 
@@ -18289,7 +18289,7 @@ begin
 
           i := CompileType(i + 3, VarType, NumAllocElements, AllocElementType);
 
-          if VarType = TDataType.SUBRANGETYPE then 
+          if VarType = TDataType.SUBRANGETYPE then
 	  begin
 	    VarType := GetTypeAtIndex(NumAllocElements).Field[0].AllocElementType;
 	    NumAllocElements := 0;
@@ -18331,7 +18331,7 @@ begin
 
           i := CompileType(i + 1, VarType, NumAllocElements, AllocElementType);
 
-          if VarType = TDataType.SUBRANGETYPE then 
+          if VarType = TDataType.SUBRANGETYPE then
 	  begin
 	    VarType := GetTypeAtIndex(NumAllocElements).Field[0].AllocElementType;
 	    NumAllocElements := 0;
@@ -19687,8 +19687,7 @@ begin
   DefineIdent(1, 'BLOCKREAD', TTokenKind.FUNCTIONTOK, TDataType.INTEGERTOK, 0, TDataType.UNTYPETOK, $00000000);
   DefineIdent(1, 'BLOCKWRITE', TTokenKind.FUNCTIONTOK, TDataType.INTEGERTOK, 0, TDataType.UNTYPETOK, $00000000);
 
-  DefineIdent(1, 'GETRESOURCEHANDLE', TTokenKind.FUNCTIONTOK, TDataType.INTEGERTOK, 0,
-    TDataType.UNTYPETOK, $00000000);
+  DefineIdent(1, 'GETRESOURCEHANDLE', TTokenKind.FUNCTIONTOK, TDataType.INTEGERTOK, 0, TDataType.UNTYPETOK, $00000000);
 
   DefineIdent(1, 'NIL', TTokenKind.CONSTTOK, TDataType.POINTERTOK, 0, TDataType.UNTYPETOK, CODEORIGIN);
 
