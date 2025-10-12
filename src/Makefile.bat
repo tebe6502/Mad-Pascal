@@ -54,6 +54,10 @@ if not "%MP_EXE%"=="" (
   )
 )
 
+set FPP_MASTER=C:\Users\JAC\Downloads\fpprofiler-master.zip\fpprofiler-master
+set PATH=%FPP_MASTER%\fpp;%FPP_MASTER%\fppview;%PATH%
+
+
 cd %MP_FOLDER%\samples\a8\math\AES-Rijndael
 %REFERENCE_MP_EXE% -ipath %MP_FOLDER%\lib rijndael-test.pas
 %MP_EXE% -ipath %MP_FOLDER%\lib rijndael-test.pas
