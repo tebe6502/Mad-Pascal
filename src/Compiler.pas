@@ -29,6 +29,7 @@ uses
   Scanner,
   Optimize,
   Parser,
+  Profiler,
   StringUtilities,
   Targets,
   Tokens,
@@ -19720,8 +19721,10 @@ begin
   Common.unitPathList := unitPathList;
   evaluationContext := TEvaluationContext.Create;
   debugger.debugger := TDebugger.Create;
+  Profiler.profiler := TProfiler.Create;
 
   TokenList := TTokenList.Create;
+  TokenArrayPtr := Addr(TokenList.tokenArray);
   IdentifierList := TIdentifierList.Create;
   for i := 1 to MAXIDENTS do IdentifierList.AddIdentifier;
 
@@ -19741,14 +19744,18 @@ begin
   // Set defines for first pass;
   scanner := TScanner.Create;
 
+  Profiler.profiler.BeginSection('scanner.TokenizeProgram(programUnit, True)');
   scanner.TokenizeProgram(programUnit, True);
+  Profiler.profiler.EndSection();
 
   if NumTok = 0 then Error(1, '');
 
   // Add default unit 'system.pas'
   SourceFileList.AddUnit(TSourceFileType.UNIT_FILE, 'SYSTEM', FindFile('system.pas', 'unit'));
 
+  Profiler.profiler.BeginSection('scanner.TokenizeProgram(programUnit, False)');
   scanner.TokenizeProgram(programUnit, False);
+  Profiler.profiler.EndSection();
 
   // ----------------------------------------------------------------------------
 
@@ -19760,11 +19767,14 @@ begin
   NumPredefIdent := NumIdent;
 
 
+  Profiler.profiler.BeginSection('CompileProgram(TPass.CALL_DETERMINATION); ');
   CompileProgram(TPass.CALL_DETERMINATION);
-
+  Profiler.profiler.EndSection();
 
   // Visit call graph nodes and mark all procedures that are called as not dead
+  Profiler.profiler.BeginSection('OptimizeProgram');
   OptimizeProgram(GetIdentIndex('MAIN'));
+  Profiler.profiler.EndSection();
 
 
   // Second pass: compile the program and generate output (IsNotDead fields are preserved since the first pass)
@@ -19804,7 +19814,9 @@ begin
 
   SetLength(OptimizeBuf, 1);
 
+  Profiler.profiler.BeginSection('CompileProgram(TPass.CODE_GENERATION);');
   CompileProgram(TPass.CODE_GENERATION);
+  Profiler.profiler.EndSection();
 
 end;
 
@@ -19818,6 +19830,7 @@ begin
   IdentifierList := nil;
 
   SetLength(IFTmpPosStack, 0);
+  Profiler.Profiler := nil;
   Debugger.debugger := nil;
   evaluationContext := nil;
   unitPathList.Free;
