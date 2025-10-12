@@ -234,7 +234,6 @@ uses
     cpu: TCPU;
 
     outputFilePath: TFilePath;
-    DiagMode: Boolean;
 
     StartTime: QWord;
     seconds: ValReal;

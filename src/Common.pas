@@ -41,6 +41,7 @@ var
   _TypeArray: array [1..MAXTYPES] of TType;
 
   TokenList: TTokenList;
+  TokenArrayPtr : ^TTokenList.TTokenArray;
 
   // This is current index in the list, not the size of the list.
   NumIdent_: Integer;
@@ -124,7 +125,7 @@ var
 // ----------------------------------------------------------------------------
 
 function NumTok: Integer;
-function TokenAt(tokenIndex: TTokenIndex): TToken;
+function TokenAt(tokenIndex: TTokenIndex): TToken; inline;
 
 function NumIdent: Integer;
 function IdentifierAt(identifierIndex: TIdentifierIndex): TIdentifier;
@@ -170,6 +171,7 @@ procedure IncVarDataSize(const tokenIndex: TTokenIndex; const size: Integer);
 function GetTypeAtIndex(const typeIndex: TTypeIndex): TType;
 
 var
+  DiagMode: Boolean;
   TraceFile: ITextFile;
 
 procedure LogTrace(message: String);
@@ -687,8 +689,9 @@ begin
   end;
 end;
 
-function TokenAt(tokenIndex: TTokenIndex): TToken;
+function TokenAt(tokenIndex: TTokenIndex): TToken; inline;
 begin
+  // Result := TokenArrayPtr^[tokenIndex];
   Assert(TokenList <> nil, 'TokenList not yet created.');
   Result := TokenList.GetTokenAtIndex(tokenIndex);
 end;

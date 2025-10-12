@@ -62,7 +62,9 @@ var
 
   procedure MarkNotDead(IdentIndex: TIdentIndex);
   var
-    ChildIndex, ChildIdentIndex, ProcAsBlockIndex: Integer;
+    ChildIndex: TBlockIndex;
+    ChildIdentIndex: TIdentIndex;
+    ProcAsBlockIndex: TBlockIndex;
   begin
 
     IdentifierAt(IdentIndex).IsNotDead := True;
