@@ -842,8 +842,8 @@ var
         if k > 0 then
         begin
 
-          if dex(k) and                   // inx      ; k-1
-            inx(k - 1) then                // dex      ; k
+          if dex(k) and                             // inx      ; k-1
+             inx(k - 1) then                        // dex      ; k
           begin
             listing[k - 1] := '';
             listing[k] := '';
@@ -852,8 +852,8 @@ var
           end;
 
 
-          if inx(k) and                   // dex      ; k-1
-            dex(k - 1) then                // inx      ; k
+          if inx(k) and                             // dex      ; k-1
+             dex(k - 1) then                        // inx      ; k
           begin
             listing[k - 1] := '';
             listing[k] := '';
@@ -862,9 +862,9 @@ var
           end;
 
 
-          if lda_stack(k) and                 // sta :STACKORIGIN  ; k-1
-            sta_stack(k - 1) and                // lda :STACKORIGIN  ; k
-            (sta_a(i + 1) or add_sub(i + 1)) then            // sta|add|sub    ; i+1
+          if lda_stack(k) and                       // sta :STACKORIGIN  ; k-1
+             sta_stack(k - 1) and                   // lda :STACKORIGIN  ; k
+             (sta_a(i + 1) or add_sub(i + 1)) then  // sta|add|sub       ; i+1
             if argMatch(k, k - 1) then
             begin
               listing[k - 1] := '';
@@ -874,9 +874,9 @@ var
             end;
 
 
-          if sta_stack(k) and                 // lda :STACKORIGIN  ; k-1
-            lda_stack(k - 1) and                // sta :STACKORIGIN  ; k
-            lda_a(i + 1) then                // lda      ; i+1
+          if sta_stack(k) and                       // lda :STACKORIGIN  ; k-1
+             lda_stack(k - 1) and                   // sta :STACKORIGIN  ; k
+             lda_a(i + 1) then                      // lda               ; i+1
             if argMatch(k, k - 1) then
             begin
               listing[k - 1] := '';
@@ -886,10 +886,10 @@ var
             end;
 
 
-          if sta_stack(k) and                 // lda #    ; k-1
-            lda_im(k - 1) and                // sta :STACKORIGIN  ; k
-            lda_val(i + 1) and                // lda      ; i+1    ~:STACKORIGIN
-            sta_stack(i + 2) then                // sta :STACKORIGIN  ; i+2
+          if sta_stack(k) and                       // lda #             ; k-1
+             lda_im(k - 1) and                      // sta :STACKORIGIN  ; k
+             lda_val(i + 1) and                     // lda               ; i+1    ~:STACKORIGIN
+             sta_stack(i + 2) then                  // sta :STACKORIGIN  ; i+2
             if listing[k] = listing[i + 2] then
             begin
               listing[k - 1] := '';
@@ -899,9 +899,9 @@ var
             end;
 
 
-          if lda_a(k) and                 // lda      ; k-1
-            lda_a(k - 1) and                // lda      ; k
-            sta_a(i + 1) then                // sta      ; i+1
+          if lda_a(k) and                           // lda      ; k-1
+             lda_a(k - 1) and                       // lda      ; k
+             sta_a(i + 1) then                      // sta      ; i+1
           begin
             listing[k - 1] := listing[k];
             listing[k] := '';
@@ -909,9 +909,9 @@ var
           end;
 
 
-          if iny(k) and                   // lda      ; k-1
-            lda_a(k - 1) and                 // iny      ; k
-            lda_a(i + 1) then                // lda      ; i+1
+          if iny(k) and                             // lda      ; k-1
+             lda_a(k - 1) and                       // iny      ; k
+             lda_a(i + 1) then                      // lda      ; i+1
           begin
             listing[k - 1] := #9'iny';
             listing[k] := '';
@@ -919,8 +919,8 @@ var
           end;
 
 
-          if sta_im_0(k) and                 // sta :STACKORIGIN  ; k-1
-            sta_stack(k - 1) then                // sta #$00    ; k
+          if sta_im_0(k) and                        // sta :STACKORIGIN  ; k-1
+             sta_stack(k - 1) then                  // sta #$00          ; k
           begin
             listing[k] := '';
             continue;
@@ -928,12 +928,12 @@ var
 
 
 
-          if sta_im_0(k) and                 // lda|rol @|asl @  ; k-1
-            (lda_a(k - 1) or rol_a(k - 1) or asl_a(k - 1)) then
-          begin        // sta #$00    ; k
+          if sta_im_0(k) and                                       // lda|rol @|asl @  ; k-1
+             (lda_a(k - 1) or rol_a(k - 1) or asl_a(k - 1)) then   // sta #$00         ; k
+          begin
 
 
-            if lda_a(i + 1) then            /// lda      ; i+1
+            if lda_a(i + 1) then                    /// lda      ; i+1
             begin
               listing[k - 1] := '';
               listing[k] := '';
@@ -942,8 +942,8 @@ var
             end;
 
 
-            if (ldy(i + 1) or mwy(i + 1) or iny(i + 1)) and      /// ldy|mwy|iny    ; i+1
-              lda_a(i + 2) then            /// lda      ; i+2
+            if (ldy(i + 1) or mwy(i + 1) or iny(i + 1)) and   /// ldy|mwy|iny   ; i+1
+               lda_a(i + 2) then                              /// lda           ; i+2
             begin
               listing[k - 1] := '';
               listing[k] := '';
@@ -952,10 +952,10 @@ var
             end;
 
 
-            if sta_im_0(i + 1) and            /// sta #$00    ; i+1
-              sta_im_0(i + 2) and            /// sta #$00    ; i+2
-              sta_im_0(i + 3) and            /// sta #$00    ; i+3
-              lda_a(i + 4) then            /// lda      ; i+4
+            if sta_im_0(i + 1) and                  /// sta #$00    ; i+1
+               sta_im_0(i + 2) and                  /// sta #$00    ; i+2
+               sta_im_0(i + 3) and                  /// sta #$00    ; i+3
+               lda_a(i + 4) then                    /// lda         ; i+4
             begin
               listing[k - 1] := '';
               listing[k] := '';
@@ -968,9 +968,9 @@ var
             end;
 
 
-            if sta_im_0(i + 1) and            /// sta #$00    ; i+1
-              sta_im_0(i + 2) and            /// sta #$00    ; i+2
-              lda_a(i + 3) then            /// lda      ; i+3
+            if sta_im_0(i + 1) and                  /// sta #$00    ; i+1
+               sta_im_0(i + 2) and                  //// sta #$00    ; i+2
+               lda_a(i + 3) then                    /// lda         ; i+3
             begin
               listing[k - 1] := '';
               listing[k] := '';
@@ -982,8 +982,8 @@ var
             end;
 
 
-            if sta_im_0(i + 1) and            /// sta #$00    ; i+1
-              lda_a(i + 2) then            /// lda      ; i+2
+            if sta_im_0(i + 1) and                  /// sta #$00    ; i+1
+               lda_a(i + 2) then                    /// lda         ; i+2
             begin
               listing[k - 1] := '';
               listing[k] := '';
@@ -3832,11 +3832,9 @@ begin        // OptimizeASM
       WriteOut('');
 
       if x = 51 then
-        WriteOut('; optimize FAIL (' + '''' + arg0 + '''' + ', ' + common.optimize.SourceFile.Name +
-          '), line = ' + IntToStr(common.optimize.line))
+        WriteOut('; optimize FAIL (' + '''' + arg0 + '''' + ', ' + common.optimize.SourceFile.Name + '), line = ' + IntToStr(common.optimize.line))
       else
-        WriteOut('; optimize FAIL (' + IntToStr(x) + ', ' + common.optimize.SourceFile.Name +
-          '), line = ' + IntToStr(common.optimize.line));
+        WriteOut('; optimize FAIL (' + IntToStr(x) + ', ' + common.optimize.SourceFile.Name + '), line = ' + IntToStr(common.optimize.line));
 
       WriteOut('');
 
