@@ -184,11 +184,16 @@ type
     SourceFileType: TSourceFileType;
     Name: TSourceFileName;
     Path: TFilePath;
-    Units: Integer;
-    AllowedUnitNames: array [1..MAXALLOWEDUNITS] of TSourceFileName;
 
     function IsRelevant: Boolean;
+
+    procedure ClearAllowedUnitNames;
+    function AddAllowedUnitName(const unitName: TSourceFileName): Boolean;
     function IsAllowedUnitName(const unitName: TSourceFileName): Boolean;
+
+  private
+    _Units: Integer;
+    _AllowedUnitNames: array [1..MAXALLOWEDUNITS] of TSourceFileName;
 
   end;
 
@@ -388,13 +393,33 @@ begin
   Result := (Name <> '') and (SourceFileType in [TSourceFileType.PROGRAM_FILE, TSourceFileType.UNIT_FILE]);
 end;
 
+procedure TSourceFile.ClearAllowedUnitNames;
+begin
+  _Units := 0;
+end;
+
+function TSourceFile.AddAllowedUnitName(const unitName: TSourceFileName): Boolean;
+begin
+
+  if _Units < High(_AllowedUnitNames) then
+  begin
+    Inc(_Units);
+    _AllowedUnitNames[_Units] := unitName;
+    Result := True;
+  end
+  else
+  begin
+    Result := False;
+  end;
+end;
+
 function TSourceFile.IsAllowedUnitName(const unitName: TSourceFileName): Boolean;
 var
   i: Integer;
 begin
   Result := False;
-  for i := High(AllowedUnitNames) downto 1 do
-    if AllowedUnitNames[i] = unitName then exit(True);
+  for i := _Units downto 1 do
+    if _AllowedUnitNames[i] = unitName then exit(True);
 end;
 
 // ----------------------------------------------------------------------------
@@ -459,7 +484,7 @@ procedure TSourceFileList.ClearAllowedUnitNames;
 var
   i: Integer;
 begin
-  for i := 1 to High(SourceFileArray) do SourceFileArray[i].Units := 0;
+  for i := 1 to High(SourceFileArray) do SourceFileArray[i].ClearAllowedUnitNames;
 end;
 
 
