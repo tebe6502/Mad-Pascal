@@ -58,7 +58,7 @@ var
   CodePosStack: array [0..MAXPOSSTACK] of Word;
 
   BlockStackTop: Integer;
-  BlockStack: array [0..MAXBLOCKS - 1] of Integer;
+  BlockStack: array [0..MAXBLOCKS - 1] of TBlockIndex;
 
   CallGraph: array [1..MAXBLOCKS] of TCallGraphNode;  // For dead code elimination
 

@@ -26,7 +26,7 @@ function DefineFunction(i: TTokenIndex; ForwardIdentIndex: TIdentIndex; out isFo
 
 function Elements(IdentIndex: TIdentIndex): Cardinal;
 
-function GetIdentIndex(S: TIdentifierName): TIdentIndex;
+function GetIdentIndex(const S: TIdentifierName): TIdentIndex;
 
 function GetSizeOf(i: TTokenIndex; ValType: TDataType): Int64;
 
@@ -68,7 +68,7 @@ end;
 // ----------------------------------------------------------------------------
 
 
-function GetIdentIndex(S: TString): TIdentIndex;
+function GetIdentIndex(const S: TString): TIdentIndex;
 var
   TempIndex: TIdentIndex;
 
@@ -86,9 +86,10 @@ var
   end;
 
 
-  function Search(X: TString; SourceFile: TSourceFile): Integer;
+  function Search(const X: TString; const SourceFile: TSourceFile): TIdentIndex;
   var
-    IdentIndex, BlockStackIndex: Integer;
+    IdentIndex: TIdentIndex;
+    BlockStackIndex: Integer;
   begin
 
     Result := 0;
@@ -97,7 +98,7 @@ var
       // search all nesting levels from the current one to the most outer one
       for IdentIndex := 1 to NumIdent do
         if (X = IdentifierAt(IdentIndex).Name) and (BlockStack[BlockStackIndex] = IdentifierAt(IdentIndex).Block) then
-          if (IdentifierAt(IdentIndex).SourceFile = SourceFile) {or IdentifierAt(IdentIndex).Section} or
+          if (IdentifierAt(IdentIndex).SourceFile.UnitIndex = SourceFile.UnitIndex) {or IdentifierAt(IdentIndex).Section} or
             (IdentifierAt(IdentIndex).SourceFile.UnitIndex = 1) or
             (IdentifierAt(IdentIndex).SourceFile.Name = 'SYSTEM') or UnitAllowedAccess(IdentIndex, SourceFile) then
           begin
@@ -106,7 +107,7 @@ var
 
             if pos('.', X) > 0 then GetIdentIndex(copy(X, 1, pos('.', X) - 1));
 
-            if (IdentifierAt(IdentIndex).SourceFile = SourceFile) or
+            if (IdentifierAt(IdentIndex).SourceFile.UnitIndex = SourceFile.UnitIndex) or
               (IdentifierAt(IdentIndex).SourceFile.UnitIndex = 1)
             { or (IdentifierAt(IdentIndex).SourceFile.NAME) = 'SYSTEM')} then exit;
           end;
@@ -125,14 +126,14 @@ var
       // search all nesting levels from the current one to the most outer one
       for IdentIndex := 1 to NumIdent do
         if (X = IdentifierAt(IdentIndex).Name) and (BlockStack[BlockStackIndex] = IdentifierAt(IdentIndex).Block) then
-          if (IdentifierAt(IdentIndex).SourceFile = SourceFile) or UnitAllowedAccess(IdentIndex, SourceFile) then
+          if (IdentifierAt(IdentIndex).SourceFile.UnitIndex = SourceFile.UnitIndex) or UnitAllowedAccess(IdentIndex, SourceFile) then
           begin
             Result := IdentIndex;
             IdentifierAt(IdentIndex).Pass := Pass;
 
             if pos('.', X) > 0 then GetIdentIndex(copy(X, 1, pos('.', X) - 1));
 
-            if (IdentifierAt(IdentIndex).SourceFile = SourceFile) then exit;
+            if (IdentifierAt(IdentIndex).SourceFile.UnitIndex = SourceFile.UnitIndex) then exit;
           end;
 
   end;
@@ -1622,7 +1623,7 @@ begin
   if (identIndex > 0) and (not (IdentifierAt(IdentIndex).Kind in [TTokenKind.PROCEDURETOK,
     TTokenKind.FUNCTIONTOK, TTokenKind.CONSTRUCTORTOK, TTokenKind.DESTRUCTORTOK])) and
     (IdentifierAt(IdentIndex).Block = BlockStack[BlockStackTop]) and
-    (IdentifierAt(IdentIndex).isOverload = False) and (IdentifierAt(identIndex).SourceFile = ActiveSourceFile) then
+    (IdentifierAt(IdentIndex).isOverload = False) and (IdentifierAt(identIndex).SourceFile.UnitIndex = ActiveSourceFile.UnitIndex) then
     Error(tokenIndex, TMessage.Create(TErrorCode.IdentifierAlreadyDefined, 'Identifier {0} is already defined', Name))
   else
   begin
