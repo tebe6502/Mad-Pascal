@@ -130,7 +130,7 @@ var
   // ----------------------------------------------------------------------------
 
 function NumTok: Integer;
-function TokenAt(tokenIndex: TTokenIndex): TToken; inline;
+function TokenAt(tokenIndex: TTokenIndex): TToken;
 
 function NumIdent: Integer;
 function IdentifierAt(identifierIndex: TIdentifierIndex): TIdentifier;
@@ -695,7 +695,7 @@ begin
   end;
 end;
 
-function TokenAt(tokenIndex: TTokenIndex): TToken; inline;
+function TokenAt(tokenIndex: TTokenIndex): TToken;
 begin
   // Result := TokenArrayPtr^[tokenIndex];
   Assert(TokenList <> nil, 'TokenList not yet created.');
