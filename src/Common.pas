@@ -110,8 +110,15 @@ var
     end;
 
 
-  PROGRAMTOK_USE, INTERFACETOK_USE, LIBRARYTOK_USE, LIBRARY_USE, RCLIBRARY, OutputDisabled,
-  isConst, isError, isInterrupt, IOCheck, Macros: Boolean;
+  PROGRAMTOK_USE, INTERFACETOK_USE, LIBRARYTOK_USE, LIBRARY_USE, RCLIBRARY, OutputDisabled: Boolean;
+
+  _isConst, _isError: Boolean;
+
+function IsConst: Boolean;
+function isError: Boolean;
+
+var
+  isInterrupt, IOCheck, Macros: Boolean;
 
   DataSegmentUse: Boolean; // Initialized in Scanner.TokenizeProgramInitialization
 
@@ -682,6 +689,16 @@ begin
   //StaticStringData[NumStaticStrChars] := 0;
   //Inc(NumStaticStrChars);
 
+end;
+
+function IsConst: Boolean;
+begin
+  result:=_isConst;
+end;
+
+function isError: Boolean;
+begin
+  result:=_isError;
 end;
 
 // The function is currently kept for compatibility, simulating the previous global variable.

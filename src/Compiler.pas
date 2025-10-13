@@ -6462,15 +6462,15 @@ begin
 
   j := i;
 
-  isError := False;     // dodatkowy test
-  isConst := True;
+  _isError := False;     // dodatkowy test
+  _isConst := True;
 
   i := CompileConstExpression(i, ConstVal, ValType, VarType, Err, War);
 
   Result := not isError;
 
-  isConst := False;
-  isError := False;
+  _isConst := False;
+  _isError := False;
 
   if not Result then i := j;
 
@@ -10271,8 +10271,8 @@ begin
 
                     j := i;
 
-                    isError := False;
-                    isConst := True;
+                    _isError := False;
+                    _isConst := True;
 
 
                     if IdentifierAt(IdentIndex).isVolatile then
@@ -10403,8 +10403,8 @@ begin
 
                     end;
 
-                    isConst := False;
-                    isError := False;
+                    _isConst := False;
+                    _isError := False;
 
                     Result := i;
                   end;

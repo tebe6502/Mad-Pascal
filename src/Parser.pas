@@ -71,6 +71,8 @@ end;
 function GetIdentIndex(const S: TIdentifierName): TIdentIndex;
 var
   WithIndex: Integer;
+  DotIndex: Integer;
+  DotPrefix, DotSuffix: TIdentifierName;
   TempIdentIndex: TIdentIndex;
   TempIdentifier: TIdentifier;
 
@@ -100,7 +102,8 @@ var
       blockIndex := BlockStack[BlockStackIndex];
       for IdentIndex := 1 to NumIdent do
       begin
-        identifier := IdentifierAt(IdentIndex);
+        // identifier := IdentifierAt(IdentIndex);
+        identifier := IdentifierList.GetIdentifierAtIndex(IdentIndex);
         if (X = identifier.Name) and (blockIndex = identifier.Block) then
           if (identifier.SourceFile.UnitIndex = SourceFile.UnitIndex)
             {or identifier.Section} or (identifier.SourceFile.UnitIndex = 1) or
@@ -108,8 +111,6 @@ var
           begin
             Result := IdentIndex;
             identifier.Pass := Pass;
-
-            if pos('.', X) > 0 then GetIdentIndex(copy(X, 1, pos('.', X) - 1));
 
             if (identifier.SourceFile.UnitIndex = SourceFile.UnitIndex) or
               (identifier.SourceFile.UnitIndex = 1)
@@ -131,24 +132,25 @@ var
     Result := 0;
 
     for BlockStackIndex := BlockStackTop downto 0 do
+    begin
+      blockIndex := BlockStack[BlockStackIndex];
+
       // Search all nesting levels from the current one to the most outer one
       for IdentIndex := 1 to NumIdent do
       begin
         identifier := IdentifierAt(IdentIndex);
 
-        if (X = identifier.Name) and (BlockStack[BlockStackIndex] = identifier.Block) then
+        if (X = identifier.Name) and (blockIndex = identifier.Block) then
           if (identifier.SourceFile.UnitIndex = SourceFile.UnitIndex) or
             UnitAllowedAccess(identifier, SourceFile) then
           begin
             Result := IdentIndex;
             identifier.Pass := Pass;
 
-            // TODO: What does the next line do? It does nothing with the result of GetIdentIndex!
-            if pos('.', X) > 0 then GetIdentIndex(copy(X, 1, pos('.', X) - 1));
-
             if (identifier.SourceFile.UnitIndex = SourceFile.UnitIndex) then exit;
           end;
       end;
+    end;
   end;
 
 begin
@@ -166,29 +168,34 @@ begin
 
   Result := Search(S, ActiveSourceFile);
 
-  if (Result = 0) and (pos('.', S) > 0) then
-  begin   // Potentially a reference to a unit/object
-
-    TempIdentIndex := Search(copy(S, 1, pos('.', S) - 1), ActiveSourceFile);
-
-    //    writeln(S,',',IdentifierAt(TempIndex).Kind,' - ', IdentifierAt(TempIndex).DataType, ' / ',IdentifierAt(TempIndex).AllocElementType);
-
-    if TempIdentIndex > 0 then
+  if (Result = 0) then
+  begin
+    DotIndex := pos('.', S);
+    if (DotIndex > 0) then;
     begin
-      TempIdentifier := IdentifierAt(TempIdentIndex);
-      if (TempIdentifier.Kind = TTokenKind.UNITTOK) or (TempIdentifier.DataType = TDataType.ENUMTOK) then
-        Result := SearchCurrenSourceFile(copy(S, pos('.', S) + 1, length(S)), TempIdentifier.SourceFile)
-      else
-        if TempIdentifier.DataType = TDataType.OBJECTTOK then
-          Result := SearchCurrenSourceFile(GetTypeAtIndex(TempIdentifier.NumAllocElements).Field[0].Name +
-            copy(S, pos('.', S), length(S)), TempIdentifier.SourceFile);
+      // Potentially a reference to a unit/object
+      dotPrefix := copy(S, 1, DotIndex - 1);
+      dotSuffix := copy(S, DotIndex + 1, length(S));
+      TempIdentIndex := Search(dotPrefix, ActiveSourceFile);
+
+      //    writeln(S,',',IdentifierAt(TempIndex).Kind,' - ', IdentifierAt(TempIndex).DataType, ' / ',IdentifierAt(TempIndex).AllocElementType);
+
+      if TempIdentIndex > 0 then
+      begin
+        TempIdentifier := IdentifierAt(TempIdentIndex);
+        if (TempIdentifier.Kind = TTokenKind.UNITTOK) or (TempIdentifier.DataType = TDataType.ENUMTOK) then
+          Result := SearchCurrenSourceFile(copy(S, pos('.', S) + 1, length(S)), TempIdentifier.SourceFile)
+        else
+          if TempIdentifier.DataType = TDataType.OBJECTTOK then
+            Result := SearchCurrenSourceFile(GetTypeAtIndex(TempIdentifier.NumAllocElements).Field[0].Name +
+              '.' + dotSuffix, TempIdentifier.SourceFile);
       {else
        if ( (TempIdentifier.DataType in Pointers) and (TempIdentifier.AllocElementType = RECORDTOK) ) then
   Result := TempIdentIndex;}
 
-      //    writeln(S,' | ',copy(S, 1, pos('.', S)-1),',',TempIdentIndex,'/',Result,' | ',TempIdentifier.Kind,',',TempIdentifier.SourceFile.Name);
+        //    writeln(S,' | ',copy(S, 1, pos('.', S)-1),',',TempIdentIndex,'/',Result,' | ',TempIdentifier.Kind,',',TempIdentifier.SourceFile.Name);
+      end;
     end;
-
   end;
 
 end;  //GetIdentIndex
@@ -309,8 +316,10 @@ begin
         begin
 
           FieldType := GetTypeAtIndex(IdentifierAt(IdentIndex).NumAllocElements).Field[i].DataType;
-          NumAllocElements := GetTypeAtIndex(IdentifierAt(IdentIndex).NumAllocElements).Field[i].NumAllocElements and $ffff;
-          NumAllocElements_ := GetTypeAtIndex(IdentifierAt(IdentIndex).NumAllocElements).Field[i].NumAllocElements shr 16;
+          NumAllocElements := GetTypeAtIndex(IdentifierAt(IdentIndex).NumAllocElements).Field[i].NumAllocElements
+            and $ffff;
+          NumAllocElements_ := GetTypeAtIndex(IdentifierAt(IdentIndex).NumAllocElements).Field[i].NumAllocElements
+            shr 16;
           AllocElementType := GetTypeAtIndex(IdentifierAt(IdentIndex).NumAllocElements).Field[i].AllocElementType;
 
           if FieldType = TDataType.ENUMTOK then FieldType := AllocElementType;
@@ -328,7 +337,8 @@ begin
               if AllocElementType = TDataType.RECORDTOK then
               begin
                 AllocElementType := TDataType.POINTERTOK;
-                NumAllocElements := GetTypeAtIndex(IdentifierAt(IdentIndex).NumAllocElements).Field[i].NumAllocElements shr 16;
+                NumAllocElements := GetTypeAtIndex(IdentifierAt(IdentIndex).NumAllocElements).Field[i].NumAllocElements
+                  shr 16;
                 NumAllocElements_ := 0;
               end;
 
@@ -494,12 +504,13 @@ end;  //GetSizeof
 
 function CompileConstFactor(i: TTokenIndex; out ConstVal: Int64; out ConstValType: TDataType): TTokenIndex;
 var
-  IdentIndex, j: Integer;
+  IdentIndex: TIdentifierIndex;
+  j: TTokenIndex;
   Kind: TTokenKind;
   ArrayIndexType: TDataType;
   ArrayIndex: Int64;
 
-  function GetStaticValue(x: Byte): Int64;
+  function GetStaticValue(const x: Byte): Int64;
   begin
 
     Result := StaticStringData[IdentifierAt(IdentIndex).Value - CODEORIGIN - CODEORIGIN_BASE +
@@ -665,7 +676,7 @@ begin
               (IdentifierAt(IdentIndex).AllocElementType = TDataType.CHARTOK) then
             begin
 
-              isError := True;
+              _isError := True;
               exit;
 
             end
@@ -1009,7 +1020,7 @@ begin
                 if (ArrayIndex < 0) or (ArrayIndex > IdentifierAt(IdentIndex).NumAllocElements -
                   1 + Ord(IdentifierAt(IdentIndex).DataType = TDataType.STRINGPOINTERTOK)) then
                 begin
-                  isConst := False;
+                  _isConst := False;
                   Error(i, TErrorCode.SubrangeBounds);
                 end;
 
@@ -1017,7 +1028,7 @@ begin
 
                 if TokenAt(j + 2).Kind = TTokenKind.OBRACKETTOK then
                 begin
-                  isError := True;
+                  _isError := True;
                   exit;
                 end;
 
@@ -1099,7 +1110,7 @@ begin
                   (IdentifierAt(IdentIndex).NumAllocElements in [0..1])) then
                 begin
 
-                  isError := True;
+                  _isError := True;
                   exit(0);
 
                 end
@@ -1109,7 +1120,7 @@ begin
 
                   if ConstVal < 0 then
                   begin
-                    isError := True;
+                    _isError := True;
                     exit(0);
                   end;
 
@@ -1121,7 +1132,7 @@ begin
 
                 if isConst then
                 begin
-                  isError := True;
+                  _isError := True;
                   exit;
                 end;      // !!! koniecznie zamiast Error !!!
 
@@ -1310,7 +1321,7 @@ begin
 
       if (TokenAt(i + 2).Kind = TTokenKind.IDENTTOK) and (IdentifierAt(GetIdentIndex(TokenAt(i + 2).Name)).Kind =
         TTokenKind.FUNCTIONTOK) then
-        isError := True
+        _isError := True
       else
         j := CompileConstExpression(i + 2, ConstVal, ConstValType);
 
@@ -1431,8 +1442,8 @@ begin
         except
           On EDivByZero do
           begin
-            isError := False;
-            isConst := False;
+            _isError := False;
+            _isConst := False;
             Error(i, TMessage.Create(TErrorCode.DivisionByZero, 'Division by zero'));
           end;
         end;
@@ -1611,8 +1622,8 @@ begin
       if Yes then
         if Err then
         begin
-          isConst := False;
-          isError := False;
+          _isConst := False;
+          _isError := False;
           ErrorRangeCheckError(i, ConstVal, VarType);
         end
         else

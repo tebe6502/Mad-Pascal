@@ -323,7 +323,7 @@ type
     function Size: Integer;
     procedure Clear;
     function AddIdentifier: TIdentifier;
-    function GetIdentifierAtIndex(const identifierIndex: TIdentifierIndex): TIdentifier;
+    function GetIdentifierAtIndex(const identifierIndex: TIdentifierIndex): TIdentifier; inline;
 
   private
   type TIdentifierArray = array of TIdentifier;
@@ -683,9 +683,9 @@ begin
 end;
 
 
-function TIdentifierList.GetIdentifierAtIndex(const identifierIndex: TIdentifierIndex): TIdentifier;
+function TIdentifierList.GetIdentifierAtIndex(const identifierIndex: TIdentifierIndex): TIdentifier; inline;
 begin
-  {$IFDEF   ASSERT_ARRAY_BOUNDARIES}
+  {$IFDEF ASSERT_ARRAY_BOUNDARIES}
   if (identifierIndex < Low(identifierArray)) then
   begin
     Writeln('ERROR: Array index ', identifierIndex, ' is smaller than the lower bound ', Low(identifierArray));
