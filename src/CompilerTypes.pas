@@ -188,6 +188,7 @@ type
     AllowedUnitNames: array [1..MAXALLOWEDUNITS] of TSourceFileName;
 
     function IsRelevant: Boolean;
+    function IsAllowedUnitName(const unitName: TSourceFileName): Boolean;
 
   end;
 
@@ -385,6 +386,15 @@ implementation
 function TSourceFile.IsRelevant: Boolean;
 begin
   Result := (Name <> '') and (SourceFileType in [TSourceFileType.PROGRAM_FILE, TSourceFileType.UNIT_FILE]);
+end;
+
+function TSourceFile.IsAllowedUnitName(const unitName: TSourceFileName): Boolean;
+var
+  i: Integer;
+begin
+  Result := False;
+  for i := High(AllowedUnitNames) downto 1 do
+    if AllowedUnitNames[i] = unitName then exit(True);
 end;
 
 // ----------------------------------------------------------------------------

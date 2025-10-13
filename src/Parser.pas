@@ -74,7 +74,7 @@ var
   TempIdentIndex: TIdentIndex;
   TempIdentifier: TIdentifier;
 
-  function UnitAllowedAccess(const identifier: TIdentifier; SourceFile: TSourceFile): Boolean;
+  function UnitAllowedAccess(const identifier: TIdentifier; const SourceFile: TSourceFile): Boolean;
   var
     i: Integer;
   begin
@@ -82,9 +82,7 @@ var
     Result := False;
 
     if identifier.IsSection then
-      for i := High(SourceFile.AllowedUnitNames) downto 1 do
-        if SourceFile.AllowedUnitNames[i] = identifier.SourceFile.Name then exit(True);
-
+      Result := SourceFile.IsAllowedUnitName(identifier.SourceFile.Name);
   end;
 
 
