@@ -81,8 +81,8 @@ var
 
     Result := False;
 
-    if identifier.Section then
-      for i := MAXALLOWEDUNITS downto 1 do
+    if identifier.IsSection then
+      for i := High(SourceFile.AllowedUnitNames) downto 1 do
         if SourceFile.AllowedUnitNames[i] = identifier.SourceFile.Name then exit(True);
 
   end;
@@ -93,16 +93,19 @@ var
     IdentIndex: TIdentIndex;
     identifier: TIdentifier;
     BlockStackIndex: Integer;
+    blockIndex: TBlockIndex;
   begin
 
     Result := 0;
 
+    // Search all nesting levels from the current one to the most outer one
     for BlockStackIndex := BlockStackTop downto 0 do
-      // search all nesting levels from the current one to the most outer one
+    begin
+      blockIndex := BlockStack[BlockStackIndex];
       for IdentIndex := 1 to NumIdent do
       begin
-        identifier :=  IdentifierAt(IdentIndex);
-        if (X = identifier.Name) and (BlockStack[BlockStackIndex] = identifier.Block) then
+        identifier := IdentifierAt(IdentIndex);
+        if (X = identifier.Name) and (blockIndex = identifier.Block) then
           if (identifier.SourceFile.UnitIndex = SourceFile.UnitIndex)
             {or identifier.Section} or (identifier.SourceFile.UnitIndex = 1) or
             (identifier.SourceFile.Name = 'SYSTEM') or UnitAllowedAccess(identifier, SourceFile) then
@@ -117,7 +120,7 @@ var
             { or (identifier.SourceFile.NAME) = 'SYSTEM')} then exit;
           end;
       end;
-
+    end;
   end;
 
 
@@ -175,9 +178,8 @@ begin
 
     if TempIdentIndex > 0 then
     begin
-TempIdentifier:=IdentifierAt(TempIdentIndex);
-      if (TempIdentifier.Kind = TTokenKind.UNITTOK) or (TempIdentifier.DataType =
-        TDataType.ENUMTOK) then
+      TempIdentifier := IdentifierAt(TempIdentIndex);
+      if (TempIdentifier.Kind = TTokenKind.UNITTOK) or (TempIdentifier.DataType = TDataType.ENUMTOK) then
         Result := SearchCurrenTSourceFile(copy(S, pos('.', S) + 1, length(S)), TempIdentifier.SourceFile)
       else
         if TempIdentifier.DataType = TDataType.OBJECTTOK then
@@ -1677,7 +1679,7 @@ begin
     identifier.PassMethod := TParameterPassingMethod.VALPASSING;
     identifier.IsUnresolvedForward := False;
 
-    identifier.Section := PublicSection;
+    identifier.IsSection := PublicSection;
 
     identifier.SourceFile := ActiveSourceFile;
 

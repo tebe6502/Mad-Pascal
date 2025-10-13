@@ -125,7 +125,7 @@ function GetLocalName(IdentIndex: Integer; a: String = ''): String;
 begin
 
   if ((IdentifierAt(IdentIndex).SourceFile.UnitIndex > 1) and (IdentifierAt(IdentIndex).SourceFile <>
-    ActiveSourceFile) and IdentifierAt(IdentIndex).Section) then
+    ActiveSourceFile) and IdentifierAt(IdentIndex).IsSection) then
     Result := IdentifierAt(IdentIndex).SourceFile.Name + '.' + a + IdentifierAt(IdentIndex).Name
   else
     Result := a + IdentifierAt(IdentIndex).Name;
@@ -8320,7 +8320,7 @@ begin
 
       if (IdentifierAt(IdentIndex).SourceFile.UnitIndex > 1) and
         (IdentifierAt(IdentIndex).SourceFile.UnitIndex <> ActiveSourceFile.UnitIndex) and
-        IdentifierAt(IdentIndex).Section then
+        IdentifierAt(IdentIndex).IsSection then
         asm65(#9'.LOCAL +MAIN.' + svar)
       // w tym samym module poza aktualnym blokiem procedury/funkcji
       else
@@ -10373,7 +10373,7 @@ begin
 
 
                       if (BLOCKSTACKTOP = 1) then
-                        if not (IdentifierAt(IdentIndex).isInit or IdentifierAt(IdentIndex).isInitialized or IdentifierAt(IdentIndex).LoopVariable) then
+                        if not (IdentifierAt(IdentIndex).isInit or IdentifierAt(IdentIndex).isInitialized or IdentifierAt(IdentIndex).IsLoopVariable) then
                           WarningVariableNotInitialized(i, IdentIndex);
 
                     end
@@ -11661,7 +11661,7 @@ begin
   if IdentifierAt(IdentIndex).PassMethod = TParameterPassingMethod.CONSTPASSING then
     Error(i, 'Can''t assign values to const variable');
 
-  if IdentifierAt(IdentIndex).LoopVariable then
+  if IdentifierAt(IdentIndex).IsLoopVariable then
     Error(i, 'Illegal assignment to for-loop variable ''' + IdentifierAt(IdentIndex).Name + '''');
 
 end;
@@ -13768,7 +13768,7 @@ WHILETOK:
             else
             begin
 
-              IdentifierAt(IdentIndex).LoopVariable := True;
+              IdentifierAt(IdentIndex).IsLoopVariable := True;
 
               if codealign.loop > 0 then
               begin
@@ -14109,7 +14109,7 @@ WHILETOK:
 
               end;  // if TokenAt(i + 2).Kind = TTokenKind.INTTOK
 
-              IdentifierAt(IdentIndex).LoopVariable := False;
+              IdentifierAt(IdentIndex).IsLoopVariable := False;
 
             end
         else
@@ -19724,7 +19724,6 @@ begin
   Profiler.profiler := TProfiler.Create;
 
   TokenList := TTokenList.Create;
-  TokenArrayPtr := Addr(TokenList.tokenArray);
   IdentifierList := TIdentifierList.Create;
   for i := 1 to MAXIDENTS do IdentifierList.AddIdentifier;
 

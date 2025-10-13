@@ -261,7 +261,7 @@ type
     function GetTokenAtIndex(const tokenIndex: TTokenIndex): TToken; inline;
     function GetTokenSpellingAtIndex(const tokenIndex: TTokenIndex): TString;
 
-  // private
+  private
   type TTokenArray = array of TToken;
   var
     tokenArray: TTokenArray;
@@ -288,9 +288,9 @@ type
 
     NestedFunctionNumAllocElements: Cardinal;
     NestedFunctionAllocElementType: TDataType;
-    isNestedFunction: Boolean;
+    IsNestedFunction: Boolean;
 
-    LoopVariable, isAbsolute, isInit, isUntype, isInitialized, Section: Boolean;
+    IsLoopVariable, IsAbsolute, IsInit, IsUntype, IsInitialized, IsSection: Boolean;
 
     Kind: TTokenKind;
 
@@ -300,7 +300,7 @@ type
     ProcAsBlock: Integer;   // ? TBlockIndex
     ObjectIndex: Integer;
 
-    IsUnresolvedForward, updateResolvedForward, isOverload, isRegister, isInterrupt,
+    isUnresolvedForward, updateResolvedForward, isOverload, isRegister, isInterrupt,
     isRecursion, isStdCall, isPascal, isInline, isAsm, isExternal, isKeep, isVolatile,
     isStriped, IsNotDead: Boolean;
 
@@ -583,7 +583,7 @@ end;
 
 function TTokenList.GetTokenAtIndex(const tokenIndex: TTokenIndex): TToken; inline;
 begin
-{$IFDEF ASSERT_ARRAY_BOUNDARIES}
+  {$IFDEF ASSERT_ARRAY_BOUNDARIES}
   if (tokenIndex < Low(tokenArray)) then
   begin
     Writeln('ERROR: Array index ', tokenIndex, ' is smaller than the lower bound ', Low(tokenArray));
@@ -595,7 +595,7 @@ begin
     Writeln('ERROR: Array index ', tokenIndex, ' is greater than the upper bound ', High(tokenArray));
     RaiseHaltException(EHaltException.COMPILING_ABORTED);
   end;
-{$ENDIF}
+  {$ENDIF}
   Result := tokenArray[tokenIndex];
 end;
 

@@ -41,7 +41,6 @@ var
   _TypeArray: array [1..MAXTYPES] of TType;
 
   TokenList: TTokenList;
-  TokenArrayPtr: ^TTokenList.TTokenArray;
 
   // This is current index in the list, not the size of the list.
   NumIdent_: Integer;
