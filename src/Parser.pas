@@ -70,13 +70,11 @@ end;
 
 function GetIdentIndex(const S: TIdentifierName): TIdentIndex;
 var
-  TempIndex: Integer;
+  WithIndex: Integer;
   TempIdentIndex: TIdentIndex;
   TempIdentifier: TIdentifier;
 
   function UnitAllowedAccess(const identifier: TIdentifier; const SourceFile: TSourceFile): Boolean;
-  var
-    i: Integer;
   begin
 
     Result := False;
@@ -88,10 +86,10 @@ var
 
   function Search(const X: TString; const SourceFile: TSourceFile): TIdentIndex;
   var
-    IdentIndex: TIdentIndex;
-    identifier: TIdentifier;
     BlockStackIndex: Integer;
     blockIndex: TBlockIndex;
+    IdentIndex: TIdentIndex;
+    identifier: TIdentifier;
   begin
 
     Result := 0;
@@ -122,17 +120,18 @@ var
   end;
 
 
-  function SearchCurrenTSourceFile(const X: TString; const SourceFile: TSourceFile): Integer;
+  function SearchCurrenSourceFile(const X: TString; const SourceFile: TSourceFile): Integer;
   var
+    BlockStackIndex: TBlockStackIndex;
+    BlockIndex: TBlockIndex;
     IdentIndex: TIdentifierIndex;
     identifier: TIdentifier;
-    BlockStackIndex: TBlockStackIndex;
   begin
 
     Result := 0;
 
     for BlockStackIndex := BlockStackTop downto 0 do
-      // search all nesting levels from the current one to the most outer one
+      // Search all nesting levels from the current one to the most outer one
       for IdentIndex := 1 to NumIdent do
       begin
         identifier := IdentifierAt(IdentIndex);
@@ -158,9 +157,9 @@ begin
 
   // Check if it can be found in the current WITH context
   if High(WithName) > 0 then
-    for TempIndex := 0 to High(WithName) do
+    for WithIndex := 0 to High(WithIndex) do
     begin
-      Result := Search(WithName[TempIndex] + '.' + S, ActiveSourceFile);
+      Result := Search(WithName[WithIndex] + '.' + S, ActiveSourceFile);
 
       if Result > 0 then exit;
     end;
@@ -178,10 +177,10 @@ begin
     begin
       TempIdentifier := IdentifierAt(TempIdentIndex);
       if (TempIdentifier.Kind = TTokenKind.UNITTOK) or (TempIdentifier.DataType = TDataType.ENUMTOK) then
-        Result := SearchCurrenTSourceFile(copy(S, pos('.', S) + 1, length(S)), TempIdentifier.SourceFile)
+        Result := SearchCurrenSourceFile(copy(S, pos('.', S) + 1, length(S)), TempIdentifier.SourceFile)
       else
         if TempIdentifier.DataType = TDataType.OBJECTTOK then
-          Result := SearchCurrenTSourceFile(GetTypeAtIndex(TempIdentifier.NumAllocElements).Field[0].Name +
+          Result := SearchCurrenSourceFile(GetTypeAtIndex(TempIdentifier.NumAllocElements).Field[0].Name +
             copy(S, pos('.', S), length(S)), TempIdentifier.SourceFile);
       {else
        if ( (TempIdentifier.DataType in Pointers) and (TempIdentifier.AllocElementType = RECORDTOK) ) then
