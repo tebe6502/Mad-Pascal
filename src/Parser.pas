@@ -159,7 +159,7 @@ begin
 
   // Check if it can be found in the current WITH context
   if High(WithName) > 0 then
-    for WithIndex := 0 to High(WithIndex) do
+    for WithIndex := 0 to High(WithName) do
     begin
       Result := Search(WithName[WithIndex] + '.' + S, ActiveSourceFile);
 
