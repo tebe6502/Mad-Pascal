@@ -662,7 +662,7 @@ begin
   //exitCode := CallMain; // TODO until 2nd call works
   {$ENDIF}
 
-  {$IFDEF DEBUG}
+  {$IFDEF WAIT_FOR_KEY_PRESSED}
   Console.WaitForKeyPressed;
   {$ENDIF}
 

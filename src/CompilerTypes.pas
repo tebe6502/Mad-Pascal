@@ -184,10 +184,16 @@ type
     SourceFileType: TSourceFileType;
     Name: TSourceFileName;
     Path: TFilePath;
-    Units: Integer;
-    AllowedUnitNames: array [1..MAXALLOWEDUNITS] of TSourceFileName;
 
     function IsRelevant: Boolean;
+
+    procedure ClearAllowedUnitNames;
+    function AddAllowedUnitName(const unitName: TSourceFileName): Boolean;
+    function IsAllowedUnitName(const unitName: TSourceFileName): Boolean;
+
+  private
+    _Units: Integer;
+    _AllowedUnitNames: array [1..MAXALLOWEDUNITS] of TSourceFileName;
 
   end;
 
@@ -261,7 +267,7 @@ type
     function GetTokenAtIndex(const tokenIndex: TTokenIndex): TToken; inline;
     function GetTokenSpellingAtIndex(const tokenIndex: TTokenIndex): TString;
 
-  // private
+  private
   type TTokenArray = array of TToken;
   var
     tokenArray: TTokenArray;
@@ -288,9 +294,9 @@ type
 
     NestedFunctionNumAllocElements: Cardinal;
     NestedFunctionAllocElementType: TDataType;
-    isNestedFunction: Boolean;
+    IsNestedFunction: Boolean;
 
-    LoopVariable, isAbsolute, isInit, isUntype, isInitialized, Section: Boolean;
+    IsLoopVariable, IsAbsolute, IsInit, IsUntype, IsInitialized, IsSection: Boolean;
 
     Kind: TTokenKind;
 
@@ -300,7 +306,7 @@ type
     ProcAsBlock: Integer;   // ? TBlockIndex
     ObjectIndex: Integer;
 
-    IsUnresolvedForward, updateResolvedForward, isOverload, isRegister, isInterrupt,
+    isUnresolvedForward, updateResolvedForward, isOverload, isRegister, isInterrupt,
     isRecursion, isStdCall, isPascal, isInline, isAsm, isExternal, isKeep, isVolatile,
     isStriped, IsNotDead: Boolean;
 
@@ -322,7 +328,7 @@ type
     function Size: Integer;
     procedure Clear;
     function AddIdentifier: TIdentifier;
-    function GetIdentifierAtIndex(const identifierIndex: TIdentifierIndex): TIdentifier;
+    function GetIdentifierAtIndex(const identifierIndex: TIdentifierIndex): TIdentifier; inline;
 
   private
   type TIdentifierArray = array of TIdentifier;
@@ -387,6 +393,35 @@ begin
   Result := (Name <> '') and (SourceFileType in [TSourceFileType.PROGRAM_FILE, TSourceFileType.UNIT_FILE]);
 end;
 
+procedure TSourceFile.ClearAllowedUnitNames;
+begin
+  _Units := 0;
+end;
+
+function TSourceFile.AddAllowedUnitName(const unitName: TSourceFileName): Boolean;
+begin
+
+  if _Units < High(_AllowedUnitNames) then
+  begin
+    Inc(_Units);
+    _AllowedUnitNames[_Units] := unitName;
+    Result := True;
+  end
+  else
+  begin
+    Result := False;
+  end;
+end;
+
+function TSourceFile.IsAllowedUnitName(const unitName: TSourceFileName): Boolean;
+var
+  i: Integer;
+begin
+  Result := False;
+  for i := _Units downto 1 do
+    if _AllowedUnitNames[i] = unitName then exit(True);
+end;
+
 // ----------------------------------------------------------------------------
 // Class TSourceFileList
 // ----------------------------------------------------------------------------
@@ -449,7 +484,7 @@ procedure TSourceFileList.ClearAllowedUnitNames;
 var
   i: Integer;
 begin
-  for i := 1 to High(SourceFileArray) do SourceFileArray[i].Units := 0;
+  for i := 1 to High(SourceFileArray) do SourceFileArray[i].ClearAllowedUnitNames;
 end;
 
 
@@ -583,7 +618,7 @@ end;
 
 function TTokenList.GetTokenAtIndex(const tokenIndex: TTokenIndex): TToken; inline;
 begin
-{$IFDEF ASSERT_ARRAY_BOUNDARIES}
+  {$IFDEF ASSERT_ARRAY_BOUNDARIES}
   if (tokenIndex < Low(tokenArray)) then
   begin
     Writeln('ERROR: Array index ', tokenIndex, ' is smaller than the lower bound ', Low(tokenArray));
@@ -595,7 +630,7 @@ begin
     Writeln('ERROR: Array index ', tokenIndex, ' is greater than the upper bound ', High(tokenArray));
     RaiseHaltException(EHaltException.COMPILING_ABORTED);
   end;
-{$ENDIF}
+  {$ENDIF}
   Result := tokenArray[tokenIndex];
 end;
 
@@ -673,9 +708,9 @@ begin
 end;
 
 
-function TIdentifierList.GetIdentifierAtIndex(const identifierIndex: TIdentifierIndex): TIdentifier;
+function TIdentifierList.GetIdentifierAtIndex(const identifierIndex: TIdentifierIndex): TIdentifier; inline;
 begin
-  {$IFDEF   ASSERT_ARRAY_BOUNDARIES}
+  {$IFDEF ASSERT_ARRAY_BOUNDARIES}
   if (identifierIndex < Low(identifierArray)) then
   begin
     Writeln('ERROR: Array index ', identifierIndex, ' is smaller than the lower bound ', Low(identifierArray));

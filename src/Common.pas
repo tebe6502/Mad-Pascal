@@ -41,7 +41,6 @@ var
   _TypeArray: array [1..MAXTYPES] of TType;
 
   TokenList: TTokenList;
-  TokenArrayPtr : ^TTokenList.TTokenArray;
 
   // This is current index in the list, not the size of the list.
   NumIdent_: Integer;
@@ -57,8 +56,12 @@ var
   CodePosStackTop: Integer;
   CodePosStack: array [0..MAXPOSSTACK] of Word;
 
-  BlockStackTop: Integer;
-  BlockStack: array [0..MAXBLOCKS - 1] of Integer;
+type
+  TBlockStackIndex = Integer;
+
+var
+  BlockStackTop: TBlockStackIndex;
+  BlockStack: array [0..MAXBLOCKS - 1] of TBlockIndex;
 
   CallGraph: array [1..MAXBLOCKS] of TCallGraphNode;  // For dead code elimination
 
@@ -107,8 +110,15 @@ var
     end;
 
 
-  PROGRAMTOK_USE, INTERFACETOK_USE, LIBRARYTOK_USE, LIBRARY_USE, RCLIBRARY, OutputDisabled,
-  isConst, isError, isInterrupt, IOCheck, Macros: Boolean;
+  PROGRAMTOK_USE, INTERFACETOK_USE, LIBRARYTOK_USE, LIBRARY_USE, RCLIBRARY, OutputDisabled: Boolean;
+
+  _isConst, _isError: Boolean;
+
+function IsConst: Boolean;
+function isError: Boolean;
+
+var
+  isInterrupt, IOCheck, Macros: Boolean;
 
   DataSegmentUse: Boolean; // Initialized in Scanner.TokenizeProgramInitialization
 
@@ -116,16 +126,17 @@ var
   // Initialized in Scanner.TokenizeProgramInitialization, updated with {$OPTIMIZATION LOOPUNROLL|NOLOOPUNROLL }
 
   PublicSection: Boolean;  // Initialized in Scanner.TokenizeProgramInitialization
+
 {$IFDEF USEOPTFILE}
 
   OptFile: ITextFile;
 
 {$ENDIF}
 
-// ----------------------------------------------------------------------------
+  // ----------------------------------------------------------------------------
 
 function NumTok: Integer;
-function TokenAt(tokenIndex: TTokenIndex): TToken; inline;
+function TokenAt(tokenIndex: TTokenIndex): TToken;
 
 function NumIdent: Integer;
 function IdentifierAt(identifierIndex: TIdentifierIndex): TIdentifier;
@@ -245,8 +256,8 @@ begin
     end
     else
     begin
-      msg := TMessage.Create(TErrorCode.FileNotFound,
-        'Cannot find {0} ''{1}'' used by program ''{2}'' in {3}.', ftyp, FileName, PROGRAM_NAME, unitPathText);
+      msg := TMessage.Create(TErrorCode.FileNotFound, 'Cannot find {0} ''{1}'' used by program ''{2}'' in {3}.',
+        ftyp, FileName, PROGRAM_NAME, unitPathText);
     end;
     Error(NumTok, msg);
   end;
@@ -313,8 +324,9 @@ var
     // Search all nesting levels from the current one to the most outer one
     for BlockStackIndex := BlockStackTop downto 0 do
       for IdentIndex := 1 to NumIdent do
-        if (IdentifierAt(IdentIndex).DataType = TDataType.ENUMTOK) and (IdentifierAt(IdentIndex).NumAllocElements = Num) and
-          (BlockStack[BlockStackIndex] = IdentifierAt(IdentIndex).Block) then
+        if (IdentifierAt(IdentIndex).DataType = TDataType.ENUMTOK) and
+          (IdentifierAt(IdentIndex).NumAllocElements = Num) and (BlockStack[BlockStackIndex] =
+          IdentifierAt(IdentIndex).Block) then
           exit(IdentIndex);
   end;
 
@@ -679,6 +691,16 @@ begin
 
 end;
 
+function IsConst: Boolean;
+begin
+  result:=_isConst;
+end;
+
+function isError: Boolean;
+begin
+  result:=_isError;
+end;
+
 // The function is currently kept for compatibility, simulating the previous global variable.
 function NumTok: Integer;
 begin
@@ -689,7 +711,7 @@ begin
   end;
 end;
 
-function TokenAt(tokenIndex: TTokenIndex): TToken; inline;
+function TokenAt(tokenIndex: TTokenIndex): TToken;
 begin
   // Result := TokenArrayPtr^[tokenIndex];
   Assert(TokenList <> nil, 'TokenList not yet created.');

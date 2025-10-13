@@ -429,7 +429,7 @@ begin
 
   end;
 
-  isError := True;
+  _isError := True;
 
 end;
 
@@ -613,7 +613,7 @@ begin
   end;
 
   // Error flag must always be set.
-  isError := True;
+  _isError := True;
 end;
 
 
