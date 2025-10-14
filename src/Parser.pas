@@ -1003,8 +1003,7 @@ begin
 
           if not (IdentifierAt(IdentIndex).Kind in [TTokenKind.CONSTTOK, TTokenKind.TYPETOK, TTokenKind.ENUMTOK]) then
           begin
-            Error(i, TMessage.Create(TErrorCode.ConstantExpected, 'Constant expected but {0} found',
-              IdentifierAt(IdentIndex).Name));
+            ErrorForIdentifier(i, TErrorCode.ConstantExpected, IdentIndex);
           end
           else
             if TokenAt(i + 1).Kind = TTokenKind.OBRACKETTOK then          // Array element access

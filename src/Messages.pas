@@ -6,7 +6,7 @@ interface
 
 uses Common, CompilerTypes, Datatypes, CommonTypes, Tokens;
 
-{$SCOPEDENUMS ON}
+  {$SCOPEDENUMS ON}
 type
   TErrorCode =
     (
@@ -57,7 +57,7 @@ type
     Text: String;
   end;
 
-// ----------------------------------------------------------------------------
+  // ----------------------------------------------------------------------------
 
 procedure Initialize;
 
@@ -78,7 +78,7 @@ procedure ErrorIncompatibleEnumIdentifierType(const tokenIndex: TTokenIndex; con
   const dstType: TDataType);
 
 procedure ErrorIdentifierIllegalTypeConversion(const tokenIndex: TTokenIndex; const identIndex: TIdentIndex;
- const dataType: TDataType);
+  const dataType: TDataType);
 
 procedure ErrorIdentifierIncompatibleTypesArray(const tokenIndex: TTokenIndex;
   const identIndex: TIdentIndex; const dataType: TDataType);
@@ -123,6 +123,10 @@ var
 begin
   Self.errorCode := errorCode;
   Self.Text := '';
+
+  // In const mode, no dynamic message formatting should be used.
+  Assert(not IsConst, 'TMessage should not be called on const mode');
+
   l := Length(Text);
   i := 1;
   repeat
@@ -263,6 +267,11 @@ begin
     TErrorCode.CantAdrConstantExp:
     begin
       Result := 'Can''t take the address of constant expressions';
+    end;
+
+    TErrorCode.ConstantExpected:
+    begin
+      Result := 'Constant expected but "' + IdentifierAt(IdentIndex).Name + '" found';
     end;
 
     TErrorCode.OParExpected:
