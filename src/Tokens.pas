@@ -12,13 +12,13 @@ type
       {$I 'Tokens.inc'}
     );
 
-function GetTokenKindName(tokenKind: TTokenKind): String;
-function GetTokenSpelling(tokenKind: TTokenKind): String;
-function GetHumanReadbleTokenSpelling(tokenKind: TTokenKind): String;
-function GetTokenDataType(tokenKind: TTokenKind): TDataType;
+function GetTokenKindName(const tokenKind: TTokenKind): String;
+function GetTokenSpelling(const tokenKind: TTokenKind): String;
+function GetHumanReadbleTokenSpelling(const tokenKind: TTokenKind): String;
+function GetTokenDataType(const tokenKind: TTokenKind): TDataType;
 
-function InfoAboutToken(t: TTokenKind): String; // TODO: What's the difference to GetTokenSpelling
-function InfoAboutDataType(dataType: TDataType): String;
+function InfoAboutToken(const t: TTokenKind): String; // TODO: What's the difference to GetTokenSpelling
+function InfoAboutDataType(const dataType: TDataType): String;
 
 function GetStandardToken(S: String): TTokenKind;
 
@@ -206,17 +206,17 @@ begin
 
 end;
 
-function GetTokenKindName(tokenKind: TTokenKind): String;
+function GetTokenKindName(const tokenKind: TTokenKind): String;
 begin
   WriteStr(Result, tokenKind);
 end;
 
-function GetTokenSpelling(tokenKind: TTokenKind): String;
+function GetTokenSpelling(const tokenKind: TTokenKind): String;
 begin
   Result := TokenSpellings[tokenKind].Spelling;
 end;
 
-function GetHumanReadbleTokenSpelling(tokenKind: TTokenKind): String;
+function GetHumanReadbleTokenSpelling(const tokenKind: TTokenKind): String;
 begin
   if tokenKind = TTokenKind.UNTYPETOK then
     Result := 'untyped token'
@@ -236,7 +236,7 @@ begin
     Result := 'unknown token';
 end;
 
-function InfoAboutToken(t: TTokenKind): String;
+function InfoAboutToken(const t: TTokenKind): String;
 begin
 
   case t of
@@ -377,13 +377,13 @@ begin
 end;
 
 
-function GetTokenDataType(tokenKind: TTokenKind): TDataType;
+function GetTokenDataType(const tokenKind: TTokenKind): TDataType;
 begin
   // TODO: Vadliate that is actually can be cast.
   Result:=TDataType(Ord(tokenKind));
 end;
 
-function InfoAboutDataType(dataType: TDataType): String;
+function InfoAboutDataType(const dataType: TDataType): String;
 begin
   result:=InfoAboutToken(TTokenKind(Ord(dataType)));
 end;
