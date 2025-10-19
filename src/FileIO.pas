@@ -29,12 +29,14 @@ type
 
 
 type
+  TFileSize = Longint;
   TFilePosition = Longint;
   // https://www.freepascal.org/docs-html/rtl/system/filepos.html
 type
   IFile = interface
     function GetFilePath: TFilePath;
     function GetAbsoluteFilePath: TFilePath;
+
     procedure Assign(filePath: TFilePath);
     procedure Close;
     procedure Erase();
@@ -45,6 +47,8 @@ type
 
 type
   IBinaryFile = interface(IFile)
+    function GetFileSize: TFileSize;
+
     // https://www.freepascal.org/docs-html/rtl/system/blockread.html
     procedure BlockRead(var Buf; Count: Longint; var Result: Longint);
     // https://www.freepascal.org/docs-html/rtl/system/filepos.html
@@ -134,6 +138,7 @@ type
     constructor Create;
     function GetFilePath(): TFilePath;
     function GetAbsoluteFilePath(): TFilePath;
+
     procedure Assign(filePath: TFilePath); virtual; abstract;
     procedure Close; virtual; abstract;
     procedure Erase(); virtual; abstract;
@@ -160,6 +165,7 @@ type
     {$ENDIF}
   public
     constructor Create;
+
     procedure Assign(filePath: TFilePath); override;
     procedure Close; override;
     procedure Erase(); override;
@@ -199,6 +205,8 @@ private
     {$ENDIF}
   public
     constructor Create;
+    function GetFileSize(): TFileSize;
+
     procedure Assign(filePath: TFilePath); override;
     // https://www.freepascal.org/docs-html/rtl/system/blockread.html
     procedure BlockRead(var Buf; Count: Longint; var Result: Longint);
@@ -238,6 +246,7 @@ type
     constructor Create;
 
     // Form TFile
+    function GetFileSize(): TFileSize;
     procedure Assign(filePath: TFilePath); overload;
     procedure Close; overload;
     procedure Erase(); overload;
@@ -527,6 +536,11 @@ begin
   {$ENDIF}
 end;
 
+function TBinaryFile.GetFileSize: TFileSize;
+begin
+  Result := FileSize(f);
+end;
+
 procedure TBinaryFile.Assign(filePath: TFilePath);
 begin
   Self.filePath := filePath;
@@ -660,6 +674,11 @@ begin
   filePosition := 0;
 end;
 
+function TCachedBinaryFile.GetFileSize(): TFileSize;
+begin
+  Result := Length(content);
+end;
+
 procedure TCachedBinaryFile.Assign(filePath: TFilePath);
 begin
   binaryFile.Assign(filePath);
@@ -679,7 +698,7 @@ end;
 
 function TCachedBinaryFile.EOF(): Boolean;
 begin
-  Result := (filePosition = Length(content));
+  Result := (filePosition = GetFileSize);
 end;
 
 procedure TCachedBinaryFile.Reset();
@@ -689,18 +708,18 @@ end;
 
 procedure TCachedBinaryFile.Reset(l: Longint); // l = record size
 var
+  length: TFileSize;
   i: Integer;
 begin
   if l <> 1 then raise EInOutError.Create('Unsupported record size ' + IntToStr(l) +
       ' specified. Only record size 1 is supported.');
 
-  binaryFile.Reset();
-  i := 0;
-  while not binaryFile.EOF() do
+  binaryFile.Reset(l);
+  length := binaryFile.GetFileSize;
+  SetLength(content, length);
+  for i := 0 to length - 1 do
   begin
-    SetLength(content, i + 1);
     binaryFile.Read(content[i]);
-    Inc(i);
   end;
 end;
 
@@ -722,7 +741,7 @@ end;
 procedure TCachedBinaryFile.Read(var c: Char);
 begin
   if EOF() then raise EInOutError.Create('End of file');
-  c := content[filePos];
+  c := content[filePosition];
   Inc(filePosition);
 end;
 
