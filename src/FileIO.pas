@@ -18,8 +18,8 @@ type
   TPathList = class
   public
     constructor Create;
-    procedure AddFolder(folderPath: TFolderPath);
-    function FindFile(filePath: TFilePath): TFilePath;
+    procedure AddFolder(const folderPath: TFolderPath);
+    function FindFile(const filePath: TFilePath): TFilePath;
     function GetSize: Integer;
     function ToString: String; override;
   private
@@ -37,7 +37,7 @@ type
     function GetFilePath: TFilePath;
     function GetAbsoluteFilePath: TFilePath;
 
-    procedure Assign(filePath: TFilePath);
+    procedure Assign(const filePath: TFilePath);
     procedure Close;
     procedure Erase();
     function EOF(): Boolean;
@@ -50,12 +50,12 @@ type
     function GetFileSize: TFileSize;
 
     // https://www.freepascal.org/docs-html/rtl/system/blockread.html
-    procedure BlockRead(var Buf; Count: Longint; var Result: Longint);
+    procedure BlockRead(var Buf; const Count: TFileSize; var Result: TFileSize);
     // https://www.freepascal.org/docs-html/rtl/system/filepos.html
-    function FilePos(): TInteger;
+    function FilePos(): TFilePosition;
     procedure Read(var c: Char);
-    procedure Reset(l: Longint); overload; // l = record size
-    procedure Seek2(Pos: TInteger);
+    procedure Reset(const l: Longint); overload; // l = record size
+    procedure Seek2(const Pos: TFilePosition);
   end;
 
 type
@@ -111,10 +111,10 @@ type
     {$ENDIF}
     class function CreateBinaryFile(const cached: Boolean = False): IBinaryFile; static;
     class function CreateTextFile: ITextFile; static;
-    class function FileExists_(filePath: TFilePath): Boolean;
-    class function FolderExists(folderPath: TFolderPath): Boolean;
-    class function NormalizePath(filePath: TFilePath): TFilePath;
-    class function GetAbsolutePath(filePath: TFilePath): TFilePath;
+    class function FileExists_(const filePath: TFilePath): Boolean;
+    class function FolderExists(const folderPath: TFolderPath): Boolean;
+    class function NormalizePath(const filePath: TFilePath): TFilePath;
+    class function GetAbsolutePath(const filePath: TFilePath): TFilePath;
 
     {$IFDEF SIMULATED_FILE_IO}
     class function GetFileMap: TFileMap;
@@ -139,7 +139,7 @@ type
     function GetFilePath(): TFilePath;
     function GetAbsoluteFilePath(): TFilePath;
 
-    procedure Assign(filePath: TFilePath); virtual; abstract;
+    procedure Assign(const filePath: TFilePath); virtual; abstract;
     procedure Close; virtual; abstract;
     procedure Erase(); virtual; abstract;
     function EOF(): Boolean; virtual; abstract;
@@ -166,7 +166,7 @@ type
   public
     constructor Create;
 
-    procedure Assign(filePath: TFilePath); override;
+    procedure Assign(const filePath: TFilePath); override;
     procedure Close; override;
     procedure Erase(); override;
     function EOF(): Boolean; override;
@@ -207,19 +207,19 @@ private
     constructor Create;
     function GetFileSize(): TFileSize;
 
-    procedure Assign(filePath: TFilePath); override;
+    procedure Assign(const filePath: TFilePath); override;
     // https://www.freepascal.org/docs-html/rtl/system/blockread.html
-    procedure BlockRead(var Buf; Count: Longint; var Result: Longint);
+    procedure BlockRead(var Buf; const Count: TFileSize; var Result: TFileSize);
     procedure Close; override;
     procedure Erase(); override;
     function EOF(): Boolean; override;
     // https://www.freepascal.org/docs-html/rtl/system/filepos.html
-    function FilePos(): TInteger;
+    function FilePos(): TFilePosition;
     procedure Read(var c: Char);
     procedure Reset(); override; overload;
-    procedure Reset(l: Longint); overload;
+    procedure Reset(const l: Longint); overload;
     procedure Rewrite(); override;
-    procedure Seek2(Pos: TInteger);
+    procedure Seek2(const Pos: TFilePosition);
 
   end;
 
@@ -240,14 +240,14 @@ type
   var
     binaryFile: IBinaryFile;
     content: array of Char;
-    filePosition: Integer;
+    filePosition: TFilePosition;
 
   public
     constructor Create;
 
     // Form TFile
     function GetFileSize(): TFileSize;
-    procedure Assign(filePath: TFilePath); overload;
+    procedure Assign(const filePath: TFilePath); overload;
     procedure Close; overload;
     procedure Erase(); overload;
     function EOF(): Boolean; overload;
@@ -255,11 +255,11 @@ type
     procedure Rewrite(); overload;  // Open for writing
 
     // From IBinaryFile
-    procedure BlockRead(var Buf; Count: Longint; var Result: Longint);
-    function FilePos(): TInteger;
+    procedure BlockRead(var Buf; const Count: TFileSize; var Result: TFileSize);
+    function FilePos(): TFilePosition;
     procedure Read(var c: Char);
-    procedure Reset(l: Longint); overload; // l = record size
-    procedure Seek2(Pos: TInteger);
+    procedure Reset(const l: Longint); overload; // l = record size
+    procedure Seek2(const Pos: TFilePosition);
 
   end;
 
@@ -269,27 +269,28 @@ begin
   SetLength(paths, 0);
 end;
 
-procedure TPathList.AddFolder(folderPath: TFolderPath);
+procedure TPathList.AddFolder(const folderPath: TFolderPath);
 var
+  normalizedFolderPath: TFolderPath;
   i, size: Integer;
 begin
 
-  folderPath := IncludeTrailingPathDelimiter(folderPath);
-  folderPath := TFileSystem.NormalizePath(folderPath);
+  normalizedFolderPath := IncludeTrailingPathDelimiter(folderPath);
+  normalizedFolderPath := TFileSystem.NormalizePath(folderPath);
 
   // Do not add duplicates.
   for i := Low(paths) to High(paths) do
   begin
-    if paths[i] = folderPath then exit;
+    if paths[i] = normalizedFolderPath then exit;
   end;
 
   size := GetSize;
   Inc(size);
   SetLength(paths, size);
-  paths[size - 1] := IncludeTrailingPathDelimiter(folderPath);
+  paths[size - 1] := IncludeTrailingPathDelimiter(normalizedFolderPath);
 end;
 
-function TPathList.FindFile(filePath: TFilePath): TFilePath;
+function TPathList.FindFile(const filePath: TFilePath): TFilePath;
 var
   i: Integer;
 begin
@@ -357,7 +358,7 @@ begin
   {$ENDIF}
 end;
 
-procedure TTextFile.Assign(filePath: TFilePath);
+procedure TTextFile.Assign(const filePath: TFilePath);
 begin
   Self.filePath := filePath;
   {$IFNDEF SIMULATED_FILE_IO}
@@ -541,7 +542,7 @@ begin
   Result := FileSize(f);
 end;
 
-procedure TBinaryFile.Assign(filePath: TFilePath);
+procedure TBinaryFile.Assign(const filePath: TFilePath);
 begin
   Self.filePath := filePath;
   {$IFNDEF SIMULATED_FILE_IO}
@@ -551,7 +552,7 @@ begin
   {$ENDIF}
 end;
 
-procedure TBinaryFile.BlockRead(var Buf; Count: Longint; var Result: Longint);
+procedure TBinaryFile.BlockRead(var Buf; const Count: TFileSize; var Result: TFileSize);
 begin
   {$IFNDEF SIMULATED_FILE_IO}
   System.BlockRead(f, Buf, Count, Result);
@@ -591,7 +592,7 @@ begin
 
 end;
 
-function TBinaryFile.FilePos(): TInteger;
+function TBinaryFile.FilePos(): TFilePosition;
 begin
   {$IFNDEF SIMULATED_FILE_IO}
   Result := System.FilePos(f);
@@ -622,7 +623,7 @@ begin
   Reset(128);
 end;
 
-procedure TBinaryFile.Reset(l: Longint); overload;
+procedure TBinaryFile.Reset(const l: Longint); overload;
 begin
   {$IFNDEF SIMULATED_FILE_IO}
   System.FileMode := 0;
@@ -652,7 +653,7 @@ begin
 
 end;
 
-procedure TBinaryFile.Seek2(Pos: TInteger);
+procedure TBinaryFile.Seek2(const Pos: TFilePosition);
 begin
   {$IFNDEF SIMULATED_FILE_IO}
   System.Seek(f, pos);
@@ -679,7 +680,7 @@ begin
   Result := Length(content);
 end;
 
-procedure TCachedBinaryFile.Assign(filePath: TFilePath);
+procedure TCachedBinaryFile.Assign(const filePath: TFilePath);
 begin
   binaryFile.Assign(filePath);
 end;
@@ -706,10 +707,10 @@ begin
   Reset(128);
 end;
 
-procedure TCachedBinaryFile.Reset(l: Longint); // l = record size
+procedure TCachedBinaryFile.Reset(const l: Longint); // l = record size
 var
   length: TFileSize;
-  i: Integer;
+  Result: TFileSize;
 begin
   if l <> 1 then raise EInOutError.Create('Unsupported record size ' + IntToStr(l) +
       ' specified. Only record size 1 is supported.');
@@ -717,9 +718,11 @@ begin
   binaryFile.Reset(l);
   length := binaryFile.GetFileSize;
   SetLength(content, length);
-  for i := 0 to length - 1 do
+  Result := -1;
+  if (length > 0) then
   begin
-    binaryFile.Read(content[i]);
+    binaryFile.BlockRead(content[0], length, Result);
+    Assert(length = Result);
   end;
 end;
 
@@ -728,12 +731,12 @@ begin
   raise EInOutError.Create('Not implemented.');
 end;
 
-procedure TCachedBinaryFile.BlockRead(var Buf; Count: Longint; var Result: Longint);
+procedure TCachedBinaryFile.BlockRead(var Buf; const Count: TFileSize; var Result: TFileSize);
 begin
   raise EInOutError.Create('Not implemented.');
 end;
 
-function TCachedBinaryFile.FilePos(): TInteger;
+function TCachedBinaryFile.FilePos(): TFilePosition;
 begin
   Result := filePosition;
 end;
@@ -746,7 +749,7 @@ begin
 end;
 
 
-procedure TCachedBinaryFile.Seek2(Pos: TInteger);
+procedure TCachedBinaryFile.Seek2(const Pos: TFilePosition);
 begin
   filePosition := Pos;
 end;
@@ -826,7 +829,7 @@ begin
   Result := TTextFile.Create;
 end;
 
-class function TFileSystem.FileExists_(filePath: TFilePath): Boolean;
+class function TFileSystem.FileExists_(const filePath: TFilePath): Boolean;
 begin
   {$IFNDEF SIMULATED_FILE_IO}
   Result := FileExists(filePath);
@@ -835,7 +838,7 @@ begin
   {$ENDIF}
 end;
 
-class function TFileSystem.FolderExists(folderPath: TFolderPath): Boolean;
+class function TFileSystem.FolderExists(const folderPath: TFolderPath): Boolean;
 begin
   {$IFNDEF SIMULATED_FILE_IO}
   Result := DirectoryExists(folderPath);
@@ -844,7 +847,7 @@ begin
   {$ENDIF}
 end;
 
-class function TFileSystem.NormalizePath(filePath: TFilePath): TFilePath;
+class function TFileSystem.NormalizePath(const filePath: TFilePath): TFilePath;
 begin
 
   Result := filePath;
@@ -869,7 +872,7 @@ begin
 end;
 
 
-class function TFileSystem.GetAbsolutePath(filePath: TFilePath): TFilePath;
+class function TFileSystem.GetAbsolutePath(const filePath: TFilePath): TFilePath;
 begin
   {$IFNDEF SIMULATED_FILE_IO}
   Result := ExpandFileName(filePath);
