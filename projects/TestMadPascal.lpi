@@ -26,7 +26,7 @@
       <Modes>
         <Mode Name="default">
           <local>
-            <CommandLineParams Value="-iPath:C:\jac\system\Atari800\Programming\Repositories\Mad-Pascal\lib rijndael-test.pas"/>
+            <CommandLineParams Value="-iPath:C:\jac\system\Atari800\Programming\Repositories\Mad-Pascal\lib rijndael-test.pas -pause"/>
             <WorkingDirectory Value="C:\jac\system\Atari800\Programming\Repositories\Mad-Pascal\samples\a8\math\AES-Rijndael"/>
           </local>
         </Mode>
@@ -618,7 +618,8 @@
 -dSIMULATED_COMMAND_LINE2
 -dSIMULATED_FILE_IO2
 -dUSEOPTFILE2
--dUSETRACEFILE2"/>
+-dUSETRACEFILE2
+-dPROFILE"/>
     </Other>
   </CompilerOptions>
   <Debugging>

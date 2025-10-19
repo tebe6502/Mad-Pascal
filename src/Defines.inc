@@ -4,7 +4,6 @@
 
 //{$DEFINE ASSERT_ARRAY_BOUNDARIES}
 
-//{$DEFINE WAIT_FOR_KEY_PRESSED} // Set in project settings only
 //{$DEFINE WHILEDO}
 //{$DEFINE USEOPTFILE}
 

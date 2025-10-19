@@ -183,6 +183,7 @@ function GetTypeAtIndex(const typeIndex: TTypeIndex): TType;
 
 var
   DiagMode: Boolean;
+  PauseMode: Boolean;
   TraceFile: ITextFile;
 
 procedure LogTrace(message: String);
@@ -693,12 +694,12 @@ end;
 
 function IsConst: Boolean;
 begin
-  result:=_isConst;
+  Result := _isConst;
 end;
 
 function isError: Boolean;
 begin
-  result:=_isError;
+  Result := _isError;
 end;
 
 // The function is currently kept for compatibility, simulating the previous global variable.
