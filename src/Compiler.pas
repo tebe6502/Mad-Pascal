@@ -6,6 +6,9 @@ interface
 
 uses FileIO, CompilerTypes;
 
+const SYSTEM_UNIT_NAME = 'SYSTEM';
+const SYSTEM_UNIT_FILE_NAME =  'system.pas';
+
 function CompilerTitle: String;
 
 procedure Initialize;
@@ -19808,7 +19811,7 @@ begin
   Writeln('Compiling ' + programUnit.Name);
 
   // ----------------------------------------------------------------------------
-  // Set defines for first pass;
+  // Set defines for first pass.
   scanner := TScanner.Create;
 
   Profiler.profiler.BeginSection('scanner.TokenizeProgram');
@@ -19818,8 +19821,8 @@ begin
 
   if NumTok = 0 then Error(1, '');
 
-  // Add default unit 'system.pas'
-  SourceFileList.AddUnit(TSourceFileType.UNIT_FILE, 'SYSTEM', FindFile('system.pas', 'unit'));
+  // Add default unit SYSTEM.
+  SourceFileList.AddUnit(TSourceFileType.UNIT_FILE, SYSTEM_UNIT_NAME, FindFile(SYSTEM_UNIT_FILE_NAME, 'unit'));
 
   Profiler.profiler.BeginSection('scanner.TokenizeProgram(programUnit, False)');
   scanner.TokenizeProgram(programUnit, False);

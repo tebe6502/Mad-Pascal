@@ -196,9 +196,9 @@ program MADPASCAL;
 
 uses
   SysUtils,
- {$IFDEF WINDOWS}
+  {$IFDEF WINDOWS}
   Windows,
-  {$ENDIF} {$IFDEF SIMULATED_CONSOLE}
+  {$ENDIF}{$IFDEF SIMULATED_CONSOLE}
   browserconsole,
   {$ENDIF}
   Common,
@@ -210,26 +210,25 @@ uses
   Messages,
   Targets,
   Tokens,
-  Utilities, Profiler;
+  Utilities,
+  Profiler;
 
 
-// ----------------------------------------------------------------------------
-// ----------------------------------------------------------------------------
+  // ----------------------------------------------------------------------------
+  // ----------------------------------------------------------------------------
 
-{$i include/syntax.inc}
+  {$i include/syntax.inc}
 
 
-// ----------------------------------------------------------------------------
-//                                 Main Program
-// ----------------------------------------------------------------------------
+  // ----------------------------------------------------------------------------
+  //                                 Main Program
+  // ----------------------------------------------------------------------------
 
   function Main: TExitCode;
-
   var
     // Command line parameters
     inputFilePath: TFilePath;
     unitPathList: TPathList;
-    libFolderPath: TFolderPath;
     targetID: TTargetID;
     cpu: TCPU;
 
@@ -240,6 +239,33 @@ uses
 
     // Processing variables.
     programUnit: TSourceFile;
+
+    procedure InitializeUnitPathList;
+    var
+      folderPath: TFolderPath;
+      libFolderLevel: Integer;
+      libFolderPath: TFolderPath;
+    begin
+      // By default the executable is in the folder 'bin/<os>'.
+      // For compatibility with previous version we also check that folder and its
+      // first and wecond parent folders for the existence of the "lib/system.pas".
+      unitPathList := TPathList.Create;
+      folderPath := ExtractFileDir(ParamStr(0));
+      for libFolderLevel := 1 to 3 do
+      begin
+        libFolderPath := IncludeTrailingPathDelimiter(folderPath) + 'lib';
+
+        if TFileSystem.FileExists_(IncludeTrailingPathDelimiter(libFolderPath) + SYSTEM_UNIT_FILE_NAME) then
+        begin
+          unitPathList.AddFolder(libFolderPath);
+          break; // Found, exit For loop
+        end
+        else
+        begin
+          folderPath := ExtractFileDir(folderPath);
+        end;
+      end;
+    end;
 
     procedure ParseParam;
     var
@@ -257,7 +283,7 @@ uses
       STACK_BASE := -1;
       outputFilePath := '';
 
-      DiagMode := false;
+      DiagMode := False;
 
       i := 1;
       while i <= TEnvironment.GetParameterCount() do
@@ -428,7 +454,8 @@ uses
 
           if not TFileSystem.FileExists_(inputFilePath) then
           begin
-            ParameterError(i, 'Error: Cannot open input file ''' + TFileSystem.GetAbsolutePath(inputFilePath) + ''' for reading.');
+            ParameterError(i, 'Error: Cannot open input file ''' + TFileSystem.GetAbsolutePath(inputFilePath) +
+ ''' for reading.');
           end;
         end;
 
@@ -468,29 +495,19 @@ uses
   begin
 
     Result := 0;
-{$IFDEF WINDOWS}
+    {$IFDEF WINDOWS}
    if Windows.GetFileType(Windows.GetStdHandle(STD_OUTPUT_HANDLE)) = Windows.FILE_TYPE_PIPE then
    begin
     System.Assign(Output, ''); FileMode:=1; System.Rewrite(Output);
    end;
-{$ENDIF}
+    {$ENDIF}
 
     // WriteLn('Sub-Pascal 32-bit real mode compiler v. 2.0 by Vasiliy Tereshkov, 2009');
 
     WriteLn(Compiler.CompilerTitle);
 
 
-    // By default the executable is in 'bin/<os>'.
-    libFolderPath := ExtractFileDir(ParamStr(0));
-    libFolderPath := ExtractFileDir(libFolderPath);
-    libFolderPath := ExtractFileDir(libFolderPath);
-    libFolderPath := IncludeTrailingPathDelimiter(libFolderPath) + 'lib';
-
-    unitPathList := TPathList.Create;
-    if TFileSystem.FolderExists(libFolderPath) then
-    begin
-      unitPathList.AddFolder(libFolderPath);
-    end;
+    InitializeUnitPathList;
 
     SourceFileList := TSourceFileList.Create();
 
@@ -512,7 +529,8 @@ uses
 
     programUnit := SourceFileList.AddUnit(TSourceFileType.PROGRAM_FILE, ExtractFilename(inputFilePath), inputFilePath);
 
-    {$IFDEF USEOPTFILE} // TODO Make command line option
+    {$IFDEF USEOPTFILE}
+ // TODO Make command line option
 
     OptFile := TFileSystem.CreateTextFile();
     OptFile.Assign(ChangeFileExt(programUnit.Name, '.opt'));
@@ -606,14 +624,14 @@ uses
 
     TextColor(WHITE);
     seconds := (GetTickCount64 - StartTime + 500) / 1000;
-{$IFNDEF PAS2JS}
+    {$IFNDEF PAS2JS}
     Writeln(TokenAt(NumTok).SourceLocation.Line, ' lines compiled, ', seconds: 2: 2, ' sec, ',
       NumTok, ' tokens, ', NumIdent, ' idents, ', NumBlocks, ' blocks, ', NumTypes, ' types');
-{$ELSE}
+    {$ELSE}
    Writeln(IntToStr(TokenAt(NumTok).SourceLocation.Line) + ' lines compiled, ' + FloatToStr(seconds) + ' sec, '
  	   + IntToStr(NumTok) + ' tokens        , ' + IntToStr(NumIdent) + ' idents, '
 	   + IntToStr(NumBlocks) + ' blocks, ' +  IntToStr(NumTypes) + ' types');
-{$ENDIF}
+    {$ENDIF}
 
     Compiler.Free;
 
@@ -628,11 +646,11 @@ uses
   function CallMain: TExitCode;
   var
     exitCode: TExitCode;
-   {$IFDEF SIMULATED_FILE_IO}
+    {$IFDEF SIMULATED_FILE_IO}
     fileMap: TFileMap;
     fileMapEntry: TFileMapEntry;
     content: String;
-   {$ENDIF}
+    {$ENDIF}
   begin
 
     exitCode := Main();
@@ -641,7 +659,7 @@ uses
       WriteLn('Program ended with exit code ' + IntToStr(exitCode));
     end;
 
-  {$IFDEF SIMULATED_FILE_IO}
+    {$IFDEF SIMULATED_FILE_IO}
   fileMap:=TFileSystem.GetFileMap();
   fileMapEntry:=fileMap.GetEntry('Output.a65');
   if fileMapEntry<>nil then
@@ -649,7 +667,7 @@ uses
     content:=fileMapEntry.content;
     WriteLn(content);
   end;
-  {$ENDIF}
+    {$ENDIF}
 
     Result := exitCode;
   end;
