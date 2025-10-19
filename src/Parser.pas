@@ -76,16 +76,6 @@ var
   TempIdentIndex: TIdentIndex;
   TempIdentifier: TIdentifier;
 
-  function UnitAllowedAccess(const identifier: TIdentifier; const SourceFile: TSourceFile): Boolean;
-  begin
-
-    Result := False;
-
-    if identifier.IsSection then
-      Result := SourceFile.IsAllowedUnitName(identifier.SourceFile.Name);
-  end;
-
-
   function Search(const X: TString; const SourceFile: TSourceFile): TIdentIndex;
   var
     BlockStackIndex: Integer;
@@ -114,8 +104,8 @@ var
           unitEquals := (identifier.SourceFile.UnitIndex = SYSTEM_UNIT_INDEX) or
             (identifier.SourceFile.UnitIndex = SourceFile.UnitIndex);
 
-          if unitEquals or (identifier.SourceFile.Name = 'SYSTEM') or
-            UnitAllowedAccess(identifier, SourceFile) then
+          if unitEquals or (identifier.SourceFile.Name = SYSTEM_UNIT_NAME) or
+            (identifier.IsSection and SourceFile.IsAllowedUnitName(identifier.SourceFile.Name)) then
           begin
             Result := IdentIndex;
             identifier.Pass := Pass;
@@ -146,11 +136,14 @@ var
       // Search all nesting levels from the current one to the most outer one
       for IdentIndex := 1 to NumIdent do
       begin
-        identifier := IdentifierAt(IdentIndex);
+        // JAC! Speed optimization test
+        // identifier := IdentifierAt(IdentIndex);
+        // identifier := IdentifierList.GetIdentifierAtIndex(IdentIndex); )
+        identifier := IdentifierList.identifierArray[IdentIndex];
 
         if (X = identifier.Name) and (blockIndex = identifier.Block) then
           if (identifier.SourceFile.UnitIndex = SourceFile.UnitIndex) or
-            UnitAllowedAccess(identifier, SourceFile) then
+             (identifier.IsSection and SourceFile.IsAllowedUnitName(identifier.SourceFile.Name)) then
           begin
             Result := IdentIndex;
             identifier.Pass := Pass;
