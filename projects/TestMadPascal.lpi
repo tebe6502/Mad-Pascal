@@ -30,34 +30,10 @@
             <WorkingDirectory Value="C:\jac\system\Atari800\Programming\Repositories\Mad-Pascal\samples\a8\math\AES-Rijndael"/>
           </local>
         </Mode>
-        <Mode Name="samples">
+        <Mode Name="profile">
           <local>
-            <CommandLineParams Value="-iPath:C:\jac\system\Atari800\Programming\Repositories\Mad-Pascal\lib lzhuf.pas"/>
-            <WorkingDirectory Value="C:\jac\system\Atari800\Programming\Repositories\Mad-Pascal\samples\a8\compression\lzh"/>
-          </local>
-        </Mode>
-        <Mode Name="test">
-          <local>
-            <CommandLineParams Value="-iPath:C:\jac\system\Atari800\Programming\Repositories\Mad-Pascal\lib const-var-scope.pas"/>
-            <WorkingDirectory Value="C:\jac\system\Atari800\Programming\Repositories\Mad-Pascal\samples\tests\tests-basic\"/>
-          </local>
-        </Mode>
-        <Mode Name="mine">
-          <local>
-            <CommandLineParams Value="-iPath:C:\jac\system\Atari800\Programming\Repositories\Mad-Pascal\lib test_ansi.pas"/>
-            <WorkingDirectory Value="C:\jac\system\Atari800\Programming\Repositories\Mad-Pascal\samples\a8\graph_vbxe_ansi\"/>
-          </local>
-        </Mode>
-        <Mode Name="hello">
-          <local>
-            <CommandLineParams Value="-iPath:C:\jac\system\Atari800\Programming\Repositories\Mad-Pascal\lib hello.pas"/>
-            <WorkingDirectory Value="C:\jac\system\Atari800\Programming\Repositories\Mad-Pascal\samples\common\object\"/>
-          </local>
-        </Mode>
-        <Mode Name="array_bracket">
-          <local>
-            <CommandLineParams Value="-iPath:C:\jac\system\Atari800\Programming\Repositories\Mad-Pascal\lib array_bracket.pas"/>
-            <WorkingDirectory Value="C:\jac\system\Atari800\Programming\Repositories\Mad-Pascal\samples\tests\tests-array"/>
+            <CommandLineParams Value="-iPath:C:\jac\system\Atari800\Programming\Repositories\Mad-Pascal\lib rijndael-test.pas"/>
+            <WorkingDirectory Value="C:\jac\system\Atari800\Programming\Repositories\Mad-Pascal\samples\a8\math\AES-Rijndael"/>
           </local>
         </Mode>
       </Modes>
