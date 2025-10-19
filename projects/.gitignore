@@ -2,5 +2,15 @@
 *.exe
 *.log
 *.lps
+
+# Ignore ProLaza64 files
+*.ini
+*.asc
+*.txt
+*.tx2
+*.tx3
+*.nev
+*.pmr
+
 backup/
 lib/
