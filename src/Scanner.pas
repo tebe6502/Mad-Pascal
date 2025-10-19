@@ -34,6 +34,8 @@ implementation
 
 uses Classes, SysUtils, Common, Datatypes, Messages, FileIO, Memory, Optimize, StringUtilities, Targets, Utilities;
 
+const SCANNER_CACHED = true;
+
 // ----------------------------------------------------------------------------
 // Class TScanner Implementation
 // ----------------------------------------------------------------------------
@@ -457,7 +459,7 @@ var
 
         tmp := 0;
         NumRead := 0;
-        bin := TFileSystem.CreateBinaryFile;
+        bin := TFileSystem.CreateBinaryFile(SCANNER_CACHED);
         bin.Assign(fn);
         bin.Reset(1);
 
@@ -1253,7 +1255,7 @@ var
 
   begin
 
-    inFile := TFileSystem.CreateBinaryFile;
+    inFile := TFileSystem.CreateBinaryFile(SCANNER_CACHED);
     inFile.Assign(filePath);
     inFile.Reset(1);
 
