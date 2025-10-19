@@ -80,7 +80,7 @@ var
   var
     BlockStackIndex: Integer;
     blockIndex: TBlockIndex;
-    IdentIndex: TIdentIndex;
+    MaxIdentIndex, IdentIndex: TIdentIndex;
     identifier: TIdentifier;
     unitEquals: Boolean;
   begin
@@ -88,10 +88,11 @@ var
     Result := 0;
 
     // Search all nesting levels from the current one to the most outer one
+     MaxIdentIndex:= NumIdent_; // JAC! Speed optimization test
     for BlockStackIndex := BlockStackTop downto 0 do
     begin
       blockIndex := BlockStack[BlockStackIndex];
-      for IdentIndex := 1 to NumIdent do
+      for IdentIndex := 1 to MaxIdentIndex do
       begin
 
         // JAC! Speed optimization test
@@ -123,18 +124,18 @@ var
   var
     BlockStackIndex: TBlockStackIndex;
     BlockIndex: TBlockIndex;
-    IdentIndex: TIdentifierIndex;
+    MaxIdentIndex, IdentIndex: TIdentifierIndex;
     identifier: TIdentifier;
   begin
 
     Result := 0;
-
+    MaxIdentIndex:= NumIdent_; // JAC! Speed optimization test
     for BlockStackIndex := BlockStackTop downto 0 do
     begin
       blockIndex := BlockStack[BlockStackIndex];
 
       // Search all nesting levels from the current one to the most outer one
-      for IdentIndex := 1 to NumIdent do
+      for IdentIndex := 1 to MaxIdentIndex do
       begin
         // JAC! Speed optimization test
         // identifier := IdentifierAt(IdentIndex);

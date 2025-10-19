@@ -574,7 +574,7 @@
       </Checks>
       <VerifyObjMethodCallValidity Value="True"/>
       <Optimizations>
-        <OptimizationLevel Value="0"/>
+        <OptimizationLevel Value="3"/>
       </Optimizations>
     </CodeGeneration>
     <Linking>
