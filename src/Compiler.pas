@@ -6,9 +6,6 @@ interface
 
 uses FileIO, CompilerTypes;
 
-const SYSTEM_UNIT_NAME = 'SYSTEM';
-const SYSTEM_UNIT_FILE_NAME =  'system.pas';
-
 function CompilerTitle: String;
 
 procedure Initialize;

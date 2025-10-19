@@ -92,6 +92,7 @@ var
     blockIndex: TBlockIndex;
     IdentIndex: TIdentIndex;
     identifier: TIdentifier;
+    unitEquals: Boolean;
   begin
 
     Result := 0;
@@ -102,20 +103,27 @@ var
       blockIndex := BlockStack[BlockStackIndex];
       for IdentIndex := 1 to NumIdent do
       begin
+
+        // JAC! Speed optimization test
         // identifier := IdentifierAt(IdentIndex);
-        identifier := IdentifierList.GetIdentifierAtIndex(IdentIndex);
+        // identifier := IdentifierList.GetIdentifierAtIndex(IdentIndex); )
+        identifier := IdentifierList.identifierArray[IdentIndex];
+
         if (X = identifier.Name) and (blockIndex = identifier.Block) then
-          if (identifier.SourceFile.UnitIndex = SourceFile.UnitIndex)
-            {or identifier.Section} or (identifier.SourceFile.UnitIndex = 1) or
-            (identifier.SourceFile.Name = 'SYSTEM') or UnitAllowedAccess(identifier, SourceFile) then
+        begin
+          unitEquals := (identifier.SourceFile.UnitIndex = SYSTEM_UNIT_INDEX) or
+            (identifier.SourceFile.UnitIndex = SourceFile.UnitIndex);
+
+          if unitEquals or (identifier.SourceFile.Name = 'SYSTEM') or
+            UnitAllowedAccess(identifier, SourceFile) then
           begin
             Result := IdentIndex;
             identifier.Pass := Pass;
 
-            if (identifier.SourceFile.UnitIndex = SourceFile.UnitIndex) or
-              (identifier.SourceFile.UnitIndex = 1)
-            { or (identifier.SourceFile.NAME) = 'SYSTEM')} then exit;
+            if unitEquals then exit;
           end;
+
+        end;
       end;
     end;
   end;

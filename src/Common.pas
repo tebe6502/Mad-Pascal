@@ -4,11 +4,22 @@ unit Common;
 
 interface
 
-uses Classes, SysUtils, CommonTypes, CompilerTypes, Datatypes, FileIO, Memory, StringUtilities, Targets, Tokens;
+uses Classes, SysUtils, CommonTypes, CompilerTypes, Datatypes, FileIO, Memory, StringUtilities,
+  Targets, Tokens;
 
 const
   title = '1.7.5-Test';
 
+
+
+const
+  SYSTEM_UNIT_NAME = 'SYSTEM';
+
+const
+  SYSTEM_UNIT_FILE_NAME = 'system.pas';
+
+const
+  SYSTEM_UNIT_INDEX = 1;
 
 var
   target: TTarget;

@@ -5,7 +5,6 @@ unit CompilerTypes;
 interface
 
 uses SysUtils, CommonTypes, Datatypes, FileIO, Tokens, Utilities;
-
   // ----------------------------------------------------------------------------
 
 
@@ -330,7 +329,8 @@ type
     function AddIdentifier: TIdentifier;
     function GetIdentifierAtIndex(const identifierIndex: TIdentifierIndex): TIdentifier; inline;
 
-  private
+    // The following type and array should be considered private.
+    // The are only public for access in specially optimized prodedures.
   type TIdentifierArray = array of TIdentifier;
   var
     identifierArray: TIdentifierArray;
