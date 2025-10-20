@@ -68,6 +68,7 @@ end;
 // ----------------------------------------------------------------------------
 
 
+// function GetIdentIndex(const S: TIdentifierName; const ActiveSourceFile: TSourceFile): TIdentIndex;
 function GetIdentIndex(const S: TIdentifierName): TIdentIndex;
 var
   WithIndex: Integer;
@@ -88,7 +89,7 @@ var
     Result := 0;
 
     // Search all nesting levels from the current one to the most outer one
-     MaxIdentIndex:= NumIdent_; // JAC! Speed optimization test
+    MaxIdentIndex := NumIdent_; // JAC! Speed optimization test
     for BlockStackIndex := BlockStackTop downto 0 do
     begin
       blockIndex := BlockStack[BlockStackIndex];
@@ -129,7 +130,7 @@ var
   begin
 
     Result := 0;
-    MaxIdentIndex:= NumIdent_; // JAC! Speed optimization test
+    MaxIdentIndex := NumIdent_; // JAC! Speed optimization test
     for BlockStackIndex := BlockStackTop downto 0 do
     begin
       blockIndex := BlockStack[BlockStackIndex];
@@ -144,7 +145,7 @@ var
 
         if (X = identifier.Name) and (blockIndex = identifier.Block) then
           if (identifier.SourceFile.UnitIndex = SourceFile.UnitIndex) or
-             (identifier.IsSection and SourceFile.IsAllowedUnitName(identifier.SourceFile.Name)) then
+            (identifier.IsSection and SourceFile.IsAllowedUnitName(identifier.SourceFile.Name)) then
           begin
             Result := IdentIndex;
             identifier.Pass := Pass;
@@ -202,6 +203,29 @@ begin
 
 end;  //GetIdentIndex
 
+
+(*
+function GetIdentIndex(const S: TIdentifierName): TIdentIndex;
+var
+  key: String;
+  BlockStackIndex: TBlockStackIndex;
+  blockIndex: TBlockIndex;
+begin
+
+  if S = '' then exit(-1);
+
+  Result := GetIdentIndexInternal(S, ActiveSourceFile);
+
+  key := s;
+  key := key + '/u=' + IntToStr(ActiveSourceFile.UnitIndex);
+  for BlockStackIndex := BlockStackTop downto 0 do
+  begin
+    blockIndex := BlockStack[BlockStackIndex];
+    key := key + '/b=' + IntToStr(blockIndex);
+  end;
+  Writeln(Format('GetIdentIndex: %s : %d', [key, Result]));
+end;
+*)
 
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
@@ -1180,9 +1204,8 @@ begin
               end;
             else
 
-              Error(i + 1, TMessage.Create(TErrorCode.CantTakeAddressOfIdentifier,
-                'Can''t take the address of ' + InfoAboutToken(IdentifierAt(IdentIndex).Kind)));
-
+               Error(i + 1, TMessage.Create(TErrorCode.CantTakeAddressOfIdentifier,
+                'Can''t take the address of ' + InfoAboutToken(IdentifierAt(IdentIndex).Kind)))
           end;
 
           if (IdentifierAt(IdentIndex).DataType in Pointers) and          // zadziala tylko dla ABSOLUTE
