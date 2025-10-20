@@ -91,7 +91,7 @@ begin
   Result := 0;
 
   for IdentIndex := 1 to NumIdent do
-    if (IdentifierAt(IdentIndex).Block = ProcAsBlock) and (IdentifierAt(IdentIndex).Name = 'RESULT') then
+    if (IdentifierAt(IdentIndex).BlockIndex = ProcAsBlock) and (IdentifierAt(IdentIndex).Name = 'RESULT') then
       exit(IdentIndex);
 
 end;
@@ -180,10 +180,14 @@ function GetIdentProc(S: TString; ProcIdentIndex: Integer; Param: TParamList; Nu
 type
   TBest = record
     hit: Cardinal;
-    IdentIndex, b: Integer;
+    IdentIndex: TIdentIndex;
+    b: TBlockIndex;
   end;
 var
-  IdentIndex, BlockStackIndex, i, k, b: Integer;
+  IdentIndex: TIdentIndex;
+  BlockStackIndex: TBlockStackIndex;
+  b: TBlockIndex;
+  i, k: Integer;
   hits, m: Cardinal;
   df: Byte;
   yes: Boolean;
@@ -204,7 +208,7 @@ begin
       if (IdentifierAt(IdentIndex).Kind in [TTokenKind.PROCEDURETOK, TTokenKind.FUNCTIONTOK,
         TTokenKind.CONSTRUCTORTOK, TTokenKind.DESTRUCTORTOK]) and
         (IdentifierAt(IdentIndex).SourceFile.UnitIndex = IdentifierAt(ProcIdentIndex).SourceFile.UnitIndex) and
-        (S = IdentifierAt(IdentIndex).Name) and (BlockStack[BlockStackIndex] = IdentifierAt(IdentIndex).Block) and
+        (S = IdentifierAt(IdentIndex).Name) and (BlockIndexStack[BlockStackIndex] = IdentifierAt(IdentIndex).BlockIndex) and
         (IdentifierAt(IdentIndex).NumParams = NumParams) then
       begin
 
@@ -389,7 +393,7 @@ writeln('_B: ', IdentifierAt(IdentIndex).Name);
 
         best[k].IdentIndex := IdentIndex;
         best[k].hit := hits;
-        best[k].b := IdentifierAt(IdentIndex).Block;
+        best[k].b := IdentifierAt(IdentIndex).BlockIndex;
 
         SetLength(best, k + 2);
 
@@ -501,13 +505,13 @@ begin
     for IdentIndex := NumIdent downto 1 do
       if (IdentifierAt(IdentIndex).Kind in [TTokenKind.PROCEDURETOK, TTokenKind.FUNCTIONTOK,
         TTokenKind.CONSTRUCTORTOK, TTokenKind.DESTRUCTORTOK]) and (S = IdentifierAt(IdentIndex).Name) and
-        (BlockStack[BlockStackIndex] = IdentifierAt(IdentIndex).Block) then
+        (BlockIndexStack[BlockStackIndex] = IdentifierAt(IdentIndex).BlockIndex) then
       begin
 
         for k := 0 to High(l) - 1 do
           if (IdentifierAt(IdentIndex).NumParams = l[k].NumParams) and
             (IdentifierAt(IdentIndex).SourceFile.UnitIndex = l[k].SourceFile.UnitIndex) and
-            (IdentifierAt(IdentIndex).Block = l[k].b) then
+            (IdentifierAt(IdentIndex).BlockIndex = l[k].b) then
           begin
 
             ok := True;
@@ -549,11 +553,11 @@ begin
         l[k].NumParams := IdentifierAt(IdentIndex).NumParams;
         l[k].Param := IdentifierAt(IdentIndex).Param;
         l[k].SourceFile := IdentifierAt(IdentIndex).SourceFile;
-        l[k].b := IdentifierAt(IdentIndex).Block;
+        l[k].b := IdentifierAt(IdentIndex).BlockIndex;
 
         SetLength(l, k + 2);
 
-        addOverlay(IdentifierAt(IdentIndex).SourceFile, IdentifierAt(IdentIndex).Block,
+        addOverlay(IdentifierAt(IdentIndex).SourceFile, IdentifierAt(IdentIndex).BlockIndex,
           IdentifierAt(IdentIndex).isOverload);
       end;
 
@@ -6799,7 +6803,7 @@ begin
             asm65(#9'mva >' + Name + ' :STACKORIGIN+STACKWIDTH,x');
 
             if Pass = TPass.CALL_DETERMINATION then
-              AddCallGraphChild(BlockStack[BlockStackTop], IdentifierAt(IdentIndex).ProcAsBlock);
+              AddCallGraphChild(BlockIndexStack[BlockStackTop], IdentifierAt(IdentIndex).ProcAsBlock);
 
           end
           else
@@ -7400,7 +7404,7 @@ begin
 
   old_i := i;
 
-  if IdentifierAt(IdentIndex).ProcAsBlock = BlockStack[BlockStackTop] then
+  if IdentifierAt(IdentIndex).ProcAsBlock = BlockIndexStack[BlockStackTop] then
     IdentifierAt(IdentIndex).isRecursion := True;
 
 
@@ -8153,7 +8157,7 @@ begin
 
       IdentifierAt(IdentIndex).updateResolvedForward := True
     else
-      AddCallGraphChild(BlockStack[BlockStackTop], IdentifierAt(IdentIndex).ProcAsBlock);
+      AddCallGraphChild(BlockIndexStack[BlockStackTop], IdentifierAt(IdentIndex).ProcAsBlock);
 
 
   (*------------------------------------------------------------------------------------------------------------*)
@@ -8310,18 +8314,18 @@ begin
     //  asm65(#9'.LOCAL ' + svar);
 
 
-    if (IdentifierAt(IdentIndex).Block > 1) and (IdentifierAt(IdentIndex).Block <> BlockStack[BlockStackTop]) then
+    if (IdentifierAt(IdentIndex).BlockIndex > 1) and (IdentifierAt(IdentIndex).BlockIndex <> BlockIndexStack[BlockStackTop]) then
       // issue #102 fixed
       for IdentTemp := NumIdent downto 1 do
         if (IdentifierAt(IdentTemp).Kind in [TTokenKind.PROCEDURETOK, TTokenKind.FUNCTIONTOK]) and
-          (IdentifierAt(IdentTemp).ProcAsBlock = IdentifierAt(IdentIndex).Block) then
+          (IdentifierAt(IdentTemp).ProcAsBlock = IdentifierAt(IdentIndex).BlockIndex) then
         begin
           svar := IdentifierAt(IdentTemp).Name + '.' + svar;
           Break;
         end;
 
 
-    if (BlockStack[BlockStackTop] <> 1) and (IdentifierAt(IdentIndex).Block = BlockStack[BlockStackTop]) then
+    if (BlockIndexStack[BlockStackTop] <> 1) and (IdentifierAt(IdentIndex).BlockIndex = BlockIndexStack[BlockStackTop]) then
       // w aktualnym bloku procedury/funkcji
       asm65(#9'.LOCAL ' + svar)
     else
@@ -15368,11 +15372,11 @@ WHILETOK:
         yes := False;
 
         for j := 1 to NumIdent do
-          if (IdentifierAt(j).ProcAsBlock = BlockStack[BlockStackTop]) and
+          if (IdentifierAt(j).ProcAsBlock = BlockIndexStack[BlockStackTop]) and
             (IdentifierAt(j).Kind = TTokenKind.FUNCTIONTOK) then
           begin
 
-            IdentIndex := GetIdentResult(BlockStack[BlockStackTop]);
+            IdentIndex := GetIdentResult(BlockIndexStack[BlockStackTop]);
 
             yes := True;
             Break;
@@ -15937,7 +15941,7 @@ begin
     varbegin := '';
 
     for IdentIndex := 1 to NumIdent do
-      if (IdentifierAt(IdentIndex).Block = IdentifierAt(BlockIdentIndex).ProcAsBlock) and
+      if (IdentifierAt(IdentIndex).BlockIndex = IdentifierAt(BlockIdentIndex).ProcAsBlock) and
         (IdentifierAt(IdentIndex).SourceFile.UnitIndex = ActiveSourceFile.UnitIndex) then
       begin
 
@@ -16137,7 +16141,7 @@ begin
 
       end;
 
-    if (BlockStack[BlockStackTop] <> 1) then
+    if (BlockIndexStack[BlockStackTop] <> 1) then
     begin
 
       asm65;
@@ -16854,7 +16858,7 @@ begin
   // Search for unresolved forward references
   for TypeIndex := 1 to NumIdent do
     if (IdentifierAt(TypeIndex).AllocElementType = TDataType.FORWARDTYPE) and
-      (IdentifierAt(TypeIndex).Block = BlockStack[BlockStackTop]) then
+      (IdentifierAt(TypeIndex).BlockIndex = BlockIndexStack[BlockStackTop]) then
     begin
 
       Name := IdentifierAt(GetIdentIndex(TokenAt(IdentifierAt(TypeIndex).NumAllocElements).Name)).Name;
@@ -16863,8 +16867,8 @@ begin
         TTokenKind.TYPETOK then
 
         for IdentIndex := 1 to NumIdent do
-          if (IdentifierAt(IdentIndex).Name = Name) and (IdentifierAt(IdentIndex).Block =
-            BlockStack[BlockStackTop]) then
+          if (IdentifierAt(IdentIndex).Name = Name) and (IdentifierAt(IdentIndex).BlockIndex =
+            BlockIndexStack[BlockStackTop]) then
           begin
 
             IdentifierAt(TypeIndex).NumAllocElements := IdentifierAt(IdentIndex).NumAllocElements;
@@ -16880,7 +16884,7 @@ begin
   // Search for unresolved forward references
   for TypeIndex := 1 to NumIdent do
     if (IdentifierAt(TypeIndex).AllocElementType = TDataType.FORWARDTYPE) and
-      (IdentifierAt(TypeIndex).Block = BlockStack[BlockStackTop]) then
+      (IdentifierAt(TypeIndex).BlockIndex = BlockIndexStack[BlockStackTop]) then
 
       if typ then
         Error(TypeIndex, 'Unresolved forward reference to type ' + IdentifierAt(TypeIndex).Name)
@@ -16935,8 +16939,8 @@ begin
     //writeln(NumAllocElements);
     //!@!@
     for ParamIndex := 1 to GetTypeAtIndex(NumAllocElements).NumFields do                  // label: ^record
-      if (GetTypeAtIndex(NumAllocElements).Block = 1) or (GetTypeAtIndex(NumAllocElements).Block =
-        BlockStack[BlockStackTop]) then
+      if (GetTypeAtIndex(NumAllocElements).BlockIndex = 1) or (GetTypeAtIndex(NumAllocElements).BlockIndex =
+        BlockIndexStack[BlockStackTop]) then
       begin
 
         //      writeln('a ',',',VarOfSameType[VarOfSameTypeIndex].Name + '.' + GetTypeAtIndex(NumAllocElements).Field[ParamIndex].Name,',',GetTypeAtIndex(NumAllocElements).Field[ParamIndex].DataType,',',GetTypeAtIndex(NumAllocElements).Field[ParamIndex].AllocElementType,',',GetTypeAtIndex(NumAllocElements).Field[ParamIndex].NumAllocElements);
@@ -16961,8 +16965,8 @@ begin
 
     if (VarType in [TDataType.RECORDTOK, TDataType.OBJECTTOK]) then                      // label: record
       for ParamIndex := 1 to GetTypeAtIndex(NumAllocElements).NumFields do
-        if (GetTypeAtIndex(NumAllocElements).Block = 1) or (GetTypeAtIndex(NumAllocElements).Block =
-          BlockStack[BlockStackTop]) then
+        if (GetTypeAtIndex(NumAllocElements).BlockIndex = 1) or (GetTypeAtIndex(NumAllocElements).BlockIndex =
+          BlockIndexStack[BlockStackTop]) then
         begin
 
           //      writeln('b ',',',VarOfSameType[VarOfSameTypeIndex].Name + '.' + GetTypeAtIndex(NumAllocElements).Field[ParamIndex].Name,',',GetTypeAtIndex(NumAllocElements).Field[ParamIndex].DataType,',',GetTypeAtIndex(NumAllocElements).Field[ParamIndex].AllocElementType,',',GetTypeAtIndex(NumAllocElements).Field[ParamIndex].NumAllocElements,' | ',IdentifierAt(NumIdent).Value);
@@ -17050,13 +17054,13 @@ begin
 
   Inc(NumBlocks);
   Inc(BlockStackTop);
-  BlockStack[BlockStackTop] := NumBlocks;
+  BlockIndexStack[BlockStackTop] := NumBlocks;
   IdentifierAt(BlockIdentIndex).ProcAsBlock := NumBlocks;
 
 
   GenerateLocal(BlockIdentIndex, IsFunction);
 
-  if (BlockStack[BlockStackTop] <> 1) {and (NumParams > 0)} and IdentifierAt(BlockIdentIndex).isRecursion then
+  if (BlockIndexStack[BlockStackTop] <> 1) {and (NumParams > 0)} and IdentifierAt(BlockIdentIndex).isRecursion then
   begin
 
     if IdentifierAt(BlockIdentIndex).isRegister then
@@ -17748,11 +17752,11 @@ begin
             for idx := 1 to NumIdent do
               if {(IdentifierAt(idx).ProcAsBlock = IdentifierAt(IdentIndex).ProcAsBlock) and}
               (IdentifierAt(idx).Name = IdentifierAt(IdentIndex).Name) then
-                AddCallGraphChild(BlockStack[BlockStackTop], IdentifierAt(idx).ProcAsBlock);
+                AddCallGraphChild(BlockIndexStack[BlockStackTop], IdentifierAt(idx).ProcAsBlock);
 
           end
           else
-            AddCallGraphChild(BlockStack[BlockStackTop], IdentifierAt(IdentIndex).ProcAsBlock);
+            AddCallGraphChild(BlockIndexStack[BlockStackTop], IdentifierAt(IdentIndex).ProcAsBlock);
 
         end;
 
@@ -18914,14 +18918,14 @@ begin
 
         if ForwardIdentIndex <> 0 then
           if (IdentifierAt(ForwardIdentIndex).IsUnresolvedForward) and
-            (IdentifierAt(ForwardIdentIndex).Block = BlockStack[BlockStackTop]) then
+            (IdentifierAt(ForwardIdentIndex).BlockIndex = BlockIndexStack[BlockStackTop]) then
             if TokenAt(i).Kind <> IdentifierAt(ForwardIdentIndex).Kind then
               Error(i, 'Unresolved forward declaration of ' + IdentifierAt(ForwardIdentIndex).Name);
 
 
         if ForwardIdentIndex <> 0 then
           if not IdentifierAt(ForwardIdentIndex).IsUnresolvedForward or
-            (IdentifierAt(ForwardIdentIndex).Block <> BlockStack[BlockStackTop]) or
+            (IdentifierAt(ForwardIdentIndex).BlockIndex <> BlockIndexStack[BlockStackTop]) or
             ((TokenAt(i).Kind = TTokenKind.PROCEDURETOK) and (IdentifierAt(ForwardIdentIndex).Kind <>
             TTokenKind.PROCEDURETOK)) or
             //   ((TokenAt(i).Kind = TTokenKind.CONSTRUCTORTOK) and (IdentifierAt(ForwardIdentIndex).Kind <> TTokenKind.CONSTRUCTORTOK)) or
@@ -19083,7 +19087,7 @@ begin
   end;// while
 
 
-  OutputDisabled := (Pass = TPass.CODE_GENERATION) and (BlockStack[BlockStackTop] <> 1) and
+  OutputDisabled := (Pass = TPass.CODE_GENERATION) and (BlockIndexStack[BlockStackTop] <> 1) and
     (not IdentifierAt(BlockIdentIndex).IsNotDead);
 
 
@@ -19126,7 +19130,7 @@ end;
   j := NumIdent;
 
   // Delete local identifiers and types from the tables to save space
-  while (j > 0) and (IdentifierAt(j).Block = BlockStack[BlockStackTop]) do
+  while (j > 0) and (IdentifierAt(j).BlockIndex = BlockIndexStack[BlockStackTop]) do
   begin
     // If procedure or function, delete parameters first
     if IdentifierAt(j).Kind in [TTokenKind.PROCEDURETOK, TTokenKind.FUNCTIONTOK,
@@ -19187,7 +19191,7 @@ end;
   if pass = TPass.CALL_DETERMINATION then
     if IdentifierAt(BlockIdentIndex).isKeep or IdentifierAt(BlockIdentIndex).isInterrupt or
       IdentifierAt(BlockIdentIndex).updateResolvedForward then
-      AddCallGraphChild(BlockStack[BlockStackTop], IdentifierAt(BlockIdentIndex).ProcAsBlock);
+      AddCallGraphChild(BlockIndexStack[BlockStackTop], IdentifierAt(BlockIdentIndex).ProcAsBlock);
 
 
   //Result := j;
@@ -19539,7 +19543,7 @@ end;
 
     yes := False;
     for IdentIndex := 1 to NumIdent do
-      if (resArray[i].resName = IdentifierAt(IdentIndex).Name) and (IdentifierAt(IdentIndex).Block = 1) then
+      if (resArray[i].resName = IdentifierAt(IdentIndex).Name) and (IdentifierAt(IdentIndex).BlockIndex = 1) then
       begin
 
         if (IdentifierAt(IdentIndex).DataType in Pointers) and (IdentifierAt(IdentIndex).NumAllocElements > 0) then

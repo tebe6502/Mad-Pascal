@@ -79,7 +79,7 @@ var
 
   function Search(const X: TString; const SourceFile: TSourceFile): TIdentIndex;
   var
-    BlockStackIndex: Integer;
+    BlockStackIndex: TBlockStackIndex;
     blockIndex: TBlockIndex;
     MaxIdentIndex, IdentIndex: TIdentIndex;
     identifier: TIdentifier;
@@ -92,7 +92,7 @@ var
     MaxIdentIndex := NumIdent_; // JAC! Speed optimization test
     for BlockStackIndex := BlockStackTop downto 0 do
     begin
-      blockIndex := BlockStack[BlockStackIndex];
+      blockIndex := BlockIndexStack[BlockStackIndex];
       for IdentIndex := 1 to MaxIdentIndex do
       begin
 
@@ -101,7 +101,7 @@ var
         // identifier := IdentifierList.GetIdentifierAtIndex(IdentIndex); )
         identifier := IdentifierList.identifierArray[IdentIndex];
 
-        if (X = identifier.Name) and (blockIndex = identifier.Block) then
+        if (X = identifier.Name) and (blockIndex = identifier.BlockIndex) then
         begin
           unitEquals := (identifier.SourceFile.UnitIndex = SYSTEM_UNIT_INDEX) or
             (identifier.SourceFile.UnitIndex = SourceFile.UnitIndex);
@@ -133,7 +133,7 @@ var
     MaxIdentIndex := NumIdent_; // JAC! Speed optimization test
     for BlockStackIndex := BlockStackTop downto 0 do
     begin
-      blockIndex := BlockStack[BlockStackIndex];
+      blockIndex := BlockIndexStack[BlockStackIndex];
 
       // Search all nesting levels from the current one to the most outer one
       for IdentIndex := 1 to MaxIdentIndex do
@@ -143,7 +143,7 @@ var
         // identifier := IdentifierList.GetIdentifierAtIndex(IdentIndex); )
         identifier := IdentifierList.identifierArray[IdentIndex];
 
-        if (X = identifier.Name) and (blockIndex = identifier.Block) then
+        if (X = identifier.Name) and (blockIndex = identifier.BlockIndex) then
           if (identifier.SourceFile.UnitIndex = SourceFile.UnitIndex) or
             (identifier.IsSection and SourceFile.IsAllowedUnitName(identifier.SourceFile.Name)) then
           begin
@@ -1679,7 +1679,7 @@ begin
 
   if (identIndex > 0) and (not (IdentifierAt(IdentIndex).Kind in [TTokenKind.PROCEDURETOK,
     TTokenKind.FUNCTIONTOK, TTokenKind.CONSTRUCTORTOK, TTokenKind.DESTRUCTORTOK])) and
-    (IdentifierAt(IdentIndex).Block = BlockStack[BlockStackTop]) and
+    (IdentifierAt(IdentIndex).BlockIndex = BlockIndexStack[BlockStackTop]) and
     (IdentifierAt(IdentIndex).isOverload = False) and (IdentifierAt(identIndex).SourceFile.UnitIndex =
     ActiveSourceFile.UnitIndex) then
     Error(tokenIndex, TMessage.Create(TErrorCode.IdentifierAlreadyDefined, 'Identifier {0} is already defined', Name))
@@ -1706,7 +1706,7 @@ begin
     identifier.Name := Name;
     identifier.Kind := Kind;
     identifier.DataType := DataType;
-    identifier.Block := BlockStack[BlockStackTop];
+    identifier.BlockIndex := BlockIndexStack[BlockStackTop];
     identifier.NumParams := 0;
     identifier.isAbsolute := False;
     identifier.PassMethod := TParameterPassingMethod.VALPASSING;
@@ -2657,7 +2657,7 @@ begin
             FieldInListName[FieldInListIndex].Value);
         end;
 
-        _TypeArray[RecType].Block := BlockStack[BlockStackTop];
+        _TypeArray[RecType].BlockIndex := BlockIndexStack[BlockStackTop];
 
         AllocElementType := DataType;
 
@@ -2897,7 +2897,7 @@ begin
 
                 CheckTok(i, TTokenKind.ENDTOK);
 
-                _TypeArray[RecType].Block := BlockStack[BlockStackTop];
+                _TypeArray[RecType].BlockIndex := BlockIndexStack[BlockStackTop];
 
                 DataType := TDataType.OBJECTTOK;
                 NumAllocElements := RecType;      // Index to the Types array
@@ -2995,7 +2995,7 @@ begin
 
                   CheckTok(i, TTokenKind.ENDTOK);
 
-                  _TypeArray[RecType].Block := BlockStack[BlockStackTop];
+                  _TypeArray[RecType].BlockIndex := BlockIndexStack[BlockStackTop];
 
                   DataType := TDataType.RECORDTOK;
                   NumAllocElements := RecType;      // index to the Types array
@@ -3396,7 +3396,7 @@ begin
                             _TypeArray[RecType].Field[1].Value := LowerBound;
                             _TypeArray[RecType].Field[2].Value := UpperBound;
 
-                            _TypeArray[RecType].Block := BlockStack[BlockStackTop];
+                            _TypeArray[RecType].BlockIndex := BlockIndexStack[BlockStackTop];
 
                             DataType := TDataType.SUBRANGETYPE;
                             NumAllocElements := RecType;      // index to the Types array

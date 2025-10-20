@@ -5,6 +5,7 @@ unit CompilerTypes;
 interface
 
 uses SysUtils, CommonTypes, Datatypes, FileIO, Tokens, Utilities;
+
   // ----------------------------------------------------------------------------
 
 
@@ -139,6 +140,7 @@ type
 
   TParamList = array [1..MAXPARAMS] of TParam;
 
+  TBlockStackIndex = Integer;
   TBlockIndex = Integer;
 
   TIdentifierName = String;
@@ -166,7 +168,7 @@ type
   TTypeIndex = Integer;
 
   TType = record
-    Block: TBlockIndex;
+    BlockIndex: TBlockIndex;
     NumFields: Integer;
     Size: Integer;
     Field: array [0..MAXTYPES] of TField;
@@ -278,7 +280,7 @@ type
   TIdentifier = class
     Name: TIdentifierName;
     Value: Int64;             // Value for a constant, address for a variable, procedure or function
-    Block: TBlockIndex;           // Index of a block in which the identifier is defined
+    BlockIndex: TBlockIndex;  // Index of a block in which the identifier is defined
     SourceFile: TSourceFile;
     Alias: TString;           // EXTERNAL alias 'libraries'
     Libraries: Integer;       // EXTERNAL alias 'libraries'

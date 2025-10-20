@@ -72,7 +72,7 @@ type
 
 var
   BlockStackTop: TBlockStackIndex;
-  BlockStack: array [0..MAXBLOCKS - 1] of TBlockIndex;
+  BlockIndexStack: array [0..MAXBLOCKS - 1] of TBlockIndex;
 
   CallGraph: array [1..MAXBLOCKS] of TCallGraphNode;  // For dead code elimination
 
@@ -337,8 +337,8 @@ var
     for BlockStackIndex := BlockStackTop downto 0 do
       for IdentIndex := 1 to NumIdent do
         if (IdentifierAt(IdentIndex).DataType = TDataType.ENUMTOK) and
-          (IdentifierAt(IdentIndex).NumAllocElements = Num) and (BlockStack[BlockStackIndex] =
-          IdentifierAt(IdentIndex).Block) then
+          (IdentifierAt(IdentIndex).NumAllocElements = Num) and (BlockIndexStack[BlockStackIndex] =
+          IdentifierAt(IdentIndex).BlockIndex) then
           exit(IdentIndex);
   end;
 
