@@ -7911,7 +7911,7 @@ begin
               if (TokenAt(i - 1).Kind = TTokenKind.ADDRESSTOK) then
 	      begin
                 
-		if IdentifierAt(IdentTemp).DataType = TDataType.POINTERTOK then
+		if IdentifierAt(IdentIndex).Param[NumActualParams].AllocElementType <> TDataType.UNTYPETOK then
 		  AllocElementType := IdentifierAt(IdentTemp).AllocElementType
 		else		
 		  AllocElementType := TDataType.UNTYPETOK;
