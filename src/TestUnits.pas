@@ -32,8 +32,8 @@ uses
 
   procedure AssertEquals(actual, expected: TDatatype); overload;
   begin
-    Assert(actual = expected, 'The actual value ''' + GetTokenKindName(actual) +
-      ''' is not equal to the expected value ''' + GetTokenKindName(expected) + '''.');
+    Assert(actual = expected, 'The actual value ''' + GetDataTypeName(actual) +
+      ''' is not equal to the expected value ''' + GetDataTypeName(expected) + '''.');
   end;
 
 
@@ -91,25 +91,39 @@ uses
   procedure TestFileIO(filePath: TFilePath);
   var
     binFile: IBinaryFile;
+    cachedBinFile: IBinaryFile;
   var
-    c: Char;
+    c1, c2: Char;
   begin
     StartTest('TestFileIO');
 
-    binFile := TFileSystem.CreateBinaryFile;
+    binFile := TFileSystem.CreateBinaryFile(False);
     binFile.Assign(filePath);
-    try
-      binFile.Reset;
 
+    cachedBinFile := TFileSystem.CreateBinaryFile(True);
+    cachedBinFile.Assign(filePath);
+    try
+      binFile.Reset(1);
+      cachedBinFile.Reset(1);
+
+      AssertEquals(binFile.GetFileSize, cachedBinFile.GetFileSize);
       while not binFile.EOF do
       begin
-        c := ' ';
-        binFile.Read(c);
-        Write(c);
+        if cachedBinFile.EOF then FailTest('End of cached file reached.');
+        c1 := ' ';
+        binFile.Read(c1);
+        Write(c1);
+
+        c2 := ' ';
+        cachedBinFile.Read(c2);
+        if (c1 <> c2) then FailTest('Read "' + c2 + '" from cached file instead of "' + c1 + '".');
+
         // WriteLn(IntToStr(Ord(c)));
       end;
-      //      binFile.Read(c);
+      if not cachedBinFile.EOF then FailTest('End of cached file not reached.');
+
       binFile.Close;
+      cachedBinFile.Close;
     except
       FailTest('Failed with Exception.');
 
@@ -122,7 +136,6 @@ uses
     TEST_MP_FILE_PATH = '..\src\tests\TestMP.pas';
   var
     pathList: TPathList;
-
   begin
     StartTest('TestUnitFileIO');
     TestNativeIO(TEST_MP_FILE_PATH);

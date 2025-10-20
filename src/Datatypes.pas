@@ -24,8 +24,9 @@ const
 
   StringTypes = [TDataType.STRINGPOINTERTOK, TDataType.STRINGLITERALTOK, TDataType.PCHARTOK];
 
-function GetDataSize(const dataType: TDataType): Byte;
-function GetValueType(Value: TInteger): TDataType;
+  function GetDataTypeName(const dataType: TDataType): String;
+  function GetDataSize(const dataType: TDataType): Byte;
+function GetValueType(const Value: TInteger): TDataType;
 
 implementation
 
@@ -60,6 +61,11 @@ const
     );
 
 
+  function GetDataTypeName(const dataType: TDataType): String;
+  begin
+    WriteStr(Result, dataType);
+  end;
+
 function GetDataSize(const dataType: TDataType): Byte;
 var
   index: Byte;
@@ -83,7 +89,7 @@ end;
 
 
 
-function GetValueType(Value: TInteger): TDataType;
+function GetValueType(const Value: TInteger): TDataType;
 begin
 
   if Value < 0 then

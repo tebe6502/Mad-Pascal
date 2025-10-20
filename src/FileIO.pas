@@ -8,7 +8,7 @@ interface
 
 uses SysUtils, CommonTypes;
 
-{$SCOPEDENUMS ON}
+  {$SCOPEDENUMS ON}
 
 type
   TFilePath = String;
@@ -18,8 +18,8 @@ type
   TPathList = class
   public
     constructor Create;
-    procedure AddFolder(folderPath: TFolderPath);
-    function FindFile(filePath: TFilePath): TFilePath;
+    procedure AddFolder(const folderPath: TFolderPath);
+    function FindFile(const filePath: TFilePath): TFilePath;
     function GetSize: Integer;
     function ToString: String; override;
   private
@@ -29,13 +29,15 @@ type
 
 
 type
+  TFileSize = Longint;
   TFilePosition = Longint;
-// https://www.freepascal.org/docs-html/rtl/system/filepos.html
+  // https://www.freepascal.org/docs-html/rtl/system/filepos.html
 type
   IFile = interface
     function GetFilePath: TFilePath;
     function GetAbsoluteFilePath: TFilePath;
-    procedure Assign(filePath: TFilePath);
+
+    procedure Assign(const filePath: TFilePath);
     procedure Close;
     procedure Erase();
     function EOF(): Boolean;
@@ -45,13 +47,15 @@ type
 
 type
   IBinaryFile = interface(IFile)
+    function GetFileSize: TFileSize;
+
     // https://www.freepascal.org/docs-html/rtl/system/blockread.html
-    procedure BlockRead(var Buf; Count: Longint; var Result: Longint);
+    procedure BlockRead(var Buf; const Count: TFileSize; var Result: TFileSize);
     // https://www.freepascal.org/docs-html/rtl/system/filepos.html
-    function FilePos(): TInteger;
+    function FilePos(): TFilePosition;
     procedure Read(var c: Char);
-    procedure Reset(l: Longint); overload; // l = record size
-    procedure Seek2(Pos: TInteger);
+    procedure Reset(const l: Longint); overload; // l = record size
+    procedure Seek2(const Pos: TFilePosition);
   end;
 
 type
@@ -100,21 +104,21 @@ type
   TFileSystem = class
   public
   const
-  {$IFNDEF SIMULATED_FILE_IO}
+    {$IFNDEF SIMULATED_FILE_IO}
     PathDelim = DirectorySeparator;
-  {$ELSE}
+    {$ELSE}
     PathDelim = '/';
-  {$ENDIF}
-    class function CreateBinaryFile: IBinaryFile; static;
+    {$ENDIF}
+    class function CreateBinaryFile(const cached: Boolean = False): IBinaryFile; static;
     class function CreateTextFile: ITextFile; static;
-    class function FileExists_(filePath: TFilePath): Boolean;
-    class function FolderExists(folderPath: TFolderPath): Boolean;
-    class function NormalizePath(filePath: TFilePath): TFilePath;
-    class function GetAbsolutePath(filePath: TFilePath): TFilePath;
+    class function FileExists_(const filePath: TFilePath): Boolean;
+    class function FolderExists(const folderPath: TFolderPath): Boolean;
+    class function NormalizePath(const filePath: TFilePath): TFilePath;
+    class function GetAbsolutePath(const filePath: TFilePath): TFilePath;
 
-  {$IFDEF SIMULATED_FILE_IO}
+    {$IFDEF SIMULATED_FILE_IO}
     class function GetFileMap: TFileMap;
-  {$ENDIF}
+    {$ENDIF}
 
   end;
 
@@ -134,7 +138,8 @@ type
     constructor Create;
     function GetFilePath(): TFilePath;
     function GetAbsoluteFilePath(): TFilePath;
-    procedure Assign(filePath: TFilePath); virtual; abstract;
+
+    procedure Assign(const filePath: TFilePath); virtual; abstract;
     procedure Close; virtual; abstract;
     procedure Erase(); virtual; abstract;
     function EOF(): Boolean; virtual; abstract;
@@ -145,22 +150,23 @@ type
 type
   TTextFile = class(TFile, ITextFile)
 
-{$IFNDEF SIMULATED_FILE_IO}
+    {$IFNDEF SIMULATED_FILE_IO}
   private
   type TSystemTextFile = System.TextFile;
   private
     f: TSystemTextFile;
-{$ELSE}
+    {$ELSE}
   private
     fileMapEntry: TFileMapEntry;
   private
     fileMode: TFileMode;
   private
     filePosition: TFilePosition;
-{$ENDIF}
+    {$ENDIF}
   public
     constructor Create;
-    procedure Assign(filePath: TFilePath); override;
+
+    procedure Assign(const filePath: TFilePath); override;
     procedure Close; override;
     procedure Erase(); override;
     function EOF(): Boolean; override;
@@ -184,41 +190,78 @@ type
 
 type
   TBinaryFile = class(TFile, IBinaryFile)
-{$IFNDEF SIMULATED_FILE_IO}
+    {$IFNDEF SIMULATED_FILE_IO}
   private
   type TSystemBinaryFile = file of Char;
   private
     f: TSystemBinaryFile;
-{$ELSE}
+    {$ELSE}
 private
   fileMapEntry: TFileMapEntry;
 private
   fileMode: TFileMode;
 private
   filePosition: TFilePosition;
-{$ENDIF}
+    {$ENDIF}
   public
     constructor Create;
-    procedure Assign(filePath: TFilePath); override;
+    function GetFileSize(): TFileSize;
+
+    procedure Assign(const filePath: TFilePath); override;
     // https://www.freepascal.org/docs-html/rtl/system/blockread.html
-    procedure BlockRead(var Buf; Count: Longint; var Result: Longint);
+    procedure BlockRead(var Buf; const Count: TFileSize; var Result: TFileSize);
     procedure Close; override;
     procedure Erase(); override;
     function EOF(): Boolean; override;
     // https://www.freepascal.org/docs-html/rtl/system/filepos.html
-    function FilePos(): TInteger;
+    function FilePos(): TFilePosition;
     procedure Read(var c: Char);
     procedure Reset(); override; overload;
-    procedure Reset(l: Longint); overload;
+    procedure Reset(const l: Longint); overload;
     procedure Rewrite(); override;
-    procedure Seek2(Pos: TInteger);
+    procedure Seek2(const Pos: TFilePosition);
 
   end;
 
-{$IFDEF SIMULATED_FILE_IO}
+  {$IFDEF SIMULATED_FILE_IO}
 //  {$I 'include\SIMULATED_FILE_IO\FileIO-SIMULATED_FILE_IO-Implementation.inc'}
-{$ENDIF}
+  {$ENDIF}
 
+
+
+  // ----------------------------------------------------------------------------
+  // TCachedBinaryFile
+  // ----------------------------------------------------------------------------
+
+
+type
+  TCachedBinaryFile = class(TFile, IBinaryFile)
+  private
+  var
+    binaryFile: IBinaryFile;
+    content: array of Char;
+    filePosition: TFilePosition;
+
+  public
+    constructor Create;
+
+    // Form TFile
+    function GetFileSize(): TFileSize;
+    procedure Assign(const filePath: TFilePath); overload;
+    procedure Close; overload;
+    procedure Erase(); overload;
+    function EOF(): Boolean; overload;
+    procedure Reset(); overload;  // Open for reading
+    procedure Rewrite(); overload;  // Open for writing
+
+    // From IBinaryFile
+    procedure BlockRead(var Buf; const Count: TFileSize; var Result: TFileSize);
+    function FilePos(): TFilePosition;
+    procedure Read(var c: Char);
+    procedure Reset(const l: Longint); overload; // l = record size
+    procedure Seek2(const Pos: TFilePosition);
+
+  end;
 
 constructor TPathList.Create;
 begin
@@ -226,27 +269,28 @@ begin
   SetLength(paths, 0);
 end;
 
-procedure TPathList.AddFolder(folderPath: TFolderPath);
+procedure TPathList.AddFolder(const folderPath: TFolderPath);
 var
+  normalizedFolderPath: TFolderPath;
   i, size: Integer;
 begin
 
-  folderPath := IncludeTrailingPathDelimiter(folderPath);
-  folderPath := TFileSystem.NormalizePath(folderPath);
+  normalizedFolderPath := IncludeTrailingPathDelimiter(folderPath);
+  normalizedFolderPath := TFileSystem.NormalizePath(folderPath);
 
   // Do not add duplicates.
   for i := Low(paths) to High(paths) do
   begin
-    if paths[i] = folderPath then exit;
+    if paths[i] = normalizedFolderPath then exit;
   end;
 
   size := GetSize;
   Inc(size);
   SetLength(paths, size);
-  paths[size - 1] := IncludeTrailingPathDelimiter(folderPath);
+  paths[size - 1] := IncludeTrailingPathDelimiter(normalizedFolderPath);
 end;
 
-function TPathList.FindFile(filePath: TFilePath): TFilePath;
+function TPathList.FindFile(const filePath: TFilePath): TFilePath;
 var
   i: Integer;
 begin
@@ -314,97 +358,97 @@ begin
   {$ENDIF}
 end;
 
-procedure TTextFile.Assign(filePath: TFilePath);
+procedure TTextFile.Assign(const filePath: TFilePath);
 begin
   Self.filePath := filePath;
-{$IFNDEF SIMULATED_FILE_IO}
+  {$IFNDEF SIMULATED_FILE_IO}
   AssignFile(f, filePath);
-{$ENDIF}
+  {$ENDIF}
 end;
 
 procedure TTextFile.Close();
 begin
-{$IFNDEF SIMULATED_FILE_IO}
+  {$IFNDEF SIMULATED_FILE_IO}
   CloseFile(f);
-{$ELSE}
+  {$ELSE}
   fileMapEntry := nil;
   fileMode := TFileMode.Read;
   filePosition := -1;
-{$ENDIF}
+  {$ENDIF}
 end;
 
 procedure TTextFile.Erase();
 begin
-{$IFNDEF SIMULATED_FILE_IO}
+  {$IFNDEF SIMULATED_FILE_IO}
   System.Erase(f);
-{$ELSE}
+  {$ELSE}
   FileIO.fileMap.RemoveEntry(filePath);
-{$ENDIF}
+  {$ENDIF}
 
 end;
 
 function TTextFile.EOF(): Boolean;
 begin
-{$IFNDEF SIMULATED_FILE_IO}
+  {$IFNDEF SIMULATED_FILE_IO}
   Result := System.EOF(f);
-{$ELSE}
+  {$ELSE}
   Result := (fileMapEntry.content.length = filePosition);
-{$ENDIF}
+  {$ENDIF}
 
 end;
 
 
 procedure TTextFile.Flush();
 begin
-{$IFNDEF SIMULATED_FILE_IO}
+  {$IFNDEF SIMULATED_FILE_IO}
   System.Flush(f);
-{$ENDIF}
+  {$ENDIF}
 
 end;
 
 procedure TTextFile.Read(var c: Char);
 begin
-{$IFNDEF SIMULATED_FILE_IO}
+  {$IFNDEF SIMULATED_FILE_IO}
   System.Read(f, c);
-{$ELSE}
+  {$ELSE}
   Assert(fileMapEntry <> nil, 'File '''+filePath+''' has no file map entry assigned.');
   Assert(fileMode = TFileMode.Read, 'File '''+filePath+''' is not opened for reading.');
   if Eof then raise EInOutError.create('End of file '''+filePath+''' reached. Cannot read position '+IntToStr(filePosition)+'.');
   c := fileMapEntry.content[filePosition];
   Inc(filePosition);
-{$ENDIF}
+  {$ENDIF}
 
 end;
 
 procedure TTextFile.ReadLn(var s: String);
 begin
-{$IFNDEF SIMULATED_FILE_IO}
+  {$IFNDEF SIMULATED_FILE_IO}
   System.ReadLn(f, s);
-{$ELSE}
+  {$ELSE}
   Assert(false, 'Not Implemented yet');
-{$ENDIF}
+  {$ENDIF}
 
 end;
 
 procedure TTextFile.Reset();
 begin
-{$IFNDEF SIMULATED_FILE_IO}
+  {$IFNDEF SIMULATED_FILE_IO}
   System.FileMode := 0;
   System.Reset(f);
-{$ELSE}
+  {$ELSE}
   fileMapEntry := fileMap.GetEntry(filePath);
   fileMode := TFileMode.Read;
   filePosition := 0;
-{$ENDIF}
+  {$ENDIF}
 
 end;
 
 procedure TTextFile.Rewrite();
 begin
-{$IFNDEF SIMULATED_FILE_IO}
+  {$IFNDEF SIMULATED_FILE_IO}
   System.FileMode := 1;
   System.Rewrite(f);
-{$ELSE}
+  {$ELSE}
   fileMapEntry := fileMap.GetEntry(filePath);
   if (fileMapEntry=nil) then
   begin
@@ -412,19 +456,19 @@ begin
   end;
   fileMode := TFileMode.Write;
   filePosition := 0;
-{$ENDIF}
+  {$ENDIF}
 end;
 
 function TTextFile.Write(s: String): ITextFile;
 begin
-{$IFNDEF SIMULATED_FILE_IO}
+  {$IFNDEF SIMULATED_FILE_IO}
   System.Write(f, s);
-{$ELSE}
+  {$ELSE}
   Assert(fileMapEntry <> nil, 'File '''+filePath+''' has no file map entry assigned.');
   Assert(fileMode = TFileMode.Write, 'File '''+filePath+''' is not opened for writing.');
   fileMapEntry.content := fileMapEntry.content + s;
   filePosition := filePosition + length(s);
-{$ENDIF}
+  {$ENDIF}
   Result := Self;
 end;
 
@@ -448,13 +492,12 @@ begin
 end;
 
 procedure TTextFile.WriteLn();
-
 begin
-{$IFNDEF SIMULATED_FILE_IO}
+  {$IFNDEF SIMULATED_FILE_IO}
   System.WriteLn(f, '');
-{$ELSE}
+  {$ELSE}
   Write(LineEnding);
-{$ENDIF}
+  {$ENDIF}
 
 end;
 
@@ -494,78 +537,83 @@ begin
   {$ENDIF}
 end;
 
-procedure TBinaryFile.Assign(filePath: TFilePath);
+function TBinaryFile.GetFileSize: TFileSize;
 begin
-  Self.filePath := filePath;
-{$IFNDEF SIMULATED_FILE_IO}
-  AssignFile(f, filePath);
-{$ELSE}
-  Close;
-{$ENDIF}
+  Result := FileSize(f);
 end;
 
-procedure TBinaryFile.BlockRead(var Buf; Count: Longint; var Result: Longint);
+procedure TBinaryFile.Assign(const filePath: TFilePath);
 begin
-{$IFNDEF SIMULATED_FILE_IO}
+  Self.filePath := filePath;
+  {$IFNDEF SIMULATED_FILE_IO}
+  AssignFile(f, filePath);
+  {$ELSE}
+  Close;
+  {$ENDIF}
+end;
+
+procedure TBinaryFile.BlockRead(var Buf; const Count: TFileSize; var Result: TFileSize);
+begin
+  {$IFNDEF SIMULATED_FILE_IO}
   System.BlockRead(f, Buf, Count, Result);
-{$ELSE}
+  {$ELSE}
   Assert(False, 'Not implemented yet');
-{$ENDIF}
+  {$ENDIF}
 end;
 
 procedure TBinaryFile.Close();
 begin
-{$IFNDEF SIMULATED_FILE_IO}
+  {$IFNDEF SIMULATED_FILE_IO}
   CloseFile(f);
-{$ELSE}
+  {$ELSE}
   fileMapEntry :=nil;
   fileMode :=TFileMode.Read;
   filePosition := -1;
-{$ENDIF}
+  {$ENDIF}
 
 end;
 
 function TBinaryFile.EOF(): Boolean;
 begin
-{$IFNDEF SIMULATED_FILE_IO}
+  {$IFNDEF SIMULATED_FILE_IO}
   Result := System.EOF(f);
-{$ELSE}
+  {$ELSE}
   Result := (fileMapEntry.content.length = filePos);
-{$ENDIF}
+  {$ENDIF}
 end;
 
 procedure TBinaryFile.Erase();
 begin
-{$IFNDEF SIMULATED_FILE_IO}
+  {$IFNDEF SIMULATED_FILE_IO}
   System.Erase(f);
-{$ELSE}
+  {$ELSE}
   Assert(false, 'Not implemented yet.');
-{$ENDIF}
+  {$ENDIF}
 
 end;
 
-function TBinaryFile.FilePos(): TInteger;
+function TBinaryFile.FilePos(): TFilePosition;
 begin
-{$IFNDEF SIMULATED_FILE_IO}
+  {$IFNDEF SIMULATED_FILE_IO}
   Result := System.FilePos(f);
-{$ELSE}
+  {$ELSE}
   Result := filePosition;
-{$ENDIF}
+  {$ENDIF}
 end;
 
 procedure TBinaryFile.Read(var c: Char);
 begin
-{$IFNDEF SIMULATED_FILE_IO}
+  {$IFNDEF SIMULATED_FILE_IO}
 
   System.Read(f, c);
-{$ELSE}
+  {$ELSE}
   Assert(fileMapEntry <> nil, 'File '''+filePath+''' has no file map entry assigned.');
   Assert(fileMode = TFileMode.Read, 'File '''+filePath+''' is not opened for reading.');
   if Eof then raise EInOutError.create('End of file '''+filePath+''' reached. Cannot read position '+IntToStr(filePosition)+'.');
   c := fileMapEntry.content[filePosition+1];
   // Writeln('Reading character '''+c+''' ($'+IntToHex(ord(c),2)+') at file position '+IntToStr(filePosition)+' of '''+filePath+'''.');
   Inc(filePosition);
-{$ENDIF}
+  {$ENDIF}
 
 end;
 
@@ -575,25 +623,25 @@ begin
   Reset(128);
 end;
 
-procedure TBinaryFile.Reset(l: Longint); overload;
+procedure TBinaryFile.Reset(const l: Longint); overload;
 begin
-{$IFNDEF SIMULATED_FILE_IO}
+  {$IFNDEF SIMULATED_FILE_IO}
   System.FileMode := 0;
   System.Reset(f, l);
-{$ELSE}
+  {$ELSE}
   if l <>1 then raise EInOutError.create('Unsupported record size '+IntToStr(l)+' specified. Only record size 1 is supported.');
   fileMapEntry := fileMap.GetEntry(filePath);
   fileMode := TFileMode.Read;
   filePosition := 0;
-{$ENDIF}
+  {$ENDIF}
 
 end;
 
 procedure TBinaryFile.Rewrite();
 begin
-{$IFNDEF SIMULATED_FILE_IO}
+  {$IFNDEF SIMULATED_FILE_IO}
   System.Rewrite(f);
-{$ELSE}
+  {$ELSE}
   fileMapEntry := fileMap.GetEntry(filePath);
   if (fileMapEntry=nil) then
   begin
@@ -601,19 +649,110 @@ begin
   end;
   fileMode := TFileMode.Write;
   filePosition := 0;
-{$ENDIF}
+  {$ENDIF}
 
 end;
 
-procedure TBinaryFile.Seek2(Pos: TInteger);
+procedure TBinaryFile.Seek2(const Pos: TFilePosition);
 begin
-{$IFNDEF SIMULATED_FILE_IO}
+  {$IFNDEF SIMULATED_FILE_IO}
   System.Seek(f, pos);
-{$ELSE}
+  {$ELSE}
   filePosition:=Pos;
-{$ENDIF}
+  {$ENDIF}
 end;
 
+
+// ----------------------------------------------------------------------------
+// TCachedBinaryFile
+// ----------------------------------------------------------------------------
+
+
+constructor TCachedBinaryFile.Create;
+begin
+  binaryFile := TBinaryFile.Create;
+  content := nil;
+  filePosition := 0;
+end;
+
+function TCachedBinaryFile.GetFileSize(): TFileSize;
+begin
+  Result := Length(content);
+end;
+
+procedure TCachedBinaryFile.Assign(const filePath: TFilePath);
+begin
+  binaryFile.Assign(filePath);
+end;
+
+procedure TCachedBinaryFile.Close;
+begin
+  binaryFile.Close;
+  content := nil;
+  filePosition := 0;
+end;
+
+procedure TCachedBinaryFile.Erase();
+begin
+  raise EInOutError.Create('Not implemented.');
+end;
+
+function TCachedBinaryFile.EOF(): Boolean;
+begin
+  Result := (filePosition = GetFileSize);
+end;
+
+procedure TCachedBinaryFile.Reset();
+begin
+  Reset(128);
+end;
+
+procedure TCachedBinaryFile.Reset(const l: Longint); // l = record size
+var
+  length: TFileSize;
+  Result: TFileSize;
+begin
+  if l <> 1 then raise EInOutError.Create('Unsupported record size ' + IntToStr(l) +
+      ' specified. Only record size 1 is supported.');
+
+  binaryFile.Reset(l);
+  length := binaryFile.GetFileSize;
+  SetLength(content, length);
+  Result := -1;
+  if (length > 0) then
+  begin
+    binaryFile.BlockRead(content[0], length, Result);
+    Assert(length = Result);
+  end;
+end;
+
+procedure TCachedBinaryFile.Rewrite();
+begin
+  raise EInOutError.Create('Not implemented.');
+end;
+
+procedure TCachedBinaryFile.BlockRead(var Buf; const Count: TFileSize; var Result: TFileSize);
+begin
+  raise EInOutError.Create('Not implemented.');
+end;
+
+function TCachedBinaryFile.FilePos(): TFilePosition;
+begin
+  Result := filePosition;
+end;
+
+procedure TCachedBinaryFile.Read(var c: Char);
+begin
+  if EOF() then raise EInOutError.Create('End of file');
+  c := content[filePosition];
+  Inc(filePosition);
+end;
+
+
+procedure TCachedBinaryFile.Seek2(const Pos: TFilePosition);
+begin
+  filePosition := Pos;
+end;
 
 // ----------------------------------------------------------------------------
 // TFileMap
@@ -673,9 +812,16 @@ end;
 // ----------------------------------------------------------------------------
 // TFileSystem
 // ----------------------------------------------------------------------------
-class function TFileSystem.CreateBinaryFile: IBinaryFile;
+class function TFileSystem.CreateBinaryFile(const cached: Boolean = False): IBinaryFile;
 begin
-  Result := TBinaryFile.Create;
+  if (cached) then
+  begin
+    Result := TCachedBinaryFile.Create;
+  end
+  else
+  begin
+    Result := TBinaryFile.Create;
+  end;
 end;
 
 class function TFileSystem.CreateTextFile: ITextFile;
@@ -683,7 +829,7 @@ begin
   Result := TTextFile.Create;
 end;
 
-class function TFileSystem.FileExists_(filePath: TFilePath): Boolean;
+class function TFileSystem.FileExists_(const filePath: TFilePath): Boolean;
 begin
   {$IFNDEF SIMULATED_FILE_IO}
   Result := FileExists(filePath);
@@ -692,7 +838,7 @@ begin
   {$ENDIF}
 end;
 
-class function TFileSystem.FolderExists(folderPath: TFolderPath): Boolean;
+class function TFileSystem.FolderExists(const folderPath: TFolderPath): Boolean;
 begin
   {$IFNDEF SIMULATED_FILE_IO}
   Result := DirectoryExists(folderPath);
@@ -701,7 +847,7 @@ begin
   {$ENDIF}
 end;
 
-class function TFileSystem.NormalizePath(filePath: TFilePath): TFilePath;
+class function TFileSystem.NormalizePath(const filePath: TFilePath): TFilePath;
 begin
 
   Result := filePath;
@@ -726,7 +872,7 @@ begin
 end;
 
 
-class function TFileSystem.GetAbsolutePath(filePath: TFilePath): TFilePath;
+class function TFileSystem.GetAbsolutePath(const filePath: TFilePath): TFilePath;
 begin
   {$IFNDEF SIMULATED_FILE_IO}
   Result := ExpandFileName(filePath);
@@ -769,8 +915,8 @@ end;
 
 initialization
 
-{$IFDEF SIMULATED_FILE_IO}
+  {$IFDEF SIMULATED_FILE_IO}
   InitializeFileMap;
-{$ENDIF}
+  {$ENDIF}
 
 end.

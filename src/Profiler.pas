@@ -77,7 +77,7 @@ begin
   seconds := (entryPtr^.EndTime - entryPtr^.StartTime + 500) / 1000;
   message:=Format('Profiler level %d section %s ended after %.2f seconds.', [entryPtr^.level, entryPtr^.Name, seconds]);
   LogTrace(message);
-  writeln(message);
+  // writeln(message);
 
   Dec(level);
 end;

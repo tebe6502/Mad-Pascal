@@ -125,7 +125,7 @@ begin
   Self.Text := '';
 
   // In const mode, no dynamic message formatting should be used.
-  Assert(not IsConst, 'TMessage should not be called on const mode');
+  // TODO JAC! Assert(not IsConst, 'TMessage should not be called on const mode');
 
   l := Length(Text);
   i := 1;

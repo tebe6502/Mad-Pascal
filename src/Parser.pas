@@ -68,6 +68,7 @@ end;
 // ----------------------------------------------------------------------------
 
 
+// function GetIdentIndex(const S: TIdentifierName; const ActiveSourceFile: TSourceFile): TIdentIndex;
 function GetIdentIndex(const S: TIdentifierName): TIdentIndex;
 var
   WithIndex: Integer;
@@ -76,46 +77,45 @@ var
   TempIdentIndex: TIdentIndex;
   TempIdentifier: TIdentifier;
 
-  function UnitAllowedAccess(const identifier: TIdentifier; const SourceFile: TSourceFile): Boolean;
-  begin
-
-    Result := False;
-
-    if identifier.IsSection then
-      Result := SourceFile.IsAllowedUnitName(identifier.SourceFile.Name);
-  end;
-
-
   function Search(const X: TString; const SourceFile: TSourceFile): TIdentIndex;
   var
-    BlockStackIndex: Integer;
+    BlockStackIndex: TBlockStackIndex;
     blockIndex: TBlockIndex;
-    IdentIndex: TIdentIndex;
+    MaxIdentIndex, IdentIndex: TIdentIndex;
     identifier: TIdentifier;
+    unitEquals: Boolean;
   begin
 
     Result := 0;
 
     // Search all nesting levels from the current one to the most outer one
+    MaxIdentIndex := NumIdent_; // JAC! Speed optimization test
     for BlockStackIndex := BlockStackTop downto 0 do
     begin
-      blockIndex := BlockStack[BlockStackIndex];
-      for IdentIndex := 1 to NumIdent do
+      blockIndex := BlockIndexStack[BlockStackIndex];
+      for IdentIndex := 1 to MaxIdentIndex do
       begin
+
+        // JAC! Speed optimization test
         // identifier := IdentifierAt(IdentIndex);
-        identifier := IdentifierList.GetIdentifierAtIndex(IdentIndex);
-        if (X = identifier.Name) and (blockIndex = identifier.Block) then
-          if (identifier.SourceFile.UnitIndex = SourceFile.UnitIndex)
-            {or identifier.Section} or (identifier.SourceFile.UnitIndex = 1) or
-            (identifier.SourceFile.Name = 'SYSTEM') or UnitAllowedAccess(identifier, SourceFile) then
+        // identifier := IdentifierList.GetIdentifierAtIndex(IdentIndex); )
+        identifier := IdentifierList.identifierArray[IdentIndex];
+
+        if (X = identifier.Name) and (blockIndex = identifier.BlockIndex) then
+        begin
+          unitEquals := (identifier.SourceFile.UnitIndex = SYSTEM_UNIT_INDEX) or
+            (identifier.SourceFile.UnitIndex = SourceFile.UnitIndex);
+
+          if unitEquals or (identifier.SourceFile.Name = SYSTEM_UNIT_NAME) or
+            (identifier.IsSection and SourceFile.IsAllowedUnitName(identifier.SourceFile.Name)) then
           begin
             Result := IdentIndex;
             identifier.Pass := Pass;
 
-            if (identifier.SourceFile.UnitIndex = SourceFile.UnitIndex) or
-              (identifier.SourceFile.UnitIndex = 1)
-            { or (identifier.SourceFile.NAME) = 'SYSTEM')} then exit;
+            if unitEquals then exit;
           end;
+
+        end;
       end;
     end;
   end;
@@ -125,24 +125,27 @@ var
   var
     BlockStackIndex: TBlockStackIndex;
     BlockIndex: TBlockIndex;
-    IdentIndex: TIdentifierIndex;
+    MaxIdentIndex, IdentIndex: TIdentifierIndex;
     identifier: TIdentifier;
   begin
 
     Result := 0;
-
+    MaxIdentIndex := NumIdent_; // JAC! Speed optimization test
     for BlockStackIndex := BlockStackTop downto 0 do
     begin
-      blockIndex := BlockStack[BlockStackIndex];
+      blockIndex := BlockIndexStack[BlockStackIndex];
 
       // Search all nesting levels from the current one to the most outer one
-      for IdentIndex := 1 to NumIdent do
+      for IdentIndex := 1 to MaxIdentIndex do
       begin
-        identifier := IdentifierAt(IdentIndex);
+        // JAC! Speed optimization test
+        // identifier := IdentifierAt(IdentIndex);
+        // identifier := IdentifierList.GetIdentifierAtIndex(IdentIndex); )
+        identifier := IdentifierList.identifierArray[IdentIndex];
 
-        if (X = identifier.Name) and (blockIndex = identifier.Block) then
+        if (X = identifier.Name) and (blockIndex = identifier.BlockIndex) then
           if (identifier.SourceFile.UnitIndex = SourceFile.UnitIndex) or
-            UnitAllowedAccess(identifier, SourceFile) then
+            (identifier.IsSection and SourceFile.IsAllowedUnitName(identifier.SourceFile.Name)) then
           begin
             Result := IdentIndex;
             identifier.Pass := Pass;
@@ -200,6 +203,29 @@ begin
 
 end;  //GetIdentIndex
 
+
+(*
+function GetIdentIndex(const S: TIdentifierName): TIdentIndex;
+var
+  key: String;
+  BlockStackIndex: TBlockStackIndex;
+  blockIndex: TBlockIndex;
+begin
+
+  if S = '' then exit(-1);
+
+  Result := GetIdentIndexInternal(S, ActiveSourceFile);
+
+  key := s;
+  key := key + '/u=' + IntToStr(ActiveSourceFile.UnitIndex);
+  for BlockStackIndex := BlockStackTop downto 0 do
+  begin
+    blockIndex := BlockStack[BlockStackIndex];
+    key := key + '/b=' + IntToStr(blockIndex);
+  end;
+  Writeln(Format('GetIdentIndex: %s : %d', [key, Result]));
+end;
+*)
 
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
@@ -1178,9 +1204,8 @@ begin
               end;
             else
 
-              Error(i + 1, TMessage.Create(TErrorCode.CantTakeAddressOfIdentifier,
-                'Can''t take the address of ' + InfoAboutToken(IdentifierAt(IdentIndex).Kind)));
-
+               Error(i + 1, TMessage.Create(TErrorCode.CantTakeAddressOfIdentifier,
+                'Can''t take the address of ' + InfoAboutToken(IdentifierAt(IdentIndex).Kind)))
           end;
 
           if (IdentifierAt(IdentIndex).DataType in Pointers) and          // zadziala tylko dla ABSOLUTE
@@ -1654,7 +1679,7 @@ begin
 
   if (identIndex > 0) and (not (IdentifierAt(IdentIndex).Kind in [TTokenKind.PROCEDURETOK,
     TTokenKind.FUNCTIONTOK, TTokenKind.CONSTRUCTORTOK, TTokenKind.DESTRUCTORTOK])) and
-    (IdentifierAt(IdentIndex).Block = BlockStack[BlockStackTop]) and
+    (IdentifierAt(IdentIndex).BlockIndex = BlockIndexStack[BlockStackTop]) and
     (IdentifierAt(IdentIndex).isOverload = False) and (IdentifierAt(identIndex).SourceFile.UnitIndex =
     ActiveSourceFile.UnitIndex) then
     Error(tokenIndex, TMessage.Create(TErrorCode.IdentifierAlreadyDefined, 'Identifier {0} is already defined', Name))
@@ -1681,7 +1706,7 @@ begin
     identifier.Name := Name;
     identifier.Kind := Kind;
     identifier.DataType := DataType;
-    identifier.Block := BlockStack[BlockStackTop];
+    identifier.BlockIndex := BlockIndexStack[BlockStackTop];
     identifier.NumParams := 0;
     identifier.isAbsolute := False;
     identifier.PassMethod := TParameterPassingMethod.VALPASSING;
@@ -2632,7 +2657,7 @@ begin
             FieldInListName[FieldInListIndex].Value);
         end;
 
-        _TypeArray[RecType].Block := BlockStack[BlockStackTop];
+        _TypeArray[RecType].BlockIndex := BlockIndexStack[BlockStackTop];
 
         AllocElementType := DataType;
 
@@ -2872,7 +2897,7 @@ begin
 
                 CheckTok(i, TTokenKind.ENDTOK);
 
-                _TypeArray[RecType].Block := BlockStack[BlockStackTop];
+                _TypeArray[RecType].BlockIndex := BlockIndexStack[BlockStackTop];
 
                 DataType := TDataType.OBJECTTOK;
                 NumAllocElements := RecType;      // Index to the Types array
@@ -2970,7 +2995,7 @@ begin
 
                   CheckTok(i, TTokenKind.ENDTOK);
 
-                  _TypeArray[RecType].Block := BlockStack[BlockStackTop];
+                  _TypeArray[RecType].BlockIndex := BlockIndexStack[BlockStackTop];
 
                   DataType := TDataType.RECORDTOK;
                   NumAllocElements := RecType;      // index to the Types array
@@ -3371,7 +3396,7 @@ begin
                             _TypeArray[RecType].Field[1].Value := LowerBound;
                             _TypeArray[RecType].Field[2].Value := UpperBound;
 
-                            _TypeArray[RecType].Block := BlockStack[BlockStackTop];
+                            _TypeArray[RecType].BlockIndex := BlockIndexStack[BlockStackTop];
 
                             DataType := TDataType.SUBRANGETYPE;
                             NumAllocElements := RecType;      // index to the Types array

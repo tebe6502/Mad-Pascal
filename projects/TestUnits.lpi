@@ -162,6 +162,9 @@
       <Item>
         <Name Value="EEValuationException"/>
       </Item>
+      <Item>
+        <Name Value="EHaltException"/>
+      </Item>
     </Exceptions>
   </Debugging>
 </CONFIG>

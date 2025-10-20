@@ -69,7 +69,7 @@ begin
   for i := 1 to NumIdent do
   begin
     identifier:=IdentifierAt(i);
-    DiagFile.Write(i, 6).Write(identifier.Block, 6).Write(identifier.Name, 30).Write(
+    DiagFile.Write(i, 6).Write(identifier.BlockIndex, 6).Write(identifier.Name, 30).Write(
       GetTokenSpelling(identifier.Kind), 15);
     if identifier.DataType <> TDataType.UNTYPETOK then
     begin
