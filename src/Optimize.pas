@@ -69,7 +69,7 @@ var
 
     IdentifierAt(IdentIndex).IsNotDead := True;
 
-    ProcAsBlockIndex := IdentifierAt(IdentIndex).ProcAsBlock;
+    ProcAsBlockIndex := IdentifierAt(IdentIndex).ProcAsBlockIndex;
 
     if (ProcAsBlockIndex > 0) and (ProcAsBlock[ProcAsBlockIndex] = False) and
       (CallGraph[ProcAsBlockIndex].NumChildren > 0) then
@@ -79,8 +79,8 @@ var
 
       for ChildIndex := 1 to CallGraph[ProcAsBlockIndex].NumChildren do
         for ChildIdentIndex := 1 to NumIdent do
-          if (IdentifierAt(ChildIdentIndex).ProcAsBlock > 0) and
-            (IdentifierAt(ChildIdentIndex).ProcAsBlock = CallGraph[ProcAsBlockIndex].ChildBlock[ChildIndex]) then
+          if (IdentifierAt(ChildIdentIndex).ProcAsBlockIndex > 0) and
+            (IdentifierAt(ChildIdentIndex).ProcAsBlockIndex = CallGraph[ProcAsBlockIndex].ChildBlock[ChildIndex]) then
             MarkNotDead(ChildIdentIndex);
 
     end;

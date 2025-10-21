@@ -6803,7 +6803,7 @@ begin
             asm65(#9'mva >' + Name + ' :STACKORIGIN+STACKWIDTH,x');
 
             if Pass = TPass.CALL_DETERMINATION then
-              AddCallGraphChild(BlockIndexStack[BlockStackTop], IdentifierAt(IdentIndex).ProcAsBlock);
+              AddCallGraphChild(BlockIndexStack[BlockStackTop], IdentifierAt(IdentIndex).ProcAsBlockIndex);
 
           end
           else
@@ -7404,7 +7404,7 @@ begin
 
   old_i := i;
 
-  if IdentifierAt(IdentIndex).ProcAsBlock = BlockIndexStack[BlockStackTop] then
+  if IdentifierAt(IdentIndex).ProcAsBlockIndex = BlockIndexStack[BlockStackTop] then
     IdentifierAt(IdentIndex).isRecursion := True;
 
 
@@ -8157,7 +8157,7 @@ begin
 
       IdentifierAt(IdentIndex).updateResolvedForward := True
     else
-      AddCallGraphChild(BlockIndexStack[BlockStackTop], IdentifierAt(IdentIndex).ProcAsBlock);
+      AddCallGraphChild(BlockIndexStack[BlockStackTop], IdentifierAt(IdentIndex).ProcAsBlockIndex);
 
 
   (*------------------------------------------------------------------------------------------------------------*)
@@ -8318,7 +8318,7 @@ begin
       // issue #102 fixed
       for IdentTemp := NumIdent downto 1 do
         if (IdentifierAt(IdentTemp).Kind in [TTokenKind.PROCEDURETOK, TTokenKind.FUNCTIONTOK]) and
-          (IdentifierAt(IdentTemp).ProcAsBlock = IdentifierAt(IdentIndex).BlockIndex) then
+          (IdentifierAt(IdentTemp).ProcAsBlockIndex = IdentifierAt(IdentIndex).BlockIndex) then
         begin
           svar := IdentifierAt(IdentTemp).Name + '.' + svar;
           Break;
@@ -11798,7 +11798,7 @@ begin
       if (IdentIndex > 0) and (IdentifierAt(IdentIndex).Kind = TTokenKind.FUNCTIONTOK) and
         (BlockStackTop > 1) and (TokenAt(i + 1).Kind <> TTokenKind.OPARTOK) then
         for j := NumIdent downto 1 do
-          if (IdentifierAt(j).ProcAsBlock = NumBlocks) and (IdentifierAt(j).Kind = TTokenKind.FUNCTIONTOK) then
+          if (IdentifierAt(j).ProcAsBlockIndex = NumBlocks) and (IdentifierAt(j).Kind = TTokenKind.FUNCTIONTOK) then
           begin
             if (IdentifierAt(j).Name = IdentifierAt(IdentIndex).Name) and
               (IdentifierAt(j).SourceFile.UnitIndex = IdentifierAt(IdentIndex).SourceFile.UnitIndex) then
@@ -12408,7 +12408,7 @@ begin
                       IdentTemp := GetIdentIndex(TokenAt(k).Name);
 
                       if (IdentTemp > 0) and (IdentifierAt(IdentTemp).Kind = TTokenKind.FUNCTIONTOK) then
-                        IdentTemp := GetIdentResult(IdentifierAt(IdentTemp).ProcAsBlock);
+                        IdentTemp := GetIdentResult(IdentifierAt(IdentTemp).ProcAsBlockIndex);
 
         {if (TokenAt(i + 3).Kind <> TTokenKind.OBRACKETTOK) and ((Elements(IdentTemp) <> Elements(IdentIndex)) or (IdentifierAt(IdentTemp).AllocElementType <> IdentifierAt(IdentIndex).AllocElementType)) then
          Error(k, IncompatibleTypesArray, GetIdentIndex(TokenAt(k).Name), ExpressionType )
@@ -12516,7 +12516,7 @@ begin
                         IdentTemp := 0;
 
                       if (IdentTemp > 0) and (IdentifierAt(IdentTemp).Kind = TTokenKind.FUNCTIONTOK) then
-                        IdentTemp := GetIdentResult(IdentifierAt(IdentTemp).ProcAsBlock);
+                        IdentTemp := GetIdentResult(IdentifierAt(IdentTemp).ProcAsBlockIndex);
 
                       if (IdentTemp > 0) and (IdentifierAt(IdentTemp).Kind = TTokenKind.TYPETOK) and
                         (IdentifierAt(IdentTemp).DataType = TDataType.ENUMTOK) then
@@ -12658,7 +12658,7 @@ begin
 
                     if IdentifierAt(IdentTemp).Kind = TTokenKind.FUNCTIONTOK then
                       yes := IdentifierAt(IdentIndex).NumAllocElements <>
-                        IdentifierAt(GetIdentResult(IdentifierAt(IdentTemp).ProcAsBlock)).NumAllocElements
+                        IdentifierAt(GetIdentResult(IdentifierAt(IdentTemp).ProcAsBlockIndex)).NumAllocElements
                     else
                       yes := IdentifierAt(IdentIndex).NumAllocElements <> IdentifierAt(IdentTemp).NumAllocElements;
 
@@ -12698,7 +12698,7 @@ begin
                     begin
                       svar := GetLocalName(IdentTemp);
 
-                      IdentTemp := GetIdentResult(IdentifierAt(IdentTemp).ProcAsBlock);
+                      IdentTemp := GetIdentResult(IdentifierAt(IdentTemp).ProcAsBlockIndex);
 
                       Name := svar + '.adr.result';
                       svar := svar + '.result';
@@ -12989,7 +12989,7 @@ begin
 
                           svar := GetLocalName(IdentTemp);
 
-                          IdentTemp := GetIdentResult(IdentifierAt(IdentTemp).ProcAsBlock);
+                          IdentTemp := GetIdentResult(IdentifierAt(IdentTemp).ProcAsBlockIndex);
 
                           Name := svar + '.adr.result';
                           svar := svar + '.result';
@@ -13359,9 +13359,9 @@ begin
 
         IdentTemp := GetIdentIndex(TokenAt(j).Name);
 
-        SelectorType := IdentifierAt(GetIdentResult(IdentifierAt(IdentTemp).ProcAsBlock)).AllocElementType;
+        SelectorType := IdentifierAt(GetIdentResult(IdentifierAt(IdentTemp).ProcAsBlockIndex)).AllocElementType;
 
-        EnumName := GetTypeAtIndex(IdentifierAt(GetIdentResult(IdentifierAt(IdentTemp).ProcAsBlock)).NumAllocElements).Field[0].Name;
+        EnumName := GetTypeAtIndex(IdentifierAt(GetIdentResult(IdentifierAt(IdentTemp).ProcAsBlockIndex)).NumAllocElements).Field[0].Name;
 
       end
       else
@@ -15372,7 +15372,7 @@ WHILETOK:
         yes := False;
 
         for j := 1 to NumIdent do
-          if (IdentifierAt(j).ProcAsBlock = BlockIndexStack[BlockStackTop]) and
+          if (IdentifierAt(j).ProcAsBlockIndex = BlockIndexStack[BlockStackTop]) and
             (IdentifierAt(j).Kind = TTokenKind.FUNCTIONTOK) then
           begin
 
@@ -15941,7 +15941,7 @@ begin
     varbegin := '';
 
     for IdentIndex := 1 to NumIdent do
-      if (IdentifierAt(IdentIndex).BlockIndex = IdentifierAt(BlockIdentIndex).ProcAsBlock) and
+      if (IdentifierAt(IdentIndex).BlockIndex = IdentifierAt(BlockIdentIndex).ProcAsBlockIndex) and
         (IdentifierAt(IdentIndex).SourceFile.UnitIndex = ActiveSourceFile.UnitIndex) then
       begin
 
@@ -17055,7 +17055,7 @@ begin
   Inc(NumBlocks);
   Inc(BlockStackTop);
   BlockIndexStack[BlockStackTop] := NumBlocks;
-  IdentifierAt(BlockIdentIndex).ProcAsBlock := NumBlocks;
+  IdentifierAt(BlockIdentIndex).ProcAsBlockIndex := NumBlocks;
 
 
   GenerateLocal(BlockIdentIndex, IsFunction);
@@ -17752,11 +17752,11 @@ begin
             for idx := 1 to NumIdent do
               if {(IdentifierAt(idx).ProcAsBlock = IdentifierAt(IdentIndex).ProcAsBlock) and}
               (IdentifierAt(idx).Name = IdentifierAt(IdentIndex).Name) then
-                AddCallGraphChild(BlockIndexStack[BlockStackTop], IdentifierAt(idx).ProcAsBlock);
+                AddCallGraphChild(BlockIndexStack[BlockStackTop], IdentifierAt(idx).ProcAsBlockIndex);
 
           end
           else
-            AddCallGraphChild(BlockIndexStack[BlockStackTop], IdentifierAt(IdentIndex).ProcAsBlock);
+            AddCallGraphChild(BlockIndexStack[BlockStackTop], IdentifierAt(IdentIndex).ProcAsBlockIndex);
 
         end;
 
@@ -19191,7 +19191,7 @@ end;
   if pass = TPass.CALL_DETERMINATION then
     if IdentifierAt(BlockIdentIndex).isKeep or IdentifierAt(BlockIdentIndex).isInterrupt or
       IdentifierAt(BlockIdentIndex).updateResolvedForward then
-      AddCallGraphChild(BlockIndexStack[BlockStackTop], IdentifierAt(BlockIdentIndex).ProcAsBlock);
+      AddCallGraphChild(BlockIndexStack[BlockStackTop], IdentifierAt(BlockIdentIndex).ProcAsBlockIndex);
 
 
   //Result := j;

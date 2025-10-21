@@ -2767,7 +2767,7 @@ begin
                       NestedFunctionResultType, NestedFunctionNumAllocElements, NestedFunctionAllocElementType);
 
                     Inc(NumBlocks);
-                    IdentifierAt(NumIdent).ProcAsBlock := NumBlocks;
+                    IdentifierAt(NumIdent).ProcAsBlockIndex := NumBlocks;
 
                     IdentifierAt(NumIdent).IsUnresolvedForward := True;
 
@@ -2876,7 +2876,7 @@ begin
                               NestedFunctionAllocElementType);
 
                             Inc(NumBlocks);
-                            IdentifierAt(NumIdent).ProcAsBlock := NumBlocks;
+                            IdentifierAt(NumIdent).ProcAsBlockIndex := NumBlocks;
 
                             IdentifierAt(NumIdent).IsUnresolvedForward := True;
 
