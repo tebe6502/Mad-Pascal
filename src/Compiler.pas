@@ -6559,7 +6559,7 @@ begin
   begin
     i := CompileExpression(i + 2, ArrayIndexType, ActualParamType);  // array index [x, ..]
 
-    GetCommonType(i, ActualParamType, ArrayIndexType);
+    CheckCommonType(i, ActualParamType, ArrayIndexType);
 
     case ArrayIndexType of
       TDataType.SHORTINTTOK: ArrayIndexType := TDataType.BYTETOK;
@@ -6660,7 +6660,7 @@ begin
     begin
       i := CompileExpression(i + 2, ArrayIndexType, ActualParamType);  // array index [.., y]
 
-      GetCommonType(i, ActualParamType, ArrayIndexType);
+      CheckCommonType(i, ActualParamType, ArrayIndexType);
 
       case ArrayIndexType of
         TDataType.SHORTINTTOK: ArrayIndexType := TDatatype.BYTETOK;
@@ -7691,7 +7691,7 @@ begin
                       IdentifierAt(IdentTemp).NumAllocElements).Field[0].Name, GetTypeAtIndex(
                       IdentifierAt(IdentIndex).Param[NumActualParams].NumAllocElements).Field[0].Name))
                   else
-                    GetCommonType(i, IdentifierAt(IdentIndex).Param[NumActualParams].DataType, IdentifierAt(IdentTemp).DataType);
+                    CheckCommonType(i, IdentifierAt(IdentIndex).Param[NumActualParams].DataType, IdentifierAt(IdentTemp).DataType);
 
               end;
 
@@ -7716,7 +7716,7 @@ begin
             if (IdentifierAt(IdentTemp).AllocElementType = TDataType.UNTYPETOK) then
             begin
 
-              GetCommonType(i, IdentifierAt(IdentIndex).Param[NumActualParams].DataType,
+              CheckCommonType(i, IdentifierAt(IdentIndex).Param[NumActualParams].DataType,
                 IdentifierAt(IdentTemp).DataType);
 
               if (IdentifierAt(IdentTemp).AllocElementType = TDataType.UNTYPETOK) then
@@ -7731,7 +7731,7 @@ begin
               [TDataType.DEREFERENCEARRAYTOK] then
               begin
 
-                //     GetCommonType(i, IdentifierAt(IdentIndex).Param[NumActualParams].AllocElementType, IdentifierAt(IdentTemp).AllocElementType);
+                //     CheckCommonType(i, IdentifierAt(IdentIndex).Param[NumActualParams].AllocElementType, IdentifierAt(IdentTemp).AllocElementType);
 
                 if (IdentifierAt(IdentIndex).Param[NumActualParams].NumAllocElements = 0) and
                   (IdentifierAt(IdentTemp).NumAllocElements = 0) then
@@ -7769,7 +7769,7 @@ begin
 
               end
               else
-                GetCommonType(i, IdentifierAt(IdentIndex).Param[NumActualParams].DataType,
+                CheckCommonType(i, IdentifierAt(IdentIndex).Param[NumActualParams].DataType,
                   IdentifierAt(IdentTemp).AllocElementType);
 
           end
@@ -7804,9 +7804,9 @@ begin
 
             else
               if (ActualParamType = TDataType.POINTERTOK) and (AllocElementType <> TDataType.UNTYPETOK) then
-                GetCommonType(i, IdentifierAt(IdentIndex).Param[NumActualParams].DataType, AllocElementType)
+                CheckCommonType(i, IdentifierAt(IdentIndex).Param[NumActualParams].DataType, AllocElementType)
               else
-                GetCommonType(i, IdentifierAt(IdentIndex).Param[NumActualParams].DataType, ActualParamType);
+                CheckCommonType(i, IdentifierAt(IdentIndex).Param[NumActualParams].DataType, ActualParamType);
 
         end
         else
@@ -7839,10 +7839,10 @@ begin
 
 
           if (IdentifierAt(IdentIndex).Param[NumActualParams].DataType in IntegerTypes + RealTypes) and (ActualParamType in RealTypes) then
-            GetCommonType(i, IdentifierAt(IdentIndex).Param[NumActualParams].DataType, ActualParamType);
+            CheckCommonType(i, IdentifierAt(IdentIndex).Param[NumActualParams].DataType, ActualParamType);
 
           if (IdentifierAt(IdentIndex).Param[NumActualParams].DataType = TDatatype.POINTERTOK) then
-            GetCommonType(i, IdentifierAt(IdentIndex).Param[NumActualParams].DataType, ActualParamType);
+            CheckCommonType(i, IdentifierAt(IdentIndex).Param[NumActualParams].DataType, ActualParamType);
 
           if (TokenAt(i).Kind = IDENTTOK) and (IdentifierAt(IdentIndex).Param[NumActualParams].DataType = TDataType.ENUMTOK) then
           begin
@@ -7926,7 +7926,7 @@ begin
 
 
               if (IdentifierAt(IdentTemp).DataType in [TDataType.RECORDTOK, TDataType.OBJECTTOK]) then
-                GetCommonType(i, IdentifierAt(IdentIndex).Param[NumActualParams].DataType, ActualParamType)
+                CheckCommonType(i, IdentifierAt(IdentIndex).Param[NumActualParams].DataType, ActualParamType)
               else
                 if IdentifierAt(IdentIndex).Param[NumActualParams].AllocElementType <> AllocElementType then
                 begin
@@ -7962,7 +7962,7 @@ begin
                       ErrorIncompatibleTypes(i, IdentifierAt(IdentTemp).DataType, IdentifierAt(IdentIndex).Param[NumActualParams].AllocElementType, True);
 
 
-                GetCommonType(i, IdentifierAt(IdentIndex).Param[NumActualParams].DataType, IdentifierAt(IdentTemp).DataType);
+                CheckCommonType(i, IdentifierAt(IdentIndex).Param[NumActualParams].DataType, IdentifierAt(IdentTemp).DataType);
 
               end
               else
@@ -8042,7 +8042,7 @@ begin
 
                 end;
 
-                // GetCommonType(i, IdentifierAt(IdentIndex).Param[NumActualParams].DataType, ActualParamType);
+                // CheckCommonType(i, IdentifierAt(IdentIndex).Param[NumActualParams].DataType, ActualParamType);
 
               end;
 
@@ -9485,7 +9485,7 @@ begin
       repeat     // Loop over all constants for the current case
   i := CompileConstExpression(i, ConstVal, ConstValType, SelectorType);
 
-  GetCommonType(i, ConstValType, SelectorType);
+  CheckCommonType(i, ConstValType, SelectorType);
 
   if (TokenAt(i).Kind = TTokenKind.IDENTTOK) then
    if ((EnumName = '') and (GetEnumName(GetIdentIndex(TokenAt(i).Name)) <> '')) or
@@ -9496,7 +9496,7 @@ begin
     begin
     i := CompileConstExpression(i + 2, ConstVal2, ConstValType, SelectorType);
 
-    GetCommonType(i, ConstValType, SelectorType);
+    CheckCommonType(i, ConstValType, SelectorType);
 
     if ConstVal > ConstVal2 then
      Error(i, 'Upper bound of case range is less than lower bound');
@@ -11106,7 +11106,7 @@ begin
     RealTypeConversion(ValType, RightValType, CastRealType);
 
 
-    ValType := GetCommonType(j + 1, ValType, RightValType);
+    ValType := CheckCommonType(j + 1, ValType, RightValType);
 
     CheckOperator(i, TokenAt(j + 1).Kind, ValType, RightValType);
 
@@ -11250,7 +11250,7 @@ begin
     end;
 
 
-    ValType := GetCommonType(j + 1, ValType, RightValType);
+    ValType := CheckCommonType(j + 1, ValType, RightValType);
 
     CheckOperator(i, TokenAt(j + 1).Kind, ValType, RightValType);
 
@@ -11486,7 +11486,7 @@ begin
 
     if sLeft or sRight then
     else
-      GetCommonType(j, ValType, RightValType);
+      CheckCommonType(j, ValType, RightValType);
 
 
     if VarType in RealTypes then
@@ -11552,7 +11552,7 @@ begin
         GenerateRelationString(TokenAt(i + 1).Kind, ValType, RightValType);
       end
       else
-        GetCommonType(j, ValType, RightValType);
+        CheckCommonType(j, ValType, RightValType);
 
     end
     else
@@ -11651,7 +11651,7 @@ begin
     else
       i := CompileExpression(i + 2, ActualParamType);  // Evaluate actual parameters and push them onto the stack
 
-    GetCommonType(i, fBlockRead_ParamType[NumActualParams], ActualParamType);
+    CheckCommonType(i, fBlockRead_ParamType[NumActualParams], ActualParamType);
 
     ExpandParam(fBlockRead_ParamType[NumActualParams], ActualParamType);
 
@@ -12328,7 +12328,7 @@ begin
                     if IdentifierAt(IdentIndex).AllocElementType = TDataType.UNTYPETOK then
                       ErrorIncompatibleTypes(i + 1, TDataType.STRINGPOINTERTOK, TDataType.POINTERTOK)
                     else
-                      GetCommonType(i + 1, IdentifierAt(IdentIndex).AllocElementType, TDataType.STRINGPOINTERTOK);
+                      CheckCommonType(i + 1, IdentifierAt(IdentIndex).AllocElementType, TDataType.STRINGPOINTERTOK);
 
                 end;
 
@@ -12390,11 +12390,11 @@ begin
                         (ExpressionType in [TDataType.RECORDTOK, TDataType.OBJECTTOK]) then
 
                       else
-                        GetCommonType(i + 1, IdentifierAt(IdentIndex).DataType, ExpressionType);
+                        CheckCommonType(i + 1, IdentifierAt(IdentIndex).DataType, ExpressionType);
 
                     end
                     else
-                      GetCommonType(i + 1, IdentifierAt(IdentIndex).AllocElementType, ExpressionType);
+                      CheckCommonType(i + 1, IdentifierAt(IdentIndex).AllocElementType, ExpressionType);
 
                 end
                 else
@@ -12418,7 +12418,7 @@ begin
         else}
 
                       if IdentifierAt(IdentTemp).AllocElementType = TDataType.RECORDTOK then
-                      // GetCommonType(i + 1, VarType, TTokenKind.RECORDTOK)
+                      // CheckCommonType(i + 1, VarType, TTokenKind.RECORDTOK)
                       else
 
                         if (IdentifierAt(IdentIndex).AllocElementType <> TDataType.UNTYPETOK) and
@@ -12480,7 +12480,7 @@ begin
                                 '" expected "^' + GetTypeAtIndex(
                                 IdentifierAt(IdentIndex).NumAllocElements).Field[0].Name + '"');
                           else
-                            GetCommonType(i + 1, VarType, ExpressionType);
+                            CheckCommonType(i + 1, VarType, ExpressionType);
 
                         end;
 
@@ -12501,7 +12501,7 @@ begin
                               '" expected "' + GetTypeAtIndex(
                               IdentifierAt(IdentIndex).NumAllocElements).Field[0].Name + '"')
                           else
-                            GetCommonType(i + 1, VarType, ExpressionType);
+                            CheckCommonType(i + 1, VarType, ExpressionType);
 
                       end;
 
@@ -12568,7 +12568,7 @@ begin
 
                       end
                       else
-                        GetCommonType(i + 1, IdentifierAt(IdentIndex).DataType, ExpressionType);
+                        CheckCommonType(i + 1, IdentifierAt(IdentIndex).DataType, ExpressionType);
 
                     end;
 
@@ -12605,7 +12605,7 @@ begin
 
                     end
                     else
-                      GetCommonType(i + 1, IdentifierAt(IdentIndex).DataType, ExpressionType);
+                      CheckCommonType(i + 1, IdentifierAt(IdentIndex).DataType, ExpressionType);
 
                 end;
 
@@ -12644,7 +12644,7 @@ begin
                         //         if {(TokenAt(i + 1).Kind <> TTokenKind.DEREFERENCETOK) and }(IdentifierAt(IdentIndex).AllocElementType <> IdentifierAt(IdentTemp).AllocElementType) and not ( IdentifierAt(IdentIndex).DataType in [TDataType.RECORDTOK, TDataType.OBJECTTOK] ) then
                         //          Error(k, 'Incompatible types: got "^' + GetTypeAtIndex(IdentifierAt(IdentTemp).NumAllocElements).Field[0].Name +'" expected "' + GetTypeAtIndex(IdentifierAt(IdentIndex).NumAllocElements).Field[0].Name + '"');
                       else
-                        ;//GetCommonType(i + 1, VarType, ExpressionType);
+                        ;//CheckCommonType(i + 1, VarType, ExpressionType);
 
                     end;
 
@@ -12927,7 +12927,7 @@ begin
 
                   end
                   else     // ExpressionType <> TTokenKind.RECORDTOK + TTokenKind.OBJECTTOK
-                    GetCommonType(i + 1, ExpressionType, TDataType.RECORDTOK);
+                    CheckCommonType(i + 1, ExpressionType, TDataType.RECORDTOK);
 
                 end
                 else
@@ -13422,7 +13422,7 @@ begin
           //   ConstVal:=ConstVal and $ff;
           // Warning(i, RangeCheckError, 0, ConstValType, SelectorType);
 
-          GetCommonType(i, ConstValType, SelectorType);
+          CheckCommonType(i, ConstValType, SelectorType);
 
           if (TokenAt(i).Kind = TTokenKind.IDENTTOK) then
             if ((EnumName = '') and (GetEnumName(GetIdentIndex(TokenAt(i).Name)) <> '')) or
@@ -13437,7 +13437,7 @@ begin
             //    ConstVal2:=ConstVal2 and $ff;
             // Warning(i, RangeCheckError, 0, ConstValType, SelectorType);
 
-            GetCommonType(i, ConstValType, SelectorType);
+            CheckCommonType(i, ConstValType, SelectorType);
 
             if ConstVal > ConstVal2 then
               Error(i, 'Upper bound of case range is less than lower bound');
@@ -13537,7 +13537,7 @@ begin
       j := CompileExpression(i + 1, ExpressionType);
       // !!! VarType = TDataType.INTEGERTOK, 'IF BYTE+SHORTINT < BYTE'
 
-      GetCommonType(j, TDataType.BOOLEANTOK, ExpressionType);  // wywali blad jesli warunek bedzie typu IF A THEN
+      CheckCommonType(j, TDataType.BOOLEANTOK, ExpressionType);  // wywali blad jesli warunek bedzie typu IF A THEN
 
       CheckTok(j + 1, TTokenKind.THENTOK);
 
@@ -13636,7 +13636,7 @@ WHILETOK:
     j := CompileExpression(i + 1, ExpressionType);
 
 
-    GetCommonType(j, TDataType.BOOLEANTOK, ExpressionType);
+    CheckCommonType(j, TDataType.BOOLEANTOK, ExpressionType);
 
     CheckTok(j + 1, TTokenKind.DOTOK);
 
@@ -13713,7 +13713,7 @@ WHILETOK:
 
       j := CompileExpression(i + 1, ExpressionType);
 
-      GetCommonType(j, TDataType.BOOLEANTOK, ExpressionType);
+      CheckCommonType(j, TDataType.BOOLEANTOK, ExpressionType);
 
       CheckTok(j + 1, TTokenKind.DOTOK);
 
@@ -13794,7 +13794,7 @@ WHILETOK:
 
       j := CompileExpression(j + 2, ExpressionType);
 
-      GetCommonType(j, TDataType.BOOLEANTOK, ExpressionType);
+      CheckCommonType(j, TDataType.BOOLEANTOK, ExpressionType);
 
       asm65;
       asm65('; --- RepeatUntilCondition');
@@ -14214,7 +14214,7 @@ WHILETOK:
             Note(i + 4, 'Only uppercase letters preceded by the drive symbol, like ''D:FILENAME.EXT'' or ''S:''');
 
           i := CompileExpression(i + 4, ActualParamType);
-          GetCommonType(i, TDataType.POINTERTOK, ActualParamType);
+          CheckCommonType(i, TDataType.POINTERTOK, ActualParamType);
 
           GenerateAssignment(ASPOINTERTOPOINTER, 2, 0, IdentifierAt(IdentIndex).Name, 's@file.pfname');
 
@@ -14284,7 +14284,7 @@ WHILETOK:
                 InfoAboutDataType(IdentifierAt(IdentIndex).DataType) + '" expected "File"');
 
             i := CompileExpression(i + 4, ActualParamType);       // custom record size
-            GetCommonType(i, TDataType.WORDTOK, ActualParamType);
+            CheckCommonType(i, TDataType.WORDTOK, ActualParamType);
 
             ExpandParam(TDataType.WORDTOK, ActualParamType);
 
@@ -14345,7 +14345,7 @@ WHILETOK:
                 InfoAboutDataType(IdentifierAt(IdentIndex).DataType) + '" expected "File"');
 
             i := CompileExpression(i + 4, ActualParamType);       // custom record size
-            GetCommonType(i, TDataType.WORDTOK, ActualParamType);
+            CheckCommonType(i, TDataType.WORDTOK, ActualParamType);
 
             ExpandParam(TDataType.WORDTOK, ActualParamType);
 
@@ -15230,7 +15230,7 @@ WHILETOK:
 
         i := j;
 
-        GetCommonType(i, ExpressionType, ActualParamType);
+        CheckCommonType(i, ExpressionType, ActualParamType);
 
         Inc(NumActualParams);
 
@@ -15462,7 +15462,7 @@ WHILETOK:
       CheckTok(i + 1, TTokenKind.OPARTOK);
 
       i := CompileConstExpression(i + 2, ConstVal, ActualParamType);
-      GetCommonType(i, TDataType.INTEGERTOK, ActualParamType);
+      CheckCommonType(i, TDataType.INTEGERTOK, ActualParamType);
 
       CheckTok(i + 1, TTokenKind.COMMATOK);
 
@@ -15545,7 +15545,7 @@ WHILETOK:
       CheckTok(i + 1, TTokenKind.OPARTOK);
 
       i := CompileConstExpression(i + 2, ConstVal, ActualParamType);
-      GetCommonType(i, TDataType.INTEGERTOK, ActualParamType);
+      CheckCommonType(i, TDataType.INTEGERTOK, ActualParamType);
 
       CheckTok(i + 1, TTokenKind.COMMATOK);
 
@@ -15555,7 +15555,7 @@ WHILETOK:
         Error(i, 'Interrupt Number in [0..4]');
 
       i := CompileExpression(i + 2, ActualParamType);
-      GetCommonType(i, TDataType.POINTERTOK, ActualParamType);
+      CheckCommonType(i, TDataType.POINTERTOK, ActualParamType);
 
       case ConstVal of
         Ord(TInterruptCode.DLI): begin
@@ -15598,7 +15598,7 @@ WHILETOK:
           begin
 
             i := CompileExpression(i + 2, ActualParamType);
-            GetCommonType(i, TDataType.BYTETOK, ActualParamType);
+            CheckCommonType(i, TDataType.BYTETOK, ActualParamType);
 
             asm65(#9'lda #$00');
             asm65(#9'ldy #$03');
@@ -15612,7 +15612,7 @@ WHILETOK:
             CheckTok(i + 1, TTokenKind.COMMATOK);
 
             i := CompileExpression(i + 2, ActualParamType);
-            GetCommonType(i, TDataType.BYTETOK, ActualParamType);
+            CheckCommonType(i, TDataType.BYTETOK, ActualParamType);
 
             asm65(#9'mva :STACKORIGIN,x AUDF1');
             a65(TCode65.subBX);
@@ -15647,7 +15647,7 @@ WHILETOK:
           begin
 
             i := CompileExpression(i + 2, ActualParamType);
-            GetCommonType(i, TDataType.BYTETOK, ActualParamType);
+            CheckCommonType(i, TDataType.BYTETOK, ActualParamType);
 
             asm65(#9'lda #$00');
             asm65(#9'ldy #$03');
@@ -15661,7 +15661,7 @@ WHILETOK:
             CheckTok(i + 1, TTokenKind.COMMATOK);
 
             i := CompileExpression(i + 2, ActualParamType);
-            GetCommonType(i, TDataType.BYTETOK, ActualParamType);
+            CheckCommonType(i, TDataType.BYTETOK, ActualParamType);
 
             asm65(#9'mva :STACKORIGIN,x AUDF2');
             a65(TCode65.subBX);
@@ -15696,7 +15696,7 @@ WHILETOK:
           begin
 
             i := CompileExpression(i + 2, ActualParamType);
-            GetCommonType(i, TDataType.BYTETOK, ActualParamType);
+            CheckCommonType(i, TDataType.BYTETOK, ActualParamType);
 
             asm65(#9'lda #$00');
             asm65(#9'ldy #$03');
@@ -15710,7 +15710,7 @@ WHILETOK:
             CheckTok(i + 1, TTokenKind.COMMATOK);
 
             i := CompileExpression(i + 2, ActualParamType);
-            GetCommonType(i, TDataType.BYTETOK, ActualParamType);
+            CheckCommonType(i, TDataType.BYTETOK, ActualParamType);
 
             asm65(#9'mva :STACKORIGIN,x AUDF4');
             a65(TCode65.subBX);
@@ -18209,7 +18209,7 @@ begin
                     ConstValType := VarType;
                   end;
 
-                  GetCommonType(i + 1, VarType, ConstValType);
+                  CheckCommonType(i + 1, VarType, ConstValType);
 
                   DefineIdent(i + 1, TokenAt(i + 1).Name, TTokenKind.CONSTTOK, VarType, 0, TDataType.UNTYPETOK,
                     ConstVal, TokenAt(j).GetDataType);

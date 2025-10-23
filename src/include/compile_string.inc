@@ -86,7 +86,7 @@
               IdentifierAt(IdentIndex).Name + ' #' + IntToStr(Succ(NumCharacters)));
 
         ASPOINTERTOARRAYORIGIN:
-          GetCommonType(i + 1, TDataType.CHARTOK, TDataType.POINTERTOK);
+          CheckCommonType(i + 1, TDataType.CHARTOK, TDataType.POINTERTOK);
 
         ASPOINTER:
         begin

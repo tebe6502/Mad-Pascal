@@ -2605,7 +2605,7 @@ begin
           begin
 
             i := CompileConstExpression(i + 1, ConstVal, ExpressionType);
-            //  GetCommonType(i, ConstValType, SelectorType);
+            //  CheckCommonType(i, ConstValType, SelectorType);
 
             Inc(i);
           end;

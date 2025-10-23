@@ -179,6 +179,9 @@ procedure CheckCommonConstType(const tokenIndex: TTokenIndex; const DstType: TDa
 function GetCommonConstType(const tokenIndex: TTokenIndex; const DstType: TDataType;
   const SrcType: TDataType; const err: Boolean = True): Boolean;
 
+
+procedure CheckCommonType(const tokenIndex: TTokenIndex; const LeftType: TDataType; const RightType: TDataType);
+
 function GetCommonType(const tokenIndex: TTokenIndex; const LeftType: TDataType;
   const RightType: TDataType): TDataType;
 
@@ -602,6 +605,12 @@ end;
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 
+
+
+procedure CheckCommonType(const tokenIndex: TTokenIndex; const LeftType: TDataType; const RightType: TDataType);
+begin
+  GetCommonType(tokenIndex, LeftType, RightType);
+end;
 
 // TOO Move core to TDataType
 function GetCommonType(const TokenIndex: TTokenIndex; const LeftType: TDataType;
