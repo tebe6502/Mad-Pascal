@@ -668,7 +668,7 @@ end;
 // TCachedBinaryFile
 // ----------------------------------------------------------------------------
 
-
+//PROFILE-NO
 constructor TCachedBinaryFile.Create;
 begin
   binaryFile := TBinaryFile.Create;
@@ -743,7 +743,7 @@ begin
   Result := filePosition;
 end;
 
-//PROFILE-NO
+
 procedure TCachedBinaryFile.Read(var c: Char);
 begin
   if filePosition = fileSize then raise EInOutError.Create('End of file');
