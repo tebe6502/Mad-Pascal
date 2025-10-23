@@ -700,7 +700,7 @@ var
                               if Err > 0 then
                                 ErrorOrdinalExpExpected(NumTok);
 
-                              GetCommonConstType(NumTok, TDataType.WORDTOK, GetValueType(v));
+                              CheckCommonConstType(NumTok, TDataType.WORDTOK, GetValueType(v));
 
                               TokenAt(NumTok).Value := v;
 
@@ -780,7 +780,7 @@ var
   if Err > 0 then
    Error(NumTok, OrdinalExpExpected);
 
-  GetCommonConstType(NumTok, CARDINALTOK, GetValueType(CPUMode));
+  CheckCommonConstType(NumTok, CARDINALTOK, GetValueType(CPUMode));
 
   dec(NumTok);
        end else
@@ -815,7 +815,7 @@ var
                                         AddDefine('FASTMUL');
                                         AddDefines := NumDefines;
 
-                                        GetCommonConstType(NumTok, TDataType.BYTETOK, GetValueType(FastMul));
+                                        CheckCommonConstType(NumTok, TDataType.BYTETOK, GetValueType(FastMul));
 
                                         tokenList.RemoveToken;
                                       end

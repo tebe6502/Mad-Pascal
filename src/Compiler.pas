@@ -8934,7 +8934,7 @@ begin
       CheckTok(i + 1, TTokenKind.OPARTOK);
 
       i := CompileExpression(i + 2, ActualParamType);
-      GetCommonConstType(i, TDataType.INTEGERTOK, ActualParamType);
+      CheckCommonConstType(i, TDataType.INTEGERTOK, ActualParamType);
 
       if GetDataSize(ActualParamType) > 2 then WarningLoHi(i);
 
@@ -8967,7 +8967,7 @@ begin
       CheckTok(i + 1, TTokenKind.OPARTOK);
 
       i := CompileExpression(i + 2, ActualParamType);
-      GetCommonConstType(i, TDataType.INTEGERTOK, ActualParamType);
+      CheckCommonConstType(i, TDataType.INTEGERTOK, ActualParamType);
 
       if GetDataSize(ActualParamType) > 2 then WarningLoHi(i);
 
@@ -8997,7 +8997,7 @@ begin
       CheckTok(i + 1, TTokenKind.OPARTOK);
 
       i := CompileExpression(i + 2, ActualParamType, TDataType.BYTETOK);
-      GetCommonConstType(i, TDataType.INTEGERTOK, ActualParamType);
+      CheckCommonConstType(i, TDataType.INTEGERTOK, ActualParamType);
 
       CheckTok(i + 1, TTokenKind.CPARTOK);
 
@@ -9266,7 +9266,7 @@ begin
 
         end
         else
-          GetCommonConstType(i, TDataType.REALTOK, ActualParamType);
+          CheckCommonConstType(i, TDataType.REALTOK, ActualParamType);
 
       Result := i + 1;
     end;
@@ -9376,7 +9376,7 @@ begin
 
         end
         else
-          GetCommonConstType(i, TDataType.REALTOK, ActualParamType);
+          CheckCommonConstType(i, TDataType.REALTOK, ActualParamType);
 
       Result := i + 1;
     end;
@@ -9388,7 +9388,7 @@ begin
       CheckTok(i + 1, TTokenKind.OPARTOK);
 
       i := CompileExpression(i + 2, ActualParamType);
-      GetCommonConstType(i, TDataType.CARDINALTOK, ActualParamType);
+      CheckCommonConstType(i, TDataType.CARDINALTOK, ActualParamType);
 
       CheckTok(i + 1, TTokenKind.CPARTOK);
 
@@ -15391,7 +15391,7 @@ WHILETOK:
           (IdentifierAt(IdentIndex).NumAllocElements = 0)) then
           ErrorIncompatibleTypes(i, ActualParamType, TDataType.PCHARTOK)
         else
-          GetCommonConstType(i, IdentifierAt(IdentIndex).DataType, ActualParamType);
+          CheckCommonConstType(i, IdentifierAt(IdentIndex).DataType, ActualParamType);
 
         GenerateAssignment(ASPOINTER, GetDataSize(IdentifierAt(IdentIndex).DataType), 0, 'RESULT');
 
@@ -15441,7 +15441,7 @@ WHILETOK:
       begin
 
         i := CompileConstExpression(i + 2, Value, ExpressionType);
-        GetCommonConstType(i, TDataType.BYTETOK, ExpressionType);
+        CheckCommonConstType(i, TDataType.BYTETOK, ExpressionType);
 
         CheckTok(i + 1, TTokenKind.CPARTOK);
 
@@ -16316,11 +16316,12 @@ var
       if ConstValType in IntegerTypes then
       begin
 
+        // TODO JAC!
         if GetCommonConstType(i, ConstValType, ActualParamType, (ActualParamType in RealTypes + Pointers)) then
           WarningForRangeCheckError(i, ConstVal, ConstValType);
       end
       else
-        GetCommonConstType(i, ConstValType, ActualParamType);
+        CheckCommonConstType(i, ConstValType, ActualParamType);
 
       SaveDataSegment(ConstValType);
 
@@ -16518,7 +16519,7 @@ var
 
       end
       else
-        GetCommonConstType(i, ConstValType, ActualParamType);
+        CheckCommonConstType(i, ConstValType, ActualParamType);
 
       SaveDataSegment(ConstValType);
 
@@ -18508,9 +18509,9 @@ begin
                 i := CompileConstExpression(i + 1, ConstVal, ActualParamType);
 
                 if VarType in Pointers then
-                  GetCommonConstType(i, TDataType.WORDTOK, ActualParamType)
+                  CheckCommonConstType(i, TDataType.WORDTOK, ActualParamType)
                 else
-                  GetCommonConstType(i, TDataType.CARDINALTOK, ActualParamType);
+                  CheckCommonConstType(i, TDataType.CARDINALTOK, ActualParamType);
 
                 if (ConstVal < 0) or (ConstVal > $FFFFFF) then
                   Error(i, 'Range check error while evaluating constants (' + IntToStr(ConstVal) +
@@ -18689,7 +18690,7 @@ begin
 
               if (VarType in RealTypes) and (ActualParamType = TDataType.REALTOK) then ActualParamType := VarType;
 
-              GetCommonConstType(i, VarType, ActualParamType);
+              CheckCommonConstType(i, VarType, ActualParamType);
 
               SaveToDataSegment(idx, ConstVal, VarType);
 
