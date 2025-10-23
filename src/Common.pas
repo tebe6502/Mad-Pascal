@@ -155,8 +155,6 @@ function IdentifierAt(identifierIndex: TIdentifierIndex): TIdentifier;
 procedure AddDefine(const defineName: TDefineName);
 function SearchDefine(const defineName: TDefineName): TDefineIndex;
 
-procedure AddPath(folderPath: TFolderPath);
-
 procedure CheckArrayIndex(i: TTokenIndex; IdentIndex: TIdentIndex; ArrayIndex: TIdentIndex; ArrayIndexType: TDataType);
 
 procedure CheckArrayIndex_(i: TTokenIndex; IdentIndex: TIdentIndex; ArrayIndex: TIdentIndex;
@@ -313,17 +311,6 @@ begin
     end;
   Result := 0;
 end;
-
-
-// ----------------------------------------------------------------------------
-// ----------------------------------------------------------------------------
-
-
-procedure AddPath(folderPath: TFolderPath);
-begin
-  unitPathList.AddFolder(folderPath);
-end;
-
 
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------

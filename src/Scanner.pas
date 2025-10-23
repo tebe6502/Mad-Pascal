@@ -721,7 +721,7 @@ var
                                     Error(NumTok, TMessage.Create(TErrorCode.FilePathNotSpecified,
                                       'An empty path cannot be used'));
 
-                                  AddPath(s);
+                                  unitPathList.AddFolder(s);
 
                                   if d[i] = ';' then
                                     Inc(i)
@@ -746,7 +746,7 @@ var
                                       Error(NumTok, TMessage.Create(TErrorCode.FilePathNotSpecified,
                                         'An empty path cannot be used'));
 
-                                    AddPath(s);
+                                    unitPathList.AddFolder(s);
 
                                     if d[i] = ';' then
                                       Inc(i)
