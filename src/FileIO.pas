@@ -741,12 +741,14 @@ begin
   Result := filePosition;
 end;
 
+//PROFILE-NO
 procedure TCachedBinaryFile.Read(var c: Char);
 begin
   if EOF() then raise EInOutError.Create('End of file');
   c := content[filePosition];
   Inc(filePosition);
 end;
+//PROFILE-YES
 
 
 procedure TCachedBinaryFile.Seek2(const Pos: TFilePosition);
