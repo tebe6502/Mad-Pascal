@@ -239,6 +239,7 @@ type
   private
   var
     binaryFile: IBinaryFile;
+    fileSize: TFileSize;
     content: array of Char;
     filePosition: TFilePosition;
 
@@ -671,13 +672,14 @@ end;
 constructor TCachedBinaryFile.Create;
 begin
   binaryFile := TBinaryFile.Create;
+  fileSize := 0;
   content := nil;
   filePosition := 0;
 end;
 
 function TCachedBinaryFile.GetFileSize(): TFileSize;
 begin
-  Result := Length(content);
+  Result := fileSize;
 end;
 
 procedure TCachedBinaryFile.Assign(const filePath: TFilePath);
@@ -688,6 +690,7 @@ end;
 procedure TCachedBinaryFile.Close;
 begin
   binaryFile.Close;
+  fileSize := 0;
   content := nil;
   filePosition := 0;
 end;
@@ -699,7 +702,7 @@ end;
 
 function TCachedBinaryFile.EOF(): Boolean;
 begin
-  Result := (filePosition = GetFileSize);
+  Result := (filePosition = fileSize);
 end;
 
 procedure TCachedBinaryFile.Reset();
@@ -709,20 +712,19 @@ end;
 
 procedure TCachedBinaryFile.Reset(const l: Longint); // l = record size
 var
-  length: TFileSize;
   Result: TFileSize;
 begin
   if l <> 1 then raise EInOutError.Create('Unsupported record size ' + IntToStr(l) +
       ' specified. Only record size 1 is supported.');
 
   binaryFile.Reset(l);
-  length := binaryFile.GetFileSize;
-  SetLength(content, length);
+  fileSize := binaryFile.GetFileSize;
+  SetLength(content, fileSize);
   Result := -1;
-  if (length > 0) then
+  if (fileSize > 0) then
   begin
-    binaryFile.BlockRead(content[0], length, Result);
-    Assert(length = Result);
+    binaryFile.BlockRead(content[0], fileSize, Result);
+    Assert(fileSize = Result);
   end;
 end;
 
@@ -744,7 +746,7 @@ end;
 //PROFILE-NO
 procedure TCachedBinaryFile.Read(var c: Char);
 begin
-  if EOF() then raise EInOutError.Create('End of file');
+  if filePosition = fileSize then raise EInOutError.Create('End of file');
   c := content[filePosition];
   Inc(filePosition);
 end;
