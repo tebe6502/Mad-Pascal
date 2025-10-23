@@ -11106,7 +11106,7 @@ begin
     RealTypeConversion(ValType, RightValType, CastRealType);
 
 
-    ValType := CheckCommonType(j + 1, ValType, RightValType);
+    ValType := GetCommonType(j + 1, ValType, RightValType);
 
     CheckOperator(i, TokenAt(j + 1).Kind, ValType, RightValType);
 
@@ -11250,7 +11250,7 @@ begin
     end;
 
 
-    ValType := CheckCommonType(j + 1, ValType, RightValType);
+    ValType := GetCommonType(j + 1, ValType, RightValType);
 
     CheckOperator(i, TokenAt(j + 1).Kind, ValType, RightValType);
 
