@@ -174,6 +174,8 @@ procedure DefineFilename(tokenIndex: TTokenIndex; StrValue: String);
 
 function FindFile(FileName: String; ftyp: TString): TFilePath; overload;
 
+procedure CheckCommonConstType(const tokenIndex: TTokenIndex; const DstType: TDataType; const SrcType: TDataType);
+
 function GetCommonConstType(const tokenIndex: TTokenIndex; const DstType: TDataType;
   const SrcType: TDataType; const err: Boolean = True): Boolean;
 
@@ -576,6 +578,10 @@ end;
 
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
+procedure CheckCommonConstType(const tokenIndex: TTokenIndex; const DstType: TDataType; const SrcType: TDataType);
+begin
+  GetCommonConstType(tokenIndex, DstType, SrcType, True);
+end;
 
 function GetCommonConstType(const tokenIndex: TTokenIndex; const DstType: TDataType;
   const SrcType: TDataType; const err: Boolean = True): Boolean;
