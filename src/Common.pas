@@ -165,7 +165,8 @@ procedure CheckArrayIndex_(i: TTokenIndex; IdentIndex: TIdentIndex; ArrayIndex: 
 procedure CheckOperator(ErrTokenIndex: TTokenIndex; op: TTokenKind; DataType: TDataType;
   RightType: TDataType = TDataType.UNTYPETOK);
 
-procedure CheckTok(i: TTokenIndex; ExpectedTokenCode: TTokenKind);
+procedure CheckTok(const i: TTokenIndex; const ExpectedTokenCode: TTokenKind); overload;
+procedure CheckTok(const Token: TToken; const ExpectedTokenCode: TTokenKind); overload;
 
 procedure DefineStaticString(StrTokenIndex: TTokenIndex; StrValue: String);
 
@@ -173,9 +174,11 @@ procedure DefineFilename(tokenIndex: TTokenIndex; StrValue: String);
 
 function FindFile(FileName: String; ftyp: TString): TFilePath; overload;
 
-function GetCommonConstType(ErrTokenIndex: TTokenIndex; DstType, SrcType: TDataType; err: Boolean = True): Boolean;
+function GetCommonConstType(const tokenIndex: TTokenIndex; const DstType: TDataType;
+  const SrcType: TDataType; const err: Boolean = True): Boolean;
 
-function GetCommonType(ErrTokenIndex: TTokenIndex; LeftType, RightType: TDataType): TDataType;
+function GetCommonType(const tokenIndex: TTokenIndex; const LeftType: TDataType;
+  const RightType: TDataType): TDataType;
 
 function GetEnumName(IdentIndex: TIdentIndex): TString;
 
@@ -533,7 +536,7 @@ end;
 // ----------------------------------------------------------------------------
 
 
-procedure CheckTok(i: TTokenIndex; ExpectedTokenCode: TTokenKind);
+procedure CheckTok(const i: TTokenIndex; const ExpectedTokenCode: TTokenKind); overload;
 var
   Token: TToken;
   found, expected: String;
@@ -546,8 +549,25 @@ begin
     found := token.GetSpelling;
     expected := GetHumanReadbleTokenSpelling(ExpectedTokenCode);
 
-    Error(i, TMessage.Create(TErrorCode.SyntaxError, 'Syntax error, ' + '''' + expected +
-      '''' + ' expected but ''' + found + ''' found.'));
+    Error(Token.TokenIndex, TMessage.Create(TErrorCode.SyntaxError, 'Syntax error, ' + '''' +
+      expected + '''' + ' expected but ''' + found + ''' found.'));
+
+  end;
+
+end;
+
+procedure CheckTok(const Token: TToken; const ExpectedTokenCode: TTokenKind); overload;
+var
+  found, expected: String;
+begin
+  if Token.Kind <> ExpectedTokenCode then
+  begin
+
+    found := token.GetSpelling;
+    expected := GetHumanReadbleTokenSpelling(ExpectedTokenCode);
+
+    Error(Token.TokenIndex, TMessage.Create(TErrorCode.SyntaxError, 'Syntax error, ' + '''' +
+      expected + '''' + ' expected but ''' + found + ''' found.'));
 
   end;
 
@@ -557,37 +577,16 @@ end;
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 
-// TODO Move core to TDataType
-function GetCommonConstType(ErrTokenIndex: TTokenIndex; DstType, SrcType: TDataType; err: Boolean = True): Boolean;
+function GetCommonConstType(const tokenIndex: TTokenIndex; const DstType: TDataType;
+  const SrcType: TDataType; const err: Boolean = True): Boolean;
 begin
 
   Result := False;
 
-  if (GetDataSize(DstType) < GetDataSize(SrcType))
-    // .
-    or ((DstType = TDataType.REALTOK) and (SrcType <> TDataType.REALTOK))
-    // .
-    or ((DstType <> TDataType.REALTOK) and (SrcType = TDataType.REALTOK))
-    // .
-    or ((DstType = TDataType.SINGLETOK) and (SrcType <> TDataType.SINGLETOK))
-    // .
-    or ((DstType <> TDataType.SINGLETOK) and (SrcType = TDataType.SINGLETOK))
-    // .
-    or ((DstType = TDataType.HALFSINGLETOK) and (SrcType <> TDataType.HALFSINGLETOK))
-    // .
-    or ((DstType <> TDataType.HALFSINGLETOK) and (SrcType = TDataType.HALFSINGLETOK))
-    // .
-    or ((DstType = TDataType.SHORTREALTOK) and (SrcType <> TDataType.SHORTREALTOK))
-    // .
-    or ((DstType <> TDataType.SHORTREALTOK) and (SrcType = TDataType.SHORTREALTOK))
-    // .
-    or ((DstType in IntegerTypes) and (SrcType in [TDataType.CHARTOK, TDataType.BOOLEANTOK,
-    TDataType.POINTERTOK, TDataType.DATAORIGINOFFSET, TDataType.CODEORIGINOFFSET, TDataType.STRINGPOINTERTOK]))
-    // .
-    or ((SrcType in IntegerTypes) and (DstType in [TDataType.CHARTOK, TDataType.BOOLEANTOK])) then
+  if IsCommonConstType(DstType, SrcType) then
 
     if err then
-      ErrorIncompatibleTypes(ErrTokenIndex, SrcType, DstType)
+      ErrorIncompatibleTypes(tokenIndex, SrcType, DstType)
     else
       Result := True;
 
@@ -599,7 +598,8 @@ end;
 
 
 // TOO Move core to TDataType
-function GetCommonType(ErrTokenIndex: TTokenIndex; LeftType, RightType: TDataType): TDataType;
+function GetCommonType(const TokenIndex: TTokenIndex; const LeftType: TDataType;
+  const RightType: TDataType): TDataType;
 begin
 
   Result := TDataType.UNTYPETOK;
@@ -618,7 +618,7 @@ begin
   if LeftType = TDataType.UNTYPETOK then Result := RightType;
 
   if Result = TDataType.UNTYPETOK then
-    ErrorIncompatibleTypes(ErrTokenIndex, RightType, LeftType);
+    ErrorIncompatibleTypes(TokenIndex, RightType, LeftType);
 
 end;
 

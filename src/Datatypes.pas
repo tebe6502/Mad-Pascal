@@ -26,7 +26,9 @@ const
 
   function GetDataTypeName(const dataType: TDataType): String;
   function GetDataSize(const dataType: TDataType): Byte;
-function GetValueType(const Value: TInteger): TDataType;
+  function GetValueType(const Value: TInteger): TDataType;
+
+  function IsCommonConstType(const DstType: TDataType; const SrcType: TDataType): Boolean;
 
 implementation
 
@@ -110,6 +112,35 @@ begin
       else
         Result := TDataType.CARDINALTOK
     end;
+
+end;
+
+function IsCommonConstType(const DstType: TDataType; const SrcType: TDataType): Boolean;
+begin
+
+  Result := (GetDataSize(DstType) < GetDataSize(SrcType))
+    // .
+    or ((DstType = TDataType.REALTOK) and (SrcType <> TDataType.REALTOK))
+    // .
+    or ((DstType <> TDataType.REALTOK) and (SrcType = TDataType.REALTOK))
+    // .
+    or ((DstType = TDataType.SINGLETOK) and (SrcType <> TDataType.SINGLETOK))
+    // .
+    or ((DstType <> TDataType.SINGLETOK) and (SrcType = TDataType.SINGLETOK))
+    // .
+    or ((DstType = TDataType.HALFSINGLETOK) and (SrcType <> TDataType.HALFSINGLETOK))
+    // .
+    or ((DstType <> TDataType.HALFSINGLETOK) and (SrcType = TDataType.HALFSINGLETOK))
+    // .
+    or ((DstType = TDataType.SHORTREALTOK) and (SrcType <> TDataType.SHORTREALTOK))
+    // .
+    or ((DstType <> TDataType.SHORTREALTOK) and (SrcType = TDataType.SHORTREALTOK))
+    // .
+    or ((DstType in IntegerTypes) and (SrcType in [TDataType.CHARTOK, TDataType.BOOLEANTOK,
+    TDataType.POINTERTOK, TDataType.DATAORIGINOFFSET, TDataType.CODEORIGINOFFSET, TDataType.STRINGPOINTERTOK]))
+    // .
+    or ((SrcType in IntegerTypes) and (DstType in [TDataType.CHARTOK, TDataType.BOOLEANTOK]));
+
 
 end;
 

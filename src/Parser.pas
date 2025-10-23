@@ -553,7 +553,6 @@ begin
   j := 0;
 
   // WRITELN(TokenAt(i).line, ',', TokenAt(i).kind);
-
   case TokenAt(i).Kind of
 
     TTokenKind.LOWTOK:
@@ -1418,7 +1417,10 @@ begin
 
     k := CompileConstFactor(j + 2, RightConstVal, RightConstValType);
 
-    if isError then Break;
+    if isError then
+    begin
+    Break;
+    end;
 
 
     if (ConstValType in RealTypes) and (RightConstValType in IntegerTypes) then
