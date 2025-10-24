@@ -89,7 +89,7 @@
          asm65(#9'@move #CODEORIGIN+$'+IntToHex(TokenAt(i + 2).StrAddress - CODEORIGIN, 4)+' '+IdentifierAt(IdentIndex).Name+' #'+IntToStr(Succ(NumCharacters)));
 
        ASPOINTERTOARRAYORIGIN:
-       GetCommonType(i + 1, CHARTOK, TTokenKind.POINTERTOK);
+       CheckCommonType(i + 1, CHARTOK, TTokenKind.POINTERTOK);
 }
         ASPOINTER:
         begin

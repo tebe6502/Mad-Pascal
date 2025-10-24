@@ -24,7 +24,7 @@
   if (VarType in [TDataType.RECORDTOK]) and (IdentifierAt(IdentIndex).DataType = TDataType.POINTERTOK) then
   // ok
   else
-    GetCommonType(i, IdentifierAt(IdentIndex).DataType, VarType);
+    CheckCommonType(i, IdentifierAt(IdentIndex).DataType, VarType);
 
   StartOptimization(j);
 

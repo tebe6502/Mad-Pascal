@@ -143,6 +143,30 @@ type
   TBlockStackIndex = Integer;
   TBlockIndex = Integer;
 
+  TBlock = class
+  public
+    BlockIndex: TBlockIndex;
+    // TODO: Identifiers defined in this block
+  end;
+
+  TBlockStack = class
+  public
+
+    constructor Create;
+    destructor Free;
+
+    function Push: TBlock;
+    function Pop: TBlock;
+    function Top: TBlock;
+  private
+  type TBlockArray = array of TBlock;
+
+  var
+    blockArray: TBlockArray;
+  var
+    stackTopIndex: TBlockStackIndex;
+  end;
+
   TIdentifierName = String;
 
   TVariableList = array [1..MAXVARS] of TParam;
@@ -150,8 +174,8 @@ type
 
   TFieldKind = (UNTYPETOK, OBJECTVARIABLE, RECORDVARIABLE);
 
-  // Lower 16 bit encode the size of the 1st array dimension.
-  // Upper 16 bits encode the size of the 2nd array dimension.
+  // The lower 16 bits encode the size of the 1st array dimension.
+  // The upper 16 bits encode the size of the 2nd array dimension.
   TNumAllocElements = Cardinal;
 
   TField = record
@@ -304,7 +328,7 @@ type
     //  For kind=PROCEDURETOK, FUNCTIONTOK:
     NumParams: Word;
     Param: TParamList;
-    ProcAsBlock: Integer;   // ? TBlockIndex
+    ProcAsBlockIndex: TBlockIndex;
     ObjectIndex: Integer;
 
     isUnresolvedForward, updateResolvedForward, isOverload, isRegister, isInterrupt,
@@ -386,6 +410,37 @@ procedure SetModifierBit(const modifierCode: TModifierCode; var bits: TModifierB
 function GetIOBits(const ioCode: TIOCode): TIOBits;
 
 implementation
+
+// ----------------------------------------------------------------------------
+// Class TBlockStack
+// ----------------------------------------------------------------------------
+
+
+constructor TBlockStack.Create;
+begin
+  SetLength(blockArray, 0);
+  stackTopIndex := 0;
+end;
+
+destructor TBlockStack.Free;
+begin
+
+end;
+
+function TBlockStack.Push: TBlock;
+begin
+  // TODO
+end;
+
+function TBlockStack.Pop: TBlock;
+begin
+  // TODO
+end;
+
+function TBlockStack.Top: TBlock;
+begin
+  // TODO
+end;
 
 // ----------------------------------------------------------------------------
 // Class TSourceFile

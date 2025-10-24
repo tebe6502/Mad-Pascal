@@ -553,7 +553,6 @@ begin
   j := 0;
 
   // WRITELN(TokenAt(i).line, ',', TokenAt(i).kind);
-
   case TokenAt(i).Kind of
 
     TTokenKind.LOWTOK:
@@ -789,7 +788,7 @@ begin
       if OldConstValType in [TDataType.DATAORIGINOFFSET, TDataType.CODEORIGINOFFSET] then
         Error(i, TMessage.Create(TErrorCode.InvalidVariableAddress, 'Can''t take the address of variable'));
 
-      GetCommonConstType(i, TDataType.INTEGERTOK, ConstValType);
+      CheckCommonConstType(i, TDataType.INTEGERTOK, ConstValType);
 
       CheckTok(i + 1, TTokenKind.CPARTOK);
 
@@ -873,7 +872,7 @@ begin
 
       if isError then Exit;
 
-      GetCommonConstType(i, TDataType.REALTOK, ConstValType);
+      CheckCommonConstType(i, TDataType.REALTOK, ConstValType);
 
       CheckTok(i + 1, TTokenKind.CPARTOK);
 
@@ -908,7 +907,7 @@ begin
 
       if isError then Exit;
 
-      GetCommonConstType(i, TDataType.CARDINALTOK, ConstValType);
+      CheckCommonConstType(i, TDataType.CARDINALTOK, ConstValType);
 
       CheckTok(i + 1, TTokenKind.CPARTOK);
 
@@ -929,7 +928,7 @@ begin
 
       if isError then Exit;
 
-      GetCommonConstType(i, TDataType.INTEGERTOK, ConstValType);
+      CheckCommonConstType(i, TDataType.INTEGERTOK, ConstValType);
 
       CheckTok(i + 1, TTokenKind.CPARTOK);
 
@@ -1418,7 +1417,10 @@ begin
 
     k := CompileConstFactor(j + 2, RightConstVal, RightConstValType);
 
-    if isError then Break;
+    if isError then
+    begin
+    Break;
+    end;
 
 
     if (ConstValType in RealTypes) and (RightConstValType in IntegerTypes) then
@@ -2603,7 +2605,7 @@ begin
           begin
 
             i := CompileConstExpression(i + 1, ConstVal, ExpressionType);
-            //  GetCommonType(i, ConstValType, SelectorType);
+            //  CheckCommonType(i, ConstValType, SelectorType);
 
             Inc(i);
           end;
@@ -2767,7 +2769,7 @@ begin
                       NestedFunctionResultType, NestedFunctionNumAllocElements, NestedFunctionAllocElementType);
 
                     Inc(NumBlocks);
-                    IdentifierAt(NumIdent).ProcAsBlock := NumBlocks;
+                    IdentifierAt(NumIdent).ProcAsBlockIndex := NumBlocks;
 
                     IdentifierAt(NumIdent).IsUnresolvedForward := True;
 
@@ -2876,7 +2878,7 @@ begin
                               NestedFunctionAllocElementType);
 
                             Inc(NumBlocks);
-                            IdentifierAt(NumIdent).ProcAsBlock := NumBlocks;
+                            IdentifierAt(NumIdent).ProcAsBlockIndex := NumBlocks;
 
                             IdentifierAt(NumIdent).IsUnresolvedForward := True;
 
