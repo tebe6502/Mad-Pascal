@@ -272,7 +272,103 @@ function GetPixel(x,y: smallint): byte; assembler;
 Return color of pixel
 *)
 asm
+	lda y+1
+	bmi stop
+	cmp MAIN.SYSTEM.ScreenHeight+1
+	bne sk0
+	lda y
+	cmp MAIN.SYSTEM.ScreenHeight
+sk0
+	bcs stop
 
+	lda x+1
+	bmi stop
+	cmp MAIN.SYSTEM.ScreenWidth+1
+	bne sk1
+	lda x
+	cmp MAIN.SYSTEM.ScreenWidth
+sk1
+	bcs stop
+
+; -----------------------------------------
+
+	lda MAIN.SYSTEM.GraphMode
+	cmp #VGAHi
+	beq HiRes
+
+MedRes
+	lda X
+	and #3
+	tay
+	lda m_mask,y
+	sta m_msk+1
+
+	ldy Y
+
+	lda X
+	and #%11111100
+
+	asl @
+	rol X+1
+
+	add @putpixel.ladr,y
+	sta :bp2
+	lda X+1
+	adc @putpixel.hadr,y
+	adc VideoRam+1
+	sta :bp2+1
+
+	ldy #$00
+
+	lda (:bp2),y
+m_msk	and #$00
+	sta Result
+
+	lda X
+	and #3
+	eor #3
+	tay
+	beq stop
+
+@	lsr Result
+	lsr Result
+	dey
+	bne @-
+
+stop	rts
+
+; -----------------------------------------
+
+m_mask	dta $c0,$30,$0c,$03
+h_mask	dta $80,$40,$20,$10,$08,$04,$02,$01
+
+; -----------------------------------------
+
+HiRes
+	lda X
+	and #7
+	tay
+	lda h_mask,y
+	sta h_msk+1
+
+	ldy Y
+
+	lda X
+	and #%11111000
+	add @putpixel.ladr,y
+	sta :bp2
+	lda X+1
+	adc @putpixel.hadr,y
+	adc VideoRam+1
+	sta :bp2+1
+
+	ldy #$00
+
+	lda (:bp2),y
+h_msk	and #$00
+	seq
+	lda #1
+	sta Result
 end;
 
 
@@ -336,6 +432,20 @@ begin
 
  CurrentX := x;
  CurrentY := y;
+
+end;
+
+
+procedure LineRel(dx, dy: smallint);
+(*
+@description:
+LineRel draws a line starting from the current pointer position to the point(DX,DY),
+relative to the current position, in the current line style and color.
+The Current Position is set to the endpoint of the line.
+*)
+begin
+
+ LineTo(CurrentX + dx, CurrentY + dy)
 
 end;
 

@@ -198,6 +198,7 @@ var
 	procedure fLine(x0, y0, x1, y1: smallint);
 	procedure HLine(x1,x2, y: smallint);
 	procedure LineTo(x, y: smallint);
+	procedure LineRel(dx, dy: smallint);
 	procedure PutPixel(x,y: smallint); assembler; overload;
 	procedure PutPixel(x,y: smallint; color: byte); overload;
 	function Scanline(y: smallint): PByte;
@@ -280,7 +281,7 @@ _2
 	scs
 	dey
 	sta x
-	sty x+1	
+	sty x+1
 _3
 	mwa x CurrentX
 	mwa y CurrentY
