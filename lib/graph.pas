@@ -18,6 +18,7 @@ InitGraph
 Line
 MoveTo
 LineTo
+LineRel
 MoveTo
 PutPixel
 SetBkColor
