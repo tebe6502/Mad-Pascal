@@ -6789,6 +6789,8 @@ begin
 
           //  writeln(IdentifierAt(IdentIndex).nAME,' = ',IdentifierAt(IdentIndex).DataType,',',IdentifierAt(IdentIndex).AllocElementType,',',IdentifierAt(IdentIndex).NumAllocElements,',',IdentifierAt(IdentIndex).PassMethod );
 
+	  if (TokenAt(i + 2).Kind = TTokenKind.DEREFERENCETOK) and (TokenAt(i + 3).Kind = TTokenKind.OBRACKETTOK) then inc(i);
+
 
           if IdentifierAt(IdentIndex).Kind in [TTokenKind.PROCEDURETOK, TTokenKind.FUNCTIONTOK,
             TTokenKind.CONSTRUCTORTOK, TTokenKind.DESTRUCTORTOK] then
@@ -6808,9 +6810,8 @@ begin
           end
           else
 
-            if (TokenAt(i + 2).Kind = TTokenKind.OBRACKETTOK) and (IdentifierAt(IdentIndex).DataType in Pointers) and
-              ((IdentifierAt(IdentIndex).NumAllocElements > 0) or
-              ((IdentifierAt(IdentIndex).NumAllocElements = 0) and
+            if (TokenAt(i + 2).Kind = TTokenKind.OBRACKETTOK) and (IdentifierAt(IdentIndex).DataType in Pointers + [TDataType.DEREFERENCEARRAYTOK]) and
+              ((IdentifierAt(IdentIndex).NumAllocElements > 0) or ((IdentifierAt(IdentIndex).NumAllocElements = 0) and
               (IdentifierAt(IdentIndex).AllocElementType <> TDataType.UNTYPETOK))) then
             begin                  // array index
               Inc(i);

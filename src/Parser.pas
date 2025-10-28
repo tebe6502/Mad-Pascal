@@ -1788,13 +1788,15 @@ begin
                 else
                 begin
 
-                  if (identifier.idType = TDataType.ARRAYTOK) and (identifier.isAbsolute = False) and
-                    (Elements(NumIdent) = 1) then
-                  begin
+                  if (identifier.idType = TDataType.ARRAYTOK) and (identifier.isAbsolute = False) and (Elements(NumIdent) = 1) then
                     // Empty array [0..0] ; [0..0, 0..0] foes not require spaces
-                  end
                   else
-                    IncVarDataSize(tokenIndex, Integer(Elements(NumIdent) * GetDataSize(AllocElementType)));
+//                    IncVarDataSize(tokenIndex, Integer(Elements(NumIdent) * GetDataSize(AllocElementType)));
+
+	           if IdentifierAt(NumIdent).DataType = TDataType.DEREFERENCEARRAYTOK then
+	             IncVarDataSize(tokenIndex, GetDataSize(TDataType.POINTERTOK))
+	           else 
+                     IncVarDataSize(tokenIndex, Integer(Elements(NumIdent) * GetDataSize(AllocElementType)));
 
                 end;
 

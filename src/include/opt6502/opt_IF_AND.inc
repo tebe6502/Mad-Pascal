@@ -9,7 +9,7 @@
        dey(i+4) and										// dey					; 4
        lab_a(i+5) and										//@					; 5
        tya(i+6) and										// tya					; 6
-       and_(i+7) and (and_stack(i+7) = false) and 						// and					; 7
+       and_val(i+7) and 									// and					; 7	~:STACKORIGIN
        jeq(i+8) then										// jeq					; 8
      begin
       listing[i] := '';
@@ -29,7 +29,7 @@
        dey(i+3) and										// dey					; 3
        lab_a(i+4) and										//@					; 4
        tya(i+5) and										// tya					; 5
-       and_(i+6) and (and_stack(i+6) = false) and						// and					; 6
+       and_val(i+6) and										// and					; 6	~:STACKORIGIN
        jeq(i+7) then										// jeq					; 7
      begin
       listing[i] := '';
@@ -43,29 +43,17 @@
      end;
 
 
-
     if lab_a(i) and										//@					; 0	AND :STACK -> JEQ
        tya(i+1) and										// tya					; 1
        and_stack(i+2) and									// and :STACKORIGIN			; 2
        jeq(i+3) then										// jeq					; 3
      begin
 
-      tmp := copy(listing[i+2], 6, 256);
-      yes := true;
-
-      for p:=i-1 downto 0 do
-       if ora_stack(p) or local(p) or
-          (sty_stack(p) and lab_a(p-1) and lda(p+1) and and_stack(p+2)) or
-          (sty_stack(p) and lab_a(p-1) and lda_stack(p+1)) or
-          (sty_stack(p) and lab_a(p-1) and ldy_1(p+1) and lda_stack(p+2) and argMatch(p, p+2)) or
-          (sty_stack(p) and lab_a(p-1) and (argMatch(p, i+2) = false)) or
-          (tya(p) and (lab_a(p-1) = false) and (and_stack(p+1) = false)) then begin yes:=false; Break end;
-
+      yes := test_ORA(i);
 
       if yes then begin
 
-//      for p:=0 to l-1 do writeln(listing[p]);
-//      writeln('-------');
+       tmp := copy(listing[i+2], 6, 256);
 
        for p:=i-1 downto 0 do begin
 

@@ -36,7 +36,7 @@ begin
 
 	end else begin
 
-	 listing[l]   := #9'lda ' + GetARG(0, x-1);
+	 listing[l] := #9'lda ' + GetARG(0, x-1);
 	 inc(l);
 
 	 for m := 0 to k - 1 do begin
@@ -44,7 +44,7 @@ begin
 	  inc(l);
 	 end;
 
-	 listing[l]   := #9'sta '+GetARG(0, x-1);
+	 listing[l] := #9'sta '+GetARG(0, x-1);
 	 inc(l);
 {
 	s[x-1, 1] := '';//#9'mva #$00';

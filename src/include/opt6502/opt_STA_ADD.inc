@@ -292,7 +292,7 @@ begin
        begin
 	listing[i+4] := listing[i+10];
 
-	if (listing[i+6] = #9'add #$01') and (pos(listing[i+7], listing[i+10]) > 0) then begin
+	if add_im_1(i+6) and (pos(listing[i+7], listing[i+10]) > 0) then begin
 	 listing[i+1] := listing[i+7];
 
 	 listing[i+5] := #9'inc ' + copy(listing[i+7], 6, 256);
@@ -319,7 +319,7 @@ begin
        end;
 
 
-    if ((i > 0) and lda_im_0(i-1) = false) and
+    if ((i > 0) and lda_im_0(i-1) = false) and						//~lda #$00				;-1
        add_sub(i) and (add_im_0(i) = false) and (sub_im_0(i) = false) and		// add|sub				; 0
        sta_stack(i+1) and								// sta :STACKORIGIN			; 1
        lda(i+2) and									// lda					; 2
@@ -338,7 +338,7 @@ begin
        begin
 	listing[i+4] := listing[i+10];
 
-	if (listing[i+6] = #9'sub #$01') and (pos(listing[i+7], listing[i+10]) > 0) then begin
+	if sub_im_1(i+6) and (pos(listing[i+7], listing[i+10]) > 0) then begin
 	 listing[i+1] := listing[i+7];
 
 	 listing[i+8] := #9'dec ' + copy(listing[i+7], 6, 256);

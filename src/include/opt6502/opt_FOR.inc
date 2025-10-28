@@ -91,7 +91,7 @@
  	  listing[3] := '';
  	  listing[4] := #9'jmi ' + copy(listing[4], 6, 256);
  	 end else begin
-	  listing[1] := #9'cmp #$'+IntToHex(k and $ff, 2);
+	  listing[1] := #9'cmp #' + Hex(k and $ff, 2);
 	  listing[2] := '';
 	  listing[3] := '';
 	  listing[4] := #9'jcs ' + copy(listing[4], 6, 256);
@@ -139,7 +139,7 @@
         k := GetBYTE(1) + 1;
 
 	 if k <> $80 then begin
-	  listing[1] := #9'sub #$' + IntToHex(k and $ff, 2);
+	  listing[1] := #9'sub #' + Hex(k and $ff, 2);
 
 	  listing[4] := #9'asl @';
 	  listing[5] := #9'jcc ' + copy(listing[6], 6, 256);
@@ -358,9 +358,9 @@
          k := GetBYTE(2) shl 8 + GetBYTE(5) + 1;
 
          if k <> $8000 then begin
-	  listing[5] := #9'cmp #$' + IntToHex(k and $ff, 2);
+	  listing[5] := #9'cmp #' + Hex(k and $ff, 2);
 	  listing[6] := listing[1];
-	  listing[7] := #9'sbc #$' + IntToHex(byte(k shr 8), 2);
+	  listing[7] := #9'sbc #' + Hex(byte(k shr 8), 2);
 	  listing[8] := #9'svc';
 	  listing[9] := #9'eor #$80';
 	  listing[10] := #9'asl @';
@@ -407,9 +407,9 @@
          k := GetBYTE(2) shl 8 + GetBYTE(5);
 
          if k <> $8000 then begin
-	  listing[5] := #9'cmp #$' + IntToHex(k and $ff, 2);
+	  listing[5] := #9'cmp #' + Hex(k and $ff, 2);
 	  listing[6] := listing[1];
-	  listing[7] := #9'sbc #$' + IntToHex(byte(k shr 8), 2);
+	  listing[7] := #9'sbc #' + Hex(byte(k shr 8), 2);
 	  listing[8] := #9'svc';
 	  listing[9] := #9'eor #$80';
 	  listing[10] := #9'jmi ' + copy(listing[18], 6, 256);

@@ -8,6 +8,167 @@ begin
 // ===				      STA #$00.
 // -----------------------------------------------------------------------------
 
+
+    if (i = l - 1) and										// "samotna" instrukcja na koncu bloku
+       (sta_stack(i) or sty_stack(i) or lda_a(i) or ldy(i) or and_ora_eor(i) or {iny(i) or}	// !!! 'iny' moze poprzedzac 'scc'
+        lsr_stack(i) or asl_stack(i) or ror_stack(i) or rol_stack(i) or
+        lsr_a(i) or asl_a(i) or ror_a(i) or rol_a(i) or adc(i) or sbc(i)) then
+      begin
+  	listing[i] := '';
+
+  	exit(false);
+      end;
+
+
+    if (i = l - 2) and
+       SKIP(i+1) and										// sta :STACKORIGIN		; 1
+       sta_stack(i) then									// SKIP				; 0
+      begin
+  	listing[i] := '';
+
+  	exit(false);
+      end;
+
+
+    if (i = l - 2) and										// "samotna" instrukcja na koncu bloku
+       jmp(i+1) and										// jmp l_
+       (sta_stack(i) or sty_stack(i) or lda_a(i) or ldy(i) or and_ora_eor(i) or iny(i) or
+        lsr_stack(i) or asl_stack(i) or ror_stack(i) or rol_stack(i) or
+        lsr_a(i) or asl_a(i) or ror_a(i) or rol_a(i) or adc(i) or sbc(i)) then
+      begin
+  	listing[i] := '';
+
+  	exit(false);
+      end;
+
+
+    if (i = l - 2) and										// "samotna" instrukcja na koncu bloku
+       sta_im_0(i) and
+       iny(i+1) then
+      begin
+  	listing[i]   := '';
+  	listing[i+1] := '';
+
+  	exit(false);
+      end;
+
+
+    if (i = l - 3) and										// "samotna" instrukcja na koncu bloku
+       (lda_val(i+1) or tya(i+1)) and
+       sta_a(i+2) and
+
+       (lda_a(i) or and_ora_eor(i) or
+        lsr_stack(i) or asl_stack(i) or ror_stack(i) or rol_stack(i) or
+        lsr_a(i) or asl_a(i) or ror_a(i) or rol_a(i)) then
+      begin
+  	listing[i] := '';
+
+  	exit(false);
+      end;
+
+
+    if (i = l - 3) and										// "samotna" instrukcja na koncu bloku
+       sta_stack(i) and
+       (jne(i+1) or jeq(i+1)) and
+       (lab_l(i+2) or lab_b(i+2)) then
+      begin
+  	listing[i] := '';
+
+  	exit(false);
+      end;
+
+
+    if (i = l - 3) and
+       iny(i) and										// iny				; 0
+       and_ora_eor(i+1) and (iy(i+1) = false) and						// and|ora|eor			; 1
+       sta_a(i+2) and (iy(i+2) = false) then							// sta				; 2
+      begin
+  	listing[i]   := '';
+
+  	exit(false);
+      end;
+
+
+    if (i = l - 4) and										// "samotna" instrukcja na koncu bloku
+       lda_val(i+1) and
+       sta_a(i+2) and
+       sta_a(i+3) and
+
+       (lda_a(i) or and_ora_eor(i) or
+        lsr_stack(i) or asl_stack(i) or ror_stack(i) or rol_stack(i) or
+        lsr_a(i) or asl_a(i) or ror_a(i) or rol_a(i)) then
+      begin
+  	listing[i] := '';
+
+  	exit(false);
+      end;
+
+
+    if (i = l - 4) and
+       lda_stack(i) and										// lda :STACKORIGIN		; 0
+       sta_stack(i+1) and									// sta :STACKORIGIN		; 1
+       (lda_val(i+2) or tya(i+2)) and								// lda|tya			; 2
+       sta_a(i+3) then										// sta				; 3
+      begin
+  	listing[i]   := '';
+  	listing[i+1] := '';
+
+  	exit(false);
+      end;
+
+
+    if (i = l - 4) and
+       iny(i) and										// iny				; 0
+       lda_a(i+1) and (iy(i+1) = false) and							// lda				; 1
+       and_ora_eor(i+2) and (iy(i+2) = false) and						// and|ora|eor			; 2
+       sta_a(i+3) and (iy(i+3) = false) then							// sta				; 3
+      begin
+  	listing[i]   := '';
+
+  	exit(false);
+      end;
+
+
+    if lda_val(i) and										// lda				; 0
+       and_im(i+1) and										// and #			; 1
+       jsr_im_0(i+2) and									// jsr #$00			; 2
+       lda_im_0(i+3) and									// lda #$00			; 3
+       sta_stack(i+4) and									// sta :STACKORIGIN		; 4
+       (listing[i+5] = #9'lda @BYTE.MOD.RESULT') then						// lda @BYTE.MOD.RESULT		; 5
+      begin
+  	listing[i+2] := listing[i+4];
+  	listing[i+3] := '';
+  	listing[i+4] := listing[i];
+  	listing[i+5] := listing[i+1];
+
+  	listing[i]   := '';
+  	listing[i+1] := #9'lda #$00';
+
+  	exit(false);
+      end;
+
+
+    if jsr_im_0(i) and										// jsr #$00			; 0
+       (listing[i+1] = #9'lda @BYTE.MOD.RESULT') then						// lda @BYTE.MOD.RESULT		; 1
+      begin
+  	listing[i]   := '';
+  	listing[i+1] := '';
+
+  	exit(false);
+      end;
+
+
+    if jsr_im_0(i) and										// jsr #$00			; 0
+       (listing[i+1] = #9'ldy @BYTE.MOD.RESULT') then						// ldy @BYTE.MOD.RESULT		; 1
+      begin
+  	listing[i]   := #9'tay';
+  	listing[i+1] := '';
+
+  	exit(false);
+      end;
+
+// -----------------------------------------------------------------------------
+
     if (listing[i] = #9'sta @PARAM?.@NIL') then							// sta @PARAM?.@NIL		; 0
       begin
 	listing[i] := #9'sta #$00';
@@ -354,7 +515,7 @@ begin
 
 
     if scc(i) and										// scc				; 0
-       (listing[i+1] = #9'inc #$00') then							// inc #$00			; 1
+       inc_im_0(i+1) then									// inc #$00			; 1
      begin
 	listing[i]   := '';
 	listing[i+1] := '';
@@ -363,7 +524,7 @@ begin
 
 
     if scs(i) and										// scs				; 0
-       (listing[i+1] = #9'dec #$00') then							// dec #$00			; 1
+       dec_im_0(i+1) then									// dec #$00			; 1
      begin
 	listing[i]   := '';
 	listing[i+1] := '';

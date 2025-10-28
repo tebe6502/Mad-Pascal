@@ -1,7 +1,6 @@
 
 function opt_ASL(i: integer): Boolean;
 var p: integer;
-    tmp: string;
     yes: Boolean;
 begin
 
@@ -288,8 +287,8 @@ begin
      end;
 
 
-    if (listing[i] = #9'asl #$00') and								// asl #$00				; 0
-       (listing[i+1] = #9'rol #$00') then							// rol #$00				; 1
+    if asl_im_0(i) and										// asl #$00				; 0
+       rol_im_0(i+1) then									// rol #$00				; 1
      begin
 	listing[i]   := '';
 	listing[i+1] := '';
@@ -299,7 +298,7 @@ begin
 
 
     if (asl_stack(i) or asl_a(i)) and								// asl @|asl :STACKORIGIN		; 0
-       (listing[i+1] = #9'rol #$00') then							// rol #$00				; 1
+       rol_im_0(i+1) then									// rol #$00				; 1
      begin
 	listing[i+1] := '';
 
@@ -308,7 +307,7 @@ begin
 
 
     if rol_stack(i) and										// rol :STACKORIGIN			; 0
-       (listing[i+1] = #9'rol #$00') then							// rol #$00				; 1
+       rol_im_0(i+1) then									// rol #$00				; 1
      begin
 	listing[i+1] := '';
 
@@ -451,7 +450,7 @@ begin
        (adc_sbc(i+11) = false) then								//~adc|sbc				; 11
      if argMatch(i, i+5) then begin
 
-	yes:=(pos(' :STACK', listing[i+8]) > 0);
+	yes := stack(i+8);
 
 	k:=i;
 	while (listing[i]=listing[k-4]) and (listing[i+1]=listing[k-4+1]) and (listing[i+2]=listing[k-4+2]) and (listing[i+3]=listing[k-4+3]) do begin
@@ -519,7 +518,7 @@ begin
        (adc_sbc(i+14) = false) then								//~adc|sbc				; 14
      if argMatch(i, i+7) then begin
 
-	yes:=(pos(' :STACK', listing[i+10]) > 0);
+	yes := stack(i+10);
 
 	k:=i;
 	while (listing[i]=listing[k-4]) and (listing[i+1]=listing[k-4+1]) and (listing[i+2]=listing[k-4+2]) and (listing[i+3]=listing[k-4+3]) do begin
@@ -1153,11 +1152,10 @@ begin
        (add_stack(i+4) = false) then								//~add					; 4
      if argMatch(i, i+2) then
       begin
-        tmp := listing[i];
+        listing[i+2] := listing[i];
 
         listing[i]   := listing[i+1];
         listing[i+1] := #9'rol @';
-	listing[i+2] := tmp;
 
 	exit(false);
       end;

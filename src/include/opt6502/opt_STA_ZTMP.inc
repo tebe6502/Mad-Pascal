@@ -13,10 +13,10 @@ begin
      bpl_a(i+1) and									// bpl @+		; 1
      lda_a(i+2) and									// lda 			; 2
      sub(i+3) and									// sub 			; 3
-     (listing[i+4] = #9'sta :eax+2') and						// sta :eax+2		; 4
+     sta_eax_2(i+4) and									// sta :eax+2		; 4
      lda_a(i+5) and									// lda 			; 5
      sbc(i+6) and									// sbc			; 6
-     (listing[i+7] = #9'sta :eax+3') and 						// sta :eax+3		; 7
+     sta_eax_3(i+7) and 								// sta :eax+3		; 7
      lab_a(i+8) then									//@			; 8
    begin
 
@@ -44,11 +44,11 @@ begin
     if mwy_bp2(i+9) and								// mwy BASE :bp2	; 9
        ldy_im_0(i+10) and 							// ldy #$00		; 10
        lda_eax(i+11) and 							// lda :eax		; 11
-       add_sub(i+12) and (pos(' (:bp2),y', listing[i+12]) > 0) and   		// add (:bp2),y		; 12
+       add_sub(i+12) and bp2_y(i+12) and  			 		// add (:bp2),y		; 12
        iny(i+13) and								// iny			; 13
        sta_a(i+14) and 								// sta			; 14
        lda_eax_1(i+15) and 							// lda :eax+1		; 15
-       adc_sbc(i+16) and (pos(' (:bp2),y', listing[i+16]) > 0) and 		// adc (:bp2),y		; 16
+       adc_sbc(i+16) and bp2_y(i+16) and			 		// adc (:bp2),y		; 16
        sta_a(i+17) and 								// sta			; 17
        (lda_a(i+18) = false) then						//~lda			; 18
      begin
@@ -94,7 +94,7 @@ begin
 // -----------------------------------------------------------------------------
 
 
-    if (pos('lda :ztmp', listing[i+21]) = 0) and 					//~lda :ztmp...				; 21
+    if (lda_ztmp(i+21) = false) and		 					//~lda :ztmp..				; 21
 
        IFDEF_MUL16(i+16) and			 					// .ifdef fmulinit			; 16
        											// fmulu_16				; 17
@@ -128,7 +128,7 @@ begin
      end;
 
 
-    if (pos('lda :ztmp', listing[i+19]) = 0) and 					//~lda :ztmp...				; 19
+    if (lda_ztmp(i+19) = false) and 							//~lda :ztmp..				; 19
 
        IFDEF_MUL16(i+14) and			 					// .ifdef fmulinit			; 14
        											// fmulu_16				; 15
@@ -160,7 +160,7 @@ begin
      end;
 
 
-    if (pos('lda :ztmp', listing[i+19]) = 0) and 					//~lda :ztmp...				; 19
+    if (lda_ztmp(i+19) = false) and		 					//~lda :ztmp..				; 19
 
        IFDEF_MUL16(i+14) and			 					// .ifdef fmulinit			; 14
        											// fmulu_16				; 15
@@ -192,7 +192,7 @@ begin
      end;
 
 
-    if (pos('lda :ztmp', listing[i+17]) = 0) and 					//~lda :ztmp...				; 17
+    if (lda_ztmp(i+17) = false) and		 					//~lda :ztmp..				; 17
 
        IFDEF_MUL16(i+12) and								// .ifdef fmulinit			; 12
       											// fmulu_16				; 13
@@ -202,16 +202,16 @@ begin
 
        //(lda_a(i) or tya(i)) and							// lda|tya				; 0
        (sta_eax(i+1) or sta_ecx(i+1)) and						// sta :eax|:ecx			; 1
-       (pos('sta :ztmp', listing[i+2]) > 0) and						// sta :ztmp...				; 2
+       sta_ztmp(i+2) and								// sta :ztmp..				; 2
        lda_a(i+3) and									// lda					; 3
        (sta_eax_1(i+4) or sta_ecx_1(i+4)) and						// sta :eax+1|:ecx+1			; 4
-       (pos('sta :ztmp', listing[i+5]) > 0) and 					// sta :ztmp...				; 5
+       sta_ztmp(i+5) and			 					// sta :ztmp..				; 5
        lda_a(i+6) and 									// lda					; 6
        (sta_eax(i+7) or sta_ecx(i+7)) and		 				// sta :ecx|:eax			; 7
-       (pos('sta :ztmp', listing[i+8]) > 0) and						// sta :ztmp...				; 8
+       sta_ztmp(i+8) and								// sta :ztmp..				; 8
        lda_a(i+9) and 									// lda					; 9
        (sta_eax_1(i+10) or sta_ecx_1(i+10)) and						// sta :ecx+1|:eax+1			; 10
-       (pos('sta :ztmp', listing[i+11]) > 0) then 					// sta :ztmp...				; 11
+       sta_ztmp(i+11) then			 					// sta :ztmp..				; 11
      begin
       listing[i+2]  := '';
       listing[i+5]  := '';
@@ -222,7 +222,7 @@ begin
      end;
 
 
-    if (pos('lda :ztmp', listing[i+16]) = 0) and 					//~lda :ztmp...				; 16
+    if (lda_ztmp(i+16) = false) and 							//~lda :ztmp..				; 16
 
        IFDEF_MUL16(i+11) and								// .ifdef fmulinit			; 11
        											// fmulu_16				; 12
@@ -231,16 +231,16 @@ begin
        											// eif					; 15
 
        dey(i) and									// dey					; 0
-       ((listing[i+1] = #9'sty :eax+1') or (listing[i+1] = #9'sty :ecx+1')) and		// sty :eax+1|:ecx+1			; 1
-       (pos('sty :ztmp', listing[i+2]) > 0) and						// sty :ztmp...				; 2
+       (sty_eax_1(i+1) or sty_ecx_1(i+1)) and						// sty :eax+1|:ecx+1			; 1
+       sty_ztmp(i+2) and								// sty :ztmp..				; 2
        (sta_eax(i+3) or sta_ecx(i+3)) and						// sta :eax|:ecx			; 3
-       (pos('sta :ztmp', listing[i+4]) > 0) and 					// sta :ztmp...				; 4
+       sta_ztmp(i+4) and			 					// sta :ztmp..				; 4
        lda_a(i+5) and 									// lda					; 5
        (sta_eax(i+6) or sta_ecx(i+6)) and		 				// sta :ecx|:eax			; 6
-       (pos('sta :ztmp', listing[i+7]) > 0) and						// sta :ztmp...				; 7
+       sta_ztmp(i+7) and								// sta :ztmp..				; 7
        lda_a(i+8) and 									// lda					; 8
        (sta_eax_1(i+9) or sta_ecx_1(i+9)) and						// sta :ecx+1|:eax+1			; 9
-       (pos('sta :ztmp', listing[i+10]) > 0) then 					// sta :ztmp...				; 10
+       sta_ztmp(i+10) then			 					// sta :ztmp..				; 10
      begin
       listing[i+2]  := '';
       listing[i+4]  := '';
@@ -251,7 +251,7 @@ begin
      end;
 
 
-    if (pos('lda :ztmp', listing[i+11]) = 0) and 					//~lda :ztmp...				; 11
+    if (lda_ztmp(i+11) = false) and		 					//~lda :ztmp..				; 11
 
        IFDEF_MUL8(i+6) and								// .ifdef fmulinit			; 6
        											// fmulu_8				; 7
@@ -280,12 +280,12 @@ begin
 
        lda_a(i) and									// lda :ztmp11				; 0
        bpl_a(i+1) and									// bpl @+				; 1
-       (listing[i+2] = #9'lda :eax+2') and						// lda :eax+2 				; 2
+       lda_eax_2(i+2) and								// lda :eax+2 				; 2
        sub(i+3) and									// sub 					; 3
-       (listing[i+4] = #9'sta :eax+2') and						// sta :eax+2				; 4
-       (listing[i+5] = #9'lda :eax+3') and						// lda :eax+3 				; 5
+       sta_eax_2(i+4) and								// sta :eax+2				; 4
+       lda_eax_3(i+5) and								// lda :eax+3 				; 5
        sbc(i+6) and									// sbc 					; 6
-       (listing[i+7] = #9'sta :eax+3') and						// sta :eax+3				; 7
+       sta_eax_3(i+7) and								// sta :eax+3				; 7
        lab_a(i+8) and									//@					; 8
 //       lda_eax_1(i+9) and 								// lda :eax+1				; 9
        (sta_a(i+10) or lda_eax(i+11)) then						// sta|					; 10
@@ -311,7 +311,7 @@ begin
        lda_a(i) and									// lda :ztmp				; 0
        bpl_a(i+1) and									// bpl @+				; 1
        lda_eax_1(i+2) and								// lda :eax+1 				; 2
-       (pos(#9'sub :ztmp', listing[i+3]) = 1) and					// sub :ztmp..				; 3
+       sub_ztmp(i+3) and								// sub :ztmp..				; 3
        sta_eax_1(i+4) and								// sta :eax+1				; 4
        lab_a(i+5) and									//@					; 5
        lda_eax(i+6) and 								// lda :eax				; 6
@@ -332,7 +332,7 @@ begin
        lda_a(i) and									// lda :ztmp				; 0
        bpl_a(i+1) and									// bpl @+				; 1
        lda_eax_1(i+2) and								// lda :eax+1 				; 2
-       (pos(#9'sub :ztmp', listing[i+3]) = 1) and					// sub :ztmp..				; 3
+       sub_ztmp(i+3) and								// sub :ztmp..				; 3
        sta_eax_1(i+4) and								// sta :eax+1				; 4
        lab_a(i+5) and									//@					; 5
        lda_stack(i+6) and		 						// lda :STACKORIGIN			; 6
@@ -355,7 +355,7 @@ begin
        lda_a(i) and									// lda :ztmp				; 0
        bpl_a(i+1) and									// bpl @+				; 1
        lda_eax_1(i+2) and								// lda :eax+1 				; 2
-       (pos(#9'sub :ztmp', listing[i+3]) = 1) and					// sub :ztmp..				; 3
+       sub_ztmp(i+3) and								// sub :ztmp..				; 3
        sta_eax_1(i+4) and								// sta :eax+1				; 4
        lab_a(i+5) and									//@					; 5
        lda_eax(i+6) and			 						// lda :eax				; 6

@@ -22,14 +22,14 @@ begin
        mva(i+7) and 										// mva   :STACKORIGIN+STACKWIDTH,x	; 7
        mva(i+8) and 										// mva   :STACKORIGIN+STACKWIDTH*2,x	; 8
        mva(i+9) then 										// mva   :STACKORIGIN+STACKWIDTH*3,x	; 9
-     if (pos(':STACKORIGIN,x', listing[i+1]) > 0) and
-	(pos(':STACKORIGIN+STACKWIDTH,x', listing[i+2]) > 0) and
-	(pos(':STACKORIGIN+STACKWIDTH*2,x', listing[i+3]) > 0) and
-	(pos(':STACKORIGIN+STACKWIDTH*3,x', listing[i+4]) > 0) and
-        (pos(':STACKORIGIN,x', listing[i+6]) > 0) and
-	(pos(':STACKORIGIN+STACKWIDTH,x', listing[i+7]) > 0) and
-	(pos(':STACKORIGIN+STACKWIDTH*2,x', listing[i+8]) > 0) and
-	(pos(':STACKORIGIN+STACKWIDTH*3,x', listing[i+9]) > 0) then
+     if stack_0x(i+1) and
+	stack_1x(i+2) and
+	stack_2x(i+3) and
+	stack_3x(i+4) and
+        stack_0x(i+6) and
+	stack_1x(i+7) and
+	stack_2x(i+8) and
+	stack_3x(i+9) then
      begin
 
        listing[i+2] := '';
@@ -53,11 +53,11 @@ begin
        mva(i+4) and 										// mva   :STACKORIGIN+STACKWIDTH*3,x	; 4
        inx(i+5) and										// inx					; 5
        mva(i+6) then										// mva   :STACKORIGIN,x			; 6
-     if (pos(':STACKORIGIN,x', listing[i+1]) > 0) and
-	(pos(':STACKORIGIN+STACKWIDTH,x', listing[i+2]) > 0) and
-	(pos(':STACKORIGIN+STACKWIDTH*2,x', listing[i+3]) > 0) and
-	(pos(':STACKORIGIN+STACKWIDTH*3,x', listing[i+4]) > 0) and
-        (pos(':STACKORIGIN,x', listing[i+6]) > 0) then
+     if stack_0x(i+1) and
+	stack_1x(i+2) and
+	stack_2x(i+3) and
+	stack_3x(i+4) and
+        stack_0x(i+6) then
      begin
 
        listing[i+2] := '';
@@ -73,19 +73,19 @@ begin
        inx(i+2) and										// inx					; 2
        mva_im(i+3) and										// mva # :STACKORIGIN,x			; 3
        add_sub_AL_CL(i+4) then									// jsr addAL_CL|subAL_CL		; 4
-     if (pos(':STACKORIGIN,x', listing[i+1]) > 0) and
-     	(pos(':STACKORIGIN,x', listing[i+3]) > 0) then
+     if stack_0x(i+1) and
+     	stack_0x(i+3) then
      begin
 
        p := GetBYTE(i+1);
        q := GetBYTE(i+3);
 
        if listing[i+4] = #9'jsr addAL_CL' then
-        p:=p + q
+        p := p + q
        else
-        p:=p - q;
+        p := p - q;
 
-       listing[i+1] := #9'mva #$'+IntToHex(p and $ff, 2) + ' :STACKORIGIN,x';
+       listing[i+1] := #9'mva #' + Hex(p and $ff, 2) + ' :STACKORIGIN,x';
 
        listing[i+2] := '';
        listing[i+3] := '';
@@ -99,8 +99,8 @@ begin
        mva(i+1) and										// mva   :STACKORIGIN,x			; 1
        mva(i+2) and 										// mva   :STACKORIGIN+STACKWIDTH,x	; 2
        add_sub_AL_CL(i+3) then									// jsr addAL_CL|subAL_CL		; 3
-     if (pos(':STACKORIGIN,x', listing[i+1]) > 0) and
-	(pos(':STACKORIGIN+STACKWIDTH,x', listing[i+2]) > 0) then
+     if stack_0x(i+1) and
+	stack_1x(i+2) then
      begin
 
        listing[i+2] := '';
@@ -114,8 +114,8 @@ begin
        mva(i+2) and 										// mva   :STACKORIGIN+STACKWIDTH,x	; 2
        mva(i+3) and 										// mva   :STACKORIGIN-1+STACKWIDTH,x	; 3
        add_sub_AL_CL(i+4) then									// jsr addAL_CL|subAL_CL		; 4
-     if (pos(':STACKORIGIN,x', listing[i+1]) > 0) and
-	(pos(':STACKORIGIN+STACKWIDTH,x', listing[i+2]) > 0) then
+     if stack_0x(i+1) and
+	stack_1x(i+2) then
      begin
 
        listing[i+2] := '';
@@ -130,7 +130,7 @@ begin
        mva(i+2) and										// mva  :STACKORIGIN,x			; 2
        add_sub_AL_CL(i+3) and									// jsr addAL_CL|subAL_CL		; 3
        dex(i+4) then										// dex					; 4
-     if (pos(':STACKORIGIN,x', listing[i+2]) > 0) then
+     if stack_0x(i+2) then
      begin
 
        listing[i+1] := #9'lda :STACKORIGIN,x';
@@ -151,8 +151,8 @@ begin
        inx(i+1) and										// inx					; 1
        mva(i+2) and 										// mva  :STACKORIGIN,x			; 2
        add_sub_AL_CL(i+3) then									// jsr addAL_CL|subAL_CL		; 3
-     if (pos(':STACKORIGIN,x', listing[i]) > 0) and
-     	(pos(':STACKORIGIN,x', listing[i+2]) > 0) then
+     if stack_0x(i) and
+     	stack_0x(i+2) then
      begin
 
         tmp:=GetString(i+2);
@@ -173,13 +173,13 @@ begin
 
 
     if (lda(i) or lda_adr(i)) and								// lda					; 0
-       (listing[i+1] = #9'sta :STACKORIGIN,x') and						// sta :STACKORIGIN,x			; 1
+       sta_stack_0x(i+1) and									// sta :STACKORIGIN,x			; 1
        (lda(i+2) or lda_adr(i+2)) and								// lda					; 2
-       (listing[i+3] = #9'sta :STACKORIGIN+STACKWIDTH,x') and					// sta :STACKORIGIN+STACKWIDTH,x	; 3
+       sta_stack_1x(i+3) and									// sta :STACKORIGIN+STACKWIDTH,x	; 3
        inx(i+4) and										// inx					; 4
        mva(i+5) and 										// mva  :STACKORIGIN,x			; 5
        add_sub_AL_CL(i+6) then									// jsr addAL_CL|subAL_CL		; 6
-     if (pos(':STACKORIGIN,x', listing[i+5]) > 0) then
+     if stack_0x(i+5) then
      begin
 
        if listing[i+6] = #9'jsr addAL_CL' then
@@ -202,9 +202,9 @@ begin
        inx(i+2) and										// inx					; 2
        mva(i+3) and 										// mva  :STACKORIGIN,x			; 3
        add_sub_AL_CL(i+4) then									// jsr addAL_CL|subAL_CL		; 4
-     if (pos(':STACKORIGIN,x', listing[i]) > 0) and
-     	(pos(':STACKORIGIN+STACKWIDTH,x', listing[i+1]) > 0) and
-     	(pos(':STACKORIGIN,x', listing[i+3]) > 0) then
+     if stack_0x(i) and
+     	stack_1x(i+1) and
+     	stack_0x(i+3) then
      begin
 
        listing[i] := #9'lda ' + GetString(i);
@@ -226,9 +226,9 @@ begin
        mva(i+1) and (iy(i+1) = false) and							// mva  :STACKORIGIN,x			; 1
        inx(i+2) and 										// inx					; 2
        (lda(i+3) or lda_adr(i+3)) and								// lda					; 3
-       (listing[i+4] = #9'sta :STACKORIGIN,x') and						// sta :STACKORIGIN,x			; 4
+       sta_stack_0x(i+4) and									// sta :STACKORIGIN,x			; 4
        add_sub_AL_CL(i+5) then									// jsr addAL_CL|subAL_CL		; 5
-     if (pos(':STACKORIGIN,x', listing[i+1]) > 0) then
+     if stack_0x(i+1) then
      begin
 
        listing[i+1] := #9'lda ' + GetString(i+1);
@@ -251,10 +251,10 @@ begin
        inx(i+2) and 										// inx					; 2
        mwy_bp2(i+3) and										// mwy ... :bp2				; 3
        ldy_im(i+4) and										// ldy #				; 4
-       (pos(#9'mva (:bp2),y', listing[i+5]) > 0) and 						// mva (:bp2),y :STACKORIGIN,x		; 5
+       mva_bp2_y(i+5) and			 						// mva (:bp2),y :STACKORIGIN,x		; 5
        add_sub_AL_CL(i+6) then									// jsr addAL_CL|subAL_CL		; 6
-     if (pos(':STACKORIGIN,x', listing[i+1]) > 0) and
-     	(pos(':STACKORIGIN,x', listing[i+5]) > 0) then
+     if stack_0x(i+1) and
+     	stack_0x(i+5) then
      begin
 
        tmp := #9'lda ' + GetString(i+1);
@@ -279,11 +279,11 @@ begin
        mwy_bp2(i+1) and										// mwa ... :bp2				; 1
        ldy_im(i+2) and										// ldy #				; 2
        LDA_BP2_Y(i+3) and 									// lda (:bp2),y 			; 3
-       (listing[i+4] = #9'sta :STACKORIGIN,x') and 						// sta :STACKORIGIN,x			; 4
+       sta_stack_0x(i+4) and 									// sta :STACKORIGIN,x			; 4
        inx(i+5) and (iy(i+6) = false) and							// inx					; 5
        mva(i+6) and 										// mva .. :STACKORIGIN,x		; 6
        add_sub_AL_CL(i+7) then									// jsr addAL_CL|subAL_CL		; 7
-     if (pos(':STACKORIGIN,x', listing[i+6]) > 0) then
+     if stack_0x(i+6) then
      begin
 
        if listing[i+7] = #9'jsr addAL_CL' then
@@ -303,12 +303,12 @@ begin
     if inx(i) and 										// inx					; 0
        mwy_bp2(i+1) and										// mwa ... :bp2				; 1
        ldy_im(i+2) and										// ldy #				; 2
-       (pos(#9'mva (:bp2),y', listing[i+3]) > 0) and 						// mva (:bp2),y :STACKORIGIN,x		; 3
+       mva_bp2_y(i+3) and			 						// mva (:bp2),y :STACKORIGIN,x		; 3
        inx(i+4) and (iy(i+5) = false) and							// inx					; 4
        mva(i+5) and 										// mva .. :STACKORIGIN,x		; 5
        add_sub_AL_CL(i+6) then									// jsr addAL_CL|subAL_CL		; 6
-     if (pos(':STACKORIGIN,x', listing[i+3]) > 0) and
-     	(pos(':STACKORIGIN,x', listing[i+5]) > 0) then
+     if stack_0x(i+3) and
+     	stack_0x(i+5) then
      begin
 
        listing[i+3] := #9'lda (:bp2),y';
@@ -328,13 +328,13 @@ begin
     if inx(i) and 										// inx					; 0
        mwy_bp2(i+1) and										// mwa ... :bp2				; 1
        ldy_im(i+2) and										// ldy #				; 2
-       (pos(#9'mva (:bp2),y', listing[i+3]) > 0) and 						// mva (:bp2),y :STACKORIGIN,x		; 3
+       mva_bp2_y(i+3) and			 						// mva (:bp2),y :STACKORIGIN,x		; 3
        inx(i+4) and 										// inx					; 4
        ldy_im(i+5) and										// ldy #				; 5
-       (pos(#9'mva (:bp2),y', listing[i+6]) > 0) and	 					// mva (:bp2),y :STACKORIGIN,x		; 6
+       mva_bp2_y(i+6) and				 					// mva (:bp2),y :STACKORIGIN,x		; 6
        add_sub_AL_CL(i+7) then									// jsr addAL_CL|subAL_CL		; 7
-     if (pos(':STACKORIGIN,x', listing[i+3]) > 0) and
-     	(pos(':STACKORIGIN,x', listing[i+6]) > 0) then
+     if stack_0x(i+3) and
+     	stack_0x(i+6) then
      begin
 
        listing[i+3] := #9'lda (:bp2),y';
@@ -354,13 +354,13 @@ begin
 
     if inx(i) and 										// inx					; 0
        ldy_im(i+1) and										// ldy #				; 1
-       (pos(#9'mva (:bp2),y', listing[i+2]) > 0) and 						// mva (:bp2),y :STACKORIGIN,x		; 2
+       mva_bp2_y(i+2) and			 						// mva (:bp2),y :STACKORIGIN,x		; 2
        inx(i+3) and 										// inx					; 3
        ldy_im(i+4) and										// ldy #				; 4
-       (pos(#9'mva (:bp2),y', listing[i+5]) > 0) and	 					// mva (:bp2),y :STACKORIGIN,x		; 5
+       mva_bp2_y(i+5) and				 					// mva (:bp2),y :STACKORIGIN,x		; 5
        add_sub_AL_CL(i+6) then									// jsr addAL_CL|subAL_CL		; 6
-     if (pos(':STACKORIGIN,x', listing[i+2]) > 0) and
-     	(pos(':STACKORIGIN,x', listing[i+5]) > 0) then
+     if stack_0x(i+2) and
+     	stack_0x(i+5) then
      begin
 
        listing[i+2] := #9'lda (:bp2),y';
@@ -399,7 +399,7 @@ begin
 
     if add_sub_AL_CL(i) and									// jsr addAL_CL|subAL_CL		; 0
        dex(i+1) and										// dex					; 1
-       (listing[i+2] = #9'lda :STACKORIGIN,x') and						// lda :STACKORIGIN,x			; 2
+       lda_stack_0x(i+2) and									// lda :STACKORIGIN,x			; 2
        sta_val(i+3) and										// sta I				; 3
        (lda(i+4) = false) then									//~lda					; 4
      begin

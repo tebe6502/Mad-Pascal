@@ -708,7 +708,7 @@ begin
      spl(i+2) and 									// spl					; 2
      dey(i+3) and 									// dey					; 3
      sta_eax(i+4) and		 							// sta :eax				; 4
-     (listing[i+5] = #9'sty :eax+1') and 						// sty :eax+1				; 5
+     sty_eax_1(i+5) and									// sty :eax+1				; 5
      (listing[i+6] = #9'lda #$0A') and 							// lda #$0A				; 6
      sta_ecx(i+7) and		 							// sta :ecx				; 7
      lda_im_0(i+8) and 									// lda #$00				; 8

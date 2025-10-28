@@ -11,22 +11,18 @@ var i, p: integer;
 
   function branch(i: integer): Boolean;
   begin
-
-   Result :=
-  	(TemporaryBuf[i] = #9'bne @+') or (TemporaryBuf[i] = #9'beq @+') or
-  	(TemporaryBuf[i] = #9'bcc @+') or (TemporaryBuf[i] = #9'bcs @+');
+    Result := bne_a(i) or beq_a(i) or bcc_a(i) or bcs_a(i)
   end;
 
 
   function branch_swap(i: integer): string;
   begin
-	Result:='';
+    Result:='';
 
-	if TemporaryBuf[i] = #9'beq @+' then Result := #9'sne' else
-	if TemporaryBuf[i] = #9'bne @+' then Result := #9'seq' else
-	if TemporaryBuf[i] = #9'bcc @+' then Result := #9'scs' else
-	if TemporaryBuf[i] = #9'bcs @+' then Result := #9'scc';
-
+    if beq_a(i) then Result := #9'sne' else
+     if bne_a(i) then Result := #9'seq' else
+      if bcc_a(i) then Result := #9'scs' else
+       if bcs_a(i) then Result := #9'scc';
   end;
 
 

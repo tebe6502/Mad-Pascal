@@ -11,7 +11,7 @@ begin
    if (TemporaryBuf[2] = '; --- WhileProlog') and					//; --- WhileProlog	; 2
       sta(0) and									// sta K+1		; 0
 											//			; 1
-      jmp(3) and									// jmp l_00FA		; 3
+      jmp_l(3) and									// jmp l_00FA		; 3
       lab_l(4) then									//l_00FB		; 4
     begin
 
@@ -34,7 +34,7 @@ begin
    if (TemporaryBuf[2] = '; --- WhileProlog') and					//; --- WhileProlog	; 2
       sta(0) and									// sta K		; 0
 											//			; 1
-      jmp(3) and									// jmp l_00FA		; 3
+      jmp_l(3) and									// jmp l_00FA		; 3
       lab_l(4) then									//l_00FB		; 4
     begin
      tmp := copy(TemporaryBuf[0], 6, 256);
@@ -60,7 +60,7 @@ begin
       lda_im(0) and (GetBYTE(0) < 128) and						// lda #		; 0
       sta(1) and									// sta K		; 1
       (TemporaryBuf[2] = '') and							//			; 2
-      jmp(4) and									// jmp l_00FA		; 4
+      jmp_l(4) and									// jmp l_00FA		; 4
       lab_l(5) then									//l_00FB		; 5
     begin
 
@@ -92,7 +92,7 @@ begin
 
    if (TemporaryBuf[2] = '; --- WhileProlog') and					//; --- WhileProlog	; 2
       (TemporaryBuf[1] = '') and							//			; 1
-      jmp(3) and									// jmp l_00FA		; 3
+      jmp_l(3) and									// jmp l_00FA		; 3
       lab_l(4) and									//l_00FB		; 4
       (TemporaryBuf[5] = '') and							//			; 5
       opti(6) and									//; optimize 		; 6
@@ -128,7 +128,7 @@ begin
 
    if (TemporaryBuf[2] = '; --- WhileProlog') and					//; --- WhileProlog	; 2
       (TemporaryBuf[1] = '') and							//			; 1
-      jmp(3) and									// jmp l_00FA		; 3
+      jmp_l(3) and									// jmp l_00FA		; 3
       lab_l(4) and									//l_00FB		; 4
       (TemporaryBuf[5] = '') and							//			; 5
       opti(6) and									//; optimize 		; 6

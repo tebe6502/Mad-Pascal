@@ -24,12 +24,12 @@ begin
 	  k := GetVAL(GetARG(0, x-1));
 	  if (k > $FFFF) or (k < 0) then exit(true);
 
-	  listing[l]   := #9'lda #$'+IntToHex(k, 2);
+	  listing[l]   := #9'lda #' + Hex(k, 2);
 
 	  k := GetVAL(GetARG(0, x)) + GetVAL(GetARG(1, x)) shl 8;
 	  if (k > $FFFF) or (k < 0) then exit(true);
 
-	  listing[l+1] := #9'sta $'+IntToHex(k, 4);
+	  listing[l+1] := #9'sta ' + Hex(k, 4);
 
 	  inc(l, 2);
 	end;
@@ -68,17 +68,17 @@ begin
 
 	  k := GetVAL(GetARG(0, x-1));
 	  if (k > $FFFF) or (k < 0) then exit(true);
-	  listing[l]   := #9'lda #$'+IntToHex(k, 2);
+	  listing[l]   := #9'lda #' + Hex(k, 2);
 
 	  k := GetVAL(GetARG(1, x-1));
 	  if (k > $FFFF) or (k < 0) then exit(true);
-	  listing[l+2] := #9'lda #$'+IntToHex(k, 2);
+	  listing[l+2] := #9'lda #' + Hex(k, 2);
 
 	  k := GetVAL(GetARG(0, x)) + GetVAL(GetARG(1, x)) shl 8;
 	  if (k > $FFFF) or (k < 0) then exit(true);
 
-	  listing[l+1] := #9'sta $'+IntToHex(k, 4);
-	  listing[l+3] := #9'sta $'+IntToHex(k, 4)+'+1';
+	  listing[l+1] := #9'sta ' + Hex(k, 4);
+	  listing[l+3] := #9'sta ' + Hex(k, 4)+'+1';
 
 	  inc(l, 4);
 	end;

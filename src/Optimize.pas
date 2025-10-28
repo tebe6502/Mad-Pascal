@@ -111,25 +111,46 @@ var
 {$i include\cmd_temporary.inc}
 
 
-  function fail(i: Integer): Boolean;
+  function argMatch(i, j: Integer): Boolean;
   begin
-
-    if (pos('#asm:', TemporaryBuf[i]) = 1) or ldy(i) or jsr(i) or iny(i) or dey(i) or
-      tay(i) or tya(i) or mwy(i) or mwy(i) or (pos(#9'.if', TemporaryBuf[i]) > 0) or
-      (pos(#9'.LOCAL ', TemporaryBuf[i]) > 0) or (pos(#9'@print', TemporaryBuf[i]) > 0) then Result := True
-    else
-      Result := False;
+    Result := copy(TemporaryBuf[i], 6, 256) = copy(TemporaryBuf[j], 6, 256);
   end;
 
 
-  function SKIP(i: Integer): Boolean;
+  function fail(i: integer): Boolean;
   begin
 
-    Result := seq(i) or sne(i) or spl(i) or smi(i) or scc(i) or scs(i) or svc(i) or svs(i) or
-      jne(i) or jeq(i) or jcc(i) or jcs(i) or jmi(i) or jpl(i) or (pos(#9'bne ', TemporaryBuf[i]) = 1) or
-      (pos(#9'beq ', TemporaryBuf[i]) = 1) or (pos(#9'bcc ', TemporaryBuf[i]) = 1) or
-      (pos(#9'bcs ', TemporaryBuf[i]) = 1) or (pos(#9'bmi ', TemporaryBuf[i]) = 1) or
-      (pos(#9'bpl ', TemporaryBuf[i]) = 1);
+        if (pos('#asm:', TemporaryBuf[i]) = 1) or
+
+	   ldy(i) or
+           jsr(i) or
+           iny(i) or
+           dey(i) or
+           tay(i) or
+           tya(i) or
+           mwy(i) or
+	   mwy(i) or
+           (pos(#9'.if', TemporaryBuf[i]) > 0) or
+           (pos(#9'.LOCAL ', TemporaryBuf[i]) > 0) or
+           (pos(#9'@print', TemporaryBuf[i]) > 0) then Result:=true else Result:=false;
+  end;
+
+
+  function SKIP(i: integer): Boolean;
+  begin
+
+      Result :=	seq(i) or sne(i) or
+		spl(i) or smi(i) or
+		scc(i) or scs(i) or
+		svc(i) or svs(i) or
+
+		jne(i) or jeq(i) or
+		jcc(i) or jcs(i) or
+		jmi(i) or jpl(i) or
+
+		(pos(#9'bne ', TemporaryBuf[i]) = 1) or (pos(#9'beq ', TemporaryBuf[i]) = 1) or
+		(pos(#9'bcc ', TemporaryBuf[i]) = 1) or (pos(#9'bcs ', TemporaryBuf[i]) = 1) or
+		(pos(#9'bmi ', TemporaryBuf[i]) = 1) or (pos(#9'bpl ', TemporaryBuf[i]) = 1);
   end;
 
 
@@ -578,14 +599,16 @@ var
     Result := GetVAL(copy(listing[i], 6, 4)) + GetVAL(copy(listing[j], 6, 4)) shl 8;
   end;
 
-  function GetDWORD(i, j, k, l: Integer): Cardinal;
-  var
-    w1, w2: Cardinal;
+  function GetTRIPLE(i, j, k: Integer): integer;
   begin
-    w1 := GetWORD(i, j);
-    w2 := GetWORD(k, l);
-    Result := w1 + w2 shl 16;
+    Result := GetVAL(copy(listing[i], 6, 4)) + GetVAL(copy(listing[j], 6, 4)) shl 8 + GetVAL(copy(listing[k], 6, 4)) shl 16;
   end;
+
+  function GetDWORD(i, j, k, l: Integer): integer;
+  begin
+    Result := GetVAL(copy(listing[i], 6, 4)) + GetVAL(copy(listing[j], 6, 4)) shl 8 + GetVAL(copy(listing[k], 6, 4)) shl 16 + GetVAL(copy(listing[l], 6, 4)) shl 24;
+  end;
+
 
 {$i include/cmd_listing.inc}
 
@@ -635,28 +658,6 @@ var
   end;
 
 
-  function LOCAL(i: Integer): Boolean;
-  begin
-
-    if (i < 0) or (listing[i] = '') then
-      Result := False
-    else
-      Result := (listing[i] = #9'.LOCAL');
-
-  end;
-
-
-  function ENDL(i: Integer): Boolean;
-  begin
-
-    if (i < 0) or (listing[i] = '') then
-      Result := False
-    else
-      Result := (listing[i] = #9'.ENDL');
-
-  end;
-
-
   function SKIP(i: Integer): Boolean;
   begin
 
@@ -686,42 +687,36 @@ var
 
 *)
 
-    procedure LabelTest(const mne: String);
-    begin
+     procedure LabelTest(const mne: string);
+     begin
 
       case optyY[1] of
 
-        '+', '-': Result := (listing[i] = mne + copy(optyY, 6, 256));
+       '+','-' : Result := (listing[i] = mne + copy(optyY, 6, 256));
 
-        '*': if optyY[2] in ['+', '-'] then
-            Result := (listing[i] = mne + copy(optyY, 6, pos('|', optyY) - 6)) or
-              (listing[i] = mne + copy(optyY, pos('|', optyY) + 1, 256))
-          else
-            Result := (listing[i] = mne + copy(optyY, 6, 256));
+           '*' : if optyY[2] in ['+', '-'] then
+	          Result := (listing[i] = mne + copy(optyY,6,pos('|',optyY) - 6)) or (listing[i] = mne + copy(optyY,pos('|',optyY) + 1,256))
+		 else
+	          Result := (listing[i] = mne + copy(optyY, 6, 256));
 
-        else
-          Result := (listing[i] = mne + optyY);
+      else
+       Result := (listing[i] = mne + optyY);
       end;
 
-    end;
+     end;
+
 
   begin
 
     Result := False;
 
     if optyY <> '' then
-      if (pos(#9'sta ', listing[i]) = 1) then LabelTest(#9'sta ')
+      if sta_a(i) then LabelTest(#9'sta ')
       else
-        if (pos(#9'inc ', listing[i]) = 1) then LabelTest(#9'inc ')
+        if inc_(i) then LabelTest(#9'inc ')
         else
-          if (pos(#9'dec ', listing[i]) = 1) then LabelTest(#9'dec ');
+          if dec_(i) then LabelTest(#9'dec ');
 
-  end;
-
-
-  function EAX(i: Integer): Boolean;
-  begin
-    Result := (pos(' :eax', listing[i]) > 0);
   end;
 
 
@@ -1337,6 +1332,7 @@ var
 {$i include/opt6502/opt_CMP_GT.inc}
 {$i include/opt6502/opt_CMP_NE_EQ.inc}
 {$i include/opt6502/opt_CMP.inc}
+{$i include/opt6502/opt_CMP_0.inc}
 
 
   function PeepholeOptimization_STACK: Boolean;
@@ -1377,86 +1373,21 @@ if (pos('mva RESOLVECOLLISIONS.RESULT', listing[i]) > 0) then begin
 end;
 }
 
-
-      if opt_LT_GTEQ(i) = False then
-      begin
-        Result := False;
-        Break;
-      end;
-      if opt_LTEQ(i) = False then
-      begin
-        Result := False;
-        Break;
-      end;
-      if opt_GT(i) = False then
-      begin
-        Result := False;
-        Break;
-      end;
-      if opt_NE_EQ(i) = False then
-      begin
-        Result := False;
-        Break;
-      end;
-
-      if opt_CMP(i) = False then
-      begin
-        Result := False;
-        Break;
-      end;
-
-      if opt_BRANCH(i) = False then
-      begin
-        Result := False;
-        Break;
-      end;
-
-      if opt_STACK(i) = False then
-      begin
-        Result := False;
-        Break;
-      end;
-
-      if opt_STACK_INX(i) = False then
-      begin
-        Result := False;
-        Break;
-      end;
-      if opt_STACK_ADD(i) = False then
-      begin
-        Result := False;
-        Break;
-      end;
-      if opt_STACK_CMP(i) = False then
-      begin
-        Result := False;
-        Break;
-      end;
-      if opt_STACK_ADR(i) = False then
-      begin
-        Result := False;
-        Break;
-      end;
-      if opt_STACK_AL_CL(i) = False then
-      begin
-        Result := False;
-        Break;
-      end;
-      if opt_STACK_AX_CX(i) = False then
-      begin
-        Result := False;
-        Break;
-      end;
-      if opt_STACK_EAX_ECX(i) = False then
-      begin
-        Result := False;
-        Break;
-      end;
-      if opt_STACK_PRINT(i) = False then
-      begin
-        Result := False;
-        Break;
-      end;
+      if opt_LT_GTEQ(i) = False then exit(False);
+      if opt_LTEQ(i) = False then exit(False);
+      if opt_GT(i) = False then exit(False);
+      if opt_NE_EQ(i) = False then exit(False);
+      if opt_CMP(i) = False then exit(False);
+      if opt_BRANCH(i) = False then exit(False);
+      if opt_STACK(i) = False then exit(False);
+      if opt_STACK_INX(i) = False then exit(False);
+      if opt_STACK_ADD(i) = False then exit(False);
+      if opt_STACK_CMP(i) = False then exit(False);
+      if opt_STACK_ADR(i) = False then exit(False);
+      if opt_STACK_AL_CL(i) = False then exit(False);
+      if opt_STACK_AX_CX(i) = False then exit(False);
+      if opt_STACK_EAX_ECX(i) = False then exit(False);
+      if opt_STACK_PRINT(i) = False then exit(False);
 
     end;
 
@@ -1479,13 +1410,10 @@ end;
 
         tmp := copy(listing[i], 6, 256);
 
-        if tmp = ':eax' then listing[i] := copy(listing[i], 1, 5) + ':STACKORIGIN+16'
-        else
-          if tmp = ':eax+1' then listing[i] := copy(listing[i], 1, 5) + ':STACKORIGIN+STACKWIDTH+16'
-          else
-            if tmp = ':eax+2' then listing[i] := copy(listing[i], 1, 5) + ':STACKORIGIN+STACKWIDTH*2+16'
-            else
-              if tmp = ':eax+3' then listing[i] := copy(listing[i], 1, 5) + ':STACKORIGIN+STACKWIDTH*3+16';
+        if tmp = ':eax' then listing[i] := copy(listing[i], 1, 5) + ':STACKORIGIN+16' else
+         if tmp = ':eax+1' then listing[i] := copy(listing[i], 1, 5) + ':STACKORIGIN+STACKWIDTH+16' else
+          if tmp = ':eax+2' then listing[i] := copy(listing[i], 1, 5) + ':STACKORIGIN+STACKWIDTH*2+16' else
+           if tmp = ':eax+3' then listing[i] := copy(listing[i], 1, 5) + ':STACKORIGIN+STACKWIDTH*3+16';
 
       end;
 
@@ -1577,42 +1505,13 @@ if (pos('lda adr.ROW1+$20,y', listing[i]) > 0) then begin
 end;
 }
 
-
-        if opt_STA_ADD(i) = False then
-        begin
-          Result := False;
-          Break;
-        end;
-        if opt_STA_LDY(i) = False then
-        begin
-          Result := False;
-          Break;
-        end;
-        if opt_STA_BP(i) = False then
-        begin
-          Result := False;
-          Break;
-        end;
-        if opt_STA_LSR(i) = False then
-        begin
-          Result := False;
-          Break;
-        end;
-        if opt_STA_IMUL(i) = False then
-        begin
-          Result := False;
-          Break;
-        end;
-        if opt_STA_IMUL_CX(i) = False then
-        begin
-          Result := False;
-          Break;
-        end;
-        if opt_STA_ZTMP(i) = False then
-        begin
-          Result := False;
-          Break;
-        end;
+        if opt_STA_ADD(i) = false then exit(False);
+        if opt_STA_LDY(i) = false then exit(False);
+        if opt_STA_BP(i) = false then exit(False);
+        if opt_STA_LSR(i) = false then exit(False);
+        if opt_STA_IMUL(i) = false then exit(False);
+        if opt_STA_IMUL_CX(i) = false then exit(False);
+        if opt_STA_ZTMP(i) = false then exit(False);
 
       end;
 
@@ -1661,275 +1560,34 @@ if (pos(#9'and #$', listing[i]) > 0) then begin
 end;
 }
 
+       if opt_FORTMP(i) = False then exit(False);
 
-        if opt_FORTMP(i) = False then
-        begin
-          Result := False;
-          Break;
-        end;
+       if opt_STA_0(i) = False then exit(False);
 
+       if opt_LDA(i) = False then exit(False);
+       if opt_TAY(i) = False then exit(False);
+       if opt_LDY(i) = False then exit(False);
+       if opt_BP(i) = False then exit(False);
+       if opt_AND(i) = False then exit(False);
+       if opt_ORA(i) = False then exit(False);
+       if opt_EOR(i) = False then exit(False);
+       if opt_NOT(i) = False then exit(False);
+       if opt_ADD(i) = False then exit(False);
+       if opt_SUB(i) = False then exit(False);
+       if opt_LSR(i) = False then exit(False);
+       if opt_ASL(i) = False then exit(False);
+       if opt_SPL(i) = False then exit(False);
+       if opt_ADR(i) = False then exit(False);
+       if opt_BP_ADR(i) = False then exit(False);
+       if opt_BP2_ADR(i) = False then exit(False);
+       if opt_POKE(i) = False then exit(False);
 
-        if (i = l - 1) and                    // "samotna" instrukcja na koncu bloku
-          (sta_stack(i) or sty_stack(i) or lda_a(i) or ldy(i) or and_ora_eor(i) or
-          {iny(i) or}// !!! 'iny' moze poprzedzac 'scc'
-          lsr_stack(i) or asl_stack(i) or ror_stack(i) or rol_stack(i) or lsr_a(i) or
-          asl_a(i) or ror_a(i) or rol_a(i) or adc(i) or sbc(i)) then
-        begin
-          listing[i] := '';
+       if target.cpu <> TCPU.CPU_6502 then begin
 
-          Result := False;
-          Break;
-        end;
+         if opt_STZ(i) = False then exit(False);
 
+       end;
 
-        if (i = l - 2) and SKIP(i + 1) and                    // sta :STACKORIGIN      ; 1
-          sta_stack(i) then                  // SKIP          ; 0
-        begin
-          listing[i] := '';
-
-          Result := False;
-          Break;
-        end;
-
-
-        if (i = l - 2) and                    // "samotna" instrukcja na koncu bloku
-          jmp(i + 1) and                    // jmp l_
-          (sta_stack(i) or sty_stack(i) or lda_a(i) or ldy(i) or and_ora_eor(i) or iny(i) or
-          lsr_stack(i) or asl_stack(i) or ror_stack(i) or rol_stack(i) or lsr_a(i) or
-          asl_a(i) or ror_a(i) or rol_a(i) or adc(i) or sbc(i)) then
-        begin
-          listing[i] := '';
-
-          Result := False;
-          Break;
-        end;
-
-
-        if (i = l - 2) and                    // "samotna" instrukcja na koncu bloku
-          sta_im_0(i) and iny(i + 1) then
-        begin
-          listing[i] := '';
-          listing[i + 1] := '';
-
-          Result := False;
-          Break;
-        end;
-
-
-        if (i = l - 3) and                    // "samotna" instrukcja na koncu bloku
-          (lda_val(i + 1) or tya(i + 1)) and sta_a(i + 2) and (lda_a(i) or and_ora_eor(i) or
-          lsr_stack(i) or asl_stack(i) or ror_stack(i) or rol_stack(i) or lsr_a(i) or
-          asl_a(i) or ror_a(i) or rol_a(i)) then
-        begin
-          listing[i] := '';
-
-          Result := False;
-          Break;
-        end;
-
-
-        if (i = l - 3) and                    // "samotna" instrukcja na koncu bloku
-          sta_stack(i) and (jne(i + 1) or jeq(i + 1)) and (lab_l(i + 2) or lab_b(i + 2)) then
-        begin
-          listing[i] := '';
-
-          Result := False;
-          Break;
-        end;
-
-
-        if (i = l - 3) and iny(i) and                    // iny          ; 0
-          and_ora_eor(i + 1) and (iy(i + 1) = False) and            // and|ora|eor        ; 1
-          sta_a(i + 2) and (iy(i + 2) = False) then              // sta          ; 2
-        begin
-          listing[i] := '';
-
-          Result := False;
-          Break;
-        end;
-
-
-        if (i = l - 4) and                    // "samotna" instrukcja na koncu bloku
-          lda_val(i + 1) and sta_a(i + 2) and sta_a(i + 3) and (lda_a(i) or and_ora_eor(i) or
-          lsr_stack(i) or asl_stack(i) or ror_stack(i) or rol_stack(i) or lsr_a(i) or asl_a(i) or
-          ror_a(i) or rol_a(i)) then
-        begin
-          listing[i] := '';
-
-          Result := False;
-          Break;
-        end;
-
-
-        if (i = l - 4) and lda_stack(i) and                    // lda :STACKORIGIN      ; 0
-          sta_stack(i + 1) and                  // sta :STACKORIGIN      ; 1
-          (lda_val(i + 2) or tya(i + 2)) and                // lda|tya        ; 2
-          sta_a(i + 3) then                    // sta          ; 3
-        begin
-          listing[i] := '';
-          listing[i + 1] := '';
-
-          Result := False;
-          Break;
-        end;
-
-
-        if (i = l - 4) and iny(i) and                    // iny          ; 0
-          lda_a(i + 1) and (iy(i + 1) = False) and              // lda          ; 1
-          and_ora_eor(i + 2) and (iy(i + 2) = False) and            // and|ora|eor        ; 2
-          sta_a(i + 3) and (iy(i + 3) = False) then              // sta          ; 3
-        begin
-          listing[i] := '';
-
-          Result := False;
-          Break;
-        end;
-
-
-        if lda_val(i) and                    // lda          ; 0
-          and_im(i + 1) and                    // and #        ; 1
-          (listing[i + 2] = #9'jsr #$00') and              // jsr #$00        ; 2
-          lda_im_0(i + 3) and                  // lda #$00        ; 3
-          sta_stack(i + 4) and                  // sta :STACKORIGIN+STACKWIDTH    ; 4
-          (listing[i + 5] = #9'lda @BYTE.MOD.RESULT') then            // lda @BYTE.MOD.RESULT      ; 5
-        begin
-          listing[i + 2] := listing[i + 4];
-          listing[i + 3] := '';
-          listing[i + 4] := listing[i];
-          listing[i + 5] := listing[i + 1];
-
-          listing[i] := '';
-          listing[i + 1] := #9'lda #$00';
-
-          Result := False;
-          Break;
-        end;
-
-
-        if (listing[i] = #9'jsr #$00') and                // jsr #$00        ; 0
-          (listing[i + 1] = #9'lda @BYTE.MOD.RESULT') then            // lda @BYTE.MOD.RESULT      ; 1
-        begin
-          listing[i] := '';
-          listing[i + 1] := '';
-
-          Result := False;
-          Break;
-        end;
-
-
-        if (listing[i] = #9'jsr #$00') and                // jsr #$00        ; 0
-          (listing[i + 1] = #9'ldy @BYTE.MOD.RESULT') then            // ldy @BYTE.MOD.RESULT      ; 1
-        begin
-          listing[i] := #9'tay';
-          listing[i + 1] := '';
-
-          Result := False;
-          Break;
-        end;
-
-
-        if opt_STA_0(i) = False then
-        begin
-          Result := False;
-          Break;
-        end;
-
-        if opt_LDA(i) = False then
-        begin
-          Result := False;
-          Break;
-        end;
-        if opt_TAY(i) = False then
-        begin
-          Result := False;
-          Break;
-        end;
-        if opt_LDY(i) = False then
-        begin
-          Result := False;
-          Break;
-        end;
-        if opt_BP(i) = False then
-        begin
-          Result := False;
-          Break;
-        end;
-        if opt_AND(i) = False then
-        begin
-          Result := False;
-          Break;
-        end;
-        if opt_ORA(i) = False then
-        begin
-          Result := False;
-          Break;
-        end;
-        if opt_EOR(i) = False then
-        begin
-          Result := False;
-          Break;
-        end;
-        if opt_NOT(i) = False then
-        begin
-          Result := False;
-          Break;
-        end;
-        if opt_ADD(i) = False then
-        begin
-          Result := False;
-          Break;
-        end;
-        if opt_SUB(i) = False then
-        begin
-          Result := False;
-          Break;
-        end;
-        if opt_LSR(i) = False then
-        begin
-          Result := False;
-          Break;
-        end;
-        if opt_ASL(i) = False then
-        begin
-          Result := False;
-          Break;
-        end;
-        if opt_SPL(i) = False then
-        begin
-          Result := False;
-          Break;
-        end;
-        if opt_ADR(i) = False then
-        begin
-          Result := False;
-          Break;
-        end;
-        if opt_BP_ADR(i) = False then
-        begin
-          Result := False;
-          Break;
-        end;
-        if opt_BP2_ADR(i) = False then
-        begin
-          Result := False;
-          Break;
-        end;
-        if opt_POKE(i) = False then
-        begin
-          Result := False;
-          Break;
-        end;
-
-        if target.cpu <> TCPU.CPU_6502 then
-        begin
-
-          if opt_STZ(i) = False then
-          begin
-            Result := False;
-            Break;
-          end;
-
-        end;
 
       end;
 
@@ -1937,18 +1595,9 @@ end;
 
   begin      // OptimizeAssignment
 
-    repeat
-    until PeepholeOptimization;
-    while RemoveUnusedSTACK do repeat
-      until PeepholeOptimization;
-    repeat
-    until PeepholeOptimization_STA;
-    while RemoveUnusedSTACK do repeat
-      until PeepholeOptimization;
-    repeat
-    until PeepholeOptimization_END;
-    while RemoveUnusedSTACK do repeat
-      until PeepholeOptimization;
+    repeat until PeepholeOptimization;     while RemoveUnusedSTACK do repeat until PeepholeOptimization;
+    repeat until PeepholeOptimization_STA; while RemoveUnusedSTACK do repeat until PeepholeOptimization;
+    repeat until PeepholeOptimization_END; while RemoveUnusedSTACK do repeat until PeepholeOptimization;
 
   end;
 
@@ -1962,6 +1611,42 @@ end;
     i, p: Integer;
     tmp: String;
     yes: Boolean;
+
+
+    function test_AND(i: integer): Boolean;
+    var p: integer;
+    begin
+
+      Result := true;
+
+      for p:=i-1 downto 1 do
+       if and_stack(p) or local(p) or
+          (sty_stack(p) and lab_a(p-1) and lda(p+1) and ora_stack(p+2)) or
+          (sty_stack(p) and lab_a(p-1) and lda_stack(p+1)) or
+	  (sty_stack(p) and lab_a(p-1) and ldy_1(p+1) and lda_stack(p+2) and argMatch(p, p+2)) or
+          (sty_stack(p) and lab_a(p-1) and (argMatch(p, i+2) = false)) or
+          (tya(p) and (lab_a(p-1) = false) and (ora_stack(p+1) = false)) then begin yes:=false; Break end;
+
+    end;
+
+
+    function test_ORA(i: integer): Boolean;
+    var p: integer;
+    begin
+
+      Result := true;
+
+      for p:=i-1 downto 1 do
+       if ora_stack(p) or local(p) or
+          (sty_stack(p) and lab_a(p-1) and lda(p+1) and ora_stack(p+2)) or
+          (sty_stack(p) and lab_a(p-1) and lda_stack(p+1)) or
+	  (sty_stack(p) and lab_a(p-1) and ldy_1(p+1) and lda_stack(p+2) and argMatch(p, p+2)) or
+          (sty_stack(p) and lab_a(p-1) and (argMatch(p, i+2) = false)) or
+          (tya(p) and (lab_a(p-1) = false) and (ora_stack(p+1) = false)) then begin yes:=false; Break end;
+
+    end;
+
+
   begin
 
     Result := True;
@@ -1988,276 +1673,19 @@ if (pos('cmp #$29', listing[i]) > 0) then begin
 end;
 }
 
+     if opt_CMP_0(i) = false then exit(false);
 
-      if cmp(i) and                    // cmp        ; 0
-        lab_a(i + 1) and                     //@        ; 1
-        (jeq(i + 2) or jne(i + 2)) and                 // jeq|jne      ; 2
-        lab_a(i + 3) then                     //@        ; 3
-      begin
-        listing[i + 3] := '';
+     if opt_LOCAL(i) = false then exit(false);
 
-        Result := False;
-        Break;
-      end;
+     if opt_LT_GTEQ(i) = false then exit(false);
+     if opt_LTEQ(i) = false then exit(false);
+     if opt_GT(i) = false then exit(false);
+     if opt_NE_EQ(i) = false then exit(false);
 
+     if opt_CMP(i) = false then exit(false);
+     if opt_CMP_BP2(i) = false then exit(false);
 
-      if lda_im(i) and                     // lda #$      ; 0
-        add_im(i + 1) and                    // add #$      ; 1
-        sta(i + 2) and                    // sta        ; 2
-        //        ; 3
-        (adc(i + 4) = False) then                  //~adc        ; 4
-      begin
-
-        p := GetBYTE(i) + GetBYTE(i + 1);
-
-        listing[i] := #9'lda #$' + IntToHex(p and $ff, 2);
-        listing[i + 1] := '';
-
-        Result := False;
-        Break;
-      end;
-
-
-      if lda_im(i) and                     // lda #$      ; 0
-        sub_im(i + 1) and                    // sub #$      ; 1
-        sta(i + 2) and                    // sta        ; 2
-        //        ; 3
-        (sbc(i + 4) = False) then                  //~sbc        ; 4
-      begin
-
-        p := GetBYTE(i) - GetBYTE(i + 1);
-
-        listing[i] := #9'lda #$' + IntToHex(p and $ff, 2);
-        listing[i + 1] := '';
-
-        Result := False;
-        Break;
-      end;
-
-
-      if lda(i) and                    // lda        ; 0
-        ldy_1(i + 1) and                    // ldy #1      ; 1
-        and_im_0(i + 2) and                  // and #$00      ; 2
-        bne(i + 3) and                    // bne @+      ; 3
-        lda(i + 4) then                    // lda        ; 4
-      begin
-        listing[i] := '';
-        listing[i + 2] := '';
-        listing[i + 3] := '';
-        Result := False;
-        Break;
-      end;
-
-
-      if (i > 0) and and_im_0(i) then                // lda #$00      ; -1
-        if lda_im_0(i - 1) then
-        begin                // and #$00      ; 0
-          listing[i] := '';
-          Result := False;
-          Break;
-        end;
-
-
-      if (i > 0) and ora(i) then                  // lda #$00      ; -1
-        if lda_im_0(i - 1) then
-        begin                // ora        ; 0
-          listing[i] := #9'lda ' + copy(listing[i], 6, 256);
-          Result := False;
-          Break;
-        end;
-
-
-      if lda_im_0(i) and                    // lda #$00      ; 0
-        bne(i + 1) and                    // bne        ; 1
-        lda(i + 2) then                    // lda        ; 2
-      begin
-        listing[i] := '';
-        listing[i + 1] := '';
-        Result := False;
-        Break;
-      end;
-
-
-      if lda(i) and                    // lda A      ; 0
-        SKIP(i + 1) and                    // SKIP        ; 1
-        lda(i + 2) and                    // lda A      ; 2
-        (listing[i] = listing[i + 2]) then
-      begin
-        listing[i + 2] := '';
-        Result := False;
-        Break;
-      end;
-
-
-      if (lda_a(i) or adc_sbc(i)) and                // lda|adc|sbc      ; 0
-        (eor_im_0(i + 1) or ora_im_0(i + 1)) and              // eor|ora #$00      ; 1
-        SKIP(i + 2) then                    // SKIP        ; 2
-      begin
-        listing[i + 1] := '';
-        Result := False;
-        Break;
-      end;
-
-
-      if and_ora_eor(i) and                  // and|ora|eor      ; 0
-        (eor_im_0(i + 1) or ora_im_0(i + 1)) and              // eor|ora #$00      ; 1
-        SKIP(i + 2) then                    // SKIP        ; 2
-      begin
-        listing[i + 1] := '';
-        Result := False;
-        Break;
-      end;
-
-
-      if sta_stack(i) and                    // sta :STACKORIGIN+9    ; 0
-        iny(i + 1) and                    // iny        ; 1
-        lda_stack(i + 2) and                  // lda :STACKORIGIN+9    ; 2
-        cmp(i + 3) then                    // cmp        ; 3
-        if argMatch(i, i + 2) then
-        begin
-          listing[i] := '';
-
-          listing[i + 2] := '';
-          Result := False;
-          Break;
-        end;
-
-
-      if sta_stack(i) and                    // sta :STACKORIGIN+9    ; 0
-        lda(i + 1) and                    // lda        ; 1  ~lda adr.
-        AND_ORA_EOR_STACK(i + 2) then                 // ora|and|eor :STACKORIGIN+9  ; 2
-        if argMatch(i, i + 2) then
-        begin
-          listing[i] := '';
-          listing[i + 1] := copy(listing[i + 2], 1, 5) + copy(listing[i + 1], 6, 256);
-          listing[i + 2] := '';
-          Result := False;
-          Break;
-        end;
-
-
-      if sty_stack(i) and                    // sty :STACKORIGIN+10    ; 0
-        lda_stack(i + 1) and                  // lda :STACKORIGIN+9    ; 1
-        AND_ORA_EOR_STACK(i + 2) and                // ora|and|eor :STACKORIGIN+10  ; 2
-        sta_stack(i + 3) then                  // sta :STACKORIGIN+9    ; 3
-        if argMatch(i, i + 2) and argMatch(i + 1, i + 3) then
-        begin
-          listing[i] := #9'tya';
-          listing[i + 1] := copy(listing[i + 2], 1, 5) + copy(listing[i + 1], 6, 256);
-          listing[i + 2] := '';
-          Result := False;
-          Break;
-        end;
-
-
-      if sty_stack(i) and                    // sty :STACKORIGIN+10    ; 0
-        lda(i + 1) and                    // lda         ; 1  ~lda adr.
-        add_stack(i + 2) and                  // add :STACKORIGIN+10    ; 2
-        sta(i + 3) then                    // sta        ; 3
-        if argMatch(i, i + 2) then
-        begin
-          listing[i] := #9'tya';
-          listing[i + 1] := #9'add ' + copy(listing[i + 1], 6, 256);
-          listing[i + 2] := '';
-          Result := False;
-          Break;
-        end;
-
-
-      if sta_stack(i) and                    // sta :STACKORIGIN+STACKWIDTH  ; 0
-        lda_stack(i + 1) and                  // lda :STACKORIGIN    ; 1
-        AND_ORA_EOR(i + 2) and (and_ora_eor_stack(i + 2) = False) and        // ora|and|eor      ; 2
-        sta_stack(i + 3) and                  // sta :STACKORIGIN    ; 3
-        lda_stack(i + 4) and                  // lda :STACKORIGIN+STACKWIDTH  ; 4
-        bne(i + 5) and                    // bne @+      ; 5
-        lda_stack(i + 6) then                  // lda :STACKORIGIN    ; 6
-        if argMatch(i, i + 4) and argMatch(i + 1, i + 3) and argMatch(i + 3, i + 6) then
-        begin
-          listing[i] := listing[i + 5];
-
-          //  listing[i+3] := '';
-
-          listing[i + 4] := '';
-          listing[i + 5] := '';
-          listing[i + 6] := '';
-
-          Result := False;
-          Break;
-        end;
-
-
-      if (and_ora_eor(i) or asl_a(i) or rol_a(i) or lsr_a(i) or ror_a(i)) and (iy(i) = False) and
-        // and|ora|eor      ; 0
-        sta_stack(i + 1) and                  // sta :STACKORIGIN+N    ; 1
-        ldy_1(i + 2) and                    // ldy #1      ; 2
-        lda_stack(i + 3) and                   // lda :STACKORIGIN+N    ; 3
-        (bne(i + 4) or beq(i + 4)) then                // bne|beq      ; 4
-        if argMatch(i + 1, i + 3) then
-        begin
-          listing[i + 1] := '';
-          listing[i + 3] := listing[i];
-          listing[i] := '';
-          Result := False;
-          Break;
-        end;
-
-
-      if (sty_stack(i) or sta_stack(i)) and              // sty|sta :STACKORIGIN    ; 0
-        mva_stack(i + 1) and                  // mva :STACKORIGIN STOP  ; 1
-        (copy(listing[i], 6, 256) = GetString(i + 1)) then
-      begin
-        listing[i + 1] := copy(listing[i], 1, 5) + copy(listing[i + 1], length(GetString(i + 1)) + 7, 256);
-        listing[i] := '';
-        Result := False;
-        Break;
-      end;
-
-
-      // -----------------------------------------------------------------------------
-
-      if opt_LOCAL(i) = False then
-      begin
-        Result := False;
-        Break;
-      end;
-
-      if opt_LT_GTEQ(i) = False then
-      begin
-        Result := False;
-        Break;
-      end;
-      if opt_LTEQ(i) = False then
-      begin
-        Result := False;
-        Break;
-      end;
-      if opt_GT(i) = False then
-      begin
-        Result := False;
-        Break;
-      end;
-      if opt_NE_EQ(i) = False then
-      begin
-        Result := False;
-        Break;
-      end;
-
-      if opt_CMP(i) = False then
-      begin
-        Result := False;
-        Break;
-      end;
-      if opt_CMP_BP2(i) = False then
-      begin
-        Result := False;
-        Break;
-      end;
-
-      if opt_BRANCH(i) = False then
-      begin
-        Result := False;
-        Break;
-      end;
+     if opt_BRANCH(i) = false then exit(false);
 
       // -----------------------------------------------------------------------------
 

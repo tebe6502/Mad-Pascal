@@ -9,7 +9,7 @@
        dey(i+4) and										// dey					; 4
        lab_a(i+5) and										//@					; 5
        tya(i+6) and										// tya					; 6
-       (ora_stack(i+7) = false) and ora(i+7) and						// ora					; 7
+       ora_val(i+7) and										// ora					; 7	~:STACKORIGIN
        jeq(i+8) then										// jeq					; 8
      begin
       listing[i] := '';
@@ -31,7 +31,7 @@
        dey(i+3) and										// dey					; 3
        lab_a(i+4) and										//@					; 4
        tya(i+5) and										// tya					; 5
-       (ora_stack(i+6) = false) and ora(i+6) and						// ora					; 6
+       ora_val(i+6) and										// ora					; 6	~:STACKORIGIN
        jeq(i+7) then										// jeq					; 7
      begin
       listing[i] := '';
@@ -53,7 +53,7 @@
        dey(i+3) and										// dey					; 3
        lab_a(i+4) and										//@					; 4
        tya(i+5) and										// tya					; 5
-       (ora_stack(i+6) = false) and ora(i+6) and						// ora A				; 6
+       ora_val(i+6) and										// ora A				; 6	~:STACKORIGIN
        jeq(i+7) then										// jeq					; 7
      begin
       listing[i] := '';
@@ -76,18 +76,11 @@
 // for p:=0 to l-1 do writeln(listing[p]);
 // writeln('--------------------');
 
-      tmp := copy(listing[i+2], 6, 256);
-      yes := true;
-
-      for p:=i-1 downto 0 do
-       if and_stack(p) or local(p) or
-          (sty_stack(p) and lab_a(p-1) and lda(p+1) and ora_stack(p+2)) or
-          (sty_stack(p) and lab_a(p-1) and lda_stack(p+1)) or
-          (sty_stack(p) and lab_a(p-1) and ldy_1(p+1) and lda_stack(p+2) and argMatch(p, p+2)) or
-          (sty_stack(p) and lab_a(p-1) and (argMatch(p, i+2) = false)) or
-          (tya(p) and (lab_a(p-1) = false) and (ora_stack(p+1) = false)) then begin yes:=false; Break end;
+      yes := test_AND(i);
 
       if yes then begin
+
+       tmp := copy(listing[i+2], 6, 256);
 
        for p:=i-1 downto 0 do begin
 
@@ -105,7 +98,7 @@
 
 	if lab_a(p) and								//@			; p
 	   tya(p+1) and								// tya			; p+1
-   	   (pos('ora ', listing[p+2]) > 0) and					// ora			; p+2
+   	   ora(p+2) and								// ora			; p+2
 	   (listing[p+3] = #9'sta ' + tmp) then					// sta :STACKORIGIN	; p+3
 	 begin
 

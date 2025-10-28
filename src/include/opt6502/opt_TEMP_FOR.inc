@@ -13,7 +13,7 @@ begin
        sne(2) and									// sne			; 2
        inc_(3) and									// inc W+1		; 3
        seq(4) and									// seq			; 4
-       jmp(5) and									// jmp l_xxxx		; 5
+       jmp_l(5) and									// jmp l_xxxx		; 5
        lab_l(6) then									//l_yyyy		; 6
      if (pos(TemporaryBuf[1], TemporaryBuf[3]) > 0) then
       begin
@@ -29,9 +29,9 @@ begin
        lda(2) and 									// lda W		; 2
        (TemporaryBuf[3] = #9'cmp #$FF') and						// cmp #$FF		; 3
        seq(4) and									// seq			; 4
-       jmp(5) and									// jmp l_xxxx		; 5
+       jmp_l(5) and									// jmp l_xxxx		; 5
        lab_l(6) then									//l_yyyy		; 6
-     if (copy(TemporaryBuf[1], 6, 256) = copy(TemporaryBuf[2], 6, 256)) then
+     if argMatch(1, 2) then
       begin
 	TemporaryBuf[3] := TemporaryBuf[1];
 
@@ -44,16 +44,16 @@ begin
 
     if //(TemporaryBuf[0] = '; --- ForToDoEpilog') and					//; --- ForToDoEpilog	; 0
        lda(1) and 									// lda W		; 1
-       (TemporaryBuf[2] = #9'bne @+') and 						// bne @+		; 2
+       bne_a(2) and			 						// bne @+		; 2
        dec_(3) and 									// dec W+1		; 3
        lab_a(4) and									//@			; 4
        dec_(5) and 									// dec W		; 5
        lda(6) and 									// lda W+1		; 6
        (TemporaryBuf[7] = #9'cmp #$FF') and						// cmp #$FF		; 7
        seq(8) and									// seq			; 8
-       jmp(9) and									// jmp l_xxxx		; 9
+       jmp_l(9) and									// jmp l_xxxx		; 9
        lab_l(10) then									//l_yyyy		; 10
-     if (copy(TemporaryBuf[3], 6, 256) = copy(TemporaryBuf[6], 6, 256)) then
+     if argMatch(3, 6) then
       begin
 	TemporaryBuf[7] := TemporaryBuf[5];
 
@@ -82,13 +82,13 @@ begin
       seq(11) and									// seq 			; 11
       (TemporaryBuf[12] = #9'jmp ' + TemporaryBuf[3]) and				// jmp l_2092		; 12
       lab_l(13) then									//l_			; 13
-    if (copy(TemporaryBuf[1], 6, 256) = copy(TemporaryBuf[5], 6, 256)) and
-       (copy(TemporaryBuf[5], 6, 256) = copy(TemporaryBuf[10], 6, 256)) then
+    if argMatch(1, 5) and
+       argMatch(5, 10) then
      begin
 	TemporaryBuf[0] := #9'ldy ' + copy(TemporaryBuf[0], 6, 256);
 	TemporaryBuf[1] := '~';
 
-	if (copy(TemporaryBuf[0], 6, 256) = copy(TemporaryBuf[6], 6, 256)) then
+	if argMatch(0, 6) then
 	 TemporaryBuf[1] := #9'tya'
 	else
 	 TemporaryBuf[1] := TemporaryBuf[6];
@@ -103,7 +103,7 @@ begin
 	end else
 	 TemporaryBuf[13] := #9'sty ' + copy(TemporaryBuf[5], 6, 256);
 
-	if (copy(TemporaryBuf[5], 6, 256) = copy(TemporaryBuf[6], 6, 256)) then begin
+	if argMatch(5, 6) then begin
 	 TemporaryBuf[5] := #9'tya';
 	 TemporaryBuf[1] := '~';
 	end else
@@ -129,8 +129,8 @@ begin
       seq(13)and									// seq 			; 13
       (TemporaryBuf[14] = #9'jmp ' + TemporaryBuf[2]) and				// jmp l_2092		; 14
       lab_l(15) then									//l_			; 15
-    if (copy(TemporaryBuf[0], 6, 256) = copy(TemporaryBuf[4], 6, 256)) and
-       (copy(TemporaryBuf[4], 6, 256) = copy(TemporaryBuf[12], 6, 256)) then
+    if argMatch(0, 4) and
+       argMatch(4, 12) then
      begin
 	TemporaryBuf[0] := #9'tay';
 
@@ -157,7 +157,7 @@ begin
 	TemporaryBuf[14] := TemporaryBuf[15];
 	TemporaryBuf[15] := TemporaryBuf[16];
 
-        if copy(TemporaryBuf[4], 6, 256) = copy(TemporaryBuf[6], 6, 256) then begin
+        if argMatch(4, 6) then begin
 	TemporaryBuf[1] := TemporaryBuf[4];
 
 	TemporaryBuf[15] := TemporaryBuf[6];
@@ -186,8 +186,8 @@ begin
       seq(13) and									// seq 			; 13
       (TemporaryBuf[14] = #9'jmp ' + TemporaryBuf[2]) and				// jmp l_2092		; 14
       lab_l(15) then									//l_			; 15
-    if (copy(TemporaryBuf[0], 6, 256) = copy(TemporaryBuf[4], 6, 256)) and
-       (copy(TemporaryBuf[4], 6, 256) = copy(TemporaryBuf[12], 6, 256)) then
+    if argMatch(0, 4) and
+       argMatch(4, 12) then
      begin
 	TemporaryBuf[0] := #9'tay';
 
@@ -241,7 +241,7 @@ begin
 
 	TemporaryBuf[11] := #9'iny';
 
-        if copy(TemporaryBuf[4], 6, 256) = copy(TemporaryBuf[6], 6, 256) then begin
+        if argMatch(4, 6) then begin
 	 TemporaryBuf[0] := TemporaryBuf[4];
 
 	 TemporaryBuf[4] := TemporaryBuf[5];
@@ -279,9 +279,9 @@ begin
       seq(13) and									// seq 			; 13
       (TemporaryBuf[14] = #9'jmp ' + TemporaryBuf[2]) and				// jmp l_2092		; 14
       lab_l(15) then									//l_			; 15
-    if (copy(TemporaryBuf[0], 6, 256) = copy(TemporaryBuf[4], 6, 256)) and
-       (copy(TemporaryBuf[4], 6, 256) = copy(TemporaryBuf[7], 6, 256)) and
-       (copy(TemporaryBuf[7], 6, 256) = copy(TemporaryBuf[12], 6, 256)) then
+    if argMatch(0, 4) and
+       argMatch(4, 7) and
+       argMatch(7, 12) then
      begin
 	TemporaryBuf[0] := #9'tay';
 
@@ -313,7 +313,7 @@ begin
       opti(8) and									//; optimize 		; 8
       (TemporaryBuf[9] = '') and							//			; 9
       lda(10) then									// lda			; 10
-    if (copy(TemporaryBuf[0], 6, 256) = copy(TemporaryBuf[4], 6, 256)) then
+    if argMatch(0, 4) then
      begin
 
       for p:=11 to High(TemporaryBuf) do
@@ -353,7 +353,7 @@ begin
       opti(8) and									//; optimize 		; 8
       (TemporaryBuf[9] = '') and							//			; 9
       (TemporaryBuf[10] = #9'ldy ' + copy(TemporaryBuf[4], 6, 256)) then		// ldy C		; 10
-    if (copy(TemporaryBuf[0], 6, 256) = copy(TemporaryBuf[4], 6, 256)) then
+    if argMatch(0, 4) then
      begin
 
       yes:=true;
@@ -516,13 +516,13 @@ begin
       (TemporaryBuf[1] = '; --- ForToDoCondition') and					//; --- ForToDoCondition; 1
       lda(2) and									// lda			; 2
       cmp(3) and									// cmp			; 3
-      (TemporaryBuf[4] = #9'bcc @+') and						// bcc @+		; 4
+      bcc_a(4) and									// bcc @+		; 4
       jne_l(5) and									// jne l_		; 5
       lda(6) and									// lda			; 6
       cmp(7) and									// cmp			; 7
-      (TemporaryBuf[8] = #9'bcc @+') and						// bcc @+		; 8
+      bcc_a(8) and									// bcc @+		; 8
       jne_l(9) and									// jne l_		; 9
-      lab_a(10) and							//@			; 10
+      lab_a(10) and									//@			; 10
       (TemporaryBuf[11] ='') and							//			; 11
       opti(12) and									//; optimize		; 12
       (TemporaryBuf[13] ='') and							//			; 13

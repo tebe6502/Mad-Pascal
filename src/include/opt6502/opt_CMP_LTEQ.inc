@@ -51,11 +51,11 @@ begin
 
         inc(c);
 
-	listing[i+1] := #9'cmp #$'+IntToHex(byte(c shr 24), 2);
+	listing[i+1] := #9'cmp #' + Hex(byte(c shr 24), 2);
 
-	listing[i+4] := #9'cmp #$'+IntToHex(byte(c shr 16), 2);
+	listing[i+4] := #9'cmp #' + Hex(byte(c shr 16), 2);
 
-	listing[i+7] := #9'cmp #$'+IntToHex(byte(c shr 8), 2);
+	listing[i+7] := #9'cmp #' + Hex(byte(c shr 8), 2);
 
 	if c and $ff = 0 then begin
 	 listing[i+8] := #9'sne';
@@ -63,7 +63,7 @@ begin
 	 listing[i+10] := '';
 	 listing[i+11] := '';
 	end else
-	 listing[i+10] := #9'cmp #$'+IntToHex(c and $ff, 2);
+	 listing[i+10] := #9'cmp #' + Hex(c and $ff, 2);
 
 	listing[i+12] := '';
 	listing[i+13] := #9'jcs ' + copy(listing[i+13], 6, 256);
@@ -108,13 +108,13 @@ begin
       if (p > 0) and (p < $FFFF) then begin
        inc(p);
 
-       listing[i+1] := #9'cmp #$'+IntToHex(byte(p shr 8), 2);
+       listing[i+1] := #9'cmp #' + Hex(byte(p shr 8), 2);
        listing[i+2] := listing[i+6];
 
        listing[i+7] := '@';
 
        if p and $ff <> 0 then
-        listing[i+5] := #9'cmp #$'+IntToHex(p and $ff, 2)
+        listing[i+5] := #9'cmp #' + Hex(p and $ff, 2)
        else
         listing[i+5] := '';
 
@@ -157,7 +157,7 @@ begin
 
         inc(p);
 
-	listing[i+1] := #9'cmp #$'+IntToHex(byte(p shr 8), 2);
+	listing[i+1] := #9'cmp #' + Hex(byte(p shr 8), 2);
 
 	if p and $ff = 0 then begin
 	 listing[i+2] := #9'sne';
@@ -165,7 +165,7 @@ begin
 	 listing[i+4] := '';
 	 listing[i+5] := '';
 	end else
-	 listing[i+4] := #9'cmp #$'+IntToHex(p and $ff, 2);
+	 listing[i+4] := #9'cmp #' + Hex(p and $ff, 2);
 
 	listing[i+6] := '';
 	listing[i+7] := #9'jcs ' + copy(listing[i+7], 6, 256);
@@ -207,9 +207,9 @@ begin
          c := GetWORD(i+4, i+1);
 
 	 if c < $FFFF then begin
-	  listing[i+1] := #9'cmp #$' + IntToHex(byte((c+1) shr 8),2);
+	  listing[i+1] := #9'cmp #' + Hex(byte((c+1) shr 8),2);
 
-	  listing[i+4] := #9'cmp #$' + IntToHex(byte(c+1),2);
+	  listing[i+4] := #9'cmp #' + Hex(byte(c+1),2);
 
 	  listing[i+7] := '';
 
@@ -267,9 +267,9 @@ begin
 	end else
 
 	if c < $FFFF then begin
-	  listing[i+1] := #9'cmp #$' + IntToHex(byte((c+1) shr 8),2);
+	  listing[i+1] := #9'cmp #' + Hex(byte((c+1) shr 8),2);
 
-	  listing[i+4] := #9'cmp #$' + IntToHex(byte(c+1),2);
+	  listing[i+4] := #9'cmp #' + Hex(byte(c+1),2);
 
 	  listing[i+7] := '';
 
@@ -296,7 +296,7 @@ begin
        exit(false);
       end else
       if p < $FF then begin
-	listing[i+1] := #9'cmp #$'+IntToHex((p+1) and $ff, 2);
+	listing[i+1] := #9'cmp #' + Hex((p+1) and $ff, 2);
 
 	listing[i+2] := '';
 	listing[i+3] := #9'jcs ' + copy(listing[i+3], 6, 256);
@@ -393,7 +393,7 @@ begin
 	 inc(p);
 
 	 listing[i+4] := listing[i+1];
-	 listing[i+5] := #9'sub #$' + IntToHex(p and $ff, 2);
+	 listing[i+5] := #9'sub #' + Hex(p and $ff, 2);
 	 listing[i+6] := #9'svc';
 	 listing[i+7] := #9'eor #$80';
 	 listing[i+8] := #9'bmi @+';
@@ -490,9 +490,9 @@ begin
 	 listing[i+16] := '';
 	end else begin
 	 listing[i+10] := listing[i+4];
-	 listing[i+11] := #9'cmp #$' + IntToHex(p and $ff, 2);
+	 listing[i+11] := #9'cmp #' + Hex(p and $ff, 2);
 	 listing[i+12] := listing[i+1];
-	 listing[i+13] := #9'sbc #$' + IntToHex(byte(p shr 8), 2);
+	 listing[i+13] := #9'sbc #' + Hex(byte(p shr 8), 2);
 	 listing[i+14] := #9'svc';
 	 listing[i+15] := #9'eor #$80';
 	 listing[i+16] := #9'bmi @+';

@@ -29,7 +29,7 @@ begin
       begin
         p:=GetWORD(i+0, i+1);
 
-	listing[i+2] := #9'@printPCHAR #$' + IntToHex(p, 4);
+	listing[i+2] := #9'@printPCHAR #' + Hex(p, 4);
 
 	listing[i]   := '';
 	listing[i+1] := '';
@@ -64,7 +64,7 @@ begin
       begin
         p:=GetWORD(i+0, i+1);
 
-	listing[i+2] := #9'@printSTRING #$' + IntToHex(p, 4);
+	listing[i+2] := #9'@printSTRING #' + Hex(p, 4);
 
 	listing[i]   := '';
 	listing[i+1] := '';
@@ -146,7 +146,7 @@ begin
 
        mva_im(i) then										// mva #  :STACKORIGIN			; 0
 //       (listing[i+1] = #9'@printCHAR') then							// @printCHAR				; 1
-     if (pos(' :STACKORIGIN,x', listing[i]) > 0 ) then
+     if stack_0x(i) then
       begin
 	listing[i+1] := #9'@print ' + GetString(i);
 
@@ -160,7 +160,7 @@ begin
 
        (pos(#9'mva adr.', listing[i]) > 0) and iy(i) then					// mva adr. ,y  :STACKORIGIN		; 0
 //       (listing[i+1] = #9'@printCHAR') then							// @printCHAR				; 1
-     if (pos(' :STACKORIGIN,x', listing[i]) > 0 ) then
+     if stack_0x(i) then
       begin
 	listing[i]   := #9'lda ' + GetString(i);
 	listing[i+1] := #9'@print @';
@@ -229,7 +229,7 @@ begin
 
        mva(i) and (iy(i) = false) then								// mva I :STACKORIGIN,x			; 0
 //       (listing[i+1] = #9'jsr @printBYTE') then						// jsr @printBYTE			; 1
-     if (pos(' :STACKORIGIN,x', listing[i]) > 0 ) then
+     if stack_0x(i) then
       begin
         listing[i]   := #9'lda ' + GetString(i);
 	listing[i+1] := #9'jsr @printBYTE._a';
@@ -248,8 +248,8 @@ begin
        mva(i) and (iy(i) = false) and								// mva ... :STACKORIGIN,x		; 0
        mva(i+1) and (iy(i+1) = false) then							// mva ... :STACKORIGIN+STACKWIDTH,x	; 1
 //       (listing[i+2] = #9'jsr @printWORD') then						// jsr @printWORD			; 2
-     if (pos(' :STACKORIGIN,x', listing[i]) > 0 ) and
-        (pos(' :STACKORIGIN+STACKWIDTH,x', listing[i+1]) > 0 ) then
+     if stack_0x(i) and
+        stack_1x(i+1) then
       begin
 
         listing[i]   := #9'lda ' + GetString(i);
@@ -272,10 +272,10 @@ begin
        mva(i+2) and										// mva ... :STACKORIGIN+STACKWIDTH*2,x	; 2
        mva(i+3) then										// mva ... :STACKORIGIN+STACKWIDTH*3,x	; 3
 //       (listing[i+4] = #9'jsr @printCARD') then						// jsr @printCARD			; 4
-     if (pos(' :STACKORIGIN,x', listing[i]) > 0 ) and
-        (pos(' :STACKORIGIN+STACKWIDTH,x', listing[i+1]) > 0 ) and
-        (pos(' :STACKORIGIN+STACKWIDTH*2,x', listing[i+2]) > 0 ) and
-        (pos(' :STACKORIGIN+STACKWIDTH*3,x', listing[i+3]) > 0 ) then
+     if stack_0x(i) and
+        stack_1x(i+1) and
+        stack_2x(i+2) and
+        stack_3x(i+3) then
       begin
 
         listing[i]   := #9'mva ' + GetString(i) + ' :dx';

@@ -14,7 +14,7 @@ begin
    i := 100;
    p := 0;
 
-   if (pos(#9'jmp a_', TemporaryBuf[i]) > 0) then			// jmp a_xxxx
+   if (pos(#9'jmp a_', TemporaryBuf[i]) > 0) then	// jmp a_xxxx
     begin
 
       if lab_s(i+1) then TemporaryBuf[i+1]:= '~';

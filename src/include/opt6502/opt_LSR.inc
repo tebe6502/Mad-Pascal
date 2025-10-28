@@ -140,7 +140,7 @@ begin
 	   begin
             p:=GetBYTE(i);
 
-	    listing[i] := #9'ldy #$' + IntToHex(byte(p) + 1, 2);
+	    listing[i] := #9'ldy #' + Hex(byte(p) + 1, 2);
 
 	    listing[i+2] := listing[i+5];
 	    listing[i+3] := #9'dey';
@@ -169,7 +169,7 @@ begin
 	   begin
             p:=GetBYTE(i);
 
-	    listing[i] := #9'ldy #$' + IntToHex(byte(p) + 1, 2);
+	    listing[i] := #9'ldy #' + Hex(byte(p) + 1, 2);
 
 	    listing[i+2] := listing[i+5];
 	    listing[i+3] := #9'dey';
@@ -194,7 +194,7 @@ begin
 	   begin
             p:=GetBYTE(i);
 
-	    listing[i] := #9'ldy #$' + IntToHex(byte(p) + 1, 2);
+	    listing[i] := #9'ldy #' + Hex(byte(p) + 1, 2);
 
 	    listing[i+2] := listing[i+5];
 	    listing[i+3] := #9'dey';
@@ -215,7 +215,7 @@ begin
 	   begin
             p:=GetBYTE(i);
 
-	    listing[i] := #9'ldy #$' + IntToHex(byte(p) + 1, 2);
+	    listing[i] := #9'ldy #' + Hex(byte(p) + 1, 2);
 
 	    listing[i+2] := listing[i+5];
 	    listing[i+3] := #9'dey';
@@ -402,7 +402,7 @@ begin
 
        sta_stack(i) and										// sta :STACKORIGIN			; 0
        lda_im_0(i+1) and									// lda #$00				; 1
-       (adc_im_0(i+2) or sbc_im_0(i+2)) and							// adc|sbc #$00				; 2
+       adc_sbc_im_0(i+2) and									// adc|sbc #$00				; 2
        lsr_a(i+3) and										// lsr @				; 3
 //       ror_stack(i+4) and									// ror :STACKORIGIN			; 4
        lda_stack(i+5) and									// lda :STACKORIGIN			; 5
@@ -424,10 +424,10 @@ begin
 
        sta_stack(i) and										// sta :STACKORIGIN			; 0
        lda_im_0(i+1) and									// lda #$00				; 1
-       (adc_im_0(i+2) or sbc_im_0(i+2)) and							// adc|sbc #$00				; 2
+       adc_sbc_im_0(i+2) and									// adc|sbc #$00				; 2
        sta_stack(i+3) and									// sta :STACKORIGIN+STACKWIDTH		; 3
        lda_im_0(i+4) and									// lda #$00				; 4
-       (adc_im_0(i+5) or sbc_im_0(i+5)) and							// adc|sbc #$00				; 5
+       adc_sbc_im_0(i+5) and									// adc|sbc #$00				; 5
        lsr_a(i+6) and										// lsr @				; 6
        ror_stack(i+7) and									// ror :STACKORIGIN+STACKWIDTH		; 7
 //       ror_stack(i+8) and									// ror :STACKORIGIN			; 8
@@ -990,13 +990,13 @@ begin
 
        sta_stack(i) and										// sta :STACKORIGIN			; 0
        lda_stack(i+1) and									// lda :STACKORIGIN+STACKWIDTH		; 1
-       (adc_im_0(i+2) or sbc_im_0(i+2)) and							// adc|sbc #$00				; 2
+       adc_sbc_im_0(i+2) and									// adc|sbc #$00				; 2
        sta_stack(i+3) and									// sta :STACKORIGIN+STACKWIDTH		; 3
        lda_stack(i+4) and									// lda :STACKORIGIN+STACKWIDTH*2	; 4
-       (adc_im_0(i+5) or sbc_im_0(i+5)) and							// adc|sbc #$00				; 5
+       adc_sbc_im_0(i+5) and									// adc|sbc #$00				; 5
        sta_stack(i+6) and									// sta :STACKORIGIN+STACKWIDTH*2	; 6
        lda_stack(i+7) and									// lda :STACKORIGIN+STACKWIDTH*3	; 7
-       (adc_im_0(i+8) or sbc_im_0(i+8)) and							// adc|sbc #$00				; 8
+       adc_sbc_im_0(i+8) and									// adc|sbc #$00				; 8
        sta_stack(i+9) and									// sta :STACKORIGIN+STACKWIDTH*3	; 9
        lda(i+10) and										// lda					; 10
 //       ldy_stack(i+11) and									// ldy :STACKORIGIN			; 11

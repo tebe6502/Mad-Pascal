@@ -74,7 +74,7 @@ begin
       (TemporaryBuf[5] = '') and							//			; 5
       ldy(6) and									// ldy W		; 6
       lda(7) then									// lda 			; 7
-    if (copy(TemporaryBuf[0], 6, 256) = copy(TemporaryBuf[6], 6, 256)) then
+    if argMatch(0, 6) then
     begin
 
      if (iy(0) = false) and (iy(1) = false) then begin
@@ -93,7 +93,7 @@ begin
       SKIP(2) and									// SKIP			; 2
       ldy(3) and									// ldy W		; 3
       lda(4) then									// lda 			; 4
-    if (copy(TemporaryBuf[0], 6, 256) = copy(TemporaryBuf[3], 6, 256)) then
+    if argMatch(0, 3) then
     begin
 
      if (iy(0) = false) and (iy(1) = false) then begin
@@ -111,7 +111,7 @@ begin
       ldy_1(1) and									// ldy #1		; 1
       lda_stack(2) and									// lda :STACKORIGIN	; 2
       (and_ora_eor(3) or cmp(3)) then							// and|ora|eor|cmp	; 3
-    if (copy(TemporaryBuf[0], 6, 256) = copy(TemporaryBuf[2], 6, 256)) then
+    if argMatch(0, 2) then
     begin
 
       TemporaryBuf[0] := '~';
@@ -124,7 +124,7 @@ begin
     if ldy_1(0) and 									// ldy #1		; 0	BOOL := BYTE > ?
        lda(1)and									// lda			; 1
        cmp(2) and									// cmp			; 2
-       (TemporaryBuf[3] = #9'bcs @+') and						// bcs @+		; 3
+       bcs_a(3) and							// bcs @+		; 3
        dey(4) and							// dey			; 4
        lab_a(5) and							//@			; 5
        tya(6) then							// tya			; 6

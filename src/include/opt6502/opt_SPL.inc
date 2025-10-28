@@ -1,7 +1,6 @@
 
 function opt_SPL(i: integer): Boolean;
 var p: integer;
-var err: integer; // ##NEEDED for val()
 begin
 
     Result := true;
@@ -18,8 +17,7 @@ begin
 //       spl(i+2) and										// spl					; 2
        dey(i+3) then										// dey					; 3
      begin
-        err:=0;
-	val(copy(listing[i+1], 7, 256), p, err);
+	p := GetBYTE(i+1);
 
 	listing[i+2] := '';
 	listing[i+3] := '';

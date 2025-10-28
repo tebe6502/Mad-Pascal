@@ -20,9 +20,9 @@ begin
        dey(3) and										// dey				; 3
        lab_a(4) and										//@				; 4
        tya(5) and										// tya				; 5
-       (TemporaryBuf[6] = #9'sta :ecx') and							// sta :ecx			; 6
+       sta_ecx(6) and										// sta :ecx			; 6
        lda(7) and										// lda				; 7
-       (TemporaryBuf[8] = #9'sta :eax') and							// sta :eax			; 8
+       sta_eax(8) and										// sta :eax			; 8
        IFDEF_MUL8(9) then									// IFDEF_MUL8			; 9
      begin
        TemporaryBuf[6] := #9'seq';
@@ -42,9 +42,9 @@ begin
        dey(4) and										// dey				; 4
        lab_a(5) and										//@				; 5
        tya(6) and										// tya				; 6
-       (TemporaryBuf[7] = #9'sta :ecx') and							// sta :ecx			; 7
+       sta_ecx(7) and										// sta :ecx			; 7
        lda(8) and										// lda				; 8
-       (TemporaryBuf[9] = #9'sta :eax') and							// sta :eax			; 9
+       sta_eax(9) and										// sta :eax			; 9
        IFDEF_MUL8(10) then									// IFDEF_MUL8			; 10
      begin
        TemporaryBuf[7] := #9'seq';
@@ -64,9 +64,9 @@ begin
        dey(4) and										// dey				; 4
        lab_a(5) and										//@				; 5
        tya(6) and										// tya				; 6
-       (TemporaryBuf[7] = #9'sta :ecx') and							// sta :ecx			; 7
+       sta_ecx(7) and										// sta :ecx			; 7
        lda(8) and										// lda				; 8
-       (TemporaryBuf[9] = #9'sta :eax') and							// sta :eax			; 9
+       sta_eax(9) and										// sta :eax			; 9
        IFDEF_MUL8(10) then									// IFDEF_MUL8			; 10
      begin
        TemporaryBuf[7] := #9'seq';
@@ -83,15 +83,15 @@ begin
       ldy_1(1) and										// ldy #1			; 1
       lda_stack(2) and										// lda :STACKORIGIN		; 2
       cmp_im_0(3) and										// cmp #$00			; 3
-      (TemporaryBuf[4] = #9'beq @+') and							// beq @+			; 4
+      beq_a(4) and										// beq @+			; 4
       dey(5) and										// dey				; 5
       lab_a(6) and										//@				; 6
       tya(7) and										// tya				; 7
-      (TemporaryBuf[8] = #9'sta :ecx') and							// sta :ecx			; 8
+      sta_ecx(8) and										// sta :ecx			; 8
       lda(9) and										// lda				; 9
-      (TemporaryBuf[10] = #9'sta :eax') and							// sta :eax			; 10
+      sta_eax(10) and										// sta :eax			; 10
       IFDEF_MUL8(11) then									// IFDEF_MUL8			; 11
-     if (copy(TemporaryBuf[0], 6, 256) = copy(TemporaryBuf[2], 6, 256)) then
+     if argMatch(0, 2) then
       begin
 	TemporaryBuf[0] := '~';
 

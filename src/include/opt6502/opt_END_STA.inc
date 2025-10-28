@@ -123,7 +123,7 @@
     if lda_stack(i) and									// lda :STACKORIGIN		; 0
        STA_BP2_Y(i+2) and								// add|sub|and|ora|eor		; 1	<> listing[i]
        (add_sub(i+1) or adc_sbc(i+1) or and_ora_eor(i+1)) and				// sta (:bp2),y			; 2
-       (pos(' :STACK', listing[i+1]) = 0) then
+       (stack(i+1) = false) then
        begin
 
         //if add_im_0(i+1) or sub_im_0(i+1) or adc_im_0(i+1) or sbc_im_0(i+1) or and_im_0(i+1) or ora_im_0(i+1) or eor_im_0(i+1) then Break;
@@ -318,7 +318,7 @@
 
 
      if lda_stack(i) and (EAX(i) = false) and						// lda :STACKORIGIN		; 0
-	sta_a(i+1) and (iy(i+1) = false) and (pos(':bp2', listing[i+1]) = 0) and	// sta				; 1
+	sta_a(i+1) and (iy(i+1) = false) and (bp2(i+1) = false) and			// sta				; 1
 	(sta_a(i+2) = false) and (tay(i+2) = false) and 				//~sta|tay			; 2
 	(argMatch(i, i+1) = false) then
        begin
@@ -348,8 +348,7 @@
 
 
      if ldy_stack(i) and								// ldy :STACKORIGIN		; 0
-	sty(i+1) and 									// sty				; 1
-	(pos(':bp2', listing[i+1]) = 0) and
+	sty(i+1) and (bp2(i+1) = false) and						// sty				; 1
 	(sty(i+2) = false) and (tya(i+2) = false) and 					//~sty				; 2
 	(argMatch(i, i+1) = false) then
        begin
@@ -539,9 +538,9 @@
               (lda_bp2_y(i+5) and sta_a(i+6))) and					// sta (:bp2),y			; 6
              (iny(i+7) = false) and							//~iny				; 7
 
-             (pos(#9'lda <adr.', listing[p-1]) > 0) and	  		/// lda <adr.				; p-1
+             lda_l_adr(p-1) and				  		/// lda <adr.				; p-1
 //	     sta_stack(p) and						/// sta :STACKORIGIN			; p
-	     (pos(#9'lda >adr.', listing[p+1]) > 0) and			/// lda >adr.				; p+1
+	     lda_h_adr(p+1) and						/// lda >adr.				; p+1
 	     sta_stack(p+2) and						/// sta :STACKORIGIN+STACKWIDTH		; p+2
 	     (sta_a(p+3) = false) then					///~sta					; p+3
 	  if argMatch(i+2, p+2) then
@@ -570,10 +569,10 @@
 	      (lda_bp2_y(i+5) and sta_a(i+6))) and					// sta (:bp2),y			; 6
              (iny(i+7) = false) and							//~iny				; 7
 
-             (pos(#9'lda <adr.', listing[p-2]) > 0) and	  		/// lda <adr.				; p-2
+             lda_l_adr(p-2) and				  		/// lda <adr.				; p-2
 	     add(p-1) and (add_stack(p-1) = false) and			/// add A				; p-1
 //	     sta_stack(p) and						/// sta :STACKORIGIN			; p
-	     (pos(#9'lda >adr.', listing[p+1]) > 0) and			/// lda >adr.				; p+1
+	     lda_h_adr(p+1) and						/// lda >adr.				; p+1
 	     adc_im_0(p+2) and						/// adc #$00				; p+2
 	     sta_stack(p+3) then					/// sta :STACKORIGIN+STACKWIDTH		; p+3
 	  if argMatch(i+2, p+3) then

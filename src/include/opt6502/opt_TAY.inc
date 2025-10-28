@@ -21,7 +21,7 @@ begin
 
 
     if lda(i) and (iy(i) = false) and								// lda					; 0
-       (listing[i+1] = #9'sub #$01') and							// sub #$01				; 1
+       sub_im_1(i+1) and									// sub #$01				; 1
        tay(i+2) and 										// tay					; 2
 												// lda					; 3
        (sbc(i+4) = false) then									//~sbc					; 4
@@ -29,7 +29,7 @@ begin
 	if lda_im(i) then begin
 	 p := GetBYTE(i);
 
-	 listing[i]   := #9'ldy #$' + IntToHex((p-1) and $ff, 2);
+	 listing[i]   := #9'ldy #' + Hex((p-1) and $ff, 2);
 	 listing[i+1] := '';
 	 listing[i+2] := '';
 
@@ -44,7 +44,7 @@ begin
 
 
     if tya(i) and										// tya					; 0
-       (listing[i+1] = #9'add #$01') and							// add #$01				; 1
+       add_im_1(i+1) and									// add #$01				; 1
        tay(i+2) and										// tay					; 2
        (SKIP(i+3) = false) then									// SKIP					; 3
       begin
@@ -57,7 +57,7 @@ begin
 
 
     if tya(i) and										// tya					; 0
-       (listing[i+1] = #9'sub #$01') and							// sub #$01				; 1
+       sub_im_1(i+1) and									// sub #$01				; 1
        tay(i+2) and										// tay					; 2
        (SKIP(i+3) = false) then									// SKIP					; 3
       begin
@@ -70,7 +70,7 @@ begin
 
 
     if lda(i) and (iy(i) = false) and								// lda					; 0
-       (listing[i+1] = #9'add #$01') and							// add #$01				; 1
+       add_im_1(i+1) and									// add #$01				; 1
        tay(i+2) and										// tay					; 2
        lda(i+3) and										// lda					; 3
        add(i+4) then										// add					; 4
@@ -448,7 +448,7 @@ begin
 	listing[i+7] := '';
 	listing[i+8] := '';
 	listing[i+9] := '';
- 
+
 	exit(false);
       end;
 

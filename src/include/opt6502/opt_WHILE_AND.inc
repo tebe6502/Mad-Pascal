@@ -8,21 +8,11 @@
        jne(i+3) then										// jne l_				; 3	WHILE
      begin
 
-      tmp := copy(listing[i+2], 6, 256);
-      yes := true;
-
-      for p:=i-1 downto 0 do
-       if ora_stack(p) or local(p) or
-          (sty_stack(p) and lab_a(p-1) and lda(p+1) and and_stack(p+2)) or
-          (sty_stack(p) and lab_a(p-1) and lda_stack(p+1)) or
-	  (sty_stack(p) and lab_a(p-1) and ldy_1(p+1) and lda_stack(p+2) and argMatch(p, p+2)) or
-          (sty_stack(p) and lab_a(p-1) and (argMatch(p, i+2) = false)) or
-          (tya(p) and (lab_a(p-1) = false) and (and_stack(p+1) = false)) then begin yes:=false; Break end;
+      yes := test_ORA(i);
 
       if yes then begin
 
-//      for p:=0 to l-1 do writeln(listing[p]);
-//      writeln('-------');
+       tmp := copy(listing[i+2], 6, 256);
 
        for p:=i-1 downto 0 do begin
 

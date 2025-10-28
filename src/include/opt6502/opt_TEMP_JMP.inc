@@ -8,14 +8,14 @@ begin
 
    if sta(0) and									// sta A		; 0
       (TemporaryBuf[1] = '') and							//			; 1
-      jmp(2) and									// jmp l_xxxx		; 2
+      jmp_l(2) and									// jmp l_xxxx		; 2
       lab_l(3) and									//l_xxxx		; 3
       (TemporaryBuf[4] = '') and							//			; 4
       opti(5) and									//; optimize 		; 5
       (TemporaryBuf[6] = '') and							//			; 6
       lda(7) then									// lda A		; 7
     if (TemporaryBuf[3] = copy(TemporaryBuf[2], 6, 256)) and
-       (copy(TemporaryBuf[0], 6, 256) = copy(TemporaryBuf[7], 6, 256)) then
+       argMatch(0, 7) then
     begin
      TemporaryBuf[2] := '~';
      TemporaryBuf[3] := '~';
@@ -36,7 +36,7 @@ begin
 
     if (pos('lda #$', TemporaryBuf[0]) > 0) and (lda_im_0(0) = false) and		// lda #$01		; 0
        jeq_l(1) and									// jeq l_xxxx		; 1
-       jmp(2) and									// jmp l_yyyy		; 2
+       jmp_l(2) and									// jmp l_yyyy		; 2
        (pos(TemporaryBuf[3], TemporaryBuf[1]) > 0) then					//l_xxxx		; 3
      begin
       TemporaryBuf[0] := '~';
@@ -59,9 +59,9 @@ begin
       end;
 
 
-    if (TemporaryBuf[0] = #9'jmp @+') and						// jmp @+		; 0
-       jmp(1) and									// jmp l_		; 1
-       (TemporaryBuf[2] = '@') then							//@			; 2
+    if jmp_a(0) and									// jmp @+		; 0
+       jmp_l(1) and									// jmp l_		; 1
+       lab_a(2) then									//@			; 2
       begin
 	TemporaryBuf[0] := '~';
 	TemporaryBuf[1] := '~';
@@ -70,7 +70,7 @@ begin
 
 
     if (SKIP(0) = false) and								//~SKIP			; 0
-       jmp(1) and									// jmp l_xxxx		; 1
+       jmp_l(1) and									// jmp l_xxxx		; 1
        (TemporaryBuf[2] = copy(TemporaryBuf[1], 6, 256)) and				//l_xxxx		; 2
        (IFTMP(3) = false) then								//~lda IFTMP_		; 3
      begin
@@ -80,7 +80,7 @@ begin
 
 
     if (SKIP(0) = false) and								//~SKIP			; 0
-       jmp(1) and									// jmp l_xxxx		; 1
+       jmp_l(1) and									// jmp l_xxxx		; 1
        lab_l(2) and									//l_yyyy		; 2
        (TemporaryBuf[3] = copy(TemporaryBuf[1], 6, 256)) and				//l_xxxx		; 3
        (IFTMP(4) = false) then								//~lda IFTMP_		; 4

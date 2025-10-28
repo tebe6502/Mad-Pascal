@@ -211,7 +211,7 @@ begin
     if (SKIP(i-1) = false) and
        lda(i) and 										// lda			; 0
        (listing[i+1] = #9'and #$80') and							// and #$80		; 1
-       (listing[i+2] = #9'cmp #$00') and							// cmp #$00		; 2
+       cmp_im_0(i+2) and									// cmp #$00		; 2
        bne(i+3) and										// bne			; 3
        lda_im_0(i+4) and									// lda #$00		; 4
        cmp_im_0(i+5) and									// cmp #$00		; 5

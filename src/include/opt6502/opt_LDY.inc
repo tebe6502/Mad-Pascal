@@ -73,7 +73,7 @@ begin
 	p := GetBYTE(i) + 1;
 
 	if p < 256 then begin
- 	 listing[i]   := #9'ldy #$' + IntToHex(p, 2);
+ 	 listing[i]   := #9'ldy #' + Hex(p, 2);
 	 listing[i+1] := '';
 
 	 exit(false);
@@ -251,7 +251,7 @@ begin
     if ldy_stack(i+5) and									// ldy :STACKORIGIN+9			; 5
 
        lda(i) and										// lda I				; 0
-       (listing[i+1] = #9'add #$01') and 							// add #$01				; 1
+       add_im_1(i+1) and 									// add #$01				; 1
        sta_stack(i+2) and									// sta :STACKORIGIN+9			; 2
        ldy(i+3) and										// ldy I				; 3
        lda_a(i+4) then 										// lda					; 4

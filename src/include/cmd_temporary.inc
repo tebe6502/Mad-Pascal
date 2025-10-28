@@ -24,15 +24,31 @@
     Result := pos(#9'mva :STACK', TemporaryBuf[i]) = 1
   end;
 
+// -----------------------------------------------------------------------------
+
+  function mINLINE(i: integer): Boolean;
+  begin
+    Result := pos(#9'm@INLINE', TemporaryBuf[i]) = 1
+  end;
+
+  function ENDL(i: integer): Boolean;
+  begin
+    Result := pos(#9'.ENDL', TemporaryBuf[i]) = 1
+  end;
 
   function IFTMP(i: integer): Boolean;
   begin
     Result := pos(#9'lda IFTMP_', TemporaryBuf[i]) = 1
   end;
 
-  function JMP(i: integer): Boolean;
+  function JMP_L(i: integer): Boolean;
   begin
     Result := pos(#9'jmp l_', TemporaryBuf[i]) = 1
+  end;
+
+  function JMP_A(i: integer): Boolean;
+  begin
+    Result := pos(#9'jmp @+', TemporaryBuf[i]) = 1
   end;
 
   function LAB_L(i: integer): Boolean;
@@ -110,6 +126,26 @@
     Result := pos(#9'sta :STACK', TemporaryBuf[i]) = 1
   end;
 
+  function ORA(i: integer): Boolean;
+  begin
+    Result := pos(#9'ora ', TemporaryBuf[i]) = 1
+  end;
+
+  function LSR(i: integer): Boolean;
+  begin
+    Result := pos(#9'lsr ', TemporaryBuf[i]) = 1
+  end;
+
+  function ASL_STACK(i: integer): Boolean;
+  begin
+    Result := pos(#9'asl :STACK', TemporaryBuf[i]) = 1
+  end;
+
+  function ROL_STACK(i: integer): Boolean;
+  begin
+    Result := pos(#9'rol :STACK', TemporaryBuf[i]) = 1
+  end;
+
   function STY(i: integer): Boolean;
   begin
     Result := pos(#9'sty ', TemporaryBuf[i]) = 1
@@ -123,6 +159,11 @@
   function ADD(i: integer): Boolean;
   begin
     Result := pos(#9'add ', TemporaryBuf[i]) = 1
+  end;
+
+  function ADC(i: integer): Boolean;
+  begin
+    Result := pos(#9'adc ', TemporaryBuf[i]) = 1
   end;
 
   function SUB(i: integer): Boolean;
@@ -145,6 +186,39 @@
     Result := pos(#9'sbc ', TemporaryBuf[i]) = 1
   end;
 
+// -----------------------------------------------------------------------------
+
+  function LDA_EAX(i: integer): Boolean;
+  begin
+    Result := TemporaryBuf[i] = #9'lda :eax'
+  end;
+
+  function LDA_EAX_1(i: integer): Boolean;
+  begin
+    Result := TemporaryBuf[i] = #9'lda :eax+1'
+  end;
+
+  function STA_EAX(i: integer): Boolean;
+  begin
+    Result := TemporaryBuf[i] = #9'sta :eax'
+  end;
+
+  function STA_EAX_1(i: integer): Boolean;
+  begin
+    Result := TemporaryBuf[i] = #9'sta :eax+1'
+  end;
+
+  function STA_ECX(i: integer): Boolean;
+  begin
+    Result := TemporaryBuf[i] = #9'sta :ecx'
+  end;
+
+  function STA_ECX_1(i: integer): Boolean;
+  begin
+    Result := TemporaryBuf[i] = #9'sta :ecx+1'
+  end;
+
+// -----------------------------------------------------------------------------
 
   function ASL_A(i: integer): Boolean;
   begin
@@ -228,9 +302,37 @@
 
   function LDA_BP2_Y(i: integer): Boolean;
   begin
-    Result := TemporaryBuf[i] = #9'lda :bp2'
+    Result := TemporaryBuf[i] = #9'lda (:bp2),y'
   end;
 
+// -----------------------------------------------------------------------------
+
+  function BEQ_A(i: integer): Boolean;
+  begin
+    Result := TemporaryBuf[i] = #9'beq @+'
+  end;
+
+  function BNE_A(i: integer): Boolean;
+  begin
+    Result := TemporaryBuf[i] = #9'bne @+'
+  end;
+
+  function BCC_A(i: integer): Boolean;
+  begin
+    Result := TemporaryBuf[i] = #9'bcc @+'
+  end;
+
+  function BCS_A(i: integer): Boolean;
+  begin
+    Result := TemporaryBuf[i] = #9'bcs @+'
+  end;
+
+  function BPL_A(i: integer): Boolean;
+  begin
+    Result := TemporaryBuf[i] = #9'bpl @+'
+  end;
+
+// -----------------------------------------------------------------------------
 
   function SNE(i: integer): Boolean;
   begin
@@ -272,6 +374,7 @@
     Result := TemporaryBuf[i] = #9'svs'
   end;
 
+// -----------------------------------------------------------------------------
 
   function JEQ(i: integer): Boolean;
   begin
@@ -303,6 +406,7 @@
     Result := pos(#9'jpl ', TemporaryBuf[i]) = 1
   end;
 
+// -----------------------------------------------------------------------------
 
   function JEQ_L(i: integer): Boolean;
   begin
@@ -324,6 +428,7 @@
     Result := pos(#9'jcs l_', TemporaryBuf[i]) = 1
   end;
 
+// -----------------------------------------------------------------------------
 
   function AND_ORA_EOR(i: integer): Boolean;
   begin
@@ -335,12 +440,12 @@
     Result := pos(',y', TemporaryBuf[i]) > 0
   end;
 
+// -----------------------------------------------------------------------------
 
   function STA_ADR(i: integer): Boolean;
   begin
     Result :=  iy(i) and (pos(#9'sta adr.', TemporaryBuf[i]) = 1) or ((pos(#9'sta ', TemporaryBuf[i]) = 1) and (pos('.adr.', TemporaryBuf[i]) > 0));
   end;
-
 
   function OPTI(i: integer): Boolean;
   begin

@@ -78,7 +78,7 @@ begin
 	exit(false);
      end;
 
-
+{
     if lda_stack(i) and										// lda :STACKORIGIN			; 0
        and_im_0(i+1) and									// and #$00				; 1
        sta_stack(i+2) then									// sta :STACKORIGIN			; 2
@@ -89,7 +89,7 @@ begin
 
 	exit(false);
      end;
-
+}
 
     if and_im_0(i) and										// and #$00				; 0
        mwy(i+1) and										// mwy					; 1
@@ -177,7 +177,7 @@ begin
 
         for p:=0 to 3 do
 
-	if listing[p*4+i+2] = #9'and #$00' then begin
+	if and_im_0(p*4+i+2) then begin
 	  listing[p*4+i+1] := '';
 	  listing[p*4+i+2] := '';
 	  listing[p*4+i+3] := '';

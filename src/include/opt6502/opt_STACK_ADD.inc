@@ -35,13 +35,13 @@ begin
 
 
     if lda_stack(i) and										// lda :STACKORIGIN,x			; 0
-       ((listing[i+1] = #9'add #$01') or (listing[i+1] = #9'sub #$01')) and			// add|sub #$01				; 1
+       (add_im_1(i+1) or sub_im_1(i+1)) and							// add|sub #$01				; 1
        sta_stack(i+2) and									// sta :STACKORIGIN,x			; 2
        (inx(i+3) or dex(i+3)) then								// inx|dex				; 3
     if argMatch(i, i+2) then
      begin
 
-       if listing[i+1] = #9'add #$01' then
+       if add_im_1(i+1) then
         listing[i+1] := #9'inc ' + copy(listing[i], 6, 256)
        else
         listing[i+1] := #9'dec ' + copy(listing[i], 6, 256);
@@ -55,13 +55,13 @@ begin
 
 
     if lda_val(i) and (iy(i) = false) and							// lda ~:STACKORIGIN			; 0
-       ((listing[i+1] = #9'add #$01') or (listing[i+1] = #9'sub #$01')) and			// add|sub #$01				; 1
+       (add_im_1(i+1) or sub_im_1(i+1)) and							// add|sub #$01				; 1
        sta_stack(i+2) and									// sta :STACKORIGIN,x			; 2
        (inx(i+3) or dex(i+3)) and								// inx|dex				; 3
        (inx(i+4) = false) and (dex(i+4) = false) then						//~inx|dex				; 4
      begin
 
-       if listing[i+1] = #9'add #$01' then
+       if add_im_1(i+1) then
         listing[i+1] := #9'iny'
        else
         listing[i+1] := #9'dey';
@@ -77,7 +77,7 @@ begin
     if inx(i) and										// inx					; 0
        lda_val(i+1) and										// lda ~:STACKORIGIN			; 1
        add_sub_val(i+2) and									// add|sub ~:STACKORIGIN		; 2
-       (listing[i+3] = #9'ldy :STACKORIGIN-1,x') and						// ldy :STACKORIGIN-1,x			; 3
+       ldy_stack_prev_0x(i+3) and								// ldy :STACKORIGIN-1,x			; 3
        sta_val(i+4) and										// sta ~:STACKORIGIN			; 4
        dex(i+5) then										// dex					; 5
      begin
@@ -106,7 +106,7 @@ begin
 
     if //inx(i) and										// inx					; 0
        lda_val(i+1) and (iy(i+1) = false) and							// lda IMAGES				; 1
-       (listing[i+2] = #9'add #$01') and							// add #$01				; 2
+       add_im_1(i+2) and									// add #$01				; 2
        tay(i+3) then										// tay					; 3
      begin
        listing[i+1] := #9'ldy ' + copy(listing[i+1], 6, 256);
@@ -174,10 +174,10 @@ begin
        sta_bp_1(i+8) and									// sta :bp+1				; 8
        lda_bp_y(i+9) and									// lda (:bp),y				; 9
        sta(i+10) then										// sta					; 10
-     if (pos(':STACKORIGIN,x', listing[i+1]) > 0) and
-	(pos(':STACKORIGIN,x', listing[i+4]) > 0) and
-	(pos(':STACKORIGIN+STACKWIDTH,x', listing[i+2]) > 0) and
-	(pos(':STACKORIGIN+STACKWIDTH,x', listing[i+7]) > 0) then
+     if stack_0x(i+1) and
+	stack_0x(i+4) and
+	stack_1x(i+2) and
+	stack_1x(i+7) then
      begin
        listing[i+4]  := #9'add ' + GetString(i+1);
        listing[i+7]  := #9'adc ' + GetString(i+2);
@@ -186,7 +186,7 @@ begin
        listing[i+2] := '';
 
        if adc_im_0(i+7) then
-	if copy(listing[i+3], 6, 256)+'+1' = copy(listing[i+6], 6, 256) then begin
+	if copy(listing[i+3], 6, 256) + '+1' = copy(listing[i+6], 6, 256) then begin
 	 listing[i+3] := #9'mwy ' + copy(listing[i+3], 6, 256) + ' :bp2';
 	 listing[i+4] := #9'ldy ' + copy(listing[i+4], 6, 256);
 	 listing[i+5] := '';
@@ -209,10 +209,10 @@ begin
        lda(i+6) and										// lda					; 6
        adc_stack(i+7) and									// adc :STACKORIGIN+STACKWIDTH,x	; 7
        sta(i+8) then										// sta					; 8
-     if (pos(':STACKORIGIN,x', listing[i+1]) > 0) and
-	(pos(':STACKORIGIN,x', listing[i+4]) > 0) and
-	(pos(':STACKORIGIN+STACKWIDTH,x', listing[i+2]) > 0) and
-	(pos(':STACKORIGIN+STACKWIDTH,x', listing[i+7]) > 0) then
+     if stack_0x(i+1) and
+	stack_0x(i+4) and
+	stack_1x(i+2) and
+	stack_1x(i+7) then
      begin
        listing[i+4]  := #9'add ' + GetString(i+1);
        listing[i+7]  := #9'adc ' + GetString(i+2);
@@ -237,11 +237,11 @@ begin
      begin
 
       for p:=i-1 downto 0 do
-       if inx(p) and mva_im(p+1) and (mva(p+2) or sta(p+2)) and
-         (pos(':STACKORIGIN,x', listing[p+1]) > 0) and
-         (pos(':STACKORIGIN+STACKWIDTH,x', listing[p+2]) > 0) then
+       if inx(p) and
+          stack_0x(p+1) and mva_im(p+1) and
+	  stack_1x(p+2) and (mva(p+2) or sta(p+2)) then
 	begin
-       	 listing[i+7] := #9'ldy ' + copy(listing[i+2], 6, 256) + '+$' + IntToHex(GetBYTE(p+1), 2);
+       	 listing[i+7] := #9'ldy ' + copy(listing[i+2], 6, 256) + '+' + Hex(GetBYTE(p+1), 2);
 
        	 listing[p+1] := '';
 	 listing[p+2] := '';

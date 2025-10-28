@@ -1,6 +1,6 @@
 
 function opt_SUB(i: integer): Boolean;
-var p, err: integer;
+var p, q: integer;
 begin
 
     Result := true;
@@ -15,19 +15,19 @@ begin
 // ~sbc adr.label
 //
 
-    if (pos(#9'lda <adr.', listing[i]) >0) and						// lda <adr.				; 0
+    if lda_l_adr(i) and									// lda <adr.				; 0
        sub_im(i+1) and									// sub #				; 1
        sta_a(i+2) and									// sta					; 2
-       (pos(#9'lda >adr.', listing[i+3]) >0) and					// lda >adr.				; 3
+       lda_h_adr(i+3) and								// lda >adr.				; 3
        sbc_im(i+4) and									// sbc #				; 4
        sta_a(i+5) then									// sta					; 5
      begin
 	p := GetWORD(i+1, i+4);
 
-	if p <> 0 then listing[i] := listing[i] + '-$' + IntToHex(p, 2);
+	if p <> 0 then listing[i] := listing[i] + '-' + Hex(p, 2);
 	listing[i+1] := '';
 
-	if p <> 0 then listing[i+3] := listing[i+3] + '-$' + IntToHex(p, 2);
+	if p <> 0 then listing[i+3] := listing[i+3] + '-' + Hex(p, 2);
 	listing[i+4] := '';
 
 	exit(false);
@@ -46,7 +46,7 @@ begin
 
     if (l = 3) and
        lda_a(i) and (iy(i) = false) and							// lda W				; 0
-       (listing[i+1] = #9'sub #$01') and						// sub #$01				; 1
+       sub_im_1(i+1) and								// sub #$01				; 1
        sta_a(i+2) then									// sta W				; 2
        if argMatch(i, i+2) then
        begin
@@ -60,7 +60,7 @@ begin
 
     if (l = 3) and
        lda_a(i) and (iy(i) = false) and							// lda X 				; 0
-       (listing[i+1] = #9'sub #$01') and						// sub #$01				; 1
+       sub_im_1(i+1) and								// sub #$01				; 1
        sta_a(i+2) and (iy(i+2) = false) then						// sta Y				; 2
       if (argMatch(i, i+2) = false) then
      begin
@@ -68,7 +68,7 @@ begin
        if lda_im(i) then begin
 	p := GetBYTE(i);
 
-	listing[i]   := #9'lda #$' + IntToHex((p-1) and $ff, 2);
+	listing[i]   := #9'lda #' + Hex((p-1) and $ff, 2);
 	listing[i+1] := '';
        end else begin
 	listing[i]   := #9'ldy '+copy(listing[i], 6, 256);
@@ -81,7 +81,7 @@ begin
 
 
     if tya(i) and 									// tya					; 0
-       (listing[i+1] = #9'sub #$01') and						// sub #$01				; 1
+       sub_im_1(i+1) and								// sub #$01				; 1
        tay(i+2) and 									// tay					; 2
        scs(i+3) and									// scs					; 3
        dec_(i+4) then									// dec					; 4
@@ -97,7 +97,7 @@ begin
 
     if sta(i) and									// sta A				; 0
        lda(i+1) and									// lda					; 1
-       ((listing[i+2] = #9'add #$01') or (listing[i+2] = #9'sub #$01')) and		// add|sub #$01				; 2
+       (add_im_1(i+2) or sub_im_1(i+2)) and						// add|sub #$01				; 2
        add(i+3) and									// add A				; 3
        tay(i+4) then									// tay					; 4
       if argMatch(i, i+3) then
@@ -514,7 +514,7 @@ begin
     if sbc_im_0(i+10) and								// sbc #$00				; 10
 
        lda_val(i) and									// lda K				; 0	~:STACKORIGIN
-       (listing[i+1] = #9'sub #$01') and						// sub #$01				; 1
+       sub_im_1(i+1) and								// sub #$01				; 1
        sta_a(i+2) and									// sta K				; 2
        lda_a(i+3) and									// lda K+1				; 3
        sbc_im_0(i+4) and								// sbc #$00				; 4
@@ -558,7 +558,7 @@ begin
 	argMatch(i+3, i+5) then
      begin
 
-	if listing[i+1] = #9'sub #$01' then begin
+	if sub_im_1(i+1) then begin
 	 listing[i+1] := #9'bne @+';
 	 listing[i+2] := #9'dec ' + copy(listing[i], 6, 256) + '+1';
 	 listing[i+3] := '@';
@@ -585,9 +585,9 @@ begin
      begin
       p := GetWORD(i, i+3) - GetWORD(i+1, i+4);
 
-      listing[i]   := #9'lda #$' + IntToHex(p and $ff, 2);
+      listing[i]   := #9'lda #' + Hex(p and $ff, 2);
       listing[i+1] := '';
-      listing[i+3] := #9'lda #$' + IntToHex(byte(p shr 8), 2);
+      listing[i+3] := #9'lda #' + Hex(byte(p shr 8), 2);
       listing[i+4] := '';
 
       exit(false);
@@ -603,7 +603,7 @@ begin
 
       listing[i] := '';
 
-      listing[i+1] := #9'lda #$' + IntToHex(p and $ff, 2);
+      listing[i+1] := #9'lda #' + Hex(p and $ff, 2);
 
       exit(false);
      end;
@@ -617,7 +617,7 @@ begin
       p := -(GetBYTE(i+1) - GetBYTE(i+2));
 
       listing[i+1] := '';
-      listing[i+2] := #9'sub #$' + IntToHex(p and $ff, 2);
+      listing[i+2] := #9'sub #' + Hex(p and $ff, 2);
 
       exit(false);
      end;
@@ -635,10 +635,10 @@ begin
 
       p := GetWORD(i, i+4) - GetWORD(i+1, i+5);
 
-      listing[i]   := #9'lda #$' + IntToHex(p and $ff, 2);
+      listing[i]   := #9'lda #' + Hex(p and $ff, 2);
       listing[i+1] := '';
 
-      listing[i+4] := #9'lda #$' + IntToHex(byte(p shr 8), 2);
+      listing[i+4] := #9'lda #' + Hex(byte(p shr 8), 2);
       listing[i+5] := '';
 
       exit(false);
@@ -659,17 +659,19 @@ begin
   //     (lda_im(i+9) = false) and							//					; 9
        (sbc(i+10) = false) then								//~sbc					; 10
      begin
+//      p := GetVAL(copy(listing[i], 6, 256)) + GetVAL(copy(listing[i+3], 6, 256)) shl 8 + GetVAL(copy(listing[i+6], 6, 256)) shl 16;
+//      err := GetVAL(copy(listing[i+1], 6, 256)) + GetVAL(copy(listing[i+4], 6, 256)) shl 8 + GetVAL(copy(listing[i+7], 6, 256)) shl 16;
 
-      p := GetVAL(copy(listing[i], 6, 256)) + GetVAL(copy(listing[i+3], 6, 256)) shl 8 + GetVAL(copy(listing[i+6], 6, 256)) shl 16;
-      err := GetVAL(copy(listing[i+1], 6, 256)) + GetVAL(copy(listing[i+4], 6, 256)) shl 8 + GetVAL(copy(listing[i+7], 6, 256)) shl 16;
+      p := GetTRIPLE(i, i+3, i+6);
+      q := GetTRIPLE(i+1, i+4, i+7);
 
-      p := p - err;
+      p := p - q;
 
-      listing[i]   := #9'lda #$' + IntToHex(p and $ff, 2);
+      listing[i]   := #9'lda #' + Hex(p and $ff, 2);
       listing[i+1] := '';
-      listing[i+3] := #9'lda #$' + IntToHex(byte(p shr 8), 2);
+      listing[i+3] := #9'lda #' + Hex(byte(p shr 8), 2);
       listing[i+4] := '';
-      listing[i+6] := #9'lda #$' + IntToHex(byte(p shr 16), 2);
+      listing[i+6] := #9'lda #' + Hex(byte(p shr 16), 2);
       listing[i+7] := '';
 
       exit(false);
@@ -695,8 +697,8 @@ begin
      begin
       p := GetWORD(i+1, i+4) + GetWORD(i+7, i+10);
 
-      listing[i+1] := #9'sub #$' + IntToHex(p and $ff, 2);
-      listing[i+4] := #9'sbc #$' + IntToHex(byte(p shr 8), 2);
+      listing[i+1] := #9'sub #' + Hex(p and $ff, 2);
+      listing[i+4] := #9'sbc #' + Hex(byte(p shr 8), 2);
 
       listing[i+2] := listing[i+8];
       listing[i+5] := listing[i+11];
@@ -727,15 +729,18 @@ begin
 //       sbc_im(i+10) and								// sbc #				; 10
        sta_a(i+11) then									// sta :STACKORIGIN+STACKWIDTH*3	; 11
       begin
-	p := GetVAL(copy(listing[i], 6, 256)) + GetVAL(copy(listing[i+3], 6, 256)) shl 8 + GetVAL(copy(listing[i+6], 6, 256)) shl 16 + GetVAL(copy(listing[i+9], 6, 256)) shl 24;
-	err := GetVAL(copy(listing[i+1], 6, 256)) + GetVAL(copy(listing[i+4], 6, 256)) shl 8 + GetVAL(copy(listing[i+7], 6, 256)) shl 16 + GetVAL(copy(listing[i+10], 6, 256)) shl 24;
+//	p := GetVAL(copy(listing[i], 6, 256)) + GetVAL(copy(listing[i+3], 6, 256)) shl 8 + GetVAL(copy(listing[i+6], 6, 256)) shl 16 + GetVAL(copy(listing[i+9], 6, 256)) shl 24;
+//	err := GetVAL(copy(listing[i+1], 6, 256)) + GetVAL(copy(listing[i+4], 6, 256)) shl 8 + GetVAL(copy(listing[i+7], 6, 256)) shl 16 + GetVAL(copy(listing[i+10], 6, 256)) shl 24;
 
-	p := p - err;
+	p := GetDWORD(i, i+3, i+6, i+9);
+	q := GetDWORD(i+1, i+4, i+7, i+10);
 
-	listing[i]   := #9'lda #$' + IntToHex(p and $ff, 2);
-	listing[i+3] := #9'lda #$' + IntToHex(byte(p shr 8), 2);
-	listing[i+6] := #9'lda #$' + IntToHex(byte(p shr 16), 2);
-	listing[i+9] := #9'lda #$' + IntToHex(byte(p shr 24), 2);
+	p := p - q;
+
+	listing[i]   := #9'lda #' + Hex(p and $ff, 2);
+	listing[i+3] := #9'lda #' + Hex(byte(p shr 8), 2);
+	listing[i+6] := #9'lda #' + Hex(byte(p shr 16), 2);
+	listing[i+9] := #9'lda #' + Hex(byte(p shr 24), 2);
 
 	listing[i+1] := '';
 	listing[i+4] := '';
@@ -758,14 +763,17 @@ begin
 //       sbc_im(i+7) and								// sbc #				; 7
        sta_a(i+8) then									// sta :STACKORIGIN+STACKWIDTH*2	; 8
       begin
-	p := GetVAL(copy(listing[i], 6, 256)) + GetVAL(copy(listing[i+3], 6, 256)) shl 8 + GetVAL(copy(listing[i+6], 6, 256)) shl 16;
-	err := GetVAL(copy(listing[i+1], 6, 256)) + GetVAL(copy(listing[i+4], 6, 256)) shl 8 + GetVAL(copy(listing[i+7], 6, 256)) shl 16;
+//	p := GetVAL(copy(listing[i], 6, 256)) + GetVAL(copy(listing[i+3], 6, 256)) shl 8 + GetVAL(copy(listing[i+6], 6, 256)) shl 16;
+//	err := GetVAL(copy(listing[i+1], 6, 256)) + GetVAL(copy(listing[i+4], 6, 256)) shl 8 + GetVAL(copy(listing[i+7], 6, 256)) shl 16;
 
-	p := p - err;
+	p := GetTRIPLE(i, i+3, i+6);
+	q := GetTRIPLE(i+1, i+4, i+7);
 
-	listing[i]   := #9'lda #$' + IntToHex(p and $ff, 2);
-	listing[i+3] := #9'lda #$' + IntToHex(byte(p shr 8), 2);
-	listing[i+6] := #9'lda #$' + IntToHex(byte(p shr 16), 2);
+	p := p - q;
+
+	listing[i]   := #9'lda #' + Hex(p and $ff, 2);
+	listing[i+3] := #9'lda #' + Hex(byte(p shr 8), 2);
+	listing[i+6] := #9'lda #' + Hex(byte(p shr 16), 2);
 
 	listing[i+1] := '';
 	listing[i+4] := '';
@@ -806,15 +814,18 @@ begin
 	 argMatch(i+8, i+18) and
 	 argMatch(i+11, i+21) then
      begin
-      p := GetVAL(copy(listing[i+1], 6, 256)) + GetVAL(copy(listing[i+4], 6, 256)) shl 8 + GetVAL(copy(listing[i+7], 6, 256)) shl 16 + GetVAL(copy(listing[i+10], 6, 256)) shl 24;
-      err :=  GetVAL(copy(listing[i+13], 6, 256)) + GetVAL(copy(listing[i+16], 6, 256)) shl 8 + GetVAL(copy(listing[i+19], 6, 256)) shl 16 + GetVAL(copy(listing[i+22], 6, 256)) shl 24;
+//      p := GetVAL(copy(listing[i+1], 6, 256)) + GetVAL(copy(listing[i+4], 6, 256)) shl 8 + GetVAL(copy(listing[i+7], 6, 256)) shl 16 + GetVAL(copy(listing[i+10], 6, 256)) shl 24;
+//      err :=  GetVAL(copy(listing[i+13], 6, 256)) + GetVAL(copy(listing[i+16], 6, 256)) shl 8 + GetVAL(copy(listing[i+19], 6, 256)) shl 16 + GetVAL(copy(listing[i+22], 6, 256)) shl 24;
 
-      p := p + err;
+      p := GetDWORD(i+1, i+4, i+7, i+10);
+      q := GetDWORD(i+13, i+16, i+19, i+22);
 
-      listing[i+1] := #9'sub #$' + IntToHex(p and $ff, 2);
-      listing[i+4] := #9'sbc #$' + IntToHex(byte(p shr 8), 2);
-      listing[i+7] := #9'sbc #$' + IntToHex(byte(p shr 16), 2);
-      listing[i+10] := #9'sbc #$' + IntToHex(byte(p shr 24), 2);
+      p := p + q;
+
+      listing[i+1] := #9'sub #' + Hex(p and $ff, 2);
+      listing[i+4] := #9'sbc #' + Hex(byte(p shr 8), 2);
+      listing[i+7] := #9'sbc #' + Hex(byte(p shr 16), 2);
+      listing[i+10] := #9'sbc #' + Hex(byte(p shr 24), 2);
 
       listing[i+2] := listing[i+14];
       listing[i+5] := listing[i+17];
@@ -869,15 +880,18 @@ begin
 	 argMatch(i+8, i+18) and
 	 argMatch(i+11, i+21) then
      begin
-      p := GetVAL(copy(listing[i+1], 6, 256)) + GetVAL(copy(listing[i+4], 6, 256)) shl 8 + GetVAL(copy(listing[i+7], 6, 256)) shl 16 + GetVAL(copy(listing[i+10], 6, 256)) shl 24;
-      err :=  GetVAL(copy(listing[i+13], 6, 256)) + GetVAL(copy(listing[i+16], 6, 256)) shl 8 + GetVAL(copy(listing[i+19], 6, 256)) shl 16 + GetVAL(copy(listing[i+22], 6, 256)) shl 24;
+//      p := GetVAL(copy(listing[i+1], 6, 256)) + GetVAL(copy(listing[i+4], 6, 256)) shl 8 + GetVAL(copy(listing[i+7], 6, 256)) shl 16 + GetVAL(copy(listing[i+10], 6, 256)) shl 24;
+//      err :=  GetVAL(copy(listing[i+13], 6, 256)) + GetVAL(copy(listing[i+16], 6, 256)) shl 8 + GetVAL(copy(listing[i+19], 6, 256)) shl 16 + GetVAL(copy(listing[i+22], 6, 256)) shl 24;
 
-      p := p - err;
+      p := GetDWORD(i+1, i+4, i+7, i+10);
+      q := GetDWORD(i+13, i+16, i+19, i+22);
 
-      listing[i+1] := #9'add #$' + IntToHex(p and $ff, 2);
-      listing[i+4] := #9'adc #$' + IntToHex(byte(p shr 8), 2);
-      listing[i+7] := #9'adc #$' + IntToHex(byte(p shr 16), 2);
-      listing[i+10] := #9'adc #$' + IntToHex(byte(p shr 24), 2);
+      p := p - q;
+
+      listing[i+1] := #9'add #' + Hex(p and $ff, 2);
+      listing[i+4] := #9'adc #' + Hex(byte(p shr 8), 2);
+      listing[i+7] := #9'adc #' + Hex(byte(p shr 16), 2);
+      listing[i+10] := #9'adc #' + Hex(byte(p shr 24), 2);
 
       listing[i+2] := listing[i+14];
       listing[i+5] := listing[i+17];
