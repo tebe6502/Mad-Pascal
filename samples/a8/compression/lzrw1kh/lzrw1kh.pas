@@ -33,7 +33,7 @@ INTERFACE
 type Int16 = SmallInt;
 
 CONST
-    BufferMaxSize  = 16*1024-1;
+    BufferMaxSize  = 8*1024-1;
     BufferMax      = BufferMaxSize-1;
     FLAG_Copied    = $80;
     FLAG_Compress  = $40;
@@ -44,8 +44,6 @@ TYPE
        { extra bytes needed here if compression fails      *dh *}
     BufferArray    = ARRAY [BufferIndex] OF BYTE;
     BufferPtr      = ^BufferArray;
-
-//    ELzrw1KHCompressor = Class(Exception);
 
 
 FUNCTION  Compression    (    Source,Dest    : BufferPtr;
@@ -79,11 +77,11 @@ BEGIN
                                      Source^[X+2]) SHR 4) AND $0FFF;
   Result := FALSE;
   TmpHash := Hash^[HashValue];
-  IF (TmpHash <> -1) and (X - TmpHash < 4096) THEN BEGIN
+  IF (TmpHash <> -1) and (word(X - TmpHash) < 4096) THEN BEGIN
     Pos := TmpHash;
     Size := 0;
     WHILE ((Size < 18) AND (Source^[X+Size] = Source^[Pos+Size])
-                       AND (X+Size < SourceSize)) DO begin
+                       AND (word(X+Size) < SourceSize)) DO begin
       INC(Size);
     end;
     Result := (Size >= 3)
@@ -99,6 +97,7 @@ VAR
   X,Y,Z,Pos                : BufferIndex;
 BEGIN
   FillChar(Hash^,SizeOf(Hashtable), $FF);
+  
   Dest^[0] := FLAG_Compress;
   X := 0;
   Y := 3;
@@ -221,7 +220,12 @@ END;  { decompression }
 
 Initialization
 
+{$IFDEF ATARI}
+ Hash:=pointer($8000);
+
+{$ELSE}
   Hash := Nil;
   Getmem(Hash,Sizeof(Hashtable));
+{$ENDIF}
 
 END.

@@ -36,15 +36,16 @@ var output   : writer;
    outbyte   : byte;
    bit	     : byte;
    input     : array[0 .. 8192] of char;
-   itail     : smallint; {place where next character will be stored}
+   itail     : word; {place where next character will be stored}
    hufftree  : array[0 .. 512] of ^treenode;
-   hufftail  : smallint; {index into tree array}
-   [striped] freqtable : array[0..255] of ^charfreq;
-   fttail    : smallint; {place where the next entry in the frequency table will be stored}
+   hufftail  : word; {index into tree array}
+   [striped]
+   freqtable : array[0..255] of ^charfreq;
+   fttail    : word; {place where the next entry in the frequency table will be stored}
 
 
 procedure addToTable(ch,fr : word);
-var i,c	  : smallint;
+var i,c	  : word;
 begin
    i:=0;
    while i<fttail do
@@ -84,10 +85,12 @@ begin
    dec(fttail);
 end;
 
+
 procedure fillFreqTable;
 var
-   [striped] frequency : array[0..255] of word;
-   i	     : smallint;
+   [striped] 
+   frequency : array[0..255] of word;
+   i	     : word;
 begin
    fttail := 0;
 
@@ -102,9 +105,10 @@ begin
 	 addToTable(i,frequency[i]);
 end;
 
+
 function huffNode(ch,fr	: word):smallint;
 var
-   i : smallint;
+   i : word;
 begin
    if ((ch and $F000) = $F000) then
    begin {it's a node that's already created.}
@@ -118,20 +122,7 @@ begin
    begin
       GetMem(hufftree[hufftail], sizeof(treenode));
    
-      {Create a node for this character}
-      
-
-{
-      with hufftree[hufftail]^ do begin
-      
-      leftChild := -1;
-      rightChild := -1;
-      character := ch;
-      frequency := fr;   
-      
-      end;
-}
-      
+      {Create a node for this character} 
       hufftree[hufftail].leftChild := -1;
       hufftree[hufftail].rightChild := -1;
       hufftree[hufftail].character := ch;
@@ -144,12 +135,15 @@ begin
 end;
 
 procedure writeNode(node : smallint);
+var ch: word;
 begin
 
-      output.writeChar(chr(hi(hufftree[node].character)));
-      output.writeChar(chr(lo(hufftree[node].character)));
+      ch := hufftree[node].character;
 
-      if ((hufftree[node].character and $F000) = $F000) then
+      output.writeChar(chr(hi(ch)));
+      output.writeChar(chr(lo(ch)));
+
+      if ((ch and $F000) = $F000) then
       begin
 	 writeNode(hufftree[node].leftChild);
 	 writeNode(hufftree[node].rightChild);
@@ -173,9 +167,10 @@ end;
 procedure encodeByte(i : char);
 var
    {a stack for the depth first search}
-   [striped] node  : array[0..64] of word;
+   [striped]
+   node  : array[0..64] of word;
    enc   : array[0..64] of byte; { 0 unchecked 1 left 2 right 3 not found}
-   cn,c  : word;
+   cn,c, ch  : word;
    found : boolean;
 begin
    cn := 0;
@@ -185,16 +180,18 @@ begin
 
    while not(found) do
    begin
+   
+      ch := huffTree[node[cn]].character;
+   
       {check it's not a node and the character matches}
-      if (not((huffTree[node[cn]].character and $F000) = $F000)
-	  and (chr(lo(hufftree[node[cn]].character)) = i)) then
+      if (not((ch and $F000) = $F000) and (chr(lo(ch)) = i)) then
       begin
 	 found := true;
       end
       else
       begin
 	 inc(enc[cn]);
-	 if not((huffTree[node[cn]].character and $F000) = $F000) then
+	 if not((ch and $F000) = $F000) then
 	    enc[cn] := 3;
 	 if (enc[cn] = 1) then
 	 begin {move to left child}
