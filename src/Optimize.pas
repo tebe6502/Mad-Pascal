@@ -1610,14 +1610,13 @@ end;
   var
     i, p: Integer;
     tmp: String;
-    yes: Boolean;
 
 
     function test_AND(i: integer): Boolean;
     var p: integer;
     begin
 
-      Result := true;
+      Result := True;
 
       for p:=i-1 downto 1 do
        if and_stack(p) or local(p) or
@@ -1625,7 +1624,7 @@ end;
           (sty_stack(p) and lab_a(p-1) and lda_stack(p+1)) or
 	  (sty_stack(p) and lab_a(p-1) and ldy_1(p+1) and lda_stack(p+2) and argMatch(p, p+2)) or
           (sty_stack(p) and lab_a(p-1) and (argMatch(p, i+2) = false)) or
-          (tya(p) and (lab_a(p-1) = false) and (ora_stack(p+1) = false)) then begin yes:=false; Break end;
+          (tya(p) and (lab_a(p-1) = false) and (ora_stack(p+1) = false)) then exit(False);
 
     end;
 
@@ -1634,7 +1633,7 @@ end;
     var p: integer;
     begin
 
-      Result := true;
+      Result := True;
 
       for p:=i-1 downto 1 do
        if ora_stack(p) or local(p) or
@@ -1642,7 +1641,7 @@ end;
           (sty_stack(p) and lab_a(p-1) and lda_stack(p+1)) or
 	  (sty_stack(p) and lab_a(p-1) and ldy_1(p+1) and lda_stack(p+2) and argMatch(p, p+2)) or
           (sty_stack(p) and lab_a(p-1) and (argMatch(p, i+2) = false)) or
-          (tya(p) and (lab_a(p-1) = false) and (ora_stack(p+1) = false)) then begin yes:=false; Break end;
+          (tya(p) and (lab_a(p-1) = false) and (ora_stack(p+1) = false)) then exit(False);
 
     end;
 
@@ -1764,6 +1763,12 @@ end;
 
 {$i include/opt6502/opt_inline_POKE.inc}
 {$i include/opt6502/opt_inline_PEEK.inc}
+
+{$i include/opt6502/opt_FOR.inc}
+{$i include/opt6502/opt_REG_A.inc}
+{$i include/opt6502/opt_REG_BP2.inc}
+{$i include/opt6502/opt_REG_Y.inc}
+
 
 begin        // OptimizeASM
 
@@ -3168,21 +3173,18 @@ begin        // OptimizeASM
 {$ENDIF}
 
 
-{$i include/opt6502/opt_FOR.inc}
-
-{$i include/opt6502/opt_REG_A.inc}
-
-{$i include/opt6502/opt_REG_BP2.inc}
-
-{$i include/opt6502/opt_REG_Y.inc}
+   opt_FOR;
+   opt_REG_A;
+   opt_REG_BP2;
+   opt_REG_Y;
 
 
-    (* -------------------------------------------------------------------------- *)
+   (* -------------------------------------------------------------------------- *)
 
     for i := 0 to l - 1 do
       if listing[i] <> '' then WriteInstruction(i);
 
-    (* -------------------------------------------------------------------------- *)
+   (* -------------------------------------------------------------------------- *)
 
   end
   else

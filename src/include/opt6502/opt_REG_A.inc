@@ -1,3 +1,8 @@
+
+procedure opt_REG_A;
+var i, k: integer;
+begin
+
 // -------------------------------------------------------------------------- //
 //				      REG A.
 // -------------------------------------------------------------------------- //
@@ -13,7 +18,7 @@
      arg0 := GetString(i);
 
      if SKIP(i+1) or
-        ((i>0) and (LOCAL(i-1) or (SKIP(i-1) and lda_im(i)))) then
+        ((i > 0) and (LOCAL(i-1) or (SKIP(i-1) and lda_im(i)))) then
 
 //     else					// !!! nie zadziala poprawnie gdy jednoczesnie A i Y wystapia w tym samym bloku kodu
 //     if (arg0 = optyY) and sta_a(i+1) then
@@ -61,3 +66,6 @@
         lda_a(i) or mva(i) or mwa(i) or tya(i) or lab_a(i) or jsr(i) or
         lab_l(i) or lab_b(i) or lab_c(i) or //SKIP(i) or
 	_for(i) or _if(i) then begin arg0 := ''; optyA := '' end;
+
+
+end;		// procedure

@@ -8,13 +8,12 @@
        jne(i+3) then										// jne l_				; 3	WHILE
      begin
 
-      yes := test_AND(i);
 
-      if yes then begin
+      if test_AND(i) then begin
 
        tmp := copy(listing[i+2], 6, 256);
 
-       for p:=i-1 downto 0 do begin
+       for p := i-1 downto 0 do begin
 
 	if ldy_1(p) then listing[p] := '';					// ldy #1
 

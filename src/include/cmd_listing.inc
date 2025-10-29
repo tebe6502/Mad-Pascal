@@ -26,7 +26,7 @@
 
    function _IF(i: integer): Boolean;
    begin
-     Result := (listing[i] = #9'.if')
+     Result := pos(#9'.if', listing[i]) = 1
    end;
 
    function EIF(i: integer): Boolean;
@@ -192,7 +192,7 @@
    begin
      Result := (listing[i] = #9'lda :STACKORIGIN-1+STACKWIDTH*3,x')
    end;
- 
+
    function STA_STACK_PREV_0X(i: integer): Boolean;
    begin
      Result := (listing[i] = #9'sta :STACKORIGIN-1,x')
@@ -383,7 +383,7 @@
      Result := listing[i] = #9'lsr #$00'
    end;
 
-   function JSR_im_0(i: integer): Boolean;
+   function JSR_IM_0(i: integer): Boolean;
    begin
      Result := listing[i] = #9'jsr #$00'
    end;
@@ -482,11 +482,6 @@
      Result := pos(#9'lda >', listing[i]) = 1
    end;
 
-   function LDA_IM(i: integer): Boolean;
-   begin
-     Result := pos(#9'lda #', listing[i]) = 1
-   end;
-
    function LDY_L(i: integer): Boolean;
    begin
      Result := pos(#9'ldy <', listing[i]) = 1
@@ -495,6 +490,13 @@
    function LDY_H(i: integer): Boolean;
    begin
      Result := pos(#9'ldy >', listing[i]) = 1
+   end;
+
+// -----------------------------------------------------------------------------
+
+   function LDA_IM(i: integer): Boolean;
+   begin
+     Result := pos(#9'lda #', listing[i]) = 1
    end;
 
    function LDY_IM(i: integer): Boolean;
@@ -770,6 +772,28 @@
 
 // -----------------------------------------------------------------------------
 
+   function LDA_TMP_Y(i: integer): Boolean;
+   begin
+     Result := listing[i] = #9'lda (:TMP),y'
+   end;
+
+   function STA_TMP(i: integer): Boolean;
+   begin
+     Result := listing[i] = #9'sta :TMP'
+   end;
+
+   function STA_TMP_1(i: integer): Boolean;
+   begin
+     Result := listing[i] = #9'sta :TMP+1'
+   end;
+
+   function MWY_TMP(i: integer): Boolean;
+   begin
+     Result := (pos(#9'mwy ', listing[i]) = 1) and (pos(' :TMP', listing[i]) > 0);
+   end;
+
+// -----------------------------------------------------------------------------
+
    function TAY(i: integer): Boolean;
    begin
      Result := listing[i] = #9'tay'
@@ -798,16 +822,6 @@
    function DEX(i: integer): Boolean;
    begin
      Result := listing[i] = #9'dex'
-   end;
-
-   function STA_TMP(i: integer): Boolean;
-   begin
-     Result := listing[i] = #9'sta :TMP'
-   end;
-
-   function STA_TMP_1(i: integer): Boolean;
-   begin
-     Result := listing[i] = #9'sta :TMP+1'
    end;
 
    function ROR_A(i: integer): Boolean;

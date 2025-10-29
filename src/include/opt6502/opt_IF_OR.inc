@@ -67,22 +67,21 @@
      end;
 
 
+// -----------------------------------------------------------------------------
+
+
     if lab_a(i) and										//@					; 0	ORA :STACK -> JEQ
        tya(i+1) and										// tya					; 1
        ora_stack(i+2) and									// ora :STACKORIGIN			; 2
        jeq(i+3) then										// jeq l_				; 3
      begin
 
-// for p:=0 to l-1 do writeln(listing[p]);
-// writeln('--------------------');
 
-      yes := test_AND(i);
-
-      if yes then begin
+      if test_AND(i) then begin
 
        tmp := copy(listing[i+2], 6, 256);
 
-       for p:=i-1 downto 0 do begin
+       for p := i-1 downto 0 do begin
 
 	if ldy_1(p) then listing[p] := '';					// ldy #1
 

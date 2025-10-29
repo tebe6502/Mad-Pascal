@@ -395,6 +395,28 @@ begin
        listing[i] := '';
 
        listing[i+2] := '';
+
+       exit(false);
+      end;
+
+
+    if lda_val(i) and (iy(i) = false) and							// lda					; 0
+       sta_stack(i+1) and									// sta :STACKORIGIN			; 1
+       lda_a(i+2) and										// lda					; 2
+       ldy_1(i+3) and										// ldy #1				; 3
+       and_ora_eor(i+4) and									// and|ora|eor				; 4
+       cmp(i+5) and										// cmp					; 5
+       bne_a(i+6) and										// bne @				; 6
+       lda_stack(i+7) and									// lda :STACKORIGIN			; 7
+       cmp(i+8) and										// cmp					; 8
+       lab_a(i+9) then										//@					; 9
+     if argMatch(i+1, i+7) then
+      begin
+       listing[i+7] := listing[i];
+
+       listing[i]   := '';
+       listing[i+1] := '';
+
        exit(false);
       end;
 
