@@ -187,6 +187,7 @@ This text-mode windowing library has window controls and modern gadgets (widgets
 * [PokeyMAX update tool](https://github.com/MADRAFi/PMAX_Update)
 * [rogul](https://gitlab.com/bocianu/rogul)
 * [kara-t-rex](https://gitlab.com/bocianu/kara-t-rex)
+* [Minimum Spanning Tree](https://github.com/mgr-inz-rafal/atari_msp_test)
 
 ## Benchmarks
 
