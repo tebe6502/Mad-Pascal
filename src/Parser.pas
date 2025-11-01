@@ -1772,10 +1772,11 @@ begin
         if not OutputDisabled then
         begin
 
-          if (DataType = TDataType.POINTERTOK) and (AllocElementType in [TDataType.RECORDTOK, TDataType.OBJECTTOK]) and
-            (NumAllocElements_ = 0) then
-            IncVarDataSize(tokenIndex, GetDataSize(TDataType.POINTERTOK))
-          else
+          if (DataType = TDataType.POINTERTOK) and (AllocElementType in [TDataType.RECORDTOK, TDataType.OBJECTTOK]) and (NumAllocElements_ = 0) then begin
+
+	    if NumAllocElements > 0 then IncVarDataSize(tokenIndex, GetDataSize(TDataType.POINTERTOK));		// ^record -> NumAllocElements > 0
+
+          end else
 
             if DataType in [TDataType.ENUMTOK] then
               IncVarDataSize(tokenIndex, 1)
@@ -1795,7 +1796,7 @@ begin
 
 	           if IdentifierAt(NumIdent).DataType = TDataType.DEREFERENCEARRAYTOK then
 	             IncVarDataSize(tokenIndex, GetDataSize(TDataType.POINTERTOK))
-	           else 
+	           else
                      IncVarDataSize(tokenIndex, Integer(Elements(NumIdent) * GetDataSize(AllocElementType)));
 
                 end;

@@ -7915,10 +7915,10 @@ begin
 
               if (TokenAt(i - 1).Kind = TTokenKind.ADDRESSTOK) then
 	      begin
-                
+
 		if IdentifierAt(IdentIndex).Param[NumActualParams].AllocElementType <> TDataType.UNTYPETOK then
 		  AllocElementType := IdentifierAt(IdentTemp).AllocElementType
-		else		
+		else
 		  AllocElementType := TDataType.UNTYPETOK;
 
               end
@@ -15802,8 +15802,7 @@ var
 
         case Byte(abs(IdentifierAt(IdentIndex).Value shr 24) and $7f) of
           1..3: Result := #9'= ' + reg[abs(IdentifierAt(IdentIndex).Value shr 24) and $7f];
-          4..19: Result := #9'= :STACKORIGIN-' + IntToStr(
-              Byte(abs(IdentifierAt(IdentIndex).Value shr 24) and $7f) - 3);
+          4..19: Result := #9'= :STACKORIGIN-' + IntToStr(Byte(abs(IdentifierAt(IdentIndex).Value shr 24) and $7f) - 3);
           else
             Result := #9'= ''out of resource'''
         end;
@@ -15991,13 +15990,11 @@ begin
             begin
               HeaFile.Close;
 
-              Error(IdentifierAt(IdentIndex).Libraries, 'Error: MADS header file ''' + fnam +
- ''' has invalid format.');
+              Error(IdentifierAt(IdentIndex).Libraries, 'Error: MADS header file ''' + fnam + ''' has invalid format.');
             end;
 
             if (txt.IndexOf('.@EXIT') < 0) and (txt.IndexOf('.@VARDATA') < 0) then      // skip '@.EXIT', '.@VARDATA'
-              if (pos('MAIN.' + svar + ' ', txt) = 1) or (pos('MAIN.' + svar + #9, txt) = 1) or
-                (pos('MAIN.' + svar + '.', txt) = 1) then
+              if (pos('MAIN.' + svar + ' ', txt) = 1) or (pos('MAIN.' + svar + #9, txt) = 1) or (pos('MAIN.' + svar + '.', txt) = 1) then
               begin
                 yes := False;
 
@@ -16034,12 +16031,10 @@ begin
                 begin
 
                   asm65('adr.' + IdentifierAt(IdentIndex).Name + Value);
-                  asm65('.var ' + IdentifierAt(IdentIndex).Name + #9'= adr.' +
-                    IdentifierAt(IdentIndex).Name + ' .word');
+                  asm65('.var ' + IdentifierAt(IdentIndex).Name + #9'= adr.' + IdentifierAt(IdentIndex).Name + ' .word');
 
                   if size = 0 then varbegin := IdentifierAt(IdentIndex).Name;
-                  IncSize(IdentifierAt(IdentIndex).NumAllocElements *
-                    GetDataSize(IdentifierAt(IdentIndex).AllocElementType));
+                  IncSize(IdentifierAt(IdentIndex).NumAllocElements * GetDataSize(IdentifierAt(IdentIndex).AllocElementType));
 
                 end
                 else
@@ -16069,8 +16064,7 @@ begin
                   begin
 
                     if IdentifierAt(IdentIndex).DataType in [TDataType.RECORDTOK, TDataType.OBJECTTOK] then
-                      asm65('adr.' + IdentifierAt(IdentIndex).Name + Value(True) + #9'; [' +
-                        IntToStr(RecordSize(IdentIndex)) + '] ' + InfoAboutDataType(IdentifierAt(IdentIndex).DataType))
+                      asm65('adr.' + IdentifierAt(IdentIndex).Name + Value(True) + #9'; [' + IntToStr(RecordSize(IdentIndex)) + '] ' + InfoAboutDataType(IdentifierAt(IdentIndex).DataType))
                     else
 
                       if Elements(IdentIndex) > 0 then
@@ -16081,19 +16075,15 @@ begin
                         if (IdentifierAt(IdentIndex).NumAllocElements_ > 0) and not
                           (IdentifierAt(IdentIndex).AllocElementType in [TDataType.RECORDTOK,
                           TDataType.OBJECTTOK]) then
-                          asm65('adr.' + IdentifierAt(IdentIndex).Name + Value(True, True) +
-                            ' .array [' + IntToStr(IdentifierAt(IdentIndex).NumAllocElements) +
-                            '] [' + IntToStr(IdentifierAt(IdentIndex).NumAllocElements_) + ']' + mads_data_size)
+                          asm65('adr.' + IdentifierAt(IdentIndex).Name + Value(True, True) + ' .array [' + IntToStr(IdentifierAt(IdentIndex).NumAllocElements) + '] [' + IntToStr(IdentifierAt(IdentIndex).NumAllocElements_) + ']' + mads_data_size)
                         else
-                          asm65('adr.' + IdentifierAt(IdentIndex).Name + Value(True, True) +
-                            ' .array [' + IntToStr(Elements(IdentIndex)) + ']' + mads_data_size);  // !!!!
+                          asm65('adr.' + IdentifierAt(IdentIndex).Name + Value(True, True) + ' .array [' + IntToStr(Elements(IdentIndex)) + ']' + mads_data_size);  // !!!!
 
                       end
                       else
                         asm65('adr.' + IdentifierAt(IdentIndex).Name + Value(True));
 
-                    asm65('.var ' + IdentifierAt(IdentIndex).Name + #9'= adr.' +
-                      IdentifierAt(IdentIndex).Name + ' .word');
+                    asm65('.var ' + IdentifierAt(IdentIndex).Name + #9'= adr.' + IdentifierAt(IdentIndex).Name + ' .word');
                     // !!!!
 
                   end;
@@ -16115,9 +16105,22 @@ begin
                     if IdentifierAt(IdentIndex).idType <> TDataType.DATAORIGINOFFSET then
                       // indeksy do RECORD nie zliczaj
 
-                      if (IdentifierAt(IdentIndex).Name = 'RESULT') and
-                        (IdentifierAt(BlockIdentIndex).Kind = TTokenKind.FUNCTIONTOK) then
-                      // RESULT nie zliczaj
+                      if (IdentifierAt(IdentIndex).Name = 'RESULT') and (IdentifierAt(BlockIdentIndex).Kind = TTokenKind.FUNCTIONTOK) then
+
+                        // zliczaj RESULT aby rekurencja zadzialala w przypadku kiedy RESULT nie jest na koĹ„cu bloku alokacji zmiennych
+{
+FIELD	= DATAORIGIN+$0178
+FIELD.GENERATED	= DATAORIGIN+$0000
+FIELD.CELLS	= DATAORIGIN+$0001
+ROW	= DATAORIGIN+$017A
+COL	= DATAORIGIN+$017B
+
+RESULT	= DATAORIGIN+$017C	!!!
+
+DROW	= DATAORIGIN+$017D
+DCOL	= DATAORIGIN+$017E
+}
+			  IncSize(GetDataSize(IdentifierAt(IdentIndex).DataType))
 
                       else
                         if IdentifierAt(IdentIndex).DataType = TDataType.ENUMTOK then
@@ -16127,8 +16130,7 @@ begin
 
                   end;
 
-            TTokenKind.CONSTTOK: if (IdentifierAt(IdentIndex).DataType in Pointers) and
-                (IdentifierAt(IdentIndex).NumAllocElements > 0) then
+            TTokenKind.CONSTTOK: if (IdentifierAt(IdentIndex).DataType in Pointers) and (IdentifierAt(IdentIndex).NumAllocElements > 0) then
               begin
 
                 asm65('adr.' + IdentifierAt(IdentIndex).Name + Value);

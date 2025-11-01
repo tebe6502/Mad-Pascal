@@ -1,3 +1,6 @@
+01.11.2025
+- poprawiona alokacja RECORD, ^RECORD w procedurze/funkcji dla dziaĹ‚ania rekurencji
+
 07.10.2025
 - add type SUBRANGETYPE (low..high)
 
