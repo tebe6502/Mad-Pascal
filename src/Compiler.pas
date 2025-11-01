@@ -13325,8 +13325,7 @@ begin
         CheckTok(i, TTokenKind.ASMTOK);
 
       j := CompileStatement(i + 1);
-      while (TokenAt(j + 1).Kind = TTokenKind.SEMICOLONTOK) or
-        ((TokenAt(j + 1).Kind = TTokenKind.COLONTOK) and (TokenAt(j).Kind = TTokenKind.IDENTTOK)) do
+      while (TokenAt(j + 1).Kind = TTokenKind.SEMICOLONTOK) or ((TokenAt(j + 1).Kind = TTokenKind.COLONTOK) and (TokenAt(j).Kind = TTokenKind.IDENTTOK)) do
         j := CompileStatement(j + 2);
 
       CheckTok(j + 1, TTokenKind.ENDTOK);
@@ -13351,40 +13350,27 @@ begin
       i := CompileExpression(i + 1, SelectorType);
 
 
-      if (TokenAt(j).Kind = TTokenKind.IDENTTOK) and (IdentifierAt(GetIdentIndex(TokenAt(j).Name)).Kind =
-        TTokenKind.FUNCTIONTOK) and (IdentifierAt(GetIdentIndex(TokenAt(j).Name)).DataType = TDatatype.ENUMTOK) then
-
-        //      if (SelectorType = TDatatype.ENUMTOK) and (TokenAt(j).Kind = TTokenKind.IDENTTOK) and
-        //      (IdentifierAt(GetIdentIndex(TokenAt(j).Name)).Kind = TTokenKind.FUNCTIONTOK) then
-      begin
-
-        IdentTemp := GetIdentIndex(TokenAt(j).Name);
-
-        SelectorType := IdentifierAt(GetIdentResult(IdentifierAt(IdentTemp).ProcAsBlockIndex)).AllocElementType;
-
-        EnumName := GetTypeAtIndex(IdentifierAt(GetIdentResult(IdentifierAt(IdentTemp).ProcAsBlockIndex)).NumAllocElements).Field[0].Name;
-
-      end
-      else
-
-        if (SelectorType = TDatatype.ENUMTOK) and (TokenAt(j).Kind = TTokenKind.IDENTTOK) and
-          (IdentifierAt(GetIdentIndex(TokenAt(j).Name)).Kind = TTokenKind.TYPETOK) then
-        begin
+        if (TokenAt(j).Kind = TTokenKind.IDENTTOK) then begin
 
           IdentTemp := GetIdentIndex(TokenAt(j).Name);
-          EnumName := GetEnumName(IdentTemp);
 
-          SelectorType := IdentifierAt(IdentTemp).AllocElementType;
+	  case IdentifierAt(IdentTemp).Kind of
 
-        end
-        else
-          if TokenAt(i).Kind = IDENTTOK then
-          begin
+	   FUNCTIONTOK: begin
+	          	  SelectorType := IdentifierAt(GetIdentResult(IdentifierAt(IdentTemp).ProcAsBlockIndex)).AllocElementType;
+        		  EnumName := GetTypeAtIndex(IdentifierAt(GetIdentResult(IdentifierAt(IdentTemp).ProcAsBlockIndex)).NumAllocElements).Field[0].Name;
+	                end;
 
-            IdentTemp := GetIdentIndex(TokenAt(i).Name);
+	       TYPETOK: begin
+	        	  SelectorType := IdentifierAt(IdentTemp).AllocElementType;
+        	    	  EnumName := GetEnumName(IdentTemp);
+	                end;
+	  else
             EnumName := GetEnumName(IdentTemp);
+	  end;
 
-          end;
+	end;
+
 
 
       if SelectorType <> TDataType.ENUMTOK then
@@ -13399,8 +13385,7 @@ begin
 
       GenerateAssignment(ASPOINTER, GetDataSize(SelectorType), 0, '@CASETMP_' + IntToHex(CaseLocalCnt, 4));
 
-      DefineIdent(i, '@CASETMP_' + IntToHex(CaseLocalCnt, 4), TTokenKind.VARTOK, SelectorType,
-        0, TDataType.UNTYPETOK, 0);
+      DefineIdent(i, '@CASETMP_' + IntToHex(CaseLocalCnt, 4), TTokenKind.VARTOK, SelectorType, 0, TDataType.UNTYPETOK, 0);
 
       GetIdentIndex('@CASETMP_' + IntToHex(CaseLocalCnt, 4));
 
