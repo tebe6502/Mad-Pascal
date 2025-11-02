@@ -85,6 +85,7 @@ begin
 
   NumDefines := AddDefines;
 
+  // TODO Remove from here
   ResetOpty;
 
   // Do NOT put this into ResetOpty!

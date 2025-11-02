@@ -34,6 +34,7 @@ function ObjectRecordSize(i: Cardinal): Integer;
 
 function RecordSize(IdentIndex: TIdentIndex; field: String = ''): Integer;
 
+// TODO Indexed, move out of this unit  to CompileBlock
 procedure SaveToDataSegment(index: Integer; Value: Int64; valueDataType: TDataType);
 
 // -----------------------------------------------------------------------------
@@ -464,6 +465,7 @@ end;  //SaveToDataSegment
 // ----------------------------------------------------------------------------
 
 
+// TODO GetSizeOfTokenIdentifier // +2 so the right hand-side?
 function GetSizeOf(i: TTokenIndex; ValType: TDataType): Int64;
 var
   IdentIndex: Integer;

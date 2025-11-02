@@ -195,6 +195,7 @@ type
     BlockIndex: TBlockIndex;
     NumFields: Integer;
     Size: Integer;
+    // TODO: MAXFIELDS?
     Field: array [0..MAXTYPES] of TField;
   end;
 
