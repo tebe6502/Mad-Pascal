@@ -1,189 +1,212 @@
+// Optimized version of "StartsWith", copied from cmd_listing.inc
+// Assumption is that "str" is always at least 4 chars, e.g. '#9abc'
+function pos1(const str: String; const i: Integer): Boolean; inline;
+begin
+  if (Length(str) > Length(TemporaryBuf[i])) // Compare lengths
+    or (str[2] <> TemporaryBuf[i][2])  // Compare first regular letter first
+    or (str[3] <> TemporaryBuf[i][3])  // ...
+    or (str[4] <> TemporaryBuf[i][4])  // ...
+    or (str[1] <> TemporaryBuf[i][1])  // Compare the typical #9 last
+  then exit(False);
+  Result := pos(str, TemporaryBuf[i], 1) = 1;  // Compare the rest
+end;
+
+
+// Check for 2 character label prefix
+function pos1_lab(const str: String; const i: Integer): Boolean; inline;
+begin
+  if (Length(str) > Length(TemporaryBuf[i])) // Compare lengths
+    or (str[1] <> TemporaryBuf[i][1])  // Compare first regular character
+    or (str[2] <> TemporaryBuf[i][2])  // Compare second regular character
+  then exit(False);
+  Result := True;
+end;
 
 function MWY(const i: Integer): Boolean;
 begin
-  Result := pos(#9'mwy ', TemporaryBuf[i]) = 1;
+  Result := pos1(#9'mwy ', i);
 end;
 
 function MVY(const i: Integer): Boolean;
 begin
-  Result := pos(#9'mvy ', TemporaryBuf[i]) = 1;
+  Result := pos1(#9'mvy ', i);
 end;
 
 function MVA(const i: Integer): Boolean;
 begin
-  Result := pos(#9'mva ', TemporaryBuf[i]) = 1;
+  Result := pos1(#9'mva ', i);
 end;
 
 function MVA_IM(const i: Integer): Boolean;
 begin
-  Result := pos(#9'mva #', TemporaryBuf[i]) = 1;
+  Result := pos1(#9'mva #', i);
 end;
 
 function MVA_STACK(const i: Integer): Boolean;
 begin
-  Result := pos(#9'mva :STACK', TemporaryBuf[i]) = 1;
+  Result := pos1(#9'mva :STACK', i);
 end;
 
 // -----------------------------------------------------------------------------
 
 function mINLINE(const i: Integer): Boolean;
 begin
-  Result := pos(#9'm@INLINE', TemporaryBuf[i]) = 1;
+  Result := pos1(#9'm@INLINE', i);
 end;
 
 function ENDL(const i: Integer): Boolean;
 begin
-  Result := pos(#9'.ENDL', TemporaryBuf[i]) = 1;
+  Result := pos1(#9'.ENDL', i);
 end;
 
 function IFTMP(const i: Integer): Boolean;
 begin
-  Result := pos(#9'lda IFTMP_', TemporaryBuf[i]) = 1;
+  Result := pos1(#9'lda IFTMP_', i);
 end;
 
 function JMP_L(const i: Integer): Boolean;
 begin
-  Result := pos(#9'jmp l_', TemporaryBuf[i]) = 1;
+  Result := pos1(#9'jmp l_', i);
 end;
 
 function JMP_A(const i: Integer): Boolean;
 begin
-  Result := pos(#9'jmp @+', TemporaryBuf[i]) = 1;
+  Result := pos1(#9'jmp @+', i);
 end;
 
 function LAB_L(const i: Integer): Boolean;
 begin
-  Result := pos('l_', TemporaryBuf[i]) = 1;
+  Result := pos1_lab('l_', i);
 end;
 
 function LAB_B(const i: Integer): Boolean;
 begin
-  Result := pos('b_', TemporaryBuf[i]) = 1;
+  Result := pos1_lab('b_', i);
 end;
 
 function LAB_C(const i: Integer): Boolean;
 begin
-  Result := pos('c_', TemporaryBuf[i]) = 1;
+  Result := pos1_lab('c_', i);
 end;
 
 function LAB_S(const i: Integer): Boolean;
 begin
-  Result := pos('s_', TemporaryBuf[i]) = 1;
+  Result := pos1_lab('s_', i);
 end;
 
 function INC_(const i: Integer): Boolean;
 begin
-  Result := pos(#9'inc ', TemporaryBuf[i]) = 1;
+  Result := pos1(#9'inc ', i);
 end;
 
 function DEC_(const i: Integer): Boolean;
 begin
-  Result := pos(#9'dec ', TemporaryBuf[i]) = 1;
+  Result := pos1(#9'dec ', i);
 end;
 
 function JSR(const i: Integer): Boolean;
 begin
-  Result := pos(#9'jsr ', TemporaryBuf[i]) = 1;
+  Result := pos1(#9'jsr ', i);
 end;
 
 function LDY(const i: Integer): Boolean;
 begin
-  Result := pos(#9'ldy ', TemporaryBuf[i]) = 1;
+  Result := pos1(#9'ldy ', i);
 end;
 
 function LDY_IM(const i: Integer): Boolean;
 begin
-  Result := pos(#9'ldy #', TemporaryBuf[i]) = 1;
+  Result := pos1(#9'ldy #', i);
 end;
 
 function CMP(const i: Integer): Boolean;
 begin
-  Result := pos(#9'cmp ', TemporaryBuf[i]) = 1;
+  Result := pos1(#9'cmp ', i);
 end;
 
 function LDA(const i: Integer): Boolean;
 begin
-  Result := pos(#9'lda ', TemporaryBuf[i]) = 1;
+  Result := pos1(#9'lda ', i);
 end;
 
 function LDA_IM(const i: Integer): Boolean;
 begin
-  Result := pos(#9'lda #', TemporaryBuf[i]) = 1;
+  Result := pos1(#9'lda #', i);
 end;
 
 function LDA_STACK(const i: Integer): Boolean;
 begin
-  Result := pos(#9'lda :STACK', TemporaryBuf[i]) = 1;
+  Result := pos1(#9'lda :STACK', i);
 end;
 
 function STA(const i: Integer): Boolean;
 begin
-  Result := pos(#9'sta ', TemporaryBuf[i]) = 1;
+  Result := pos1(#9'sta ', i);
 end;
 
 function STA_STACK(const i: Integer): Boolean;
 begin
-  Result := pos(#9'sta :STACK', TemporaryBuf[i]) = 1;
+  Result := pos1(#9'sta :STACK', i);
 end;
 
 function ORA(const i: Integer): Boolean;
 begin
-  Result := pos(#9'ora ', TemporaryBuf[i]) = 1;
+  Result := pos1(#9'ora ', i);
 end;
 
 function LSR(const i: Integer): Boolean;
 begin
-  Result := pos(#9'lsr ', TemporaryBuf[i]) = 1;
+  Result := pos1(#9'lsr ', i);
 end;
 
 function ASL_STACK(const i: Integer): Boolean;
 begin
-  Result := pos(#9'asl :STACK', TemporaryBuf[i]) = 1;
+  Result := pos1(#9'asl :STACK', i);
 end;
 
 function ROL_STACK(const i: Integer): Boolean;
 begin
-  Result := pos(#9'rol :STACK', TemporaryBuf[i]) = 1;
+  Result := pos1(#9'rol :STACK', i);
 end;
 
 function STY(const i: Integer): Boolean;
 begin
-  Result := pos(#9'sty ', TemporaryBuf[i]) = 1;
+  Result := pos1(#9'sty ', i);
 end;
 
 function STY_STACK(const i: Integer): Boolean;
 begin
-  Result := pos(#9'sty :STACK', TemporaryBuf[i]) = 1;
+  Result := pos1(#9'sty :STACK', i);
 end;
 
 function ADD(const i: Integer): Boolean;
 begin
-  Result := pos(#9'add ', TemporaryBuf[i]) = 1;
+  Result := pos1(#9'add ', i);
 end;
 
 function ADC(const i: Integer): Boolean;
 begin
-  Result := pos(#9'adc ', TemporaryBuf[i]) = 1;
+  Result := pos1(#9'adc ', i);
 end;
 
 function SUB(const i: Integer): Boolean;
 begin
-  Result := pos(#9'sub ', TemporaryBuf[i]) = 1;
+  Result := pos1(#9'sub ', i);
 end;
 
 function ADD_SUB(const i: Integer): Boolean;
 begin
-  Result := (pos(#9'add ', TemporaryBuf[i]) = 1) or (pos(#9'sub ', TemporaryBuf[i]) = 1);
+  Result := pos1(#9'add ', i) or pos1(#9'sub ', i);
 end;
 
 function ADC_SBC(const i: Integer): Boolean;
 begin
-  Result := (pos(#9'adc ', TemporaryBuf[i]) = 1) or (pos(#9'sbc ', TemporaryBuf[i]) = 1);
+  Result := pos1(#9'adc ', i) or pos1(#9'sbc ', i);
 end;
 
 function SBC(const i: Integer): Boolean;
 begin
-  Result := pos(#9'sbc ', TemporaryBuf[i]) = 1;
+  Result := pos1(#9'sbc ', i);
 end;
 
 // -----------------------------------------------------------------------------
@@ -378,62 +401,61 @@ end;
 
 function JEQ(const i: Integer): Boolean;
 begin
-  Result := pos(#9'jeq ', TemporaryBuf[i]) = 1;
+  Result := pos1(#9'jeq ', i);
 end;
 
 function JNE(const i: Integer): Boolean;
 begin
-  Result := pos(#9'jne ', TemporaryBuf[i]) = 1;
+  Result := pos1(#9'jne ', i);
 end;
 
 function JCC(const i: Integer): Boolean;
 begin
-  Result := pos(#9'jcc ', TemporaryBuf[i]) = 1;
+  Result := pos1(#9'jcc ', i);
 end;
 
 function JCS(const i: Integer): Boolean;
 begin
-  Result := pos(#9'jcs ', TemporaryBuf[i]) = 1;
+  Result := pos1(#9'jcs ', i);
 end;
 
 function JMI(const i: Integer): Boolean;
 begin
-  Result := pos(#9'jmi ', TemporaryBuf[i]) = 1;
+  Result := pos1(#9'jmi ', i);
 end;
 
 function JPL(const i: Integer): Boolean;
 begin
-  Result := pos(#9'jpl ', TemporaryBuf[i]) = 1;
+  Result := pos1(#9'jpl ', i);
 end;
 
 // -----------------------------------------------------------------------------
 
 function JEQ_L(const i: Integer): Boolean;
 begin
-  Result := pos(#9'jeq l_', TemporaryBuf[i]) = 1;
+  Result := pos1(#9'jeq l_', i);
 end;
 
 function JNE_L(const i: Integer): Boolean;
 begin
-  Result := pos(#9'jne l_', TemporaryBuf[i]) = 1;
+  Result := pos1(#9'jne l_', i);
 end;
 
 function JCC_L(const i: Integer): Boolean;
 begin
-  Result := pos(#9'jcc l_', TemporaryBuf[i]) = 1;
+  Result := pos1(#9'jcc l_', i);
 end;
 
 function JCS_L(const i: Integer): Boolean;
 begin
-  Result := pos(#9'jcs l_', TemporaryBuf[i]) = 1;
+  Result := pos1(#9'jcs l_', i);
 end;
 
 // -----------------------------------------------------------------------------
 
 function AND_ORA_EOR(const i: Integer): Boolean;
 begin
-  Result := (pos(#9'and ', TemporaryBuf[i]) = 1) or (pos(#9'ora ', TemporaryBuf[i]) = 1) or
-    (pos(#9'eor ', TemporaryBuf[i]) = 1);
+  Result := (pos1(#9'and ', i)) or (pos1(#9'ora ', i)) or (pos1(#9'eor ', i));
 end;
 
 function IY(const i: Integer): Boolean;
@@ -445,8 +467,7 @@ end;
 
 function STA_ADR(const i: Integer): Boolean;
 begin
-  Result := iy(i) and (pos(#9'sta adr.', TemporaryBuf[i]) = 1) or
-    ((pos(#9'sta ', TemporaryBuf[i]) = 1) and (pos('.adr.', TemporaryBuf[i]) > 0));
+  Result := iy(i) and (pos1(#9'sta adr.', i)) or ((pos1(#9'sta ', i)) and (pos('.adr.', TemporaryBuf[i]) > 0));
 end;
 
 function OPTI(const i: Integer): Boolean;
