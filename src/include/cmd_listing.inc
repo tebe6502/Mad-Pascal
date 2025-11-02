@@ -1,9 +1,4 @@
 
-function pos1(const str: String; const i: Integer): Boolean; inline;
-begin
-  Result := listing[i].StartsWith(str);
-end;
-
 function LOCAL(i: Integer): Boolean;
 begin
 
@@ -31,7 +26,7 @@ end;
 
 function _IF(i: Integer): Boolean;
 begin
-  Result := pos1(#9'.if', i);
+  Result := pos(#9'.if', listing[i]) = 1;
 end;
 
 function EIF(i: Integer): Boolean;
@@ -48,22 +43,22 @@ end;
 
 function LDA_ZTMP(i: Integer): Boolean;
 begin
-  Result := pos1(#9'lda :ztmp', i);
+  Result := pos(#9'lda :ztmp', listing[i]) = 1;
 end;
 
 function STA_ZTMP(i: Integer): Boolean;
 begin
-  Result := pos1(#9'sta :ztmp', i);
+  Result := pos(#9'sta :ztmp', listing[i]) = 1;
 end;
 
 function STY_ZTMP(i: Integer): Boolean;
 begin
-  Result := pos1(#9'sty :ztmp', i);
+  Result := pos(#9'sty :ztmp', listing[i]) = 1;
 end;
 
 function SUB_ZTMP(i: Integer): Boolean;
 begin
-  Result := pos1(#9'sub :ztmp', i);
+  Result := pos(#9'sub :ztmp', listing[i]) = 1;
 end;
 
 // -----------------------------------------------------------------------------
@@ -462,133 +457,134 @@ end;
 
 function MVA_IM_0(i: Integer): Boolean;
 begin
-  Result := pos1(#9'mva #$00', i);
+  Result := pos(#9'mva #$00', listing[i]) = 1;
 end;
 
 // -----------------------------------------------------------------------------
 
 function LDA_L_ADR(i: Integer): Boolean;
 begin
-  Result := pos1(#9'lda <adr.', i);
+  Result := pos(#9'lda <adr.', listing[i]) = 1;
 end;
 
 function LDA_H_ADR(i: Integer): Boolean;
 begin
-  Result := pos1(#9'lda >adr.', i);
+  Result := pos(#9'lda >adr.', listing[i]) = 1;
 end;
 
 function LDA_L(i: Integer): Boolean;
 begin
-  Result := pos1(#9'lda <', i);
+  Result := pos(#9'lda <', listing[i]) = 1;
 end;
 
 function LDA_H(i: Integer): Boolean;
 begin
-  Result := pos1(#9'lda >', i);
+  Result := pos(#9'lda >', listing[i]) = 1;
 end;
 
 function LDY_L(i: Integer): Boolean;
 begin
-  Result := pos1(#9'ldy <', i);
+  Result := pos(#9'ldy <', listing[i]) = 1;
 end;
 
 function LDY_H(i: Integer): Boolean;
 begin
-  Result := pos1(#9'ldy >', i);
+  Result := pos(#9'ldy >', listing[i]) = 1;
 end;
 
 // -----------------------------------------------------------------------------
 
 function LDA_IM(i: Integer): Boolean;
 begin
-  Result := pos1(#9'lda #', i);
+  Result := pos(#9'lda #', listing[i]) = 1;
 end;
 
 function LDY_IM(i: Integer): Boolean;
 begin
-  Result := pos1(#9'ldy #', i);
+  Result := pos(#9'ldy #', listing[i]) = 1;
 end;
 
 function CMP_IM(i: Integer): Boolean;
 begin
-  Result := pos1(#9'cmp #', i);
+  Result := pos(#9'cmp #', listing[i]) = 1;
 end;
 
 function ADD_IM(i: Integer): Boolean;
 begin
-  Result := pos1(#9'add #', i);
+  Result := (pos(#9'add #', listing[i]) = 1);
 end;
 
 function ADC_IM(i: Integer): Boolean;
 begin
-  Result := pos1(#9'adc #', i);
+  Result := (pos(#9'adc #', listing[i]) = 1);
 end;
 
 function SUB_IM(i: Integer): Boolean;
 begin
-  Result := pos1(#9'sub #', i);
+  Result := (pos(#9'sub #', listing[i]) = 1);
 end;
 
 function SBC_IM(i: Integer): Boolean;
 begin
-  Result := pos1(#9'sbc #', i);
+  Result := (pos(#9'sbc #', listing[i]) = 1);
 end;
 
 function ADD_SUB_IM(i: Integer): Boolean;
 begin
-  Result := pos1(#9'add #', i) or pos1(#9'sub #', i);
+  Result := (pos(#9'add #', listing[i]) = 1) or (pos(#9'sub #', listing[i]) = 1);
 end;
 
 function ADC_SBC_IM(i: Integer): Boolean;
 begin
-  Result := pos1(#9'adc #', i) or pos1(#9'sbc #', i);
+  Result := (pos(#9'adc #', listing[i]) = 1) or (pos(#9'sbc #', listing[i]) = 1);
 end;
 
 function AND_IM(i: Integer): Boolean;
 begin
-  Result := pos1(#9'and #', i);
+  Result := pos(#9'and #', listing[i]) = 1;
 end;
 
 function AND_ORA_EOR_IM(i: Integer): Boolean;
 begin
-  Result := pos1(#9'and #', i) or pos1(#9'ora #', i) or pos1(#9'eor #', i);
+  Result := (pos(#9'and #', listing[i]) = 1) or (pos(#9'ora #', listing[i]) = 1) or
+    (pos(#9'eor #', listing[i]) = 1);
 end;
 
 function MVA_IM(i: Integer): Boolean;
 begin
-  Result := pos1(#9'mva #', i);
+  Result := pos(#9'mva #', listing[i]) = 1;
 end;
 
 function MVY_IM(i: Integer): Boolean;
 begin
-  Result := pos1(#9'mvy #', i);
+  Result := pos(#9'mvy #', listing[i]) = 1;
 end;
 
 // -----------------------------------------------------------------------------
 
 function JSR(i: Integer): Boolean;
 begin
-  Result := pos1(#9'jsr ', i);
+  Result := (pos(#9'jsr ', listing[i]) = 1);
 end;
 
 function JMP(i: Integer): Boolean;
 begin
-  Result := pos1(#9'jmp l_', i);
+  Result := (pos(#9'jmp l_', listing[i]) = 1);
 end;
 
 function LAB_L(i: Integer): Boolean;
 begin
-  Result := pos1('l_', i);
+  Result := (pos('l_', listing[i]) = 1);
 end;
 
 function LAB_B(i: Integer): Boolean;
 begin
-  Result := pos1('b_', i);
+  Result := (pos('b_', listing[i]) = 1);
 end;
 
 function LAB_C(i: Integer): Boolean;
 begin
-  Result := pos1('c_', i);
+  Result := (pos('c_', listing[i]) = 1);
 end;
 
 function LAB_A(i: Integer): Boolean;
@@ -767,12 +763,12 @@ end;
 
 function MVA_BP2_Y(i: Integer): Boolean;
 begin
-  Result := pos1(#9'mva (:bp2),y', i);
+  Result := (pos(#9'mva (:bp2),y', listing[i]) = 1);
 end;
 
 function MWY_BP2(i: Integer): Boolean;
 begin
-  Result := pos1(#9'mwy ', i) and (pos(' :bp2', listing[i]) > 0);
+  Result := (pos(#9'mwy ', listing[i]) = 1) and (pos(' :bp2', listing[i]) > 0);
 end;
 
 // -----------------------------------------------------------------------------
@@ -794,7 +790,7 @@ end;
 
 function MWY_TMP(i: Integer): Boolean;
 begin
-  Result := pos1(#9'mwy ', i) and (pos(' :TMP', listing[i]) > 0);
+  Result := (pos(#9'mwy ', listing[i]) = 1) and (pos(' :TMP', listing[i]) > 0);
 end;
 
 // -----------------------------------------------------------------------------
@@ -987,156 +983,159 @@ end;
 
 function LDA_VAL(i: Integer): Boolean;
 begin
-  Result := pos1(#9'lda ', i) and (pos(#9'lda :STACK', listing[i]) = 0);
+  Result := (pos(#9'lda ', listing[i]) = 1) and (pos(#9'lda :STACK', listing[i]) = 0);
 end;
 
 function STA_VAL(i: Integer): Boolean;
 begin
   if listing[i] = #9'sta #$00' then exit(False);
 
-  Result := pos1(#9'sta ', i) and (pos(#9'sta :STACK', listing[i]) = 0);
+  Result := (pos(#9'sta ', listing[i]) = 1) and (pos(#9'sta :STACK', listing[i]) = 0);
 end;
 
 function LDY_VAL(i: Integer): Boolean;
 begin
-  Result := pos1(#9'ldy ', i) and (pos(#9'ldy :STACK', listing[i]) = 0);
+  Result := (pos(#9'ldy ', listing[i]) = 1) and (pos(#9'ldy :STACK', listing[i]) = 0);
 end;
 
 function CMP_VAL(i: Integer): Boolean;
 begin
-  Result := pos1(#9'cmp ', i) and (pos(#9'cmp :STACK', listing[i]) = 0);
+  Result := (pos(#9'cmp ', listing[i]) = 1) and (pos(#9'cmp :STACK', listing[i]) = 0);
 end;
 
 function ADD_SUB_VAL(i: Integer): Boolean;
 begin
-  Result := (pos(' :STACK', listing[i]) = 0) and (pos1(#9'add ', i) or pos1(#9'sub ', i));
+  Result := (pos(' :STACK', listing[i]) = 0) and ((pos(#9'add ', listing[i]) = 1) or
+    (pos(#9'sub ', listing[i]) = 1));
 end;
 
 function ADC_SBC_VAL(i: Integer): Boolean;
 begin
-  Result := (pos(' :STACK', listing[i]) = 0) and (pos1(#9'adc ', i) or pos1(#9'sbc ', i));
+  Result := (pos(' :STACK', listing[i]) = 0) and ((pos(#9'adc ', listing[i]) = 1) or
+    (pos(#9'sbc ', listing[i]) = 1));
 end;
 
 function ORA_VAL(i: Integer): Boolean;
 begin
-  Result := pos1(#9'ora ', i) and (pos(#9'ora :STACK', listing[i]) = 0);
+  Result := (pos(#9'ora ', listing[i]) = 1) and (pos(#9'ora :STACK', listing[i]) = 0);
 end;
 
 function AND_VAL(i: Integer): Boolean;
 begin
-  Result := pos1(#9'and ', i) and (pos(#9'and :STACK', listing[i]) = 0);
+  Result := (pos(#9'and ', listing[i]) = 1) and (pos(#9'and :STACK', listing[i]) = 0);
 end;
 
 function AND_ORA_EOR_VAL(i: Integer): Boolean;
 begin
-  Result := (pos(' :STACK', listing[i]) = 0) and (pos1(#9'and ', i) or pos1(#9'ora ', i) or pos1(#9'eor ', i));
+  Result := (pos(' :STACK', listing[i]) = 0) and ((pos(#9'and ', listing[i]) = 1) or
+    (pos(#9'ora ', listing[i]) = 1) or (pos(#9'eor ', listing[i]) = 1));
 end;
 
 // -----------------------------------------------------------------------------
 
 function LDA_STACK(i: Integer): Boolean;
 begin
-  Result := pos1(#9'lda :STACK', i);
+  Result := pos(#9'lda :STACK', listing[i]) = 1;
 end;
 
 function STA_STACK(i: Integer): Boolean;
 begin
-  Result := pos1(#9'sta :STACK', i);
+  Result := pos(#9'sta :STACK', listing[i]) = 1;
 end;
 
 function ADD_STACK(i: Integer): Boolean;
 begin
-  Result := pos1(#9'add :STACK', i);
+  Result := (pos(#9'add :STACK', listing[i]) = 1);
 end;
 
 function ADC_STACK(i: Integer): Boolean;
 begin
-  Result := pos1(#9'adc :STACK', i);
+  Result := (pos(#9'adc :STACK', listing[i]) = 1);
 end;
 
 function SUB_STACK(i: Integer): Boolean;
 begin
-  Result := pos1(#9'sub :STACK', i);
+  Result := (pos(#9'sub :STACK', listing[i]) = 1);
 end;
 
 function SBC_STACK(i: Integer): Boolean;
 begin
-  Result := pos1(#9'sbc :STACK', i);
+  Result := (pos(#9'sbc :STACK', listing[i]) = 1);
 end;
 
 function ADD_SUB_STACK(i: Integer): Boolean;
 begin
-  Result := pos1(#9'add :STACK', i) or pos1(#9'sub :STACK', i);
+  Result := (pos(#9'add :STACK', listing[i]) = 1) or (pos(#9'sub :STACK', listing[i]) = 1);
 end;
 
 function ADC_SBC_STACK(i: Integer): Boolean;
 begin
-  Result := pos1(#9'adc :STACK', i) or pos1(#9'sbc :STACK', i);
+  Result := (pos(#9'adc :STACK', listing[i]) = 1) or (pos(#9'sbc :STACK', listing[i]) = 1);
 end;
 
 function INC_STACK(i: Integer): Boolean;
 begin
-  Result := pos1(#9'inc :STACK', i);
+  Result := (pos(#9'inc :STACK', listing[i]) = 1);
 end;
 
 function DEC_STACK(i: Integer): Boolean;
 begin
-  Result := pos1(#9'dec :STACK', i);
+  Result := (pos(#9'dec :STACK', listing[i]) = 1);
 end;
 
 function LDY_STACK(i: Integer): Boolean;
 begin
-  Result := pos1(#9'ldy :STACK', i);
+  Result := pos(#9'ldy :STACK', listing[i]) = 1;
 end;
 
 function STY_STACK(i: Integer): Boolean;
 begin
-  Result := pos1(#9'sty :STACK', i);
+  Result := pos(#9'sty :STACK', listing[i]) = 1;
 end;
 
 function CMP_STACK(i: Integer): Boolean;
 begin
-  Result := pos1(#9'cmp :STACK', i);
+  Result := pos(#9'cmp :STACK', listing[i]) = 1;
 end;
 
 function MVA_STACK(i: Integer): Boolean;
 begin
-  Result := pos1(#9'mva :STACK', i);
+  Result := pos(#9'mva :STACK', listing[i]) = 1;
 end;
 
 function ROR_STACK(i: Integer): Boolean;
 begin
-  Result := pos1(#9'ror :STACK', i);
+  Result := pos(#9'ror :STACK', listing[i]) = 1;
 end;
 
 function ROL_STACK(i: Integer): Boolean;
 begin
-  Result := pos1(#9'rol :STACK', i);
+  Result := pos(#9'rol :STACK', listing[i]) = 1;
 end;
 
 function LSR_STACK(i: Integer): Boolean;
 begin
-  Result := pos1(#9'lsr :STACK', i);
+  Result := pos(#9'lsr :STACK', listing[i]) = 1;
 end;
 
 function ASL_STACK(i: Integer): Boolean;
 begin
-  Result := pos1(#9'asl :STACK', i);
+  Result := pos(#9'asl :STACK', listing[i]) = 1;
 end;
 
 function AND_STACK(i: Integer): Boolean;
 begin
-  Result := pos1(#9'and :STACK', i);
+  Result := (pos(#9'and :STACK', listing[i]) = 1);
 end;
 
 function ORA_STACK(i: Integer): Boolean;
 begin
-  Result := pos1(#9'ora :STACK', i);
+  Result := (pos(#9'ora :STACK', listing[i]) = 1);
 end;
 
 function EOR_STACK(i: Integer): Boolean;
 begin
-  Result := pos1(#9'eor :STACK', i);
+  Result := (pos(#9'eor :STACK', listing[i]) = 1);
 end;
 
 function AND_ORA_EOR_STACK(i: Integer): Boolean;
@@ -1148,208 +1147,219 @@ end;
 
 function LDA(i: Integer): Boolean;
 begin
-  Result := pos1(#9'lda ', i) and (pos(#9'lda adr.', listing[i]) = 0) and (pos('.adr.', listing[i]) = 0);
+  Result := (pos(#9'lda ', listing[i]) = 1) and (pos(#9'lda adr.', listing[i]) = 0) and
+    (pos('.adr.', listing[i]) = 0);
 end;
 
 function LDA_A(i: Integer): Boolean;
 begin
-  Result := pos1(#9'lda ', i);
+  Result := (pos(#9'lda ', listing[i]) = 1);
 end;
 
 function LDA_Y(i: Integer): Boolean;
 begin
-  Result := pos1(#9'lda ', i) and (pos(',y', listing[i]) > 0);
+  Result := (pos(#9'lda ', listing[i]) = 1) and (pos(',y', listing[i]) > 0);
 end;
 
 function LDA_ADR_Y(i: Integer): Boolean;
 begin
   if (pos(',y', listing[i]) > 0) then
-    Result := pos1(#9'lda adr.', i) or (pos1(#9'lda ', i) and (pos('.adr.', listing[i]) > 0))
+    Result := (pos(#9'lda adr.', listing[i]) = 1) or ((pos(#9'lda ', listing[i]) = 1) and
+      (pos('.adr.', listing[i]) > 0))
   else
     Result := False;
 end;
 
 function LDA_ADR(i: Integer): Boolean;
 begin
-  Result := pos1(#9'lda adr.', i) or (pos1(#9'lda ', i) and (pos('.adr.', listing[i]) > 0));
+  Result := (pos(#9'lda adr.', listing[i]) = 1) or ((pos(#9'lda ', listing[i]) = 1) and
+    (pos('.adr.', listing[i]) > 0));
 end;
 
 function STA_ADR_Y(i: Integer): Boolean;
 begin
   if (pos(',y', listing[i]) > 0) then
-    Result := pos1(#9'sta adr.', i) or (pos1(#9'sta ', i) and (pos('.adr.', listing[i]) > 0))
+    Result := (pos(#9'sta adr.', listing[i]) = 1) or ((pos(#9'sta ', listing[i]) = 1) and
+      (pos('.adr.', listing[i]) > 0))
   else
     Result := False;
 end;
 
 function STA_ADR(i: Integer): Boolean;
 begin
-  Result := pos1(#9'sta adr.', i) or (pos1(#9'sta ', i) and (pos('.adr.', listing[i]) > 0));
+  Result := (pos(#9'sta adr.', listing[i]) = 1) or ((pos(#9'sta ', listing[i]) = 1) and
+    (pos('.adr.', listing[i]) > 0));
 end;
 
 function STA(i: Integer): Boolean;
 begin
   if listing[i] = #9'sta #$00' then exit(False);
 
-  Result := pos1(#9'sta ', i) and (pos(#9'sta adr.', listing[i]) = 0) and (pos('.adr.', listing[i]) = 0);
+  Result := (pos(#9'sta ', listing[i]) = 1) and (pos(#9'sta adr.', listing[i]) = 0) and
+    (pos('.adr.', listing[i]) = 0);
 end;
 
 function STA_A(i: Integer): Boolean;
 begin
   if listing[i] = #9'sta #$00' then exit(False);
 
-  Result := pos1(#9'sta ', i);
+  Result := (pos(#9'sta ', listing[i]) = 1);
 end;
 
 function LDY(i: Integer): Boolean;
 begin
-  Result := pos1(#9'ldy ', i);
+  Result := pos(#9'ldy ', listing[i]) = 1;
 end;
 
 function STY(i: Integer): Boolean;
 begin
   if listing[i] = #9'sty #$00' then exit(False);
 
-  Result := pos1(#9'sty ', i);
+  Result := pos(#9'sty ', listing[i]) = 1;
 end;
 
 function ROR(i: Integer): Boolean;
 begin
-  Result := pos1(#9'ror ', i);
+  Result := pos(#9'ror ', listing[i]) = 1;
 end;
 
 function LSR(i: Integer): Boolean;
 begin
-  Result := pos1(#9'lsr ', i);
+  Result := pos(#9'lsr ', listing[i]) = 1;
 end;
 
 function ROL(i: Integer): Boolean;
 begin
-  Result := pos1(#9'rol ', i);
+  Result := pos(#9'rol ', listing[i]) = 1;
 end;
 
 function ASL(i: Integer): Boolean;
 begin
-  Result := pos1(#9'asl ', i);
+  Result := pos(#9'asl ', listing[i]) = 1;
 end;
 
 function CMP(i: Integer): Boolean;
 begin
-  Result := pos1(#9'cmp ', i);
+  Result := pos(#9'cmp ', listing[i]) = 1;
 end;
 
 function MVA(i: Integer): Boolean;
 begin
-  Result := pos1(#9'mva ', i);
+  Result := pos(#9'mva ', listing[i]) = 1;
 end;
 
 function MWA(i: Integer): Boolean;
 begin
-  Result := pos1(#9'mwa ', i);
+  Result := pos(#9'mwa ', listing[i]) = 1;
 end;
 
 function MVY(i: Integer): Boolean;
 begin
-  Result := pos1(#9'mvy ', i);
+  Result := pos(#9'mvy ', listing[i]) = 1;
 end;
 
 function MWY(i: Integer): Boolean;
 begin
-  Result := pos1(#9'mwy ', i);
+  Result := pos(#9'mwy ', listing[i]) = 1;
 end;
 
 function MVA_ADR(i: Integer): Boolean;
 begin
-  Result := pos1(#9'mva adr.', i) or (pos1(#9'mva ', i) and (pos('.adr.', listing[i]) > 0));
+  Result := (pos(#9'mva adr.', listing[i]) = 1) or ((pos(#9'mva ', listing[i]) = 1) and
+    (pos('.adr.', listing[i]) > 0));
 end;
 
 function MVA_ARG(i: Integer): Boolean;
 begin
-  Result := pos1(#9'mva ', i) and (pos(',y', listing[i]) = 0);
+  Result := (pos(#9'mva ', listing[i]) = 1) and (pos(',y', listing[i]) = 0);
 end;
 
 function ORA(i: Integer): Boolean;
 begin
-  Result := pos1(#9'ora ', i);
+  Result := pos(#9'ora ', listing[i]) = 1;
 end;
 
 function ADD_ADR(i: Integer): Boolean;
 begin
-  Result := pos1(#9'add adr.', i) or (pos1(#9'add ', i) and (pos('.adr.', listing[i]) > 0));
+  Result := (pos(#9'add adr.', listing[i]) = 1) or ((pos(#9'add ', listing[i]) = 1) and
+    (pos('.adr.', listing[i]) > 0));
 end;
 
 function SUB_ADR(i: Integer): Boolean;
 begin
-  Result := pos1(#9'sub adr.', i) or (pos1(#9'sub ', i) and (pos('.adr.', listing[i]) > 0));
+  Result := (pos(#9'sub adr.', listing[i]) = 1) or ((pos(#9'sub ', listing[i]) = 1) and
+    (pos('.adr.', listing[i]) > 0));
 end;
 
 function ADC_ADR(i: Integer): Boolean;
 begin
-  Result := pos1(#9'adc adr.', i) or (pos1(#9'adc ', i) and (pos('.adr.', listing[i]) > 0));
+  Result := (pos(#9'adc adr.', listing[i]) = 1) or ((pos(#9'adc ', listing[i]) = 1) and
+    (pos('.adr.', listing[i]) > 0));
 end;
 
 function SBC_ADR(i: Integer): Boolean;
 begin
-  Result := pos1(#9'sbc adr.', i) or (pos1(#9'sbc ', i) and (pos('.adr.', listing[i]) > 0));
+  Result := (pos(#9'sbc adr.', listing[i]) = 1) or ((pos(#9'sbc ', listing[i]) = 1) and
+    (pos('.adr.', listing[i]) > 0));
 end;
 
 function INC_(i: Integer): Boolean;
 begin
   if listing[i] = #9'inc #$00' then exit(False);
 
-  Result := pos1(#9'inc ', i);
+  Result := (pos(#9'inc ', listing[i]) = 1);
 end;
 
 function DEC_(i: Integer): Boolean;
 begin
   if listing[i] = #9'dec #$00' then exit(False);
 
-  Result := pos1(#9'dec ', i);
+  Result := (pos(#9'dec ', listing[i]) = 1);
 end;
 
 function ADD(i: Integer): Boolean;
 begin
-  Result := pos1(#9'add ', i);
+  Result := (pos(#9'add ', listing[i]) = 1);
 end;
 
 function ADC(i: Integer): Boolean;
 begin
-  Result := pos1(#9'adc ', i);
+  Result := (pos(#9'adc ', listing[i]) = 1);
 end;
 
 function SUB(i: Integer): Boolean;
 begin
-  Result := pos1(#9'sub ', i);
+  Result := (pos(#9'sub ', listing[i]) = 1);
 end;
 
 function SBC(i: Integer): Boolean;
 begin
-  Result := pos1(#9'sbc ', i);
+  Result := (pos(#9'sbc ', listing[i]) = 1);
 end;
 
 function ADD_SUB(i: Integer): Boolean;
 begin
-  Result := pos1(#9'add ', i) or pos1(#9'sub ', i);
+  Result := (pos(#9'add ', listing[i]) = 1) or (pos(#9'sub ', listing[i]) = 1);
 end;
 
 function ADC_SBC(i: Integer): Boolean;
 begin
-  Result := pos1(#9'adc ', i) or pos1(#9'sbc ', i);
+  Result := (pos(#9'adc ', listing[i]) = 1) or (pos(#9'sbc ', listing[i]) = 1);
 end;
 
 function EOR(i: Integer): Boolean;
 begin
-  Result := pos1(#9'eor ', i);
+  Result := (pos(#9'eor ', listing[i]) = 1);
 end;
 
 function AND_(i: Integer): Boolean;
 begin
-  Result := pos1(#9'and ', i);
+  Result := (pos(#9'and ', listing[i]) = 1);
 end;
 
 function AND_ORA_EOR(i: Integer): Boolean;
 begin
-  Result := pos1(#9'and ', i) or pos1(#9'ora ', i) or pos1(#9'eor ', i);
+  Result := (pos(#9'and ', listing[i]) = 1) or (pos(#9'ora ', listing[i]) = 1) or (pos(#9'eor ', listing[i]) = 1);
 end;
 
 // -----------------------------------------------------------------------------
@@ -1368,64 +1378,64 @@ end;
 
 function JEQ(i: Integer): Boolean;
 begin
-  Result := pos1(#9'jeq ', i);
+  Result := pos(#9'jeq ', listing[i]) = 1;
 end;
 
 function JNE(i: Integer): Boolean;
 begin
-  Result := pos1(#9'jne ', i);
+  Result := pos(#9'jne ', listing[i]) = 1;
 end;
 
 function JPL(i: Integer): Boolean;
 begin
-  Result := pos1(#9'jpl ', i);
+  Result := pos(#9'jpl ', listing[i]) = 1;
 end;
 
 function JMI(i: Integer): Boolean;
 begin
-  Result := pos1(#9'jmi ', i);
+  Result := pos(#9'jmi ', listing[i]) = 1;
 end;
 
 function JCC(i: Integer): Boolean;
 begin
-  Result := pos1(#9'jcc ', i);
+  Result := pos(#9'jcc ', listing[i]) = 1;
 end;
 
 function JCS(i: Integer): Boolean;
 begin
-  Result := pos1(#9'jcs ', i);
+  Result := pos(#9'jcs ', listing[i]) = 1;
 end;
 
 // -----------------------------------------------------------------------------
 
 function BEQ(i: Integer): Boolean;
 begin
-  Result := pos1(#9'beq ', i);
+  Result := pos(#9'beq ', listing[i]) = 1;
 end;
 
 function BNE(i: Integer): Boolean;
 begin
-  Result := pos1(#9'bne ', i);
+  Result := pos(#9'bne ', listing[i]) = 1;
 end;
 
 function BCC(i: Integer): Boolean;
 begin
-  Result := pos1(#9'bcc ', i);
+  Result := pos(#9'bcc ', listing[i]) = 1;
 end;
 
 function BCS(i: Integer): Boolean;
 begin
-  Result := pos1(#9'bcs ', i);
+  Result := pos(#9'bcs ', listing[i]) = 1;
 end;
 
 function BPL(i: Integer): Boolean;
 begin
-  Result := pos1(#9'bpl ', i);
+  Result := pos(#9'bpl ', listing[i]) = 1;
 end;
 
 function BMI(i: Integer): Boolean;
 begin
-  Result := pos1(#9'bmi ', i);
+  Result := pos(#9'bmi ', listing[i]) = 1;
 end;
 
 // -----------------------------------------------------------------------------
