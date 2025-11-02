@@ -12,7 +12,7 @@ procedure Diagnostics(ProgramUnit: TSourceFile);
 
 implementation
 
-uses SysUtils, Common, Datatypes, FileIO, Tokens;
+uses SysUtils, Common, DataTypes, FileIO, Tokens;
 
 procedure Diagnostics(ProgramUnit: TSourceFile);
 var

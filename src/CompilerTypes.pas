@@ -4,7 +4,7 @@ unit CompilerTypes;
 
 interface
 
-uses SysUtils, CommonTypes, Datatypes, FileIO, Tokens, Utilities;
+uses SysUtils, CommonTypes, DataTypes, FileIO, Tokens, Utilities;
 
   // ----------------------------------------------------------------------------
 

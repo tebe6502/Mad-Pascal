@@ -7,7 +7,7 @@ uses
   Common,
   CommonTypes,
   CompilerTypes,
-  Datatypes,
+  DataTypes,
   FileIO,
   MathEvaluate,
   Messages,
@@ -30,7 +30,7 @@ uses
       ''' is not equal to the expected value ''' + IntToStr(expected) + '''.');
   end;
 
-  procedure AssertEquals(actual, expected: TDatatype); overload;
+  procedure AssertEquals(actual, expected: TDataType); overload;
   begin
     Assert(actual = expected, 'The actual value ''' + GetDataTypeName(actual) +
       ''' is not equal to the expected value ''' + GetDataTypeName(expected) + '''.');
@@ -253,18 +253,18 @@ type
   end;
 
   // ----------------------------------------------------------------------------
-  // Unit Datatypes
+  // Unit DataTypes
   // ----------------------------------------------------------------------------
-  procedure TestUnitDatatypes;
+  procedure TestUnitDataTypes;
   begin
-    AssertEquals(Datatypes.GetDataSize(TDataType.UNTYPETOK), 0);
-    AssertEquals(Datatypes.GetDataSize(TDataType.BYTETOK), 1);
-    AssertEquals(Datatypes.GetDataSize(TDataType.WORDTOK), 2);
+    AssertEquals(DataTypes.GetDataSize(TDataType.UNTYPETOK), 0);
+    AssertEquals(DataTypes.GetDataSize(TDataType.BYTETOK), 1);
+    AssertEquals(DataTypes.GetDataSize(TDataType.WORDTOK), 2);
 
-    AssertEquals(Datatypes.GetValueType(0), TDataType.BYTETOK);
-    AssertEquals(Datatypes.GetValueType(255), TDataType.BYTETOK);
-    AssertEquals(Datatypes.GetValueType($ffff), TDataType.WORDTOK);
-    AssertEquals(Datatypes.GetValueType(-1), TDataType.SHORTINTTOK);
+    AssertEquals(DataTypes.GetValueType(0), TDataType.BYTETOK);
+    AssertEquals(DataTypes.GetValueType(255), TDataType.BYTETOK);
+    AssertEquals(DataTypes.GetValueType($ffff), TDataType.WORDTOK);
+    AssertEquals(DataTypes.GetValueType(-1), TDataType.SHORTINTTOK);
   end;
 
   // ----------------------------------------------------------------------------
@@ -361,7 +361,7 @@ begin
     TestLanguage;
     TestUnitFileIO;
     TestUnitCommon;
-    TestUnitDatatypes;
+    TestUnitDataTypes;
     TestUnitMathEvaluate;
     TestUnitMessages;
     TestUnitStringUtilities;

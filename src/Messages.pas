@@ -4,7 +4,7 @@ unit Messages;
 
 interface
 
-uses Common, CompilerTypes, Datatypes, CommonTypes, Tokens;
+uses Common, CompilerTypes, DataTypes, CommonTypes, Tokens;
 
   {$SCOPEDENUMS ON}
 type
