@@ -152,7 +152,7 @@ function TokenAt(tokenIndex: TTokenIndex): TToken;
 function NumIdent: Integer;
 function IdentifierAt(identifierIndex: TIdentifierIndex): TIdentifier;
 
-function Hex(a:cardinal; b:shortint): string;
+function Hex(a: Cardinal; b: Shortint): String;
 
 procedure AddDefine(const defineName: TDefineName);
 function SearchDefine(const defineName: TDefineName): TDefineIndex;
@@ -248,6 +248,12 @@ end;
 
 function GetTypeAtIndex(const typeIndex: TTypeIndex): TType;
 begin
+  {$IFDEF DEBUG}
+  if (typeIndex<Low(_TypeArray)) or (typeIndex>High(_TypeArray)) then
+  begin
+    Writeln('ERROR: typeIndex=',typeIndex);
+  end;
+  {$ENDIF}
   Result := _TypeArray[typeIndex];
 end;
 
@@ -286,32 +292,32 @@ end;
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 
-function Hex(a:cardinal; b:shortint): string;
-(*----------------------------------------------------------------------------*)
-(*  zamiana na zapis hexadecymalny                                            *)
-(*  'B' okresla maksymalna liczbe nibbli do zamiany                           *)
-(*  jesli sa jeszcze jakies wartosci to kontynuuje zamiane                    *)
-(*----------------------------------------------------------------------------*)
-var v: byte;
-
+function Hex(a: Cardinal; b: Shortint): String;
+  (*----------------------------------------------------------------------------*)
+  (*  zamiana na zapis hexadecymalny                                            *)
+  (*  'B' okresla maksymalna liczbe nibbli do zamiany                           *)
+  (*  jesli sa jeszcze jakies wartosci to kontynuuje zamiane                    *)
+  (*----------------------------------------------------------------------------*)
+var
+  v: Byte;
 const
-    tHex: array [0..15] of char =
-    ('0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F');
-
+  tHex: array [0..15] of Char =
+    ('0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F');
 begin
- Result := '';
+  Result := '';
 
- while (b > 0) or (a <> 0) do begin
+  while (b > 0) or (a <> 0) do
+  begin
 
-  v := byte(a);
-  Result := tHex[v shr 4] + tHex[v and $0f] + Result;
+    v := Byte(a);
+    Result := tHex[v shr 4] + tHex[v and $0f] + Result;
 
-  a := a shr 8;
+    a := a shr 8;
 
-  dec(b,2);
- end;
+    Dec(b, 2);
+  end;
 
- Result := '$' + Result;
+  Result := '$' + Result;
 
 end;
 

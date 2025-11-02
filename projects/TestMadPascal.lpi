@@ -36,6 +36,12 @@
             <WorkingDirectory Value="C:\jac\system\Atari800\Programming\Repositories\Mad-Pascal\samples\a8\math\AES-Rijndael"/>
           </local>
         </Mode>
+        <Mode Name="test">
+          <local>
+            <CommandLineParams Value="-iPath:C:\jac\system\Atari800\Programming\Repositories\Mad-Pascal\lib chessboard.pas -pause"/>
+            <WorkingDirectory Value="C:\jac\system\Atari800\Programming\Repositories\Mad-Pascal\samples\a8\bench"/>
+          </local>
+        </Mode>
       </Modes>
     </RunParams>
     <Units>
