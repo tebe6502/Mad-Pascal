@@ -193,10 +193,9 @@ type
 
   TType = record
     BlockIndex: TBlockIndex;
-    NumFields: Integer;
     Size: Integer;
-    // TODO: MAXFIELDS?
-    Field: array [0..MAXTYPES] of TField;
+    NumFields: Integer;
+    Field: array [0..MAXFIELDS] of TField;
   end;
 
   TSourceFileName = TName;
