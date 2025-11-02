@@ -1,6 +1,6 @@
 // Optimized version of "StartsWith"
 // Assumption is that "str" is always at least 4 chars, e.g. '#9abc'
-function pos1(const str: String; const i: Integer): Boolean; inline;
+function pos1(const str: String; const i: Integer): Boolean;
 begin
   if (Length(str) > Length(listing[i])) // Compare lengths
     or (str[2] <> listing[i][2])  // Compare first regular letter first
@@ -12,7 +12,7 @@ begin
 end;
 
 // Check for 2 character label prefix
-function pos1_lab(const str: String; const i: Integer): Boolean; inline;
+function pos1_lab(const str: String; const i: Integer): Boolean;
 begin
   if (Length(str) > Length(listing[i])) // Compare lengths
     or (str[1] <> listing[i][1])  // Compare first regular character
@@ -21,6 +21,7 @@ begin
   Result := True;
 end;
 
+// -----------------------------------------------------------------------------
 
 function LOCAL(const i: Integer): Boolean;
 begin
@@ -49,7 +50,7 @@ end;
 
 function _IF(const i: Integer): Boolean;
 begin
-  Result := pos1(#9'.if', i);
+  Result := pos1(#9'.if ', i);
 end;
 
 function EIF(const i: Integer): Boolean;
@@ -998,31 +999,31 @@ end;
 
 function LDA_EAX_X(const i: Integer): Boolean;
 begin
-  Result := pos(#9'lda :eax', listing[i]) > 0;
+  Result := pos1(#9'lda :eax', i)
 end;
 
 // -----------------------------------------------------------------------------
 
 function LDA_VAL(const i: Integer): Boolean;
 begin
-  Result := pos1(#9'lda ', i) and (pos(#9'lda :STACK', listing[i]) = 0);
+  Result := pos1(#9'lda ', i) and (pos1(#9'lda :STACK', i) = false)
 end;
 
 function STA_VAL(const i: Integer): Boolean;
 begin
   if listing[i] = #9'sta #$00' then exit(False);
 
-  Result := pos1(#9'sta ', i) and (pos(#9'sta :STACK', listing[i]) = 0);
+  Result := pos1(#9'sta ', i) and (pos1(#9'sta :STACK', i) = false)
 end;
 
 function LDY_VAL(const i: Integer): Boolean;
 begin
-  Result := pos1(#9'ldy ', i) and (pos(#9'ldy :STACK', listing[i]) = 0);
+  Result := pos1(#9'ldy ', i) and (pos1(#9'ldy :STACK', i) = false)
 end;
 
 function CMP_VAL(const i: Integer): Boolean;
 begin
-  Result := pos1(#9'cmp ', i) and (pos(#9'cmp :STACK', listing[i]) = 0);
+  Result := pos1(#9'cmp ', i) and (pos1(#9'cmp :STACK', i) = false)
 end;
 
 function ADD_SUB_VAL(const i: Integer): Boolean;
@@ -1037,12 +1038,12 @@ end;
 
 function ORA_VAL(const i: Integer): Boolean;
 begin
-  Result := pos1(#9'ora ', i) and (pos(#9'ora :STACK', listing[i]) = 0);
+  Result := pos1(#9'ora ', i) and (pos1(#9'ora :STACK', i) = false)
 end;
 
 function AND_VAL(const i: Integer): Boolean;
 begin
-  Result := pos1(#9'and ', i) and (pos(#9'and :STACK', listing[i]) = 0);
+  Result := pos1(#9'and ', i) and (pos1(#9'and :STACK', i) = false)
 end;
 
 function AND_ORA_EOR_VAL(const i: Integer): Boolean;
@@ -1166,7 +1167,7 @@ end;
 
 function LDA(const i: Integer): Boolean;
 begin
-  Result := pos1(#9'lda ', i) and (pos(#9'lda adr.', listing[i]) = 0) and (pos('.adr.', listing[i]) = 0);
+  Result := pos1(#9'lda ', i) and (pos1(#9'lda adr.', i) = false) and (pos('.adr.', listing[i]) = 0);
 end;
 
 function LDA_A(const i: Integer): Boolean;
@@ -1209,7 +1210,7 @@ function STA(const i: Integer): Boolean;
 begin
   if listing[i] = #9'sta #$00' then exit(False);
 
-  Result := pos1(#9'sta ', i) and (pos(#9'sta adr.', listing[i]) = 0) and (pos('.adr.', listing[i]) = 0);
+  Result := pos1(#9'sta ', i) and (pos1(#9'sta adr.', i) = false) and (pos('.adr.', listing[i]) = 0);
 end;
 
 function STA_A(const i: Integer): Boolean;
