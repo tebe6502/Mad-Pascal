@@ -4,7 +4,7 @@ unit fastgraph;
 @name: Unit to handle screen graphics, accelerated bitmap modes
 @author: Tomasz Biela (Tebe/Madteam)
 
-@version: 1.2
+@version: 1.3
 
 @description:
 <http://www.freepascal.org/docs-html/rtl/graph/index-5.html>
@@ -24,6 +24,7 @@ VLine
 InitGraph		mode: 3, 5, 7, 8, 9, 10, 11, 15
 Line
 LineTo
+LineRel
 MoveTo
 PutPixel
 Scanline
@@ -120,6 +121,7 @@ var	WIN_LEFT: smallint = 0;
 	procedure Hline(x0,x1,y: smallint);
 	procedure Vline(x,y0,y1: smallint);
 	procedure LineTo(x, y: smallint);
+	procedure LineRel(dx, dy: smallint);	
 	procedure PutPixel(x,y: smallint); assembler; register;
 	function Scanline(y: smallint): PByte;
 	function NewDisplayBuffer(var a: TDisplayBuffer; mode, bound: byte): TDisplayBuffer;
@@ -1187,6 +1189,20 @@ end;
 
 	CurrentX := x;
 	CurrentY := y;
+end;
+
+
+procedure LineRel(dx, dy: smallint);
+(*
+@description:
+LineRel draws a line starting from the current pointer position to the point(DX,DY),
+relative to the current position, in the current line style and color.
+The Current Position is set to the endpoint of the line.
+*)
+begin
+
+ LineTo(CurrentX + dx, CurrentY + dy)
+
 end;
 
 
