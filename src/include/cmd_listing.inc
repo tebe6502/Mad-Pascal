@@ -8,8 +8,19 @@ begin
     or (str[4] <> listing[i][4])  // ...
     or (str[1] <> listing[i][1])  // Compare the typical #9 last
   then exit(False);
-  Result := pos(str, listing[i], 5) = 1;  // Compare the rest
+  Result := pos(str, listing[i]) = 1;  // Compare the rest
 end;
+
+// Check for 2 character label prefix
+function pos1_lab(const str: String; const i: Integer): Boolean; inline;
+begin
+  if (Length(str) > Length(TemporaryBuf[i])) // Compare lengths
+    or (str[1] <> TemporaryBuf[i][1])  // Compare first regular character
+    or (str[2] <> TemporaryBuf[i][2])  // Compare second regular character
+  then exit(False);
+  Result := True;
+end;
+
 
 function LOCAL(i: Integer): Boolean;
 begin
@@ -585,17 +596,17 @@ end;
 
 function LAB_L(i: Integer): Boolean;
 begin
-  Result := pos1('l_', i);
+  Result := pos1_lab('l_', i);
 end;
 
 function LAB_B(i: Integer): Boolean;
 begin
-  Result := pos1('b_', i);
+  Result := pos1_lab('b_', i);
 end;
 
 function LAB_C(i: Integer): Boolean;
 begin
-  Result := pos1('c_', i);
+  Result := pos1_lab('c_', i);
 end;
 
 function LAB_A(i: Integer): Boolean;
