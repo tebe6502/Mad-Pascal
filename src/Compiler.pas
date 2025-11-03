@@ -13358,7 +13358,7 @@ begin
 
 	  case IdentifierAt(IdentTemp).Kind of
 
-	   FUNCTIONTOK: if SelectorType = TDataType.ENUMTOK begin
+	   FUNCTIONTOK: if SelectorType = TDataType.ENUMTOK then begin
 	          	  SelectorType := IdentifierAt(GetIdentResult(IdentifierAt(IdentTemp).ProcAsBlockIndex)).AllocElementType;
         		  EnumName := GetTypeAtIndex(IdentifierAt(GetIdentResult(IdentifierAt(IdentTemp).ProcAsBlockIndex)).NumAllocElements).Field[0].Name;
 	                end;
