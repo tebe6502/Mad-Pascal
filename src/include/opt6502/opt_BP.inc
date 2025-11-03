@@ -1587,13 +1587,13 @@ begin
        mwy_bp2(i) and										// mwy FIRST bp2			; 0
        ldy_im(i+1) and (listing[i+1] = listing[i+8]) and					// ldy #				; 1
        LDA_BP2_Y(i+2) and									// lda (:bp2),y				; 2
-       sta_stack(i+3) and									// sta :STACKORIGIN+9			; 3
+       sta_stack(i+3) and									// sta :STACKORIGIN			; 3
        iny(i+4) and										// iny					; 4
        LDA_BP2_Y(i+5) and									// lda (:bp2),y				; 5
-       sta_stack(i+6) and									// sta :STACKORIGIN+STACKWIDTH+9	; 6
+       sta_stack(i+6) and									// sta :STACKORIGIN+STACKWIDTHT		; 6
        mwy_bp2(i+7) and	(listing[i+7] <> listing[i]) and					// mwy LAST bp2				; 7
 //       ldy_im(i+8) and									// ldy #				; 8
-       lda_stack(i+9) and									// lda :STACKORIGIN+9			; 9
+       lda_stack(i+9) and									// lda :STACKORIGIN			; 9
        STA_BP2_Y(i+10) and  									// sta (:bp2),y				; 10
        iny(i+11) and										// iny					; 11
        lda_stack(i+12) then									// lda :STACKORIGIN+STACKWIDTH		; 12
@@ -1616,6 +1616,49 @@ begin
 	listing[i+11] := '';
 	listing[i+12] := '';
 	listing[i+13] := '';
+
+	exit(false);
+      end;
+
+
+    if ADC_SBC_BP2_Y(i+14) and									// adc|sbc (:bp2),y			; 14
+
+       mwy_bp2(i) and										// mwy FIRST bp2			; 0
+       ldy_im(i+1) and (listing[i+1] = listing[i+8]) and					// ldy #				; 1
+       LDA_BP2_Y(i+2) and									// lda (:bp2),y				; 2
+       sta_stack(i+3) and									// sta :STACKORIGIN			; 3
+       iny(i+4) and										// iny					; 4
+       LDA_BP2_Y(i+5) and									// lda (:bp2),y				; 5
+       sta_stack(i+6) and									// sta :STACKORIGIN+STACKWIDTH		; 6
+       mwy_bp2(i+7) and	(listing[i+7] <> listing[i]) and					// mwy LAST bp2				; 7
+//       ldy_im(i+8) and									// ldy #				; 8
+       lda_stack(i+9) and									// lda :STACKORIGIN			; 9
+       ADD_SUB_BP2_Y(i+10) and 									// add|sub (:bp2),y			; 10
+       sta_a(i+11) and										// sta					; 11
+       iny(i+12) and										// iny					; 12
+       lda_stack(i+13) and									// lda :STACKORIGIN+STACKWIDTH		; 13
+//       ADC_SBC_BP2_Y(i+14) and								// adc|sbc (:bp2),y			; 14
+       sta_a(i+15) then										// sta					; 15
+     if argMatch(i+3, i+9) and
+	argMatch(i+6, i+13) then
+      begin
+
+	listing[i]   := #9'mwy ' + GetString(i) + ' :TMP';
+	listing[i+1] := listing[i+7];
+	listing[i+2] := listing[i+8];
+	listing[i+3] := #9'lda (:TMP),y';
+        listing[i+4] := listing[i+10];
+	listing[i+5] := listing[i+11];
+ 	listing[i+6] := #9'iny';
+ 	listing[i+7] := #9'lda (:TMP),y';
+ 	listing[i+8] := listing[i+14];
+        listing[i+9] := listing[i+15];
+	listing[i+10]:= '';
+	listing[i+11]:= '';
+	listing[i+12]:= '';
+	listing[i+13]:= '';
+	listing[i+14]:= '';
+	listing[i+15]:= '';
 
 	exit(false);
       end;
