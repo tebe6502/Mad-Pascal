@@ -4,7 +4,7 @@ unit Common;
 
 interface
 
-uses Classes, SysUtils, CommonTypes, CompilerTypes, Datatypes, FileIO, Memory, StringUtilities,
+uses Classes, SysUtils, CommonTypes, CompilerTypes, DataTypes, FileIO, Memory, StringUtilities,
   Targets, Tokens;
 
 const
@@ -252,6 +252,7 @@ begin
   if (typeIndex<Low(_TypeArray)) or (typeIndex>High(_TypeArray)) then
   begin
     Writeln('ERROR: typeIndex=',typeIndex);
+    Exit(Default(TType));
   end;
   {$ENDIF}
   Result := _TypeArray[typeIndex];

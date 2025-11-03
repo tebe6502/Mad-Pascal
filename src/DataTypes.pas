@@ -1,4 +1,4 @@
-unit Datatypes; // TODO: Should be DataTypes
+unit DataTypes;
 
 interface
 

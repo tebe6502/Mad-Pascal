@@ -32,7 +32,7 @@ type
 
 implementation
 
-uses Classes, SysUtils, Common, Datatypes, Messages, FileIO, Memory, Optimize, StringUtilities, Targets, Utilities;
+uses Classes, SysUtils, Common, DataTypes, Messages, FileIO, Memory, Optimize, StringUtilities, Targets, Utilities;
 
 const SCANNER_CACHED = true;
 

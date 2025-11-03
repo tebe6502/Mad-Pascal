@@ -20,7 +20,7 @@ uses
   Common,
   CommonTypes,
   Console,
-  Datatypes,
+  DataTypes,
   Debugger,
   MathEvaluate,
   Memory,
@@ -2716,7 +2716,7 @@ begin
   if IdentIndex > 0 then
   begin
 
-    if IdentifierAt(IdentIndex).DataType = TDatatype.ENUMTOK then
+    if IdentifierAt(IdentIndex).DataType = TDataType.ENUMTOK then
     begin
       Size := GetDataSize(IdentifierAt(IdentIndex).AllocElementType);
       NumAllocElements := 0;
@@ -6085,7 +6085,7 @@ begin
  end else
  }
 
-  if (LeftValType = TDatatype.STRINGPOINTERTOK) and (RightValType = TDatatype.STRINGPOINTERTOK) then
+  if (LeftValType = TDataType.STRINGPOINTERTOK) and (RightValType = TDataType.STRINGPOINTERTOK) then
   begin
     //  a65(TCode65.cmpSTRING)          // STRING ? STRING
 
@@ -6103,7 +6103,7 @@ begin
 
   end
   else
-    if LeftValType = TDatatype.CHARTOK then
+    if LeftValType = TDataType.CHARTOK then
     begin
       //  a65(TCode65.cmpCHAR2STRING)        // CHAR ? STRING
 
@@ -6119,7 +6119,7 @@ begin
 
     end
     else
-      if RightValType = TDatatype.CHARTOK then
+      if RightValType = TDataType.CHARTOK then
       begin
         //  a65(TCode65.cmpSTRING2CHAR);        // STRING ? CHAR
 
@@ -6134,7 +6134,7 @@ begin
         asm65(#9'jsr @cmpSTRING2CHAR');
       end;
 
-  GenerateRelationOperation(relation, TDatatype.BYTETOK);
+  GenerateRelationOperation(relation, TDataType.BYTETOK);
 
   Gen;
 
@@ -6535,7 +6535,7 @@ begin
     NumAllocElements_ := 0;
 
 
-  ActualParamType := TDatatype.WORDTOK;    // !!! aby dzialaly optymalizacje dla ADR.
+  ActualParamType := TDataType.WORDTOK;    // !!! aby dzialaly optymalizacje dla ADR.
 
 
   j := i + 2;
@@ -6650,7 +6650,7 @@ begin
 
       CheckArrayIndex_(i, IdentIndex, ConstVal, ArrayIndexType);
 
-      ArrayIndexType := TDatatype.WORDTOK;
+      ArrayIndexType := TDataType.WORDTOK;
       ShortArrayIndex := False;
 
       Push(ConstVal * Size, ASVALUE, GetDataSize(ArrayIndexType));
@@ -6663,9 +6663,9 @@ begin
       CheckCommonType(i, ActualParamType, ArrayIndexType);
 
       case ArrayIndexType of
-        TDataType.SHORTINTTOK: ArrayIndexType := TDatatype.BYTETOK;
-        TDataType.SMALLINTTOK: ArrayIndexType := TDatatype.WORDTOK;
-        TDataType.INTEGERTOK: ArrayIndexType := TDatatype.CARDINALTOK;
+        TDataType.SHORTINTTOK: ArrayIndexType := TDataType.BYTETOK;
+        TDataType.SMALLINTTOK: ArrayIndexType := TDataType.WORDTOK;
+        TDataType.INTEGERTOK: ArrayIndexType := TDataType.CARDINALTOK;
       end;
 
       if GetDataSize(ArrayIndexType) = 4 then
@@ -6678,11 +6678,11 @@ begin
 
       if GetDataSize(ArrayIndexType) = 1 then
       begin
-        ExpandParam(TDatatype.WORDTOK, ArrayIndexType);
-        ArrayIndexType := TDatatype.WORDTOK;
+        ExpandParam(TDataType.WORDTOK, ArrayIndexType);
+        ArrayIndexType := TDataType.WORDTOK;
       end
       else
-        ArrayIndexType := TDatatype.WORDTOK;
+        ArrayIndexType := TDataType.WORDTOK;
 
       //      if (Size > 1) or (Elements(IdentIndex) > 256) or (Elements(IdentIndex) in [0,1]) {or (NumAllocElements_ > 0)} then begin
       //        ExpandParam(WORDTOK, ArrayIndexType);
@@ -6693,7 +6693,7 @@ begin
 
     end;
 
-    GenerateBinaryOperation(TTokenKind.PLUSTOK, TDatatype.WORDTOK);
+    GenerateBinaryOperation(TTokenKind.PLUSTOK, TDataType.WORDTOK);
 
   end;
 
@@ -7336,7 +7336,7 @@ begin
   end;
 
 
-  if ((ValType in [TDatatype.REALTOK, TDatatype.SHORTREALTOK]) or (castDataType in [TDataType.REALTOK, TDataType.SHORTREALTOK])) and (RightValType in IntegerTypes) then
+  if ((ValType in [TDataType.REALTOK, TDataType.SHORTREALTOK]) or (castDataType in [TDataType.REALTOK, TDataType.SHORTREALTOK])) and (RightValType in IntegerTypes) then
   begin
 
     ExpandParam(TDataType.INTEGERTOK, RightValType);
@@ -7352,7 +7352,7 @@ begin
    asm65(#9'lda #$00');
    asm65(#9'sta :STACKORIGIN,x');
 }
-    if not (ValType in [TDatatype.REALTOK, TDatatype.SHORTREALTOK]) and (castDataType in [TDataType.REALTOK, TDataType.SHORTREALTOK]) then
+    if not (ValType in [TDataType.REALTOK, TDataType.SHORTREALTOK]) and (castDataType in [TDataType.REALTOK, TDataType.SHORTREALTOK]) then
       RightValType := castDataType
     else
       RightValType := ValType;
@@ -7377,8 +7377,8 @@ begin
    asm65(#9'sta :STACKORIGIN-1,x');
 }
 
-    if not (RightValType in [TDatatype.REALTOK, TDatatype.SHORTREALTOK]) and
-      (castDataType in [TDatatype.REALTOK, TDatatype.SHORTREALTOK]) then
+    if not (RightValType in [TDataType.REALTOK, TDataType.SHORTREALTOK]) and
+      (castDataType in [TDataType.REALTOK, TDataType.SHORTREALTOK]) then
       ValType := castDataType
     else
       ValType := RightValType;
@@ -7842,7 +7842,7 @@ begin
           if (IdentifierAt(IdentIndex).Param[NumActualParams].DataType in IntegerTypes + RealTypes) and (ActualParamType in RealTypes) then
             CheckCommonType(i, IdentifierAt(IdentIndex).Param[NumActualParams].DataType, ActualParamType);
 
-          if (IdentifierAt(IdentIndex).Param[NumActualParams].DataType = TDatatype.POINTERTOK) then
+          if (IdentifierAt(IdentIndex).Param[NumActualParams].DataType = TDataType.POINTERTOK) then
             CheckCommonType(i, IdentifierAt(IdentIndex).Param[NumActualParams].DataType, ActualParamType);
 
           if (TokenAt(i).Kind = IDENTTOK) and (IdentifierAt(IdentIndex).Param[NumActualParams].DataType = TDataType.ENUMTOK) then
@@ -9589,7 +9589,7 @@ begin
 
           //    CheckTok(i + 1, TTokenKind.OPARTOK);
 
-          if (IdentifierAt(IdentIndex).DataType = TDatatype.POINTERTOK) and (Elements(IdentIndex) > 0) then
+          if (IdentifierAt(IdentIndex).DataType = TDataType.POINTERTOK) and (Elements(IdentIndex) > 0) then
           begin
 
             i := CompileAddress(i + 1, VarType, ValType);
@@ -9675,15 +9675,15 @@ begin
 
             case IdentifierAt(IdentIndex).DataType of
 
-              TDatatype.ENUMTOK:
+              TDataType.ENUMTOK:
               begin
-                ValType := TDatatype.ENUMTOK;
+                ValType := TDataType.ENUMTOK;
               end;
 
 
-              TDatatype.SHORTREALTOK:
+              TDataType.SHORTREALTOK:
               begin
-                ExpandParam(TDatatype.SMALLINTTOK, ValType);
+                ExpandParam(TDataType.SMALLINTTOK, ValType);
 
                 asm65(#9'lda :STACKORIGIN+STACKWIDTH*2,x');
                 asm65(#9'sta :STACKORIGIN+STACKWIDTH*3,x');
@@ -9698,9 +9698,9 @@ begin
               end;
 
 
-              TDatatype.REALTOK:
+              TDataType.REALTOK:
               begin
-                ExpandParam(TDatatype.INTEGERTOK, ValType);
+                ExpandParam(TDataType.INTEGERTOK, ValType);
 
                 asm65(#9'lda :STACKORIGIN+STACKWIDTH*2,x');
                 asm65(#9'sta :STACKORIGIN+STACKWIDTH*3,x');
@@ -9715,9 +9715,9 @@ begin
               end;
 
 
-              TDatatype.HALFSINGLETOK:
+              TDataType.HALFSINGLETOK:
               begin
-                ExpandParam(TDatatype.INTEGERTOK, ValType);
+                ExpandParam(TDataType.INTEGERTOK, ValType);
 
                 //asm65(#9'jsr @F16_I2F');
 
@@ -9741,9 +9741,9 @@ begin
               end;
 
 
-              TDatatype.SINGLETOK:
+              TDataType.SINGLETOK:
               begin
-                ExpandParam(TDatatype.INTEGERTOK, ValType);
+                ExpandParam(TDataType.INTEGERTOK, ValType);
 
                 //asm65(#9'jsr @I2F');
 
@@ -9802,14 +9802,14 @@ begin
           end
           else
             if ((ValType = TDataType.POINTERTOK) and (IdentifierAt(IdentIndex).AllocElementType in
-              OrdinalTypes + RealTypes + [TDatatype.RECORDTOK, TDataType.OBJECTTOK])) or
+              OrdinalTypes + RealTypes + [TDataType.RECORDTOK, TDataType.OBJECTTOK])) or
               ((ValType = TDataType.POINTERTOK) and (IdentifierAt(IdentIndex).DataType in
-              [TDatatype.RECORDTOK, TDataType.OBJECTTOK])) then
+              [TDataType.RECORDTOK, TDataType.OBJECTTOK])) then
             begin
 
               yes := False;
 
-              if (IdentifierAt(IdentIndex).DataType in [TDatatype.RECORDTOK, TDatatype.OBJECTTOK]) and
+              if (IdentifierAt(IdentIndex).DataType in [TDataType.RECORDTOK, TDataType.OBJECTTOK]) and
                 (TokenAt(j).Kind = TTokenKind.DEREFERENCETOK) then yes := True;
 
               if (IdentifierAt(IdentIndex).DataType = TDataType.POINTERTOK) and
@@ -9820,8 +9820,8 @@ begin
 
               //  writeln(IdentifierAt(IdentIndex).Name,',',IdentifierAt(IdentIndex).DataType,',',TokenAt(j ].Kind,',',TokenAt(j + 1).Kind,',',TokenAt(j + 2).Kind);
 
-              if (IdentifierAt(IdentIndex).AllocElementType in [TDatatype.RECORDTOK, TDatatype.OBJECTTOK]) or
-                (IdentifierAt(IdentIndex).DataType in [TDatatype.RECORDTOK, TDatatype.OBJECTTOK]) then
+              if (IdentifierAt(IdentIndex).AllocElementType in [TDataType.RECORDTOK, TDataType.OBJECTTOK]) or
+                (IdentifierAt(IdentIndex).DataType in [TDataType.RECORDTOK, TDataType.OBJECTTOK]) then
               begin
 
                 if TokenAt(j + 2).Kind = TTokenKind.DEREFERENCETOK then Inc(j);
@@ -17396,7 +17396,7 @@ begin
           GenerateAssignment(ASPOINTER, GetDataSize(TDataType.POINTERTOK), 0, Param[ParamIndex].Name)
         else
         begin
-          if Param[ParamIndex].DataType = TDatatype.ENUMTOK then
+          if Param[ParamIndex].DataType = TDataType.ENUMTOK then
             GenerateAssignment(ASPOINTER, GetDataSize(Param[ParamIndex].AllocElementType), 0, Param[ParamIndex].Name)
           else
             GenerateAssignment(ASPOINTER, GetDataSize(Param[ParamIndex].DataType), 0, Param[ParamIndex].Name);

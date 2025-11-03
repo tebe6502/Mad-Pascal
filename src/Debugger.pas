@@ -2,7 +2,7 @@ unit Debugger;
 
 interface
 
-uses SysUtils, Common, CompilerTypes, Datatypes, Parser, Tokens;
+uses SysUtils, Common, CompilerTypes, DataTypes, Parser, Tokens;
 
 type
   IDebugger = interface

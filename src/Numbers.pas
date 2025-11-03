@@ -6,7 +6,7 @@ unit Numbers;
 
 interface
 
-uses Datatypes;
+uses DataTypes;
 
 type
   TNumber = Int64;
