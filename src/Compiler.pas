@@ -13350,26 +13350,24 @@ begin
       i := CompileExpression(i + 1, SelectorType);
 
 
-        if (TokenAt(j).Kind = TTokenKind.IDENTTOK) then begin
+      if (TokenAt(j).Kind = TTokenKind.IDENTTOK) then begin
 
           IdentTemp := GetIdentIndex(TokenAt(j).Name);
 
+          EnumName := GetEnumName(IdentTemp);
+
 	  case IdentifierAt(IdentTemp).Kind of
 
-	   FUNCTIONTOK: begin
+	   FUNCTIONTOK: if SelectorType = TDataType.ENUMTOK begin
 	          	  SelectorType := IdentifierAt(GetIdentResult(IdentifierAt(IdentTemp).ProcAsBlockIndex)).AllocElementType;
         		  EnumName := GetTypeAtIndex(IdentifierAt(GetIdentResult(IdentifierAt(IdentTemp).ProcAsBlockIndex)).NumAllocElements).Field[0].Name;
 	                end;
 
-	       TYPETOK: begin
-	        	  SelectorType := IdentifierAt(IdentTemp).AllocElementType;
-        	    	  EnumName := GetEnumName(IdentTemp);
-	                end;
-	  else
-            EnumName := GetEnumName(IdentTemp);
+	       TYPETOK: SelectorType := IdentifierAt(IdentTemp).AllocElementType;
+
 	  end;
 
-	end;
+      end;
 
 
 
