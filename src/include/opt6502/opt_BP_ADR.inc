@@ -138,8 +138,8 @@ begin
 
 	end;
 
-	listing[i+6] := #9'lda ' + copy(listing[i], 7, 256) + '+' + Hex(q, 2) + ',y';
-	listing[i+8] := #9'sta ' + copy(listing[i], 7, 256) + '+' + Hex(q, 2) + ',y';
+	listing[i+6] := #9'lda ' + copy(listing[i], 7, 256) + '+' + HexByte(q) + ',y';
+	listing[i+8] := #9'sta ' + copy(listing[i], 7, 256) + '+' + HexByte(q) + ',y';
 
 	listing[i]   := '';
 	listing[i+1] := '';
@@ -185,8 +185,8 @@ begin
 
 //	end;
 
-	listing[i+6] := #9'lda ' + copy(listing[i], 7, 256) + '-' + Hex(q, 2) + ',y';
-	listing[i+8] := #9'sta ' + copy(listing[i], 7, 256) + '-' + Hex(q, 2) + ',y';
+	listing[i+6] := #9'lda ' + copy(listing[i], 7, 256) + '-' + HexByte(q) + ',y';
+	listing[i+8] := #9'sta ' + copy(listing[i], 7, 256) + '-' + HexByte(q) + ',y';
 
 	listing[i]   := '';
 	listing[i+1] := '';
@@ -249,8 +249,8 @@ begin
     begin
 	q:=getWORD(i+1, i+4);
 
-	listing[i+6] := #9'lda ' + copy(listing[i], 7, 256) + '+' + Hex(q, 2);
-	listing[i+8] := #9'sta ' + copy(listing[i], 7, 256) + '+' + Hex(q, 2);
+	listing[i+6] := #9'lda ' + copy(listing[i], 7, 256) + '+' + HexByte(q);
+	listing[i+8] := #9'sta ' + copy(listing[i], 7, 256) + '+' + HexByte(q);
 
 	listing[i]   := '';
 	listing[i+1] := '';

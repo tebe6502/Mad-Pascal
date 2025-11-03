@@ -24,7 +24,7 @@ begin
 	  k := GetVAL(GetARG(0, x)) + GetVAL(GetARG(1, x)) shl 8;
 	  if (k > $FFFF) or (k < 0) then exit(true);
 
-	  listing[l]   := #9'lda ' + Hex(k, 4);
+	  listing[l]   := #9'lda ' + HexWord(k);
 	  listing[l+1] := #9'sta ' + GetARG(0, x);
 
 	  inc(l, 2);
@@ -64,9 +64,9 @@ begin
 	  k := GetVAL(GetARG(0, x)) + GetVAL(GetARG(1, x)) shl 8;
 	  if (k > $FFFF) or (k < 0) then exit(true);
 
-	  listing[l]   := #9'lda ' + Hex(k, 4);
+	  listing[l]   := #9'lda ' + HexWord(k);
 	  listing[l+1] := #9'sta ' + GetARG(0, x);
-	  listing[l+2] := #9'lda ' + Hex(k, 4)+'+1';
+	  listing[l+2] := #9'lda ' + HexWord(k)+'+1';
 	  listing[l+3] := #9'sta ' + GetARG(1, x);
 
 	  inc(l, 4);

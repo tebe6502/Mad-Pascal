@@ -2957,10 +2957,10 @@ begin
        begin
 	 p := GetWORD(i+1, i+4) + GetWORD(i+6, i+9);
 
-	 listing[i+6] := #9'lda #' + Hex(byte(p),2);
+	 listing[i+6] := #9'lda #' + HexByte(byte(p));
 	 listing[i+7] := #9'add ' + copy(listing[i], 6, 256);
 
-	 listing[i+9] := #9'lda #' + Hex(byte(p shr 8),2);
+	 listing[i+9] := #9'lda #' + HexByte(byte(p shr 8));
 	 listing[i+10]:= #9'adc ' + copy(listing[i+3], 6, 256);
 
 	 listing[i]   := '';
@@ -2991,7 +2991,7 @@ begin
 	 p := GetWORD(i, i+3);
 
 	 listing[i+8] := #9'ldy ' + copy(listing[i+1], 6, 256);
-	 listing[i+9] := #9'sta ' + Hex(p, 4) + ',y';
+	 listing[i+9] := #9'sta ' + HexWord(p) + ',y';
 
 	 listing[i]   := '';
 	 listing[i+1] := '';
@@ -3022,7 +3022,7 @@ begin
 	 p := GetWORD(i, i+3);
 
 	 listing[i+9] := #9'ldy ' + copy(listing[i+1], 6, 256);
-	 listing[i+10] := #9'sta ' + Hex(p, 4) + ',y';
+	 listing[i+10] := #9'sta ' + HexWord(p) + ',y';
 
 	 listing[i]   := '';
 	 listing[i+1] := '';
@@ -3093,7 +3093,7 @@ begin
 	p := GetWORD(i, i+3);
 
 	listing[i+9] := #9'ldy ' + copy(listing[i+1], 6, 256);
-	listing[i+10] := #9'sta ' + Hex(p, 4) + ',y';
+	listing[i+10] := #9'sta ' + HexWord(p) + ',y';
 
 	listing[i]   := '';
 	listing[i+1] := '';
@@ -3608,8 +3608,8 @@ begin
       begin
         p := GetWORD(i, i+3) + GetWORD(i+1, i+4);
 
-	if lda_bp_y(i+6) then listing[i+6] := #9'lda ' + Hex(p, 4);
-	if sta_bp_y(i+7) then listing[i+7] := #9'sta ' + Hex(p, 4);
+	if lda_bp_y(i+6) then listing[i+6] := #9'lda ' + HexWord(p);
+	if sta_bp_y(i+7) then listing[i+7] := #9'sta ' + HexWord(p);
 
 	listing[i]  := '';
 	listing[i+1]:= '';
@@ -3636,9 +3636,9 @@ begin
       begin
         p := GetWORD(i, i+3) + GetWORD(i+1, i+4);
 
-	listing[i+6] := #9'lda ' + Hex(p, 4);
+	listing[i+6] := #9'lda ' + HexWord(p);
 
-	listing[i+8] := #9'sta ' + Hex(p, 4);
+	listing[i+8] := #9'sta ' + HexWord(p);
 
 	listing[i]  := '';
 	listing[i+1]:= '';
@@ -3664,8 +3664,8 @@ begin
       begin
         p := GetWORD(i, i+3);
 
-	if lda_bp_y(i+6) then listing[i+6] := #9'lda ' + Hex(p, 4) + ',y';
-	if sta_bp_y(i+7) then listing[i+7] := #9'sta ' + Hex(p, 4) + ',y';
+	if lda_bp_y(i+6) then listing[i+6] := #9'lda ' + HexWord(p) + ',y';
+	if sta_bp_y(i+7) then listing[i+7] := #9'sta ' + HexWord(p) + ',y';
 
 	listing[i]  := '';
 	listing[i+1]:= #9'ldy ' + copy(listing[i+1], 6, 256);
@@ -3688,8 +3688,8 @@ begin
       begin
         p := GetWORD(i, i+1);
 
-	if lda_bp_y(i+3) then listing[i+3] := #9'lda ' + Hex(p, 4);
-	if sta_bp_y(i+4) then listing[i+4] := #9'sta ' + Hex(p, 4);
+	if lda_bp_y(i+3) then listing[i+3] := #9'lda ' + HexWord(p);
+	if sta_bp_y(i+4) then listing[i+4] := #9'sta ' + HexWord(p);
 
 	listing[i]  := '';
 	listing[i+1]:= '';
@@ -3710,8 +3710,8 @@ begin
       begin
         p := GetWORD(i, i+1);
 
-	listing[i+3] := #9'lda ' + Hex(p, 4);
-	listing[i+5] := #9'sta ' + Hex(p, 4);
+	listing[i+3] := #9'lda ' + HexWord(p);
+	listing[i+5] := #9'sta ' + HexWord(p);
 
 	listing[i]  := '';
 	listing[i+1]:= '';
@@ -3744,8 +3744,8 @@ begin
 
 	listing[i+11] := #9'ldy ' + copy(listing[i+1], 6, 256);
 
-	if lda_bp_y(i+12) then listing[i+12] := #9'lda ' + Hex(p, 4) + ',y';
-	if sta_bp_y(i+13) then listing[i+13] := #9'sta ' + Hex(p, 4) + ',y';
+	if lda_bp_y(i+12) then listing[i+12] := #9'lda ' + HexWord(p) + ',y';
+	if sta_bp_y(i+13) then listing[i+13] := #9'sta ' + HexWord(p) + ',y';
 
 	listing[i]   := '';
 	listing[i+1] := '';
@@ -3790,8 +3790,8 @@ begin
 
 	listing[i+11] := #9'ldy ' + copy(listing[i], 6, 256);
 
-	if lda_bp_y(i+12) then listing[i+12] := #9'lda ' + Hex(p, 4) + ',y';
-	if sta_bp_y(i+13) then listing[i+13] := #9'sta ' + Hex(p, 4) + ',y';
+	if lda_bp_y(i+12) then listing[i+12] := #9'lda ' + HexWord(p) + ',y';
+	if sta_bp_y(i+13) then listing[i+13] := #9'sta ' + HexWord(p) + ',y';
 
 	listing[i]   := '';
 	listing[i+1] := '';
@@ -3948,8 +3948,8 @@ begin
 
 	listing[i+6] := #9'ldy ' + copy(listing[i], 6, 256);
 
-	if lda_bp_y(i+7) then listing[i+7] := #9'lda ' + Hex(p, 4) + ',y';
-	if sta_bp_y(i+8) then listing[i+8] := #9'sta ' + Hex(p, 4) + ',y';
+	if lda_bp_y(i+7) then listing[i+7] := #9'lda ' + HexWord(p) + ',y';
+	if sta_bp_y(i+8) then listing[i+8] := #9'sta ' + HexWord(p) + ',y';
 
 	listing[i] := '';
 	listing[i+1] := '';
@@ -3978,8 +3978,8 @@ begin
 
 	listing[i] := #9'tay';
 
-	if lda_bp_y(i+6) then listing[i+6] := #9'lda ' + Hex(p, 4) + ',y';
-	if sta_bp_y(i+7) then listing[i+7] := #9'sta ' + Hex(p, 4) + ',y';
+	if lda_bp_y(i+6) then listing[i+6] := #9'lda ' + HexWord(p) + ',y';
+	if sta_bp_y(i+7) then listing[i+7] := #9'sta ' + HexWord(p) + ',y';
 
 	listing[i+1] := '';
 	listing[i+2] := '';
@@ -4008,8 +4008,8 @@ begin
 
 	 listing[i+6] := #9'ldy ' + copy(listing[i+1], 6, 256);
 
-	 if lda_bp_y(i+7) then listing[i+7] := #9'lda ' + Hex(p, 4) + ',y';
-	 if sta_bp_y(i+8) then listing[i+8] := #9'sta ' + Hex(p, 4) + ',y';
+	 if lda_bp_y(i+7) then listing[i+7] := #9'lda ' + HexWord(p) + ',y';
+	 if sta_bp_y(i+8) then listing[i+8] := #9'sta ' + HexWord(p) + ',y';
 
 	 listing[i]   := '';
 	 listing[i+1] := '';
@@ -4039,9 +4039,9 @@ begin
 	 p := GetWORD(i, i+3);
 
 	 listing[i+6] := #9'ldy ' + copy(listing[i+1], 6, 256);
-	 listing[i+7] := #9'lda ' + Hex(p, 4) + ',y';
+	 listing[i+7] := #9'lda ' + HexWord(p) + ',y';
 
-	 if sta_bp_y(i+9) then listing[i+9] := #9'sta ' + Hex(p, 4) + ',y';
+	 if sta_bp_y(i+9) then listing[i+9] := #9'sta ' + HexWord(p) + ',y';
 
 	 listing[i]   := '';
 	 listing[i+1] := '';
@@ -4477,16 +4477,16 @@ begin
 	listing[i+3] := '';
 	listing[i+4] := '';
 
-	listing[i+5] := #9'lda ' + Hex(p, 4);
+	listing[i+5] := #9'lda ' + HexWord(p);
 	listing[i+7] := '';
 
-	listing[i+8] := #9'lda ' + Hex(p+1, 4);
+	listing[i+8] := #9'lda ' + HexWord(p+1);
 	listing[i+10]:= '';
 
-	listing[i+11]:= #9'lda ' + Hex(p+2, 4);
+	listing[i+11]:= #9'lda ' + HexWord(p+2);
 	listing[i+13]:= '';
 
-	listing[i+14]:= #9'lda ' + Hex(p+3, 4);
+	listing[i+14]:= #9'lda ' + HexWord(p+3);
 
 	exit(false);
        end;
@@ -4514,10 +4514,10 @@ begin
 	listing[i+3] := '';
 	listing[i+4] := '';
 
-	listing[i+5] := #9'lda ' + Hex(p, 4);
+	listing[i+5] := #9'lda ' + HexWord(p);
 	listing[i+7] := '';
 
-	listing[i+8] := #9'lda ' + Hex(p+1, 4);
+	listing[i+8] := #9'lda ' + HexWord(p+1);
 
 	exit(false);
        end;
@@ -4550,16 +4550,16 @@ begin
 	listing[i+3] := '';
 	listing[i+4] := '';
 
-	listing[i+6] := #9'sta ' + Hex(p, 4);
+	listing[i+6] := #9'sta ' + HexWord(p);
 	listing[i+7] := '';
 
-	listing[i+9] := #9'sta ' + Hex(p+1, 4);
+	listing[i+9] := #9'sta ' + HexWord(p+1);
 	listing[i+10]:= '';
 
-	listing[i+12]:= #9'sta ' + Hex(p+2, 4);
+	listing[i+12]:= #9'sta ' + HexWord(p+2);
 	listing[i+13]:= '';
 
-	listing[i+15]:= #9'sta ' + Hex(p+3, 4);
+	listing[i+15]:= #9'sta ' + HexWord(p+3);
 
 	exit(false);
        end;
@@ -4587,10 +4587,10 @@ begin
 	listing[i+3] := '';
 	listing[i+4] := '';
 
-	listing[i+6] := #9'sta ' + Hex(p, 4);
+	listing[i+6] := #9'sta ' + HexWord(p);
 	listing[i+7] := '';
 
-	listing[i+9] := #9'sta ' + Hex(p+1, 4);
+	listing[i+9] := #9'sta ' + HexWord(p+1);
 
 	exit(false);
        end;
@@ -4620,13 +4620,13 @@ begin
 	listing[i+3] := '';
 	listing[i+4] := '';
 
-	listing[i+5] := #9'lda ' + Hex(p, 4);
+	listing[i+5] := #9'lda ' + HexWord(p);
 
-	listing[i+7] := #9'sta ' + Hex(p, 4);
+	listing[i+7] := #9'sta ' + HexWord(p);
 	listing[i+8] := '';
-	listing[i+9] := #9'lda ' + Hex(p+1, 4);
+	listing[i+9] := #9'lda ' + HexWord(p+1);
 
-	listing[i+11] := #9'sta ' + Hex(p+1, 4);
+	listing[i+11] := #9'sta ' + HexWord(p+1);
 
 	exit(false);
        end;
@@ -4663,17 +4663,17 @@ begin
 	listing[i+3] := '';
 	listing[i+4] := '';
 
-	listing[i+5] := #9'lda ' + Hex(p, 4);
-	listing[i+7] := #9'sta ' + Hex(p, 4);
+	listing[i+5] := #9'lda ' + HexWord(p);
+	listing[i+7] := #9'sta ' + HexWord(p);
 	listing[i+8] := '';
-	listing[i+9] := #9'lda ' + Hex(p+1, 4);
-	listing[i+11]:= #9'sta ' + Hex(p+1, 4);
+	listing[i+9] := #9'lda ' + HexWord(p+1);
+	listing[i+11]:= #9'sta ' + HexWord(p+1);
 	listing[i+12] := '';
-	listing[i+13]:= #9'lda ' + Hex(p+2, 4);
-	listing[i+15]:= #9'sta ' + Hex(p+2, 4);
+	listing[i+13]:= #9'lda ' + HexWord(p+2);
+	listing[i+15]:= #9'sta ' + HexWord(p+2);
 	listing[i+16] := '';
-	listing[i+17]:= #9'lda ' + Hex(p+3, 4);
-	listing[i+19]:= #9'sta ' + Hex(p+3, 4);
+	listing[i+17]:= #9'lda ' + HexWord(p+3);
+	listing[i+19]:= #9'sta ' + HexWord(p+3);
 
 	exit(false);
        end;

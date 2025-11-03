@@ -8,7 +8,7 @@ interface
 // if there are any values left, continue the conversion
 
 
-function Hex(Value: Cardinal; nibbles: Shortint): String;
+// function Hex(Value: Cardinal; nibbles: Shortint): String;
 function HexByte(Value: Byte): String;
 function HexWord(Value: Cardinal): String;
 
@@ -47,7 +47,7 @@ end;
 
 function HexWord(Value: Cardinal): String;
 begin
-  Result := Hex(Value, 2);
+  Result := Hex(Value, 4);
 end;
 
 end.
