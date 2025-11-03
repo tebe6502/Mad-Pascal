@@ -49,6 +49,29 @@ begin
 end;
 
 
+
+function GetVAL(a: String): Integer;
+var
+  err: Integer;
+begin
+
+  Result := -1;
+
+  if a <> '' then
+    if a[1] = '#' then
+    begin
+      val(copy(a, 2, length(a)), Result, err);
+
+      if err > 0 then
+      begin
+        Result := -1;
+        // TODO Writeln('ERROR: Cannot get value of ' + a);
+      end;
+
+    end;
+
+end;
+
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 
@@ -194,6 +217,7 @@ var
     Result := GetVAL(copy(TemporaryBuf[i], 6, 4));
   end;
 
+  // TODO: The functions below do not handle errors situations (-1) correctly
   function GetWORD(i, j: Integer): Integer;
   begin
     Result := GetVAL(copy(TemporaryBuf[i], 6, 4)) + GetVAL(copy(TemporaryBuf[j], 6, 4)) * 256;

@@ -185,9 +185,6 @@ function GetCommonType(const tokenIndex: TTokenIndex; const LeftType: TDataType;
 
 function GetEnumName(IdentIndex: TIdentIndex): TString;
 
-
-function GetVAL(a: String): Integer;
-
 function LowBound(const i: TTokenIndex; const DataType: TDataType): TInteger;
 function HighBound(const i: TTokenIndex; const DataType: TDataType): TInteger;
 
@@ -503,30 +500,6 @@ begin
   end;
 
 end;
-
-
-// ----------------------------------------------------------------------------
-// ----------------------------------------------------------------------------
-
-
-function GetVAL(a: String): Integer;
-var
-  err: Integer;
-begin
-
-  Result := -1;
-
-  if a <> '' then
-    if a[1] = '#' then
-    begin
-      val(copy(a, 2, length(a)), Result, err);
-
-      if err > 0 then Result := -1;
-
-    end;
-
-end;
-
 
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------

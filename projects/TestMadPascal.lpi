@@ -622,19 +622,12 @@
         <Name Value="EFOpenError"/>
       </Item>
       <Item>
-        <Name Value="THaltException"/>
-      </Item>
-      <Item>
         <Name Value="ERangeError"/>
-      </Item>
-      <Item>
-        <Name Value="RunError(201)"/>
+        <Enabled Value="False"/>
       </Item>
       <Item>
         <Name Value="EEValuationException"/>
-      </Item>
-      <Item>
-        <Name Value="RunError(100)"/>
+        <Enabled Value="False"/>
       </Item>
       <Item>
         <Name Value="EInOutError"/>
