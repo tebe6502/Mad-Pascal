@@ -24,7 +24,7 @@ procedure FlushTempBuf;
 
 implementation
 
-uses SysUtils, Common, Console, StringUtilities, Targets, Utilities;
+uses SysUtils, Assembler, Common, Console, StringUtilities, Targets, Utilities;
 
 var
   TemporaryBuf: array [0..511] of String;

@@ -29,7 +29,7 @@ begin
       begin
         p:=GetWORD(i+0, i+1);
 
-	listing[i+2] := #9'@printPCHAR #' + Hex(p, 4);
+	listing[i+2] := #9'@printPCHAR #' + HexWord(p);
 
 	listing[i]   := '';
 	listing[i+1] := '';
@@ -64,7 +64,7 @@ begin
       begin
         p:=GetWORD(i+0, i+1);
 
-	listing[i+2] := #9'@printSTRING #' + Hex(p, 4);
+	listing[i+2] := #9'@printSTRING #' + HexWord(p);
 
 	listing[i]   := '';
 	listing[i+1] := '';

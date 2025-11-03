@@ -191,7 +191,7 @@ type
 
   TTypeIndex = Integer;
 
-  TType = record
+  TType = record // TODO Class
     BlockIndex: TBlockIndex;
     Size: Integer;
     NumFields: Integer;

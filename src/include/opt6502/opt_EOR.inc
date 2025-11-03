@@ -392,7 +392,7 @@ begin
 
 	p := GetBYTE(i) xor GetBYTE(i+1);
 
-	listing[i]   := #9'lda #' + Hex(p, 2);
+	listing[i]   := #9'lda #' + HexByte(p);
 	listing[i+1] := '';
 	exit(false);
      end;

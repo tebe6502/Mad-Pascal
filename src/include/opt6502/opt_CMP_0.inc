@@ -29,7 +29,7 @@ begin
 
       p := GetBYTE(i) + GetBYTE(i+1);
 
-      listing[i]   := #9'lda #' + Hex(p and $ff, 2);
+      listing[i]   := #9'lda #' + HexByte(p and $ff);
       listing[i+1] := '';
 
       exit(false);
@@ -45,7 +45,7 @@ begin
 
       p := GetBYTE(i) - GetBYTE(i+1);
 
-      listing[i]   := #9'lda #' + Hex(p and $ff, 2);
+      listing[i]   := #9'lda #' + HexByte(p and $ff);
       listing[i+1] := '';
 
       exit(false);

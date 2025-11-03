@@ -29,7 +29,7 @@ begin
 	if lda_im(i) then begin
 	 p := GetBYTE(i);
 
-	 listing[i]   := #9'ldy #' + Hex((p-1) and $ff, 2);
+	 listing[i]   := #9'ldy #' + HexByte((p-1) and $ff);
 	 listing[i+1] := '';
 	 listing[i+2] := '';
 

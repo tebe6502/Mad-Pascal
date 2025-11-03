@@ -152,8 +152,6 @@ function TokenAt(tokenIndex: TTokenIndex): TToken;
 function NumIdent: Integer;
 function IdentifierAt(identifierIndex: TIdentifierIndex): TIdentifier;
 
-function Hex(a: Cardinal; b: Shortint): String;
-
 procedure AddDefine(const defineName: TDefineName);
 function SearchDefine(const defineName: TDefineName): TDefineIndex;
 
@@ -288,38 +286,6 @@ begin
     end;
     Error(NumTok, msg);
   end;
-end;
-
-// ----------------------------------------------------------------------------
-// ----------------------------------------------------------------------------
-
-function Hex(a: Cardinal; b: Shortint): String;
-  (*----------------------------------------------------------------------------*)
-  (*  zamiana na zapis hexadecymalny                                            *)
-  (*  'B' okresla maksymalna liczbe nibbli do zamiany                           *)
-  (*  jesli sa jeszcze jakies wartosci to kontynuuje zamiane                    *)
-  (*----------------------------------------------------------------------------*)
-var
-  v: Byte;
-const
-  tHex: array [0..15] of Char =
-    ('0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F');
-begin
-  Result := '';
-
-  while (b > 0) or (a <> 0) do
-  begin
-
-    v := Byte(a);
-    Result := tHex[v shr 4] + tHex[v and $0f] + Result;
-
-    a := a shr 8;
-
-    Dec(b, 2);
-  end;
-
-  Result := '$' + Result;
-
 end;
 
 // ----------------------------------------------------------------------------

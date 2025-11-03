@@ -26,8 +26,8 @@
       <Modes>
         <Mode Name="default">
           <local>
-            <CommandLineParams Value="-iPath:C:\jac\system\Atari800\Programming\Repositories\Mad-Pascal\lib rijndael-test.pas -pause"/>
-            <WorkingDirectory Value="C:\jac\system\Atari800\Programming\Repositories\Mad-Pascal\samples\a8\math\AES-Rijndael"/>
+            <CommandLineParams Value="-iPath:C:\jac\system\Atari800\Programming\Repositories\Mad-Pascal\lib milf.pas -pause"/>
+            <WorkingDirectory Value="C:\jac\system\Atari800\Programming\Repositories\Mad-Pascal\samples\a8\tools\milf\"/>
           </local>
         </Mode>
         <Mode Name="profile">
@@ -551,6 +551,10 @@
         <Filename Value="..\src\Profiler.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit>
+      <Unit>
+        <Filename Value="..\src\Assembler.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
@@ -622,11 +626,9 @@
       </Item>
       <Item>
         <Name Value="ERangeError"/>
-        <Enabled Value="False"/>
       </Item>
       <Item>
         <Name Value="RunError(201)"/>
-        <Enabled Value="False"/>
       </Item>
       <Item>
         <Name Value="EEValuationException"/>

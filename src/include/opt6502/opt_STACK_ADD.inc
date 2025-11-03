@@ -241,7 +241,7 @@ begin
           stack_0x(p+1) and mva_im(p+1) and
 	  stack_1x(p+2) and (mva(p+2) or sta(p+2)) then
 	begin
-       	 listing[i+7] := #9'ldy ' + copy(listing[i+2], 6, 256) + '+' + Hex(GetBYTE(p+1), 2);
+       	 listing[i+7] := #9'ldy ' + copy(listing[i+2], 6, 256) + '+' + HexByte(GetBYTE(p+1));
 
        	 listing[p+1] := '';
 	 listing[p+2] := '';
