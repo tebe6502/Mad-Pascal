@@ -1,14 +1,9 @@
 unit Assembler;
 
+// TODO Check other locations that still use IntToHex
+
 interface
 
-// Conversion to hexadecimal notation
-// The parameter 'nibbles' specifies the maximum number of nibbles to be converted.
-// This must be an even number.
-// if there are any values left, continue the conversion
-
-
-// function Hex(Value: Cardinal; nibbles: Shortint): String;
 function HexByte(Value: Byte): String;
 function HexWord(Value: Cardinal): String;
 
@@ -16,6 +11,14 @@ implementation
 
 // ----------------------------------------------------------------------------
 
+var
+  HexBytes: array[0..255] of String;
+  Count: Longint;
+
+// Conversion to hexadecimal notation
+// The parameter 'nibbles' specifies the maximum number of nibbles to be converted.
+// This must be an even number.
+// if there are any values left, continue the conversion
 function Hex(Value: Cardinal; nibbles: Shortint): String;
 var
   v: Byte;
@@ -36,18 +39,37 @@ begin
     Dec(nibbles, 2);
   end;
 
-  Result := '$' + Result;
+end;
 
+
+procedure DoCount;
+begin
+  Inc(Count);
+  WriteLn(Count);
 end;
 
 function HexByte(Value: Byte): String;
 begin
-  Result := Hex(Value, 2);
+  Result := '$' + HexBytes[Value];
 end;
 
 function HexWord(Value: Cardinal): String;
 begin
-  Result := Hex(Value, 4);
+  Result := '$' + HexBytes[(Value shr 8) and $ff] + HexBytes[Value and $ff];
+  DoCount;
 end;
+
+procedure InitializeStrings;
+var
+  i: Byte;
+begin
+  for i := 0 to 255 do HexBytes[i] := Hex(i, 2);
+  Count := 0;
+end;
+
+
+initialization
+
+  InitializeStrings;
 
 end.
