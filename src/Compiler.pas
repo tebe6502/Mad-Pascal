@@ -7849,11 +7849,11 @@ begin
           begin
             IdentTemp := GetIdentIndex(TokenAt(i).Name);
 
-            if _TypeArray[IdentifierAt(IdentTemp).NumAllocElements].Field[0].Name <>
-              _TypeArray[IdentifierAt(IdentIndex).Param[NumActualParams].NumAllocElements].Field[0].Name then
+            if GetTypeAtIndex(IdentifierAt(IdentTemp).NumAllocElements).Field[0].Name <>
+              GetTypeAtIndex(IdentifierAt(IdentIndex).Param[NumActualParams].NumAllocElements).Field[0].Name then
               Error(i, 'Incompatible types: got "' +
-                _TypeArray[IdentifierAt(IdentTemp).NumAllocElements].Field[0].Name +
-                '" expected "' + _TypeArray[IdentifierAt(IdentIndex).Param[NumActualParams].NumAllocElements].Field[0].Name + '"');
+                GetTypeAtIndex(IdentifierAt(IdentTemp).NumAllocElements).Field[0].Name +
+                '" expected "' + GetTypeAtIndex(IdentifierAt(IdentIndex).Param[NumActualParams].NumAllocElements).Field[0].Name + '"');
 
             ActualParamType := IdentifierAt(IdentTemp).CastKindToDataType;
 
@@ -19785,6 +19785,7 @@ begin
   TokenList := TTokenList.Create;
   IdentifierList := TIdentifierList.Create;
   for i := 1 to MAXIDENTS do IdentifierList.AddIdentifier;
+  TypeList:=TTypeList.Create;
 
   SetLength(IFTmpPosStack, 1);
 
@@ -19882,6 +19883,9 @@ end;
 
 procedure Free;
 begin
+
+  TypeList.Free;
+  TypeList:=nil;
 
   TokenList.Free;
   TokenList := nil;

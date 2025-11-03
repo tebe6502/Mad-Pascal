@@ -48,14 +48,14 @@ var
   NumDefines: Integer = 1;  // NumDefines = AddDefines
   Defines: array [1..MAXDEFINES] of TDefine;
 
-  NumTypes: Integer;
-  _TypeArray: array [1..MAXTYPES] of TType;
-
   TokenList: TTokenList;
 
   // This is current index in the list, not the size of the list.
   NumIdent_: Integer;
   IdentifierList: TIdentifierList;
+
+  NumTypes: Integer;
+  TypeList: TTypeList;
 
   SourceFileList: TSourceFileList;
 
@@ -243,14 +243,7 @@ end;
 
 function GetTypeAtIndex(const typeIndex: TTypeIndex): TType;
 begin
-  {$IFDEF DEBUG}
-  if (typeIndex<Low(_TypeArray)) or (typeIndex>High(_TypeArray)) then
-  begin
-    Writeln('ERROR: typeIndex=',typeIndex);
-    Exit(Default(TType));
-  end;
-  {$ENDIF}
-  Result := _TypeArray[typeIndex];
+  Result := TypeList.GetTypeAtIndex(typeIndex);
 end;
 
 function FindFile(FileName: String; ftyp: TString): TFilePath; overload;

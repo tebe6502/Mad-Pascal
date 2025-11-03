@@ -34,7 +34,7 @@ const
   MAXTOKENNAMES = 200;
   MAXSTRLENGTH = 255;
   MAXFIELDS = 256;
-  MAXTYPES = 1024;
+
   //  MAXTOKENS    = 32768;
   MAXPOSSTACK = 512;
   MAXIDENTS = 16384;
@@ -191,11 +191,32 @@ type
 
   TTypeIndex = Integer;
 
-  TType = record // TODO Class
+  TType = class
+    TypeIndex: TTypeIndex;
     BlockIndex: TBlockIndex;
     Size: Integer;
     NumFields: Integer;
     Field: array [0..MAXFIELDS] of TField;
+  end;
+
+  TTypeList = class
+  public
+
+
+    constructor Create();
+    destructor Free;
+
+    function Size: Integer;
+    // function AddType(BlockIndex: TBlockIndex): TType;
+    function GetTypeAtIndex(const typeIndex: TTypeIndex): TType;
+
+  const
+    MAXTYPES = 1024;
+
+  private
+  var
+    Count: Integer;
+    TypeArray: array of TType;
   end;
 
   TSourceFileName = TName;
@@ -329,7 +350,7 @@ type
     NumParams: Word;
     Param: TParamList;
     ProcAsBlockIndex: TBlockIndex;
-    ObjectIndex: Integer;
+    ObjectIndex: TTypeIndex;
 
     isUnresolvedForward, updateResolvedForward, isOverload, isRegister, isInterrupt,
     isRecursion, isStdCall, isPascal, isInline, isAsm, isExternal, isKeep, isVolatile,
@@ -720,7 +741,7 @@ end;
 
 constructor TIdentifierList.Create;
 begin
-  identifierArray := nil;
+  IdentifierArray := nil;
   Clear;
 end;
 
@@ -731,7 +752,7 @@ end;
 
 function TIdentifierList.Size: Integer;
 begin
-  Result := High(identifierArray);
+  Result := High(IdentifierArray);
 end;
 
 procedure TIdentifierList.Clear;
@@ -781,6 +802,53 @@ begin
   end;
   {$ENDIF}
   Result := identifierArray[identifierIndex];
+end;
+
+// ----------------------------------------------------------------------------
+// Class TTypeList
+// ----------------------------------------------------------------------------
+
+
+constructor TTypeList.Create();
+var
+  i: Integer;
+begin
+  TypeArray := nil;
+  SetLength(TypeArray, MAXTYPES);
+  for i := Low(TypeArray) to High(TypeArray) do
+  begin
+    TypeArray[i] := TType.Create;
+    TypeArray[i].TypeIndex := i;
+  end;
+end;
+
+destructor TTypeList.Free;
+var
+  i: Integer;
+begin
+  if TypeArray <> nil then
+  begin
+    for i := Low(TypeArray) to High(TypeArray) do TypeArray[i].Free;
+  end;
+
+end;
+
+function TTypeList.Size: Integer;
+begin
+  Result := High(TypeArray);
+end;
+
+function TTypeList.GetTypeAtIndex(const TypeIndex: TTypeIndex): TType;
+begin
+  {$IFDEF DEBUG}
+  if (typeIndex<Low(TypeArray)) or (typeIndex>High(TypeArray)) then
+  begin
+    Writeln('ERROR: typeIndex=',typeIndex);
+    Exit(Default(TType));
+  end;
+  {$ENDIF}
+
+  Result := TypeArray[TypeIndex];
 end;
 
 // ----------------------------------------------------------------------------
