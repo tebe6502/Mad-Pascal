@@ -1069,35 +1069,25 @@ end;// GenerateInterrupt
 // ----------------------------------------------------------------------------
 
 
+
+procedure StartOptimization(const tokenIndex: TTokenIndex);
+  begin
+
+  StopOptimization;
+  Optimize.StartOptimization(TokenAt(tokenIndex).SourceLocation);
+
+end;
+
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+
 procedure StopOptimization;
 begin
 
-  if run_func = 0 then
-  begin
-
-    common.optimize.use := False;
-
-    if High(OptimizeBuf) > 0 then asm65;
-
-  end;
+  if run_func = 0 then Optimize.StopOptimization;
 
 end;
 
-
-// ----------------------------------------------------------------------------
-// ----------------------------------------------------------------------------
-
-
-procedure StartOptimization(i: TTokenIndex);
-begin
-
-  StopOptimization;
-
-  common.optimize.use := True;
-  common.optimize.SourceFile := TokenAt(i).SourceLocation.SourceFile;
-  common.optimize.line := TokenAt(i).SourceLocation.Line;
-
-end;
 
 
 // ----------------------------------------------------------------------------
@@ -6429,7 +6419,8 @@ end;  //GenerateRelation
 // The following functions implement recursive descent parser in accordance with Sub-Pascal EBNF
 // Parameter i is the index of the first token of the current EBNF symbol, result is the index of the last one
 
-function CompileExpression(i: TTokenIndex; out ValType: TDataType; VarType: TDataType = TDataType.INTEGERTOK): TTokenIndex; forward;
+function CompileExpression(i: TTokenIndex; out ValType: TDataType;
+  VarType: TDataType = TDataType.INTEGERTOK): TTokenIndex; forward;
 
 
 // ----------------------------------------------------------------------------
@@ -6495,7 +6486,7 @@ var
   yes, ShortArrayIndex: Boolean;
 begin
 
-  if common.optimize.use = False then StartOptimization(i);
+  if Optimize.IsOptimizationActive = False then StartOptimization(i);
 
 
   if (IdentifierAt(IdentIndex).isStriped) then
@@ -6789,7 +6780,7 @@ begin
 
           //  writeln(IdentifierAt(IdentIndex).nAME,' = ',IdentifierAt(IdentIndex).DataType,',',IdentifierAt(IdentIndex).AllocElementType,',',IdentifierAt(IdentIndex).NumAllocElements,',',IdentifierAt(IdentIndex).PassMethod );
 
-	  if (TokenAt(i + 2).Kind = TTokenKind.DEREFERENCETOK) and (TokenAt(i + 3).Kind = TTokenKind.OBRACKETTOK) then inc(i);
+          if (TokenAt(i + 2).Kind = TTokenKind.DEREFERENCETOK) and (TokenAt(i + 3).Kind = TTokenKind.OBRACKETTOK) then Inc(i);
 
 
           if IdentifierAt(IdentIndex).Kind in [TTokenKind.PROCEDURETOK, TTokenKind.FUNCTIONTOK,
@@ -9993,7 +9984,7 @@ begin
                 if (IdentifierAt(IdentIndex).isStdCall = False) then
                   StartOptimization(i)
                 else
-                  if common.optimize.use = False then StartOptimization(i);
+                  if Optimize.IsOptimizationActive = False then StartOptimization(i);
 
 
                 Inc(run_func);
@@ -13188,7 +13179,7 @@ begin
             if (IdentifierAt(IdentIndex).isStdCall = False) then
               StartOptimization(i)
             else
-              if common.optimize.use = False then StartOptimization(i);
+              if optimize.IsOptimizationActive then StartOptimization(i);
 
 
             Inc(run_func);
@@ -19429,7 +19420,7 @@ begin
   Common.pass := pass;
   ResetOpty;
 
-  common.optimize.use := False;
+  Optimize.SetOptimizationActive(false);
 
   SetVarDataSize(0, 0);
 
@@ -19871,10 +19862,7 @@ begin
   INTERFACETOK_USE := False;
   PublicSection := True;
 
-  iOut := -1;
-  outTmp := '';
-
-  SetLength(OptimizeBuf, 1);
+  Optimize.Initialize;
 
   Profiler.profiler.BeginSection('CompileProgram(TPass.CODE_GENERATION);');
   CompileProgram(TPass.CODE_GENERATION);

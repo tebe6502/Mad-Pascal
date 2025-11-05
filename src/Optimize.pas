@@ -6,7 +6,7 @@ interface
 
 uses CompilerTypes;
 
-// ----------------------------------------------------------------------------
+  // ----------------------------------------------------------------------------
 
 procedure Initialize;
 
@@ -15,6 +15,11 @@ procedure ResetOpty;
 procedure asm65(a: String = ''; comment: String = '');      // OptimizeASM
 
 procedure OptimizeProgram(MainProcedureIndex: TIdentIndex);
+
+procedure SetOptimizationActive(active: Boolean);
+function IsOptimizationActive: Boolean;
+procedure StartOptimization(SourceLocation: TSourceLocation);
+procedure StopOptimization;
 
 procedure WriteOut(a: String);            // OptimizeTemporaryBuf
 
@@ -26,17 +31,33 @@ implementation
 
 uses SysUtils, Assembler, Common, Console, StringUtilities, Targets, Utilities;
 
+type
+  TTemporaryBufIndex = Integer;
+
 var
   TemporaryBuf: array [0..511] of String;
+  TemporaryBufIndex: TTemporaryBufIndex;
+  LastTempBuf0: TString;
+  OptimizeBuf: TStringArray;
 
-// ----------------------------------------------------------------------------
+  optimize: record
+    use: Boolean;
+    SourceFile: TSourceFile;
+    line, oldLine: Integer;
+    end;
+
+  // ----------------------------------------------------------------------------
 
 
 procedure Initialize;
 var
-  i: Integer;
+  i: TTemporaryBufIndex;
 begin
   for i := Low(TemporaryBuf) to High(TemporaryBuf) do TemporaryBuf[i] := '';
+  TemporaryBufIndex := -1;
+  LastTempBuf0 := '';
+
+  SetLength(OptimizeBuf, 1);
 end;
 
 procedure ResetOpty;
@@ -48,7 +69,34 @@ begin
 
 end;
 
+procedure SetOptimizationActive(active: Boolean);
+begin
+  optimize.use := active;
+end;
 
+function IsOptimizationActive: Boolean;
+begin
+  Result := optimize.use;
+end;
+
+
+procedure StartOptimization(SourceLocation: TSourceLocation);
+begin
+
+  optimize.use := True;
+  optimize.SourceFile := SourceLocation.SourceFile;
+  optimize.line := SourceLocation.Line;
+
+end;
+
+procedure StopOptimization;
+begin
+
+  optimize.use := False;
+
+  if High(OptimizeBuf) > 0 then asm65;
+
+end;
 
 function GetVAL(a: String): Integer;
 var
@@ -79,7 +127,6 @@ end;
 procedure OptimizeProgram(MainProcedureIndex: TIdentIndex);
 type
   TBooleanArray = array [1..MAXBLOCKS] of Boolean;
-
 var
   ProcAsBlock: TBooleanArray;          // issue #125 fixed
 
@@ -131,53 +178,38 @@ var
   yes: Boolean;
 
 
-{$i include\cmd_temporary.inc}
+  {$i include\cmd_temporary.inc}
 
 
-  function argMatch(i, j: Integer): Boolean;
+  function argMatch(const i, j: TTemporaryBufIndex): Boolean;
   begin
     Result := copy(TemporaryBuf[i], 6, 256) = copy(TemporaryBuf[j], 6, 256);
   end;
 
 
-  function fail(i: integer): Boolean;
+  function fail(i: Integer): Boolean;
   begin
 
-        if (pos('#asm:', TemporaryBuf[i]) = 1) or
-
-	   ldy(i) or
-           jsr(i) or
-           iny(i) or
-           dey(i) or
-           tay(i) or
-           tya(i) or
-           mwy(i) or
-	   mwy(i) or
-           (pos(#9'.if', TemporaryBuf[i]) > 0) or
-           (pos(#9'.LOCAL ', TemporaryBuf[i]) > 0) or
-           (pos(#9'@print', TemporaryBuf[i]) > 0) then Result:=true else Result:=false;
+    if (pos('#asm:', TemporaryBuf[i]) = 1) or ldy(i) or jsr(i) or
+      iny(i) or dey(i) or tay(i) or tya(i) or mwy(i) or
+      mwy(i) or (pos(#9'.if', TemporaryBuf[i]) > 0) or (pos(#9'.LOCAL ', TemporaryBuf[i]) > 0) or
+      (pos(#9'@print', TemporaryBuf[i]) > 0) then Result := True
+    else
+      Result := False;
   end;
 
 
-  function SKIP(i: integer): Boolean;
+  function SKIP(const i: TTemporaryBufIndex): Boolean;
   begin
 
-      Result :=	seq(i) or sne(i) or
-		spl(i) or smi(i) or
-		scc(i) or scs(i) or
-		svc(i) or svs(i) or
-
-		jne(i) or jeq(i) or
-		jcc(i) or jcs(i) or
-		jmi(i) or jpl(i) or
-
-		(pos(#9'bne ', TemporaryBuf[i]) = 1) or (pos(#9'beq ', TemporaryBuf[i]) = 1) or
-		(pos(#9'bcc ', TemporaryBuf[i]) = 1) or (pos(#9'bcs ', TemporaryBuf[i]) = 1) or
-		(pos(#9'bmi ', TemporaryBuf[i]) = 1) or (pos(#9'bpl ', TemporaryBuf[i]) = 1);
+    Result := seq(i) or sne(i) or spl(i) or smi(i) or scc(i) or scs(i) or svc(i) or
+      svs(i) or jne(i) or jeq(i) or jcc(i) or jcs(i) or jmi(i) or jpl(i) or (pos(#9'bne ', TemporaryBuf[i]) = 1) or
+      (pos(#9'beq ', TemporaryBuf[i]) = 1) or (pos(#9'bcc ', TemporaryBuf[i]) = 1) or
+      (pos(#9'bcs ', TemporaryBuf[i]) = 1) or (pos(#9'bmi ', TemporaryBuf[i]) = 1) or (pos(#9'bpl ', TemporaryBuf[i]) = 1);
   end;
 
 
-  function IFDEF_MUL8(i: Integer): Boolean;
+  function IFDEF_MUL8(const i: TTemporaryBufIndex): Boolean;
   begin
     Result :=  //(TemporaryBuf[i+4] = #9'eif') and
       //(TemporaryBuf[i+3] = #9'imulCL') and
@@ -186,7 +218,7 @@ var
   end;
 
 
-  function IFDEF_MUL16(i: Integer): Boolean;
+  function IFDEF_MUL16(const i: TTemporaryBufIndex): Boolean;
   begin
     Result :=  //(TemporaryBuf[i+4] = #9'eif') and
       //(TemporaryBuf[i+3] = #9'imulCX') and
@@ -212,19 +244,19 @@ var
   end;
 
 
-  function GetBYTE(i: Integer): Integer;
+  function GetBYTE(const i: TTemporaryBufIndex): Integer;
   begin
     Result := GetVAL(copy(TemporaryBuf[i], 6, 4));
   end;
 
   // TODO: The functions below do not handle errors situations (-1) correctly
-  function GetWORD(i, j: Integer): Integer;
+  function GetWORD(const i, j: TTemporaryBufIndex): Integer;
   begin
     Result := GetVAL(copy(TemporaryBuf[i], 6, 4)) + GetVAL(copy(TemporaryBuf[j], 6, 4)) * 256;
   end;
 
 
-  function GetSTRING(j: Integer): String;
+  function GetSTRING(const j: TTemporaryBufIndex): String;
   var
     i: Integer;
     a: String;
@@ -245,26 +277,25 @@ var
   end;
 
 
-{$i include/opt6502/opt_TEMP_MOVE.inc}
-{$i include/opt6502/opt_TEMP_FILL.inc}
-{$i include/opt6502/opt_TEMP_TAIL_IF.inc}
-{$i include/opt6502/opt_TEMP_TAIL_CASE.inc}
-{$i include/opt6502/opt_TEMP.inc}
-{$i include/opt6502/opt_TEMP_CMP.inc}
-{$i include/opt6502/opt_TEMP_CMP_0.inc}
-{$i include/opt6502/opt_TEMP_WHILE.inc}
-{$i include/opt6502/opt_TEMP_FOR.inc}
-{$i include/opt6502/opt_TEMP_FORDEC.inc}
-{$i include/opt6502/opt_TEMP_IMUL_CX.inc}
-{$i include/opt6502/opt_TEMP_IFTMP.inc}
-{$i include/opt6502/opt_TEMP_ORD.inc}
-{$i include/opt6502/opt_TEMP_X.inc}
-{$i include/opt6502/opt_TEMP_EAX.inc}
-{$i include/opt6502/opt_TEMP_JMP.inc}
-{$i include/opt6502/opt_TEMP_ZTMP.inc}
-{$i include/opt6502/opt_TEMP_UNROLL.inc}
-{$i include/opt6502/opt_TEMP_BOOLEAN_OR.inc}
-
+  {$i include/opt6502/opt_TEMP_MOVE.inc}
+  {$i include/opt6502/opt_TEMP_FILL.inc}
+  {$i include/opt6502/opt_TEMP_TAIL_IF.inc}
+  {$i include/opt6502/opt_TEMP_TAIL_CASE.inc}
+  {$i include/opt6502/opt_TEMP.inc}
+  {$i include/opt6502/opt_TEMP_CMP.inc}
+  {$i include/opt6502/opt_TEMP_CMP_0.inc}
+  {$i include/opt6502/opt_TEMP_WHILE.inc}
+  {$i include/opt6502/opt_TEMP_FOR.inc}
+  {$i include/opt6502/opt_TEMP_FORDEC.inc}
+  {$i include/opt6502/opt_TEMP_IMUL_CX.inc}
+  {$i include/opt6502/opt_TEMP_IFTMP.inc}
+  {$i include/opt6502/opt_TEMP_ORD.inc}
+  {$i include/opt6502/opt_TEMP_X.inc}
+  {$i include/opt6502/opt_TEMP_EAX.inc}
+  {$i include/opt6502/opt_TEMP_JMP.inc}
+  {$i include/opt6502/opt_TEMP_ZTMP.inc}
+  {$i include/opt6502/opt_TEMP_UNROLL.inc}
+  {$i include/opt6502/opt_TEMP_BOOLEAN_OR.inc}
 begin
 
 {
@@ -505,21 +536,21 @@ begin
   if (pos(#9'jsr ', a) = 1) or (a = '#asm') then ResetOpty;
 
 
-  if iOut < High(TemporaryBuf) then
+  if TemporaryBufIndex < High(TemporaryBuf) then
   begin
 
-    if (iOut >= 0) and (TemporaryBuf[iOut] <> '') then
+    if (TemporaryBufIndex >= 0) and (TemporaryBuf[TemporaryBufIndex] <> '') then
     begin
 
-      if TemporaryBuf[iOut] = '; --- ForToDoCondition' then
+      if TemporaryBuf[TemporaryBufIndex] = '; --- ForToDoCondition' then
         if (a = '') or (pos('; optimize ', a) > 0) then exit;
 
-      if (pos(#9'#for', TemporaryBuf[iOut]) > 0) then
+      if (pos(#9'#for', TemporaryBuf[TemporaryBufIndex]) > 0) then
         if (a = '') or (pos('; optimize ', a) > 0) then exit;
     end;
 
-    Inc(iOut);
-    TemporaryBuf[iOut] := a;
+    Inc(TemporaryBufIndex);
+    TemporaryBuf[TemporaryBufIndex] := a;
 
   end
   else
@@ -527,26 +558,26 @@ begin
 
     OptimizeTemporaryBuf;
 
-    if TemporaryBuf[iOut] <> '' then
+    if TemporaryBuf[TemporaryBufIndex] <> '' then
     begin
 
-      if TemporaryBuf[iOut] = '; --- ForToDoCondition' then
+      if TemporaryBuf[TemporaryBufIndex] = '; --- ForToDoCondition' then
         if (a = '') or (pos('; optimize ', a) > 0) then exit;
 
-      if (pos(#9'#for', TemporaryBuf[iOut]) > 0) then
+      if (pos(#9'#for', TemporaryBuf[TemporaryBufIndex]) > 0) then
         if (a = '') or (pos('; optimize ', a) > 0) then exit;
     end;
 
     if TemporaryBuf[0] <> '~' then
     begin
-      if (TemporaryBuf[0] <> '') or (outTmp <> TemporaryBuf[0]) then OutFile.WriteLn(TemporaryBuf[0]);
+      if (TemporaryBuf[0] <> '') or (LastTempBuf0 <> TemporaryBuf[0]) then OutFile.WriteLn(TemporaryBuf[0]);
 
-      outTmp := TemporaryBuf[0];
+      LastTempBuf0 := TemporaryBuf[0];
     end;
 
-    for i := 1 to iOut do TemporaryBuf[i - 1] := TemporaryBuf[i];
+    for i := 1 to TemporaryBufIndex do TemporaryBuf[i - 1] := TemporaryBuf[i];
 
-    TemporaryBuf[iOut] := a;
+    TemporaryBuf[TemporaryBufIndex] := a;
 
   end;
 
@@ -596,7 +627,6 @@ type
   TListing = array [0..1023] of String;
   TListing_tmp = array [0..127] of String;
   TString0_3_Array = array [0..3] of String;
-
 var
   inxUse, found: Boolean;
   i, l, k, m, x: Integer;
@@ -623,18 +653,20 @@ var
     Result := GetVAL(copy(listing[i], 6, 4)) + GetVAL(copy(listing[j], 6, 4)) shl 8;
   end;
 
-  function GetTRIPLE(i, j, k: Integer): integer;
+  function GetTRIPLE(i, j, k: Integer): Integer;
   begin
-    Result := GetVAL(copy(listing[i], 6, 4)) + GetVAL(copy(listing[j], 6, 4)) shl 8 + GetVAL(copy(listing[k], 6, 4)) shl 16;
+    Result := GetVAL(copy(listing[i], 6, 4)) + GetVAL(copy(listing[j], 6, 4)) shl 8 +
+      GetVAL(copy(listing[k], 6, 4)) shl 16;
   end;
 
-  function GetDWORD(i, j, k, l: Integer): integer;
+  function GetDWORD(i, j, k, l: Integer): Integer;
   begin
-    Result := GetVAL(copy(listing[i], 6, 4)) + GetVAL(copy(listing[j], 6, 4)) shl 8 + GetVAL(copy(listing[k], 6, 4)) shl 16 + GetVAL(copy(listing[l], 6, 4)) shl 24;
+    Result := GetVAL(copy(listing[i], 6, 4)) + GetVAL(copy(listing[j], 6, 4)) shl 8 +
+      GetVAL(copy(listing[k], 6, 4)) shl 16 + GetVAL(copy(listing[l], 6, 4)) shl 24;
   end;
 
 
-{$i include/cmd_listing.inc}
+  {$i include/cmd_listing.inc}
 
 
   // !!! kolejny rozkaz po UNUSED_A na pozycji 'i+1' musi koniecznie byc conajmniej 'LDA ' !!!
@@ -669,7 +701,7 @@ var
 
       TextColor(LIGHTRED);
 
-      WriteLn(common.optimize.SourceFile.Path + ' (' + IntToStr(common.optimize.line) +
+      WriteLn(optimize.SourceFile.Path + ' (' + IntToStr(optimize.line) +
         ') Error: Illegal instruction in INTERRUPT block ''' + copy(listing[i], 2, 256) + '''');
 
       NormVideo;
@@ -711,24 +743,24 @@ var
 
 *)
 
-     procedure LabelTest(const mne: string);
-     begin
+    procedure LabelTest(const mne: String);
+    begin
 
       case optyY[1] of
 
-       '+','-' : Result := (listing[i] = mne + copy(optyY, 6, 256));
+        '+', '-': Result := (listing[i] = mne + copy(optyY, 6, 256));
 
-           '*' : if optyY[2] in ['+', '-'] then
-	          Result := (listing[i] = mne + copy(optyY,6,pos('|',optyY) - 6)) or (listing[i] = mne + copy(optyY,pos('|',optyY) + 1,256))
-		 else
-	          Result := (listing[i] = mne + copy(optyY, 6, 256));
+        '*': if optyY[2] in ['+', '-'] then
+            Result := (listing[i] = mne + copy(optyY, 6, pos('|', optyY) - 6)) or
+              (listing[i] = mne + copy(optyY, pos('|', optyY) + 1, 256))
+          else
+            Result := (listing[i] = mne + copy(optyY, 6, 256));
 
-      else
-       Result := (listing[i] = mne + optyY);
+        else
+          Result := (listing[i] = mne + optyY);
       end;
 
-     end;
-
+    end;
 
   begin
 
@@ -864,7 +896,7 @@ var
         begin
 
           if dex(k) and                             // inx      ; k-1
-             inx(k - 1) then                        // dex      ; k
+            inx(k - 1) then                        // dex      ; k
           begin
             listing[k - 1] := '';
             listing[k] := '';
@@ -874,7 +906,7 @@ var
 
 
           if inx(k) and                             // dex      ; k-1
-             dex(k - 1) then                        // inx      ; k
+            dex(k - 1) then                        // inx      ; k
           begin
             listing[k - 1] := '';
             listing[k] := '';
@@ -884,8 +916,8 @@ var
 
 
           if lda_stack(k) and                       // sta :STACKORIGIN  ; k-1
-             sta_stack(k - 1) and                   // lda :STACKORIGIN  ; k
-             (sta_a(i + 1) or add_sub(i + 1)) then  // sta|add|sub       ; i+1
+            sta_stack(k - 1) and                   // lda :STACKORIGIN  ; k
+            (sta_a(i + 1) or add_sub(i + 1)) then  // sta|add|sub       ; i+1
             if argMatch(k, k - 1) then
             begin
               listing[k - 1] := '';
@@ -896,8 +928,8 @@ var
 
 
           if sta_stack(k) and                       // lda :STACKORIGIN  ; k-1
-             lda_stack(k - 1) and                   // sta :STACKORIGIN  ; k
-             lda_a(i + 1) then                      // lda               ; i+1
+            lda_stack(k - 1) and                   // sta :STACKORIGIN  ; k
+            lda_a(i + 1) then                      // lda               ; i+1
             if argMatch(k, k - 1) then
             begin
               listing[k - 1] := '';
@@ -908,9 +940,9 @@ var
 
 
           if sta_stack(k) and                       // lda #             ; k-1
-             lda_im(k - 1) and                      // sta :STACKORIGIN  ; k
-             lda_val(i + 1) and                     // lda               ; i+1    ~:STACKORIGIN
-             sta_stack(i + 2) then                  // sta :STACKORIGIN  ; i+2
+            lda_im(k - 1) and                      // sta :STACKORIGIN  ; k
+            lda_val(i + 1) and                     // lda               ; i+1    ~:STACKORIGIN
+            sta_stack(i + 2) then                  // sta :STACKORIGIN  ; i+2
             if listing[k] = listing[i + 2] then
             begin
               listing[k - 1] := '';
@@ -921,8 +953,8 @@ var
 
 
           if lda_a(k) and                           // lda      ; k-1
-             lda_a(k - 1) and                       // lda      ; k
-             sta_a(i + 1) then                      // sta      ; i+1
+            lda_a(k - 1) and                       // lda      ; k
+            sta_a(i + 1) then                      // sta      ; i+1
           begin
             listing[k - 1] := listing[k];
             listing[k] := '';
@@ -931,8 +963,8 @@ var
 
 
           if iny(k) and                             // lda      ; k-1
-             lda_a(k - 1) and                       // iny      ; k
-             lda_a(i + 1) then                      // lda      ; i+1
+            lda_a(k - 1) and                       // iny      ; k
+            lda_a(i + 1) then                      // lda      ; i+1
           begin
             listing[k - 1] := #9'iny';
             listing[k] := '';
@@ -941,7 +973,7 @@ var
 
 
           if sta_im_0(k) and                        // sta :STACKORIGIN  ; k-1
-             sta_stack(k - 1) then                  // sta #$00          ; k
+            sta_stack(k - 1) then                  // sta #$00          ; k
           begin
             listing[k] := '';
             continue;
@@ -950,9 +982,8 @@ var
 
 
           if sta_im_0(k) and                                       // lda|rol @|asl @  ; k-1
-             (lda_a(k - 1) or rol_a(k - 1) or asl_a(k - 1)) then   // sta #$00         ; k
+            (lda_a(k - 1) or rol_a(k - 1) or asl_a(k - 1)) then   // sta #$00         ; k
           begin
-
 
             if lda_a(i + 1) then                    /// lda      ; i+1
             begin
@@ -964,7 +995,7 @@ var
 
 
             if (ldy(i + 1) or mwy(i + 1) or iny(i + 1)) and   /// ldy|mwy|iny   ; i+1
-               lda_a(i + 2) then                              /// lda           ; i+2
+              lda_a(i + 2) then                              /// lda           ; i+2
             begin
               listing[k - 1] := '';
               listing[k] := '';
@@ -974,9 +1005,9 @@ var
 
 
             if sta_im_0(i + 1) and                  /// sta #$00    ; i+1
-               sta_im_0(i + 2) and                  /// sta #$00    ; i+2
-               sta_im_0(i + 3) and                  /// sta #$00    ; i+3
-               lda_a(i + 4) then                    /// lda         ; i+4
+              sta_im_0(i + 2) and                  /// sta #$00    ; i+2
+              sta_im_0(i + 3) and                  /// sta #$00    ; i+3
+              lda_a(i + 4) then                    /// lda         ; i+4
             begin
               listing[k - 1] := '';
               listing[k] := '';
@@ -990,8 +1021,8 @@ var
 
 
             if sta_im_0(i + 1) and                  /// sta #$00    ; i+1
-               sta_im_0(i + 2) and                  //// sta #$00    ; i+2
-               lda_a(i + 3) then                    /// lda         ; i+3
+              sta_im_0(i + 2) and                  //// sta #$00    ; i+2
+              lda_a(i + 3) then                    /// lda         ; i+3
             begin
               listing[k - 1] := '';
               listing[k] := '';
@@ -1004,7 +1035,7 @@ var
 
 
             if sta_im_0(i + 1) and                  /// sta #$00    ; i+1
-               lda_a(i + 2) then                    /// lda         ; i+2
+              lda_a(i + 2) then                    /// lda         ; i+2
             begin
               listing[k - 1] := '';
               listing[k] := '';
@@ -1330,33 +1361,33 @@ var
 
   end;    // RemoveUnusedSTACK
 
-{$i include/opt6502/opt_SHR_BYTE.inc}
-{$i include/opt6502/opt_SHR_WORD.inc}
-{$i include/opt6502/opt_SHR_CARD.inc}
-{$i include/opt6502/opt_SHL_BYTE.inc}
-{$i include/opt6502/opt_SHL_WORD.inc}
-{$i include/opt6502/opt_SHL_CARD.inc}
-{$i include/opt6502/opt_BYTE_DIV.inc}
+  {$i include/opt6502/opt_SHR_BYTE.inc}
+  {$i include/opt6502/opt_SHR_WORD.inc}
+  {$i include/opt6502/opt_SHR_CARD.inc}
+  {$i include/opt6502/opt_SHL_BYTE.inc}
+  {$i include/opt6502/opt_SHL_WORD.inc}
+  {$i include/opt6502/opt_SHL_CARD.inc}
+  {$i include/opt6502/opt_BYTE_DIV.inc}
 
-{$i include/opt6502/opt_STA_0.inc}
-{$i include/opt6502/opt_STACK.inc}
-{$i include/opt6502/opt_STACK_INX.inc}
-{$i include/opt6502/opt_STACK_ADD.inc}
-{$i include/opt6502/opt_STACK_CMP.inc}
-{$i include/opt6502/opt_STACK_ADR.inc}
-{$i include/opt6502/opt_STACK_AL_CL.inc}
-{$i include/opt6502/opt_STACK_AX_CX.inc}
-{$i include/opt6502/opt_STACK_EAX_ECX.inc}
-{$i include/opt6502/opt_STACK_PRINT.inc}
-{$i include/opt6502/opt_CMP_BRANCH.inc}
-{$i include/opt6502/opt_CMP_BP2.inc}
-{$i include/opt6502/opt_CMP_LOCAL.inc}
-{$i include/opt6502/opt_CMP_LT_GTEQ.inc}
-{$i include/opt6502/opt_CMP_LTEQ.inc}
-{$i include/opt6502/opt_CMP_GT.inc}
-{$i include/opt6502/opt_CMP_NE_EQ.inc}
-{$i include/opt6502/opt_CMP.inc}
-{$i include/opt6502/opt_CMP_0.inc}
+  {$i include/opt6502/opt_STA_0.inc}
+  {$i include/opt6502/opt_STACK.inc}
+  {$i include/opt6502/opt_STACK_INX.inc}
+  {$i include/opt6502/opt_STACK_ADD.inc}
+  {$i include/opt6502/opt_STACK_CMP.inc}
+  {$i include/opt6502/opt_STACK_ADR.inc}
+  {$i include/opt6502/opt_STACK_AL_CL.inc}
+  {$i include/opt6502/opt_STACK_AX_CX.inc}
+  {$i include/opt6502/opt_STACK_EAX_ECX.inc}
+  {$i include/opt6502/opt_STACK_PRINT.inc}
+  {$i include/opt6502/opt_CMP_BRANCH.inc}
+  {$i include/opt6502/opt_CMP_BP2.inc}
+  {$i include/opt6502/opt_CMP_LOCAL.inc}
+  {$i include/opt6502/opt_CMP_LT_GTEQ.inc}
+  {$i include/opt6502/opt_CMP_LTEQ.inc}
+  {$i include/opt6502/opt_CMP_GT.inc}
+  {$i include/opt6502/opt_CMP_NE_EQ.inc}
+  {$i include/opt6502/opt_CMP.inc}
+  {$i include/opt6502/opt_CMP_0.inc}
 
 
   function PeepholeOptimization_STACK: Boolean;
@@ -1434,10 +1465,13 @@ end;
 
         tmp := copy(listing[i], 6, 256);
 
-        if tmp = ':eax' then listing[i] := copy(listing[i], 1, 5) + ':STACKORIGIN+16' else
-         if tmp = ':eax+1' then listing[i] := copy(listing[i], 1, 5) + ':STACKORIGIN+STACKWIDTH+16' else
-          if tmp = ':eax+2' then listing[i] := copy(listing[i], 1, 5) + ':STACKORIGIN+STACKWIDTH*2+16' else
-           if tmp = ':eax+3' then listing[i] := copy(listing[i], 1, 5) + ':STACKORIGIN+STACKWIDTH*3+16';
+        if tmp = ':eax' then listing[i] := copy(listing[i], 1, 5) + ':STACKORIGIN+16'
+        else
+          if tmp = ':eax+1' then listing[i] := copy(listing[i], 1, 5) + ':STACKORIGIN+STACKWIDTH+16'
+          else
+            if tmp = ':eax+2' then listing[i] := copy(listing[i], 1, 5) + ':STACKORIGIN+STACKWIDTH*2+16'
+            else
+              if tmp = ':eax+3' then listing[i] := copy(listing[i], 1, 5) + ':STACKORIGIN+STACKWIDTH*3+16';
 
       end;
 
@@ -1474,13 +1508,13 @@ end;
     k: Integer;
 
 
-{$i include/opt6502/opt_STA_ADD.inc}
-{$i include/opt6502/opt_STA_LDY.inc}
-{$i include/opt6502/opt_STA_BP.inc}
-{$i include/opt6502/opt_STA_LSR.inc}
-{$i include/opt6502/opt_STA_IMUL.inc}
-{$i include/opt6502/opt_STA_IMUL_CX.inc}
-{$i include/opt6502/opt_STA_ZTMP.inc}
+    {$i include/opt6502/opt_STA_ADD.inc}
+    {$i include/opt6502/opt_STA_LDY.inc}
+    {$i include/opt6502/opt_STA_BP.inc}
+    {$i include/opt6502/opt_STA_LSR.inc}
+    {$i include/opt6502/opt_STA_IMUL.inc}
+    {$i include/opt6502/opt_STA_IMUL_CX.inc}
+    {$i include/opt6502/opt_STA_ZTMP.inc}
 
 
     function PeepholeOptimization_END: Boolean;
@@ -1500,7 +1534,7 @@ end;
       for i := 0 to l - 1 do
       begin
 
-{$i include/opt6502/opt_END_STA.inc}
+        {$i include/opt6502/opt_END_STA.inc}
 
       end;
 
@@ -1529,38 +1563,38 @@ if (pos('lda adr.ROW1+$20,y', listing[i]) > 0) then begin
 end;
 }
 
-        if opt_STA_ADD(i) = false then exit(False);
-        if opt_STA_LDY(i) = false then exit(False);
-        if opt_STA_BP(i) = false then exit(False);
-        if opt_STA_LSR(i) = false then exit(False);
-        if opt_STA_IMUL(i) = false then exit(False);
-        if opt_STA_IMUL_CX(i) = false then exit(False);
-        if opt_STA_ZTMP(i) = false then exit(False);
+        if opt_STA_ADD(i) = False then exit(False);
+        if opt_STA_LDY(i) = False then exit(False);
+        if opt_STA_BP(i) = False then exit(False);
+        if opt_STA_LSR(i) = False then exit(False);
+        if opt_STA_IMUL(i) = False then exit(False);
+        if opt_STA_IMUL_CX(i) = False then exit(False);
+        if opt_STA_ZTMP(i) = False then exit(False);
 
       end;
 
     end;  //PeepholeOptimization_STA
 
-{$i include/opt65c02/opt_STZ.inc}
+    {$i include/opt65c02/opt_STZ.inc}
 
-{$i include/opt6502/opt_LDA.inc}
-{$i include/opt6502/opt_TAY.inc}
-{$i include/opt6502/opt_LDY.inc}
-{$i include/opt6502/opt_AND.inc}
-{$i include/opt6502/opt_ORA.inc}
-{$i include/opt6502/opt_EOR.inc}
-{$i include/opt6502/opt_NOT.inc}
-{$i include/opt6502/opt_ADD.inc}
-{$i include/opt6502/opt_SUB.inc}
-{$i include/opt6502/opt_LSR.inc}
-{$i include/opt6502/opt_ASL.inc}
-{$i include/opt6502/opt_SPL.inc}
-{$i include/opt6502/opt_POKE.inc}
-{$i include/opt6502/opt_BP.inc}
-{$i include/opt6502/opt_BP_ADR.inc}
-{$i include/opt6502/opt_BP2_ADR.inc}
-{$i include/opt6502/opt_ADR.inc}
-{$i include/opt6502/opt_FORTMP.inc}
+    {$i include/opt6502/opt_LDA.inc}
+    {$i include/opt6502/opt_TAY.inc}
+    {$i include/opt6502/opt_LDY.inc}
+    {$i include/opt6502/opt_AND.inc}
+    {$i include/opt6502/opt_ORA.inc}
+    {$i include/opt6502/opt_EOR.inc}
+    {$i include/opt6502/opt_NOT.inc}
+    {$i include/opt6502/opt_ADD.inc}
+    {$i include/opt6502/opt_SUB.inc}
+    {$i include/opt6502/opt_LSR.inc}
+    {$i include/opt6502/opt_ASL.inc}
+    {$i include/opt6502/opt_SPL.inc}
+    {$i include/opt6502/opt_POKE.inc}
+    {$i include/opt6502/opt_BP.inc}
+    {$i include/opt6502/opt_BP_ADR.inc}
+    {$i include/opt6502/opt_BP2_ADR.inc}
+    {$i include/opt6502/opt_ADR.inc}
+    {$i include/opt6502/opt_FORTMP.inc}
 
 
     function PeepholeOptimization: Boolean;
@@ -1584,34 +1618,34 @@ if (pos(#9'and #$', listing[i]) > 0) then begin
 end;
 }
 
-       if opt_FORTMP(i) = False then exit(False);
+        if opt_FORTMP(i) = False then exit(False);
 
-       if opt_STA_0(i) = False then exit(False);
+        if opt_STA_0(i) = False then exit(False);
 
-       if opt_LDA(i) = False then exit(False);
-       if opt_TAY(i) = False then exit(False);
-       if opt_LDY(i) = False then exit(False);
-       if opt_BP(i) = False then exit(False);
-       if opt_AND(i) = False then exit(False);
-       if opt_ORA(i) = False then exit(False);
-       if opt_EOR(i) = False then exit(False);
-       if opt_NOT(i) = False then exit(False);
-       if opt_ADD(i) = False then exit(False);
-       if opt_SUB(i) = False then exit(False);
-       if opt_LSR(i) = False then exit(False);
-       if opt_ASL(i) = False then exit(False);
-       if opt_SPL(i) = False then exit(False);
-       if opt_ADR(i) = False then exit(False);
-       if opt_BP_ADR(i) = False then exit(False);
-       if opt_BP2_ADR(i) = False then exit(False);
-       if opt_POKE(i) = False then exit(False);
+        if opt_LDA(i) = False then exit(False);
+        if opt_TAY(i) = False then exit(False);
+        if opt_LDY(i) = False then exit(False);
+        if opt_BP(i) = False then exit(False);
+        if opt_AND(i) = False then exit(False);
+        if opt_ORA(i) = False then exit(False);
+        if opt_EOR(i) = False then exit(False);
+        if opt_NOT(i) = False then exit(False);
+        if opt_ADD(i) = False then exit(False);
+        if opt_SUB(i) = False then exit(False);
+        if opt_LSR(i) = False then exit(False);
+        if opt_ASL(i) = False then exit(False);
+        if opt_SPL(i) = False then exit(False);
+        if opt_ADR(i) = False then exit(False);
+        if opt_BP_ADR(i) = False then exit(False);
+        if opt_BP2_ADR(i) = False then exit(False);
+        if opt_POKE(i) = False then exit(False);
 
-       if target.cpu <> TCPU.CPU_6502 then begin
+        if target.cpu <> TCPU.CPU_6502 then
+        begin
 
-         if opt_STZ(i) = False then exit(False);
+          if opt_STZ(i) = False then exit(False);
 
-       end;
-
+        end;
 
       end;
 
@@ -1619,9 +1653,18 @@ end;
 
   begin      // OptimizeAssignment
 
-    repeat until PeepholeOptimization;     while RemoveUnusedSTACK do repeat until PeepholeOptimization;
-    repeat until PeepholeOptimization_STA; while RemoveUnusedSTACK do repeat until PeepholeOptimization;
-    repeat until PeepholeOptimization_END; while RemoveUnusedSTACK do repeat until PeepholeOptimization;
+    repeat
+    until PeepholeOptimization;
+    while RemoveUnusedSTACK do repeat
+      until PeepholeOptimization;
+    repeat
+    until PeepholeOptimization_STA;
+    while RemoveUnusedSTACK do repeat
+      until PeepholeOptimization;
+    repeat
+    until PeepholeOptimization_END;
+    while RemoveUnusedSTACK do repeat
+      until PeepholeOptimization;
 
   end;
 
@@ -1636,39 +1679,38 @@ end;
     tmp: String;
 
 
-    function test_AND(i: integer): Boolean;
-    var p: integer;
+    function test_AND(i: Integer): Boolean;
+    var
+      p: Integer;
     begin
 
       Result := True;
 
-      for p:=i-1 downto 1 do
-       if and_stack(p) or local(p) or
-          (sty_stack(p) and lab_a(p-1) and lda(p+1) and ora_stack(p+2)) or
-          (sty_stack(p) and lab_a(p-1) and lda_stack(p+1)) or
-	  (sty_stack(p) and lab_a(p-1) and ldy_1(p+1) and lda_stack(p+2) and argMatch(p, p+2)) or
-          (sty_stack(p) and lab_a(p-1) and (argMatch(p, i+2) = false)) or
-          (tya(p) and (lab_a(p-1) = false) and (ora_stack(p+1) = false)) then exit(False);
+      for p := i - 1 downto 1 do
+        if and_stack(p) or local(p) or (sty_stack(p) and lab_a(p - 1) and lda(p + 1) and ora_stack(p + 2)) or
+          (sty_stack(p) and lab_a(p - 1) and lda_stack(p + 1)) or (sty_stack(p) and lab_a(p - 1) and
+          ldy_1(p + 1) and lda_stack(p + 2) and argMatch(p, p + 2)) or (sty_stack(p) and lab_a(p - 1) and
+          (argMatch(p, i + 2) = False)) or (tya(p) and (lab_a(p - 1) = False) and (ora_stack(p + 1) = False)) then
+          exit(False);
 
     end;
 
 
-    function test_ORA(i: integer): Boolean;
-    var p: integer;
+    function test_ORA(i: Integer): Boolean;
+    var
+      p: Integer;
     begin
 
       Result := True;
 
-      for p:=i-1 downto 1 do
-       if ora_stack(p) or local(p) or
-          (sty_stack(p) and lab_a(p-1) and lda(p+1) and ora_stack(p+2)) or
-          (sty_stack(p) and lab_a(p-1) and lda_stack(p+1)) or
-	  (sty_stack(p) and lab_a(p-1) and ldy_1(p+1) and lda_stack(p+2) and argMatch(p, p+2)) or
-          (sty_stack(p) and lab_a(p-1) and (argMatch(p, i+2) = false)) or
-          (tya(p) and (lab_a(p-1) = false) and (ora_stack(p+1) = false)) then exit(False);
+      for p := i - 1 downto 1 do
+        if ora_stack(p) or local(p) or (sty_stack(p) and lab_a(p - 1) and lda(p + 1) and ora_stack(p + 2)) or
+          (sty_stack(p) and lab_a(p - 1) and lda_stack(p + 1)) or (sty_stack(p) and lab_a(p - 1) and
+          ldy_1(p + 1) and lda_stack(p + 2) and argMatch(p, p + 2)) or (sty_stack(p) and lab_a(p - 1) and
+          (argMatch(p, i + 2) = False)) or (tya(p) and (lab_a(p - 1) = False) and (ora_stack(p + 1) = False)) then
+          exit(False);
 
     end;
-
 
   begin
 
@@ -1696,28 +1738,28 @@ if (pos('cmp #$29', listing[i]) > 0) then begin
 end;
 }
 
-     if opt_CMP_0(i) = false then exit(false);
+      if opt_CMP_0(i) = False then exit(False);
 
-     if opt_LOCAL(i) = false then exit(false);
+      if opt_LOCAL(i) = False then exit(False);
 
-     if opt_LT_GTEQ(i) = false then exit(false);
-     if opt_LTEQ(i) = false then exit(false);
-     if opt_GT(i) = false then exit(false);
-     if opt_NE_EQ(i) = false then exit(false);
+      if opt_LT_GTEQ(i) = False then exit(False);
+      if opt_LTEQ(i) = False then exit(False);
+      if opt_GT(i) = False then exit(False);
+      if opt_NE_EQ(i) = False then exit(False);
 
-     if opt_CMP(i) = false then exit(false);
-     if opt_CMP_BP2(i) = false then exit(false);
+      if opt_CMP(i) = False then exit(False);
+      if opt_CMP_BP2(i) = False then exit(False);
 
-     if opt_BRANCH(i) = false then exit(false);
+      if opt_BRANCH(i) = False then exit(False);
 
       // -----------------------------------------------------------------------------
 
-{$i include/opt6502/opt_IF_AND.inc}
-{$i include/opt6502/opt_IF_OR.inc}
-{$i include/opt6502/opt_WHILE_AND.inc}
-{$i include/opt6502/opt_WHILE_OR.inc}
-{$i include/opt6502/opt_BOOLEAN_AND.inc}
-{$i include/opt6502/opt_BOOLEAN_OR.inc}
+      {$i include/opt6502/opt_IF_AND.inc}
+      {$i include/opt6502/opt_IF_OR.inc}
+      {$i include/opt6502/opt_WHILE_AND.inc}
+      {$i include/opt6502/opt_WHILE_OR.inc}
+      {$i include/opt6502/opt_BOOLEAN_AND.inc}
+      {$i include/opt6502/opt_BOOLEAN_OR.inc}
 
       // -----------------------------------------------------------------------------
 
@@ -1783,17 +1825,15 @@ end;
   end;  // index
 
 
-{$i include/opt6502/opt_IMUL_CL.inc}
+  {$i include/opt6502/opt_IMUL_CL.inc}
 
-{$i include/opt6502/opt_inline_POKE.inc}
-{$i include/opt6502/opt_inline_PEEK.inc}
+  {$i include/opt6502/opt_inline_POKE.inc}
+  {$i include/opt6502/opt_inline_PEEK.inc}
 
-{$i include/opt6502/opt_FOR.inc}
-{$i include/opt6502/opt_REG_A.inc}
-{$i include/opt6502/opt_REG_BP2.inc}
-{$i include/opt6502/opt_REG_Y.inc}
-
-
+  {$i include/opt6502/opt_FOR.inc}
+  {$i include/opt6502/opt_REG_A.inc}
+  {$i include/opt6502/opt_REG_BP2.inc}
+  {$i include/opt6502/opt_REG_Y.inc}
 begin        // OptimizeASM
 
   l := 0;
@@ -2846,10 +2886,12 @@ begin        // OptimizeASM
                                                                         if elf = $06FEACE2 then
                                                                         // @cmpSTRING2CHAR  accepted
                                                                         else
-                                                                          if elf = $044A824C then    // @FCMPL    accepted
+                                                                          if elf = $044A824C then
+                                                                          // @FCMPL    accepted
                                                                           else
 
-                                                                            if elf = $0044B931 then    // @FTOA    accepted
+                                                                            if elf = $0044B931 then
+                                                                            // @FTOA    accepted
                                                                             else
 
                                                                               if elf = $094C6F26 then
@@ -2883,10 +2925,12 @@ begin        // OptimizeASM
                                                                                                 if elf = $0E887644 then
                                                                                                 // @BYTE.MOD    accepted
                                                                                                 else
-                                                                                                  if elf = $046775F4 then
+                                                                                                  if elf =
+                                                                                                    $046775F4 then
                                                                                                   // @WORD.MOD    accepted
                                                                                                   else
-                                                                                                    if elf = $06295A94 then
+                                                                                                    if elf =
+                                                                                                      $06295A94 then
                                                                                                     // @CARDINAL.MOD  accepted
                                                                                                     else
 
@@ -2895,98 +2939,140 @@ begin        // OptimizeASM
                                                                                                       // @SHORTREAL_MUL  accepted
                                                                                                       else
                                                                                                         if elf =
-                                                                                                          $096287FC then    // @REAL_MUL    accepted
+                                                                                                          $096287FC then
+                                                                                                        // @REAL_MUL    accepted
                                                                                                         else
                                                                                                           if elf =
-                                                                                                            $0E9645D6 then    // @SHORTREAL_DIV  accepted
+                                                                                                            $0E9645D6 then
+                                                                                                          // @SHORTREAL_DIV  accepted
                                                                                                           else
                                                                                                             if elf =
-                                                                                                              $09627D86 then    // @REAL_DIV    accepted
+                                                                                                              $09627D86 then
+                                                                                                            // @REAL_DIV    accepted
                                                                                                             else
 
                                                                                                               if elf =
-                                                                                                                $02042144 then    // @REAL_ROUND    accepted
+                                                                                                                $02042144
+                                                                                                              then    // @REAL_ROUND    accepted
                                                                                                               else
-                                                                                                                if elf =
+                                                                                                                if
+                                                                                                                elf =
                                                                                                                   $063448B3 then    // @SHORTREAL_TRUNC  accepted
                                                                                                                 else
-                                                                                                                  if elf =
-                                                                                                                    $020C1143 then    // @REAL_TRUNC    accepted
+                                                                                                                  if elf
+                                                                                                                    = $020C1143
+                                                                                                                  then    // @REAL_TRUNC    accepted
                                                                                                                   else
                                                                                                                     if
-                                                                                                                    elf = $0627E0C3 then    // @REAL_FRAC    accepted
+                                                                                                                    elf =
+                                                                                                                      $0627E0C3 then    // @REAL_FRAC    accepted
                                                                                                                     else
 
-                                                                                                                      if elf
-                                                                                                                        = $0044B29C then    // @FMUL    accepted
+                                                                                                                      if
+                                                                                                                      elf
+                                                                                                                        =
+                                                                                                                        $0044B29C then    // @FMUL    accepted
                                                                                                                       else
-                                                                                                                        if elf
-                                                                                                                          = $0044A8E6 then    // @FDIV    accepted
+                                                                                                                        if
+                                                                                                                        elf
+                                                                                                                          =
+                                                                                                                          $0044A8E6 then    // @FDIV    accepted
                                                                                                                         else
                                                                                                                           if
-                                                                                                                          elf = $0044A584 then    // @FADD    accepted
+                                                                                                                          elf
+                                                                                                                            = $0044A584 then    // @FADD    accepted
                                                                                                                           else
                                                                                                                             if
-                                                                                                                            elf = $0044B892 then    // @FSUB    accepted
+                                                                                                                            elf
+                                                                                                                              = $0044B892 then    // @FSUB    accepted
                                                                                                                             else
                                                                                                                               if
-                                                                                                                              elf = $00044C66 then    // @I2F      accepted
+                                                                                                                              elf
+                                                                                                                                = $00044C66 then    // @I2F      accepted
                                                                                                                               else
                                                                                                                                 if
-                                                                                                                                elf = $00044969 then    // @F2I      accepted
+                                                                                                                                elf
+                                                                                                                                  =
+                                                                                                                                  $00044969 then    // @F2I      accepted
                                                                                                                                 else
                                                                                                                                   if
-                                                                                                                                  elf = $044AB653 then    // @FFRAC    accepted
+                                                                                                                                  elf
+                                                                                                                                    =
+                                                                                                                                    $044AB653 then    // @FFRAC    accepted
                                                                                                                                   else
                                                                                                                                     if
-                                                                                                                                    elf = $04B74A64 then    // @FROUND    accepted
+                                                                                                                                    elf
+                                                                                                                                      =
+                                                                                                                                      $04B74A64 then    // @FROUND    accepted
                                                                                                                                     else
 
                                                                                                                                       if
-                                                                                                                                      elf = $094C3D21 then    // @F16_F2A    accepted
+                                                                                                                                      elf
+                                                                                                                                        =
+                                                                                                                                        $094C3D21 then    // @F16_F2A    accepted
                                                                                                                                       else
                                                                                                                                         if
-                                                                                                                                        elf = $094C31C4 then    // @F16_ADD    accepted
+                                                                                                                                        elf
+                                                                                                                                          =
+                                                                                                                                          $094C31C4 then    // @F16_ADD    accepted
                                                                                                                                         else
                                                                                                                                           if
-                                                                                                                                          elf = $094C4CD2 then     // @F16_SUB    accepted
+                                                                                                                                          elf
+                                                                                                                                            =
+                                                                                                                                            $094C4CD2 then     // @F16_SUB    accepted
                                                                                                                                           else
                                                                                                                                             if
-                                                                                                                                            elf = $094C46DC then    // @F16_MUL    accepted
+                                                                                                                                            elf
+                                                                                                                                              =
+                                                                                                                                              $094C46DC then    // @F16_MUL    accepted
                                                                                                                                             else
                                                                                                                                               if
-                                                                                                                                              elf = $094C3CA6 then    // @F16_DIV    accepted
+                                                                                                                                              elf
+                                                                                                                                                =
+                                                                                                                                                $094C3CA6 then    // @F16_DIV    accepted
                                                                                                                                               else
                                                                                                                                                 if
-                                                                                                                                                elf = $094C3A74 then    // @F16_INT    accepted
+                                                                                                                                                elf
+                                                                                                                                                  =
+                                                                                                                                                  $094C3A74 then    // @F16_INT    accepted
                                                                                                                                                 else
                                                                                                                                                   if
-                                                                                                                                                  elf = $0C430164 then    // @F16_ROUND    accepted
+                                                                                                                                                  elf
+                                                                                                                                                    =
+                                                                                                                                                    $0C430164 then    // @F16_ROUND    accepted
                                                                                                                                                   else
                                                                                                                                                     if
-                                                                                                                                                    elf = $04C3F2C3 then    // @F16_FRAC    accepted
+                                                                                                                                                    elf
+                                                                                                                                                      =
+                                                                                                                                                      $04C3F2C3 then    // @F16_FRAC    accepted
                                                                                                                                                     else
                                                                                                                                                       if
-                                                                                                                                                      elf = $094C3826 then    // @F16_I2F    accepted
+                                                                                                                                                      elf
+                                                                                                                                                        =
+                                                                                                                                                        $094C3826 then    // @F16_I2F    accepted
                                                                                                                                                       else
                                                                                                                                                         if
-                                                                                                                                                        elf = $0494C3E1 then    // @F16_EQ    accepted
+                                                                                                                                                        elf
+                                                                                                                                                          =
+                                                                                                                                                          $0494C3E1 then    // @F16_EQ    accepted
                                                                                                                                                         else
                                                                                                                                                           if
-                                                                                                                                                          elf = $0494C384 then    // @F16_GT    accepted
+                                                                                                                                                          elf =
+                                                                                                                                                            $0494C384 then    // @F16_GT    accepted
                                                                                                                                                           else
                                                                                                                                                             if
-                                                                                                                                                            elf = $094C38C5 then    // @F16_GTE    accepted
+                                                                                                                                                            elf =
+                                                                                                                                                              $094C38C5 then    // @F16_GTE    accepted
 
 
                                                                                                                                                             else
                                                                                                                                                             begin
 
-{$IFDEF USEOPTFILE}
+                                                                                                                                                              {$IFDEF USEOPTFILE}
 
 	writeln(arg0);
 
-{$ENDIF}
+                                                                                                                                                              {$ENDIF}
 
                                                                                                                                                               x :=
                                                                                                                                                                 51;
@@ -3162,53 +3248,55 @@ begin        // OptimizeASM
   if ((x = 0) and inxUse) then
   begin   // succesfull
 
-    if common.optimize.line <> common.optimize.oldLine then
+    if optimize.line <> optimize.oldLine then
     begin
       WriteOut('');
-      WriteOut('; optimize OK (' + common.optimize.SourceFile.Name + '), line = ' +
-        IntToStr(common.optimize.line));
+      WriteOut('; optimize OK (' + optimize.SourceFile.Name + '), line = ' +
+        IntToStr(optimize.line));
       WriteOut('');
 
-      common.optimize.oldLine := common.optimize.line;
+      optimize.oldLine := optimize.line;
     end;
 
 
-{$IFDEF OPTIMIZECODE}
+    {$IFDEF OPTIMIZECODE}
 
-  repeat
+    repeat
 
-    OptimizeAssignment;
+      OptimizeAssignment;
 
-    repeat until OptimizeRelation;
+      repeat
+      until OptimizeRelation;
 
-    OptimizeAssignment;
+      OptimizeAssignment;
 
-  until OptimizeRelation;
-
-
-  if OptimizeEAX then begin
-    OptimizeAssignment;
-
-    OptimizeEAX_OFF;
-
-    OptimizeAssignment;
-  end;
-
-{$ENDIF}
+    until OptimizeRelation;
 
 
-   opt_FOR;
-   opt_REG_A;
-   opt_REG_BP2;
-   opt_REG_Y;
+    if OptimizeEAX then
+    begin
+      OptimizeAssignment;
+
+      OptimizeEAX_OFF;
+
+      OptimizeAssignment;
+    end;
+
+    {$ENDIF}
 
 
-   (* -------------------------------------------------------------------------- *)
+    opt_FOR;
+    opt_REG_A;
+    opt_REG_BP2;
+    opt_REG_Y;
+
+
+    (* -------------------------------------------------------------------------- *)
 
     for i := 0 to l - 1 do
       if listing[i] <> '' then WriteInstruction(i);
 
-   (* -------------------------------------------------------------------------- *)
+    (* -------------------------------------------------------------------------- *)
 
   end
   else
@@ -3226,11 +3314,12 @@ begin        // OptimizeASM
       listing[i] := OptimizeBuf[i];
 
 
-{$IFDEF OPTIMIZECODE}
+    {$IFDEF OPTIMIZECODE}
 
-  repeat until PeepholeOptimization_STACK;		// optymalizacja lda :STACK...,x \ sta :STACK...,x
+    repeat
+    until PeepholeOptimization_STACK;    // optymalizacja lda :STACK...,x \ sta :STACK...,x
 
-{$ENDIF}
+    {$ENDIF}
 
 
     // optyA := '';
@@ -3283,18 +3372,20 @@ begin        // OptimizeASM
       end;
 
 
-    if common.optimize.line <> common.optimize.oldLine then
+    if optimize.line <> optimize.oldLine then
     begin
       WriteOut('');
 
       if x = 51 then
-        WriteOut('; optimize FAIL (' + '''' + arg0 + '''' + ', ' + common.optimize.SourceFile.Name + '), line = ' + IntToStr(common.optimize.line))
+        WriteOut('; optimize FAIL (' + '''' + arg0 + '''' + ', ' + optimize.SourceFile.Name +
+          '), line = ' + IntToStr(optimize.line))
       else
-        WriteOut('; optimize FAIL (' + IntToStr(x) + ', ' + common.optimize.SourceFile.Name + '), line = ' + IntToStr(common.optimize.line));
+        WriteOut('; optimize FAIL (' + IntToStr(x) + ', ' + optimize.SourceFile.Name +
+          '), line = ' + IntToStr(optimize.line));
 
       WriteOut('');
 
-      common.optimize.oldLine := common.optimize.line;
+      optimize.oldLine := optimize.line;
     end;
 
 
@@ -3307,7 +3398,7 @@ begin        // OptimizeASM
   end;
 
 
-{$IFDEF USEOPTFILE}
+  {$IFDEF USEOPTFILE}
 
  OptFile.writeln(StringOfChar('-', 32));
  OptFile.writeln( 'SOURCE');
@@ -3331,7 +3422,7 @@ begin        // OptimizeASM
  OptFile.writeln( StringOfChar('-', 64));
  OptFile.writeln();
 
-{$ENDIF}
+  {$ENDIF}
 
   SetLength(OptimizeBuf, 1);
 
@@ -3349,18 +3440,18 @@ var
   str: String;
 begin
 
-{$IFDEF OPTIMIZECODE}
- optimize_code := True;
-{$ELSE}
+  {$IFDEF OPTIMIZECODE}
+  optimize_code := True;
+  {$ELSE}
   optimize_code := False;
-{$ENDIF}
+  {$ENDIF}
 
   if not OutputDisabled then
 
     if pass = TPass.CODE_GENERATION then
     begin
 
-      if optimize_code and common.optimize.use then
+      if optimize_code and optimize.use then
       begin
 
         i := High(OptimizeBuf);

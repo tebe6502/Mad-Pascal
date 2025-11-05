@@ -1,13 +1,13 @@
 procedure GenerateProgramProlog;
 var i, j: Integer;
-    tmp: Boolean;
+    wasOptimizationActive: Boolean;
     a, header: string;
 begin
 
 if Pass = TPass.CODE_GENERATION then begin
 
- tmp := common.optimize.use;
- common.optimize.use := false;
+ wasOptimizationActive := Optimize.IsOptimizationActive;
+ Optimize.SetOptimizationActive(false);
 
  Gen;
 
@@ -398,7 +398,7 @@ end;
  asm65(#9'UNITINITIALIZATION');
  asm65;
 
- common.optimize.use := tmp;
+  optimize.SetOptimizationActive(wasOptimizationActive);
 end;
 
 end;
