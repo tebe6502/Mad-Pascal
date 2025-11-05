@@ -8,7 +8,6 @@ uses FileIO, CompilerTypes;
 
 function CompilerTitle: String;
 
-procedure Initialize;
 procedure Main(const programUnit: TSourceFile; const unitPathList: TPathList);
 procedure Free;
 
@@ -78,10 +77,6 @@ end;
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 
-procedure Initialize;
-begin
-
-end;
 
 function GetIdentResult(ProcAsBlock: Integer): Integer;
 var
@@ -579,16 +574,10 @@ end;  //TestIdentProc
 // ----------------------------------------------------------------------------
 
 
-procedure AddCallGraphChild(ParentBlock, ChildBlock: Integer);
+procedure AddCallGraphChild(const ParentBlock, ChildBlock: Integer);
 begin
 
-  if ParentBlock <> ChildBlock then
-  begin
-
-    Inc(CallGraph[ParentBlock].NumChildren);
-    CallGraph[ParentBlock].ChildBlock[CallGraph[ParentBlock].NumChildren] := ChildBlock;
-
-  end;
+  CallGraph.AddChild(parentBlock, ChildBlock);
 
 end;
 
@@ -15035,9 +15024,6 @@ WHILETOK:
 
       asm65('#asm:' + IntToStr(AsmBlockIndex));
 
-
-      //     if (OutputDisabled=false) and (Pass = CODE_GENERATION) then WriteOut(AsmBlock[AsmBlockIndex]);
-
       Inc(AsmBlockIndex);
 
       if isAsm and (TokenAt(i).Value = 0) then
@@ -19713,7 +19699,7 @@ end;
   asm65;
   asm65(#9'end');
 
-  flushTempBuf;      // flush TemporaryBuf
+  Optimize.FlushTemporaryBuf;
 
 end;
 
@@ -19778,6 +19764,7 @@ begin
   IdentifierList := TIdentifierList.Create;
   for i := 1 to MAXIDENTS do IdentifierList.AddIdentifier;
   TypeList:=TTypeList.Create;
+  CallGraph:=TCallGraph.Create;
 
   SetLength(IFTmpPosStack, 1);
 
@@ -19888,6 +19875,9 @@ begin
   evaluationContext := nil;
   unitPathList.Free;
   unitPathList := nil;
+
+  CallGraph.Free;
+  CallGraph:=nil;
 end;
 
 end.

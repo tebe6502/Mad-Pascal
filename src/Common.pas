@@ -74,7 +74,7 @@ var
   BlockStackTop: TBlockStackIndex;
   BlockIndexStack: array [0..MAXBLOCKS - 1] of TBlockIndex;
 
-  CallGraph: array [1..MAXBLOCKS] of TCallGraphNode;  // For dead code elimination
+  CallGraph: TCallGraph;
 
   OldConstValType: TDataType;
 

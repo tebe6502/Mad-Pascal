@@ -12,7 +12,7 @@ procedure Initialize;
 
 procedure ResetOpty;
 
-procedure asm65(a: String = ''; comment: String = '');      // OptimizeASM
+procedure asm65(const a: String = ''; const comment: String = '');
 
 procedure OptimizeProgram(MainProcedureIndex: TIdentIndex);
 
@@ -21,9 +21,7 @@ function IsOptimizationActive: Boolean;
 procedure StartOptimization(SourceLocation: TSourceLocation);
 procedure StopOptimization;
 
-procedure WriteOut(a: String);            // OptimizeTemporaryBuf
-
-procedure FlushTempBuf;
+procedure FlushTemporaryBuf;
 
 // ----------------------------------------------------------------------------
 
@@ -142,15 +140,15 @@ var
     ProcAsBlockIndex := IdentifierAt(IdentIndex).ProcAsBlockIndex;
 
     if (ProcAsBlockIndex > 0) and (ProcAsBlock[ProcAsBlockIndex] = False) and
-      (CallGraph[ProcAsBlockIndex].NumChildren > 0) then
+      (CallGraph.CallGraphNodeArray[ProcAsBlockIndex].NumChildren > 0) then
     begin
 
       ProcAsBlock[ProcAsBlockIndex] := True;
 
-      for ChildIndex := 1 to CallGraph[ProcAsBlockIndex].NumChildren do
+      for ChildIndex := 1 to CallGraph.CallGraphNodeArray[ProcAsBlockIndex].NumChildren do
         for ChildIdentIndex := 1 to NumIdent do
           if (IdentifierAt(ChildIdentIndex).ProcAsBlockIndex > 0) and
-            (IdentifierAt(ChildIdentIndex).ProcAsBlockIndex = CallGraph[ProcAsBlockIndex].ChildBlock[ChildIndex]) then
+            (IdentifierAt(ChildIdentIndex).ProcAsBlockIndex = CallGraph.CallGraphNodeArray[ProcAsBlockIndex].ChildBlock[ChildIndex]) then
             MarkNotDead(ChildIdentIndex);
 
     end;
@@ -587,7 +585,7 @@ end;
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 
-procedure FlushTempBuf;
+procedure FlushTemporaryBuf;
 var
   i: Integer;
 begin
@@ -3433,7 +3431,7 @@ end;
 // ----------------------------------------------------------------------------
 
 
-procedure asm65(a: String = ''; comment: String = '');
+procedure asm65(const a: String = ''; const comment: String = '');
 var
   len, i: Integer;
   optimize_code: Boolean;

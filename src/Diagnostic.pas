@@ -94,8 +94,8 @@ begin
   for i := 1 to NumBlocks do
   begin
     DiagFile.Write(i, 6).Write('  ---> ');
-    for ChildIndex := 1 to CallGraph[i].NumChildren do
-      DiagFile.Write(CallGraph[i].ChildBlock[ChildIndex], 5);
+    for ChildIndex := 1 to CallGraph.CallGraphNodeArray[i].NumChildren do
+      DiagFile.Write(CallGraph.CallGraphNodeArray[i].ChildBlock[ChildIndex], 5);
     DiagFile.WriteLn;
   end;
 

@@ -390,6 +390,17 @@ type
   end;
 
 
+  // For dead code elimination
+  TCallGraph = class
+
+    CallGraphNodeArray: array [1..MAXBLOCKS] of TCallGraphNode;
+
+    constructor Create;
+    destructor Free;
+
+    procedure AddChild(const ParentBlock, ChildBlock: TBlockIndex);
+  end;
+
   TResource = record
     resStream: Boolean;
     resName, resType, resFile: TString;
@@ -808,7 +819,6 @@ end;
 // Class TTypeList
 // ----------------------------------------------------------------------------
 
-
 constructor TTypeList.Create();
 var
   i: Integer;
@@ -849,6 +859,33 @@ begin
   {$ENDIF}
 
   Result := TypeArray[TypeIndex];
+end;
+
+// ----------------------------------------------------------------------------
+// Class TCallGraph
+// ----------------------------------------------------------------------------
+
+constructor TCallGraph.Create;
+begin
+
+end;
+
+destructor TCallGraph.Free;
+begin
+
+end;
+
+procedure TCallGraph.AddChild(const ParentBlock, ChildBlock: TBlockIndex);
+begin
+
+  if ParentBlock <> ChildBlock then
+  begin
+
+    Inc(CallGraphNodeArray[ParentBlock].NumChildren);
+    CallGraphNodeArray[ParentBlock].ChildBlock[CallGraphNodeArray[ParentBlock].NumChildren] := ChildBlock;
+
+  end;
+
 end;
 
 // ----------------------------------------------------------------------------
