@@ -353,8 +353,7 @@ type
     ObjectIndex: TTypeIndex;
 
     isUnresolvedForward, updateResolvedForward, isOverload, isRegister, isInterrupt,
-    isRecursion, isStdCall, isPascal, isInline, isAsm, isExternal, isKeep, isVolatile,
-    isStriped, IsNotDead: Boolean;
+    isRecursion, isStdCall, isPascal, isInline, isAsm, isExternal, isKeep, isVolatile, isStriped, IsAlive: Boolean;
 
     //  For kind=VARIABLE, USERTYPE:
     NumAllocElements, NumAllocElements_: Cardinal;
@@ -393,12 +392,20 @@ type
   // For dead code elimination
   TCallGraph = class
 
-    CallGraphNodeArray: array [1..MAXBLOCKS] of TCallGraphNode;
+  public
 
     constructor Create;
     destructor Free;
 
     procedure AddChild(const ParentBlock, ChildBlock: TBlockIndex);
+    function GetCallGraphNode(blockIndex: TBlockIndex): TCallGraphNode;
+
+    // Mark all identifiers in the identifier list from 1...NumIdent as alive, if the are (in)directly called by the root identifier.
+    procedure MarkAlive(const IdentfierList: TIdentifierList; const NumIdent: Integer;
+      const rootIdentifierIndex: TIdentifierIndex);
+
+  private
+    CallGraphNodeArray: array [1..MAXBLOCKS] of TCallGraphNode;
   end;
 
   TResource = record
@@ -888,6 +895,59 @@ begin
 
 end;
 
+function TCallGraph.GetCallGraphNode(blockIndex: TBlockIndex): TCallGraphNode;
+begin
+  Result := CallGraphNodeArray[blockIndex];
+end;
+
+procedure TCallGraph.MarkAlive(const IdentfierList: TIdentifierList; const NumIdent: Integer;
+  const rootIdentifierIndex: TIdentifierIndex);
+type
+  TBooleanArray = array [1..MAXBLOCKS] of Boolean;
+var
+  ProcAsBlock: TBooleanArray;
+
+  procedure MarkNotDead(IdentIndex: TIdentIndex);
+  var
+    Identifier: TIdentifier;
+    ChildIndex: TBlockIndex;
+    ChildIdentIndex: TIdentIndex;
+    ChildIdentifier: TIdentifier;
+    ProcAsBlockIndex: TBlockIndex;
+  begin
+
+    Identifier := IdentfierList.GetIdentifierAtIndex(IdentIndex);
+    Identifier.IsAlive := True;
+
+    ProcAsBlockIndex := Identifier.ProcAsBlockIndex;
+
+    if (ProcAsBlockIndex > 0) and (ProcAsBlock[ProcAsBlockIndex] = False) and
+      (CallGraphNodeArray[ProcAsBlockIndex].NumChildren > 0) then
+    begin
+
+      ProcAsBlock[ProcAsBlockIndex] := True;
+
+      for ChildIndex := 1 to CallGraphNodeArray[ProcAsBlockIndex].NumChildren do
+        for ChildIdentIndex := 1 to NumIdent do
+        begin
+          ChildIdentifier := IdentfierList.GetIdentifierAtIndex(ChildIdentIndex);
+          if (ChildIdentifier.ProcAsBlockIndex > 0) and (ChildIdentifier.ProcAsBlockIndex =
+            CallGraphNodeArray[ProcAsBlockIndex].ChildBlock[ChildIndex]) then
+            MarkNotDead(ChildIdentIndex);
+        end;
+
+    end;
+
+  end;
+
+begin
+
+  ProcAsBlock := Default(TBooleanArray);
+
+  // Perform dead code elimination
+  MarkNotDead(rootIdentifierIndex);
+
+end;
 // ----------------------------------------------------------------------------
 // Global procedures and functions.
 // ----------------------------------------------------------------------------

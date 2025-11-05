@@ -14,8 +14,6 @@ procedure ResetOpty;
 
 procedure asm65(const a: String = ''; const comment: String = '');
 
-procedure OptimizeProgram(MainProcedureIndex: TIdentIndex);
-
 procedure SetOptimizationActive(active: Boolean);
 function IsOptimizationActive: Boolean;
 procedure StartOptimization(SourceLocation: TSourceLocation);
@@ -115,52 +113,6 @@ begin
       end;
 
     end;
-
-end;
-
-// ----------------------------------------------------------------------------
-// ----------------------------------------------------------------------------
-
-
-procedure OptimizeProgram(MainProcedureIndex: TIdentIndex);
-type
-  TBooleanArray = array [1..MAXBLOCKS] of Boolean;
-var
-  ProcAsBlock: TBooleanArray;          // issue #125 fixed
-
-  procedure MarkNotDead(IdentIndex: TIdentIndex);
-  var
-    ChildIndex: TBlockIndex;
-    ChildIdentIndex: TIdentIndex;
-    ProcAsBlockIndex: TBlockIndex;
-  begin
-
-    IdentifierAt(IdentIndex).IsNotDead := True;
-
-    ProcAsBlockIndex := IdentifierAt(IdentIndex).ProcAsBlockIndex;
-
-    if (ProcAsBlockIndex > 0) and (ProcAsBlock[ProcAsBlockIndex] = False) and
-      (CallGraph.CallGraphNodeArray[ProcAsBlockIndex].NumChildren > 0) then
-    begin
-
-      ProcAsBlock[ProcAsBlockIndex] := True;
-
-      for ChildIndex := 1 to CallGraph.CallGraphNodeArray[ProcAsBlockIndex].NumChildren do
-        for ChildIdentIndex := 1 to NumIdent do
-          if (IdentifierAt(ChildIdentIndex).ProcAsBlockIndex > 0) and
-            (IdentifierAt(ChildIdentIndex).ProcAsBlockIndex = CallGraph.CallGraphNodeArray[ProcAsBlockIndex].ChildBlock[ChildIndex]) then
-            MarkNotDead(ChildIdentIndex);
-
-    end;
-
-  end;
-
-begin
-
-  ProcAsBlock := Default(TBooleanArray);
-
-  // Perform dead code elimination
-  MarkNotDead(MainProcedureIndex);
 
 end;
 

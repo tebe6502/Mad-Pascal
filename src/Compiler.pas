@@ -18926,7 +18926,7 @@ begin
 
             TestIdentProc(i, IdentifierAt(NumIdent).Name);
 
-            if ((Pass = TPass.CODE_GENERATION) and (not IdentifierAt(NumIdent).IsNotDead)) then
+            if ((Pass = TPass.CODE_GENERATION) and (not IdentifierAt(NumIdent).IsAlive)) then
               // Do not compile dead procedures and functions
             begin
               OutputDisabled := True;
@@ -18953,7 +18953,7 @@ begin
             //  GenerateForwardResolution(ForwardIdentIndex);
             //  CompileBlock(ForwardIdentIndex);
 
-            if ((Pass = TPass.CODE_GENERATION) and (not IdentifierAt(ForwardIdentIndex).IsNotDead)) then
+            if ((Pass = TPass.CODE_GENERATION) and (not IdentifierAt(ForwardIdentIndex).IsAlive)) then
               // Do not compile dead procedures and functions
             begin
               OutputDisabled := True;
@@ -19053,7 +19053,7 @@ begin
 
 
   OutputDisabled := (Pass = TPass.CODE_GENERATION) and (BlockIndexStack[BlockStackTop] <> 1) and
-    (not IdentifierAt(BlockIdentIndex).IsNotDead);
+    (not IdentifierAt(BlockIdentIndex).IsAlive);
 
 
   // asm65('@main');
@@ -19812,8 +19812,8 @@ begin
   Profiler.profiler.EndSection();
 
   // Visit call graph nodes and mark all procedures that are called as not dead
-  Profiler.profiler.BeginSection('OptimizeProgram');
-  OptimizeProgram(GetIdentIndex('MAIN'));
+  Profiler.profiler.BeginSection('CallGraph.MarkNotDead');
+  CallGraph.MarkAlive(IdentifierList, NumIdent, GetIdentIndex('MAIN'));
   Profiler.profiler.EndSection();
 
 

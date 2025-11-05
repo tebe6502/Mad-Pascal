@@ -1737,7 +1737,7 @@ begin
     if Name <> 'RESULT' then
       if (NumIdent > NumPredefIdent + 1) and (ActiveSourceFile.UnitIndex = 1) and (pass = TPass.CODE_GENERATION) then
         if not ((identifier.Pass in [TPass.CALL_DETERMINATION, TPass.CODE_GENERATION]) or
-          (identifier.IsNotDead)) then
+          (identifier.IsAlive)) then
           NoteForIdentifierNotUsed(tokenIndex, NumIdent);
 
     case Kind of
@@ -2250,7 +2250,7 @@ begin
       TTokenKind.INTERRUPTTOK: begin
         isInt := True;
         IdentifierAt(NumIdent).isInterrupt := True;
-        IdentifierAt(NumIdent).IsNotDead := True;    // Always generate code for interrupt
+        IdentifierAt(NumIdent).IsAlive := True;    // Always generate code for interrupt
         Inc(i);
         CheckTok(i + 1, TTokenKind.SEMICOLONTOK);
       end;
@@ -2300,7 +2300,7 @@ begin
 
       TTokenKind.KEEPTOK: begin
         IdentifierAt(NumIdent).isKeep := True;
-        IdentifierAt(NumIdent).IsNotDead := True;
+        IdentifierAt(NumIdent).IsAlive := True;
         Inc(i);
         CheckTok(i + 1, TTokenKind.SEMICOLONTOK);
       end;
