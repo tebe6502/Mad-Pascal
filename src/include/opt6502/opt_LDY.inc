@@ -73,7 +73,7 @@ begin
 	p := GetBYTE(i) + 1;
 
 	if p < 256 then begin
- 	 listing[i]   := #9'ldy #' + Hex(p, 2);
+ 	 listing[i]   := #9'ldy #' + HexByte(p);
 	 listing[i+1] := '';
 
 	 exit(false);

@@ -85,7 +85,7 @@ begin
        else
         p := p - q;
 
-       listing[i+1] := #9'mva #' + Hex(p and $ff, 2) + ' :STACKORIGIN,x';
+       listing[i+1] := #9'mva #' + HexByte(p and $ff) + ' :STACKORIGIN,x';
 
        listing[i+2] := '';
        listing[i+3] := '';

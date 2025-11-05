@@ -48,14 +48,14 @@ var
   NumDefines: Integer = 1;  // NumDefines = AddDefines
   Defines: array [1..MAXDEFINES] of TDefine;
 
-  NumTypes: Integer;
-  _TypeArray: array [1..MAXTYPES] of TType;
-
   TokenList: TTokenList;
 
   // This is current index in the list, not the size of the list.
   NumIdent_: Integer;
   IdentifierList: TIdentifierList;
+
+  NumTypes: Integer;
+  TypeList: TTypeList;
 
   SourceFileList: TSourceFileList;
 
@@ -152,8 +152,6 @@ function TokenAt(tokenIndex: TTokenIndex): TToken;
 function NumIdent: Integer;
 function IdentifierAt(identifierIndex: TIdentifierIndex): TIdentifier;
 
-function Hex(a: Cardinal; b: Shortint): String;
-
 procedure AddDefine(const defineName: TDefineName);
 function SearchDefine(const defineName: TDefineName): TDefineIndex;
 
@@ -186,9 +184,6 @@ function GetCommonType(const tokenIndex: TTokenIndex; const LeftType: TDataType;
   const RightType: TDataType): TDataType;
 
 function GetEnumName(IdentIndex: TIdentIndex): TString;
-
-
-function GetVAL(a: String): Integer;
 
 function LowBound(const i: TTokenIndex; const DataType: TDataType): TInteger;
 function HighBound(const i: TTokenIndex; const DataType: TDataType): TInteger;
@@ -248,14 +243,7 @@ end;
 
 function GetTypeAtIndex(const typeIndex: TTypeIndex): TType;
 begin
-  {$IFDEF DEBUG}
-  if (typeIndex<Low(_TypeArray)) or (typeIndex>High(_TypeArray)) then
-  begin
-    Writeln('ERROR: typeIndex=',typeIndex);
-    Exit(Default(TType));
-  end;
-  {$ENDIF}
-  Result := _TypeArray[typeIndex];
+  Result := TypeList.GetTypeAtIndex(typeIndex);
 end;
 
 function FindFile(FileName: String; ftyp: TString): TFilePath; overload;
@@ -288,38 +276,6 @@ begin
     end;
     Error(NumTok, msg);
   end;
-end;
-
-// ----------------------------------------------------------------------------
-// ----------------------------------------------------------------------------
-
-function Hex(a: Cardinal; b: Shortint): String;
-  (*----------------------------------------------------------------------------*)
-  (*  zamiana na zapis hexadecymalny                                            *)
-  (*  'B' okresla maksymalna liczbe nibbli do zamiany                           *)
-  (*  jesli sa jeszcze jakies wartosci to kontynuuje zamiane                    *)
-  (*----------------------------------------------------------------------------*)
-var
-  v: Byte;
-const
-  tHex: array [0..15] of Char =
-    ('0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F');
-begin
-  Result := '';
-
-  while (b > 0) or (a <> 0) do
-  begin
-
-    v := Byte(a);
-    Result := tHex[v shr 4] + tHex[v and $0f] + Result;
-
-    a := a shr 8;
-
-    Dec(b, 2);
-  end;
-
-  Result := '$' + Result;
-
 end;
 
 // ----------------------------------------------------------------------------
@@ -537,30 +493,6 @@ begin
   end;
 
 end;
-
-
-// ----------------------------------------------------------------------------
-// ----------------------------------------------------------------------------
-
-
-function GetVAL(a: String): Integer;
-var
-  err: Integer;
-begin
-
-  Result := -1;
-
-  if a <> '' then
-    if a[1] = '#' then
-    begin
-      val(copy(a, 2, length(a)), Result, err);
-
-      if err > 0 then Result := -1;
-
-    end;
-
-end;
-
 
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------

@@ -47,7 +47,7 @@ begin
 
       if optyY <> '' then
        if (optyY[1] = '#') and (optyY[2] = '$') then
-        optyY:='#' + Hex( byte( StrToInt(copy(optyY,2,256)) + 1), 2)						// #$xx
+        optyY:='#' + HexByte( byte( StrToInt(copy(optyY,2,256)) + 1))						// #$xx
        else
         optyY:='+#$01'+optyY;											// +#$01
 
@@ -63,7 +63,7 @@ begin
 
       if optyY <> '' then
        if (optyY[1] = '#') and (optyY[2] = '$') then
-        optyY:='#' + Hex( byte( StrToInt(copy(optyY,2,256)) - 1), 2)						// #$xx
+        optyY:='#' + HexByte( byte( StrToInt(copy(optyY,2,256)) - 1))						// #$xx
        else
         optyY:='-#$01'+optyY;											// -#$01
 

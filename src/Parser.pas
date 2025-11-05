@@ -314,7 +314,7 @@ begin
           if AllocElementType = TDataType.RECORDTOK then
           begin
             AllocElementType := TDataType.POINTERTOK;
-            NumAllocElements := _TypeArray[i].Field[j].NumAllocElements shr 16;
+            NumAllocElements := GetTypeAtIndex(i).Field[j].NumAllocElements shr 16;
             NumAllocElements_ := 0;
           end;
           if NumAllocElements_ > 0 then
@@ -2390,7 +2390,7 @@ var
         Error(i, TMessage.Create(TErrorCode.DuplicateIdentifier, 'Duplicate identifier ''{0}''.', Name));
 
     // Add new field
-    Inc(_TypeArray[RecType].NumFields);
+    Inc(GetTypeAtIndex(RecType).NumFields);
 
     x := GetTypeAtIndex(RecType).NumFields;
 
@@ -2407,11 +2407,11 @@ var
 
 
     // Add new field
-    _TypeArray[RecType].Field[x].Name := Name;
-    _TypeArray[RecType].Field[x].DataType := FieldType;
-    _TypeArray[RecType].Field[x].Value := Data;
-    _TypeArray[RecType].Field[x].AllocElementType := AllocElementType;
-    _TypeArray[RecType].Field[x].NumAllocElements := NumAllocElements;
+    GetTypeAtIndex(RecType).Field[x].Name := Name;
+    GetTypeAtIndex(RecType).Field[x].DataType := FieldType;
+    GetTypeAtIndex(RecType).Field[x].Value := Data;
+    GetTypeAtIndex(RecType).Field[x].AllocElementType := AllocElementType;
+    GetTypeAtIndex(RecType).Field[x].NumAllocElements := NumAllocElements;
 
 
     //   writeln('>> ',Name,',',FieldType,',',AllocElementType,',',NumAllocElements);
@@ -2433,26 +2433,26 @@ var
         end;
 
         if (FieldType = TDataType.POINTERTOK) and (AllocElementType = TDataType.FORWARDTYPE) then
-          Inc(_TypeArray[RecType].Size, GetDataSize(TDataType.POINTERTOK))
+          Inc(GetTypeAtIndex(RecType).Size, GetDataSize(TDataType.POINTERTOK))
         else
           if NumAllocElements shr 16 > 0 then
-            Inc(_TypeArray[RecType].Size, (NumAllocElements shr 16) * (NumAllocElements and $FFFF) *
+            Inc(GetTypeAtIndex(RecType).Size, (NumAllocElements shr 16) * (NumAllocElements and $FFFF) *
               GetDataSize(AllocElementType))
           else
-            Inc(_TypeArray[RecType].Size, NumAllocElements * GetDataSize(AllocElementType));
+            Inc(GetTypeAtIndex(RecType).Size, NumAllocElements * GetDataSize(AllocElementType));
 
       end
       else
-        Inc(_TypeArray[RecType].Size, GetDataSize(FieldType));
+        Inc(GetTypeAtIndex(RecType).Size, GetDataSize(FieldType));
 
     end
     else
-      Inc(_TypeArray[RecType].Size, GetDataSize(FieldType));
+      Inc(GetTypeAtIndex(RecType).Size, GetDataSize(FieldType));
 
     if pos('.', GetTypeAtIndex(RecType).Field[x].Name) > 0 then
-      _TypeArray[RecType].Field[x].ObjectVariable := GetTypeAtIndex(RecType).Field[0].ObjectVariable
+      GetTypeAtIndex(RecType).Field[x].ObjectVariable := GetTypeAtIndex(RecType).Field[0].ObjectVariable
     else
-      _TypeArray[RecType].Field[x].ObjectVariable := False;
+      GetTypeAtIndex(RecType).Field[x].ObjectVariable := False;
 
   end;
 
@@ -2585,13 +2585,13 @@ begin
         Inc(NumTypes);
         RecType := NumTypes;
 
-        if NumTypes > MAXTYPES then
+        if NumTypes > TTypeList.MAXTYPES then
           Error(i, TMessage.Create(TErrorCode.OutOfResources, 'Out of resources, MAXTYPES'));
 
         Inc(i);
 
-        _TypeArray[RecType].Field[0].Name := Name;
-        _TypeArray[RecType].NumFields := 0;
+        GetTypeAtIndex(RecType).Field[0].Name := Name;
+        GetTypeAtIndex(RecType).NumFields := 0;
 
         ConstVal := 0;
         LowerBound := 0;
@@ -2664,7 +2664,7 @@ begin
             FieldInListName[FieldInListIndex].Value);
         end;
 
-        _TypeArray[RecType].BlockIndex := BlockIndexStack[BlockStackTop];
+        GetTypeAtIndex(RecType).BlockIndex := BlockIndexStack[BlockStackTop];
 
         AllocElementType := DataType;
 
@@ -2749,14 +2749,14 @@ begin
                 Inc(NumTypes);
                 RecType := NumTypes;
 
-                if NumTypes > MAXTYPES then
+                if NumTypes > TTypeList.MAXTYPES then
                   Error(i, TMessage.Create(TErrorCode.OutOfResources, 'Out of resources, MAXTYPES'));
 
                 Inc(i);
 
-                _TypeArray[RecType].NumFields := 0;
-                _TypeArray[RecType].Field[0].Name := Name;
-                _TypeArray[RecType].Field[0].ObjectVariable := True;
+                GetTypeAtIndex(RecType).NumFields := 0;
+                GetTypeAtIndex(RecType).Field[0].Name := Name;
+                GetTypeAtIndex(RecType).Field[0].ObjectVariable := True;
 
                 if (TokenAt(i).Kind in [TTokenKind.PROCEDURETOK, TTokenKind.FUNCTIONTOK,
                   TTokenKind.CONSTRUCTORTOK, TTokenKind.DESTRUCTORTOK]) then
@@ -2904,7 +2904,7 @@ begin
 
                 CheckTok(i, TTokenKind.ENDTOK);
 
-                _TypeArray[RecType].BlockIndex := BlockIndexStack[BlockStackTop];
+                GetTypeAtIndex(RecType).BlockIndex := BlockIndexStack[BlockStackTop];
 
                 DataType := TDataType.OBJECTTOK;
                 NumAllocElements := RecType;      // Index to the Types array
@@ -2930,14 +2930,14 @@ begin
                   Inc(NumTypes);
                   RecType := NumTypes;
 
-                  if NumTypes > MAXTYPES then
+                  if NumTypes > TTypeList.MAXTYPES then
                     Error(i, TMessage.Create(TErrorCode.OutOfResources, 'Out of resources, MAXTYPES'));
 
                   Inc(i);
 
-                  _TypeArray[RecType].Size := 0;
-                  _TypeArray[RecType].NumFields := 0;
-                  _TypeArray[RecType].Field[0].Name := Name;
+                  GetTypeAtIndex(RecType).Size := 0;
+                  GetTypeAtIndex(RecType).NumFields := 0;
+                  GetTypeAtIndex(RecType).Field[0].Name := Name;
 
                   repeat
                     NumFieldsInList := 0;
@@ -3002,7 +3002,7 @@ begin
 
                   CheckTok(i, TTokenKind.ENDTOK);
 
-                  _TypeArray[RecType].BlockIndex := BlockIndexStack[BlockStackTop];
+                  GetTypeAtIndex(RecType).BlockIndex := BlockIndexStack[BlockStackTop];
 
                   DataType := TDataType.RECORDTOK;
                   NumAllocElements := RecType;      // index to the Types array
@@ -3393,17 +3393,17 @@ begin
                             Inc(NumTypes);
                             RecType := NumTypes;
 
-                            if NumTypes > MAXTYPES then
+                            if NumTypes > TTypeList.MAXTYPES then
                               Error(i, TMessage.Create(TErrorCode.OutOfResources, 'Out of resources, MAXTYPES'));
 
-                            _TypeArray[RecType].NumFields := 2;
-                            _TypeArray[RecType].Field[0].AllocElementType := BoundaryType;
-                            _TypeArray[RecType].Field[0].Name := Name;
+                            GetTypeAtIndex(RecType).NumFields := 2;
+                            GetTypeAtIndex(RecType).Field[0].AllocElementType := BoundaryType;
+                            GetTypeAtIndex(RecType).Field[0].Name := Name;
 
-                            _TypeArray[RecType].Field[1].Value := LowerBound;
-                            _TypeArray[RecType].Field[2].Value := UpperBound;
+                            GetTypeAtIndex(RecType).Field[1].Value := LowerBound;
+                            GetTypeAtIndex(RecType).Field[2].Value := UpperBound;
 
-                            _TypeArray[RecType].BlockIndex := BlockIndexStack[BlockStackTop];
+                            GetTypeAtIndex(RecType).BlockIndex := BlockIndexStack[BlockStackTop];
 
                             DataType := TDataType.SUBRANGETYPE;
                             NumAllocElements := RecType;      // index to the Types array
