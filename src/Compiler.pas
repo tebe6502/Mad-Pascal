@@ -19860,24 +19860,20 @@ end;
 procedure Free;
 begin
 
-  TypeList.Free;
-  TypeList:=nil;
+  FreeAndNil(TypeList);
 
-  TokenList.Free;
-  TokenList := nil;
+  FreeAndNil(TokenList);
 
-  IdentifierList.Free;
-  IdentifierList := nil;
+  FreeAndNil(IdentifierList);
 
   SetLength(IFTmpPosStack, 0);
-  Profiler.Profiler := nil;
-  Debugger.debugger := nil;
-  evaluationContext := nil;
-  unitPathList.Free;
-  unitPathList := nil;
+  // Interface reference call Free implicitly.
+  Profiler.Profiler:=nil;
+  Debugger.debugger:=nil;
+  evaluationContext:=nil;
+  FreeAndNil(unitPathList);
 
-  CallGraph.Free;
-  CallGraph:=nil;
+  FreeAndNil(CallGraph);
 end;
 
 end.
