@@ -383,7 +383,7 @@ type
 
   end;
 
-  TCallGraphNode = record
+  TCallGraphNode = class
     ChildBlock: array [1..MAXBLOCKS] of TBlockIndex;
     NumChildren: Word;
   end;
@@ -873,13 +873,22 @@ end;
 // ----------------------------------------------------------------------------
 
 constructor TCallGraph.Create;
+var
+  i: TBlockIndex;
 begin
 
+  for i := 1 to MAXBLOCKS do CallGraphNodeArray[i] := TCallGraphNode.Create;
 end;
 
 destructor TCallGraph.Free;
+var
+  i: TBlockIndex;
 begin
 
+  for i := 1 to MAXBLOCKS do
+  begin
+    FreeAndNil(CallGraphNodeArray[i]);
+  end;
 end;
 
 procedure TCallGraph.AddChild(const ParentBlock, ChildBlock: TBlockIndex);
@@ -907,35 +916,37 @@ type
 var
   ProcAsBlock: TBooleanArray;
 
-  procedure MarkNotDead(IdentIndex: TIdentIndex);
+  procedure MarkNotDead(const Identifier: TIdentifier);
   var
-    Identifier: TIdentifier;
+    ProcAsBlockIndex: TBlockIndex;
+    CallGraphNode: TCallGraphNode;
     ChildIndex: TBlockIndex;
     ChildIdentIndex: TIdentIndex;
     ChildIdentifier: TIdentifier;
-    ProcAsBlockIndex: TBlockIndex;
   begin
 
-    Identifier := IdentfierList.GetIdentifierAtIndex(IdentIndex);
     Identifier.IsAlive := True;
 
     ProcAsBlockIndex := Identifier.ProcAsBlockIndex;
 
-    if (ProcAsBlockIndex > 0) and (ProcAsBlock[ProcAsBlockIndex] = False) and
-      (CallGraphNodeArray[ProcAsBlockIndex].NumChildren > 0) then
+    if (ProcAsBlockIndex > 0) and (ProcAsBlock[ProcAsBlockIndex] = False) then
     begin
+      CallGraphNode := CallGraphNodeArray[ProcAsBlockIndex];
+      if (CallGraphNode.NumChildren > 0) then
+      begin
 
-      ProcAsBlock[ProcAsBlockIndex] := True;
+        ProcAsBlock[ProcAsBlockIndex] := True;
 
-      for ChildIndex := 1 to CallGraphNodeArray[ProcAsBlockIndex].NumChildren do
-        for ChildIdentIndex := 1 to NumIdent do
-        begin
-          ChildIdentifier := IdentfierList.GetIdentifierAtIndex(ChildIdentIndex);
-          if (ChildIdentifier.ProcAsBlockIndex > 0) and (ChildIdentifier.ProcAsBlockIndex =
-            CallGraphNodeArray[ProcAsBlockIndex].ChildBlock[ChildIndex]) then
-            MarkNotDead(ChildIdentIndex);
-        end;
+        for ChildIndex := 1 to CallGraphNode.NumChildren do
+          for ChildIdentIndex := 1 to NumIdent do
+          begin
+            ChildIdentifier := IdentfierList.GetIdentifierAtIndex(ChildIdentIndex);
+            if { (ChildIdentifier.ProcAsBlockIndex > 0) and  } (ChildIdentifier.ProcAsBlockIndex =
+              CallGraphNode.ChildBlock[ChildIndex]) then
+              MarkNotDead(ChildIdentifier);
+          end;
 
+      end;
     end;
 
   end;
@@ -945,7 +956,7 @@ begin
   ProcAsBlock := Default(TBooleanArray);
 
   // Perform dead code elimination
-  MarkNotDead(rootIdentifierIndex);
+  MarkNotDead(IdentfierList.GetIdentifierAtIndex(rootIdentifierIndex));
 
 end;
 // ----------------------------------------------------------------------------
