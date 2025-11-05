@@ -89,7 +89,7 @@ BEGIN
         enough := 5 * total DIV 10; (* enough visit 50% of maze *)
         WHILE unvisited > enough DO BEGIN
                 (* One step *)
-                CASE Random(4) OF
+                CASE byte(Random(4)) OF
                 0: BEGIN dx := 0;  dy := -1; d := '^'; END; (* UP *)
                 1: BEGIN dx := 1;  dy := 0;  d := '>'; END; (* RIGHT *)
                 2: BEGIN dx := 0;  dy := 1;  d := 'V'; END; (* DOWN *)
@@ -127,4 +127,6 @@ BEGIN
 	
         ClearMaze;
         GenerateMaze;
+
+	repeat until keypressed;
 END.

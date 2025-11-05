@@ -26,7 +26,7 @@ SOFTWARE.
 *****************************************************************************)
 PROGRAM ABMaze4;
 
-uses crt, atari, efast;
+uses crt, atari;
 
 CONST
 CELL_VISITED = ' '; (* cell is visited *)
@@ -120,7 +120,7 @@ BEGIN
         enough := 5 * total DIV 10; (* enough visit 50% of maze *)
         WHILE TRUE DO BEGIN
                 (* One step *)
-                CASE Random(4) OF
+                CASE byte(Random(4)) OF
                 0: BEGIN dx := 0;  dy := -1; d := '^'; END; (* UP *)
                 1: BEGIN dx := 1;  dy := 0;  d := '>'; END; (* RIGHT *)
                 2: BEGIN dx := 0;  dy := 1;  d := 'V'; END; (* DOWN *)
@@ -163,7 +163,7 @@ BEGIN
 END;
 
 BEGIN
-	lmargin:=0;
+ 	lmargin:=0;
 
         Randomize;
 
@@ -171,4 +171,6 @@ BEGIN
 	
         ClearMaze;
         GenerateMaze;
+
+	repeat until keypressed;
 END.
