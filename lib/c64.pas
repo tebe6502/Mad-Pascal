@@ -126,6 +126,8 @@ var
   D6510               : byte absolute $0000;
   R6510               : byte absolute $0001;
 
+  SCREENRAM           : byte absolute $0400;
+
   PRA2                : byte absolute $DD00;
 
   SP0X                : byte absolute $D000;
@@ -239,7 +241,7 @@ var
   CI2ICR              : byte absolute $DD0D;
   CI2CRA              : byte absolute $DD0E;
   CI2CRB              : byte absolute $DD0F;
- 
+
   NMIADL              : byte absolute $FFFA;
   NMIADH              : byte absolute $FFFB;
   RSTADL              : byte absolute $FFFC;
