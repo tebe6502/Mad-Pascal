@@ -920,7 +920,7 @@ var
   var
     ProcAsBlockIndex: TBlockIndex;
     CallGraphNode: TCallGraphNode;
-    ChildIndex: TBlockIndex;
+    ChildBlockIndex: TBlockIndex;
     ChildIdentIndex: TIdentIndex;
     ChildIdentifier: TIdentifier;
   begin
@@ -937,13 +937,15 @@ var
 
         ProcAsBlock[ProcAsBlockIndex] := True;
 
-        for ChildIndex := 1 to CallGraphNode.NumChildren do
+        for ChildBlockIndex := 1 to CallGraphNode.NumChildren do
           for ChildIdentIndex := 1 to NumIdent do
           begin
             ChildIdentifier := IdentfierList.GetIdentifierAtIndex(ChildIdentIndex);
             if { (ChildIdentifier.ProcAsBlockIndex > 0) and  } (ChildIdentifier.ProcAsBlockIndex =
-              CallGraphNode.ChildBlock[ChildIndex]) then
+              CallGraphNode.ChildBlock[ChildBlockIndex]) then
+            begin
               MarkNotDead(ChildIdentifier);
+            end;
           end;
 
       end;

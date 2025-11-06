@@ -584,12 +584,12 @@
       </Checks>
       <VerifyObjMethodCallValidity Value="True"/>
       <Optimizations>
-        <OptimizationLevel Value="3"/>
+        <OptimizationLevel Value="0"/>
       </Optimizations>
     </CodeGeneration>
     <Linking>
       <Debugging>
-        <DebugInfoType Value="dsDwarf2Set"/>
+        <DebugInfoType Value="dsDwarf3"/>
       </Debugging>
     </Linking>
     <Other>
@@ -604,7 +604,7 @@
 -dSIMULATED_COMMAND_LINE2
 -dSIMULATED_FILE_IO2
 -dUSEOPTFILE2
--dUSETRACEFILE2
+-dUSETRACEFILE
 -dPROFILE"/>
     </Other>
   </CompilerOptions>
@@ -620,6 +620,7 @@
       </Item>
       <Item>
         <Name Value="EFOpenError"/>
+        <Enabled Value="False"/>
       </Item>
       <Item>
         <Name Value="ERangeError"/>
@@ -634,6 +635,7 @@
       </Item>
       <Item>
         <Name Value="EHaltException"/>
+        <Enabled Value="False"/>
       </Item>
     </Exceptions>
   </Debugging>
