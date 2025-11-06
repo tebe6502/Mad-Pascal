@@ -2,6 +2,8 @@
 
 [English Documentation](https://tebe6502.github.io/mad-pascal-en-mkdocs/) / [Polska Dokumentacja](https://tebe6502.github.io/mad-pascal-mkdocs/)
 
+[Turbo Pascal](https://turbopascal.org/)
+
 [Full Pascal Programming Crash Course - Basics to Advanced](https://youtu.be/6jRVhT_JotY)
 
 ## [Introduction](https://tebe6502.github.io/mad-pascal-en-mkdocs/introduction/)
