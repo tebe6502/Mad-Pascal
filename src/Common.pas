@@ -67,6 +67,7 @@ var
   CodePosStackTop: Integer;
   CodePosStack: array [0..MAXPOSSTACK] of Word;
 
+  // TODO move to class
 type
   TBlockStackIndex = Integer;
 

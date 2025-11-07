@@ -4,7 +4,7 @@ unit CompilerTypes;
 
 interface
 
-uses SysUtils, CommonTypes, DataTypes, FileIO, Tokens, Utilities;
+uses SysUtils, CommonTypes, DataTypes, FileIO, Tokens;
 
   // ----------------------------------------------------------------------------
 
@@ -143,10 +143,19 @@ type
   TBlockStackIndex = Integer;
   TBlockIndex = Integer;
 
+  TIdentifier = class;
+
   TBlock = class
   public
     BlockIndex: TBlockIndex;
-    // TODO: Identifiers defined in this block
+
+    constructor Create;
+    destructor Free;
+    procedure AddIdentifer(const identifier: TIdentifier);
+  private
+    NumIdentifiers_: Integer;
+    IdentifierArray: array of TIdentifier;
+
   end;
 
   TBlockStack = class
@@ -458,10 +467,37 @@ function GetIOBits(const ioCode: TIOCode): TIOBits;
 
 implementation
 
+
+// ----------------------------------------------------------------------------
+// Class TBlock
+// ----------------------------------------------------------------------------
+
+constructor TBlock.Create;
+begin
+  NumIdentifiers_ := 0;
+  IdentifierArray := nil;
+end;
+
+destructor TBlock.Free;
+begin
+  IdentifierArray := nil;
+  NumIdentifiers_ := 0;
+end;
+
+procedure TBlock.AddIdentifer(const identifier: TIdentifier);
+var
+  capacity: Integer;
+begin
+  capacity := Length(IdentifierArray);
+  if capacity = 0 then SetLength(IdentifierArray, 10)
+  else if NumIdentifiers_ = capacity then SetLength(IdentifierArray, 2 * capacity);
+  IdentifierArray[NumIdentifiers_] := identifier;
+  Inc(NumIdentifiers_);
+end;
+
 // ----------------------------------------------------------------------------
 // Class TBlockStack
 // ----------------------------------------------------------------------------
-
 
 constructor TBlockStack.Create;
 begin
@@ -915,10 +951,8 @@ end;
 constructor TCallGraph.Create;
 var
   i: TBlockIndex;
-  start, duration: QWord;
 begin
   for i := 1 to MAXBLOCKS do CallGraphNodeArray[i] := TCallGraphNode.Create;
-
 end;
 
 destructor TCallGraph.Free;
