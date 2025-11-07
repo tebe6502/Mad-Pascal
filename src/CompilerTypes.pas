@@ -941,7 +941,7 @@ end;
 
 function TCallGraphNode.GetChild(Index: Word): TBlockIndex;
 begin
-  Result := ChildBlockArray[Index];
+  Result := ChildBlockArray[Index-1];
 end;
 
 // ----------------------------------------------------------------------------
