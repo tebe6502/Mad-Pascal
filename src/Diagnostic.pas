@@ -16,7 +16,8 @@ uses SysUtils, Common, DataTypes, FileIO, Tokens;
 
 procedure Diagnostics(ProgramUnit: TSourceFile);
 var
-  i, CharIndex, ChildIndex: Integer;
+  i, CharIndex: Integer;
+  ChildIndex: Word;
   DiagFile: ITextFile;
   token: TToken;
   identifier: TIdentifier;
@@ -97,7 +98,7 @@ begin
     DiagFile.Write(i, 6).Write('  ---> ');
     CallGraphNode := CallGraph.GetCallGraphNode(i);
     for ChildIndex := 1 to CallGraphNode.NumChildren do
-      DiagFile.Write(CallGraphNode.ChildBlock[ChildIndex], 5);
+      DiagFile.Write(CallGraphNode.GetChild(ChildIndex), 5);
     DiagFile.WriteLn;
   end;
 

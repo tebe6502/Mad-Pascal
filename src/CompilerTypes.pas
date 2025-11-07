@@ -384,8 +384,16 @@ type
   end;
 
   TCallGraphNode = class
-    ChildBlock: array [1..MAXBLOCKS] of TBlockIndex;
-    NumChildren: Word;
+
+  public
+    constructor Create;
+    procedure AddChild(const blockIndex: TBlockIndex);
+    function NumChildren: Word;
+    function GetChild(Index: Word): TBlockIndex;
+  private
+    NumChildren_: Word;
+    ChildBlockArray: array of TBlockIndex;
+
   end;
 
 
@@ -868,6 +876,38 @@ begin
   Result := TypeArray[TypeIndex];
 end;
 
+
+// ----------------------------------------------------------------------------
+// Class TCallGraphNode
+// ----------------------------------------------------------------------------
+
+constructor TCallGraphNode.Create;
+begin
+  NumChildren_ := 0;
+  ChildBlockArray := nil;
+end;
+
+procedure TCallGraphNode.AddChild(const blockIndex: TBlockIndex);
+var
+  capacity: Integer;
+begin
+  capacity := Length(ChildBlockArray);
+  if capacity = 0 then SetLength(ChildBlockArray, 10)
+  else if NumChildren_ = capacity then SetLength(ChildBlockArray, 2 * capacity);
+  ChildBlockArray[NumChildren_] := blockIndex;
+  Inc(NumChildren_);
+end;
+
+function TCallGraphNode.NumChildren: Word;
+begin
+  Result := NumChildren_;
+end;
+
+function TCallGraphNode.GetChild(Index: Word): TBlockIndex;
+begin
+  Result := ChildBlockArray[Index];
+end;
+
 // ----------------------------------------------------------------------------
 // Class TCallGraph
 // ----------------------------------------------------------------------------
@@ -875,9 +915,10 @@ end;
 constructor TCallGraph.Create;
 var
   i: TBlockIndex;
+  start, duration: QWord;
 begin
-
   for i := 1 to MAXBLOCKS do CallGraphNodeArray[i] := TCallGraphNode.Create;
+
 end;
 
 destructor TCallGraph.Free;
@@ -896,10 +937,7 @@ begin
 
   if ParentBlock <> ChildBlock then
   begin
-
-    Inc(CallGraphNodeArray[ParentBlock].NumChildren);
-    CallGraphNodeArray[ParentBlock].ChildBlock[CallGraphNodeArray[ParentBlock].NumChildren] := ChildBlock;
-
+    CallGraphNodeArray[ParentBlock].AddChild(ChildBlock);
   end;
 
 end;
@@ -920,7 +958,7 @@ var
   var
     ProcAsBlockIndex: TBlockIndex;
     CallGraphNode: TCallGraphNode;
-    ChildBlockIndex: TBlockIndex;
+    ChildIndex: Word;
     ChildIdentIndex: TIdentIndex;
     ChildIdentifier: TIdentifier;
   begin
@@ -937,12 +975,12 @@ var
 
         ProcAsBlock[ProcAsBlockIndex] := True;
 
-        for ChildBlockIndex := 1 to CallGraphNode.NumChildren do
+        for ChildIndex := 1 to CallGraphNode.NumChildren do
           for ChildIdentIndex := 1 to NumIdent do
           begin
             ChildIdentifier := IdentfierList.GetIdentifierAtIndex(ChildIdentIndex);
             if { (ChildIdentifier.ProcAsBlockIndex > 0) and  } (ChildIdentifier.ProcAsBlockIndex =
-              CallGraphNode.ChildBlock[ChildBlockIndex]) then
+              CallGraphNode.GetChild(ChildIndex)) then
             begin
               MarkNotDead(ChildIdentifier);
             end;
