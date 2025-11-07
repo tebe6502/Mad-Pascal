@@ -12,8 +12,8 @@ begin
    found := false;
 
    for i := 0 to l - 1 do
-    if (pos('@FORTMP_', listing[i]) > 0) then		// licznik petli FOR nie moze byc modyfikowany podczas jej dzialania
-     if mva_im(i) then begin				// !!! tylko MVA_IM !!!
+    if (pos('@FORTMP_', listing[i]) > 0) then		// the FOR loop counter cannot be modified inside the loop
+     if mva_im(i) then begin				// !!! Just MVA_IM !!!
 
       found := true;
 
@@ -63,7 +63,7 @@ begin
 	end;
 
 
-       if (l = 5) and					// BYTE zamien miejscami
+       if (l = 5) and					// BYTE swap places
           lda_a(0) and
           cmp(1) and (cmp_im(1) = false) and
 	  (listing[2] = #9'bcc *+7') and
@@ -232,7 +232,7 @@ begin
         end;
 
 
-       if (l = 15) and					// CARDINAL zamien miejscami
+       if (l = 15) and					// CARDINAL swap places
           lda_a(0) and
           cmp(1) and (cmp_im(1) = false) and
 	  bne_a(2) and
