@@ -8,7 +8,6 @@ uses FileIO, CompilerTypes;
 
 function CompilerTitle: String;
 
-procedure Initialize;
 procedure Main(const programUnit: TSourceFile; const unitPathList: TPathList);
 procedure Free;
 
@@ -78,10 +77,6 @@ end;
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 
-procedure Initialize;
-begin
-
-end;
 
 function GetIdentResult(ProcAsBlock: Integer): Integer;
 var
@@ -579,16 +574,10 @@ end;  //TestIdentProc
 // ----------------------------------------------------------------------------
 
 
-procedure AddCallGraphChild(ParentBlock, ChildBlock: Integer);
+procedure AddCallGraphChild(const ParentBlock, ChildBlock: Integer);
 begin
 
-  if ParentBlock <> ChildBlock then
-  begin
-
-    Inc(CallGraph[ParentBlock].NumChildren);
-    CallGraph[ParentBlock].ChildBlock[CallGraph[ParentBlock].NumChildren] := ChildBlock;
-
-  end;
+  CallGraph.AddChild(parentBlock, ChildBlock);
 
 end;
 
@@ -1069,35 +1058,25 @@ end;// GenerateInterrupt
 // ----------------------------------------------------------------------------
 
 
+
+procedure StartOptimization(const tokenIndex: TTokenIndex);
+  begin
+
+  StopOptimization;
+  Optimize.StartOptimization(TokenAt(tokenIndex).SourceLocation);
+
+end;
+
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+
 procedure StopOptimization;
 begin
 
-  if run_func = 0 then
-  begin
-
-    common.optimize.use := False;
-
-    if High(OptimizeBuf) > 0 then asm65;
-
-  end;
+  if run_func = 0 then Optimize.StopOptimization;
 
 end;
 
-
-// ----------------------------------------------------------------------------
-// ----------------------------------------------------------------------------
-
-
-procedure StartOptimization(i: TTokenIndex);
-begin
-
-  StopOptimization;
-
-  common.optimize.use := True;
-  common.optimize.SourceFile := TokenAt(i).SourceLocation.SourceFile;
-  common.optimize.line := TokenAt(i).SourceLocation.Line;
-
-end;
 
 
 // ----------------------------------------------------------------------------
@@ -6429,7 +6408,8 @@ end;  //GenerateRelation
 // The following functions implement recursive descent parser in accordance with Sub-Pascal EBNF
 // Parameter i is the index of the first token of the current EBNF symbol, result is the index of the last one
 
-function CompileExpression(i: TTokenIndex; out ValType: TDataType; VarType: TDataType = TDataType.INTEGERTOK): TTokenIndex; forward;
+function CompileExpression(i: TTokenIndex; out ValType: TDataType;
+  VarType: TDataType = TDataType.INTEGERTOK): TTokenIndex; forward;
 
 
 // ----------------------------------------------------------------------------
@@ -6495,7 +6475,7 @@ var
   yes, ShortArrayIndex: Boolean;
 begin
 
-  if common.optimize.use = False then StartOptimization(i);
+  if Optimize.IsOptimizationActive = False then StartOptimization(i);
 
 
   if (IdentifierAt(IdentIndex).isStriped) then
@@ -6789,7 +6769,7 @@ begin
 
           //  writeln(IdentifierAt(IdentIndex).nAME,' = ',IdentifierAt(IdentIndex).DataType,',',IdentifierAt(IdentIndex).AllocElementType,',',IdentifierAt(IdentIndex).NumAllocElements,',',IdentifierAt(IdentIndex).PassMethod );
 
-	  if (TokenAt(i + 2).Kind = TTokenKind.DEREFERENCETOK) and (TokenAt(i + 3).Kind = TTokenKind.OBRACKETTOK) then inc(i);
+          if (TokenAt(i + 2).Kind = TTokenKind.DEREFERENCETOK) and (TokenAt(i + 3).Kind = TTokenKind.OBRACKETTOK) then Inc(i);
 
 
           if IdentifierAt(IdentIndex).Kind in [TTokenKind.PROCEDURETOK, TTokenKind.FUNCTIONTOK,
@@ -9993,7 +9973,7 @@ begin
                 if (IdentifierAt(IdentIndex).isStdCall = False) then
                   StartOptimization(i)
                 else
-                  if common.optimize.use = False then StartOptimization(i);
+                  if Optimize.IsOptimizationActive = False then StartOptimization(i);
 
 
                 Inc(run_func);
@@ -13188,7 +13168,7 @@ begin
             if (IdentifierAt(IdentIndex).isStdCall = False) then
               StartOptimization(i)
             else
-              if common.optimize.use = False then StartOptimization(i);
+              if optimize.IsOptimizationActive then StartOptimization(i);
 
 
             Inc(run_func);
@@ -15043,9 +15023,6 @@ WHILETOK:
 
 
       asm65('#asm:' + IntToStr(AsmBlockIndex));
-
-
-      //     if (OutputDisabled=false) and (Pass = CODE_GENERATION) then WriteOut(AsmBlock[AsmBlockIndex]);
 
       Inc(AsmBlockIndex);
 
@@ -18949,7 +18926,7 @@ begin
 
             TestIdentProc(i, IdentifierAt(NumIdent).Name);
 
-            if ((Pass = TPass.CODE_GENERATION) and (not IdentifierAt(NumIdent).IsNotDead)) then
+            if ((Pass = TPass.CODE_GENERATION) and (not IdentifierAt(NumIdent).IsAlive)) then
               // Do not compile dead procedures and functions
             begin
               OutputDisabled := True;
@@ -18976,7 +18953,7 @@ begin
             //  GenerateForwardResolution(ForwardIdentIndex);
             //  CompileBlock(ForwardIdentIndex);
 
-            if ((Pass = TPass.CODE_GENERATION) and (not IdentifierAt(ForwardIdentIndex).IsNotDead)) then
+            if ((Pass = TPass.CODE_GENERATION) and (not IdentifierAt(ForwardIdentIndex).IsAlive)) then
               // Do not compile dead procedures and functions
             begin
               OutputDisabled := True;
@@ -19076,7 +19053,7 @@ begin
 
 
   OutputDisabled := (Pass = TPass.CODE_GENERATION) and (BlockIndexStack[BlockStackTop] <> 1) and
-    (not IdentifierAt(BlockIdentIndex).IsNotDead);
+    (not IdentifierAt(BlockIdentIndex).IsAlive);
 
 
   // asm65('@main');
@@ -19429,7 +19406,7 @@ begin
   Common.pass := pass;
   ResetOpty;
 
-  common.optimize.use := False;
+  Optimize.SetOptimizationActive(false);
 
   SetVarDataSize(0, 0);
 
@@ -19722,7 +19699,7 @@ end;
   asm65;
   asm65(#9'end');
 
-  flushTempBuf;      // flush TemporaryBuf
+  Optimize.FlushTemporaryBuf;
 
 end;
 
@@ -19787,6 +19764,7 @@ begin
   IdentifierList := TIdentifierList.Create;
   for i := 1 to MAXIDENTS do IdentifierList.AddIdentifier;
   TypeList:=TTypeList.Create;
+  CallGraph:=TCallGraph.Create;
 
   SetLength(IFTmpPosStack, 1);
 
@@ -19834,8 +19812,8 @@ begin
   Profiler.profiler.EndSection();
 
   // Visit call graph nodes and mark all procedures that are called as not dead
-  Profiler.profiler.BeginSection('OptimizeProgram');
-  OptimizeProgram(GetIdentIndex('MAIN'));
+  Profiler.profiler.BeginSection('CallGraph.MarkNotDead');
+  CallGraph.MarkAlive(IdentifierList, NumIdent, GetIdentIndex('MAIN'));
   Profiler.profiler.EndSection();
 
 
@@ -19871,10 +19849,7 @@ begin
   INTERFACETOK_USE := False;
   PublicSection := True;
 
-  iOut := -1;
-  outTmp := '';
-
-  SetLength(OptimizeBuf, 1);
+  Optimize.Initialize;
 
   Profiler.profiler.BeginSection('CompileProgram(TPass.CODE_GENERATION);');
   CompileProgram(TPass.CODE_GENERATION);
@@ -19885,21 +19860,20 @@ end;
 procedure Free;
 begin
 
-  TypeList.Free;
-  TypeList:=nil;
+  FreeAndNil(TypeList);
 
-  TokenList.Free;
-  TokenList := nil;
+  FreeAndNil(TokenList);
 
-  IdentifierList.Free;
-  IdentifierList := nil;
+  FreeAndNil(IdentifierList);
 
   SetLength(IFTmpPosStack, 0);
-  Profiler.Profiler := nil;
-  Debugger.debugger := nil;
-  evaluationContext := nil;
-  unitPathList.Free;
-  unitPathList := nil;
+  // Interface reference call Free implicitly.
+  Profiler.Profiler:=nil;
+  Debugger.debugger:=nil;
+  evaluationContext:=nil;
+  FreeAndNil(unitPathList);
+
+  FreeAndNil(CallGraph);
 end;
 
 end.

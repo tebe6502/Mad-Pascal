@@ -4,7 +4,7 @@ unit CompilerTypes;
 
 interface
 
-uses SysUtils, CommonTypes, DataTypes, FileIO, Tokens, Utilities;
+uses SysUtils, CommonTypes, DataTypes, FileIO, Tokens;
 
   // ----------------------------------------------------------------------------
 
@@ -143,10 +143,19 @@ type
   TBlockStackIndex = Integer;
   TBlockIndex = Integer;
 
+  TIdentifier = class;
+
   TBlock = class
   public
     BlockIndex: TBlockIndex;
-    // TODO: Identifiers defined in this block
+
+    constructor Create;
+    destructor Free;
+    procedure AddIdentifer(const identifier: TIdentifier);
+  private
+    NumIdentifiers_: Integer;
+    IdentifierArray: array of TIdentifier;
+
   end;
 
   TBlockStack = class
@@ -353,8 +362,7 @@ type
     ObjectIndex: TTypeIndex;
 
     isUnresolvedForward, updateResolvedForward, isOverload, isRegister, isInterrupt,
-    isRecursion, isStdCall, isPascal, isInline, isAsm, isExternal, isKeep, isVolatile,
-    isStriped, IsNotDead: Boolean;
+    isRecursion, isStdCall, isPascal, isInline, isAsm, isExternal, isKeep, isVolatile, isStriped, IsAlive: Boolean;
 
     //  For kind=VARIABLE, USERTYPE:
     NumAllocElements, NumAllocElements_: Cardinal;
@@ -384,11 +392,38 @@ type
 
   end;
 
-  TCallGraphNode = record
-    ChildBlock: array [1..MAXBLOCKS] of TBlockIndex;
-    NumChildren: Word;
+  TCallGraphNode = class
+
+  public
+    constructor Create;
+    procedure AddChild(const blockIndex: TBlockIndex);
+    function NumChildren: Word;
+    function GetChild(Index: Word): TBlockIndex;
+  private
+    NumChildren_: Word;
+    ChildBlockArray: array of TBlockIndex;
+
   end;
 
+
+  // For dead code elimination
+  TCallGraph = class
+
+  public
+
+    constructor Create;
+    destructor Free;
+
+    procedure AddChild(const ParentBlock, ChildBlock: TBlockIndex);
+    function GetCallGraphNode(blockIndex: TBlockIndex): TCallGraphNode;
+
+    // Mark all identifiers in the identifier list from 1...NumIdent as alive, if the are (in)directly called by the root identifier.
+    procedure MarkAlive(const IdentfierList: TIdentifierList; const NumIdent: Integer;
+      const rootIdentifierIndex: TIdentifierIndex);
+
+  private
+    CallGraphNodeArray: array [1..MAXBLOCKS] of TCallGraphNode;
+  end;
 
   TResource = record
     resStream: Boolean;
@@ -432,10 +467,37 @@ function GetIOBits(const ioCode: TIOCode): TIOBits;
 
 implementation
 
+
+// ----------------------------------------------------------------------------
+// Class TBlock
+// ----------------------------------------------------------------------------
+
+constructor TBlock.Create;
+begin
+  NumIdentifiers_ := 0;
+  IdentifierArray := nil;
+end;
+
+destructor TBlock.Free;
+begin
+  IdentifierArray := nil;
+  NumIdentifiers_ := 0;
+end;
+
+procedure TBlock.AddIdentifer(const identifier: TIdentifier);
+var
+  capacity: Integer;
+begin
+  capacity := Length(IdentifierArray);
+  if capacity = 0 then SetLength(IdentifierArray, 10)
+  else if NumIdentifiers_ = capacity then SetLength(IdentifierArray, 2 * capacity);
+  IdentifierArray[NumIdentifiers_] := identifier;
+  Inc(NumIdentifiers_);
+end;
+
 // ----------------------------------------------------------------------------
 // Class TBlockStack
 // ----------------------------------------------------------------------------
-
 
 constructor TBlockStack.Create;
 begin
@@ -808,7 +870,6 @@ end;
 // Class TTypeList
 // ----------------------------------------------------------------------------
 
-
 constructor TTypeList.Create();
 var
   i: Integer;
@@ -851,6 +912,127 @@ begin
   Result := TypeArray[TypeIndex];
 end;
 
+
+// ----------------------------------------------------------------------------
+// Class TCallGraphNode
+// ----------------------------------------------------------------------------
+
+constructor TCallGraphNode.Create;
+begin
+  NumChildren_ := 0;
+  ChildBlockArray := nil;
+end;
+
+procedure TCallGraphNode.AddChild(const blockIndex: TBlockIndex);
+var
+  capacity: Integer;
+begin
+  capacity := Length(ChildBlockArray);
+  if capacity = 0 then SetLength(ChildBlockArray, 10)
+  else if NumChildren_ = capacity then SetLength(ChildBlockArray, 2 * capacity);
+  ChildBlockArray[NumChildren_] := blockIndex;
+  Inc(NumChildren_);
+end;
+
+function TCallGraphNode.NumChildren: Word;
+begin
+  Result := NumChildren_;
+end;
+
+function TCallGraphNode.GetChild(Index: Word): TBlockIndex;
+begin
+  Result := ChildBlockArray[Index];
+end;
+
+// ----------------------------------------------------------------------------
+// Class TCallGraph
+// ----------------------------------------------------------------------------
+
+constructor TCallGraph.Create;
+var
+  i: TBlockIndex;
+begin
+  for i := 1 to MAXBLOCKS do CallGraphNodeArray[i] := TCallGraphNode.Create;
+end;
+
+destructor TCallGraph.Free;
+var
+  i: TBlockIndex;
+begin
+
+  for i := 1 to MAXBLOCKS do
+  begin
+    FreeAndNil(CallGraphNodeArray[i]);
+  end;
+end;
+
+procedure TCallGraph.AddChild(const ParentBlock, ChildBlock: TBlockIndex);
+begin
+
+  if ParentBlock <> ChildBlock then
+  begin
+    CallGraphNodeArray[ParentBlock].AddChild(ChildBlock);
+  end;
+
+end;
+
+function TCallGraph.GetCallGraphNode(blockIndex: TBlockIndex): TCallGraphNode;
+begin
+  Result := CallGraphNodeArray[blockIndex];
+end;
+
+procedure TCallGraph.MarkAlive(const IdentfierList: TIdentifierList; const NumIdent: Integer;
+  const rootIdentifierIndex: TIdentifierIndex);
+type
+  TBooleanArray = array [1..MAXBLOCKS] of Boolean;
+var
+  ProcAsBlock: TBooleanArray;
+
+  procedure MarkNotDead(const Identifier: TIdentifier);
+  var
+    ProcAsBlockIndex: TBlockIndex;
+    CallGraphNode: TCallGraphNode;
+    ChildIndex: Word;
+    ChildIdentIndex: TIdentIndex;
+    ChildIdentifier: TIdentifier;
+  begin
+
+    Identifier.IsAlive := True;
+
+    ProcAsBlockIndex := Identifier.ProcAsBlockIndex;
+
+    if (ProcAsBlockIndex > 0) and (ProcAsBlock[ProcAsBlockIndex] = False) then
+    begin
+      CallGraphNode := CallGraphNodeArray[ProcAsBlockIndex];
+      if (CallGraphNode.NumChildren > 0) then
+      begin
+
+        ProcAsBlock[ProcAsBlockIndex] := True;
+
+        for ChildIndex := 1 to CallGraphNode.NumChildren do
+          for ChildIdentIndex := 1 to NumIdent do
+          begin
+            ChildIdentifier := IdentfierList.GetIdentifierAtIndex(ChildIdentIndex);
+            if { (ChildIdentifier.ProcAsBlockIndex > 0) and  } (ChildIdentifier.ProcAsBlockIndex =
+              CallGraphNode.GetChild(ChildIndex)) then
+            begin
+              MarkNotDead(ChildIdentifier);
+            end;
+          end;
+
+      end;
+    end;
+
+  end;
+
+begin
+
+  ProcAsBlock := Default(TBooleanArray);
+
+  // Perform dead code elimination
+  MarkNotDead(IdentfierList.GetIdentifierAtIndex(rootIdentifierIndex));
+
+end;
 // ----------------------------------------------------------------------------
 // Global procedures and functions.
 // ----------------------------------------------------------------------------

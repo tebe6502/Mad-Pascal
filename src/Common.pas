@@ -67,6 +67,7 @@ var
   CodePosStackTop: Integer;
   CodePosStack: array [0..MAXPOSSTACK] of Word;
 
+  // TODO move to class
 type
   TBlockStackIndex = Integer;
 
@@ -74,7 +75,7 @@ var
   BlockStackTop: TBlockStackIndex;
   BlockIndexStack: array [0..MAXBLOCKS - 1] of TBlockIndex;
 
-  CallGraph: array [1..MAXBLOCKS] of TCallGraphNode;  // For dead code elimination
+  CallGraph: TCallGraph;
 
   OldConstValType: TDataType;
 
@@ -106,15 +107,6 @@ var
   WithName: TStringArray;
 
   // Optimizer Settings
-  iOut: Integer;
-  outTmp: TString;
-  OptimizeBuf: TStringArray;
-
-  optimize: record
-    use: Boolean;
-    SourceFile: TSourceFile;
-    line, oldLine: Integer;
-    end;
 
   codealign: record
     proc, loop, link: Integer;
@@ -700,6 +692,7 @@ begin
   // Result := TokenArrayPtr^[tokenIndex];
   Assert(TokenList <> nil, 'TokenList not yet created.');
   Result := TokenList.GetTokenAtIndex(tokenIndex);
+  // Writeln(tokenIndex);
 end;
 
 function NumIdent: Integer;

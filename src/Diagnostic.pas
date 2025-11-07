@@ -16,10 +16,12 @@ uses SysUtils, Common, DataTypes, FileIO, Tokens;
 
 procedure Diagnostics(ProgramUnit: TSourceFile);
 var
-  i, CharIndex, ChildIndex: Integer;
+  i, CharIndex: Integer;
+  ChildIndex: Word;
   DiagFile: ITextFile;
   token: TToken;
   identifier: TIdentifier;
+  CallGraphNode: TCallGraphNode;
 begin
 
   DiagFile := TFileSystem.CreateTextFile;
@@ -68,7 +70,7 @@ begin
 
   for i := 1 to NumIdent do
   begin
-    identifier:=IdentifierAt(i);
+    identifier := IdentifierAt(i);
     DiagFile.Write(i, 6).Write(identifier.BlockIndex, 6).Write(identifier.Name, 30).Write(
       GetTokenSpelling(identifier.Kind), 15);
     if identifier.DataType <> TDataType.UNTYPETOK then
@@ -81,7 +83,7 @@ begin
     end;
     DiagFile.Write(identifier.NumAllocElements, 15).Write(IntToHex(identifier.Value, 8), 15);
     if (identifier.Kind in [TTokenKind.PROCEDURETOK, TTokenKind.FUNCTIONTOK, TTokenKind.CONSTRUCTORTOK,
-      TTokenKind.DESTRUCTORTOK]) and not identifier.IsNotDead then DiagFile.Write('Yes', 5)
+      TTokenKind.DESTRUCTORTOK]) and not identifier.IsAlive then DiagFile.Write('Yes', 5)
     else
       DiagFile.Write('', 5);
   end;
@@ -94,8 +96,9 @@ begin
   for i := 1 to NumBlocks do
   begin
     DiagFile.Write(i, 6).Write('  ---> ');
-    for ChildIndex := 1 to CallGraph[i].NumChildren do
-      DiagFile.Write(CallGraph[i].ChildBlock[ChildIndex], 5);
+    CallGraphNode := CallGraph.GetCallGraphNode(i);
+    for ChildIndex := 1 to CallGraphNode.NumChildren do
+      DiagFile.Write(CallGraphNode.GetChild(ChildIndex), 5);
     DiagFile.WriteLn;
   end;
 

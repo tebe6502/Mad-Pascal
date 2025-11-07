@@ -1,3 +1,4 @@
+//PROFILE-NO
 procedure Syntax(ExitCode: Byte);
 begin
   (* Keep in sync with https://mads.atari8.info/doc/en/usage/ *)
@@ -97,3 +98,4 @@ begin
               ParameterError(index, 'Invalid target ''' + parameterValue +
  '''. Use on of ''A8, C64, C4P, NEO, RAW, X16''.');
 end;
+//PROFILE-YES
