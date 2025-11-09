@@ -10,6 +10,7 @@ uses CompilerTypes;
 
 procedure Initialize;
 
+procedure ResetForTmp;
 procedure ResetOpty;
 
 procedure asm65(const a: String = ''; const comment: String = '');
@@ -20,6 +21,9 @@ procedure StartOptimization(SourceLocation: TSourceLocation);
 procedure StopOptimization;
 
 procedure FlushTemporaryBuf;
+
+var
+  optyY, optyBP2: TString;  // Initialized in ResetOpty
 
 // ----------------------------------------------------------------------------
 
@@ -42,6 +46,10 @@ var
     line, oldLine: Integer;
     end;
 
+  optyFOR0, optyFOR1, optyFOR2, optyFOR3: TString;
+
+  optyA: TString;
+
   // ----------------------------------------------------------------------------
 
 
@@ -54,6 +62,15 @@ begin
   LastTempBuf0 := '';
 
   SetLength(OptimizeBuf, 1);
+end;
+
+
+procedure ResetForTmp;
+begin
+   optyFOR0:='';
+   optyFOR1:='';
+   optyFOR2:='';
+   optyFOR3:='';
 end;
 
 procedure ResetOpty;
