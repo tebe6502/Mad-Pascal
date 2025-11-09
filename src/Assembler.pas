@@ -4,8 +4,12 @@ unit Assembler;
 
 interface
 
-function HexByte(Value: Byte): String;
-function HexWord(Value: Cardinal): String;
+// 8 Bit
+function HexByte(const Value: Byte): String;
+// 16 bit
+function HexWord(const Value: Word): String;
+// 32 bit
+function HexLongWord(const Value: Longword): String;
 
 implementation
 
@@ -49,14 +53,21 @@ begin
   WriteLn('DoCount: ', Count);
 end;
 
-function HexByte(Value: Byte): String;
+function HexByte(const Value: Byte): String;
 begin
   Result := '$' + HexBytes[Value];
 end;
 
-function HexWord(Value: Cardinal): String;
+function HexWord(const Value: Word): String;
 begin
   Result := '$' + HexBytes[(Value shr 8) and $ff] + HexBytes[Value and $ff];
+  // DoCount;
+end;
+
+function HexLongWord(const Value: Longword): String;
+begin
+  Result := '$' + HexBytes[(Value shr 24) and $ff] + HexBytes[(Value shr 16) and $ff] +
+    HexBytes[(Value shr 8) and $ff] + HexBytes[Value and $ff];
   // DoCount;
 end;
 
