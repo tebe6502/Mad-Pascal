@@ -42,10 +42,11 @@ begin
 end;
 
 
+// TODO JAC! Disable after optimization
 procedure DoCount;
 begin
   Inc(Count);
-  WriteLn(Count);
+  WriteLn('DoCount: ', Count);
 end;
 
 function HexByte(Value: Byte): String;
@@ -56,7 +57,7 @@ end;
 function HexWord(Value: Cardinal): String;
 begin
   Result := '$' + HexBytes[(Value shr 8) and $ff] + HexBytes[Value and $ff];
-  DoCount;
+  // DoCount;
 end;
 
 procedure InitializeStrings;
