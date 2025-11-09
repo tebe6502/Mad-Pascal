@@ -93,8 +93,6 @@ var
 
   resArray: array of TResource;
 
-  optyA, optyY, optyBP2, optyFOR0, optyFOR1, optyFOR2, optyFOR3: TString; // Initialized in ResetOpty
-
   msgLists: record
     msgWarning: TStringList;
     msgNote: TStringList;
