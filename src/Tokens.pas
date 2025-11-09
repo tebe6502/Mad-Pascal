@@ -20,14 +20,14 @@ function GetTokenDataType(const tokenKind: TTokenKind): TDataType;
 function InfoAboutToken(const t: TTokenKind): String; // TODO: What's the difference to GetTokenSpelling
 function InfoAboutDataType(const dataType: TDataType): String;
 
-function GetStandardToken(S: String): TTokenKind;
+function GetStandardToken(const S: String): TTokenKind;
 
 
 
 
 implementation
 
-uses SysUtils;
+uses SysUtils, Generics.Collections;
 
 type
   TTokenSpelling = record
@@ -35,10 +35,15 @@ type
     spelling: String;
   end;
 
+  TTokenSpellingArray = array [Low(TTokenKind)..High(TTokenKind)] of TTokenSpelling;
+
 var
-  TokenSpellings: array [Low(TTokenKind)..High(TTokenKind)] of TTokenSpelling;
+  TokenSpellingArray: TTokenSpellingArray;
 
+type
+  TTokenSpellingMap = TDictionary<String, TTokenKind>;
 
+  var TokenSpellingMap : TTokenSpellingMap;
 
 procedure AddTokenSpelling(t: TTokenKind; s: String);
 var
@@ -47,11 +52,14 @@ begin
   tokenSpelling.TokenKind := t;
   tokenSpelling.Spelling := s;
 
-  TokenSpellings[tokenSpelling.TokenKind] := tokenSpelling;
+  TokenSpellingArray[tokenSpelling.TokenKind] := tokenSpelling;
+  TokenSpellingMap.Add( s,t);
 end;
 
 procedure InitializeTokenSpellings;
 begin
+
+  TokenSpellingMap  :=TTokenSpellingMap.Create;
   // Token spelling definition
   AddTokenSpelling(TTokenKind.CONSTTOK, 'CONST');
   AddTokenSpelling(TTokenKind.TYPETOK, 'TYPE');
@@ -204,6 +212,12 @@ begin
   AddTokenSpelling(TTokenKind.FLOATTOK, 'FLOAT');
   AddTokenSpelling(TTokenKind.TEXTTOK, 'TEXT');
 
+  // Add direct mappings for aliases
+  TokenSpellingMap.Add( 'DWORD',TTokenKind.CARDINALTOK);
+  TokenSpellingMap.Add( 'LONGWORD',TTokenKind.CARDINALTOK);
+  TokenSpellingMap.Add( 'UINT32',TTokenKind.CARDINALTOK);
+  TokenSpellingMap.Add( 'UINT16',TTokenKind.WORDTOK);
+  TokenSpellingMap.Add( 'LONGINT',TTokenKind.INTEGERTOK);
 end;
 
 function GetTokenKindName(const tokenKind: TTokenKind): String;
@@ -213,7 +227,7 @@ end;
 
 function GetTokenSpelling(const tokenKind: TTokenKind): String;
 begin
-  Result := TokenSpellings[tokenKind].Spelling;
+  Result := TokenSpellingArray[tokenKind].Spelling;
 end;
 
 function GetHumanReadbleTokenSpelling(const tokenKind: TTokenKind): String;
@@ -330,24 +344,9 @@ begin
 end;
 
 
-function GetStandardToken(S: String): TTokenKind;
-var
-  i: TTokenKind;
+function GetStandardToken(const S: String): TTokenKind;
 begin
-  Result := TTokenKind.UNTYPETOK;
-
-  if (S = 'LONGWORD') or (S = 'DWORD') or (S = 'UINT32') then S := 'CARDINAL'
-  else
-  if (S = 'UINT16') then S := 'WORD'
-  else
-  if (S = 'LONGINT') then S := 'INTEGER';
-
-  for i := Low(TTokenKind) to High(TTokenKind) do
-    if S = TokenSpellings[i].spelling then
-    begin
-      Result := TokenSpellings[i].TokenKind;
-      Break;
-    end;
+  if not TokenSpellingMap.TryGetValue(s,Result) then Result:= TTokenKind.UNTYPETOK;
 end;
 
 procedure AssertTokenOrd(const tokenKind: TTokenKind; Value: Byte);
@@ -379,7 +378,7 @@ end;
 
 function GetTokenDataType(const tokenKind: TTokenKind): TDataType;
 begin
-  // TODO: Vadliate that is actually can be cast.
+  // TODO: Validate that is actually can be cast.
   Result:=TDataType(Ord(tokenKind));
 end;
 
