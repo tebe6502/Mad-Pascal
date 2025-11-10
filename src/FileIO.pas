@@ -612,7 +612,7 @@ begin
   Assert(fileMode = TFileMode.Read, 'File '''+filePath+''' is not opened for reading.');
   if Eof then raise EInOutError.create('End of file '''+filePath+''' reached. Cannot read position '+IntToStr(filePosition)+'.');
   c := fileMapEntry.content[filePosition+1];
-  // Writeln('Reading character '''+c+''' ($'+IntToHex(ord(c),2)+') at file position '+IntToStr(filePosition)+' of '''+filePath+'''.');
+  // Writeln('Reading character '''+c+''' ('+HexByte(ord(c))+') at file position '+IntToStr(filePosition)+' of '''+filePath+'''.');
   Inc(filePosition);
   {$ENDIF}
 

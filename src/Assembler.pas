@@ -1,19 +1,34 @@
 unit Assembler;
 
-// TODO Check other locations that still use IntToHex
+// TODO Check other locations that still use IntToHex/IntToStr
 
 interface
 
-// 8 Bit
+
+// Decimal output of signed integer.
+function IntToDec(const Value: Int64): String;
+
+// Hexadecimal output of 8-Bit with '$' prefix, 2 digits
 function HexByte(const Value: Byte): String;
-// 16 bit
+
+// Hexadecimal output of 16-Bit with '$' prefix, 4 digits
 function HexWord(const Value: Word): String;
-// 32 bit
-function HexLongWord(const Value: Longword): String;
+
+// Hexadecimal output of 32/64-Bit with '$' prefix, minimum lenght 8 digit
+function HexLongWord(const Value: Int64): String;
+
+
+// ----------------------------------------------------------------------------
 
 implementation
 
-// ----------------------------------------------------------------------------
+uses SysUtils;
+
+const
+  MAX_DECIMAL_VALUE = 1023;
+
+var
+  DecimalStringArray: array[0..MAX_DECIMAL_VALUE] of String;
 
 var
   HexBytes: array[0..255] of String;
@@ -53,6 +68,18 @@ begin
   WriteLn('DoCount: ', Count);
 end;
 
+function IntToDec(const Value: Int64): String;
+begin
+  if (Value >= Low(DecimalStringArray)) and (Value <= High(DecimalStringArray)) then
+  begin
+    Result := DecimalStringArray[Value];
+  end
+  else
+  begin
+    Result := IntToStr(Value);
+  end;
+end;
+
 function HexByte(const Value: Byte): String;
 begin
   Result := '$' + HexBytes[Value];
@@ -64,18 +91,29 @@ begin
   // DoCount;
 end;
 
-function HexLongWord(const Value: Longword): String;
+function HexLongWord(const Value: Int64): String;
 begin
-  Result := '$' + HexBytes[(Value shr 24) and $ff] + HexBytes[(Value shr 16) and $ff] +
-    HexBytes[(Value shr 8) and $ff] + HexBytes[Value and $ff];
+  if Value < $100000000 then
+    Result := '$' + HexBytes[(Value shr 24) and $ff] + HexBytes[(Value shr 16) and $ff] +
+      HexBytes[(Value shr 8) and $ff] + HexBytes[Value and $ff]
+  else
+    Result := IntToHex(Value, 8);
   // DoCount;
 end;
 
 procedure InitializeStrings;
 var
-  i: Byte;
+  i: Integer;
 begin
-  for i := 0 to 255 do HexBytes[i] := Hex(i, 2);
+  for i := Low(DecimalStringArray) to High(DecimalStringArray) do
+  begin
+    DecimalStringArray[i] := IntToStr(i);
+  end;
+
+  for i := Low(HexBytes) to High(HexBytes) do
+  begin
+    HexBytes[i] := Hex(i, 2);
+  end;
   Count := 0;
 end;
 

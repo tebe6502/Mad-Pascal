@@ -683,8 +683,8 @@ begin
 
         if Size = 4 then
         begin
-          asm65(#9'mva #$' + HexByte(Byte(Value shr 16)) + GetStackVariable(2));
-          asm65(#9'mva #$' + HexByte(Byte(Value shr 24)) + GetStackVariable(3));
+          asm65(#9'mva #' + HexByte(Byte(Value shr 16)) + GetStackVariable(2));
+          asm65(#9'mva #' + HexByte(Byte(Value shr 24)) + GetStackVariable(3));
         end;
 
       end;
