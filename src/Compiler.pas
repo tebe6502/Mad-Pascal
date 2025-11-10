@@ -19828,6 +19828,7 @@ begin
   for i := 1 to MAXIDENTS do IdentifierList.AddIdentifier;
   TypeList := TTypeList.Create;
   BlockList:=TBlockList.Create;
+  BlockStack:=TBlockStack.Create;
   CallGraph := TCallGraph.Create;
 
   SetLength(IFTmpPosStack, 1);
@@ -19923,6 +19924,7 @@ procedure Free;
 begin
 
   // Free in reverse order of creation.
+  FreeAndNil(BlockStack);
   FreeAndNil(BlockList);
   FreeAndNil(TypeList);
   FreeAndNil(IdentifierList);

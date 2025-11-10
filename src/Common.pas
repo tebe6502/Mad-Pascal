@@ -72,9 +72,9 @@ type
   TBlockStackIndex = Integer;
 
 var
-  BlockStackTop: TBlockStackIndex;
   BlockIndexStack: array [0..MAXBLOCKS - 1] of TBlockIndex;
   BlockList: TBlockList;
+  BlockStack: TBlockStack;
 
   CallGraph: TCallGraph;
 
@@ -136,6 +136,7 @@ var
 {$ENDIF}
 
 function NumBlocks_: Integer;
+var BlockStackTop: TBlockStackIndex;
 
 // ----------------------------------------------------------------------------
 
@@ -712,5 +713,14 @@ function NumBlocks_: Integer;
 begin
   Result := BlockList.Count;
 end;
+
+(*
+function BlockStackTop: TBlockStackIndex;
+begin
+  if BlockStack.Top <> nil then
+    Result := BlockStack.Top.BlockIndex
+  else
+    Result := 0;
+end; *)
 
 end.
