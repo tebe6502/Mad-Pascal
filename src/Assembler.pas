@@ -5,9 +5,6 @@ unit Assembler;
 interface
 
 
-// Decimal output of signed integer.
-function IntToDec(const Value: Int64): String;
-
 // Hexadecimal output of 8-Bit with '$' prefix, 2 digits
 function HexByte(const Value: Byte): String;
 
@@ -24,11 +21,6 @@ implementation
 
 uses SysUtils;
 
-const
-  MAX_DECIMAL_VALUE = 1023;
-
-var
-  DecimalStringArray: array[0..MAX_DECIMAL_VALUE] of String;
 
 var
   HexBytes: array[0..255] of String;
@@ -68,18 +60,6 @@ begin
   WriteLn('DoCount: ', Count);
 end;
 
-function IntToDec(const Value: Int64): String;
-begin
-  if (Value >= Low(DecimalStringArray)) and (Value <= High(DecimalStringArray)) then
-  begin
-    Result := DecimalStringArray[Value];
-  end
-  else
-  begin
-    Result := IntToStr(Value);
-  end;
-end;
-
 function HexByte(const Value: Byte): String;
 begin
   Result := '$' + HexBytes[Value];
@@ -105,11 +85,6 @@ procedure InitializeStrings;
 var
   i: Integer;
 begin
-  for i := Low(DecimalStringArray) to High(DecimalStringArray) do
-  begin
-    DecimalStringArray[i] := IntToStr(i);
-  end;
-
   for i := Low(HexBytes) to High(HexBytes) do
   begin
     HexBytes[i] := Hex(i, 2);
