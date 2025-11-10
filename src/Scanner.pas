@@ -66,7 +66,7 @@ begin
 
   Messages.Initialize;
 
-  NumBlocks := 0;
+  blockList.Clear;
   BlockStackTop := 0;
   CodeSize := 0;
   CodePosStackTop := 0;

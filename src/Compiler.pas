@@ -79,7 +79,7 @@ end;
 // ----------------------------------------------------------------------------
 
 
-function GetIdentResult(ProcAsBlock: Integer): Integer;
+function GetIdentResult(ProcAsBlock: TBlockIndex): TIdentIndex;
 var
   IdentIndex: Integer;
 begin
@@ -11823,11 +11823,11 @@ begin
       if (IdentIndex > 0) and (IdentifierAt(IdentIndex).Kind = TTokenKind.FUNCTIONTOK) and
         (BlockStackTop > 1) and (TokenAt(i + 1).Kind <> TTokenKind.OPARTOK) then
         for j := NumIdent downto 1 do
-          if (IdentifierAt(j).ProcAsBlockIndex = NumBlocks) and (IdentifierAt(j).Kind = TTokenKind.FUNCTIONTOK) then
+          if (IdentifierAt(j).ProcAsBlockIndex = NumBlocks_) and (IdentifierAt(j).Kind = TTokenKind.FUNCTIONTOK) then
           begin
             if (IdentifierAt(j).Name = IdentifierAt(IdentIndex).Name) and
               (IdentifierAt(j).SourceFile.UnitIndex = IdentifierAt(IdentIndex).SourceFile.UnitIndex) then
-              IdentIndex := GetIdentResult(NumBlocks);
+              IdentIndex := GetIdentResult(NumBlocks_);
             Break;
           end;
 
@@ -17046,6 +17046,8 @@ var
   external_name: TString;
 
   SourceFileList: array of TString;
+
+  block: TBlock;
 begin
 
   ResetOpty;
@@ -17078,10 +17080,10 @@ begin
 
   isInterrupt := isInt;
 
-  Inc(NumBlocks);
+  block:=BlockList.AddBlock();
   Inc(BlockStackTop);
-  BlockIndexStack[BlockStackTop] := NumBlocks;
-  IdentifierAt(BlockIdentIndex).ProcAsBlockIndex := NumBlocks;
+  BlockIndexStack[BlockStackTop] := block.BlockIndex;
+  IdentifierAt(BlockIdentIndex).ProcAsBlockIndex := block.BlockIndex;
 
 
   GenerateLocal(BlockIdentIndex, IsFunction);
@@ -19825,6 +19827,7 @@ begin
   IdentifierList := TIdentifierList.Create;
   for i := 1 to MAXIDENTS do IdentifierList.AddIdentifier;
   TypeList := TTypeList.Create;
+  BlockList:=TBlockList.Create;
   CallGraph := TCallGraph.Create;
 
   SetLength(IFTmpPosStack, 1);
@@ -19884,8 +19887,9 @@ begin
 
   SourceFileList.ClearAllowedUnitNames;
 
-  NumBlocks := 0;
+  BlockList.Clear;
   BlockStackTop := 0;
+
   CodeSize := 0;
   CodePosStackTop := 0;
   CaseCnt := 0;
@@ -19918,11 +19922,12 @@ end;
 procedure Free;
 begin
 
+  // Free in reverse order of creation.
+  FreeAndNil(BlockList);
   FreeAndNil(TypeList);
-
+  FreeAndNil(IdentifierList);
   FreeAndNil(TokenList);
 
-  FreeAndNil(IdentifierList);
 
   SetLength(IFTmpPosStack, 0);
   // Interface reference call Free implicitly.

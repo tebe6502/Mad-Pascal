@@ -145,6 +145,9 @@ type
 
   TIdentifier = class;
 
+  // ----------------------------------------------------------------------------
+  // Class TBlock and related containers.
+  // ----------------------------------------------------------------------------
   TBlock = class
   public
     BlockIndex: TBlockIndex;
@@ -155,6 +158,22 @@ type
   private
     NumIdentifiers_: Integer;
     IdentifierArray: array of TIdentifier;
+
+  end;
+
+  TBlockList = class
+  public
+    constructor Create;
+    destructor Free;
+
+    procedure Clear;
+    function AddBlock(): TBlock;
+    function Count: Integer;
+
+  private
+  var
+    Count_: Integer;
+    Array_: array of TBlock;
 
   end;
 
@@ -495,8 +514,54 @@ begin
   Inc(NumIdentifiers_);
 end;
 
+
+
 // ----------------------------------------------------------------------------
-// Class TBlockStack
+// Class TBlockList
+// ----------------------------------------------------------------------------
+constructor TBlockList.Create;
+begin
+  Count_ := 0;
+  Array_ := nil;
+end;
+
+destructor TBlockList.Free;
+begin
+  Clear;
+end;
+
+procedure TBlockList.Clear;
+var
+  i: Integer;
+begin
+  if array_ <> nil then
+  begin
+    for i := 0 to Count_ do FreeAndNil(Array_[i]);
+    Array_ := nil;
+    Count_ := 0;
+  end;
+end;
+
+function TBlockList.AddBlock: TBlock;
+var
+  Capacity: Integer;
+begin
+  Result := TBlock.Create;
+  Capacity := Length(Array_);
+  if capacity = 0 then SetLength(Array_, 256)
+  else if Count_ = capacity then SetLength(Array_, 2 * capacity);
+  Array_[Count_] := Result;
+  Inc(Count_);
+  Result.BlockIndex := Count_;
+end;
+
+function TBlockList.Count: Integer;
+begin
+  Result := Count_;
+end;
+
+// ----------------------------------------------------------------------------
+// Class TBlockStack: TODO Unused
 // ----------------------------------------------------------------------------
 
 constructor TBlockStack.Create;
@@ -941,7 +1006,7 @@ end;
 
 function TCallGraphNode.GetChild(Index: Word): TBlockIndex;
 begin
-  Result := ChildBlockArray[Index-1];
+  Result := ChildBlockArray[Index - 1];
 end;
 
 // ----------------------------------------------------------------------------
