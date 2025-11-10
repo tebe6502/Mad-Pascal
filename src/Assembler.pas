@@ -1,15 +1,26 @@
 unit Assembler;
 
-// TODO Check other locations that still use IntToHex
+// TODO Check other locations that still use IntToHex/IntToStr
 
 interface
 
-function HexByte(Value: Byte): String;
-function HexWord(Value: Cardinal): String;
+
+// Hexadecimal output of 8-Bit with '$' prefix, 2 digits
+function HexByte(const Value: Byte): String;
+
+// Hexadecimal output of 16-Bit with '$' prefix, 4 digits
+function HexWord(const Value: Word): String;
+
+// Hexadecimal output of 32/64-Bit with '$' prefix, minimum lenght 8 digit
+function HexLongWord(const Value: Int64): String;
+
+
+// ----------------------------------------------------------------------------
 
 implementation
 
-// ----------------------------------------------------------------------------
+uses SysUtils;
+
 
 var
   HexBytes: array[0..255] of String;
@@ -49,22 +60,35 @@ begin
   WriteLn('DoCount: ', Count);
 end;
 
-function HexByte(Value: Byte): String;
+function HexByte(const Value: Byte): String;
 begin
   Result := '$' + HexBytes[Value];
 end;
 
-function HexWord(Value: Cardinal): String;
+function HexWord(const Value: Word): String;
 begin
   Result := '$' + HexBytes[(Value shr 8) and $ff] + HexBytes[Value and $ff];
   // DoCount;
 end;
 
+function HexLongWord(const Value: Int64): String;
+begin
+  if Value < $100000000 then
+    Result := '$' + HexBytes[(Value shr 24) and $ff] + HexBytes[(Value shr 16) and $ff] +
+      HexBytes[(Value shr 8) and $ff] + HexBytes[Value and $ff]
+  else
+    Result := IntToHex(Value, 8);
+  // DoCount;
+end;
+
 procedure InitializeStrings;
 var
-  i: Byte;
+  i: Integer;
 begin
-  for i := 0 to 255 do HexBytes[i] := Hex(i, 2);
+  for i := Low(HexBytes) to High(HexBytes) do
+  begin
+    HexBytes[i] := Hex(i, 2);
+  end;
   Count := 0;
 end;
 

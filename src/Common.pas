@@ -74,13 +74,14 @@ type
 var
   BlockStackTop: TBlockStackIndex;
   BlockIndexStack: array [0..MAXBLOCKS - 1] of TBlockIndex;
+  BlockList: TBlockList;
 
   CallGraph: TCallGraph;
 
   OldConstValType: TDataType;
 
-  NumPredefIdent, NumStaticStrChars, NumBlocks, run_func, NumProc, CodeSize, NumStaticStrCharsTmp,
-  IfCnt, CaseCnt, IfdefLevel: Integer;
+  NumPredefIdent, NumStaticStrChars, run_func, NumProc, CodeSize, NumStaticStrCharsTmp, IfCnt,
+  CaseCnt, IfdefLevel: Integer;
 
   ShrShlCnt: Integer; // Counter, used only for label generation
 
@@ -134,7 +135,9 @@ var
 
 {$ENDIF}
 
-  // ----------------------------------------------------------------------------
+function NumBlocks_: Integer;
+
+// ----------------------------------------------------------------------------
 
 function NumTok: Integer;
 function TokenAt(tokenIndex: TTokenIndex): TToken;
@@ -702,6 +705,12 @@ function IdentifierAt(identifierIndex: TIdentifierIndex): TIdentifier;
 begin
   Assert(IdentifierList <> nil, 'IdentifierList not yet created.');
   Result := IdentifierList.GetIdentifierAtIndex(identifierIndex);
+end;
+
+
+function NumBlocks_: Integer;
+begin
+  Result := BlockList.Count;
 end;
 
 end.

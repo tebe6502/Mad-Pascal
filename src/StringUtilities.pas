@@ -23,9 +23,9 @@ const
   AllowDigitFirstChars: set of Char = ['0'..'9', '%', '$'];
   AllowDigitChars: set of Char = ['0'..'9', 'A'..'F'];
 
-// ----------------------------------------------------------------------------
+  // ----------------------------------------------------------------------------
 
-function IntToStr(const a: Int64): String;
+function IntToStr(const Value: Int64): String;
 function StrToInt(const a: String): TInteger;
 
 // ----------------------------------------------------------------------------
@@ -49,6 +49,26 @@ function SplitStr(const a: String; const separatorCharacter: Char): TStringArray
 
 implementation
 
+const
+  MAX_DECIMAL_VALUE = 1023;
+
+var
+  DecimalStringArray: array[0..MAX_DECIMAL_VALUE] of String;
+
+
+
+function IntToStr(const Value: Int64): String;
+begin
+  if (Value >= Low(DecimalStringArray)) and (Value <= High(DecimalStringArray)) then
+  begin
+    Result := DecimalStringArray[Value];
+  end
+  else
+  begin
+    str(Value, Result);
+  end;
+end;
+
 function StrToInt(const a: String): TInteger;
 {$IFNDEF PAS2JS}
 var
@@ -66,11 +86,6 @@ begin
  Result := value;
 end;
 {$ENDIF}
-
-function IntToStr(const a: Int64): String;
-begin
-  str(a, Result);
-end;
 
 (*----------------------------------------------------------------------------*)
 (* Skip whitespace characters until the next non-whitespace character.        *)
@@ -257,7 +272,6 @@ end;
 (* If there are characters opening the string, read such a string             *)
 (*----------------------------------------------------------------------------*)
 function SplitStr(const a: String; const separatorCharacter: Char): TStringArray;
-
 var
   znak: Char;
   i, len: Integer;
@@ -383,4 +397,20 @@ begin
 
 end;
 
+procedure InitializeStrings;
+var
+  i: Integer;
+begin
+  for i := Low(DecimalStringArray) to High(DecimalStringArray) do
+  begin
+    DecimalStringArray[i] := SysUtils.IntToStr(i);
+  end;
+end;
+
+
+initialization
+
+  InitializeStrings;
+
+end.
 end.

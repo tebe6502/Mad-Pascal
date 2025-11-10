@@ -15,7 +15,7 @@ set MP_EXE_PATH=%MP_FOLDER%\bin\windows_x86_64\mp.exe
 rem For 1.7.4
 set MP_REFERENCE_EXE_PATH= %MP_REFERECE_FOLDER%\bin\windows_x86_64\mp.exe
 rem For 1.7.5-master
-set MP_REFERENCE_EXE_PATH= %MP_FOLDER%\bin\windows_x86_64\master\mp.exe
+rem set MP_REFERENCE_EXE_PATH= %MP_FOLDER%\bin\windows_x86_64\master\mp.exe
 
 MakeMadPascal.exe -allThreads -allFiles -mpFolderPath .\.. -compileReference -compile -compare -openResults ^
 -mpExePath          %MP_EXE_PATH% ^

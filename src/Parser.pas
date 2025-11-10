@@ -82,6 +82,7 @@ var
   var
     BlockStackIndex: TBlockStackIndex;
     blockIndex: TBlockIndex;
+    block: TBlock;
     MaxIdentIndex, IdentIndex: TIdentIndex;
     identifier: TIdentifier;
     unitEquals: Boolean;
@@ -94,6 +95,7 @@ var
     for BlockStackIndex := BlockStackTop downto 0 do
     begin
       blockIndex := BlockIndexStack[BlockStackIndex];
+      // block:=blockArray[blockIndex];
       for IdentIndex := 1 to MaxIdentIndex do
       begin
 
@@ -2773,8 +2775,7 @@ begin
                     i := DefineFunction(i, 0, isForward, isInt, isInl, isOvr, IsNestedFunction,
                       NestedFunctionResultType, NestedFunctionNumAllocElements, NestedFunctionAllocElementType);
 
-                    Inc(NumBlocks);
-                    IdentifierAt(NumIdent).ProcAsBlockIndex := NumBlocks;
+                    IdentifierAt(NumIdent).ProcAsBlockIndex := BlockList.AddBlock().BlockIndex;
 
                     IdentifierAt(NumIdent).IsUnresolvedForward := True;
 
@@ -2882,8 +2883,7 @@ begin
                               IsNestedFunction, NestedFunctionResultType, NestedFunctionNumAllocElements,
                               NestedFunctionAllocElementType);
 
-                            Inc(NumBlocks);
-                            IdentifierAt(NumIdent).ProcAsBlockIndex := NumBlocks;
+                            IdentifierAt(NumIdent).ProcAsBlockIndex := BlockList.AddBlock().BlockIndex;
 
                             IdentifierAt(NumIdent).IsUnresolvedForward := True;
 
