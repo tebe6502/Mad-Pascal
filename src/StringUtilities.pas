@@ -403,7 +403,7 @@ var
 begin
   for i := Low(DecimalStringArray) to High(DecimalStringArray) do
   begin
-    DecimalStringArray[i] := IntToStr(i);
+    DecimalStringArray[i] := SysUtils.IntToStr(i);
   end;
 end;
 
