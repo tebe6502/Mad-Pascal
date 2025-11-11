@@ -193,6 +193,7 @@ type
     function Pop: TBlock;
     function Top: TBlock;
     function TopIndex: TBlockStackIndex;
+    function GetBlockAtIndex(const blockStackIndex: TBlockStackIndex): TBlock;
 
   private
 
@@ -604,15 +605,25 @@ begin
   if topIndex_ = Capacity then  SetLength(array_, Capacity * 2);
   array_[topIndex_] := block;
   Inc(topIndex_);
-  WriteLn(' TBlockStack.Push: ', block.BlockIndex, ' topIndex=', topIndex_);
+  // WriteLn(' TBlockStack.Push: ', block.BlockIndex, ' topIndex=', topIndex_);
 end;
 
 function TBlockStack.Pop: TBlock;
 begin
   assert(topIndex_ > 0);
-  Dec(topIndex_);
   Result := array_[topIndex_];
-  WriteLn(' TBlockStack.Pop: ', Result.BlockIndex, ' topIndex=', topIndex_);
+  Dec(topIndex_);
+  // WriteLn(' TBlockStack.Pop: ', Result.BlockIndex, ' topIndex=', topIndex_);
+end;
+
+function TBlockStack.GetBlockAtIndex(const blockStackIndex: TBlockStackIndex): TBlock;
+begin
+  Result := array_[blockStackIndex];
+end;
+
+function TBlockStack.TopIndex: TBlockStackIndex;
+begin
+  Result := topIndex_;
 end;
 
 function TBlockStack.Top: TBlock;
@@ -620,11 +631,6 @@ begin
   if topIndex = 0 then Result := nil
   else
     Result := array_[topIndex - 1];
-end;
-
-function TBlockStack.TopIndex: TBlockStackIndex;
-begin
-  Result := topIndex_;
 end;
 
 // ----------------------------------------------------------------------------

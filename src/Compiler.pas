@@ -182,6 +182,7 @@ type
 var
   IdentIndex: TIdentIndex;
   BlockStackIndex: TBlockStackIndex;
+  BlockIndex: TBlockIndex;
   b: TBlockIndex;
   i, k: Integer;
   hits, m: Cardinal;
@@ -200,11 +201,12 @@ begin
   for BlockStackIndex := BlockStackTopIndex downto 0 do
     // search all nesting levels from the current one to the most outer one
   begin
+    blockIndex := BlockIndexStack[BlockStackIndex];
     for IdentIndex := NumIdent downto 1 do
       if (IdentifierAt(IdentIndex).Kind in [TTokenKind.PROCEDURETOK, TTokenKind.FUNCTIONTOK,
         TTokenKind.CONSTRUCTORTOK, TTokenKind.DESTRUCTORTOK]) and
         (IdentifierAt(IdentIndex).SourceFile.UnitIndex = IdentifierAt(ProcIdentIndex).SourceFile.UnitIndex) and
-        (S = IdentifierAt(IdentIndex).Name) and (BlockIndexStack[BlockStackIndex] =
+        (S = IdentifierAt(IdentIndex).Name) and (BlockIndex =
         IdentifierAt(IdentIndex).BlockIndex) and (IdentifierAt(IdentIndex).NumParams = NumParams) then
       begin
 
