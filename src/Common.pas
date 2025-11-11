@@ -72,13 +72,14 @@ type
   TBlockStackIndex = Integer;
 
 var
-  BlockIndexStack: array [0..MAXBLOCKS - 1] of TBlockIndex;
+  BlockIndexStack_: array [0..MAXBLOCKS - 1] of TBlockIndex;
   BlockList: TBlockList;
   BlockStack: TBlockStack;
 
 function NumBlocks_: Integer;
 function BlockStackTopIndex: TBlockStackIndex;
 function BlockStackTopBlockIndex: TBlockIndex;
+function BlockStackGetBlockIndexAt(const BlockStackIndex: TBlockStackIndex): TBlockIndex;
 
 var
   BlockStackTopIndex_: TBlockStackIndex;
@@ -326,7 +327,7 @@ var
     // Search all nesting levels from the current one to the most outer one
     for BlockStackIndex := BlockStackTopIndex downto 0 do
     begin
-      BlockIndex := BlockIndexStack[BlockStackIndex];
+      BlockIndex := BlockStackGetBlockIndexAt(BlockStackIndex);
       for IdentIndex := 1 to NumIdent do
         if (IdentifierAt(IdentIndex).DataType = TDataType.ENUMTOK) and
           (IdentifierAt(IdentIndex).NumAllocElements = Num) and (BlockIndex =
@@ -724,15 +725,6 @@ begin
   Result := BlockList.Count;
 end;
 
-(*
-function BlockStackTop: TBlockStackIndex;
-begin
-  if BlockStack.Top <> nil then
-    Result := BlockStack.Top.BlockIndex
-  else
-    Result := 0;
-end; *)
-
 function BlockStackTopIndex: TBlockStackIndex;
 begin
   Result := BlockStackTopIndex_;
@@ -740,7 +732,13 @@ end;
 
 function BlockStackTopBlockIndex: TBlockIndex;
 begin
-  Result := BlockIndexStack[BlockStackTopIndex];
+  Result := BlockIndexStack_[BlockStackTopIndex];
+end;
+
+
+function BlockStackGetBlockIndexAt(const BlockStackIndex: TBlockStackIndex): TBlockIndex;
+begin
+  Result := BlockIndexStack_[BlockStackIndex];
 end;
 
 

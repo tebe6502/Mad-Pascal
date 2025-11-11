@@ -201,7 +201,7 @@ begin
   for BlockStackIndex := BlockStackTopIndex downto 0 do
     // search all nesting levels from the current one to the most outer one
   begin
-    blockIndex := BlockIndexStack[BlockStackIndex];
+    blockIndex := BlockStackGetBlockIndexAt(BlockStackIndex);
     for IdentIndex := NumIdent downto 1 do
       if (IdentifierAt(IdentIndex).Kind in [TTokenKind.PROCEDURETOK, TTokenKind.FUNCTIONTOK,
         TTokenKind.CONSTRUCTORTOK, TTokenKind.DESTRUCTORTOK]) and
@@ -454,8 +454,9 @@ type
     NumParams: Word;
   end;
 var
-  IdentIndex: TIdentIndex;
-  BlockStackIndex: Integer;
+  IdentIndex: TIdentifierIndex;
+  BlockStackIndex: TBlockStackIndex;
+  BlockIndex: TBlockIndex;
   i, k, m: Integer;
   ok: Boolean;
 
@@ -500,10 +501,11 @@ begin
   for BlockStackIndex := BlockStackTopIndex downto 0 do
     // search all nesting levels from the current one to the most outer one
   begin
+    BlockIndex :=  BlockStackGetBlockIndexAt(BlockStackIndex);
     for IdentIndex := NumIdent downto 1 do
       if (IdentifierAt(IdentIndex).Kind in [TTokenKind.PROCEDURETOK, TTokenKind.FUNCTIONTOK,
         TTokenKind.CONSTRUCTORTOK, TTokenKind.DESTRUCTORTOK]) and (S = IdentifierAt(IdentIndex).Name) and
-        (BlockIndexStack[BlockStackIndex] = IdentifierAt(IdentIndex).BlockIndex) then
+        (blockIndex = IdentifierAt(IdentIndex).BlockIndex) then
       begin
 
         for k := 0 to High(l) - 1 do
@@ -17086,7 +17088,7 @@ begin
   Inc(BlockStackTopIndex_);
   BlockStack.Push(block);
   Assert(BlockStack.TopIndex = BlockStackTopIndex_);
-  BlockIndexStack[BlockStackTopIndex_] := block.BlockIndex;
+  BlockIndexStack_[BlockStackTopIndex_] := block.BlockIndex;
   IdentifierAt(BlockIdentIndex).ProcAsBlockIndex := block.BlockIndex;
 
 

@@ -94,7 +94,7 @@ var
     MaxIdentIndex := NumIdent_; // JAC! Speed optimization test
     for BlockStackIndex := BlockStackTopIndex downto 0 do
     begin
-      blockIndex := BlockIndexStack[BlockStackIndex];
+      blockIndex := BlockStackGetBlockIndexAt(BlockStackIndex);
       // block:=blockArray[blockIndex];
       for IdentIndex := 1 to MaxIdentIndex do
       begin
@@ -136,7 +136,7 @@ var
     MaxIdentIndex := NumIdent_; // JAC! Speed optimization test
     for BlockStackIndex := BlockStackTopIndex downto 0 do
     begin
-      blockIndex := BlockIndexStack[BlockStackIndex];
+      blockIndex := BlockStackGetBlockIndexAt(BlockStackIndex);
 
       // Search all nesting levels from the current one to the most outer one
       for IdentIndex := 1 to MaxIdentIndex do
