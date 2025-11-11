@@ -595,6 +595,7 @@ procedure TBlockStack.Clear;
 begin
   topIndex_ := 0;
   SetLength(array_, 10);
+  array_[0]:=TBlock.Create;
 end;
 
 procedure TBlockStack.Push(const block: TBlock);
@@ -603,8 +604,9 @@ var
 begin
   Capacity := Length(array_); // Never 0
   if topIndex_ = Capacity then  SetLength(array_, Capacity * 2);
-  array_[topIndex_] := block;
   Inc(topIndex_);
+  array_[topIndex_] := block;
+
   // WriteLn(' TBlockStack.Push: ', block.BlockIndex, ' topIndex=', topIndex_);
 end;
 
@@ -628,9 +630,7 @@ end;
 
 function TBlockStack.Top: TBlock;
 begin
-  if topIndex = 0 then Result := nil
-  else
-    Result := array_[topIndex - 1];
+    Result := array_[topIndex];
 end;
 
 // ----------------------------------------------------------------------------

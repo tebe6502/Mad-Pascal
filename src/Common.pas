@@ -68,9 +68,6 @@ var
   CodePosStack: array [0..MAXPOSSTACK] of Word;
 
   // TODO move to class
-type
-  TBlockStackIndex = Integer;
-
 var
   BlockIndexStack_: array [0..MAXBLOCKS - 1] of TBlockIndex;
   BlockList: TBlockList;
@@ -80,6 +77,8 @@ function NumBlocks_: Integer;
 function BlockStackTopIndex: TBlockStackIndex;
 function BlockStackTopBlockIndex: TBlockIndex;
 function BlockStackGetBlockIndexAt(const BlockStackIndex: TBlockStackIndex): TBlockIndex;
+procedure AssertBlockStacksEqual;
+
 
 var
   BlockStackTopIndex_: TBlockStackIndex;
@@ -330,8 +329,8 @@ var
       BlockIndex := BlockStackGetBlockIndexAt(BlockStackIndex);
       for IdentIndex := 1 to NumIdent do
         if (IdentifierAt(IdentIndex).DataType = TDataType.ENUMTOK) and
-          (IdentifierAt(IdentIndex).NumAllocElements = Num) and (BlockIndex =
-          IdentifierAt(IdentIndex).BlockIndex) then
+          (IdentifierAt(IdentIndex).NumAllocElements = Num) and
+          (BlockIndex = IdentifierAt(IdentIndex).BlockIndex) then
           exit(IdentIndex);
     end;
   end;
@@ -739,7 +738,23 @@ end;
 function BlockStackGetBlockIndexAt(const BlockStackIndex: TBlockStackIndex): TBlockIndex;
 begin
   Result := BlockIndexStack_[BlockStackIndex];
+  // WriteLn( 'BlockStackGetBlockIndexAt(',BlockStackIndex,')=',Result);
 end;
 
+
+procedure AssertBlockStacksEqual;
+var
+  BlockStackIndex: TBlockStackIndex;
+  a, b: TBlockIndex;
+begin
+  Assert(BlockStack.TopIndex = BlockStackTopIndex_);
+  for BlockStackIndex := BlockStackTopIndex_ to 0 do
+  begin
+    a := BlockStackGetBlockIndexAt(BlockStackIndex);
+    b := BlockStack.GetBlockAtIndex(BlockStackIndex).BlockIndex;
+    Assert(a = b);
+  end;
+
+end;
 
 end.

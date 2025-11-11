@@ -17087,8 +17087,9 @@ begin
   block:=BlockList.AddBlock();
   Inc(BlockStackTopIndex_);
   BlockStack.Push(block);
-  Assert(BlockStack.TopIndex = BlockStackTopIndex_);
   BlockIndexStack_[BlockStackTopIndex_] := block.BlockIndex;
+  AssertBlockStacksEqual;
+
   IdentifierAt(BlockIdentIndex).ProcAsBlockIndex := block.BlockIndex;
 
 
@@ -19221,7 +19222,7 @@ end;
 
   Dec(BlockStackTopIndex_);
   BlockStack.Pop;
-  Assert(BlockStack.TopIndex = BlockStackTopIndex_);
+  AssertBlockStacksEqual;
 
   if pass = TPass.CALL_DETERMINATION then
     if IdentifierAt(BlockIdentIndex).isKeep or IdentifierAt(BlockIdentIndex).isInterrupt or
