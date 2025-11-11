@@ -1523,7 +1523,7 @@ begin
 
  code:=1;
 
- len:=length(s) + 1;
+ len:=length(s^) + 1;
 
  if len > 1 then begin
 

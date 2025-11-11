@@ -292,7 +292,11 @@ writeln('_A: ', IdentifierAt(IdentIndex).Name);
      writeln (IdentifierAt(IdentIndex).Param[i].AllocElementType ,',', Param[i].AllocElementType);
      writeln (IdentifierAt(IdentIndex).Param[i].NumAllocElements,',', Param[i].NumAllocElements);
 }
-              Inc(hits);
+
+		if (Param[i].AllocElementType in [TDataType.OBJECTTOK, TDataType.RECORDTOK]) and (Param[i].NumAllocElements_ = 0) then
+
+		else
+                  Inc(hits);
 
             end;
 
@@ -3661,8 +3665,7 @@ begin
       if TestName(IdentIndex, svar) then
       begin
 
-        if (IdentifierAt(IdentIndex).DataType = TDataType.POINTERTOK) and not
-          (IdentifierAt(IdentIndex).AllocElementType in [TDataType.UNTYPETOK, TDataType.PROCVARTOK]) then
+        if (IdentifierAt(IdentIndex).DataType = TDataType.POINTERTOK) and not (IdentifierAt(IdentIndex).AllocElementType in [TDataType.UNTYPETOK, TDataType.PROCVARTOK, TDataType.RECORDTOK, TDataType.OBJECTTOK]) then
           asm65(#9'mwy ' + svar + ' :bp2')
         else
           asm65(#9'mwy ' + ExtractName(IdentIndex, svar) + ' :bp2');
@@ -7073,7 +7076,7 @@ function NumActualParameters(i: TTokenIndex; IdentIndex: TIdentIndex; out NumAct
   (*----------------------------------------------------------------------------*)
 var
   ActualParamType, AllocElementType: TDataType;
-  NumAllocElements: Cardinal;
+  NumAllocElements, NumAllocElements_: Cardinal;
   oldPass: TPass;
   oldCodeSize, IdentTemp: Integer;
 begin
@@ -7115,6 +7118,7 @@ begin
 
       AllocElementType := TDataType.UNTYPETOK;
       NumAllocElements := 0;
+      NumAllocElements_ :=0;
 
       if (ActualParamType in [TDataType.POINTERTOK, TDataType.STRINGPOINTERTOK]) and
         (TokenAt(i).Kind = TTokenKind.IDENTTOK) then
@@ -7129,6 +7133,7 @@ begin
         begin
           AllocElementType := IdentifierAt(IdentTemp).AllocElementType;
           NumAllocElements := IdentifierAt(IdentTemp).NumAllocElements;
+          NumAllocElements_ := IdentifierAt(IdentTemp).NumAllocElements_;
         end;
 
 
@@ -7154,6 +7159,7 @@ begin
 
           AllocElementType := IdentifierAt(IdentTemp).AllocElementType;
           NumAllocElements := IdentifierAt(IdentTemp).NumAllocElements;
+          NumAllocElements_ := IdentifierAt(IdentTemp).NumAllocElements_;
 
           //  writeln(IdentifierAt(IdentTemp).Name,' > ',ActualPAramType,',',AllocElementType,',',NumAllocElements,' | ',IdentifierAt(IdentTemp).DataType,',',IdentifierAt(IdentTemp).AllocElementType,',',IdentifierAt(IdentTemp).NumAllocElements);
 
@@ -7166,7 +7172,7 @@ begin
       Result[NumActualParams].DataType := ActualParamType;
       Result[NumActualParams].AllocElementType := AllocElementType;
       Result[NumActualParams].NumAllocElements := NumAllocElements;
-
+      Result[NumActualParams].NumAllocElements_ := NumAllocElements_;
 
       //  writeln(Result[NumActualParams].DataType,',',Result[NumActualParams].AllocElementType);
 
@@ -8793,15 +8799,15 @@ begin
                 end
                 else
 
-                  if (IdentifierAt(IdentIndex).DataType = TDataType.STRINGPOINTERTOK) or
-                    ((IdentifierAt(IdentIndex).DataType in Pointers) and
-                    (IdentifierAt(IdentIndex).NumAllocElements > 0)) then
+                  if //(IdentifierAt(IdentIndex).DataType = TDataType.STRINGPOINTERTOK) or
+                     ((IdentifierAt(IdentIndex).DataType in Pointers) and (IdentifierAt(IdentIndex).NumAllocElements > 0)) or
+                     ((IdentifierAt(IdentIndex).DataType in Pointers) and (IdentifierAt(IdentIndex).NumAllocElements = 0) and (TokenAt(i + 3).Kind = TTokenKind.DEREFERENCETOK)) then
                   begin
 
-                    if ((IdentifierAt(IdentIndex).DataType = TDataType.STRINGPOINTERTOK) or
-                      (IdentifierAt(IdentIndex).AllocElementType = TDataType.CHARTOK)) or
-                      ((IdentifierAt(IdentIndex).DataType = TDataType.POINTERTOK) and
-                      (IdentifierAt(IdentIndex).AllocElementType = TDataType.STRINGPOINTERTOK)) then
+		    if TokenAt(i + 3).Kind = TTokenKind.DEREFERENCETOK then inc(i);
+
+                    if ((IdentifierAt(IdentIndex).DataType = TDataType.STRINGPOINTERTOK) or (IdentifierAt(IdentIndex).AllocElementType = TDataType.CHARTOK)) or
+                       ((IdentifierAt(IdentIndex).DataType = TDataType.POINTERTOK) and (IdentifierAt(IdentIndex).AllocElementType = TDataType.STRINGPOINTERTOK)) then
                     begin
 
                       if IdentifierAt(IdentIndex).AllocElementType = TDataType.STRINGPOINTERTOK then
@@ -8814,8 +8820,8 @@ begin
                         svar := GetLocalName(IdentIndex);
 
                         if (IdentifierAt(IdentIndex).NumAllocElements * 2 > 256) or
-                          (IdentifierAt(IdentIndex).NumAllocElements in [0, 1]) or
-                          (IdentifierAt(IdentIndex).PassMethod = TParameterPassingMethod.VARPASSING)
+			   (IdentifierAt(IdentIndex).NumAllocElements in [0, 1]) or
+                           (IdentifierAt(IdentIndex).PassMethod = TParameterPassingMethod.VARPASSING)
                         then
                         begin
 
