@@ -92,7 +92,7 @@ var
 
     // Search all nesting levels from the current one to the most outer one
     MaxIdentIndex := NumIdent_; // JAC! Speed optimization test
-    for BlockStackIndex := BlockStackTop downto 0 do
+    for BlockStackIndex := BlockStackTopIndex downto 0 do
     begin
       blockIndex := BlockIndexStack[BlockStackIndex];
       // block:=blockArray[blockIndex];
@@ -134,7 +134,7 @@ var
 
     Result := 0;
     MaxIdentIndex := NumIdent_; // JAC! Speed optimization test
-    for BlockStackIndex := BlockStackTop downto 0 do
+    for BlockStackIndex := BlockStackTopIndex downto 0 do
     begin
       blockIndex := BlockIndexStack[BlockStackIndex];
 
@@ -1685,7 +1685,7 @@ begin
 
   if (identIndex > 0) and (not (IdentifierAt(IdentIndex).Kind in [TTokenKind.PROCEDURETOK,
     TTokenKind.FUNCTIONTOK, TTokenKind.CONSTRUCTORTOK, TTokenKind.DESTRUCTORTOK])) and
-    (IdentifierAt(IdentIndex).BlockIndex = BlockIndexStack[BlockStackTop]) and
+    (IdentifierAt(IdentIndex).BlockIndex = BlockStackTopBlockIndex) and
     (IdentifierAt(IdentIndex).isOverload = False) and (IdentifierAt(identIndex).SourceFile.UnitIndex =
     ActiveSourceFile.UnitIndex) then
     Error(tokenIndex, TMessage.Create(TErrorCode.IdentifierAlreadyDefined, 'Identifier {0} is already defined', Name))
@@ -1712,7 +1712,7 @@ begin
     identifier.Name := Name;
     identifier.Kind := Kind;
     identifier.DataType := DataType;
-    identifier.BlockIndex := BlockIndexStack[BlockStackTop];
+    identifier.BlockIndex := BlockStackTopBlockIndex;
     identifier.NumParams := 0;
     identifier.isAbsolute := False;
     identifier.PassMethod := TParameterPassingMethod.VALPASSING;
@@ -2666,7 +2666,7 @@ begin
             FieldInListName[FieldInListIndex].Value);
         end;
 
-        GetTypeAtIndex(RecType).BlockIndex := BlockIndexStack[BlockStackTop];
+        GetTypeAtIndex(RecType).BlockIndex := BlockStackTopBlockIndex;
 
         AllocElementType := DataType;
 
@@ -2904,7 +2904,7 @@ begin
 
                 CheckTok(i, TTokenKind.ENDTOK);
 
-                GetTypeAtIndex(RecType).BlockIndex := BlockIndexStack[BlockStackTop];
+                GetTypeAtIndex(RecType).BlockIndex := BlockStackTopBlockIndex;
 
                 DataType := TDataType.OBJECTTOK;
                 NumAllocElements := RecType;      // Index to the Types array
@@ -3002,7 +3002,7 @@ begin
 
                   CheckTok(i, TTokenKind.ENDTOK);
 
-                  GetTypeAtIndex(RecType).BlockIndex := BlockIndexStack[BlockStackTop];
+                  GetTypeAtIndex(RecType).BlockIndex := BlockStackTopBlockIndex;
 
                   DataType := TDataType.RECORDTOK;
                   NumAllocElements := RecType;      // index to the Types array
@@ -3403,7 +3403,7 @@ begin
                             GetTypeAtIndex(RecType).Field[1].Value := LowerBound;
                             GetTypeAtIndex(RecType).Field[2].Value := UpperBound;
 
-                            GetTypeAtIndex(RecType).BlockIndex := BlockIndexStack[BlockStackTop];
+                            GetTypeAtIndex(RecType).BlockIndex := BlockStackTopBlockIndex;
 
                             DataType := TDataType.SUBRANGETYPE;
                             NumAllocElements := RecType;      // index to the Types array

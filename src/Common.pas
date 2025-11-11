@@ -76,6 +76,14 @@ var
   BlockList: TBlockList;
   BlockStack: TBlockStack;
 
+function NumBlocks_: Integer;
+function BlockStackTopIndex: TBlockStackIndex;
+function BlockStackTopBlockIndex: TBlockIndex;
+
+var
+  BlockStackTopIndex_: TBlockStackIndex;
+
+
   CallGraph: TCallGraph;
 
   OldConstValType: TDataType;
@@ -135,10 +143,7 @@ var
 
 {$ENDIF}
 
-function NumBlocks_: Integer;
-var BlockStackTop: TBlockStackIndex;
-
-// ----------------------------------------------------------------------------
+  // ----------------------------------------------------------------------------
 
 function NumTok: Integer;
 function TokenAt(tokenIndex: TTokenIndex): TToken;
@@ -317,7 +322,7 @@ var
     Result := 0;
 
     // Search all nesting levels from the current one to the most outer one
-    for BlockStackIndex := BlockStackTop downto 0 do
+    for BlockStackIndex := BlockStackTopIndex downto 0 do
       for IdentIndex := 1 to NumIdent do
         if (IdentifierAt(IdentIndex).DataType = TDataType.ENUMTOK) and
           (IdentifierAt(IdentIndex).NumAllocElements = Num) and (BlockIndexStack[BlockStackIndex] =
@@ -722,5 +727,16 @@ begin
   else
     Result := 0;
 end; *)
+
+function BlockStackTopIndex: TBlockStackIndex;
+begin
+  Result:= BlockStackTopIndex_;
+end;
+
+function BlockStackTopBlockIndex: TBlockIndex;
+begin
+  Result := BlockIndexStack[BlockStackTopIndex];
+end;
+
 
 end.

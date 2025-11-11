@@ -192,14 +192,14 @@ type
     procedure Push(const block: TBlock);
     function Pop: TBlock;
     function Top: TBlock;
+    function TopIndex: TBlockStackIndex;
 
   private
 
   type
     TBlockArray = array of TBlock;
   var
-    topIndex: TBlockStackIndex;
-  var
+    topIndex_: TBlockStackIndex;
     array_: TBlockArray;
 
   end;
@@ -592,7 +592,7 @@ end;
 
 procedure TBlockStack.Clear;
 begin
-  topIndex := 0;
+  topIndex_ := 0;
   SetLength(array_, 10);
 end;
 
@@ -600,19 +600,19 @@ procedure TBlockStack.Push(const block: TBlock);
 var
   Capacity: Integer;
 begin
-  Capacity := Length(array_);
-  Inc(topIndex);
-  if topIndex = Capacity then  SetLength(array_, Capacity * 2);
-  array_[topIndex] := block;
-  WriteLn(' TBlockStack.Push: ', block.BlockIndex, ' topIndex=', topIndex);
+  Capacity := Length(array_); // Never 0
+  if topIndex_ = Capacity then  SetLength(array_, Capacity * 2);
+  array_[topIndex_] := block;
+  Inc(topIndex_);
+  WriteLn(' TBlockStack.Push: ', block.BlockIndex, ' topIndex=', topIndex_);
 end;
 
 function TBlockStack.Pop: TBlock;
 begin
-  assert(topIndex > 0);
-  Dec(topIndex);
-  Result := array_[topIndex];
-  WriteLn(' TBlockStack.Pop: ', Result.BlockIndex, ' topIndex=', topIndex);
+  assert(topIndex_ > 0);
+  Dec(topIndex_);
+  Result := array_[topIndex_];
+  WriteLn(' TBlockStack.Pop: ', Result.BlockIndex, ' topIndex=', topIndex_);
 end;
 
 function TBlockStack.Top: TBlock;
@@ -620,6 +620,11 @@ begin
   if topIndex = 0 then Result := nil
   else
     Result := array_[topIndex - 1];
+end;
+
+function TBlockStack.TopIndex: TBlockStackIndex;
+begin
+  Result := topIndex_;
 end;
 
 // ----------------------------------------------------------------------------
