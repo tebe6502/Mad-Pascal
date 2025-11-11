@@ -3,7 +3,7 @@ unit strutils;
  @type: unit
  @author: Tomasz Biela (Tebe)
  @name: Various string handling routines
- @version: 1.0
+ @version: 1.1
 
  @description:
  https://www.freepascal.org/docs-html/rtl/strutils/index-5.html
@@ -14,6 +14,8 @@ unit strutils;
 
 AddChar
 AddCharR
+PadLeft
+PadRight
 
 }
 
@@ -42,9 +44,9 @@ The resulting string can be thought of as a right-aligned version of S, with len
 *)
 begin
 
- Result:=S;
+ Result^ := S;
 
- while length(Result) < N do Result:=Concat(C, Result);
+ while length(Result^) < N do Result^ := Concat(C, Result^);
 
 end;
 
@@ -64,9 +66,9 @@ The resulting string can be thought of as a left-aligned version of S, with leng
 *)
 begin
 
- Result:=S;
+ Result^ := S;
 
- while length(Result) < N do Result:=Concat(Result, C);
+ while length(Result^) < N do Result^ := Concat(Result, C);
 
 end;
 
@@ -82,9 +84,9 @@ function PadLeft(var S: string; N: Byte): ^string;
 *)
 begin
 
- Result:=S;
+ Result^ := S;
 
- while length(Result) < N do Result:=Concat(' ', Result);
+ while length(Result^) < N do Result^ := Concat(' ', Result);
 
 end;
 
@@ -100,9 +102,9 @@ function PadRight(var S: string; N: Byte): ^string;
 *)
 begin
 
- Result:=S;
+ Result^ := S;
 
- while length(Result) < N do Result:=Concat(Result, ' ');
+ while length(Result^) < N do Result^ := Concat(Result, ' ');
 
 end;
 

@@ -479,7 +479,7 @@ begin
 
  Result:=a;
 
- for j:=length(a) downto 1 do Result[j] := UpCase(Result[j]);
+ for j:=length(a^) downto 1 do Result[j] := UpCase(Result[j]);
 
 end;
 
@@ -497,7 +497,7 @@ begin
 
  Result:=a;
 
- for j:=length(a) downto 1 do Result[j] := LowerCase(Result[j]);
+ for j:=length(a^) downto 1 do Result[j] := LowerCase(Result[j]);
 
 end;
 

@@ -132,7 +132,7 @@ type
   TParam = record
     Name: TParameterName;
     DataType: TDataType;
-    NumAllocElements: Cardinal;
+    NumAllocElements, NumAllocElements_: Cardinal;
     AllocElementType: TDataType;
     PassMethod: TParameterPassingMethod;
     i, i_: Integer;
