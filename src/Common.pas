@@ -67,9 +67,7 @@ var
   CodePosStackTop: Integer;
   CodePosStack: array [0..MAXPOSSTACK] of Word;
 
-  // TODO move to class
 var
-  BlockIndexStack_: array [0..MAXBLOCKS - 1] of TBlockIndex;
   BlockList: TBlockList;
   BlockStack: TBlockStack;
 
@@ -77,13 +75,8 @@ function NumBlocks_: Integer;
 function BlockStackTopIndex: TBlockStackIndex;
 function BlockStackTopBlockIndex: TBlockIndex;
 function BlockStackGetBlockIndexAt(const BlockStackIndex: TBlockStackIndex): TBlockIndex;
-procedure AssertBlockStacksEqual;
-
 
 var
-  BlockStackTopIndex_: TBlockStackIndex;
-
-
   CallGraph: TCallGraph;
 
   OldConstValType: TDataType;
@@ -329,8 +322,8 @@ var
       BlockIndex := BlockStackGetBlockIndexAt(BlockStackIndex);
       for IdentIndex := 1 to NumIdent do
         if (IdentifierAt(IdentIndex).DataType = TDataType.ENUMTOK) and
-          (IdentifierAt(IdentIndex).NumAllocElements = Num) and
-          (BlockIndex = IdentifierAt(IdentIndex).BlockIndex) then
+          (IdentifierAt(IdentIndex).NumAllocElements = Num) and (BlockIndex =
+          IdentifierAt(IdentIndex).BlockIndex) then
           exit(IdentIndex);
     end;
   end;
@@ -726,35 +719,18 @@ end;
 
 function BlockStackTopIndex: TBlockStackIndex;
 begin
-  Result := BlockStackTopIndex_;
+  Result := BlockStack.TopIndex;
 end;
 
 function BlockStackTopBlockIndex: TBlockIndex;
 begin
-  Result := BlockIndexStack_[BlockStackTopIndex];
+  Result := BlockStack.GetBlockAtIndex(BlockStackTopIndex).BlockIndex;
 end;
 
 
 function BlockStackGetBlockIndexAt(const BlockStackIndex: TBlockStackIndex): TBlockIndex;
 begin
-  Result := BlockIndexStack_[BlockStackIndex];
-  // WriteLn( 'BlockStackGetBlockIndexAt(',BlockStackIndex,')=',Result);
-end;
-
-
-procedure AssertBlockStacksEqual;
-var
-  BlockStackIndex: TBlockStackIndex;
-  a, b: TBlockIndex;
-begin
-  Assert(BlockStack.TopIndex = BlockStackTopIndex_);
-  for BlockStackIndex := BlockStackTopIndex_ to 0 do
-  begin
-    a := BlockStackGetBlockIndexAt(BlockStackIndex);
-    b := BlockStack.GetBlockAtIndex(BlockStackIndex).BlockIndex;
-    Assert(a = b);
-  end;
-
+  Result := BlockStack.GetBlockAtIndex(BlockStackIndex).BlockIndex;
 end;
 
 end.

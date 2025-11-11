@@ -17085,10 +17085,7 @@ begin
   isInterrupt := isInt;
 
   block:=BlockList.AddBlock();
-  Inc(BlockStackTopIndex_);
   BlockStack.Push(block);
-  BlockIndexStack_[BlockStackTopIndex_] := block.BlockIndex;
-  AssertBlockStacksEqual;
 
   IdentifierAt(BlockIdentIndex).ProcAsBlockIndex := block.BlockIndex;
 
@@ -19220,9 +19217,7 @@ end;
 
   end;
 
-  Dec(BlockStackTopIndex_);
   BlockStack.Pop;
-  AssertBlockStacksEqual;
 
   if pass = TPass.CALL_DETERMINATION then
     if IdentifierAt(BlockIdentIndex).isKeep or IdentifierAt(BlockIdentIndex).isInterrupt or
@@ -19897,7 +19892,7 @@ begin
   SourceFileList.ClearAllowedUnitNames;
 
   BlockList.Clear;
-  BlockStackTopIndex_ := 0;
+  BlockStack.Clear;
 
   CodeSize := 0;
   CodePosStackTop := 0;
