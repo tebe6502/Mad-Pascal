@@ -67,15 +67,16 @@ var
   CodePosStackTop: Integer;
   CodePosStack: array [0..MAXPOSSTACK] of Word;
 
-  // TODO move to class
-type
-  TBlockStackIndex = Integer;
+var
+  BlockList: TBlockList;
+  BlockStack: TBlockStack;
+
+function NumBlocks_: Integer;
+function BlockStackTopIndex: TBlockStackIndex;
+function BlockStackTopBlockIndex: TBlockIndex;
+function BlockStackGetBlockIndexAt(const BlockStackIndex: TBlockStackIndex): TBlockIndex;
 
 var
-  BlockStackTop: TBlockStackIndex;
-  BlockIndexStack: array [0..MAXBLOCKS - 1] of TBlockIndex;
-  BlockList: TBlockList;
-
   CallGraph: TCallGraph;
 
   OldConstValType: TDataType;
@@ -135,9 +136,7 @@ var
 
 {$ENDIF}
 
-function NumBlocks_: Integer;
-
-// ----------------------------------------------------------------------------
+  // ----------------------------------------------------------------------------
 
 function NumTok: Integer;
 function TokenAt(tokenIndex: TTokenIndex): TToken;
@@ -310,18 +309,23 @@ var
 
   function Search(Num: Cardinal): Integer;
   var
-    IdentIndex, BlockStackIndex: Integer;
+    IdentIndex: TIdentifierIndex;
+    BlockStackIndex: TBlockStackIndex;
+    BlockIndex: TBlockIndex;
   begin
 
     Result := 0;
 
     // Search all nesting levels from the current one to the most outer one
-    for BlockStackIndex := BlockStackTop downto 0 do
+    for BlockStackIndex := BlockStackTopIndex downto 0 do
+    begin
+      BlockIndex := BlockStackGetBlockIndexAt(BlockStackIndex);
       for IdentIndex := 1 to NumIdent do
         if (IdentifierAt(IdentIndex).DataType = TDataType.ENUMTOK) and
-          (IdentifierAt(IdentIndex).NumAllocElements = Num) and (BlockIndexStack[BlockStackIndex] =
+          (IdentifierAt(IdentIndex).NumAllocElements = Num) and (BlockIndex =
           IdentifierAt(IdentIndex).BlockIndex) then
           exit(IdentIndex);
+    end;
   end;
 
 begin
@@ -711,6 +715,22 @@ end;
 function NumBlocks_: Integer;
 begin
   Result := BlockList.Count;
+end;
+
+function BlockStackTopIndex: TBlockStackIndex;
+begin
+  Result := BlockStack.TopIndex;
+end;
+
+function BlockStackTopBlockIndex: TBlockIndex;
+begin
+  Result := BlockStack.GetBlockAtIndex(BlockStackTopIndex).BlockIndex;
+end;
+
+
+function BlockStackGetBlockIndexAt(const BlockStackIndex: TBlockStackIndex): TBlockIndex;
+begin
+  Result := BlockStack.GetBlockAtIndex(BlockStackIndex).BlockIndex;
 end;
 
 end.
