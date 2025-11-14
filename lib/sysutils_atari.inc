@@ -304,7 +304,7 @@ begin
   Assign (f, name);
   FileMode := fmOpenRead;
   Reset (f);
-  Result:=(IoResult<128) and (length(name)>0);
+  Result:=(IoResult<128) and (length(name^)>0);
   Close (f);
   {$I+}
 
