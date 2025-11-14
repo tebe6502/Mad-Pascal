@@ -249,7 +249,7 @@ uses
       // By default the executable is in the folder 'bin/<os>'.
       // For compatibility with previous version we also check that folder and its
       // first and wecond parent folders for the existence of the "lib/system.pas".
-      unitPathList := TPathList.Create;
+      unitPathList := TPathList.Create(True);
       folderPath := ExtractFileDir(ParamStr(0));
       for libFolderLevel := 1 to 3 do
       begin

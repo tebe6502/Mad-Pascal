@@ -102,7 +102,7 @@ var
     end;
 
   LinkObj: TStringArray;
-  unitPathList: TPathList;
+  unitPathList: IPathList;
 
   WithName: TStringArray;
 
