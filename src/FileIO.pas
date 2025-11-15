@@ -876,12 +876,13 @@ end;
 
 class function TFileSystem.FileExists_(const filePath: TFilePath): Boolean;
 begin
-  Writeln('TFileSystem.FileExists:', filePath);
+
   {$IFNDEF SIMULATED_FILE_IO}
   Result := FileExists(filePath);
   {$ELSE}
   Result := fileMap.GetEntry(filePath) <> nil;
   {$ENDIF}
+  Writeln('TFileSystem.FileExists:' , filePath,' - ',Result);
 end;
 
 class function TFileSystem.FolderExists(const folderPath: TFolderPath): Boolean;
