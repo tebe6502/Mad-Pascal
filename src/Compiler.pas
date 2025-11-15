@@ -8809,7 +8809,8 @@ begin
                   ((IdentifierAt(IdentIndex).DataType in Pointers) and
                     (IdentifierAt(IdentIndex).NumAllocElements > 0)) or
                     ((IdentifierAt(IdentIndex).DataType in Pointers) and
-                    (IdentifierAt(IdentIndex).NumAllocElements = 0) and (TokenAt(i + 3).Kind = TTokenKind.DEREFERENCETOK)) then
+                    (IdentifierAt(IdentIndex).NumAllocElements = 0) and (TokenAt(i + 3).Kind =
+                    TTokenKind.DEREFERENCETOK)) then
                   begin
 
                     if TokenAt(i + 3).Kind = TTokenKind.DEREFERENCETOK then Inc(i);
@@ -13008,10 +13009,11 @@ begin
 
                   // dla PROC, FUNC -> IdentifierAt(GetIdentIndex(TokenAt(k).Name)).NumAllocElements -> oznacza liczbe parametrow takiej procedury/funkcji
                     if (VarType in Pointers) and ((ExpressionType in Pointers) and
-                      (TokenAt(k).Kind = TTokenKind.IDENTTOK)) and (not
-                      (IdentifierAt(IdentIndex).AllocElementType in Pointers + [TDataType.RECORDTOK,
-                      TDataType.OBJECTTOK]) and not (IdentifierAt(GetIdentIndex(TokenAt(k).Name)).AllocElementType in
-                      Pointers + [TDataType.RECORDTOK, TDataType.OBJECTTOK])) then
+                      (TokenAt(k).Kind = TTokenKind.IDENTTOK)) and
+                      (not (IdentifierAt(IdentIndex).AllocElementType in Pointers +
+                      [TDataType.RECORDTOK, TDataType.OBJECTTOK]) and not
+                      (IdentifierAt(GetIdentIndex(TokenAt(k).Name)).AllocElementType in Pointers +
+                      [TDataType.RECORDTOK, TDataType.OBJECTTOK])) then
                     begin
 
                       j := Elements(IdentIndex) {IdentifierAt(IdentIndex).NumAllocElements} *
@@ -19477,6 +19479,7 @@ var
   tmp: String;
   yes: Boolean;
   SourceFile: TSourceFile;
+  MainIdentifier: TIdentifier;
 begin
 
   WriteLn(Format('Pass %d', [Ord(pass)]));
@@ -19497,11 +19500,11 @@ begin
 
   //SetLength(AsmLabels, 1);
 
-  DefineIdent(1, 'MAIN', TTokenKind.PROCEDURETOK, TDataType.UNTYPETOK, 0, TDataType.UNTYPETOK, 0);
+  mainIdentifier := DefineIdent(1, 'MAIN', TTokenKind.PROCEDURETOK, TDataType.UNTYPETOK, 0, TDataType.UNTYPETOK, 0);
 
   GenerateProgramProlog;
 
-  j := CompileBlock(1, NumIdent, 0, False, TDataType.UNTYPETOK);
+  j := CompileBlock(1, MainIdentifier.IdentifierIndex, 0, False, TDataType.UNTYPETOK);
 
 
   if TokenAt(j).Kind = TTokenKind.ENDTOK then CheckTok(j + 1, TTokenKind.DOTTOK)
