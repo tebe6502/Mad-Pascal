@@ -72,6 +72,8 @@ var
   BlockStack: TBlockStack;
 
 function NumBlocks_: Integer;
+function GetBlockAtIndex(const blockIndex: TBlockIndex): TBlock;
+
 function BlockStackTopIndex: TBlockStackIndex;
 function BlockStackTopBlockIndex: TBlockIndex;
 function BlockStackGetBlockIndexAt(const BlockStackIndex: TBlockStackIndex): TBlockIndex;
@@ -715,6 +717,15 @@ end;
 function NumBlocks_: Integer;
 begin
   Result := BlockList.Count;
+end;
+
+function GetBlockAtIndex(const blockIndex: TBlockIndex): TBlock;
+begin
+  if   blockIndex = 0 then
+         Result:=BlockStack.GetBlockAtIndex(0) // TODO Dirty hack
+  else
+  Result:=BlockList.GetBlockAtIndex(blockIndex);
+
 end;
 
 function BlockStackTopIndex: TBlockStackIndex;

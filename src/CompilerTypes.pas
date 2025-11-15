@@ -170,6 +170,7 @@ type
     procedure Clear;
     function AddBlock(): TBlock;
     function Count: Integer;
+  function GetBlockAtIndex(const blockIndex: TBlockIndex): TBlock;
 
   private
 
@@ -361,6 +362,8 @@ type
   TIdentifierIndex = Integer;
 
   TIdentifier = class
+    IdentifierIndex: TIdentifierIndex;
+
     SourceFile: TSourceFile;
     BlockIndex: TBlockIndex;  // Index of a block in which the identifier is defined
     Name: TIdentifierName;
@@ -576,6 +579,13 @@ function TBlockList.Count: Integer;
 begin
   Result := Count_;
 end;
+
+
+function TBlockList.GetBlockAtIndex(const blockIndex: TBlockIndex): TBlock;
+begin
+  Result:=Array_[blockIndex];
+end;
+
 
 // ----------------------------------------------------------------------------
 // Class TBlockStack
