@@ -80,13 +80,10 @@ var
 
   function Search(const X: TString; const SourceFile: TSourceFile): TIdentIndex;
   var
-    BlockStackIndex: TBlockStackIndex;
-    blockIndex: TBlockIndex;
     block: TBlock;
     index: Integer;
     identifier: TIdentifier;
     unitEquals: Boolean;
-    // otherIdentifier: TIdentifier;
   begin
 
     Result := 0;
@@ -94,11 +91,9 @@ var
     // WriteLn('Parser.GetIdentIndex('+s+'): BlockStack='+BlockStack.ToString);
 
     // Search all nesting levels from the current one to the most outer one
-    for BlockStackIndex := BlockStackTopIndex downto 0 do
+    Block := BlockManager.BlockStack.Top;
+    while (Block <> nil) do
     begin
-      blockIndex := BlockStackGetBlockIndexAt(BlockStackIndex);
-      block := GetBlockAtIndex(blockIndex);
-
       for Index := 1 to Block.NumIdentifiers do
       begin
 
@@ -106,9 +101,6 @@ var
 
         if (X = identifier.Name) then
         begin
-//          otherIdentifier := Block.GetIdentifier(X);
-//          assert(identifier = otherIdentifier);
-
           unitEquals := (identifier.SourceFile.UnitIndex = SYSTEM_UNIT_INDEX) or
             (identifier.SourceFile.UnitIndex = SourceFile.UnitIndex);
 
@@ -123,6 +115,7 @@ var
 
         end;
       end;
+      block := Block.ParentBlock;
     end;
 
   end;
@@ -130,19 +123,15 @@ var
 
   function SearchCurrenSourceFile(const X: TString; const SourceFile: TSourceFile): Integer;
   var
-    BlockStackIndex: TBlockStackIndex;
-    BlockIndex: TBlockIndex;
     block: TBlock;
     index: Integer;
     identifier: TIdentifier;
   begin
 
     Result := 0;
-    for BlockStackIndex := BlockStackTopIndex downto 0 do
+    Block := BlockManager.BlockStack.Top;
+    while (Block <> nil) do
     begin
-      blockIndex := BlockStackGetBlockIndexAt(BlockStackIndex);
-      block := GetBlockAtIndex(blockIndex);
-
       // Search all nesting levels from the current one to the most outer one
       for index := 1 to Block.NumIdentifiers do
       begin
@@ -158,6 +147,7 @@ var
             if (identifier.SourceFile.UnitIndex = SourceFile.UnitIndex) then exit;
           end;
       end;
+      block := Block.ParentBlock;
     end;
   end;
 
@@ -2788,7 +2778,7 @@ begin
                     i := DefineFunction(i, 0, isForward, isInt, isInl, isOvr, IsNestedFunction,
                       NestedFunctionResultType, NestedFunctionNumAllocElements, NestedFunctionAllocElementType);
 
-                    IdentifierAt(NumIdent).ProcAsBlockIndex := BlockManager.BlockList.AddBlock().BlockIndex;
+                    IdentifierAt(NumIdent).ProcAsBlockIndex := BlockManager.AddBlock().BlockIndex;
 
                     IdentifierAt(NumIdent).IsUnresolvedForward := True;
 
@@ -2896,7 +2886,7 @@ begin
                               IsNestedFunction, NestedFunctionResultType, NestedFunctionNumAllocElements,
                               NestedFunctionAllocElementType);
 
-                            IdentifierAt(NumIdent).ProcAsBlockIndex := BlockManager.BlockList.AddBlock().BlockIndex;
+                            IdentifierAt(NumIdent).ProcAsBlockIndex := BlockManager.AddBlock().BlockIndex;
 
                             IdentifierAt(NumIdent).IsUnresolvedForward := True;
 

@@ -154,8 +154,9 @@ type
   TBlock = class
   public
     BlockIndex: TBlockIndex;
+    ParentBlock: TBlock;
 
-    constructor Create;
+    constructor Create(const ParentBlock: TBlock);
     destructor Free;
     procedure AddIdentifer(const identifier: TIdentifier);
     function NumIdentifiers: Integer;
@@ -174,7 +175,7 @@ type
     destructor Free;
 
     procedure Clear(const fromIndex: TBlockIndex = 0);
-    function AddBlock(): TBlock;
+    function AddBlock(const ParentBlock: TBlock): TBlock;
     function Count: Integer;
     function GetBlockAtIndex(const blockIndex: TBlockIndex): TBlock;
 
@@ -223,6 +224,7 @@ type
     constructor Create;
     destructor Free;
     procedure Initialize;
+    function AddBlock: TBlock;
     function AddAndPushBlock: TBlock;
 
   private
@@ -534,8 +536,9 @@ implementation
 // Class TBlock
 // ----------------------------------------------------------------------------
 
-constructor TBlock.Create;
+constructor TBlock.Create(const ParentBlock: TBlock);
 begin
+  Self.ParentBlock := parentBlock;
   NumIdentifiers_ := 0;
   IdentifierArray := nil;
 end;
@@ -548,12 +551,12 @@ end;
 
 procedure TBlock.AddIdentifer(const identifier: TIdentifier);
 var
-//  otherIdentifier: TIdentifier;
+  //  otherIdentifier: TIdentifier;
   capacity: Integer;
 begin
-// TODO: Why can the same identifier be there in a block multiple times?
-//  otherIdentifier := GetIdentifier(identifier.Name);
-//  assert(otherIdentifier = nil);
+  // TODO: Why can the same identifier be there in a block multiple times?
+  //  otherIdentifier := GetIdentifier(identifier.Name);
+  //  assert(otherIdentifier = nil);
 
   capacity := Length(IdentifierArray);
   if capacity = 0 then SetLength(IdentifierArray, 10)
@@ -614,7 +617,7 @@ begin
   end;
 end;
 
-function TBlockList.AddBlock: TBlock;
+function TBlockList.AddBlock(const ParentBlock: TBlock): TBlock;
 var
   Capacity: Integer;
 begin
@@ -622,7 +625,7 @@ begin
   Capacity := Length(Array_);
   if capacity = 0 then SetLength(Array_, 256)
   else if Count_ = capacity then SetLength(Array_, 2 * capacity);
-  Result := TBlock.Create;
+  Result := TBlock.Create(ParentBlock);
   Result.BlockIndex := Count_;
   Array_[Count_] := Result;
 
@@ -714,7 +717,7 @@ constructor TBlockManager.Create;
 begin
   BlockList := TBlockList.Create;
   BlockStack := TBlockStack.Create;
-  Block0 := BlockList.AddBlock();
+  Block0 := BlockList.AddBlock(nil);
 end;
 
 
@@ -732,9 +735,14 @@ begin
   BlockStack.Push(block0);
 end;
 
+function TBlockManager.AddBlock: TBlock;
+begin
+  Result := BlockList.AddBlock(BlockStack.Top);
+end;
+
 function TBlockManager.AddAndPushBlock: TBlock;
 begin
-  Result := BlockList.AddBlock();
+  Result := AddBlock();
   BlockStack.Push(Result);
 end;
 

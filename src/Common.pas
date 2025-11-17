@@ -71,11 +71,9 @@ var
   BlockManager: TBlockManager;
 
 function NumBlocks_: Integer;
-function GetBlockAtIndex(const blockIndex: TBlockIndex): TBlock;
-
 function BlockStackTopIndex: TBlockStackIndex;
 function BlockStackTopBlockIndex: TBlockIndex;
-function BlockStackGetBlockIndexAt(const BlockStackIndex: TBlockStackIndex): TBlockIndex;
+
 
 var
   CallGraph: TCallGraph;
@@ -310,22 +308,25 @@ var
 
   function Search(Num: Cardinal): Integer;
   var
-    IdentIndex: TIdentifierIndex;
-    BlockStackIndex: TBlockStackIndex;
-    BlockIndex: TBlockIndex;
+    Block: TBlock;
+    Index: Integer;
+    Identifier: TIdentifier;
   begin
 
     Result := 0;
 
     // Search all nesting levels from the current one to the most outer one
-    for BlockStackIndex := BlockStackTopIndex downto 0 do
+    Block := BlockManager.BlockStack.Top;
+    while (Block <> nil) do
     begin
-      BlockIndex := BlockStackGetBlockIndexAt(BlockStackIndex);
-      for IdentIndex := 1 to NumIdent do
-        if (IdentifierAt(IdentIndex).DataType = TDataType.ENUMTOK) and
-          (IdentifierAt(IdentIndex).NumAllocElements = Num) and
-          (BlockIndex = IdentifierAt(IdentIndex).BlockIndex) then
-          exit(IdentIndex);
+
+      for Index := 1 to Block.NumIdentifiers do
+      begin
+        Identifier := Block.GetIdentifierAtIndex(Index);
+        if (Identifier.DataType = TDataType.ENUMTOK) and (Identifier.NumAllocElements = Num) then
+          exit(Identifier.IdentifierIndex);
+      end;
+
     end;
   end;
 
@@ -718,25 +719,15 @@ begin
   Result := BlockManager.BlockList.Count;
 end;
 
-function GetBlockAtIndex(const blockIndex: TBlockIndex): TBlock;
-begin
-    Result :=  BlockManager.BlockList.GetBlockAtIndex(blockIndex);
-end;
-
 function BlockStackTopIndex: TBlockStackIndex;
 begin
-  Result :=  BlockManager.BlockStack.TopIndex;
+  Result := BlockManager.BlockStack.TopIndex;
 end;
 
 function BlockStackTopBlockIndex: TBlockIndex;
 begin
-  Result :=  BlockManager.BlockStack.GetBlockAtIndex(BlockStackTopIndex).BlockIndex;
+  Result := BlockManager.BlockStack.Top.BlockIndex;
 end;
 
-
-function BlockStackGetBlockIndexAt(const BlockStackIndex: TBlockStackIndex): TBlockIndex;
-begin
-  Result :=  BlockManager.BlockStack.GetBlockAtIndex(BlockStackIndex).BlockIndex;
-end;
 
 end.
