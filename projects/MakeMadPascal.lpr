@@ -837,7 +837,7 @@ type
 
   procedure Main;
   const
-    MP_REFERENCE_FOLDER = 'origin';
+    MP_REFERENCE_FOLDER = 'master';
 
   {$IFDEF DARWIN}
   const
@@ -929,10 +929,10 @@ type
     if mpExePath = '' then mpExePath :=
         AppendPath(mpFolderPath, 'bin', MP_BIN_FOLDER, MP_EXE);
 
-    // TODO: Compute Reference Folder
     if referenceMPFolderPath = '' then referenceMPFolderPath := mpFolderPath;
     if referenceMPExePath = '' then referenceMPExePath :=
-        AppendPath(referenceMPFolderPath, MP_REFERENCE_FOLDER, MP_EXE);
+        AppendPath(mpFolderPath, 'bin', MP_BIN_FOLDER, MP_REFERENCE_FOLDER, MP_EXE);
+
     if inputFolderPath = '' then  inputFolderPath := AppendPath(mpFolderPath, 'samples');
 
     MakeAbsolutePath(mpFolderPath);
