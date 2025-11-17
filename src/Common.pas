@@ -326,7 +326,7 @@ var
         if (Identifier.DataType = TDataType.ENUMTOK) and (Identifier.NumAllocElements = Num) then
           exit(Identifier.IdentifierIndex);
       end;
-
+      Block:=Block.ParentBlock;
     end;
   end;
 
@@ -699,7 +699,7 @@ begin
   // Result := TokenArrayPtr^[tokenIndex];
   Assert(TokenList <> nil, 'TokenList not yet created.');
   Result := TokenList.GetTokenAtIndex(tokenIndex);
-  // Writeln(tokenIndex);
+  // if tokenIndex=9024  then Writeln(tokenIndex);
 end;
 
 function NumIdent: Integer;

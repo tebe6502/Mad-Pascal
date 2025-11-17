@@ -673,7 +673,8 @@ begin
   if topIndex_ = Capacity then SetLength(array_, Capacity * 2);
   array_[topIndex_] := block;
 
-  // WriteLn(' TBlockStack.Push: ', block.BlockIndex, ' topIndex=', topIndex_);
+  //if     block.BlockIndex=134 then
+  //WriteLn(' TBlockStack.Push: ', block.BlockIndex, ' topIndex=', topIndex_);
 end;
 
 function TBlockStack.Pop: TBlock;
