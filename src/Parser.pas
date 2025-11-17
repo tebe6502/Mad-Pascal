@@ -83,7 +83,6 @@ var
     BlockStackIndex: TBlockStackIndex;
     blockIndex: TBlockIndex;
     block: TBlock;
-    MaxIdentIndex, IdentIndex: TIdentIndex;
     index: Integer;
     identifier: TIdentifier;
     unitEquals: Boolean;
@@ -94,65 +93,30 @@ var
     // WriteLn('Parser.GetIdentIndex('+s+'): BlockStack='+BlockStack.ToString);
 
     // Search all nesting levels from the current one to the most outer one
-    MaxIdentIndex := NumIdent_; // JAC! Speed optimization test
     for BlockStackIndex := BlockStackTopIndex downto 0 do
     begin
       blockIndex := BlockStackGetBlockIndexAt(BlockStackIndex);
-      if False then
+      block := GetBlockAtIndex(blockIndex);
+
+      for Index := 1 to Block.NumIdentifiers do
       begin
 
-        for IdentIndex := 1 to MaxIdentIndex do
+        identifier := Block.GetIdentifierAtIndex(index);
+
+        if (X = identifier.Name) and (blockIndex = identifier.BlockIndex) then
         begin
+          unitEquals := (identifier.SourceFile.UnitIndex = SYSTEM_UNIT_INDEX) or
+            (identifier.SourceFile.UnitIndex = SourceFile.UnitIndex);
 
-          // JAC! Speed optimization test
-          // identifier := IdentifierAt(IdentIndex);
-          // identifier := IdentifierList.GetIdentifierAtIndex(IdentIndex); )
-          identifier := IdentifierList.identifierArray[IdentIndex];
-
-          if (X = identifier.Name) and (blockIndex = identifier.BlockIndex) then
+          if unitEquals or (identifier.SourceFile.Name = SYSTEM_UNIT_NAME) or
+            (identifier.IsSection and SourceFile.IsAllowedUnitName(identifier.SourceFile.Name)) then
           begin
-            unitEquals := (identifier.SourceFile.UnitIndex = SYSTEM_UNIT_INDEX) or
-              (identifier.SourceFile.UnitIndex = SourceFile.UnitIndex);
+            Result := identifier.IdentifierIndex;
+            identifier.Pass := Pass;
 
-            if unitEquals or (identifier.SourceFile.Name = SYSTEM_UNIT_NAME) or
-              (identifier.IsSection and SourceFile.IsAllowedUnitName(identifier.SourceFile.Name)) then
-            begin
-              Result := IdentIndex;
-              identifier.Pass := Pass;
-
-              if unitEquals then exit;
-            end;
-
+            if unitEquals then exit;
           end;
-        end;
-      end
 
-      else
-      begin
-        // New implementation
-        block := GetBlockAtIndex(blockIndex);
-        assert(block <> nil);
-
-        for Index := 1 to Block.NumIdentifiers do
-        begin
-
-          identifier := Block.GetIdentifierAtIndex(index);
-
-          if (X = identifier.Name) and (blockIndex = identifier.BlockIndex) then
-          begin
-            unitEquals := (identifier.SourceFile.UnitIndex = SYSTEM_UNIT_INDEX) or
-              (identifier.SourceFile.UnitIndex = SourceFile.UnitIndex);
-
-            if unitEquals or (identifier.SourceFile.Name = SYSTEM_UNIT_NAME) or
-              (identifier.IsSection and SourceFile.IsAllowedUnitName(identifier.SourceFile.Name)) then
-            begin
-              Result := identifier.IdentifierIndex;
-              identifier.Pass := Pass;
-
-              if unitEquals then exit;
-            end;
-
-          end;
         end;
       end;
     end;
@@ -164,29 +128,27 @@ var
   var
     BlockStackIndex: TBlockStackIndex;
     BlockIndex: TBlockIndex;
-    MaxIdentIndex, IdentIndex: TIdentifierIndex;
+    block: TBlock;
+    index: Integer;
     identifier: TIdentifier;
   begin
 
     Result := 0;
-    MaxIdentIndex := NumIdent_; // JAC! Speed optimization test
     for BlockStackIndex := BlockStackTopIndex downto 0 do
     begin
       blockIndex := BlockStackGetBlockIndexAt(BlockStackIndex);
+      block := GetBlockAtIndex(blockIndex);
 
       // Search all nesting levels from the current one to the most outer one
-      for IdentIndex := 1 to MaxIdentIndex do
+      for index := 1 to Block.NumIdentifiers do
       begin
-        // JAC! Speed optimization test
-        // identifier := IdentifierAt(IdentIndex);
-        // identifier := IdentifierList.GetIdentifierAtIndex(IdentIndex); )
-        identifier := IdentifierList.identifierArray[IdentIndex];
+        identifier := Block.GetIdentifierAtIndex(index);
 
-        if (X = identifier.Name) and (blockIndex = identifier.BlockIndex) then
+        if (X = identifier.Name) then
           if (identifier.SourceFile.UnitIndex = SourceFile.UnitIndex) or
             (identifier.IsSection and SourceFile.IsAllowedUnitName(identifier.SourceFile.Name)) then
           begin
-            Result := IdentIndex;
+            Result := identifier.IdentifierIndex;
             identifier.Pass := Pass;
 
             if (identifier.SourceFile.UnitIndex = SourceFile.UnitIndex) then exit;

@@ -140,6 +140,8 @@ type
 
   TParamList = array [1..MAXPARAMS] of TParam;
 
+  TIdentifierName = String;
+
   TBlockStackIndex = Integer;
   TBlockIndex = Integer;
 
@@ -148,6 +150,7 @@ type
   // ----------------------------------------------------------------------------
   // Class TBlock and related containers.
   // ----------------------------------------------------------------------------
+
   TBlock = class
   public
     BlockIndex: TBlockIndex;
@@ -157,6 +160,7 @@ type
     procedure AddIdentifer(const identifier: TIdentifier);
     function NumIdentifiers: Integer;
     function GetIdentifierAtIndex(const index: Integer): TIdentifier;
+    function GetIdentifier(const Name: TIdentifierName): TIdentifier;
   private
     NumIdentifiers_: Integer;
     IdentifierArray: array of TIdentifier;
@@ -226,7 +230,6 @@ type
     Block0: TBlock;
   end;
 
-  TIdentifierName = String;
 
   TVariableList = array [1..MAXVARS] of TParam;
   TFieldName = TName;
@@ -563,6 +566,21 @@ end;
 function TBlock.GetIdentifierAtIndex(const index: Integer): TIdentifier;
 begin
   Result := IdentifierArray[index - 1];
+end;
+
+
+function TBlock.GetIdentifier(const Name: TIdentifierName): TIdentifier;
+var
+  index: Integer;
+  identifier: TIdentifier;
+begin
+  // TODO Use map
+  for index := 0 to NumIdentifiers_ - 1 do
+  begin
+    identifier := IdentifierArray[index];
+    if identifier.Name = Name then exit(identifier);
+  end;
+  Result := nil;
 end;
 
 // ----------------------------------------------------------------------------
