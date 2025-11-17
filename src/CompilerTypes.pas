@@ -155,6 +155,8 @@ type
     constructor Create;
     destructor Free;
     procedure AddIdentifer(const identifier: TIdentifier);
+    function NumIdentifiers: Integer;
+    function GetIdentifierAtIndex(const index: Integer): TIdentifier;
   private
     NumIdentifiers_: Integer;
     IdentifierArray: array of TIdentifier;
@@ -170,7 +172,7 @@ type
     procedure Clear;
     function AddBlock(): TBlock;
     function Count: Integer;
-  function GetBlockAtIndex(const blockIndex: TBlockIndex): TBlock;
+    function GetBlockAtIndex(const blockIndex: TBlockIndex): TBlock;
 
   private
 
@@ -535,6 +537,15 @@ begin
 end;
 
 
+function TBlock.NumIdentifiers: Integer;
+begin
+  Result := NumIdentifiers_;
+end;
+
+function TBlock.GetIdentifierAtIndex(const index: Integer):TIdentifier;
+begin
+  Result := IdentifierArray[index-1];
+end;
 
 // ----------------------------------------------------------------------------
 // Class TBlockList
@@ -583,7 +594,7 @@ end;
 
 function TBlockList.GetBlockAtIndex(const blockIndex: TBlockIndex): TBlock;
 begin
-  Result:=Array_[blockIndex];
+  Result := Array_[blockIndex];
 end;
 
 
@@ -605,7 +616,7 @@ procedure TBlockStack.Clear;
 begin
   topIndex_ := 0;
   SetLength(array_, 10);
-  array_[0]:=TBlock.Create;
+  array_[0] := TBlock.Create;
 end;
 
 procedure TBlockStack.Push(const block: TBlock);
@@ -640,7 +651,7 @@ end;
 
 function TBlockStack.Top: TBlock;
 begin
-    Result := array_[topIndex];
+  Result := array_[topIndex];
 end;
 
 // ----------------------------------------------------------------------------
@@ -837,7 +848,6 @@ begin
   // Result.UnitIndex:=SourceFile.UnitIndex;
   Result.Kind := Kind;
   Result.Value := Value;
-
 
   if i = 1 then
     Column := 1

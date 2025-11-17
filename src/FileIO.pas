@@ -882,17 +882,17 @@ begin
   {$ELSE}
   Result := fileMap.GetEntry(filePath) <> nil;
   {$ENDIF}
-  Writeln('TFileSystem.FileExists:' , filePath,' - ',Result);
+  // Writeln('TFileSystem.FileExists:' , filePath,' - ',Result);
 end;
 
 class function TFileSystem.FolderExists(const folderPath: TFolderPath): Boolean;
 begin
-  Writeln('TFileSystem.FolderExists:', folderPath);
   {$IFNDEF SIMULATED_FILE_IO}
   Result := DirectoryExists(folderPath);
   {$ELSE}
   Result := fileMap.GetEntry(folderPath) <> nil;
   {$ENDIF}
+  // Writeln('TFileSystem.FolderExists:' , folderPath,' - ',Result);
 end;
 
 class function TFileSystem.NormalizePath(const filePath: TFilePath): TFilePath;

@@ -84,6 +84,7 @@ var
     blockIndex: TBlockIndex;
     block: TBlock;
     MaxIdentIndex, IdentIndex: TIdentIndex;
+    index: Integer;
     identifier: TIdentifier;
     unitEquals: Boolean;
   begin
@@ -96,32 +97,68 @@ var
     begin
       blockIndex := BlockStackGetBlockIndexAt(BlockStackIndex);
       block := GetBlockAtIndex(blockIndex);
-      // block:=BlockList.GetBlockAtIndex(blockIndex);
-      for IdentIndex := 1 to MaxIdentIndex do
+
+      if True then
       begin
 
-        // JAC! Speed optimization test
-        // identifier := IdentifierAt(IdentIndex);
-        // identifier := IdentifierList.GetIdentifierAtIndex(IdentIndex); )
-        identifier := IdentifierList.identifierArray[IdentIndex];
+        // block:=BlockList.GetBlockAtIndex(blockIndex);
 
-        if (X = identifier.Name) and (blockIndex = identifier.BlockIndex) then
+        for IdentIndex := 1 to MaxIdentIndex do
         begin
-          unitEquals := (identifier.SourceFile.UnitIndex = SYSTEM_UNIT_INDEX) or
-            (identifier.SourceFile.UnitIndex = SourceFile.UnitIndex);
 
-          if unitEquals or (identifier.SourceFile.Name = SYSTEM_UNIT_NAME) or
-            (identifier.IsSection and SourceFile.IsAllowedUnitName(identifier.SourceFile.Name)) then
+          // JAC! Speed optimization test
+          // identifier := IdentifierAt(IdentIndex);
+          // identifier := IdentifierList.GetIdentifierAtIndex(IdentIndex); )
+          identifier := IdentifierList.identifierArray[IdentIndex];
+
+          if (X = identifier.Name) and (blockIndex = identifier.BlockIndex) then
           begin
-            Result := IdentIndex;
-            identifier.Pass := Pass;
+            unitEquals := (identifier.SourceFile.UnitIndex = SYSTEM_UNIT_INDEX) or
+              (identifier.SourceFile.UnitIndex = SourceFile.UnitIndex);
 
-            if unitEquals then exit;
+            if unitEquals or (identifier.SourceFile.Name = SYSTEM_UNIT_NAME) or
+              (identifier.IsSection and SourceFile.IsAllowedUnitName(identifier.SourceFile.Name)) then
+            begin
+              Result := IdentIndex;
+              identifier.Pass := Pass;
+
+              if unitEquals then exit;
+            end;
+
           end;
+        end;
+      end
 
+      else
+      begin
+        // New implementation
+
+        assert(block <> nil);
+
+        for Index := 1 to Block.NumIdentifiers do
+        begin
+
+          identifier := Block.GetIdentifierAtIndex(index);
+
+          if (X = identifier.Name) and (blockIndex = identifier.BlockIndex) then
+          begin
+            unitEquals := (identifier.SourceFile.UnitIndex = SYSTEM_UNIT_INDEX) or
+              (identifier.SourceFile.UnitIndex = SourceFile.UnitIndex);
+
+            if unitEquals or (identifier.SourceFile.Name = SYSTEM_UNIT_NAME) or
+              (identifier.IsSection and SourceFile.IsAllowedUnitName(identifier.SourceFile.Name)) then
+            begin
+              Result := identifier.IdentifierIndex;
+              identifier.Pass := Pass;
+
+              if unitEquals then exit;
+            end;
+
+          end;
         end;
       end;
     end;
+
   end;
 
 
@@ -1710,7 +1747,7 @@ begin
       Error(NumTok, TMessage.Create(TErrorCode.OutOfResources, 'Out of resources, IDENT'));
     end;
 
-    identifier.IdentifierIndex:=NumIdent_;
+    identifier.IdentifierIndex := NumIdent_;
     identifier.Name := Name;
     identifier.Kind := Kind;
     identifier.DataType := DataType;

@@ -324,8 +324,8 @@ var
       BlockIndex := BlockStackGetBlockIndexAt(BlockStackIndex);
       for IdentIndex := 1 to NumIdent do
         if (IdentifierAt(IdentIndex).DataType = TDataType.ENUMTOK) and
-          (IdentifierAt(IdentIndex).NumAllocElements = Num) and (BlockIndex =
-          IdentifierAt(IdentIndex).BlockIndex) then
+          (IdentifierAt(IdentIndex).NumAllocElements = Num) and
+          (BlockIndex = IdentifierAt(IdentIndex).BlockIndex) then
           exit(IdentIndex);
     end;
   end;
@@ -721,11 +721,10 @@ end;
 
 function GetBlockAtIndex(const blockIndex: TBlockIndex): TBlock;
 begin
-  if   blockIndex = 0 then
-         Result:=BlockStack.GetBlockAtIndex(0) // TODO Dirty hack
+  if blockIndex = 0 then
+    Result := BlockStack.GetBlockAtIndex(0) // TODO Dirty hack
   else
-  Result:=BlockList.GetBlockAtIndex(blockIndex);
-
+    Result := BlockList.GetBlockAtIndex(blockIndex);
 end;
 
 function BlockStackTopIndex: TBlockStackIndex;
