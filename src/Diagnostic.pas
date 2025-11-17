@@ -93,7 +93,7 @@ begin
   DiagFile.WriteLn('Call graph: ');
   DiagFile.WriteLn;
 
-  for i := 1 to blockList.Count do
+  for i := 1 to BlockManager.blockList.Count do
   begin
     DiagFile.Write(i, 6).Write('  ---> ');
     CallGraphNode := CallGraph.GetCallGraphNode(i);

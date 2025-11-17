@@ -68,8 +68,7 @@ var
   CodePosStack: array [0..MAXPOSSTACK] of Word;
 
 var
-  BlockList: TBlockList;
-  BlockStack: TBlockStack;
+  BlockManager: TBlockManager;
 
 function NumBlocks_: Integer;
 function GetBlockAtIndex(const blockIndex: TBlockIndex): TBlock;
@@ -716,31 +715,28 @@ end;
 
 function NumBlocks_: Integer;
 begin
-  Result := BlockList.Count;
+  Result := BlockManager.BlockList.Count;
 end;
 
 function GetBlockAtIndex(const blockIndex: TBlockIndex): TBlock;
 begin
-  if blockIndex = 0 then
-    Result := BlockStack.GetBlockAtIndex(0) // TODO Dirty hack
-  else
-    Result := BlockList.GetBlockAtIndex(blockIndex);
+    Result :=  BlockManager.BlockList.GetBlockAtIndex(blockIndex);
 end;
 
 function BlockStackTopIndex: TBlockStackIndex;
 begin
-  Result := BlockStack.TopIndex;
+  Result :=  BlockManager.BlockStack.TopIndex;
 end;
 
 function BlockStackTopBlockIndex: TBlockIndex;
 begin
-  Result := BlockStack.GetBlockAtIndex(BlockStackTopIndex).BlockIndex;
+  Result :=  BlockManager.BlockStack.GetBlockAtIndex(BlockStackTopIndex).BlockIndex;
 end;
 
 
 function BlockStackGetBlockIndexAt(const BlockStackIndex: TBlockStackIndex): TBlockIndex;
 begin
-  Result := BlockStack.GetBlockAtIndex(BlockStackIndex).BlockIndex;
+  Result :=  BlockManager.BlockStack.GetBlockAtIndex(BlockStackIndex).BlockIndex;
 end;
 
 end.

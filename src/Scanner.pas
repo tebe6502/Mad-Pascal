@@ -66,8 +66,8 @@ begin
 
   Messages.Initialize;
 
-  blockList.Clear;
-  blockStack.Clear;
+  BlockManager.Initialize;
+
   CodeSize := 0;
   CodePosStackTop := 0;
   CaseCnt := 0;

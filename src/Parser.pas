@@ -91,17 +91,20 @@ var
 
     Result := 0;
 
+    // WriteLn('Parser.GetIdentIndex('+s+'): BlockStack='+BlockStack.ToString);
+
     // Search all nesting levels from the current one to the most outer one
     MaxIdentIndex := NumIdent_; // JAC! Speed optimization test
     for BlockStackIndex := BlockStackTopIndex downto 0 do
     begin
       blockIndex := BlockStackGetBlockIndexAt(BlockStackIndex);
       block := GetBlockAtIndex(blockIndex);
-
+             assert(block <> nil);
+  // block:=BlockList.GetBlockAtIndex(blockIndex);
       if True then
       begin
 
-        // block:=BlockList.GetBlockAtIndex(blockIndex);
+
 
         for IdentIndex := 1 to MaxIdentIndex do
         begin
@@ -215,7 +218,7 @@ begin
   if (Result = 0) then
   begin
     DotIndex := pos('.', S);
-    if (DotIndex > 0) then;
+    if (DotIndex > 0) then
     begin
       // Potentially a reference to a unit/object
       dotPrefix := copy(S, 1, DotIndex - 1);
@@ -2820,7 +2823,7 @@ begin
                     i := DefineFunction(i, 0, isForward, isInt, isInl, isOvr, IsNestedFunction,
                       NestedFunctionResultType, NestedFunctionNumAllocElements, NestedFunctionAllocElementType);
 
-                    IdentifierAt(NumIdent).ProcAsBlockIndex := BlockList.AddBlock().BlockIndex;
+                    IdentifierAt(NumIdent).ProcAsBlockIndex := BlockManager.BlockList.AddBlock().BlockIndex;
 
                     IdentifierAt(NumIdent).IsUnresolvedForward := True;
 
@@ -2928,7 +2931,7 @@ begin
                               IsNestedFunction, NestedFunctionResultType, NestedFunctionNumAllocElements,
                               NestedFunctionAllocElementType);
 
-                            IdentifierAt(NumIdent).ProcAsBlockIndex := BlockList.AddBlock().BlockIndex;
+                            IdentifierAt(NumIdent).ProcAsBlockIndex := BlockManager.BlockList.AddBlock().BlockIndex;
 
                             IdentifierAt(NumIdent).IsUnresolvedForward := True;
 

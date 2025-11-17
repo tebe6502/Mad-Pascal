@@ -638,7 +638,7 @@ uses
     seconds := (GetTickCount64 - StartTime + 500) / 1000;
     {$IFNDEF PAS2JS}
     Writeln(TokenAt(NumTok).SourceLocation.Line, ' lines compiled, ', seconds: 2: 2, ' sec, ',
-      NumTok, ' tokens, ', NumIdent, ' idents, ', blockList.Count, ' blocks, ', NumTypes, ' types');
+      NumTok, ' tokens, ', NumIdent, ' idents, ', BlockManager.BlockList.Count, ' blocks, ', NumTypes, ' types');
     {$ELSE}
    Writeln(IntToStr(TokenAt(NumTok).SourceLocation.Line) + ' lines compiled, ' + FloatToStr(seconds) + ' sec, '
  	   + IntToStr(NumTok) + ' tokens        , ' + IntToStr(NumIdent) + ' idents, '

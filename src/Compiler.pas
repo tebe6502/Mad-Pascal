@@ -13009,11 +13009,10 @@ begin
 
                   // dla PROC, FUNC -> IdentifierAt(GetIdentIndex(TokenAt(k).Name)).NumAllocElements -> oznacza liczbe parametrow takiej procedury/funkcji
                     if (VarType in Pointers) and ((ExpressionType in Pointers) and
-                      (TokenAt(k).Kind = TTokenKind.IDENTTOK)) and
-                      (not (IdentifierAt(IdentIndex).AllocElementType in Pointers +
-                      [TDataType.RECORDTOK, TDataType.OBJECTTOK]) and not
-                      (IdentifierAt(GetIdentIndex(TokenAt(k).Name)).AllocElementType in Pointers +
-                      [TDataType.RECORDTOK, TDataType.OBJECTTOK])) then
+                      (TokenAt(k).Kind = TTokenKind.IDENTTOK)) and (not
+                      (IdentifierAt(IdentIndex).AllocElementType in Pointers + [TDataType.RECORDTOK,
+                      TDataType.OBJECTTOK]) and not (IdentifierAt(GetIdentIndex(TokenAt(k).Name)).AllocElementType in
+                      Pointers + [TDataType.RECORDTOK, TDataType.OBJECTTOK])) then
                     begin
 
                       j := Elements(IdentIndex) {IdentifierAt(IdentIndex).NumAllocElements} *
@@ -17097,8 +17096,7 @@ begin
 
   isInterrupt := isInt;
 
-  block := BlockList.AddBlock();
-  BlockStack.Push(block);
+  block := BlockManager.AddAndPushBlock();
 
   IdentifierAt(BlockIdentIndex).ProcAsBlockIndex := block.BlockIndex;
 
@@ -19230,7 +19228,7 @@ end;
 
   end;
 
-  BlockStack.Pop;
+  BlockManager.BlockStack.Pop;
 
   if pass = TPass.CALL_DETERMINATION then
     if IdentifierAt(BlockIdentIndex).isKeep or IdentifierAt(BlockIdentIndex).isInterrupt or
@@ -19799,30 +19797,38 @@ const
   const INFINITY_VALUE: Int64 = $22222222;
   const NEGINFINITY_VALUE: Int64 = $33333333;
 {$ENDIF}
+const
+  tokenIndex: TTokenIndex = 1;
 begin
 
   // Initilize identifiers for predefined constants
-  DefineIdent(1, 'BLOCKREAD', TTokenKind.FUNCTIONTOK, TDataType.INTEGERTOK, 0, TDataType.UNTYPETOK, $00000000);
-  DefineIdent(1, 'BLOCKWRITE', TTokenKind.FUNCTIONTOK, TDataType.INTEGERTOK, 0, TDataType.UNTYPETOK, $00000000);
 
-  DefineIdent(1, 'GETRESOURCEHANDLE', TTokenKind.FUNCTIONTOK, TDataType.INTEGERTOK, 0, TDataType.UNTYPETOK, $00000000);
+  DefineIdent(tokenIndex, 'BLOCKREAD', TTokenKind.FUNCTIONTOK, TDataType.INTEGERTOK, 0,
+    TDataType.UNTYPETOK, $00000000);
+  DefineIdent(tokenIndex, 'BLOCKWRITE', TTokenKind.FUNCTIONTOK, TDataType.INTEGERTOK, 0,
+    TDataType.UNTYPETOK, $00000000);
 
-  DefineIdent(1, 'NIL', TTokenKind.CONSTTOK, TDataType.POINTERTOK, 0, TDataType.UNTYPETOK, CODEORIGIN);
+  DefineIdent(tokenIndex, 'GETRESOURCEHANDLE', TTokenKind.FUNCTIONTOK, TDataType.INTEGERTOK,
+    0, TDataType.UNTYPETOK, $00000000);
 
-  DefineIdent(1, 'EOL', TTokenKind.CONSTTOK, TDataType.CHARTOK, 0, TDataType.UNTYPETOK, target.eol);
+  DefineIdent(tokenIndex, 'NIL', TTokenKind.CONSTTOK, TDataType.POINTERTOK, 0, TDataType.UNTYPETOK, CODEORIGIN);
 
-  DefineIdent(1, '__BUFFER', TTokenKind.CONSTTOK, TDataType.WORDTOK, 0, TDataType.UNTYPETOK, target.buf);
+  DefineIdent(tokenIndex, 'EOL', TTokenKind.CONSTTOK, TDataType.CHARTOK, 0, TDataType.UNTYPETOK, target.eol);
 
-  DefineIdent(1, 'TRUE', TTokenKind.CONSTTOK, TDataType.BOOLEANTOK, 0, TDataType.UNTYPETOK, $00000001);
-  DefineIdent(1, 'FALSE', TTokenKind.CONSTTOK, TDataType.BOOLEANTOK, 0, TDataType.UNTYPETOK, $00000000);
+  DefineIdent(tokenIndex, '__BUFFER', TTokenKind.CONSTTOK, TDataType.WORDTOK, 0, TDataType.UNTYPETOK, target.buf);
 
-  DefineIdent(1, 'MAXINT', TTokenKind.CONSTTOK, TDataType.INTEGERTOK, 0, TDataType.UNTYPETOK, MAXINT);
+  DefineIdent(tokenIndex, 'TRUE', TTokenKind.CONSTTOK, TDataType.BOOLEANTOK, 0, TDataType.UNTYPETOK, $00000001);
+  DefineIdent(tokenIndex, 'FALSE', TTokenKind.CONSTTOK, TDataType.BOOLEANTOK, 0, TDataType.UNTYPETOK, $00000000);
+
+  DefineIdent(tokenIndex, 'MAXINT', TTokenKind.CONSTTOK, TDataType.INTEGERTOK, 0, TDataType.UNTYPETOK, MAXINT);
   DefineIdent(1, 'MAXSMALLINT', TTokenKind.CONSTTOK, TDataType.INTEGERTOK, 0, TDataType.UNTYPETOK, MAXSMALLINT);
 
-  DefineIdent(1, 'PI', TTokenKind.CONSTTOK, TDataType.REALTOK, 0, TDataType.UNTYPETOK, PI_VALUE);
-  DefineIdent(1, 'NAN', TTokenKind.CONSTTOK, TDataType.SINGLETOK, 0, TDataType.UNTYPETOK, NAN_VALUE);
-  DefineIdent(1, 'INFINITY', TTokenKind.CONSTTOK, TDataType.SINGLETOK, 0, TDataType.UNTYPETOK, INFINITY_VALUE);
-  DefineIdent(1, 'NEGINFINITY', TTokenKind.CONSTTOK, TDataType.SINGLETOK, 0, TDataType.UNTYPETOK, NEGINFINITY_VALUE);
+  DefineIdent(tokenIndex, 'PI', TTokenKind.CONSTTOK, TDataType.REALTOK, 0, TDataType.UNTYPETOK, PI_VALUE);
+  DefineIdent(tokenIndex, 'NAN', TTokenKind.CONSTTOK, TDataType.SINGLETOK, 0, TDataType.UNTYPETOK, NAN_VALUE);
+  DefineIdent(tokenIndex, 'INFINITY', TTokenKind.CONSTTOK, TDataType.SINGLETOK, 0,
+    TDataType.UNTYPETOK, INFINITY_VALUE);
+  DefineIdent(tokenIndex, 'NEGINFINITY', TTokenKind.CONSTTOK, TDataType.SINGLETOK, 0,
+    TDataType.UNTYPETOK, NEGINFINITY_VALUE);
 end;
 
 // ----------------------------------------------------------------------------
@@ -19833,6 +19839,7 @@ procedure Main(const programUnit: TSourceFile; const unitPathList: TPathList);
 var
   scanner: IScanner;
   i: Integer;
+  block0: TBlock;
 begin
 
   Common.unitPathList := unitPathList;
@@ -19844,8 +19851,9 @@ begin
   IdentifierList := TIdentifierList.Create;
   for i := 1 to MAXIDENTS do IdentifierList.AddIdentifier;
   TypeList := TTypeList.Create;
-  BlockList := TBlockList.Create;
-  BlockStack := TBlockStack.Create;
+  BlockManager := TBlockManager.Create;
+  BlockManager.Initialize;
+
   CallGraph := TCallGraph.Create;
 
   SetLength(IFTmpPosStack, 1);
@@ -19905,8 +19913,7 @@ begin
 
   SourceFileList.ClearAllowedUnitNames;
 
-  BlockList.Clear;
-  BlockStack.Clear;
+  BlockManager.Initialize;
 
   CodeSize := 0;
   CodePosStackTop := 0;
@@ -19941,8 +19948,7 @@ procedure Free;
 begin
 
   // Free in reverse order of creation.
-  FreeAndNil(BlockStack);
-  FreeAndNil(BlockList);
+  FreeAndNil(BlockManager);
   FreeAndNil(TypeList);
   FreeAndNil(IdentifierList);
   FreeAndNil(TokenList);
