@@ -86,6 +86,7 @@ var
     index: Integer;
     identifier: TIdentifier;
     unitEquals: Boolean;
+    // otherIdentifier: TIdentifier;
   begin
 
     Result := 0;
@@ -103,8 +104,11 @@ var
 
         identifier := Block.GetIdentifierAtIndex(index);
 
-        if (X = identifier.Name) and (blockIndex = identifier.BlockIndex) then
+        if (X = identifier.Name) then
         begin
+//          otherIdentifier := Block.GetIdentifier(X);
+//          assert(identifier = otherIdentifier);
+
           unitEquals := (identifier.SourceFile.UnitIndex = SYSTEM_UNIT_INDEX) or
             (identifier.SourceFile.UnitIndex = SourceFile.UnitIndex);
 

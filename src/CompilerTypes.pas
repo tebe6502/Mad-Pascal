@@ -201,7 +201,7 @@ type
     function Top: TBlock;
     function TopIndex: TBlockStackIndex;
     function GetBlockAtIndex(const blockStackIndex: TBlockStackIndex): TBlock;
-    function ToString: String;
+    function ToString: String; override;
 
   private
 
@@ -548,8 +548,13 @@ end;
 
 procedure TBlock.AddIdentifer(const identifier: TIdentifier);
 var
+//  otherIdentifier: TIdentifier;
   capacity: Integer;
 begin
+// TODO: Why can the same identifier be there in a block multiple times?
+//  otherIdentifier := GetIdentifier(identifier.Name);
+//  assert(otherIdentifier = nil);
+
   capacity := Length(IdentifierArray);
   if capacity = 0 then SetLength(IdentifierArray, 10)
   else if NumIdentifiers_ = capacity then SetLength(IdentifierArray, 2 * capacity);
@@ -569,12 +574,12 @@ begin
 end;
 
 
+// TODO Use map, provided the identifier name is unique inside one block
 function TBlock.GetIdentifier(const Name: TIdentifierName): TIdentifier;
 var
   index: Integer;
   identifier: TIdentifier;
 begin
-  // TODO Use map
   for index := 0 to NumIdentifiers_ - 1 do
   begin
     identifier := IdentifierArray[index];
