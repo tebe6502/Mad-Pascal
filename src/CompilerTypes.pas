@@ -169,7 +169,7 @@ type
     constructor Create;
     destructor Free;
 
-    procedure Clear;
+    procedure Clear(const fromIndex: TBlockIndex = 0);
     function AddBlock(): TBlock;
     function Count: Integer;
     function GetBlockAtIndex(const blockIndex: TBlockIndex): TBlock;
@@ -219,7 +219,11 @@ type
     constructor Create;
     destructor Free;
     procedure Initialize;
-    function AddAndPushBlock:TBlock;
+    function AddAndPushBlock: TBlock;
+
+  private
+  var
+    Block0: TBlock;
   end;
 
   TIdentifierName = String;
@@ -575,15 +579,15 @@ begin
   Clear;
 end;
 
-procedure TBlockList.Clear;
+procedure TBlockList.Clear(const fromIndex: TBlockIndex = 0);
 var
   i: Integer;
 begin
   if array_ <> nil then
   begin
-    for i := 0 to Count_ do FreeAndNil(Array_[i]);
-    Array_ := nil;
-    Count_ := -1;
+    for i := fromIndex to Count_ do FreeAndNil(Array_[i]);
+    if (fromIndex = 0) then Array_ := nil;
+    Count_ := fromIndex - 1;
   end;
 end;
 
@@ -594,7 +598,7 @@ begin
   Inc(Count_);
   Capacity := Length(Array_);
   if capacity = 0 then SetLength(Array_, 256)
-  else if Count_ > capacity then SetLength(Array_, 2 * capacity);
+  else if Count_ = capacity then SetLength(Array_, 2 * capacity);
   Result := TBlock.Create;
   Result.BlockIndex := Count_;
   Array_[Count_] := Result;
@@ -687,6 +691,7 @@ constructor TBlockManager.Create;
 begin
   BlockList := TBlockList.Create;
   BlockStack := TBlockStack.Create;
+  Block0 := BlockList.AddBlock();
 end;
 
 
@@ -698,19 +703,15 @@ end;
 
 
 procedure TBlockManager.Initialize;
-var
-  Block0: TBLock;
 begin
-
   BlockStack.Clear;
-  BlockList.Clear;
-  Block0 := BlockList.AddBlock();
-  BlockStack.Push(Block0);
+  BlockList.Clear(1);
+  BlockStack.Push(block0);
 end;
 
-function TBlockManager.AddAndPushBlock:TBlock;
+function TBlockManager.AddAndPushBlock: TBlock;
 begin
-    Result := BlockList.AddBlock();
+  Result := BlockList.AddBlock();
   BlockStack.Push(Result);
 end;
 

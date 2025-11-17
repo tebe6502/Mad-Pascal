@@ -98,13 +98,8 @@ var
     for BlockStackIndex := BlockStackTopIndex downto 0 do
     begin
       blockIndex := BlockStackGetBlockIndexAt(BlockStackIndex);
-      block := GetBlockAtIndex(blockIndex);
-             assert(block <> nil);
-  // block:=BlockList.GetBlockAtIndex(blockIndex);
-      if True then
+      if False then
       begin
-
-
 
         for IdentIndex := 1 to MaxIdentIndex do
         begin
@@ -135,7 +130,7 @@ var
       else
       begin
         // New implementation
-
+        block := GetBlockAtIndex(blockIndex);
         assert(block <> nil);
 
         for Index := 1 to Block.NumIdentifiers do
@@ -1717,6 +1712,7 @@ function DefineIdent(const tokenIndex: TTokenIndex; Name: TIdentifierName; Kind:
 var
   identIndex: Integer;
   identifier: TIdentifier;
+  Block: TBlock;
   NumAllocElements_: Cardinal;
 begin
 
@@ -1732,6 +1728,8 @@ begin
     Error(tokenIndex, TMessage.Create(TErrorCode.IdentifierAlreadyDefined, 'Identifier {0} is already defined', Name))
   else
   begin
+
+    block := BlockManager.BlockStack.Top;
 
     Inc(NumIdent_);
     identifier := IdentifierList.GetIdentifierAtIndex(NumIdent_);
@@ -1754,7 +1752,7 @@ begin
     identifier.Name := Name;
     identifier.Kind := Kind;
     identifier.DataType := DataType;
-    identifier.BlockIndex := BlockStackTopBlockIndex;
+    identifier.BlockIndex := block.blockIndex;
     identifier.NumParams := 0;
     identifier.isAbsolute := False;
     identifier.PassMethod := TParameterPassingMethod.VALPASSING;
@@ -1890,6 +1888,7 @@ begin
     end;// case
   end;// else
 
+  block.AddIdentifer(identifier);
   Result := identifier;
 end;  //DefineIdent
 

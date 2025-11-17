@@ -19781,6 +19781,7 @@ end;
 
 end;
 
+// Define global initializers in block 0.
 procedure InitializeIdentifiers;
 {$IFNDEF PAS2JS}
 const
@@ -19852,7 +19853,6 @@ begin
   for i := 1 to MAXIDENTS do IdentifierList.AddIdentifier;
   TypeList := TTypeList.Create;
   BlockManager := TBlockManager.Create;
-  BlockManager.Initialize;
 
   CallGraph := TCallGraph.Create;
 
@@ -19912,8 +19912,7 @@ begin
   ClearWordMemory(_DataSegment);
 
   SourceFileList.ClearAllowedUnitNames;
-
-  BlockManager.Initialize;
+  BlockManager.Initialize; // Keeps block 0
 
   CodeSize := 0;
   CodePosStackTop := 0;
