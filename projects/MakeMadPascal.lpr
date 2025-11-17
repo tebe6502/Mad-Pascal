@@ -7,13 +7,13 @@ program MakeMadPascal;
 {$ScopedEnums ON}
 
 uses
- {$IFDEF DARWIN}
+  {$IFDEF DARWIN}
 
-                                                             {$ENDIF} {$IFDEF WINDOWS}
+  {$ENDIF}{$IFDEF WINDOWS}
   Windows,
-                                                             {$ENDIF} {$IFDEF UNIX}
+  {$ENDIF}{$IFDEF UNIX}
   cthreads, cmem,
-                                                             {$ENDIF}
+  {$ENDIF}
   Crt,
   Classes,
   Utilities,
@@ -476,7 +476,6 @@ type
     foundMessages: TStringList;
     logMessage: String;
     a65FilePath: TFilePath;
-
   begin
 
     if IsSampleFile(AppendPath(curDir, fileName), fileResultMessages.suffix) then
@@ -692,8 +691,8 @@ type
 
     if (operation.verbose) then
     begin
-      Log(Format('Processing program %s with action %s and MP path %s.', [filePath,
-        operation.GetActionString(), operation.mpExePath]));
+      Log(Format('Processing program %s with action %s and MP path %s.',
+        [filePath, operation.GetActionString(), operation.mpExePath]));
     end;
 
     curDir := ExtractFilePath(FilePath);
@@ -780,9 +779,16 @@ type
 
   procedure ProcessPrograms(ProgramFiles: TStringList; operation: TOperation);
   var
+    startTickCount: QWord;
+    endTickCount: QWord;
+    seconds: QWord;
+    secondsPerFile: QWord;
+
     i: Integer;
     parallelData: TParallelData;
   begin
+    startTickCount := GetTickCount64;
+
     SetLength(operation.results, ProgramFiles.Count);
 
     if operation.threads = 1 then
@@ -813,6 +819,13 @@ type
         operation.logMessages.AddStrings(operation.results[i].logMessages);
       end;
     end;
+
+    endTickCount := GetTickCount64;
+    seconds := trunc((endTickCount - startTickCount)+999 / 1000);
+    secondsPerFile := trunc(seconds / ProgramFiles.Count);
+    operation.logMessages.Insert(0, Format(
+      'INFO: Operation %s for %d files completed in %d seconds (%d seconds/file).',
+      [operation.GetActionString(), ProgramFiles.Count, seconds, secondsPerFile]));
   end;
 
   procedure GetNextParam(var i: Integer; var Value: String);
@@ -839,16 +852,16 @@ type
   const
     MP_REFERENCE_FOLDER = 'master';
 
-  {$IFDEF DARWIN}
+    {$IFDEF DARWIN}
   const
     MP_BIN_FOLDER = 'macosx_aarch64';
   const
     MP_EXE = 'mp';
-  {$ENDIF}
-  {$IFDEF WINDOWS}
+    {$ENDIF}
+    {$IFDEF WINDOWS}
        const MP_BIN_FOLDER = 'windows_x86_64';
        const MP_EXE = 'mp.exe';
-  {$ENDIF}
+    {$ENDIF}
   var
     // application: TCustomApplication;
     maxFiles: Integer;
@@ -877,7 +890,6 @@ type
     fileInfo: TFileInfo;
     ProgramFiles: TStringList;
     fileResult: TFileResult;
-
   begin
 
     referenceMPFolderPath := '';
