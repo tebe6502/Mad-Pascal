@@ -49,6 +49,10 @@ uses SysUtils, Debugger, Messages, Utilities;
 function Elements(IdentIndex: Integer): Cardinal;
 begin
 
+  if (IdentifierAt(IdentIndex).DataType = TDataType.FORWARDTYPE) then
+    Result := 1
+  else
+
   if (IdentifierAt(IdentIndex).DataType = TDataType.ENUMTOK) then
     Result := 0
   else
@@ -337,10 +341,8 @@ begin
         begin
 
           FieldType := GetTypeAtIndex(IdentifierAt(IdentIndex).NumAllocElements).Field[i].DataType;
-          NumAllocElements := GetTypeAtIndex(IdentifierAt(IdentIndex).NumAllocElements).Field[i].NumAllocElements
-            and $ffff;
-          NumAllocElements_ := GetTypeAtIndex(IdentifierAt(IdentIndex).NumAllocElements).Field[i].NumAllocElements
-            shr 16;
+          NumAllocElements := GetTypeAtIndex(IdentifierAt(IdentIndex).NumAllocElements).Field[i].NumAllocElements and $ffff;
+          NumAllocElements_ := GetTypeAtIndex(IdentifierAt(IdentIndex).NumAllocElements).Field[i].NumAllocElements shr 16;
           AllocElementType := GetTypeAtIndex(IdentifierAt(IdentIndex).NumAllocElements).Field[i].AllocElementType;
 
           if FieldType = TDataType.ENUMTOK then FieldType := AllocElementType;
@@ -358,8 +360,7 @@ begin
               if AllocElementType = TDataType.RECORDTOK then
               begin
                 AllocElementType := TDataType.POINTERTOK;
-                NumAllocElements := GetTypeAtIndex(IdentifierAt(IdentIndex).NumAllocElements).Field[i].NumAllocElements
-                  shr 16;
+                NumAllocElements := GetTypeAtIndex(IdentifierAt(IdentIndex).NumAllocElements).Field[i].NumAllocElements shr 16;
                 NumAllocElements_ := 0;
               end;
 
@@ -405,8 +406,7 @@ begin
       _DataSegment[index] := Byte(Value);
     end;
 
-    TDataType.SMALLINTTOK, TDataType.WORDTOK, TDataType.SHORTREALTOK, TDataType.POINTERTOK,
-    TDataType.STRINGPOINTERTOK, TDataType.PCHARTOK:
+    TDataType.SMALLINTTOK, TDataType.WORDTOK, TDataType.SHORTREALTOK, TDataType.POINTERTOK, TDataType.STRINGPOINTERTOK, TDataType.PCHARTOK:
     begin
       _DataSegment[index] := Byte(Value);
       _DataSegment[index + 1] := Byte(Value shr 8);
@@ -535,8 +535,7 @@ var
   function GetStaticValue(const x: Byte): Int64;
   begin
 
-    Result := StaticStringData[IdentifierAt(IdentIndex).Value - CODEORIGIN - CODEORIGIN_BASE +
-      ArrayIndex * GetDataSize(ConstValType) + x];
+    Result := StaticStringData[IdentifierAt(IdentIndex).Value - CODEORIGIN - CODEORIGIN_BASE + ArrayIndex * GetDataSize(ConstValType) + x];
 
   end;
 
@@ -694,7 +693,7 @@ begin
           begin
 
             if (IdentifierAt(IdentIndex).DataType = TDataType.STRINGPOINTERTOK) or
-              (IdentifierAt(IdentIndex).AllocElementType = TDataType.CHARTOK) then
+               (IdentifierAt(IdentIndex).AllocElementType = TDataType.CHARTOK) then
             begin
 
               _isError := True;
@@ -707,7 +706,7 @@ begin
               //  writeln(IdentifierAt(IdentIndex).name,',',IdentifierAt(IdentIndex).DataType,',',IdentifierAt(IdentIndex).NumAllocElements,'/',IdentifierAt(IdentIndex).NumAllocElements_,',',IdentifierAt(IdentIndex).AllocElementType );
 
               if (IdentifierAt(IdentIndex).DataType = TDataType.POINTERTOK) and
-                (IdentifierAt(IdentIndex).AllocElementType in [TDataType.RECORDTOK, TDataType.OBJECTTOK]) then
+                 (IdentifierAt(IdentIndex).AllocElementType in [TDataType.RECORDTOK, TDataType.OBJECTTOK]) then
                 ConstVal := IdentifierAt(IdentIndex).NumAllocElements_
               else
                 ConstVal := IdentifierAt(IdentIndex).NumAllocElements;
@@ -1037,8 +1036,7 @@ begin
 
                 if isError then Exit;
 
-                if (ArrayIndex < 0) or (ArrayIndex > IdentifierAt(IdentIndex).NumAllocElements -
-                  1 + Ord(IdentifierAt(IdentIndex).DataType = TDataType.STRINGPOINTERTOK)) then
+                if (ArrayIndex < 0) or (ArrayIndex > IdentifierAt(IdentIndex).NumAllocElements - 1 + Ord(IdentifierAt(IdentIndex).DataType = TDataType.STRINGPOINTERTOK)) then
                 begin
                   _isConst := False;
                   Error(i, TErrorCode.SubrangeBounds);
@@ -1114,8 +1112,8 @@ begin
         begin
 
           case IdentifierAt(IdentIndex).Kind of
-            TTokenKind.CONSTTOK: if not ((IdentifierAt(IdentIndex).DataType in Pointers) and
-                (IdentifierAt(IdentIndex).NumAllocElements > 0)) then
+
+            TTokenKind.CONSTTOK: if not ((IdentifierAt(IdentIndex).DataType in Pointers) and (IdentifierAt(IdentIndex).NumAllocElements > 0)) then
                 Error(i + 1, TErrorCode.CantAdrConstantExp)
               else
                 ConstVal := IdentifierAt(IdentIndex).Value - CODEORIGIN;
@@ -1163,8 +1161,8 @@ begin
                 //  writeln(IdentifierAt(IdentIndex).name,',',IdentifierAt(IdentIndex).DataType,',',IdentifierAt(IdentIndex).AllocElementType,' / ',ConstVal);
 
                 if (IdentifierAt(IdentIndex).DataType in Pointers) and          // zadziala tylko dla ABSOLUTE
-                  (IdentifierAt(IdentIndex).NumAllocElements > 0) and (TokenAt(i + 2).Kind =
-                  TTokenKind.OBRACKETTOK) then
+                   (IdentifierAt(IdentIndex).NumAllocElements > 0) and 
+		   (TokenAt(i + 2).Kind = TTokenKind.OBRACKETTOK) then
                 begin
                   j := CompileConstExpression(i + 3, ArrayIndex, ArrayIndexType);      // Array index [xx,
 
@@ -1174,8 +1172,7 @@ begin
 
                   if TokenAt(j + 1).Kind = TTokenKind.COMMATOK then
                   begin
-                    Inc(ConstVal, ArrayIndex * GetDataSize(IdentifierAt(IdentIndex).AllocElementType) *
-                      IdentifierAt(IdentIndex).NumAllocElements_);
+                    Inc(ConstVal, ArrayIndex * GetDataSize(IdentifierAt(IdentIndex).AllocElementType) * IdentifierAt(IdentIndex).NumAllocElements_);
 
                     j := CompileConstExpression(j + 2, ArrayIndex, ArrayIndexType);    // Array index ,yy]
 
@@ -1199,8 +1196,7 @@ begin
               end;
             else
 
-              Error(i + 1, TMessage.Create(TErrorCode.CantTakeAddressOfIdentifier,
-                'Can''t take the address of ' + InfoAboutToken(IdentifierAt(IdentIndex).Kind)))
+              Error(i + 1, TMessage.Create(TErrorCode.CantTakeAddressOfIdentifier, 'Can''t take the address of ' + InfoAboutToken(IdentifierAt(IdentIndex).Kind)))
           end;
 
           if (IdentifierAt(IdentIndex).DataType in Pointers) and          // zadziala tylko dla ABSOLUTE
@@ -1214,8 +1210,7 @@ begin
 
             if TokenAt(j + 1).Kind = TTokenKind.COMMATOK then
             begin
-              Inc(ConstVal, ArrayIndex * GetDataSize(IdentifierAt(IdentIndex).AllocElementType) *
-                IdentifierAt(IdentIndex).NumAllocElements_);
+              Inc(ConstVal, ArrayIndex * GetDataSize(IdentifierAt(IdentIndex).AllocElementType) * IdentifierAt(IdentIndex).NumAllocElements_);
 
               j := CompileConstExpression(j + 2, ArrayIndex, ArrayIndexType);    // Array index ,yy]
 
@@ -1309,8 +1304,7 @@ begin
     end;
 
 
-    TTokenKind.SHORTREALTOK, TTokenKind.REALTOK, TTokenKind.SINGLETOK, TTokenKind.HALFSINGLETOK:
-      // Q8.8 ; Q24.8 ; SINGLE 32bit ; FLOAT16
+    TTokenKind.SHORTREALTOK, TTokenKind.REALTOK, TTokenKind.SINGLETOK, TTokenKind.HALFSINGLETOK:	// Q8.8 ; Q24.8 ; SINGLE 32bit ; FLOAT16
     begin
 
       CheckTok(i + 1, TTokenKind.OPARTOK);
@@ -1338,8 +1332,7 @@ begin
       CheckTok(i + 1, TTokenKind.OPARTOK);
 
 
-      if (TokenAt(i + 2).Kind = TTokenKind.IDENTTOK) and (IdentifierAt(GetIdentIndex(TokenAt(i + 2).Name)).Kind =
-        TTokenKind.FUNCTIONTOK) then
+      if (TokenAt(i + 2).Kind = TTokenKind.IDENTTOK) and (IdentifierAt(GetIdentIndex(TokenAt(i + 2).Name)).Kind = TTokenKind.FUNCTIONTOK) then
         _isError := True
       else
         j := CompileConstExpression(i + 2, ConstVal, ConstValType);
@@ -1348,8 +1341,7 @@ begin
       if isError then exit;
 
 
-      if (ConstValType in Pointers) and (TokenAt(i + 2).Kind = TTokenKind.IDENTTOK) and
-        (TokenAt(i + 3).Kind <> TTokenKind.OBRACKETTOK) then
+      if (ConstValType in Pointers) and (TokenAt(i + 2).Kind = TTokenKind.IDENTTOK) and (TokenAt(i + 3).Kind <> TTokenKind.OBRACKETTOK) then
       begin
 
         IdentIndex := GetIdentIndex(TokenAt(i + 2).Name);
@@ -1407,8 +1399,7 @@ begin
 
   if isError then Exit;
 
-  while TokenAt(j + 1).Kind in [TTokenKind.MULTOK, TTokenKind.DIVTOK, TTokenKind.MODTOK,
-      TTokenKind.IDIVTOK, TTokenKind.SHLTOK, TTokenKind.SHRTOK, TTokenKind.ANDTOK] do
+  while TokenAt(j + 1).Kind in [TTokenKind.MULTOK, TTokenKind.DIVTOK, TTokenKind.MODTOK, TTokenKind.IDIVTOK, TTokenKind.SHLTOK, TTokenKind.SHRTOK, TTokenKind.ANDTOK] do
   begin
 
     k := CompileConstFactor(j + 2, RightConstVal, RightConstValType);
@@ -1547,11 +1538,11 @@ begin
     end;
 
     if (ConstValType in [TDataType.SINGLETOK, TDataType.HALFSINGLETOK]) and
-      (RightConstValType in [TDataType.SHORTREALTOK, TDataType.REALTOK]) then
+       (RightConstValType in [TDataType.SHORTREALTOK, TDataType.REALTOK]) then
       RightConstValType := ConstValType;
 
     if (RightConstValType in [TDataType.SINGLETOK, TDataType.HALFSINGLETOK]) and
-      (ConstValType in [TDataType.SHORTREALTOK, TDataType.REALTOK]) then
+       (ConstValType in [TDataType.SHORTREALTOK, TDataType.REALTOK]) then
       ConstValType := RightConstValType;
 
 
@@ -1772,12 +1763,10 @@ begin
         if not OutputDisabled then
         begin
 
-          if (DataType = TDataType.POINTERTOK) and (AllocElementType in [TDataType.RECORDTOK, TDataType.OBJECTTOK]) and
-            (NumAllocElements_ = 0) then
+          if (DataType = TDataType.POINTERTOK) and (AllocElementType in [TDataType.RECORDTOK, TDataType.OBJECTTOK]) and (NumAllocElements_ = 0) then
           begin
 
-            if NumAllocElements > 0 then IncVarDataSize(tokenIndex, GetDataSize(TDataType.POINTERTOK));
-            // ^record -> NumAllocElements > 0
+            if NumAllocElements > 0 then IncVarDataSize(tokenIndex, GetDataSize(TDataType.POINTERTOK));		// ^record -> NumAllocElements > 0
 
           end
           else
@@ -1793,11 +1782,9 @@ begin
                 else
                 begin
 
-                  if (identifier.idType = TDataType.ARRAYTOK) and (identifier.isAbsolute = False) and
-                    (Elements(NumIdent) = 1) then
+                  if (identifier.idType = TDataType.ARRAYTOK) and (identifier.isAbsolute = False) and (Elements(NumIdent) = 1) then
                   // Empty array [0..0] ; [0..0, 0..0] foes not require spaces
                   else
-                  //                    IncVarDataSize(tokenIndex, Integer(Elements(NumIdent) * GetDataSize(AllocElementType)));
 
                     if IdentifierAt(NumIdent).DataType = TDataType.DEREFERENCEARRAYTOK then
                       IncVarDataSize(tokenIndex, GetDataSize(TDataType.POINTERTOK))
@@ -2763,12 +2750,10 @@ begin
                 GetTypeAtIndex(RecType).Field[0].Name := Name;
                 GetTypeAtIndex(RecType).Field[0].ObjectVariable := True;
 
-                if (TokenAt(i).Kind in [TTokenKind.PROCEDURETOK, TTokenKind.FUNCTIONTOK,
-                  TTokenKind.CONSTRUCTORTOK, TTokenKind.DESTRUCTORTOK]) then
+                if (TokenAt(i).Kind in [TTokenKind.PROCEDURETOK, TTokenKind.FUNCTIONTOK, TTokenKind.CONSTRUCTORTOK, TTokenKind.DESTRUCTORTOK]) then
                 begin
 
-                  while TokenAt(i).Kind in [TTokenKind.PROCEDURETOK, TTokenKind.FUNCTIONTOK,
-                      TTokenKind.CONSTRUCTORTOK, TTokenKind.DESTRUCTORTOK] do
+                  while TokenAt(i).Kind in [TTokenKind.PROCEDURETOK, TTokenKind.FUNCTIONTOK, TTokenKind.CONSTRUCTORTOK, TTokenKind.DESTRUCTORTOK] do
                   begin
 
                     IsNestedFunction := (TokenAt(i).Kind = TTokenKind.FUNCTIONTOK);
@@ -2791,8 +2776,7 @@ begin
                   end;
 
                   if (TokenAt(i).Kind in [TTokenKind.IDENTTOK]) then
-                    Error(i, TMessage.Create(TErrorCode.FieldAfterMethodOrProperty,
-                      'Fields cannot appear after a method or property definition'));
+                    Error(i, TMessage.Create(TErrorCode.FieldAfterMethodOrProperty, 'Fields cannot appear after a method or property definition'));
 
                 end
                 else
@@ -2802,10 +2786,8 @@ begin
 
                     repeat
 
-                      if (TokenAt(i).Kind in [TTokenKind.PROCEDURETOK, TTokenKind.FUNCTIONTOK,
-                        TTokenKind.CONSTRUCTORTOK, TTokenKind.DESTRUCTORTOK]) then
-                        Error(i, TMessage.Create(TErrorCode.FieldAfterMethodOrProperty,
-                          'Fields cannot appear after a method or property definition'));
+                      if (TokenAt(i).Kind in [TTokenKind.PROCEDURETOK, TTokenKind.FUNCTIONTOK, TTokenKind.CONSTRUCTORTOK, TTokenKind.DESTRUCTORTOK]) then
+                        Error(i, TMessage.Create(TErrorCode.FieldAfterMethodOrProperty, 'Fields cannot appear after a method or property definition'));
 
                       CheckTok(i, TTokenKind.IDENTTOK);
 
@@ -2975,8 +2957,7 @@ begin
 
                     for FieldInListIndex := 1 to NumFieldsInList do
                     begin                // issue #92 fixed
-                      DeclareField(FieldInListName[FieldInListIndex].Name, DataType,
-                        NumAllocElements, AllocElementType);
+                      DeclareField(FieldInListName[FieldInListIndex].Name, DataType, NumAllocElements, AllocElementType);
 
                       if DataType = TDataType.RECORDTOK then
                         //for FieldInListIndex := 1 to NumFieldsInList do                //
@@ -3059,8 +3040,7 @@ begin
                         i := CompileConstExpression(i + 2, UpperBound, ExpressionType);
 
                         if (UpperBound < 1) or (UpperBound > 255) then
-                          Error(i, TMessage.Create(TErrorCode.StringLengthNotInRange,
-                            'String length must be a value from 1 to 255'));
+                          Error(i, TMessage.Create(TErrorCode.StringLengthNotInRange, 'String length must be a value from 1 to 255'));
 
                         CheckTok(i + 1, TTokenKind.CBRACKETTOK);
 
@@ -3102,8 +3082,7 @@ begin
                       // -----------------------------------------------------------------------------
 
                         if (TokenAt(i).Kind = TTokenKind.ARRAYTOK) or
-                          ((TokenAt(i).Kind = TTokenKind.PACKEDTOK) and (TokenAt(i + 1).Kind =
-                          TTokenKind.ARRAYTOK)) then
+                           ((TokenAt(i).Kind = TTokenKind.PACKEDTOK) and (TokenAt(i + 1).Kind = TTokenKind.ARRAYTOK)) then
                           // Array
                         begin
                           DataType := TDataType.POINTERTOK;
@@ -3130,8 +3109,7 @@ begin
                               UpperBound := GetTypeAtIndex(IdentifierAt(IdentIndex).NumAllocElements).Field[2].Value;
 
                               if LowerBound <> 0 then
-                                Error(i, TMessage.Create(TErrorCode.ArrayLowerBoundNotZero,
-                                  'Array lower bound is not zero.'));
+                                Error(i, TMessage.Create(TErrorCode.ArrayLowerBoundNotZero, 'Array lower bound is not zero.'));
 
                               if UpperBound > High(Word) then
                                 Error(i, TErrorCode.HighLimit);
@@ -3148,8 +3126,7 @@ begin
                                 NumAllocElements := 256;
                               end
                               else
-                                Error(i, TMessage.Create(TErrorCode.InvalidTypeDefinition,
-                                  'Invalid type definition.'));
+                                Error(i, TMessage.Create(TErrorCode.InvalidTypeDefinition, 'Invalid type definition.'));
 
                           end
                           else
@@ -3165,8 +3142,7 @@ begin
                                 NumAllocElements := 256;
                               end
                               else
-                                Error(i, TMessage.Create(TErrorCode.InvalidTypeDefinition,
-                                  'Invalid type definition.'));
+                                Error(i, TMessage.Create(TErrorCode.InvalidTypeDefinition, 'Invalid type definition.'));
 
                               Inc(i, 2);
 
@@ -3176,19 +3152,16 @@ begin
 
                               i := CompileConstExpression(i + 2, LowerBound, ExpressionType);
                               if not (ExpressionType in IntegerTypes) then
-                                Error(i, TMessage.Create(TErrorCode.ArrayLowerBoundNotInteger,
-                                  'Array lower bound must be an integer value.'));
+                                Error(i, TMessage.Create(TErrorCode.ArrayLowerBoundNotInteger, 'Array lower bound must be an integer value.'));
 
                               if LowerBound <> 0 then
-                                Error(i, TMessage.Create(TErrorCode.ArrayLowerBoundNotZero,
-                                  'Array lower bound is not zero.'));
+                                Error(i, TMessage.Create(TErrorCode.ArrayLowerBoundNotZero, 'Array lower bound is not zero.'));
 
                               CheckTok(i + 1, TTokenKind.RANGETOK);
 
                               i := CompileConstExpression(i + 2, UpperBound, ExpressionType);
                               if not (ExpressionType in IntegerTypes) then
-                                Error(i, TMessage.Create(TErrorCode.ArrayUpperBoundNotInteger,
-                                  'Array upper bound must be integer value.'));
+                                Error(i, TMessage.Create(TErrorCode.ArrayUpperBoundNotInteger, 'Array upper bound must be integer value.'));
 
                               if UpperBound < 0 then
                                 Error(i, TErrorCode.UpperBoundOfRange);
@@ -3203,19 +3176,16 @@ begin
 
                                 i := CompileConstExpression(i + 2, LowerBound, ExpressionType);
                                 if not (ExpressionType in IntegerTypes) then
-                                  Error(i, TMessage.Create(TErrorCode.ArrayLowerBoundNotInteger,
-                                    'Array lower bound must be an integer value.'));
+                                  Error(i, TMessage.Create(TErrorCode.ArrayLowerBoundNotInteger, 'Array lower bound must be an integer value.'));
 
                                 if LowerBound <> 0 then
-                                  Error(i, TMessage.Create(TErrorCode.ArrayLowerBoundNotZero,
-                                    'Array lower bound is not zero.'));
+                                  Error(i, TMessage.Create(TErrorCode.ArrayLowerBoundNotZero, 'Array lower bound is not zero.'));
 
                                 CheckTok(i + 1, TTokenKind.RANGETOK);
 
                                 i := CompileConstExpression(i + 2, UpperBound, ExpressionType);
                                 if not (ExpressionType in IntegerTypes) then
-                                  Error(i, TMessage.Create(TErrorCode.ArrayUpperBoundNotInteger,
-                                    'Array upper bound must be an integer value.'));
+                                  Error(i, TMessage.Create(TErrorCode.ArrayUpperBoundNotInteger, 'Array upper bound must be an integer value.'));
 
                                 if UpperBound < 0 then
                                   Error(i, TErrorCode.UpperBoundOfRange);
@@ -3234,8 +3204,7 @@ begin
 
 
                           if TokenAt(i + 3).GetDataType in [TDataType.RECORDTOK, TDataType.OBJECTTOK] then
-                            Error(i, TMessage.Create(TErrorCode.InvalidArrayOfPointers,
-                              'Only arrays of ^{0} are supported.', InfoAboutToken(TokenAt(i + 3).Kind)));
+                            Error(i, TMessage.Create(TErrorCode.InvalidArrayOfPointers, 'Only arrays of ^{0} are supported.', InfoAboutToken(TokenAt(i + 3).Kind)));
 
 
                           if TokenAt(i + 3).Kind = TTokenKind.ARRAYTOK then
@@ -3259,11 +3228,9 @@ begin
 
 
                           // TODO: Have Constant for 40960
-                          if (NumAllocElements shr 16) * (NumAllocElements and $FFFF) *
-                            GetDataSize(NestedDataType) > 40960 - 1 then
+                          if (NumAllocElements shr 16) * (NumAllocElements and $FFFF) * GetDataSize(NestedDataType) > 40960 - 1 then
                             Error(i, TMessage.Create(TErrorCode.ArraySizeExceedsRAMSize,
-                              'Array [0..{0}, 0..{1} size exceeds the available RAM', IntToStr(
-                              (NumAllocElements and $FFFF) - 1), IntToStr((NumAllocElements shr 16) - 1)));
+                              'Array [0..{0}, 0..{1} size exceeds the available RAM', IntToStr((NumAllocElements and $FFFF) - 1), IntToStr((NumAllocElements shr 16) - 1)));
 
 
                           // sick3
@@ -3280,15 +3247,13 @@ begin
 
                               if NumAllocElements shr 16 > 0 then
                                 Error(i, TMessage.Create(TErrorCode.MultiDimensionalArrayOfTypeNotSupported,
-                                  'Multidimensional arrays of element type {0} are not supported.',
-                                  InfoAboutDataType(NestedDataType)));
+                                  'Multidimensional arrays of element type {0} are not supported.', InfoAboutDataType(NestedDataType)));
 
                               //    if NestedDataType = RECORDTOK then
                               //    else
                               if NestedDataType in [TDataType.RECORDTOK, TDataType.OBJECTTOK] then
                                 Error(i, TMessage.Create(TErrorCode.OnlyArrayOfTypeSupported,
-                                  'Only Array [0..{0}] of ^{1} supported', IntToStr(NumAllocElements - 1),
-                                  InfoAboutDataType(NestedDataType)))
+                                  'Only Array [0..{0}] of ^{1} supported', IntToStr(NumAllocElements - 1), InfoAboutDataType(NestedDataType)))
                               else
                                 Error(i, TMessage.Create(TErrorCode.ArrayOfTypeNotSupported,
                                   'Arrays of type {0} are not supported.', InfoAboutDataType(NestedDataType)));
@@ -3307,11 +3272,10 @@ begin
                                 (TokenAt(i).Kind <> TTokenKind.PCHARTOK) then
                               begin
 
-                                if (NestedAllocElementType in [TDataType.RECORDTOK,
-                                  TDataType.OBJECTTOK, TDataType.PROCVARTOK]) and (NumAllocElements shr 16 > 0) then
+                                if (NestedAllocElementType in [TDataType.RECORDTOK, TDataType.OBJECTTOK, TDataType.PROCVARTOK]) and 
+				   (NumAllocElements shr 16 > 0) then
                                   Error(i, TMessage.Create(TErrorCode.MultiDimensionalArrayOfTypeNotSupported,
-                                    'Multidimensional arrays of element type {0} are not supported.',
-                                    InfoAboutDataType(NestedAllocElementType)));
+                                    'Multidimensional arrays of element type {0} are not supported.', InfoAboutDataType(NestedAllocElementType)));
 
                                 NestedDataType := NestedAllocElementType;
 
@@ -3319,8 +3283,7 @@ begin
                                   NumAllocElements := NumAllocElements or NestedNumAllocElements
                                 else
                                   if NestedAllocElementType in [TDataType.RECORDTOK, TDataType.OBJECTTOK] then
-                                    NumAllocElements :=
-                                      NestedNumAllocElements or (NumAllocElements shl 16)
+                                    NumAllocElements := NestedNumAllocElements or (NumAllocElements shl 16)
                                   // array [..] of ^record|^object
                                   else
                                     NumAllocElements := NumAllocElements or (NestedNumAllocElements shl 16);
@@ -3346,16 +3309,14 @@ begin
                               Error(i, TErrorCode.UnknownIdentifier);
 
                             if IdentifierAt(IdentIndex).Kind <> TTokenKind.TYPETOK then
-                              Error(i, TMessage.Create(TErrorCode.TypeIdentifierExpected,
-                                'Type identifier expected but {0} found', TokenAt(i).Name));
+                              Error(i, TMessage.Create(TErrorCode.TypeIdentifierExpected, 'Type identifier expected but {0} found', TokenAt(i).Name));
 
                             DataType := IdentifierAt(IdentIndex).DataType;
 
                             if DataType = TDataType.SUBRANGETYPE then
                             begin
 
-                              DataType :=
-                                GetTypeAtIndex(IdentifierAt(IdentIndex).NumAllocElements).Field[0].AllocElementType;
+                              DataType := GetTypeAtIndex(IdentifierAt(IdentIndex).NumAllocElements).Field[0].AllocElementType;
                               NumAllocElements := 0;
                               AllocElementType := TDataType.UNTYPETOK;
 
@@ -3363,9 +3324,7 @@ begin
                             else
                             begin
 
-                              NumAllocElements :=
-                                IdentifierAt(IdentIndex).NumAllocElements or
-                                (IdentifierAt(IdentIndex).NumAllocElements_ shl 16);
+                              NumAllocElements := IdentifierAt(IdentIndex).NumAllocElements or (IdentifierAt(IdentIndex).NumAllocElements_ shl 16);
                               AllocElementType := IdentifierAt(IdentIndex).AllocElementType;
 
                             end;
