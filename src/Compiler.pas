@@ -451,12 +451,12 @@ procedure TestIdentProc(x: Integer; S: TString);
 type
   TOV = record
     i, j: Integer;
+    SourceFileUnitIndex: TSourceFileIndex;
     BlockIndex: TBlockIndex;
-    SourceFile: TSourceFile;
   end;
 type
   TL = record
-    SourceFile: TSourceFile;
+    SourceFileUnitIndex: TSourceFileIndex;
     BlockIndex: TBlockIndex;
     Param: TParamList;
     NumParams: Word;
@@ -473,13 +473,13 @@ var
   l: array of TL;
 
 
-  procedure addOverlay(SourceFile: TSourceFile; BlockIndex: TBlockIndex; ovr: Boolean);
+  procedure addOverlay(SourceFileUnitIndex: TSourceFileIndex; BlockIndex: TBlockIndex; ovr: Boolean);
   var
     i: Integer;
   begin
 
     for i := High(ov) - 1 downto 0 do
-      if (ov[i].SourceFile.UnitIndex = SourceFile.UnitIndex) and (ov[i].BlockIndex = BlockIndex) then
+      if (ov[i].SourceFileUnitIndex = SourceFileUnitIndex) and (ov[i].BlockIndex = BlockIndex) then
       begin
 
         Inc(ov[i].i, Ord(ovr));
@@ -490,7 +490,7 @@ var
 
     i := High(ov);
 
-    ov[i].SourceFile := SourceFile;
+    ov[i].SourceFileUnitIndex := SourceFileUnitIndex;
     ov[i].BlockIndex := BlockIndex;
     ov[i].i := Ord(ovr);
     ov[i].j := 1;
@@ -522,7 +522,7 @@ begin
 
         for k := 0 to High(l) - 1 do
           if (Identifier.NumParams = l[k].NumParams) and (Identifier.SourceFile.UnitIndex =
-            l[k].SourceFile.UnitIndex) and (Identifier.BlockIndex = l[k].BlockIndex) then
+            l[k].SourceFileUnitIndex) and (Identifier.BlockIndex = l[k].BlockIndex) then
           begin
 
             sameParameterList := True;
@@ -563,12 +563,12 @@ begin
 
         l[k].NumParams := Identifier.NumParams;
         l[k].Param := Identifier.Param;
-        l[k].SourceFile := Identifier.SourceFile;
+        l[k].SourceFileUnitIndex := Identifier.SourceFile.UnitIndex;
         l[k].BlockIndex := Identifier.BlockIndex;
 
         SetLength(l, k + 2);
 
-        addOverlay(Identifier.SourceFile, Identifier.BlockIndex,
+        addOverlay(Identifier.SourceFile.UnitIndex, Identifier.BlockIndex,
           Identifier.isOverload);
       end;
     end;
@@ -13017,10 +13017,11 @@ begin
 
                   // dla PROC, FUNC -> IdentifierAt(GetIdentIndex(TokenAt(k).Name)).NumAllocElements -> oznacza liczbe parametrow takiej procedury/funkcji
                     if (VarType in Pointers) and ((ExpressionType in Pointers) and
-                      (TokenAt(k).Kind = TTokenKind.IDENTTOK)) and (not
-                      (IdentifierAt(IdentIndex).AllocElementType in Pointers + [TDataType.RECORDTOK,
-                      TDataType.OBJECTTOK]) and not (IdentifierAt(GetIdentIndex(TokenAt(k).Name)).AllocElementType in
-                      Pointers + [TDataType.RECORDTOK, TDataType.OBJECTTOK])) then
+                      (TokenAt(k).Kind = TTokenKind.IDENTTOK)) and
+                      (not (IdentifierAt(IdentIndex).AllocElementType in Pointers +
+                      [TDataType.RECORDTOK, TDataType.OBJECTTOK]) and not
+                      (IdentifierAt(GetIdentIndex(TokenAt(k).Name)).AllocElementType in Pointers +
+                      [TDataType.RECORDTOK, TDataType.OBJECTTOK])) then
                     begin
 
                       j := Elements(IdentIndex) {IdentifierAt(IdentIndex).NumAllocElements} *
