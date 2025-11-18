@@ -656,13 +656,6 @@ begin
     TCode65.shrAX_CL: asm65(#9'jsr @shrAX_CL');
     TCode65.shrEAX_CL: asm65(#9'jsr @shrEAX_CL');
 
-    // TCode65.je: asm65(#9'beq *+5');          // =
-    // TCode65.jne: asm65(#9'bne *+5');          // <>
-    // TCode65.jg: begin asm65(#9'seq'); asm65(#9'bcs *+5') end;  // >
-    // TCode65.jge: asm65(#9'bcs *+5');          // >=
-    // TCode65.jl: asm65(#9'bcc *+5');          // <
-    // TCode65.jle: begin asm65(#9'bcc *+7'); asm65(#9'beq *+5') end;  // <=
-
     TCode65.addBX: asm65(#9'inx');
     TCode65.subBX: asm65(#9'dex');
 
@@ -1168,17 +1161,22 @@ begin
   else
     svara := 'adr.' + svar;
 
-  asm65separator;
+//  asm65separator;
 
+{$IFDEF USEOPTFILE}
   asm65;
   asm65('; Push' + InfoAboutSize(Size));
+{$ENDIF}
 
   case IndirectionLevel of
 
     ASVALUE:
     begin
+
+{$IFDEF USEOPTFILE}
       asm65('; as Value $' + IntToHex(Value, 8) + ' (' + IntToStr(Value) + ')');
       asm65;
+{$ENDIF}
 
       a65(TCode65.addBX);
 
@@ -1190,8 +1188,11 @@ begin
 
     ASPOINTER:
     begin
+
+{$IFDEF USEOPTFILE}
       asm65('; as Pointer');
       asm65;
+{$ENDIF}
 
       Gen;
 
@@ -1252,8 +1253,11 @@ begin
 
     ASPOINTERTORECORD:
     begin
+
+{$IFDEF USEOPTFILE}
       asm65('; as Pointer to Record');
       asm65;
+{$ENDIF}
 
       Gen;
 
@@ -1286,15 +1290,19 @@ begin
 
     ASPOINTERTOPOINTER:
     begin
+
+{$IFDEF USEOPTFILE}
       asm65('; as Pointer to Pointer');
       asm65;
+{$ENDIF}
 
       Gen;
 
       a65(TCode65.addBX);
 
-      if (IdentifierAt(IdentIndex).isAbsolute) and (IdentifierAt(IdentIndex).PassMethod <>
-        TParameterPassingMethod.VARPASSING) and (NumAllocElements = 0) then asm65('+' + svar);  // +lda
+      if (IdentifierAt(IdentIndex).isAbsolute) and 
+         (IdentifierAt(IdentIndex).PassMethod <> TParameterPassingMethod.VARPASSING) and 
+	 (NumAllocElements = 0) then asm65('+' + svar);  // +lda
 
       //  writeln(IdentifierAt(IdentIndex).PassMethod,',', IdentifierAt(IdentIndex).name,',',IdentifierAt(IdentIndex).DataType,',',IdentifierAt(IdentIndex).AllocElementType,',',IdentifierAt(IdentIndex).NumAllocElements,' | ', svar,',',ExtractName(IdentIndex, svar),',',par);
 
@@ -1357,17 +1365,20 @@ begin
         end;
       end;
 
-      if (IdentifierAt(IdentIndex).isAbsolute) and (IdentifierAt(IdentIndex).PassMethod <>
-        TParameterPassingMethod.VARPASSING) and (NumAllocElements = 0) then
-        asm65('+');  // +lda
+      if (IdentifierAt(IdentIndex).isAbsolute) and 
+         (IdentifierAt(IdentIndex).PassMethod <> TParameterPassingMethod.VARPASSING) and 
+	 (NumAllocElements = 0) then asm65('+');  // +lda
 
     end;
 
 
     ASPOINTERTOARRAYORIGIN, ASPOINTERTOARRAYORIGIN2:
     begin
+
+{$IFDEF USEOPTFILE}
       asm65('; as Pointer to Array Origin');
       asm65;
+{$ENDIF}
 
       Gen;
 
@@ -1377,12 +1388,13 @@ begin
           if (NumAllocElements > 256) or (NumAllocElements in [0, 1]) then
           begin
 
-            if (IdentifierAt(IdentIndex).isAbsolute) and (IdentifierAt(IdentIndex).PassMethod <>
-              TParameterPassingMethod.VARPASSING) and (NumAllocElements = 0) then
-              asm65('+' + svar);  // +lda
+            if (IdentifierAt(IdentIndex).isAbsolute) and 
+	       (IdentifierAt(IdentIndex).PassMethod <> TParameterPassingMethod.VARPASSING) and 
+	       (NumAllocElements = 0) then asm65('+' + svar);  // +lda
 
-            if (IdentifierAt(IdentIndex).isAbsolute) and (IdentifierAt(IdentIndex).idType =
-              TDataType.ARRAYTOK) and (IdentifierAt(IdentIndex).Value >= 0) then
+            if (IdentifierAt(IdentIndex).isAbsolute) and 
+	       (IdentifierAt(IdentIndex).idType = TDataType.ARRAYTOK) and 
+	       (IdentifierAt(IdentIndex).Value >= 0) then
             begin
 
               asm65(#9'lda #$' + IntToHex(Byte(IdentifierAt(IdentIndex).Value), 2));
@@ -1433,9 +1445,9 @@ begin
 
             end;
 
-            if (IdentifierAt(IdentIndex).isAbsolute) and (IdentifierAt(IdentIndex).PassMethod <>
-              TParameterPassingMethod.VARPASSING) and (NumAllocElements = 0) then
-              asm65('+');  // +lda
+            if (IdentifierAt(IdentIndex).isAbsolute) and 
+	       (IdentifierAt(IdentIndex).PassMethod <> TParameterPassingMethod.VARPASSING) and
+	       (NumAllocElements = 0) then asm65('+');  // +lda
 
           end
           else
@@ -1720,8 +1732,11 @@ begin
 
     ASPOINTERTOARRAYRECORD:                  // array [0..X] of ^record
     begin
+
+{$IFDEF USEOPTFILE}
       asm65('; as Pointer to Array ^Record');
       asm65;
+{$ENDIF}
 
       Gen;
 
@@ -1798,8 +1813,11 @@ begin
 
     ASPOINTERTOARRAYRECORDTOSTRING:                  // array_of_pointer_to_record[index].string
     begin
+
+{$IFDEF USEOPTFILE}
       asm65('; as Pointer to Array ^Record to String');
       asm65;
+{$ENDIF}
 
       Gen;
 
@@ -1844,8 +1862,11 @@ begin
 
     ASPOINTERTORECORDARRAYORIGIN:                  // record^.array[i]
     begin
+
+{$IFDEF USEOPTFILE}
       asm65('; as Pointer to Record^ Array Origin');
       asm65;
+{$ENDIF}
 
       Gen;
 
@@ -2217,8 +2238,11 @@ begin
 
     ASPOINTER:
     begin
+
+{$IFDEF USEOPTFILE}
       asm65('; as Pointer');
       asm65;
+{$ENDIF}
 
       case GetDataSize(ExpressionType) of
         1: begin
@@ -2263,8 +2287,10 @@ begin
     ASPOINTERTOPOINTER:
     begin
 
+{$IFDEF USEOPTFILE}
       asm65('; as Pointer To Pointer');
       asm65;
+{$ENDIF}
 
       LoadBP2(IdentIndex, svar);
 
@@ -2313,8 +2339,10 @@ begin
     ASPOINTERTOARRAYORIGIN, ASPOINTERTOARRAYORIGIN2:
     begin
 
+{$IFDEF USEOPTFILE}
       asm65('; as Pointer To Array Origin');
       asm65;
+{$ENDIF}
 
       case GetDataSize(ExpressionType) of
         1: begin
@@ -2729,10 +2757,12 @@ begin
   else
     svara := 'adr.' + svar;
 
-  asm65separator;
+//  asm65separator;
 
+{$IFDEF USEOPTFILE}
   asm65;
   asm65('; Generate Assignment for' + InfoAboutSize(Size));
+{$ENDIF}
 
   Gen;
   Gen;
@@ -2743,8 +2773,10 @@ begin
 
     ASPOINTERTOARRAYRECORD:            // array_of_record_pointers[index]
     begin
-      asm65('; as Pointer to Array ^Record');
 
+{$IFDEF USEOPTFILE}
+      asm65('; as Pointer to Array ^Record');
+{$ENDIF}
 
       if (NumAllocElements * 2 > 256) or (NumAllocElements in [0, 1]) then
       begin
@@ -2862,7 +2894,10 @@ begin
 
     ASPOINTERTODEREFERENCE:
     begin
+
+{$IFDEF USEOPTFILE}
       asm65('; as Pointer to Dereference');
+{$ENDIF}
 
       asm65(#9'lda :STACKORIGIN-1,x');
       asm65(#9'sta :bp2');
@@ -2910,7 +2945,10 @@ begin
 
     ASPOINTERTOARRAYORIGIN, ASPOINTERTOARRAYORIGIN2:
     begin
+
+{$IFDEF USEOPTFILE}
       asm65('; as Pointer to Array Origin');
+{$ENDIF}
 
       case Size of
         1: begin                    // PULL BYTE
@@ -2918,8 +2956,9 @@ begin
           if (NumAllocElements > 256) or (NumAllocElements in [0, 1]) then
           begin
 
-            if (IdentifierAt(IdentIndex).isAbsolute) and (IdentifierAt(IdentIndex).PassMethod <>
-              TParameterPassingMethod.VARPASSING) and (NumAllocElements = 0) then asm65('-' + svar);  // -sta
+            if (IdentifierAt(IdentIndex).isAbsolute) and 
+	       (IdentifierAt(IdentIndex).PassMethod <> TParameterPassingMethod.VARPASSING) and 
+	       (NumAllocElements = 0) then asm65('-' + svar);  // -sta
 
             if (IdentifierAt(IdentIndex).isAbsolute) and (IdentifierAt(IdentIndex).idType =
               TDataType.ARRAYTOK) and (IdentifierAt(IdentIndex).Value >= 0) then
@@ -2973,8 +3012,9 @@ begin
 
             end;
 
-            if (IdentifierAt(IdentIndex).isAbsolute) and (IdentifierAt(IdentIndex).PassMethod <>
-              TParameterPassingMethod.VARPASSING) and (NumAllocElements = 0) then asm65('-');  // -sta
+            if (IdentifierAt(IdentIndex).isAbsolute) and 
+	       (IdentifierAt(IdentIndex).PassMethod <> TParameterPassingMethod.VARPASSING) and
+	       (NumAllocElements = 0) then asm65('-');  // -sta
 
           end
           else
@@ -3258,7 +3298,10 @@ begin
 
     ASSTRINGPOINTER1TOARRAYORIGIN:
     begin
+
+{$IFDEF USEOPTFILE}
       asm65('; as StringPointer to Array Origin');
+{$ENDIF}
 
       case Size of
 
@@ -3338,7 +3381,10 @@ begin
 
     ASSTRINGPOINTERTOARRAYORIGIN:
     begin
+
+{$IFDEF USEOPTFILE}
       asm65('; as StringPointer to Array Origin');
+{$ENDIF}
 
       case Size of
 
@@ -3504,8 +3550,11 @@ begin
 
     ASPOINTERTORECORDARRAYORIGIN:            // record^.array[i]
     begin
+
+{$IFDEF USEOPTFILE}
       asm65('; as Pointer to Record^ Array Origin');
       asm65;
+{$ENDIF}
 
       Gen;
 
@@ -3667,11 +3716,14 @@ begin
 
     ASPOINTERTOPOINTER:
     begin
+
+{$IFDEF USEOPTFILE}
       asm65('; as Pointer to Pointer');
+{$ENDIF}
 
       if (IdentIndex > 0) and (IdentifierAt(IdentIndex).isAbsolute) and
-        (IdentifierAt(IdentIndex).PassMethod <> TParameterPassingMethod.VARPASSING) and (NumAllocElements = 0) then
-        asm65('-' + svar);  // -sta
+        (IdentifierAt(IdentIndex).PassMethod <> TParameterPassingMethod.VARPASSING) and 
+	(NumAllocElements = 0) then asm65('-' + svar);  // -sta
 
       //  writeln(IdentifierAt(IdentIndex).Name,',',IdentifierAt(IdentIndex).DataType,',',IdentifierAt(IdentIndex).AllocElementType,' / ',svar ,' / ', UnitArray[IdentifierAt(IdentIndex).UnitIndex].Name,',',svar.LastIndexOf('.'));
 
@@ -3723,8 +3775,8 @@ begin
       end;
 
       if (IdentIndex > 0) and (IdentifierAt(IdentIndex).isAbsolute) and
-        (IdentifierAt(IdentIndex).PassMethod <> TParameterPassingMethod.VARPASSING) and (NumAllocElements = 0) then
-        asm65('-');  // -sta
+         (IdentifierAt(IdentIndex).PassMethod <> TParameterPassingMethod.VARPASSING) and
+	 (NumAllocElements = 0) then asm65('-');  // -sta
 
       a65(TCode65.subBX);
 
@@ -3733,7 +3785,10 @@ begin
 
     ASPOINTER:
     begin
+
+{$IFDEF USEOPTFILE}
       asm65('; as Pointer');
+{$ENDIF}
 
       case Size of
         1: begin
@@ -3985,7 +4040,9 @@ begin
   svar := GetLocalName(IdentIndex);
   CounterSize := GetDataSize(ValType);
 
+{$IFDEF USEOPTFILE}
   asm65(';' + InfoAboutSize(CounterSize));
+{$ENDIF}
 
   Gen;
   Gen;
