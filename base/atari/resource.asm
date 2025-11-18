@@ -1323,6 +1323,8 @@ ln	= .filesize(%%1)-he-1024
 ?bnk	= main.%%lab/$1000
 ?cnt	= 1
 
+	ert ?bnk > $80, 'Out of memory'
+
 	org RESORIGIN
 	fxs FX_MEMS #?bnk+$80
 	rts
@@ -1341,6 +1343,9 @@ ln	= .filesize(%%1)-he-1024
 	.sav ?tmp
 
 	?bnk++
+
+	ert ?bnk > $80, 'Out of memory'
+	
 	org RESORIGIN
 	fxs FX_MEMS #?bnk+$80
 	rts
