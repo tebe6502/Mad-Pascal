@@ -157,7 +157,7 @@ var
   function fail(i: Integer): Boolean;
   begin
 
-    if (pos('#asm:', TemporaryBuf[i]) = 1) or ldy(i) or jsr(i) or
+    if pos1('#asm:', i) or ldy(i) or jsr(i) or
       iny(i) or dey(i) or tay(i) or tya(i) or mwy(i) or
       mwy(i) or (pos(#9'.if', TemporaryBuf[i]) > 0) or (pos(#9'.LOCAL ', TemporaryBuf[i]) > 0) or
       (pos(#9'@print', TemporaryBuf[i]) > 0) then Result := True
@@ -170,9 +170,9 @@ var
   begin
 
     Result := seq(i) or sne(i) or spl(i) or smi(i) or scc(i) or scs(i) or svc(i) or
-      svs(i) or jne(i) or jeq(i) or jcc(i) or jcs(i) or jmi(i) or jpl(i) or (pos(#9'bne ', TemporaryBuf[i]) = 1) or
-      (pos(#9'beq ', TemporaryBuf[i]) = 1) or (pos(#9'bcc ', TemporaryBuf[i]) = 1) or
-      (pos(#9'bcs ', TemporaryBuf[i]) = 1) or (pos(#9'bmi ', TemporaryBuf[i]) = 1) or (pos(#9'bpl ', TemporaryBuf[i]) = 1);
+      svs(i) or jne(i) or jeq(i) or jcc(i) or jcs(i) or jmi(i) or jpl(i) or
+      pos1(#9'bne ',i) or pos1(#9'beq ',i) or pos1(#9'bcc ', i) or
+      pos1(#9'bcs ',i) or pos1(#9'bmi ',i) or pos1(#9'bpl ',i);
   end;
 
 
@@ -501,7 +501,6 @@ var
 begin
 
   if (pos(#9'jsr ', a) = 1) or (a = '#asm') then ResetOpty;
-
 
   if TemporaryBufIndex < High(TemporaryBuf) then
   begin
