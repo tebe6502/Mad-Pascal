@@ -18,10 +18,10 @@ const
   AllowWhiteSpaces: set of Char = [' ', TAB, CR, LF];
   AllowQuotes: set of Char = ['''', '"'];
   // TODO: Include '.'?
-  AllowLabelFirstChars: set of Char = ['A'..'Z', '_'];
-  AllowLabelChars: set of Char = ['A'..'Z', '0'..'9', '_', '.'];
+  AllowLabelFirstChars: set of Char = ['A'..'Z', 'a'..'z', '_'];
+  AllowLabelChars: set of Char = ['A'..'Z', 'a'..'z', '0'..'9', '_', '.'];
   AllowDigitFirstChars: set of Char = ['0'..'9', '%', '$'];
-  AllowDigitChars: set of Char = ['0'..'9', 'A'..'F'];
+  AllowDigitChars: set of Char = ['0'..'9', 'A'..'F', 'a'..'f'];
 
   // ----------------------------------------------------------------------------
 
@@ -36,7 +36,7 @@ function GetNumber(const a: String; var i: TStringIndex): String;
 
 function GetConstantUpperCase(const a: String; var i: TStringIndex): String;
 
-function GetLabel(const a: String; const upperCase: Boolean; var i: TStringIndex): String;
+function GetLabel(const a: String; var i: TStringIndex): String;
 function GetLabelUpperCase(const a: String; var i: TStringIndex): String;
 
 function GetString(const a: String; const upperCase: Boolean; var i: TStringIndex): String;
@@ -112,13 +112,13 @@ begin
 
     if (i <= Length(a)) then
     begin
-      if UpCase(a[i]) in AllowDigitFirstChars then
+      if a[i] in AllowDigitFirstChars then
       begin
 
         Result := UpCase(a[i]);
         Inc(i);
 
-        while (i <= Length(a)) and (UpCase(a[i]) in AllowDigitChars) do
+        while (i <= Length(a)) and (a[i] in AllowDigitChars) do
         begin
           Result := Result + UpCase(a[i]);
           Inc(i);
@@ -145,8 +145,8 @@ begin
 
     SkipWhitespaces(a, i);
 
-    if UpCase(a[i]) in AllowLabelFirstChars + ['.'] then
-      while UpCase(a[i]) in AllowLabelChars do
+    if a[i] in AllowLabelFirstChars + ['.'] then
+      while a[i] in AllowLabelChars do
       begin
 
         Result := Result + UpCase(a[i]);
@@ -162,7 +162,7 @@ end;
 (*----------------------------------------------------------------------------*)
 (* Get label starting with characters 'A'..'Z','_', '.', '/', '\'.            *)
 (*----------------------------------------------------------------------------*)
-function GetLabel(const a: String; const upperCase: Boolean; var i: TStringIndex): String;
+function GetLabel(const a: String; var i: TStringIndex): String;
 begin
 
   Result := '';
@@ -172,18 +172,14 @@ begin
 
     SkipWhitespaces(a, i);
 
-    if (i <= length(a)) and (UpCase(a[i]) in AllowLabelFirstChars + ['.']) then
-      while (i <= length(a)) and (UpCase(a[i]) in (AllowLabelChars + AllowDirectorySeparators)) do
-      begin
 
-        if upperCase then
-          Result := Result + UpCase(a[i])
-        else
-          Result := Result + a[i];
+    if (i <= length(a)) and (a[i] in AllowLabelFirstChars + ['.']) then
+      while (i <= length(a)) and (a[i] in (AllowLabelChars + AllowDirectorySeparators)) do
+      begin
+        Result := Result + a[i];
 
         Inc(i);
       end;
-
   end;
 
 end;
@@ -194,7 +190,22 @@ end;
 (*----------------------------------------------------------------------------*)
 function GetLabelUpperCase(const a: String; var i: TStringIndex): String;
 begin
-  Result := GetLabel(a, True, i);
+  Result := '';
+
+  if a <> '' then
+  begin
+
+    SkipWhitespaces(a, i);
+
+    if (i <= length(a)) and (a[i] in AllowLabelFirstChars + ['.']) then
+      while (i <= length(a)) and (a[i] in (AllowLabelChars + AllowDirectorySeparators)) do
+      begin
+        Result := Result + UpCase(a[i]);
+
+        Inc(i);
+      end;
+  end;
+
 end;
 
 
@@ -217,7 +228,7 @@ begin
     if a[i] = '%' then
     begin
 
-      while (i <= length(a)) and (UpCase(a[i]) in ['A'..'Z', '%']) do
+      while (i <= length(a)) and (a[i] in ['A'..'Z', 'a'..'z', '%']) do
       begin
         Result := Result + Upcase(a[i]);
         Inc(i);
@@ -228,7 +239,9 @@ begin
       if not (a[i] in AllowQuotes) then
       begin
 
-        Result := GetLabel(a, upperCase, i);
+        if upperCase then Result := GetLabelUpperCase(a, i)
+        else
+          Result := GetLabel(a, i);
 
       end
       else

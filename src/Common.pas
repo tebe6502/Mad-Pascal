@@ -68,13 +68,12 @@ var
   CodePosStack: array [0..MAXPOSSTACK] of Word;
 
 var
-  BlockList: TBlockList;
-  BlockStack: TBlockStack;
+  BlockManager: TBlockManager;
 
 function NumBlocks_: Integer;
 function BlockStackTopIndex: TBlockStackIndex;
 function BlockStackTopBlockIndex: TBlockIndex;
-function BlockStackGetBlockIndexAt(const BlockStackIndex: TBlockStackIndex): TBlockIndex;
+
 
 var
   CallGraph: TCallGraph;
@@ -102,7 +101,7 @@ var
     end;
 
   LinkObj: TStringArray;
-  unitPathList: TPathList;
+  unitPathList: IPathList;
 
   WithName: TStringArray;
 
@@ -309,22 +308,25 @@ var
 
   function Search(Num: Cardinal): Integer;
   var
-    IdentIndex: TIdentifierIndex;
-    BlockStackIndex: TBlockStackIndex;
-    BlockIndex: TBlockIndex;
+    Block: TBlock;
+    Index: Integer;
+    Identifier: TIdentifier;
   begin
 
     Result := 0;
 
     // Search all nesting levels from the current one to the most outer one
-    for BlockStackIndex := BlockStackTopIndex downto 0 do
+    Block := BlockManager.BlockStack.Top;
+    while (Block <> nil) do
     begin
-      BlockIndex := BlockStackGetBlockIndexAt(BlockStackIndex);
-      for IdentIndex := 1 to NumIdent do
-        if (IdentifierAt(IdentIndex).DataType = TDataType.ENUMTOK) and
-          (IdentifierAt(IdentIndex).NumAllocElements = Num) and (BlockIndex =
-          IdentifierAt(IdentIndex).BlockIndex) then
-          exit(IdentIndex);
+
+      for Index := 1 to Block.NumIdentifiers do
+      begin
+        Identifier := Block.GetIdentifierAtIndex(Index);
+        if (Identifier.DataType = TDataType.ENUMTOK) and (Identifier.NumAllocElements = Num) then
+          exit(Identifier.IdentifierIndex);
+      end;
+      Block:=Block.ParentBlock;
     end;
   end;
 
@@ -697,7 +699,7 @@ begin
   // Result := TokenArrayPtr^[tokenIndex];
   Assert(TokenList <> nil, 'TokenList not yet created.');
   Result := TokenList.GetTokenAtIndex(tokenIndex);
-  // Writeln(tokenIndex);
+  // if tokenIndex=9024  then Writeln(tokenIndex);
 end;
 
 function NumIdent: Integer;
@@ -714,23 +716,18 @@ end;
 
 function NumBlocks_: Integer;
 begin
-  Result := BlockList.Count;
+  Result := BlockManager.BlockList.Count;
 end;
 
 function BlockStackTopIndex: TBlockStackIndex;
 begin
-  Result := BlockStack.TopIndex;
+  Result := BlockManager.BlockStack.TopIndex;
 end;
 
 function BlockStackTopBlockIndex: TBlockIndex;
 begin
-  Result := BlockStack.GetBlockAtIndex(BlockStackTopIndex).BlockIndex;
+  Result := BlockManager.BlockStack.Top.BlockIndex;
 end;
 
-
-function BlockStackGetBlockIndexAt(const BlockStackIndex: TBlockStackIndex): TBlockIndex;
-begin
-  Result := BlockStack.GetBlockAtIndex(BlockStackIndex).BlockIndex;
-end;
 
 end.

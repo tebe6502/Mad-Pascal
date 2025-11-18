@@ -16,9 +16,9 @@ function CompileConstExpression(i: TTokenIndex; out ConstVal: Int64; out ConstVa
 
 function CompileConstTerm(i: TTokenIndex; out ConstVal: Int64; out ConstValType: TDataType): TTokenIndex;
 
-procedure DefineIdent(const tokenIndex: TTokenIndex; Name: TIdentifierName; Kind: TTokenKind;
+function DefineIdent(const tokenIndex: TTokenIndex; Name: TIdentifierName; Kind: TTokenKind;
   DataType: TDataType; NumAllocElements: Cardinal; AllocElementType: TDataType; Data: Int64;
-  IdType: TDataType = TDataType.IDENTTOK);
+  IdType: TDataType = TDataType.IDENTTOK): TIdentifier;
 
 function DefineFunction(i: TTokenIndex; ForwardIdentIndex: TIdentIndex; out isForward, isInt, isInl, isOvr: Boolean;
   var IsNestedFunction: Boolean; out NestedFunctionResultType: TDataType;
@@ -80,31 +80,26 @@ var
 
   function Search(const X: TString; const SourceFile: TSourceFile): TIdentIndex;
   var
-    BlockStackIndex: TBlockStackIndex;
-    blockIndex: TBlockIndex;
     block: TBlock;
-    MaxIdentIndex, IdentIndex: TIdentIndex;
+    index: Integer;
     identifier: TIdentifier;
     unitEquals: Boolean;
   begin
 
     Result := 0;
 
+    // WriteLn('Parser.GetIdentIndex('+s+'): BlockStack='+BlockStack.ToString);
+
     // Search all nesting levels from the current one to the most outer one
-    MaxIdentIndex := NumIdent_; // JAC! Speed optimization test
-    for BlockStackIndex := BlockStackTopIndex downto 0 do
+    Block := BlockManager.BlockStack.Top;
+    while (Block <> nil) do
     begin
-      blockIndex := BlockStackGetBlockIndexAt(BlockStackIndex);
-      // block:=blockArray[blockIndex];
-      for IdentIndex := 1 to MaxIdentIndex do
+      for Index := 1 to Block.NumIdentifiers do
       begin
 
-        // JAC! Speed optimization test
-        // identifier := IdentifierAt(IdentIndex);
-        // identifier := IdentifierList.GetIdentifierAtIndex(IdentIndex); )
-        identifier := IdentifierList.identifierArray[IdentIndex];
+        identifier := Block.GetIdentifierAtIndex(index);
 
-        if (X = identifier.Name) and (blockIndex = identifier.BlockIndex) then
+        if (X = identifier.Name) then
         begin
           unitEquals := (identifier.SourceFile.UnitIndex = SYSTEM_UNIT_INDEX) or
             (identifier.SourceFile.UnitIndex = SourceFile.UnitIndex);
@@ -112,7 +107,7 @@ var
           if unitEquals or (identifier.SourceFile.Name = SYSTEM_UNIT_NAME) or
             (identifier.IsSection and SourceFile.IsAllowedUnitName(identifier.SourceFile.Name)) then
           begin
-            Result := IdentIndex;
+            Result := identifier.IdentifierIndex;
             identifier.Pass := Pass;
 
             if unitEquals then exit;
@@ -120,42 +115,39 @@ var
 
         end;
       end;
+      block := Block.ParentBlock;
     end;
+
   end;
 
 
   function SearchCurrenSourceFile(const X: TString; const SourceFile: TSourceFile): Integer;
   var
-    BlockStackIndex: TBlockStackIndex;
-    BlockIndex: TBlockIndex;
-    MaxIdentIndex, IdentIndex: TIdentifierIndex;
+    block: TBlock;
+    index: Integer;
     identifier: TIdentifier;
   begin
 
     Result := 0;
-    MaxIdentIndex := NumIdent_; // JAC! Speed optimization test
-    for BlockStackIndex := BlockStackTopIndex downto 0 do
+    Block := BlockManager.BlockStack.Top;
+    while (Block <> nil) do
     begin
-      blockIndex := BlockStackGetBlockIndexAt(BlockStackIndex);
-
       // Search all nesting levels from the current one to the most outer one
-      for IdentIndex := 1 to MaxIdentIndex do
+      for index := 1 to Block.NumIdentifiers do
       begin
-        // JAC! Speed optimization test
-        // identifier := IdentifierAt(IdentIndex);
-        // identifier := IdentifierList.GetIdentifierAtIndex(IdentIndex); )
-        identifier := IdentifierList.identifierArray[IdentIndex];
+        identifier := Block.GetIdentifierAtIndex(index);
 
-        if (X = identifier.Name) and (blockIndex = identifier.BlockIndex) then
+        if (X = identifier.Name) then
           if (identifier.SourceFile.UnitIndex = SourceFile.UnitIndex) or
             (identifier.IsSection and SourceFile.IsAllowedUnitName(identifier.SourceFile.Name)) then
           begin
-            Result := IdentIndex;
+            Result := identifier.IdentifierIndex;
             identifier.Pass := Pass;
 
             if (identifier.SourceFile.UnitIndex = SourceFile.UnitIndex) then exit;
           end;
       end;
+      block := Block.ParentBlock;
     end;
   end;
 
@@ -177,7 +169,7 @@ begin
   if (Result = 0) then
   begin
     DotIndex := pos('.', S);
-    if (DotIndex > 0) then;
+    if (DotIndex > 0) then
     begin
       // Potentially a reference to a unit/object
       dotPrefix := copy(S, 1, DotIndex - 1);
@@ -1207,7 +1199,7 @@ begin
               end;
             else
 
-               Error(i + 1, TMessage.Create(TErrorCode.CantTakeAddressOfIdentifier,
+              Error(i + 1, TMessage.Create(TErrorCode.CantTakeAddressOfIdentifier,
                 'Can''t take the address of ' + InfoAboutToken(IdentifierAt(IdentIndex).Kind)))
           end;
 
@@ -1423,7 +1415,7 @@ begin
 
     if isError then
     begin
-    Break;
+      Break;
     end;
 
 
@@ -1670,12 +1662,13 @@ end;  //CompileConstExpression
 // ----------------------------------------------------------------------------
 
 
-procedure DefineIdent(const tokenIndex: TTokenIndex; Name: TIdentifierName; Kind: TTokenKind;
+function DefineIdent(const tokenIndex: TTokenIndex; Name: TIdentifierName; Kind: TTokenKind;
   DataType: TDataType; NumAllocElements: TNumAllocElements; AllocElementType: TDataType;
-  Data: Int64; IdType: TDataType = TDataType.IDENTTOK);
+  Data: Int64; IdType: TDataType = TDataType.IDENTTOK): TIdentifier;
 var
   identIndex: Integer;
   identifier: TIdentifier;
+  Block: TBlock;
   NumAllocElements_: Cardinal;
 begin
 
@@ -1692,8 +1685,10 @@ begin
   else
   begin
 
+    block := BlockManager.BlockStack.Top;
+
     Inc(NumIdent_);
-    identifier := IdentifierList.GetIdentifierAtIndex(NumIdent);
+    identifier := IdentifierList.GetIdentifierAtIndex(NumIdent_);
 
     // For debugging
     (*
@@ -1704,15 +1699,16 @@ begin
         ' NumAllocElements=' + IntToStr(NumAllocElements) + ' AllocElementType=' + IntToStr(Ord(AllocElementType)));
     end;
     *)
-    if NumIdent > MAXIDENTS then
+    if NumIdent_ > MAXIDENTS then
     begin
       Error(NumTok, TMessage.Create(TErrorCode.OutOfResources, 'Out of resources, IDENT'));
     end;
 
+    identifier.IdentifierIndex := NumIdent_;
     identifier.Name := Name;
     identifier.Kind := Kind;
     identifier.DataType := DataType;
-    identifier.BlockIndex := BlockStackTopBlockIndex;
+    identifier.BlockIndex := block.blockIndex;
     identifier.NumParams := 0;
     identifier.isAbsolute := False;
     identifier.PassMethod := TParameterPassingMethod.VALPASSING;
@@ -1737,10 +1733,10 @@ begin
     //   if name = 'CH_EOL' then writeln( identifier.Block ,',', identifier.unitindex, ',',  identifier.Section,',', identifier.idType);
 
     if Name <> 'RESULT' then
-      if (NumIdent > NumPredefIdent + 1) and (ActiveSourceFile.UnitIndex = 1) and (pass = TPass.CODE_GENERATION) then
+      if (NumIdent_ > NumPredefIdent + 1) and (ActiveSourceFile.UnitIndex = 1) and (pass = TPass.CODE_GENERATION) then
         if not ((identifier.Pass in [TPass.CALL_DETERMINATION, TPass.CODE_GENERATION]) or
           (identifier.IsAlive)) then
-          NoteForIdentifierNotUsed(tokenIndex, NumIdent);
+          NoteForIdentifierNotUsed(tokenIndex, NumIdent_);
 
     case Kind of
 
@@ -1776,11 +1772,15 @@ begin
         if not OutputDisabled then
         begin
 
-          if (DataType = TDataType.POINTERTOK) and (AllocElementType in [TDataType.RECORDTOK, TDataType.OBJECTTOK]) and (NumAllocElements_ = 0) then begin
+          if (DataType = TDataType.POINTERTOK) and (AllocElementType in [TDataType.RECORDTOK, TDataType.OBJECTTOK]) and
+            (NumAllocElements_ = 0) then
+          begin
 
-	    if NumAllocElements > 0 then IncVarDataSize(tokenIndex, GetDataSize(TDataType.POINTERTOK));		// ^record -> NumAllocElements > 0
+            if NumAllocElements > 0 then IncVarDataSize(tokenIndex, GetDataSize(TDataType.POINTERTOK));
+            // ^record -> NumAllocElements > 0
 
-          end else
+          end
+          else
 
             if DataType in [TDataType.ENUMTOK] then
               IncVarDataSize(tokenIndex, 1)
@@ -1793,15 +1793,16 @@ begin
                 else
                 begin
 
-                  if (identifier.idType = TDataType.ARRAYTOK) and (identifier.isAbsolute = False) and (Elements(NumIdent) = 1) then
-                    // Empty array [0..0] ; [0..0, 0..0] foes not require spaces
+                  if (identifier.idType = TDataType.ARRAYTOK) and (identifier.isAbsolute = False) and
+                    (Elements(NumIdent) = 1) then
+                  // Empty array [0..0] ; [0..0, 0..0] foes not require spaces
                   else
-//                    IncVarDataSize(tokenIndex, Integer(Elements(NumIdent) * GetDataSize(AllocElementType)));
+                  //                    IncVarDataSize(tokenIndex, Integer(Elements(NumIdent) * GetDataSize(AllocElementType)));
 
-	           if IdentifierAt(NumIdent).DataType = TDataType.DEREFERENCEARRAYTOK then
-	             IncVarDataSize(tokenIndex, GetDataSize(TDataType.POINTERTOK))
-	           else
-                     IncVarDataSize(tokenIndex, Integer(Elements(NumIdent) * GetDataSize(AllocElementType)));
+                    if IdentifierAt(NumIdent).DataType = TDataType.DEREFERENCEARRAYTOK then
+                      IncVarDataSize(tokenIndex, GetDataSize(TDataType.POINTERTOK))
+                    else
+                      IncVarDataSize(tokenIndex, Integer(Elements(NumIdent) * GetDataSize(AllocElementType)));
 
                 end;
 
@@ -1843,6 +1844,8 @@ begin
     end;// case
   end;// else
 
+  block.AddIdentifer(identifier);
+  Result := identifier;
 end;  //DefineIdent
 
 
@@ -2775,7 +2778,7 @@ begin
                     i := DefineFunction(i, 0, isForward, isInt, isInl, isOvr, IsNestedFunction,
                       NestedFunctionResultType, NestedFunctionNumAllocElements, NestedFunctionAllocElementType);
 
-                    IdentifierAt(NumIdent).ProcAsBlockIndex := BlockList.AddBlock().BlockIndex;
+                    IdentifierAt(NumIdent).ProcAsBlockIndex := BlockManager.AddBlock().BlockIndex;
 
                     IdentifierAt(NumIdent).IsUnresolvedForward := True;
 
@@ -2883,7 +2886,7 @@ begin
                               IsNestedFunction, NestedFunctionResultType, NestedFunctionNumAllocElements,
                               NestedFunctionAllocElementType);
 
-                            IdentifierAt(NumIdent).ProcAsBlockIndex := BlockList.AddBlock().BlockIndex;
+                            IdentifierAt(NumIdent).ProcAsBlockIndex := BlockManager.AddBlock().BlockIndex;
 
                             IdentifierAt(NumIdent).IsUnresolvedForward := True;
 

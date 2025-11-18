@@ -249,7 +249,7 @@ uses
       // By default the executable is in the folder 'bin/<os>'.
       // For compatibility with previous version we also check that folder and its
       // first and wecond parent folders for the existence of the "lib/system.pas".
-      unitPathList := TPathList.Create;
+      unitPathList := TPathList.Create(True);
       folderPath := ExtractFileDir(ParamStr(0));
       for libFolderLevel := 1 to 3 do
       begin
@@ -638,7 +638,7 @@ uses
     seconds := (GetTickCount64 - StartTime + 500) / 1000;
     {$IFNDEF PAS2JS}
     Writeln(TokenAt(NumTok).SourceLocation.Line, ' lines compiled, ', seconds: 2: 2, ' sec, ',
-      NumTok, ' tokens, ', NumIdent, ' idents, ', blockList.Count, ' blocks, ', NumTypes, ' types');
+      NumTok, ' tokens, ', NumIdent, ' idents, ', BlockManager.BlockList.Count, ' blocks, ', NumTypes, ' types');
     {$ELSE}
    Writeln(IntToStr(TokenAt(NumTok).SourceLocation.Line) + ' lines compiled, ' + FloatToStr(seconds) + ' sec, '
  	   + IntToStr(NumTok) + ' tokens        , ' + IntToStr(NumIdent) + ' idents, '

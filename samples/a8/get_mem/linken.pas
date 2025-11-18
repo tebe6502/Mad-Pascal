@@ -1,4 +1,3 @@
-
 program LinkEcho(intput,output);
 
 uses crt;
@@ -23,6 +22,7 @@ begin
 
    (* Initialize the list and its pointers. *)
    GetMem(FirstElement, sizeof(Element));
+
    FirstElement^.Next := Nil;
    CurrentElement := FirstElement;
 
