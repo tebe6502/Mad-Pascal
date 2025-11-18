@@ -996,7 +996,7 @@ var
 
         end
         else
-          InFile.Seek2(InFile.FilePos() - 1);
+          InFile.SeekBack;
 
       end;
 
@@ -1014,7 +1014,7 @@ var
         if c2 = '$' then
           dir := True
         else
-          InFile.Seek2(InFile.FilePos() - 1);
+          InFile.SeekBack;
 
         repeat            // Skip comments
           InFile.Read(c);
@@ -1040,7 +1040,7 @@ var
           if c2 = '/' then
             ReadSingleLineComment
           else
-            InFile.Seek2(InFile.FilePos() - 1);
+            InFile.SeekBack;
 
         end;
 
@@ -1289,7 +1289,7 @@ var
           begin
             SafeReadChar(ch);
             if ch = '.' then
-              InFile.Seek2(InFile.FilePos() - 1)  // Range ('..') token
+              InFile.SeekBack   // Range ('..') token
             else
             begin        // Fractional part found
               Frac := ReadFractionalPart(ch);
@@ -1500,7 +1500,7 @@ var
               else
               begin
 
-                InFile.Seek2(InFile.FilePos() - 1);
+                InFile.SeekBack;
 
                 AsmFound := True;
 
@@ -1596,7 +1596,7 @@ var
                       ch := #0;
                     end
                     else
-                      InFile.Seek2(InFile.FilePos() - 1);
+                      InFile.SeekBack;
 
                   end;
 
@@ -1779,12 +1779,12 @@ var
 
               Frac := '';
 
-              InFile.Seek2(InFile.FilePos() - 1);
+              InFile.SeekBack;
 
             end
             else
             begin
-              InFile.Seek2(InFile.FilePos() - 1);
+              InFile.SeekBack;
               Line := Line2;
 
               if ch in [':', '>', '<', '.'] then

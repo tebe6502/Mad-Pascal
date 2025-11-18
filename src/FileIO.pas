@@ -71,6 +71,7 @@ type
     function FilePos(): TFilePosition;
     procedure Read(var c: Char);
     procedure Reset(const l: Longint); overload; // l = record size
+    procedure SeekBack; // Seek one character back
     procedure Seek2(const Pos: TFilePosition);
   end;
 
@@ -235,6 +236,7 @@ private
     procedure Reset(); override; overload;
     procedure Reset(const l: Longint); overload;
     procedure Rewrite(); override;
+    procedure SeekBack;
     procedure Seek2(const Pos: TFilePosition);
 
   end;
@@ -276,6 +278,7 @@ type
     function FilePos(): TFilePosition;
     procedure Read(var c: Char);
     procedure Reset(const l: Longint); overload; // l = record size
+    procedure Seekback;
     procedure Seek2(const Pos: TFilePosition);
 
   end;
@@ -695,6 +698,15 @@ begin
 
 end;
 
+procedure TBinaryFile.SeekBack();
+begin
+  {$IFNDEF SIMULATED_FILE_IO}
+  System.Seek(f, FilePos - 1);
+  {$ELSE}
+     Dec(filePosition);
+  {$ENDIF}
+end;
+
 procedure TBinaryFile.Seek2(const Pos: TFilePosition);
 begin
   {$IFNDEF SIMULATED_FILE_IO}
@@ -793,6 +805,10 @@ begin
 end;
 //PROFILE-YES
 
+procedure TCachedBinaryFile.SeekBack();
+begin
+  Dec(filePosition);
+end;
 
 procedure TCachedBinaryFile.Seek2(const Pos: TFilePosition);
 begin
