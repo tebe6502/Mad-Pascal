@@ -140,6 +140,8 @@ type
 
   TParamList = array [1..MAXPARAMS] of TParam;
 
+  TIdentifierName = String;
+
   TBlockStackIndex = Integer;
   TBlockIndex = Integer;
 
@@ -148,13 +150,18 @@ type
   // ----------------------------------------------------------------------------
   // Class TBlock and related containers.
   // ----------------------------------------------------------------------------
+
   TBlock = class
   public
     BlockIndex: TBlockIndex;
+    ParentBlock: TBlock;
 
-    constructor Create;
+    constructor Create(const ParentBlock: TBlock);
     destructor Free;
     procedure AddIdentifer(const identifier: TIdentifier);
+    function NumIdentifiers: Integer;
+    function GetIdentifierAtIndex(const index: Integer): TIdentifier;
+
   private
     NumIdentifiers_: Integer;
     IdentifierArray: array of TIdentifier;
@@ -167,9 +174,10 @@ type
     constructor Create;
     destructor Free;
 
-    procedure Clear;
-    function AddBlock(): TBlock;
+    procedure Clear(const fromIndex: TBlockIndex = 0);
+    function AddBlock(const ParentBlock: TBlock): TBlock;
     function Count: Integer;
+    function GetBlockAtIndex(const blockIndex: TBlockIndex): TBlock;
 
   private
 
@@ -194,6 +202,7 @@ type
     function Top: TBlock;
     function TopIndex: TBlockStackIndex;
     function GetBlockAtIndex(const blockStackIndex: TBlockStackIndex): TBlock;
+    function ToString: String; override;
 
   private
 
@@ -205,7 +214,24 @@ type
 
   end;
 
-  TIdentifierName = String;
+  TBlockManager = class
+  public
+
+  var
+    BlockList: TBlockList;
+    BlockStack: TBlockStack;
+
+    constructor Create;
+    destructor Free;
+    procedure Initialize;
+    function AddBlock: TBlock;
+    function AddAndPushBlock: TBlock;
+
+  private
+  var
+    Block0: TBlock;
+  end;
+
 
   TVariableList = array [1..MAXVARS] of TParam;
   TFieldName = TName;
@@ -361,6 +387,8 @@ type
   TIdentifierIndex = Integer;
 
   TIdentifier = class
+    IdentifierIndex: TIdentifierIndex;
+
     SourceFile: TSourceFile;
     BlockIndex: TBlockIndex;  // Index of a block in which the identifier is defined
     Name: TIdentifierName;
@@ -508,8 +536,9 @@ implementation
 // Class TBlock
 // ----------------------------------------------------------------------------
 
-constructor TBlock.Create;
+constructor TBlock.Create(const ParentBlock: TBlock);
 begin
+  Self.ParentBlock := parentBlock;
   NumIdentifiers_ := 0;
   IdentifierArray := nil;
 end;
@@ -522,8 +551,13 @@ end;
 
 procedure TBlock.AddIdentifer(const identifier: TIdentifier);
 var
+  //  otherIdentifier: TIdentifier;
   capacity: Integer;
 begin
+  // TODO: Why can the same identifier be there in a block multiple times?
+  //  otherIdentifier := GetIdentifier(identifier.Name);
+  //  assert(otherIdentifier = nil);
+
   capacity := Length(IdentifierArray);
   if capacity = 0 then SetLength(IdentifierArray, 10)
   else if NumIdentifiers_ = capacity then SetLength(IdentifierArray, 2 * capacity);
@@ -532,13 +566,22 @@ begin
 end;
 
 
+function TBlock.NumIdentifiers: Integer;
+begin
+  Result := NumIdentifiers_;
+end;
+
+function TBlock.GetIdentifierAtIndex(const index: Integer): TIdentifier;
+begin
+  Result := IdentifierArray[index - 1];
+end;
 
 // ----------------------------------------------------------------------------
 // Class TBlockList
 // ----------------------------------------------------------------------------
 constructor TBlockList.Create;
 begin
-  Count_ := 0;
+  Count_ := -1;
   Array_ := nil;
 end;
 
@@ -547,35 +590,44 @@ begin
   Clear;
 end;
 
-procedure TBlockList.Clear;
+procedure TBlockList.Clear(const fromIndex: TBlockIndex = 0);
 var
   i: Integer;
 begin
   if array_ <> nil then
   begin
-    for i := 0 to Count_ do FreeAndNil(Array_[i]);
-    Array_ := nil;
-    Count_ := 0;
+    for i := fromIndex to Count_ do FreeAndNil(Array_[i]);
+    if (fromIndex = 0) then Array_ := nil;
+    Count_ := fromIndex - 1;
   end;
 end;
 
-function TBlockList.AddBlock: TBlock;
+function TBlockList.AddBlock(const ParentBlock: TBlock): TBlock;
 var
   Capacity: Integer;
 begin
-  Result := TBlock.Create;
+  Inc(Count_);
   Capacity := Length(Array_);
   if capacity = 0 then SetLength(Array_, 256)
   else if Count_ = capacity then SetLength(Array_, 2 * capacity);
-  Array_[Count_] := Result;
-  Inc(Count_);
+  Result := TBlock.Create(ParentBlock);
   Result.BlockIndex := Count_;
+  Array_[Count_] := Result;
+
 end;
 
 function TBlockList.Count: Integer;
 begin
   Result := Count_;
 end;
+
+
+function TBlockList.GetBlockAtIndex(const blockIndex: TBlockIndex): TBlock;
+begin
+  assert((blockIndex >= 0) and (blockIndex <= Count_));
+  Result := Array_[blockIndex];
+end;
+
 
 // ----------------------------------------------------------------------------
 // Class TBlockStack
@@ -593,26 +645,26 @@ end;
 
 procedure TBlockStack.Clear;
 begin
-  topIndex_ := 0;
+  topIndex_ := -1;
   SetLength(array_, 10);
-  array_[0]:=TBlock.Create;
 end;
 
 procedure TBlockStack.Push(const block: TBlock);
 var
   Capacity: Integer;
 begin
-  Capacity := Length(array_); // Never 0
-  if topIndex_ = Capacity then  SetLength(array_, Capacity * 2);
   Inc(topIndex_);
+  Capacity := Length(array_); // Never 0
+  if topIndex_ = Capacity then SetLength(array_, Capacity * 2);
   array_[topIndex_] := block;
 
-  // WriteLn(' TBlockStack.Push: ', block.BlockIndex, ' topIndex=', topIndex_);
+  //if     block.BlockIndex=134 then
+  //WriteLn(' TBlockStack.Push: ', block.BlockIndex, ' topIndex=', topIndex_);
 end;
 
 function TBlockStack.Pop: TBlock;
 begin
-  assert(topIndex_ > 0);
+  assert(topIndex_ >= 0);
   Result := array_[topIndex_];
   Dec(topIndex_);
   // WriteLn(' TBlockStack.Pop: ', Result.BlockIndex, ' topIndex=', topIndex_);
@@ -630,7 +682,54 @@ end;
 
 function TBlockStack.Top: TBlock;
 begin
-    Result := array_[topIndex];
+  Result := array_[topIndex];
+end;
+
+
+function TBlockStack.ToString: String;
+var
+  i: TBlockStackIndex;
+begin
+  Result := '/';
+  for i := 0 to topIndex_ do Result := Result + IntToStr(GetBlockAtIndex(i).BlockIndex) + '/';
+end;
+
+
+// ----------------------------------------------------------------------------
+// Class TBlockManager
+// ----------------------------------------------------------------------------
+
+constructor TBlockManager.Create;
+begin
+  BlockList := TBlockList.Create;
+  BlockStack := TBlockStack.Create;
+  Block0 := BlockList.AddBlock(nil);
+end;
+
+
+destructor TBlockManager.Free;
+begin
+  BlockStack.Free;
+  BlockList.Free;
+end;
+
+
+procedure TBlockManager.Initialize;
+begin
+  BlockStack.Clear;
+  BlockList.Clear(1);
+  BlockStack.Push(block0);
+end;
+
+function TBlockManager.AddBlock: TBlock;
+begin
+  Result := BlockList.AddBlock(BlockStack.Top);
+end;
+
+function TBlockManager.AddAndPushBlock: TBlock;
+begin
+  Result := AddBlock();
+  BlockStack.Push(Result);
 end;
 
 // ----------------------------------------------------------------------------
@@ -827,7 +926,6 @@ begin
   // Result.UnitIndex:=SourceFile.UnitIndex;
   Result.Kind := Kind;
   Result.Value := Value;
-
 
   if i = 1 then
     Column := 1

@@ -6,7 +6,7 @@ unit FileIO;
 
 interface
 
-uses SysUtils, CommonTypes;
+uses SysUtils, CommonTypes, Generics.Collections;
 
   {$SCOPEDENUMS ON}
 
@@ -15,16 +15,32 @@ type
   TFolderPath = TFilePath;
 
 
-  TPathList = class
+  IPathList = interface
+
+    procedure AddFolder(const folderPath: TFolderPath);
+    function FindFile(const filePath: TFilePath): TFilePath;
+    function GetSize: Integer;
+    function ToString: String;
+  end;
+
+  TPathList = class(TInterfacedObject, IPathList)
   public
-    constructor Create;
+    // If the parameter "cached" is true, the results of the FindFile operation will be cached.
+    // Adding an additional folder via "AddFolder" clears the cache.
+    constructor Create(const cached: Boolean = False);
+    destructor Free;
     procedure AddFolder(const folderPath: TFolderPath);
     function FindFile(const filePath: TFilePath): TFilePath;
     function GetSize: Integer;
     function ToString: String; override;
   private
+  type TCachedResult = TDictionary<TFilePath, TFilePath>;
   var
     paths: array of TFilePath;
+    cached: Boolean;
+    cachedResult: TCachedResult;
+
+    function FindFileInternal(const filePath: TFilePath): TFilePath;
   end;
 
 
@@ -55,6 +71,7 @@ type
     function FilePos(): TFilePosition;
     procedure Read(var c: Char);
     procedure Reset(const l: Longint); overload; // l = record size
+    procedure SeekBack; // Seek one character back
     procedure Seek2(const Pos: TFilePosition);
   end;
 
@@ -219,6 +236,7 @@ private
     procedure Reset(); override; overload;
     procedure Reset(const l: Longint); overload;
     procedure Rewrite(); override;
+    procedure SeekBack;
     procedure Seek2(const Pos: TFilePosition);
 
   end;
@@ -260,14 +278,27 @@ type
     function FilePos(): TFilePosition;
     procedure Read(var c: Char);
     procedure Reset(const l: Longint); overload; // l = record size
+    procedure Seekback;
     procedure Seek2(const Pos: TFilePosition);
 
   end;
 
-constructor TPathList.Create;
+constructor TPathList.Create(const cached: Boolean);
 begin
   paths := nil;
   SetLength(paths, 0);
+  self.cached := cached;
+  cachedResult := TCachedResult.Create;
+end;
+
+
+
+destructor TPathList.Free();
+begin
+
+  SetLength(paths, 0);
+  paths := nil;
+  FreeAndNil(cachedResult);
 end;
 
 procedure TPathList.AddFolder(const folderPath: TFolderPath);
@@ -289,9 +320,22 @@ begin
   Inc(size);
   SetLength(paths, size);
   paths[size - 1] := IncludeTrailingPathDelimiter(normalizedFolderPath);
+
+  cachedResult.Clear;
 end;
 
 function TPathList.FindFile(const filePath: TFilePath): TFilePath;
+begin
+  if cachedResult.ContainsKey(filePath) then
+    Result := cachedResult[filePath]
+  else
+  begin
+    Result := FindFileInternal(filePath);
+    cachedResult.Add(filePath, Result);
+  end;
+end;
+
+function TPathList.FindFileInternal(const filePath: TFilePath): TFilePath;
 var
   i: Integer;
 begin
@@ -654,6 +698,15 @@ begin
 
 end;
 
+procedure TBinaryFile.SeekBack();
+begin
+  {$IFNDEF SIMULATED_FILE_IO}
+  System.Seek(f, FilePos - 1);
+  {$ELSE}
+     Dec(filePosition);
+  {$ENDIF}
+end;
+
 procedure TBinaryFile.Seek2(const Pos: TFilePosition);
 begin
   {$IFNDEF SIMULATED_FILE_IO}
@@ -752,6 +805,10 @@ begin
 end;
 //PROFILE-YES
 
+procedure TCachedBinaryFile.SeekBack();
+begin
+  Dec(filePosition);
+end;
 
 procedure TCachedBinaryFile.Seek2(const Pos: TFilePosition);
 begin
@@ -835,11 +892,13 @@ end;
 
 class function TFileSystem.FileExists_(const filePath: TFilePath): Boolean;
 begin
+
   {$IFNDEF SIMULATED_FILE_IO}
   Result := FileExists(filePath);
   {$ELSE}
   Result := fileMap.GetEntry(filePath) <> nil;
   {$ENDIF}
+  // Writeln('TFileSystem.FileExists:' , filePath,' - ',Result);
 end;
 
 class function TFileSystem.FolderExists(const folderPath: TFolderPath): Boolean;
@@ -849,6 +908,7 @@ begin
   {$ELSE}
   Result := fileMap.GetEntry(folderPath) <> nil;
   {$ENDIF}
+  // Writeln('TFileSystem.FolderExists:' , folderPath,' - ',Result);
 end;
 
 class function TFileSystem.NormalizePath(const filePath: TFilePath): TFilePath;

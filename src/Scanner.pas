@@ -66,8 +66,8 @@ begin
 
   Messages.Initialize;
 
-  blockList.Clear;
-  blockStack.Clear;
+  BlockManager.Initialize;
+
   CodeSize := 0;
   CodePosStackTop := 0;
   CaseCnt := 0;
@@ -435,7 +435,7 @@ var
     end;
 
 
-    procedure ReadDirective(d: String; DefineLine: Integer);
+    procedure ReadDirective(const d: String; DefineLine: Integer);
     var
       i, v, x: Integer;
       cmd, s: String;
@@ -445,7 +445,7 @@ var
       Param: TDefineParams;
 
 
-      procedure bin2csv(fn: String);
+      procedure bin2csv(const fn: String);
       var
         bin: IBinaryFile;
         tmp: Byte;
@@ -493,7 +493,7 @@ var
       end;
 
 
-      procedure newMsgUser(Kind: TTokenKind);
+      procedure newMsgUser(const Kind: TTokenKind);
       var
         k: Integer;
       begin
@@ -549,7 +549,8 @@ var
                   else
 
                     if cmd = 'I' then
-                    begin          // {$i filename}
+                    begin
+                      // {$i filename}
                       // {$i+-} iocheck
                       if d[i] = '+' then
                       begin
@@ -996,7 +997,7 @@ var
 
         end
         else
-          InFile.Seek2(InFile.FilePos() - 1);
+          InFile.SeekBack;
 
       end;
 
@@ -1014,7 +1015,7 @@ var
         if c2 = '$' then
           dir := True
         else
-          InFile.Seek2(InFile.FilePos() - 1);
+          InFile.SeekBack;
 
         repeat            // Skip comments
           InFile.Read(c);
@@ -1040,7 +1041,7 @@ var
           if c2 = '/' then
             ReadSingleLineComment
           else
-            InFile.Seek2(InFile.FilePos() - 1);
+            InFile.SeekBack;
 
         end;
 
@@ -1289,7 +1290,7 @@ var
           begin
             SafeReadChar(ch);
             if ch = '.' then
-              InFile.Seek2(InFile.FilePos() - 1)  // Range ('..') token
+              InFile.SeekBack   // Range ('..') token
             else
             begin        // Fractional part found
               Frac := ReadFractionalPart(ch);
@@ -1500,7 +1501,7 @@ var
               else
               begin
 
-                InFile.Seek2(InFile.FilePos() - 1);
+                InFile.SeekBack;
 
                 AsmFound := True;
 
@@ -1596,7 +1597,7 @@ var
                       ch := #0;
                     end
                     else
-                      InFile.Seek2(InFile.FilePos() - 1);
+                      InFile.SeekBack;
 
                   end;
 
@@ -1779,12 +1780,12 @@ var
 
               Frac := '';
 
-              InFile.Seek2(InFile.FilePos() - 1);
+              InFile.SeekBack;
 
             end
             else
             begin
-              InFile.Seek2(InFile.FilePos() - 1);
+              InFile.SeekBack;
               Line := Line2;
 
               if ch in [':', '>', '<', '.'] then
