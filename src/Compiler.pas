@@ -19849,7 +19849,6 @@ procedure Main(const programUnit: TSourceFile; const unitPathList: TPathList);
 var
   scanner: IScanner;
   i: Integer;
-  block0: TBlock;
 begin
 
   Common.unitPathList := unitPathList;

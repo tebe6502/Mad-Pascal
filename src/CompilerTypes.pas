@@ -161,7 +161,7 @@ type
     procedure AddIdentifer(const identifier: TIdentifier);
     function NumIdentifiers: Integer;
     function GetIdentifierAtIndex(const index: Integer): TIdentifier;
-    function GetIdentifier(const Name: TIdentifierName): TIdentifier;
+
   private
     NumIdentifiers_: Integer;
     IdentifierArray: array of TIdentifier;
@@ -574,21 +574,6 @@ end;
 function TBlock.GetIdentifierAtIndex(const index: Integer): TIdentifier;
 begin
   Result := IdentifierArray[index - 1];
-end;
-
-
-// TODO Use map, provided the identifier name is unique inside one block
-function TBlock.GetIdentifier(const Name: TIdentifierName): TIdentifier;
-var
-  index: Integer;
-  identifier: TIdentifier;
-begin
-  for index := 0 to NumIdentifiers_ - 1 do
-  begin
-    identifier := IdentifierArray[index];
-    if identifier.Name = Name then exit(identifier);
-  end;
-  Result := nil;
 end;
 
 // ----------------------------------------------------------------------------
