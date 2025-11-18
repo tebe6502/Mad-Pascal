@@ -435,7 +435,7 @@ var
     end;
 
 
-    procedure ReadDirective(d: String; DefineLine: Integer);
+    procedure ReadDirective(const d: String; DefineLine: Integer);
     var
       i, v, x: Integer;
       cmd, s: String;
@@ -445,7 +445,7 @@ var
       Param: TDefineParams;
 
 
-      procedure bin2csv(fn: String);
+      procedure bin2csv(const fn: String);
       var
         bin: IBinaryFile;
         tmp: Byte;
@@ -493,7 +493,7 @@ var
       end;
 
 
-      procedure newMsgUser(Kind: TTokenKind);
+      procedure newMsgUser(const Kind: TTokenKind);
       var
         k: Integer;
       begin
