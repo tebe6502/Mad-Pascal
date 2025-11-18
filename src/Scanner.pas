@@ -549,7 +549,8 @@ var
                   else
 
                     if cmd = 'I' then
-                    begin          // {$i filename}
+                    begin
+                      // {$i filename}
                       // {$i+-} iocheck
                       if d[i] = '+' then
                       begin
