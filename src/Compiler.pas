@@ -450,13 +450,14 @@ end;  //GetIdentProc
 procedure TestIdentProc(x: Integer; S: TString);
 type
   TOV = record
-    i, j, b: Integer;
+    i, j: Integer;
+    BlockIndex: TBlockIndex;
     SourceFile: TSourceFile;
   end;
 type
   TL = record
     SourceFile: TSourceFile;
-    b: Integer;
+    BlockIndex: TBlockIndex;
     Param: TParamList;
     NumParams: Word;
   end;
@@ -465,20 +466,20 @@ var
   Index: Integer;
   Identifier: TIdentifier;
   i, k, m: Integer;
-  ok: Boolean;
+  sameParameterList: Boolean;
 
   ov: array of TOV;
 
   l: array of TL;
 
 
-  procedure addOverlay(SourceFile: TSourceFile; Block: Integer; ovr: Boolean);
+  procedure addOverlay(SourceFile: TSourceFile; BlockIndex: TBlockIndex; ovr: Boolean);
   var
     i: Integer;
   begin
 
     for i := High(ov) - 1 downto 0 do
-      if (ov[i].SourceFile.UnitIndex = SourceFile.UnitIndex) and (ov[i].b = Block) then
+      if (ov[i].SourceFile.UnitIndex = SourceFile.UnitIndex) and (ov[i].BlockIndex = BlockIndex) then
       begin
 
         Inc(ov[i].i, Ord(ovr));
@@ -490,7 +491,7 @@ var
     i := High(ov);
 
     ov[i].SourceFile := SourceFile;
-    ov[i].b := Block;
+    ov[i].BlockIndex := BlockIndex;
     ov[i].i := Ord(ovr);
     ov[i].j := 1;
 
@@ -510,27 +511,29 @@ begin
   while (block <> nil) do
   begin
 
-    for Index := Block.NumIdentifiers downto 1 do
+    // TODO Can this loop over the identifiers of the block instead?
+    for Index := NumIdent downto 1 do
     begin
-      Identifier := Block.GetIdentifierAtIndex(Index);
+      Identifier := identifierList.GetIdentifierAtIndex(Index);
       if (Identifier.Kind in [TTokenKind.PROCEDURETOK, TTokenKind.FUNCTIONTOK,
-        TTokenKind.CONSTRUCTORTOK, TTokenKind.DESTRUCTORTOK]) and (S = Identifier.Name) then
+        TTokenKind.CONSTRUCTORTOK, TTokenKind.DESTRUCTORTOK]) and (S = Identifier.Name) and
+        (Block.BlockIndex = Identifier.BlockIndex) then
       begin
 
         for k := 0 to High(l) - 1 do
           if (Identifier.NumParams = l[k].NumParams) and (Identifier.SourceFile.UnitIndex =
-            l[k].SourceFile.UnitIndex) and (Identifier.BlockIndex = l[k].b) then
+            l[k].SourceFile.UnitIndex) and (Identifier.BlockIndex = l[k].BlockIndex) then
           begin
 
-            ok := True;
+            sameParameterList := True;
 
             for m := 1 to l[k].NumParams do
             begin
               if (Identifier.Param[m].DataType <> l[k].Param[m].DataType) or
                 (Identifier.Param[m].AllocElementType <> l[k].Param[m].AllocElementType) then
               begin
-                ok := False;
-                Break;
+                sameParameterList := False;
+                Break;  // for
               end;
 
 
@@ -541,16 +544,16 @@ begin
                 16) then
               begin
 
-                //writeln('>',Identifier.NumParams);//,',', l[k].Param[m].NumParams );
+                // writeln('>',Identifier.NumParams);//,',', l[k].Param[m].NumParams );
 
-                ok := False;
-                Break;
+                sameParameterList := False;
+                Break; // for
 
               end;
 
             end;
 
-            if ok then
+            if sameParameterList then
               Error(x, TMessage.Create(TErrorCode.WrongParameterList, 'Overloaded functions ''' +
                 Identifier.Name + ''' have the same parameter list'));
 
@@ -561,7 +564,7 @@ begin
         l[k].NumParams := Identifier.NumParams;
         l[k].Param := Identifier.Param;
         l[k].SourceFile := Identifier.SourceFile;
-        l[k].b := Identifier.BlockIndex;
+        l[k].BlockIndex := Identifier.BlockIndex;
 
         SetLength(l, k + 2);
 
@@ -13014,11 +13017,10 @@ begin
 
                   // dla PROC, FUNC -> IdentifierAt(GetIdentIndex(TokenAt(k).Name)).NumAllocElements -> oznacza liczbe parametrow takiej procedury/funkcji
                     if (VarType in Pointers) and ((ExpressionType in Pointers) and
-                      (TokenAt(k).Kind = TTokenKind.IDENTTOK)) and
-                      (not (IdentifierAt(IdentIndex).AllocElementType in Pointers +
-                      [TDataType.RECORDTOK, TDataType.OBJECTTOK]) and not
-                      (IdentifierAt(GetIdentIndex(TokenAt(k).Name)).AllocElementType in Pointers +
-                      [TDataType.RECORDTOK, TDataType.OBJECTTOK])) then
+                      (TokenAt(k).Kind = TTokenKind.IDENTTOK)) and (not
+                      (IdentifierAt(IdentIndex).AllocElementType in Pointers + [TDataType.RECORDTOK,
+                      TDataType.OBJECTTOK]) and not (IdentifierAt(GetIdentIndex(TokenAt(k).Name)).AllocElementType in
+                      Pointers + [TDataType.RECORDTOK, TDataType.OBJECTTOK])) then
                     begin
 
                       j := Elements(IdentIndex) {IdentifierAt(IdentIndex).NumAllocElements} *
