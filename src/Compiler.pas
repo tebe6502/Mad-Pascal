@@ -16960,31 +16960,28 @@ end;  //FormalParameterList
 procedure CheckForwardResolutions(typ: Boolean = True);
 var
   TypeIndex, IdentIndex: Integer;
-  Name: String;
 begin
 
   // Search for unresolved forward references
   for TypeIndex := 1 to NumIdent do
-    if (IdentifierAt(TypeIndex).AllocElementType = TDataType.FORWARDTYPE) and
-      (IdentifierAt(TypeIndex).BlockIndex = BlockStackTopBlockIndex) then
+    if (IdentifierAt(TypeIndex).AllocElementType = TDataType.FORWARDTYPE) and (IdentifierAt(TypeIndex).BlockIndex = BlockStackTopBlockIndex) then
     begin
 
-      Name := IdentifierAt(GetIdentIndex(TokenAt(IdentifierAt(TypeIndex).NumAllocElements).Name)).Name;
+      IdentIndex := GetIdentIndex(TokenAt(IdentifierAt(TypeIndex).NumAllocElements).Name);
 
-      if IdentifierAt(GetIdentIndex(TokenAt(IdentifierAt(TypeIndex).NumAllocElements).Name)).Kind =
-        TTokenKind.TYPETOK then
-
-        for IdentIndex := 1 to NumIdent do
-          if (IdentifierAt(IdentIndex).Name = Name) and (IdentifierAt(IdentIndex).BlockIndex =
-            BlockStackTopBlockIndex) then
-          begin
+      if IdentifierAt(IdentIndex).Kind = TTokenKind.TYPETOK then
+      begin
 
             IdentifierAt(TypeIndex).NumAllocElements := IdentifierAt(IdentIndex).NumAllocElements;
             IdentifierAt(TypeIndex).NumAllocElements_ := IdentifierAt(IdentIndex).NumAllocElements_;
             IdentifierAt(TypeIndex).AllocElementType := IdentifierAt(IdentIndex).DataType;
 
-            Break;
-          end;
+	    if (IdentifierAt(TypeIndex).DataType = TDataType.POINTERTOK) and (IdentifierAt(TypeIndex).AllocElementType = TDataType.POINTERTOK) then 
+	    begin
+	      IdentifierAt(TypeIndex).DataType := TDataType.DEREFERENCEARRAYTOK;
+	      IdentifierAt(TypeIndex).AllocElementType := IdentifierAt(IdentIndex).AllocElementType;
+	    end;
+      end;
 
     end;
 
@@ -16992,13 +16989,12 @@ begin
   // Search for unresolved forward references
   for TypeIndex := 1 to NumIdent do
     if (IdentifierAt(TypeIndex).AllocElementType = TDataType.FORWARDTYPE) and
-      (IdentifierAt(TypeIndex).BlockIndex = BlockStackTopBlockIndex) then
+       (IdentifierAt(TypeIndex).BlockIndex = BlockStackTopBlockIndex) then
 
       if typ then
         Error(TypeIndex, 'Unresolved forward reference to type ' + IdentifierAt(TypeIndex).Name)
       else
-        Error(TypeIndex, 'Identifier not found "' + IdentifierAt(
-          GetIdentIndex(TokenAt(IdentifierAt(TypeIndex).NumAllocElements).Name)).Name + '"');
+        Error(TypeIndex, 'Identifier not found "' + IdentifierAt(GetIdentIndex(TokenAt(IdentifierAt(TypeIndex).NumAllocElements).Name)).Name + '"');
 
 end;  //CheckForwardResolutions
 
@@ -18604,8 +18600,7 @@ begin
                 varPassMethod := IdentifierAt(GetIdentIndex(TokenAt(i + 1).Name)).PassMethod;
 
                 if (ConstVal < 0) or (ConstVal > $FFFFFF) then
-                  Error(i, 'Range check error while evaluating constants (' + IntToStr(ConstVal) +
-                    ' must be between 0 and ' + IntToStr($FFFFFF) + ')');
+                  Error(i, 'Range check error while evaluating constants (' + IntToStr(ConstVal) + ' must be between 0 and ' + IntToStr($FFFFFF) + ')');
 
 
                 ConstVal := -ConstVal;
@@ -18622,8 +18617,7 @@ begin
                   CheckCommonConstType(i, TDataType.CARDINALTOK, ActualParamType);
 
                 if (ConstVal < 0) or (ConstVal > $FFFFFF) then
-                  Error(i, 'Range check error while evaluating constants (' + IntToStr(ConstVal) +
-                    ' must be between 0 and ' + IntToStr($FFFFFF) + ')');
+                  Error(i, 'Range check error while evaluating constants (' + IntToStr(ConstVal) + ' must be between 0 and ' + IntToStr($FFFFFF) + ')');
               end;
 
               Inc(ConstVal);   // wyjatkowo, aby mozna bylo ustawic adres $0000, DefineIdent zmniejszy wartosc -1
@@ -18657,8 +18651,7 @@ begin
           if VarType = TDataType.ENUMTOK then
           begin
 
-            DefineIdent(i, VarOfSameType[VarOfSameTypeIndex].Name, TTokenKind.VARTOK, AllocElementType, 0,
-              TDataType.UNTYPETOK, 0, IdType);
+            DefineIdent(i, VarOfSameType[VarOfSameTypeIndex].Name, TTokenKind.VARTOK, AllocElementType, 0, TDataType.UNTYPETOK, 0, IdType);
 
             IdentifierAt(NumIdent).DataType := TDataType.ENUMTOK;
             IdentifierAt(NumIdent).AllocElementType := AllocElementType;
@@ -18703,8 +18696,9 @@ begin
             //    writeln(VarType, ' / ', AllocElementType ,' = ',NestedDataType, ',',NestedAllocElementType,',', hexStr(NestedNumAllocElements,8),',',hexStr(NumAllocElements,8));
 
 
-            if (VarType = TDataType.POINTERTOK) and (AllocElementType = TDataType.STRINGPOINTERTOK) and
-              (NestedNumAllocElements > 0) and (NumAllocElements > 1) then
+            if (VarType = TDataType.POINTERTOK) and 
+	       (AllocElementType = TDataType.STRINGPOINTERTOK) and
+               (NestedNumAllocElements > 0) and (NumAllocElements > 1) then
             begin  // array [ ][ ] of string;
 
 
@@ -18928,8 +18922,7 @@ begin
                         end
                         else
                         begin
-                          i := ReadDataOpenArray(i, idx, IdentifierAt(NumIdent).AllocElementType,
-                            NumAllocElements, False, TokenAt(i - 2).Kind = TTokenKind.PCHARTOK);
+                          i := ReadDataOpenArray(i, idx, IdentifierAt(NumIdent).AllocElementType, NumAllocElements, False, TokenAt(i - 2).Kind = TTokenKind.PCHARTOK);
 
                           IdentifierAt(NumIdent).NumAllocElements := NumAllocElements;
                         end;
@@ -18959,8 +18952,7 @@ begin
                         end
                         else
                           i := ReadDataArray(i, idx, IdentifierAt(NumIdent).AllocElementType,
-                            IdentifierAt(NumIdent).NumAllocElements or IdentifierAt(NumIdent).NumAllocElements_ shl
-                            16, False, TokenAt(i - 2).Kind = TTokenKind.PCHARTOK);
+                            IdentifierAt(NumIdent).NumAllocElements or IdentifierAt(NumIdent).NumAllocElements_ shl 16, False, TokenAt(i - 2).Kind = TTokenKind.PCHARTOK);
 
                       end;
 
@@ -18973,8 +18965,7 @@ begin
         isVolatile := False;
         isStriped := False;
 
-        if (TokenAt(i + 2).Kind = TTokenKind.OBRACKETTOK) and (TokenAt(i + 3).Kind in
-          [TTokenKind.VOLATILETOK, TTokenKind.STRIPEDTOK]) then
+        if (TokenAt(i + 2).Kind = TTokenKind.OBRACKETTOK) and (TokenAt(i + 3).Kind in [TTokenKind.VOLATILETOK, TTokenKind.STRIPEDTOK]) then
         begin
           CheckTok(i + 4, TTokenKind.CBRACKETTOK);
 
@@ -18996,8 +18987,7 @@ begin
     end;// if TTokenKind.VARTOK
 
 
-    if TokenAt(i).Kind in [TTokenKind.PROCEDURETOK, TTokenKind.FUNCTIONTOK, TTokenKind.CONSTRUCTORTOK,
-      TTokenKind.DESTRUCTORTOK] then
+    if TokenAt(i).Kind in [TTokenKind.PROCEDURETOK, TTokenKind.FUNCTIONTOK, TTokenKind.CONSTRUCTORTOK, TTokenKind.DESTRUCTORTOK] then
       if TokenAt(i + 1).Kind <> TTokenKind.IDENTTOK then
         Error(i + 1, 'Procedure name expected but ' + tokenList.GetTokenSpellingAtIndex(i + 1) + ' found')
       else
@@ -19114,8 +19104,7 @@ begin
             begin
 
               if IdentifierAt(ForwardIdentIndex).NumParams <> ParamIndex then
-                Error(i, 'Wrong number of parameters specified for call to ' + '''' +
-                  IdentifierAt(ForwardIdentIndex).Name + '''');
+                Error(i, 'Wrong number of parameters specified for call to ' + '''' + IdentifierAt(ForwardIdentIndex).Name + '''');
 
               //     function header "arg1" doesn't match forward : var name changes arg2 = arg3
 
@@ -19123,13 +19112,11 @@ begin
                 if ((IdentifierAt(ForwardIdentIndex).Param[ParamIndex].Name <> Param[ParamIndex].Name) or
                   (IdentifierAt(ForwardIdentIndex).Param[ParamIndex].DataType <> Param[ParamIndex].DataType)) then
                   Error(i, 'Function header ''' + IdentifierAt(ForwardIdentIndex).Name +
-                    ''' doesn''t match forward : ' + IdentifierAt(ForwardIdentIndex).Param[ParamIndex].Name +
-                    ' <> ' + Param[ParamIndex].Name);
+                    ''' doesn''t match forward : ' + IdentifierAt(ForwardIdentIndex).Param[ParamIndex].Name + ' <> ' + Param[ParamIndex].Name);
 
               for ParamIndex := 1 to IdentifierAt(ForwardIdentIndex).NumParams do
                 if (IdentifierAt(ForwardIdentIndex).Param[ParamIndex].PassMethod <> Param[ParamIndex].PassMethod) then
-                  Error(i, 'Function header doesn''t match the previous declaration ''' +
-                    IdentifierAt(ForwardIdentIndex).Name + '''');
+                  Error(i, 'Function header doesn''t match the previous declaration ''' + IdentifierAt(ForwardIdentIndex).Name + '''');
 
             end;
 
@@ -19146,16 +19133,14 @@ begin
 
             if Tmp <> TmpResult then
               // TODO: List the difference in the modifiers
-              Error(i, 'Function header doesn''t match the previous declaration ''' +
-                IdentifierAt(ForwardIdentIndex).Name + '''. Different modifiers.');
+              Error(i, 'Function header doesn''t match the previous declaration ''' + IdentifierAt(ForwardIdentIndex).Name + '''. Different modifiers.');
 
 
             if IsNestedFunction then
               if (IdentifierAt(ForwardIdentIndex).DataType <> NestedFunctionResultType) or
                 (IdentifierAt(ForwardIdentIndex).NestedFunctionNumAllocElements <> NestedFunctionNumAllocElements) or
                 (IdentifierAt(ForwardIdentIndex).NestedFunctionAllocElementType <> NestedFunctionAllocElementType) then
-                Error(i, 'Function header doesn''t match the previous declaration ''' +
-                  IdentifierAt(ForwardIdentIndex).Name + '''');
+                Error(i, 'Function header doesn''t match the previous declaration ''' + IdentifierAt(ForwardIdentIndex).Name + '''');
 
 
             CheckTok(i + 2, TTokenKind.SEMICOLONTOK);
@@ -19196,8 +19181,7 @@ begin
   end;// while
 
 
-  OutputDisabled := (Pass = TPass.CODE_GENERATION) and (BlockStackTopBlockIndex <> 1) and
-    (not IdentifierAt(BlockIdentIndex).IsAlive);
+  OutputDisabled := (Pass = TPass.CODE_GENERATION) and (BlockStackTopBlockIndex <> 1) and (not IdentifierAt(BlockIdentIndex).IsAlive);
 
 
   // asm65('@main');
@@ -19242,8 +19226,7 @@ end;
   while (j > 0) and (IdentifierAt(j).BlockIndex = BlockStackTopBlockIndex) do
   begin
     // If procedure or function, delete parameters first
-    if IdentifierAt(j).Kind in [TTokenKind.PROCEDURETOK, TTokenKind.FUNCTIONTOK,
-      TTokenKind.CONSTRUCTORTOK, TTokenKind.DESTRUCTORTOK] then
+    if IdentifierAt(j).Kind in [TTokenKind.PROCEDURETOK, TTokenKind.FUNCTIONTOK, TTokenKind.CONSTRUCTORTOK, TTokenKind.DESTRUCTORTOK] then
       if IdentifierAt(j).IsUnresolvedForward and (IdentifierAt(j).isExternal = False) then
         Error(i, 'Unresolved forward declaration of ' + IdentifierAt(j).Name);
 
@@ -19264,8 +19247,7 @@ end;
     if IdentifierAt(BlockIdentIndex).isStdCall or IdentifierAt(BlockIdentIndex).isRecursion then
     begin
 
-      Push(IdentifierAt(GetIdentIndex('RESULT')).Value, ASPOINTER, GetDataSize(FunctionResultType),
-        GetIdentIndex('RESULT'));
+      Push(IdentifierAt(GetIdentIndex('RESULT')).Value, ASPOINTER, GetDataSize(FunctionResultType), GetIdentIndex('RESULT'));
 
       asm65;
 
@@ -19284,8 +19266,7 @@ end;
 
   end;
 
-  if IdentifierAt(BlockIdentIndex).Kind in [TTokenKind.PROCEDURETOK, TTokenKind.FUNCTIONTOK,
-    TTokenKind.CONSTRUCTORTOK, TTokenKind.DESTRUCTORTOK] then
+  if IdentifierAt(BlockIdentIndex).Kind in [TTokenKind.PROCEDURETOK, TTokenKind.FUNCTIONTOK, TTokenKind.CONSTRUCTORTOK, TTokenKind.DESTRUCTORTOK] then
   begin
 
     if IdentifierAt(BlockIdentIndex).isInline then asm65(#9'.ENDM');
@@ -19297,9 +19278,10 @@ end;
   BlockManager.BlockStack.Pop;
 
   if pass = TPass.CALL_DETERMINATION then
-    if IdentifierAt(BlockIdentIndex).isKeep or IdentifierAt(BlockIdentIndex).isInterrupt or
-      IdentifierAt(BlockIdentIndex).updateResolvedForward then
-      AddCallGraphChild(BlockStackTopBlockIndex, IdentifierAt(BlockIdentIndex).ProcAsBlockIndex);
+    if IdentifierAt(BlockIdentIndex).isKeep or 
+       IdentifierAt(BlockIdentIndex).isInterrupt or
+       IdentifierAt(BlockIdentIndex).updateResolvedForward then
+         AddCallGraphChild(BlockStackTopBlockIndex, IdentifierAt(BlockIdentIndex).ProcAsBlockIndex);
 
 
   //Result := j;
@@ -19581,8 +19563,7 @@ begin
   while (j > 0) and (IdentifierAt(j).SourceFile.UnitIndex = 1) do
   begin
     // If procedure or function, delete parameters first
-    if IdentifierAt(j).Kind in [TTokenKind.PROCEDURETOK, TTokenKind.FUNCTIONTOK,
-      TTokenKind.CONSTRUCTORTOK, TTokenKind.DESTRUCTORTOK] then
+    if IdentifierAt(j).Kind in [TTokenKind.PROCEDURETOK, TTokenKind.FUNCTIONTOK, TTokenKind.CONSTRUCTORTOK, TTokenKind.DESTRUCTORTOK] then
       if (IdentifierAt(j).IsUnresolvedForward) and (IdentifierAt(j).isExternal = False) then
         Error(j, 'Unresolved forward declaration of ' + IdentifierAt(j).Name);
 
@@ -19707,8 +19688,7 @@ end;
             end
             else
 
-              Error(NumTok, 'Resource identifier not found: Type = ' + resArray[i].resType +
-                ', Name = ' + resArray[i].resName);
+              Error(NumTok, 'Resource identifier not found: Type = ' + resArray[i].resType + ', Name = ' + resArray[i].resName);
 
     //  asm65(#9+resArray[i].resType+' '''+resArray[i].resFile+''''+','+resArray[i].resName);
 
@@ -19870,13 +19850,10 @@ begin
 
   // Initilize identifiers for predefined constants
 
-  DefineIdent(tokenIndex, 'BLOCKREAD', TTokenKind.FUNCTIONTOK, TDataType.INTEGERTOK, 0,
-    TDataType.UNTYPETOK, $00000000);
-  DefineIdent(tokenIndex, 'BLOCKWRITE', TTokenKind.FUNCTIONTOK, TDataType.INTEGERTOK, 0,
-    TDataType.UNTYPETOK, $00000000);
+  DefineIdent(tokenIndex, 'BLOCKREAD', TTokenKind.FUNCTIONTOK, TDataType.INTEGERTOK, 0, TDataType.UNTYPETOK, $00000000);
+  DefineIdent(tokenIndex, 'BLOCKWRITE', TTokenKind.FUNCTIONTOK, TDataType.INTEGERTOK, 0, TDataType.UNTYPETOK, $00000000);
 
-  DefineIdent(tokenIndex, 'GETRESOURCEHANDLE', TTokenKind.FUNCTIONTOK, TDataType.INTEGERTOK,
-    0, TDataType.UNTYPETOK, $00000000);
+  DefineIdent(tokenIndex, 'GETRESOURCEHANDLE', TTokenKind.FUNCTIONTOK, TDataType.INTEGERTOK, 0, TDataType.UNTYPETOK, $00000000);
 
   DefineIdent(tokenIndex, 'NIL', TTokenKind.CONSTTOK, TDataType.POINTERTOK, 0, TDataType.UNTYPETOK, CODEORIGIN);
 
@@ -19892,10 +19869,8 @@ begin
 
   DefineIdent(tokenIndex, 'PI', TTokenKind.CONSTTOK, TDataType.REALTOK, 0, TDataType.UNTYPETOK, PI_VALUE);
   DefineIdent(tokenIndex, 'NAN', TTokenKind.CONSTTOK, TDataType.SINGLETOK, 0, TDataType.UNTYPETOK, NAN_VALUE);
-  DefineIdent(tokenIndex, 'INFINITY', TTokenKind.CONSTTOK, TDataType.SINGLETOK, 0,
-    TDataType.UNTYPETOK, INFINITY_VALUE);
-  DefineIdent(tokenIndex, 'NEGINFINITY', TTokenKind.CONSTTOK, TDataType.SINGLETOK, 0,
-    TDataType.UNTYPETOK, NEGINFINITY_VALUE);
+  DefineIdent(tokenIndex, 'INFINITY', TTokenKind.CONSTTOK, TDataType.SINGLETOK, 0, TDataType.UNTYPETOK, INFINITY_VALUE);
+  DefineIdent(tokenIndex, 'NEGINFINITY', TTokenKind.CONSTTOK, TDataType.SINGLETOK, 0, TDataType.UNTYPETOK, NEGINFINITY_VALUE);
 end;
 
 // ----------------------------------------------------------------------------
