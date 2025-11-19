@@ -6468,32 +6468,8 @@ end;  //GenerateRelation
 // The following functions implement recursive descent parser in accordance with Sub-Pascal EBNF
 // Parameter i is the index of the first token of the current EBNF symbol, result is the index of the last one
 
-function CompileExpression(i: TTokenIndex; out ValType: TDataType;
-  VarType: TDataType = TDataType.INTEGERTOK): TTokenIndex; forward;
+function CompileExpression(i: TTokenIndex; out ValType: TDataType; VarType: TDataType = TDataType.INTEGERTOK): TTokenIndex; forward;
 
-
-// ----------------------------------------------------------------------------
-// ----------------------------------------------------------------------------
-
-{
-procedure InfoAboutArray(IdentIndex: Integer; c: Boolean = false);
-var t: string;
-begin
-
-  if c then
-   t := ' Const'
-  else
-   t := '';
-
-  asm65;
-
-  if IdentifierAt(IdentIndex).NumAllocElements_ > 0 then
-   asm65(';' + t + ' Array index '+IdentifierAt(IdentIndex).Name+'[0..'+IntToStr(IdentifierAt(IdentIndex).NumAllocElements - 1)+', 0..'+IntToStr(IdentifierAt(IdentIndex).NumAllocElements_ - 1)+']')
-  else
-   asm65(';' + t + ' Array index '+IdentifierAt(IdentIndex).Name+'[0..'+IntToStr(IdentifierAt(IdentIndex).NumAllocElements - 1)+']');
-
-end;
-}
 
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
@@ -7737,12 +7713,10 @@ begin
 
                 if IdentifierAt(IdentTemp).PassMethod <> TParameterPassingMethod.VARPASSING then
 
-                  if IdentifierAt(IdentIndex).Param[NumActualParams].DataType in
-                    [TDataType.RECORDTOK, TDataType.OBJECTTOK] then
-                    Error(i, TMessage.Create(TErrorCode.IncompatibleTypes,
-                      'Incompatible types: got "{0}" expected "^{1}".', GetTypeAtIndex(
-                      IdentifierAt(IdentTemp).NumAllocElements).Field[0].Name, GetTypeAtIndex(
-                      IdentifierAt(IdentIndex).Param[NumActualParams].NumAllocElements).Field[0].Name))
+                  if IdentifierAt(IdentIndex).Param[NumActualParams].DataType in [TDataType.RECORDTOK, TDataType.OBJECTTOK] then
+                    Error(i, TMessage.Create(TErrorCode.IncompatibleTypes, 'Incompatible types: got "{0}" expected "^{1}".', 
+		      GetTypeAtIndex(IdentifierAt(IdentTemp).NumAllocElements).Field[0].Name, 
+		      GetTypeAtIndex(IdentifierAt(IdentIndex).Param[NumActualParams].NumAllocElements).Field[0].Name))
                   else
                     CheckCommonType(i, IdentifierAt(IdentIndex).Param[NumActualParams].DataType,
                       IdentifierAt(IdentTemp).DataType);
