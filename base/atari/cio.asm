@@ -71,8 +71,6 @@ code	equ *-1
 
 	m@call	ciov
 
-	bpl ok
-
 error	sty MAIN.SYSTEM.IOResult
 
 	bpl ok
