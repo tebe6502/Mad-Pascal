@@ -1007,11 +1007,11 @@ begin
           else
             if IdentifierAt(IdentIndex).DataType in Pointers then
             begin
-              Error(j, TMessage.Create(TErrorCode.IllegalTypeConversion, 'Illegal type conversion: "' +
-                InfoAboutDataType(ConstValType) + '" to "' + TokenAt(i).Name + '"'));
+              Error(j, TMessage.Create(TErrorCode.IllegalTypeConversion, 'Illegal type conversion: "' + InfoAboutDataType(ConstValType) + '" to "' + TokenAt(i).Name + '"'));
             end;
 
           ConstValType := IdentifierAt(GetIdentIndex(TokenAt(i).Name)).DataType;
+
           if ConstValType = TDataType.ENUMTOK then ConstValType := IdentifierAt(IdentIndex).AllocElementType;
 
           CheckTok(j + 1, TTokenKind.CPARTOK);
@@ -1057,8 +1057,7 @@ begin
                 case GetDataSize(ConstValType) of
                   1: ConstVal := GetStaticValue(0 + Ord(IdentifierAt(IdentIndex).idType = TDataType.PCHARTOK));
                   2: ConstVal := GetStaticValue(0) + GetStaticValue(1) shl 8;
-                  4: ConstVal := GetStaticValue(0) + GetStaticValue(1) shl 8 + GetStaticValue(2) shl
-                      16 + GetStaticValue(3) shl 24;
+                  4: ConstVal := GetStaticValue(0) + GetStaticValue(1) shl 8 + GetStaticValue(2) shl 16 + GetStaticValue(3) shl 24;
                 end;
 
                 if ConstValType in [TDataType.HALFSINGLETOK, TDataType.SINGLETOK] then ConstVal := ConstVal shl 32;
@@ -1122,10 +1121,8 @@ begin
               begin        // wyjatek gdy ABSOLUTE
 
                 if (abs(IdentifierAt(IdentIndex).Value) and $ff = 0) and
-                  (Byte(abs(IdentifierAt(IdentIndex).Value shr 24) and $7f) in [1..127]) or
-                  ((IdentifierAt(IdentIndex).DataType in Pointers) and
-                  (IdentifierAt(IdentIndex).AllocElementType <> TDataType.UNTYPETOK) and
-                  (IdentifierAt(IdentIndex).NumAllocElements in [0..1])) then
+                  (Byte(abs(IdentifierAt(IdentIndex).Value shr 24) and $7f) in [1..127]) or ((IdentifierAt(IdentIndex).DataType in Pointers) and
+                  (IdentifierAt(IdentIndex).AllocElementType <> TDataType.UNTYPETOK) and (IdentifierAt(IdentIndex).NumAllocElements in [0..1])) then
                 begin
 
                   _isError := True;
@@ -1161,8 +1158,7 @@ begin
                 //  writeln(IdentifierAt(IdentIndex).name,',',IdentifierAt(IdentIndex).DataType,',',IdentifierAt(IdentIndex).AllocElementType,' / ',ConstVal);
 
                 if (IdentifierAt(IdentIndex).DataType in Pointers) and          // zadziala tylko dla ABSOLUTE
-                   (IdentifierAt(IdentIndex).NumAllocElements > 0) and
-		   (TokenAt(i + 2).Kind = TTokenKind.OBRACKETTOK) then
+                   (IdentifierAt(IdentIndex).NumAllocElements > 0) and (TokenAt(i + 2).Kind = TTokenKind.OBRACKETTOK) then
                 begin
                   j := CompileConstExpression(i + 3, ArrayIndex, ArrayIndexType);      // Array index [xx,
 
