@@ -1161,7 +1161,7 @@ begin
                 //  writeln(IdentifierAt(IdentIndex).name,',',IdentifierAt(IdentIndex).DataType,',',IdentifierAt(IdentIndex).AllocElementType,' / ',ConstVal);
 
                 if (IdentifierAt(IdentIndex).DataType in Pointers) and          // zadziala tylko dla ABSOLUTE
-                   (IdentifierAt(IdentIndex).NumAllocElements > 0) and 
+                   (IdentifierAt(IdentIndex).NumAllocElements > 0) and
 		   (TokenAt(i + 2).Kind = TTokenKind.OBRACKETTOK) then
                 begin
                   j := CompileConstExpression(i + 3, ArrayIndex, ArrayIndexType);      // Array index [xx,
@@ -1725,14 +1725,12 @@ begin
 
     if Name <> 'RESULT' then
       if (NumIdent_ > NumPredefIdent + 1) and (ActiveSourceFile.UnitIndex = 1) and (pass = TPass.CODE_GENERATION) then
-        if not ((identifier.Pass in [TPass.CALL_DETERMINATION, TPass.CODE_GENERATION]) or
-          (identifier.IsAlive)) then
+        if not ((identifier.Pass in [TPass.CALL_DETERMINATION, TPass.CODE_GENERATION]) or (identifier.IsAlive)) then
           NoteForIdentifierNotUsed(tokenIndex, NumIdent_);
 
     case Kind of
 
-      TTokenKind.PROCEDURETOK, TTokenKind.FUNCTIONTOK, TTokenKind.UNITTOK, TTokenKind.CONSTRUCTORTOK,
-      TTokenKind.DESTRUCTORTOK:
+      TTokenKind.PROCEDURETOK, TTokenKind.FUNCTIONTOK, TTokenKind.UNITTOK, TTokenKind.CONSTRUCTORTOK, TTokenKind.DESTRUCTORTOK:
       begin
         identifier.Value := CodeSize;      // Procedure entry point address
         //      identifier.Section := true;
@@ -2501,8 +2499,7 @@ begin
           end
           else
 
-            if (IdentIndex > 0) and (IdentifierAt(IdentIndex).DataType in
-              [TDataType.RECORDTOK, TDataType.OBJECTTOK] + Pointers) then
+            if (IdentIndex > 0) and (IdentifierAt(IdentIndex).DataType in [TDataType.RECORDTOK, TDataType.OBJECTTOK] + Pointers) then
             begin
               NumAllocElements := IdentifierAt(IdentIndex).NumAllocElements;
 
@@ -2529,8 +2526,7 @@ begin
                 end
                 else
                 begin
-                  NumAllocElements := IdentifierAt(IdentIndex).NumAllocElements or
-                    (IdentifierAt(IdentIndex).NumAllocElements_ shl 16);
+                  NumAllocElements := IdentifierAt(IdentIndex).NumAllocElements or (IdentifierAt(IdentIndex).NumAllocElements_ shl 16);
                   AllocElementType := IdentifierAt(IdentIndex).AllocElementType;
                   DataType := TDataType.DEREFERENCEARRAYTOK;
                 end;
@@ -2538,8 +2534,7 @@ begin
               end
               else
               begin
-                NumAllocElements := IdentifierAt(IdentIndex).NumAllocElements or
-                  (IdentifierAt(IdentIndex).NumAllocElements_ shl 16);
+                NumAllocElements := IdentifierAt(IdentIndex).NumAllocElements or (IdentifierAt(IdentIndex).NumAllocElements_ shl 16);
                 AllocElementType := IdentifierAt(IdentIndex).DataType;
               end;
 
@@ -2570,7 +2565,7 @@ begin
     // -----------------------------------------------------------------------------
 
       if TokenAt(i).Kind = TTokenKind.OPARTOK then
-      begin          // enumerated
+      begin         									 // enumerated
 
         Name := TokenAt(i - 2).Name;
 
@@ -2675,7 +2670,7 @@ begin
       // -----------------------------------------------------------------------------
 
         if TokenAt(i).Kind = TTokenKind.TEXTFILETOK then
-        begin          // TextFile
+        begin											// TextFile
 
           AllocElementType := TDataType.BYTETOK;
           NumAllocElements := 1;
@@ -2691,7 +2686,7 @@ begin
         // -----------------------------------------------------------------------------
 
           if TokenAt(i).Kind = TTokenKind.FILETOK then
-          begin          // File
+          begin											// File
 
             if TokenAt(i + 1).Kind = TTokenKind.OFTOK then
               i := CompileType(i + 2, DataType, NumAllocElements, AllocElementType)
@@ -2712,7 +2707,7 @@ begin
           // -----------------------------------------------------------------------------
 
             if TokenAt(i).Kind = TTokenKind.SETTOK then
-            begin          // Set Of
+            begin										// Set Of
 
               CheckTok(i + 1, TTokenKind.OFTOK);
 
@@ -2733,7 +2728,7 @@ begin
             //        OBJECT
             // -----------------------------------------------------------------------------
 
-              if TokenAt(i).Kind = TTokenKind.OBJECTTOK then          // Object
+              if TokenAt(i).Kind = TTokenKind.OBJECTTOK then					// Object
               begin
 
                 Name := TokenAt(i - 2).Name;
@@ -2905,7 +2900,7 @@ begin
 
                 if (TokenAt(i).Kind = TTokenKind.RECORDTOK) or
                   ((TokenAt(i).Kind = TTokenKind.PACKEDTOK) and (TokenAt(i + 1).Kind = TTokenKind.RECORDTOK)) then
-                  // Record
+                  										// Record
                 begin
 
                   Name := TokenAt(i - 2).Name;
@@ -2993,8 +2988,7 @@ begin
                   AllocElementType := TDataType.UNTYPETOK;
 
                   if GetTypeAtIndex(RecType).Size > 256 then
-                    Error(i, TMessage.Create(TErrorCode.RecordSizeExceedsLimit,
-                      'Record size {0} exceeds the 256 bytes limit.', IntToStr(GetTypeAtIndex(RecType).Size)));
+                    Error(i, TMessage.Create(TErrorCode.RecordSizeExceedsLimit, 'Record size {0} exceeds the 256 bytes limit.', IntToStr(GetTypeAtIndex(RecType).Size)));
 
                   Result := i;
                 end
@@ -3004,7 +2998,7 @@ begin
                 //        PCHAR
                 // -----------------------------------------------------------------------------
 
-                  if TokenAt(i).Kind = TTokenKind.PCHARTOK then            // PChar
+                  if TokenAt(i).Kind = TTokenKind.PCHARTOK then						// PChar
                   begin
 
                     DataType := TDataType.POINTERTOK;
@@ -3020,7 +3014,7 @@ begin
                   //        STRING
                   // -----------------------------------------------------------------------------
 
-                    if TokenAt(i).Kind = TTokenKind.STRINGTOK then          // String
+                    if TokenAt(i).Kind = TTokenKind.STRINGTOK then					// String
                     begin
                       DataType := TDataType.STRINGPOINTERTOK;
                       AllocElementType := TDataType.CHARTOK;
@@ -3077,13 +3071,13 @@ begin
                       end
                       else
 
-                      // -----------------------------------------------------------------------------
-                      //          ARRAY
-                      // -----------------------------------------------------------------------------
+                    // -----------------------------------------------------------------------------
+                    //          ARRAY
+                    // -----------------------------------------------------------------------------
 
                         if (TokenAt(i).Kind = TTokenKind.ARRAYTOK) or
                            ((TokenAt(i).Kind = TTokenKind.PACKEDTOK) and (TokenAt(i + 1).Kind = TTokenKind.ARRAYTOK)) then
-                          // Array
+													// Array
                         begin
                           DataType := TDataType.POINTERTOK;
 
@@ -3267,13 +3261,11 @@ begin
 
                             end
                             else
-                              if not (NestedDataType in [TDataType.STRINGPOINTERTOK,
-                                TDataType.RECORDTOK, TDataType.OBJECTTOK{, TDataType.PCHARTOK}]) and
+                              if not (NestedDataType in [TDataType.STRINGPOINTERTOK, TDataType.RECORDTOK, TDataType.OBJECTTOK{, TDataType.PCHARTOK}]) and
                                 (TokenAt(i).Kind <> TTokenKind.PCHARTOK) then
                               begin
 
-                                if (NestedAllocElementType in [TDataType.RECORDTOK, TDataType.OBJECTTOK, TDataType.PROCVARTOK]) and 
-				   (NumAllocElements shr 16 > 0) then
+                                if (NestedAllocElementType in [TDataType.RECORDTOK, TDataType.OBJECTTOK, TDataType.PROCVARTOK]) and (NumAllocElements shr 16 > 0) then
                                   Error(i, TMessage.Create(TErrorCode.MultiDimensionalArrayOfTypeNotSupported,
                                     'Multidimensional arrays of element type {0} are not supported.', InfoAboutDataType(NestedAllocElementType)));
 
@@ -3283,8 +3275,7 @@ begin
                                   NumAllocElements := NumAllocElements or NestedNumAllocElements
                                 else
                                   if NestedAllocElementType in [TDataType.RECORDTOK, TDataType.OBJECTTOK] then
-                                    NumAllocElements := NestedNumAllocElements or (NumAllocElements shl 16)
-                                  // array [..] of ^record|^object
+                                    NumAllocElements := NestedNumAllocElements or (NumAllocElements shl 16)		// array [..] of ^record|^object
                                   else
                                     NumAllocElements := NumAllocElements or (NestedNumAllocElements shl 16);
 
