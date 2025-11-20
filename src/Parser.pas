@@ -1777,7 +1777,7 @@ begin
               if (DataType in [TDataType.RECORDTOK, TDataType.OBJECTTOK]) and (NumAllocElements > 0) then
                 IncVarDataSize(tokenIndex, 0)
               else
-                if (DataType in [TDataType.FILETOK, TDataType.TEXTFILETOK]) and (NumAllocElements > 0) then
+                if (DataType in FileTypes) and (NumAllocElements > 0) then
                   IncVarDataSize(tokenIndex, 12)
                 else
                 begin
@@ -1937,7 +1937,7 @@ begin
 
         i := CompileType(i + 1, VarType, NumAllocElements, AllocElementType);
 
-        if (VarType = TDataType.FILETOK) and (ListPassMethod <> TParameterPassingMethod.VARPASSING) then
+        if (VarType in FileTypes) and (ListPassMethod <> TParameterPassingMethod.VARPASSING) then
           Error(i, TMessage.Create(TErrorCode.FileParameterMustBeVAR, 'File parameters must be var parameters'));
 
       end;
@@ -2105,7 +2105,7 @@ begin
 
           i := CompileType(i + 1, VarType, NumAllocElements, AllocElementType);
 
-          if (VarType = TDataType.FILETOK) and (ListPassMethod <> TParameterPassingMethod.VARPASSING) then
+          if (VarType in FileTypes) and (ListPassMethod <> TParameterPassingMethod.VARPASSING) then
             Error(i, TMessage.Create(TErrorCode.FileParameterMustBeVar, 'File parameters must be var parameters'));
 
         end;
