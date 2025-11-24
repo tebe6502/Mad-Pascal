@@ -395,7 +395,7 @@ begin
 
   if (index < 0) or (index > $FFFF) then
   begin
-    writeln('SaveToDataSegment: Invalid segment index', index);
+    writeln('ERROR: SaveToDataSegment: Invalid segment index', index);
     RaiseHaltException(EHaltException.COMPILING_ABORTED);
   end;
 
