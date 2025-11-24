@@ -9491,7 +9491,7 @@ begin
 
 
     if GetDataSize( TDataType.SelectorType]<>1 then
-     Error(i, 'Expected BYTE, SHORTINT, CHAR or BOOLEAN as CASE selector');
+     Error(i, 'Expected BYTE, SHORTINT, CHAR, or BOOLEAN as CASE selector');
 
     if not (SelectorType in OrdinalTypes) then
       Error(i, 'Ordinal variable expected as ''CASE'' selector');
@@ -13328,7 +13328,7 @@ begin
 
       if SelectorType <> TDataType.ENUMTOK then
         if GetDataSize(SelectorType) <> 1 then
-          Error(i, 'Expected BYTE, SHORTINT, CHAR or BOOLEAN as CASE selector');
+          Error(i, 'Expected BYTE, SHORTINT, CHAR, or BOOLEAN as CASE selector');
 
       if not (SelectorType in OrdinalTypes + [TDataType.ENUMTOK]) then
         Error(i, 'Ordinal variable expected as ''CASE'' selector');

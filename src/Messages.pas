@@ -304,7 +304,7 @@ begin
     end;
 
     TErrorCode.IdNumExpExpected: begin
-      Result := 'Identifier, number or expression' + GetExpectedButTokenFound(tokenIndex);
+      Result := 'Identifier, number, or expression' + GetExpectedButTokenFound(tokenIndex);
     end;
 
     TErrorCode.StringTruncated:

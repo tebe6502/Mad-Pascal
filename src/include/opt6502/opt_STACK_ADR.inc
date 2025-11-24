@@ -425,48 +425,48 @@ begin
 
        if lda_adr_y(i+8) then begin							// BYTE
 	 delete(listing[i+8], pos(',y', listing[i+8]), 2);
-	 listing[i+8] := listing[i+8] + '+' + HexByte(p);
+	 listing[i+8] := listing[i+8] + '+' + HexByte(Byte(p));
        end;
 
        if sta_adr_y(i+9) then begin
 	 delete(listing[i+9], pos(',y', listing[i+9]), 2);
-	 listing[i+9] := listing[i+9] + '+' + HexByte(p);
+	 listing[i+9] := listing[i+9] + '+' + HexByte(Byte(p));
        end;
 
        if (lda(i+10) or lda_adr(i+10)) and (sta(i+11) or sta_adr(i+11)) then begin
 
         if lda_adr_y(i+10) then begin							// WORD
 	 delete(listing[i+10], pos(',y', listing[i+10]), 2);
-	 listing[i+10] := listing[i+10] + '+' + HexByte(p);
+	 listing[i+10] := listing[i+10] + '+' + HexByte(Byte(p));
         end;
 
         if sta_adr_y(i+11) then begin
 	 delete(listing[i+11], pos(',y', listing[i+11]), 2);
-	 listing[i+11] := listing[i+11] + '+' + HexByte(p);
+	 listing[i+11] := listing[i+11] + '+' + HexByte(Byte(p));
         end;
 
 	if (lda(i+12) or lda_adr(i+12)) and (sta(i+13) or sta_adr(i+13)) then begin
 
          if lda_adr_y(i+12) then begin							// CARDINAL
 	  delete(listing[i+12], pos(',y', listing[i+12]), 2);
-	  listing[i+12] := listing[i+12] + '+' + HexByte(p);
+	  listing[i+12] := listing[i+12] + '+' + HexByte(Byte(p));
          end;
 
          if sta_adr_y(i+13) then begin
 	  delete(listing[i+13], pos(',y', listing[i+13]), 2);
-	  listing[i+13] := listing[i+13] + '+' + HexByte(p);
+	  listing[i+13] := listing[i+13] + '+' + HexByte(Byte(p));
          end;
 
 	 if (lda(i+14) or lda_adr(i+14)) and (sta(i+15) or sta_adr(i+15)) then begin
 
           if lda_adr_y(i+14) then begin
 	   delete(listing[i+14], pos(',y', listing[i+14]), 2);
-	   listing[i+14] := listing[i+14] + '+' + HexByte(p);
+	   listing[i+14] := listing[i+14] + '+' + HexByte(Byte(p));
           end;
 
           if sta_adr_y(i+15) then begin
 	   delete(listing[i+15], pos(',y', listing[i+15]), 2);
-	   listing[i+15] := listing[i+15] + '+' + HexByte(p);
+	   listing[i+15] := listing[i+15] + '+' + HexByte(Byte(p));
           end;
 
 	 end;
