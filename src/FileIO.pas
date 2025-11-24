@@ -584,7 +584,11 @@ end;
 
 function TBinaryFile.GetFileSize: TFileSize;
 begin
+  {$IFNDEF SIMULATED_FILE_IO}
   Result := FileSize(f);
+  {$ELSE}
+  Result := Length(fileMapEntry.content);
+  {$ENDIF}
 end;
 
 procedure TBinaryFile.Assign(const filePath: TFilePath);
