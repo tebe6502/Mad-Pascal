@@ -9,38 +9,32 @@ var
 
 begin
 
- s:='qwerty';
 
  assign(t, 'D:TEXT.TXT');
- append(t);
+ rewrite(t);
 
  writeln(t, 'ATARI');
 
  writeln(t, 'C64');
 
- write(t, 'Amstrad');
-
-// write(t, s);
-// writeln(t, s);
+ writeln(t, 'Amstrad');
 
  close(t);
 
 
 
-
-{
  assign(t, 'D:TEXT.TXT');
  reset(t);
 
- while IOResult=1 do begin
+ while IOResult = 1 do begin
 
- readln(t, s );
+ readln(t, s);
  writeln(s);
 
  end;
 
  close(t);
-}
+
 
  repeat until keypressed;
 

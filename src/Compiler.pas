@@ -111,8 +111,7 @@ begin
       Result := Result + IntToHex(Ord(IdentifierAt(IdentIndex).Param[ParamIndex].PassMethod), 2) +
         IntToHex(Ord(IdentifierAt(IdentIndex).Param[ParamIndex].DataType), 2) +
         IntToHex(Ord(IdentifierAt(IdentIndex).Param[ParamIndex].AllocElementType), 2) +
-        IntToHex(IdentifierAt(IdentIndex).Param[ParamIndex].NumAllocElements, 8 *
-        Ord(IdentifierAt(IdentIndex).Param[ParamIndex].NumAllocElements <> 0));
+        IntToHex(IdentifierAt(IdentIndex).Param[ParamIndex].NumAllocElements, 8 * Ord(IdentifierAt(IdentIndex).Param[ParamIndex].NumAllocElements <> 0));
 
 end;
 
@@ -120,8 +119,7 @@ end;
 function GetLocalName(IdentIndex: Integer; a: String = ''): String;
 begin
 
-  if ((IdentifierAt(IdentIndex).SourceFile.UnitIndex > 1) and (IdentifierAt(IdentIndex).SourceFile <>
-    ActiveSourceFile) and IdentifierAt(IdentIndex).IsSection) then
+  if ((IdentifierAt(IdentIndex).SourceFile.UnitIndex > 1) and (IdentifierAt(IdentIndex).SourceFile <> ActiveSourceFile) and IdentifierAt(IdentIndex).IsSection) then
     Result := IdentifierAt(IdentIndex).SourceFile.Name + '.' + a + IdentifierAt(IdentIndex).Name
   else
     Result := a + IdentifierAt(IdentIndex).Name;
@@ -157,8 +155,7 @@ end;
 function TestName(IdentIndex: Integer; a: String): Boolean;
 begin
 
-  if (IdentIndex > 0) and (IdentifierAt(IdentIndex).SourceFile.UnitIndex > 1) and
-    (pos(IdentifierAt(IdentIndex).SourceFile.Name + '.', a) = 1) then
+  if (IdentIndex > 0) and (IdentifierAt(IdentIndex).SourceFile.UnitIndex > 1) and (pos(IdentifierAt(IdentIndex).SourceFile.Name + '.', a) = 1) then
   begin
     a := copy(a, a.IndexOf('.') + 2, length(a));
   end;
@@ -227,13 +224,11 @@ begin
             (Param[i].DataType in UnsignedOrdinalTypes)) and  // smallint > byte
             (GetDataSize(Identifier.Param[i].DataType) >= GetDataSize(Param[i].DataType)))
             // .
-            or ((Identifier.Param[i].DataType =
-            Param[i].DataType) {and (Identifier.Param[i].AllocElementType = Param[i].AllocElementType)})
+            or ((Identifier.Param[i].DataType = Param[i].DataType) {and (Identifier.Param[i].AllocElementType = Param[i].AllocElementType)})
             // .
             // or ( (Identifier.Param[i].AllocElementType = TDataType.PROCVARTOK) and (Identifier.Param[i].NumAllocElements shr 16 = Param[i].NumAllocElements shr 16) )
             // .
-            or ((Param[i].DataType in Pointers) and (Identifier.Param[i].DataType =
-            Param[i].AllocElementType))    // dla parametru VAR
+            or ((Param[i].DataType in Pointers) and (Identifier.Param[i].DataType = Param[i].AllocElementType))    // dla parametru VAR
             // .
             or ((Identifier.Param[i].DataType = TDataType.UNTYPETOK) and
             (Identifier.Param[i].PassMethod = TParameterPassingMethod.VARPASSING))
@@ -251,14 +246,10 @@ begin
               case Param[i].AllocElementType of
 
                 TDataType.PROCEDURETOK, TDataType.FUNCTIONTOK:
-                  yes := IdentifierAt(GetIdentIndex('@FN' + IntToHex(
-                    Identifier.Param[i].NumAllocElements shr 16, 4))).NumParams =
-                    IdentifierAt(GetIdentIndex(Param[i].Name)).NumParams;
+                  yes := IdentifierAt(GetIdentIndex('@FN' + IntToHex(Identifier.Param[i].NumAllocElements shr 16, 4))).NumParams = IdentifierAt(GetIdentIndex(Param[i].Name)).NumParams;
 
                 TDataType.PROCVARTOK:
-                  yes := (IdentifierAt(GetIdentIndex('@FN' + IntToHex(
-                    Identifier.Param[i].NumAllocElements shr 16, 4))).NumParams) =
-                    (IdentifierAt(GetIdentIndex('@FN' + IntToHex(Param[i].NumAllocElements shr 16, 4))).NumParams);
+                  yes := (IdentifierAt(GetIdentIndex('@FN' + IntToHex(Identifier.Param[i].NumAllocElements shr 16, 4))).NumParams) = (IdentifierAt(GetIdentIndex('@FN' + IntToHex(Param[i].NumAllocElements shr 16, 4))).NumParams);
 
                 else
 
@@ -655,13 +646,6 @@ begin
     TCode65.shrAL_CL: asm65(#9'jsr @shrAL_CL');
     TCode65.shrAX_CL: asm65(#9'jsr @shrAX_CL');
     TCode65.shrEAX_CL: asm65(#9'jsr @shrEAX_CL');
-
-    // TCode65.je: asm65(#9'beq *+5');          // =
-    // TCode65.jne: asm65(#9'bne *+5');          // <>
-    // TCode65.jg: begin asm65(#9'seq'); asm65(#9'bcs *+5') end;  // >
-    // TCode65.jge: asm65(#9'bcs *+5');          // >=
-    // TCode65.jl: asm65(#9'bcc *+5');          // <
-    // TCode65.jle: begin asm65(#9'bcc *+7'); asm65(#9'beq *+5') end;  // <=
 
     TCode65.addBX: asm65(#9'inx');
     TCode65.subBX: asm65(#9'dex');
@@ -1168,17 +1152,22 @@ begin
   else
     svara := 'adr.' + svar;
 
-  asm65separator;
+//  asm65separator;
 
+{$IFDEF USEOPTFILE}
   asm65;
   asm65('; Push' + InfoAboutSize(Size));
+{$ENDIF}
 
   case IndirectionLevel of
 
     ASVALUE:
     begin
+
+{$IFDEF USEOPTFILE}
       asm65('; as Value $' + IntToHex(Value, 8) + ' (' + IntToStr(Value) + ')');
       asm65;
+{$ENDIF}
 
       a65(TCode65.addBX);
 
@@ -1190,8 +1179,11 @@ begin
 
     ASPOINTER:
     begin
+
+{$IFDEF USEOPTFILE}
       asm65('; as Pointer');
       asm65;
+{$ENDIF}
 
       Gen;
 
@@ -1252,8 +1244,11 @@ begin
 
     ASPOINTERTORECORD:
     begin
+
+{$IFDEF USEOPTFILE}
       asm65('; as Pointer to Record');
       asm65;
+{$ENDIF}
 
       Gen;
 
@@ -1286,15 +1281,19 @@ begin
 
     ASPOINTERTOPOINTER:
     begin
+
+{$IFDEF USEOPTFILE}
       asm65('; as Pointer to Pointer');
       asm65;
+{$ENDIF}
 
       Gen;
 
       a65(TCode65.addBX);
 
-      if (IdentifierAt(IdentIndex).isAbsolute) and (IdentifierAt(IdentIndex).PassMethod <>
-        TParameterPassingMethod.VARPASSING) and (NumAllocElements = 0) then asm65('+' + svar);  // +lda
+      if (IdentifierAt(IdentIndex).isAbsolute) and
+         (IdentifierAt(IdentIndex).PassMethod <> TParameterPassingMethod.VARPASSING) and
+	 (NumAllocElements = 0) then asm65('+' + svar);  // +lda
 
       //  writeln(IdentifierAt(IdentIndex).PassMethod,',', IdentifierAt(IdentIndex).name,',',IdentifierAt(IdentIndex).DataType,',',IdentifierAt(IdentIndex).AllocElementType,',',IdentifierAt(IdentIndex).NumAllocElements,' | ', svar,',',ExtractName(IdentIndex, svar),',',par);
 
@@ -1357,17 +1356,20 @@ begin
         end;
       end;
 
-      if (IdentifierAt(IdentIndex).isAbsolute) and (IdentifierAt(IdentIndex).PassMethod <>
-        TParameterPassingMethod.VARPASSING) and (NumAllocElements = 0) then
-        asm65('+');  // +lda
+      if (IdentifierAt(IdentIndex).isAbsolute) and
+         (IdentifierAt(IdentIndex).PassMethod <> TParameterPassingMethod.VARPASSING) and
+	 (NumAllocElements = 0) then asm65('+');  // +lda
 
     end;
 
 
     ASPOINTERTOARRAYORIGIN, ASPOINTERTOARRAYORIGIN2:
     begin
+
+{$IFDEF USEOPTFILE}
       asm65('; as Pointer to Array Origin');
       asm65;
+{$ENDIF}
 
       Gen;
 
@@ -1377,12 +1379,13 @@ begin
           if (NumAllocElements > 256) or (NumAllocElements in [0, 1]) then
           begin
 
-            if (IdentifierAt(IdentIndex).isAbsolute) and (IdentifierAt(IdentIndex).PassMethod <>
-              TParameterPassingMethod.VARPASSING) and (NumAllocElements = 0) then
-              asm65('+' + svar);  // +lda
+            if (IdentifierAt(IdentIndex).isAbsolute) and
+	       (IdentifierAt(IdentIndex).PassMethod <> TParameterPassingMethod.VARPASSING) and
+	       (NumAllocElements = 0) then asm65('+' + svar);  // +lda
 
-            if (IdentifierAt(IdentIndex).isAbsolute) and (IdentifierAt(IdentIndex).idType =
-              TDataType.ARRAYTOK) and (IdentifierAt(IdentIndex).Value >= 0) then
+            if (IdentifierAt(IdentIndex).isAbsolute) and
+	       (IdentifierAt(IdentIndex).idType = TDataType.ARRAYTOK) and
+	       (IdentifierAt(IdentIndex).Value >= 0) then
             begin
 
               asm65(#9'lda #$' + IntToHex(Byte(IdentifierAt(IdentIndex).Value), 2));
@@ -1433,9 +1436,9 @@ begin
 
             end;
 
-            if (IdentifierAt(IdentIndex).isAbsolute) and (IdentifierAt(IdentIndex).PassMethod <>
-              TParameterPassingMethod.VARPASSING) and (NumAllocElements = 0) then
-              asm65('+');  // +lda
+            if (IdentifierAt(IdentIndex).isAbsolute) and
+	       (IdentifierAt(IdentIndex).PassMethod <> TParameterPassingMethod.VARPASSING) and
+	       (NumAllocElements = 0) then asm65('+');  // +lda
 
           end
           else
@@ -1720,8 +1723,11 @@ begin
 
     ASPOINTERTOARRAYRECORD:                  // array [0..X] of ^record
     begin
+
+{$IFDEF USEOPTFILE}
       asm65('; as Pointer to Array ^Record');
       asm65;
+{$ENDIF}
 
       Gen;
 
@@ -1798,8 +1804,11 @@ begin
 
     ASPOINTERTOARRAYRECORDTOSTRING:                  // array_of_pointer_to_record[index].string
     begin
+
+{$IFDEF USEOPTFILE}
       asm65('; as Pointer to Array ^Record to String');
       asm65;
+{$ENDIF}
 
       Gen;
 
@@ -1844,8 +1853,11 @@ begin
 
     ASPOINTERTORECORDARRAYORIGIN:                  // record^.array[i]
     begin
+
+{$IFDEF USEOPTFILE}
       asm65('; as Pointer to Record^ Array Origin');
       asm65;
+{$ENDIF}
 
       Gen;
 
@@ -2217,8 +2229,11 @@ begin
 
     ASPOINTER:
     begin
+
+{$IFDEF USEOPTFILE}
       asm65('; as Pointer');
       asm65;
+{$ENDIF}
 
       case GetDataSize(ExpressionType) of
         1: begin
@@ -2263,8 +2278,10 @@ begin
     ASPOINTERTOPOINTER:
     begin
 
+{$IFDEF USEOPTFILE}
       asm65('; as Pointer To Pointer');
       asm65;
+{$ENDIF}
 
       LoadBP2(IdentIndex, svar);
 
@@ -2313,8 +2330,10 @@ begin
     ASPOINTERTOARRAYORIGIN, ASPOINTERTOARRAYORIGIN2:
     begin
 
+{$IFDEF USEOPTFILE}
       asm65('; as Pointer To Array Origin');
       asm65;
+{$ENDIF}
 
       case GetDataSize(ExpressionType) of
         1: begin
@@ -2729,10 +2748,12 @@ begin
   else
     svara := 'adr.' + svar;
 
-  asm65separator;
+//  asm65separator;
 
+{$IFDEF USEOPTFILE}
   asm65;
   asm65('; Generate Assignment for' + InfoAboutSize(Size));
+{$ENDIF}
 
   Gen;
   Gen;
@@ -2743,8 +2764,10 @@ begin
 
     ASPOINTERTOARRAYRECORD:            // array_of_record_pointers[index]
     begin
-      asm65('; as Pointer to Array ^Record');
 
+{$IFDEF USEOPTFILE}
+      asm65('; as Pointer to Array ^Record');
+{$ENDIF}
 
       if (NumAllocElements * 2 > 256) or (NumAllocElements in [0, 1]) then
       begin
@@ -2862,7 +2885,10 @@ begin
 
     ASPOINTERTODEREFERENCE:
     begin
+
+{$IFDEF USEOPTFILE}
       asm65('; as Pointer to Dereference');
+{$ENDIF}
 
       asm65(#9'lda :STACKORIGIN-1,x');
       asm65(#9'sta :bp2');
@@ -2910,7 +2936,10 @@ begin
 
     ASPOINTERTOARRAYORIGIN, ASPOINTERTOARRAYORIGIN2:
     begin
+
+{$IFDEF USEOPTFILE}
       asm65('; as Pointer to Array Origin');
+{$ENDIF}
 
       case Size of
         1: begin                    // PULL BYTE
@@ -2918,8 +2947,9 @@ begin
           if (NumAllocElements > 256) or (NumAllocElements in [0, 1]) then
           begin
 
-            if (IdentifierAt(IdentIndex).isAbsolute) and (IdentifierAt(IdentIndex).PassMethod <>
-              TParameterPassingMethod.VARPASSING) and (NumAllocElements = 0) then asm65('-' + svar);  // -sta
+            if (IdentifierAt(IdentIndex).isAbsolute) and
+	       (IdentifierAt(IdentIndex).PassMethod <> TParameterPassingMethod.VARPASSING) and
+	       (NumAllocElements = 0) then asm65('-' + svar);  // -sta
 
             if (IdentifierAt(IdentIndex).isAbsolute) and (IdentifierAt(IdentIndex).idType =
               TDataType.ARRAYTOK) and (IdentifierAt(IdentIndex).Value >= 0) then
@@ -2973,8 +3003,9 @@ begin
 
             end;
 
-            if (IdentifierAt(IdentIndex).isAbsolute) and (IdentifierAt(IdentIndex).PassMethod <>
-              TParameterPassingMethod.VARPASSING) and (NumAllocElements = 0) then asm65('-');  // -sta
+            if (IdentifierAt(IdentIndex).isAbsolute) and
+	       (IdentifierAt(IdentIndex).PassMethod <> TParameterPassingMethod.VARPASSING) and
+	       (NumAllocElements = 0) then asm65('-');  // -sta
 
           end
           else
@@ -3258,7 +3289,10 @@ begin
 
     ASSTRINGPOINTER1TOARRAYORIGIN:
     begin
+
+{$IFDEF USEOPTFILE}
       asm65('; as StringPointer to Array Origin');
+{$ENDIF}
 
       case Size of
 
@@ -3338,7 +3372,10 @@ begin
 
     ASSTRINGPOINTERTOARRAYORIGIN:
     begin
+
+{$IFDEF USEOPTFILE}
       asm65('; as StringPointer to Array Origin');
+{$ENDIF}
 
       case Size of
 
@@ -3504,8 +3541,11 @@ begin
 
     ASPOINTERTORECORDARRAYORIGIN:            // record^.array[i]
     begin
+
+{$IFDEF USEOPTFILE}
       asm65('; as Pointer to Record^ Array Origin');
       asm65;
+{$ENDIF}
 
       Gen;
 
@@ -3574,7 +3614,7 @@ begin
     ASARRAYORIGINOFPOINTERTORECORDARRAYORIGIN:        // record_array[index].array[i]
     begin
 
-      asm65(#9'dex');              // maksymalnie mozemy uzyc :STACKORIGIN-1 lub :STACKORIGIN+1, pomagamy przez DEX/INX
+      a65(TCode65.subBX);	// maksymalnie mozemy uzyc :STACKORIGIN-1 lub :STACKORIGIN+1, pomagamy przez DEX/INX
 
       if (NumAllocElements * 2 > 256) or (NumAllocElements in [0, 1]) then
       begin
@@ -3617,7 +3657,7 @@ begin
         asm65(#9'sta :bp2+1');
       end;
 
-      asm65(#9'inx');
+      a65(TCode65.addBX);
 
       asm65(#9'lda :STACKORIGIN-1,x');
       asm65(#9'add #' + ParamY);
@@ -3667,11 +3707,14 @@ begin
 
     ASPOINTERTOPOINTER:
     begin
+
+{$IFDEF USEOPTFILE}
       asm65('; as Pointer to Pointer');
+{$ENDIF}
 
       if (IdentIndex > 0) and (IdentifierAt(IdentIndex).isAbsolute) and
-        (IdentifierAt(IdentIndex).PassMethod <> TParameterPassingMethod.VARPASSING) and (NumAllocElements = 0) then
-        asm65('-' + svar);  // -sta
+        (IdentifierAt(IdentIndex).PassMethod <> TParameterPassingMethod.VARPASSING) and
+	(NumAllocElements = 0) then asm65('-' + svar);  // -sta
 
       //  writeln(IdentifierAt(IdentIndex).Name,',',IdentifierAt(IdentIndex).DataType,',',IdentifierAt(IdentIndex).AllocElementType,' / ',svar ,' / ', UnitArray[IdentifierAt(IdentIndex).UnitIndex].Name,',',svar.LastIndexOf('.'));
 
@@ -3723,8 +3766,8 @@ begin
       end;
 
       if (IdentIndex > 0) and (IdentifierAt(IdentIndex).isAbsolute) and
-        (IdentifierAt(IdentIndex).PassMethod <> TParameterPassingMethod.VARPASSING) and (NumAllocElements = 0) then
-        asm65('-');  // -sta
+         (IdentifierAt(IdentIndex).PassMethod <> TParameterPassingMethod.VARPASSING) and
+	 (NumAllocElements = 0) then asm65('-');  // -sta
 
       a65(TCode65.subBX);
 
@@ -3733,7 +3776,10 @@ begin
 
     ASPOINTER:
     begin
+
+{$IFDEF USEOPTFILE}
       asm65('; as Pointer');
+{$ENDIF}
 
       case Size of
         1: begin
@@ -3985,7 +4031,9 @@ begin
   svar := GetLocalName(IdentIndex);
   CounterSize := GetDataSize(ValType);
 
+{$IFDEF USEOPTFILE}
   asm65(';' + InfoAboutSize(CounterSize));
+{$ENDIF}
 
   Gen;
   Gen;
@@ -6168,7 +6216,7 @@ begin
 
         asm65(#9'jsr @F16_EQ');
 
-        asm65(#9'dex');
+        a65(TCode65.subBX);
       end;
 
       TTokenKind.NETOK, TTokenKind.UNTYPETOK:  // <>
@@ -6185,7 +6233,8 @@ begin
 
         asm65(#9'jsr @F16_EQ');
 
-        asm65(#9'dex');
+	a65(TCode65.subBX);
+
         asm65(#9'eor #$01');
       end;
 
@@ -6203,7 +6252,7 @@ begin
 
         asm65(#9'jsr @F16_GT');
 
-        asm65(#9'dex');
+        a65(TCode65.subBX);
       end;
 
       TTokenKind.LTTOK:  // <
@@ -6220,7 +6269,7 @@ begin
 
         asm65(#9'jsr @F16_GT');
 
-        asm65(#9'dex');
+        a65(TCode65.subBX);
       end;
 
       TTokenKind.GETOK:  // >=
@@ -6237,7 +6286,7 @@ begin
 
         asm65(#9'jsr @F16_GTE');
 
-        asm65(#9'dex');
+        a65(TCode65.subBX);
       end;
 
       TTokenKind.LETOK:  // <=
@@ -6254,7 +6303,7 @@ begin
 
         asm65(#9'jsr @F16_GTE');
 
-        asm65(#9'dex');
+        a65(TCode65.subBX);
       end;
 
     end;
@@ -6420,32 +6469,8 @@ end;  //GenerateRelation
 // The following functions implement recursive descent parser in accordance with Sub-Pascal EBNF
 // Parameter i is the index of the first token of the current EBNF symbol, result is the index of the last one
 
-function CompileExpression(i: TTokenIndex; out ValType: TDataType;
-  VarType: TDataType = TDataType.INTEGERTOK): TTokenIndex; forward;
+function CompileExpression(i: TTokenIndex; out ValType: TDataType; VarType: TDataType = TDataType.INTEGERTOK): TTokenIndex; forward;
 
-
-// ----------------------------------------------------------------------------
-// ----------------------------------------------------------------------------
-
-{
-procedure InfoAboutArray(IdentIndex: Integer; c: Boolean = false);
-var t: string;
-begin
-
-  if c then
-   t := ' Const'
-  else
-   t := '';
-
-  asm65;
-
-  if IdentifierAt(IdentIndex).NumAllocElements_ > 0 then
-   asm65(';' + t + ' Array index '+IdentifierAt(IdentIndex).Name+'[0..'+IntToStr(IdentifierAt(IdentIndex).NumAllocElements - 1)+', 0..'+IntToStr(IdentifierAt(IdentIndex).NumAllocElements_ - 1)+']')
-  else
-   asm65(';' + t + ' Array index '+IdentifierAt(IdentIndex).Name+'[0..'+IntToStr(IdentifierAt(IdentIndex).NumAllocElements - 1)+']');
-
-end;
-}
 
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
@@ -6708,8 +6733,7 @@ end;  //CompileArrayIndex
 // ----------------------------------------------------------------------------
 
 
-function CompileAddress(i: TTokenIndex; out ValType, AllocElementType: TDataType;
-  VarPass: Boolean = False): TTokenIndex;
+function CompileAddress(i: TTokenIndex; out ValType, AllocElementType: TDataType; VarPass: Boolean = False): TTokenIndex;
 var
   IdentIndex, IdentTemp, j: Integer;
   Name, svar, lab: String;
@@ -6774,19 +6798,17 @@ begin
         begin
 
           if IdentifierAt(IdentIndex).Kind = TTokenKind.CONSTTOK then
-            if not ((IdentifierAt(IdentIndex).DataType in Pointers) and
-              (IdentifierAt(IdentIndex).NumAllocElements > 0)) then
+            if not ((IdentifierAt(IdentIndex).DataType in Pointers) and (IdentifierAt(IdentIndex).NumAllocElements > 0)) then
               Error(i + 1, TErrorCode.CantAdrConstantExp);
 
 
           //  writeln(IdentifierAt(IdentIndex).nAME,' = ',IdentifierAt(IdentIndex).DataType,',',IdentifierAt(IdentIndex).AllocElementType,',',IdentifierAt(IdentIndex).NumAllocElements,',',IdentifierAt(IdentIndex).PassMethod );
 
-          if (TokenAt(i + 2).Kind = TTokenKind.DEREFERENCETOK) and (TokenAt(i + 3).Kind = TTokenKind.OBRACKETTOK) then
+          if (TokenAt(i + 2).Kind = TTokenKind.DEREFERENCETOK) and (TokenAt(i + 3).Kind = TTokenKind.OBRACKETTOK) and (IdentifierAt(IdentIndex).DataType in [TDataType.POINTERTOK, TDataType.DEREFERENCEARRAYTOK])  then
             Inc(i);
 
 
-          if IdentifierAt(IdentIndex).Kind in [TTokenKind.PROCEDURETOK, TTokenKind.FUNCTIONTOK,
-            TTokenKind.CONSTRUCTORTOK, TTokenKind.DESTRUCTORTOK] then
+          if IdentifierAt(IdentIndex).Kind in [TTokenKind.PROCEDURETOK, TTokenKind.FUNCTIONTOK, TTokenKind.CONSTRUCTORTOK, TTokenKind.DESTRUCTORTOK] then
           begin
 
             Name := GetLocalName(IdentIndex);
@@ -6887,8 +6909,7 @@ begin
 
             end
             else
-              if (IdentifierAt(IdentIndex).DataType in [TDataType.FILETOK, TDataType.TEXTFILETOK,
-                TDataType.RECORDTOK, TDataType.OBJECTTOK] {+ Pointers}) or
+              if (IdentifierAt(IdentIndex).DataType in [TDataType.RECORDTOK, TDataType.OBJECTTOK] + FileTypes) or
                 ((IdentifierAt(IdentIndex).DataType in Pointers) and
                 (IdentifierAt(IdentIndex).AllocElementType <> TDataType.UNTYPETOK) and
                 (IdentifierAt(IdentIndex).NumAllocElements > 0)) or
@@ -6908,8 +6929,7 @@ begin
                   (IdentifierAt(IdentIndex).idType = TDataType.DATAORIGINOFFSET) then
                 begin
 
-                  Push(IdentifierAt(IdentIndex).Value, ASPOINTERTORECORD, GetDataSize(TDataType.POINTERTOK),
-                    IdentIndex);
+                  Push(IdentifierAt(IdentIndex).Value, ASPOINTERTORECORD, GetDataSize(TDataType.POINTERTOK), IdentIndex);
 
                 end
                 else
@@ -6925,8 +6945,7 @@ begin
 
                     if (IdentifierAt(IdentIndex).DataType in Pointers)
                     {and (TokenAt(i + 2).Kind = TTokenKind.DEREFERENCETOK)} then
-                      if (IdentifierAt(IdentIndex).AllocElementType = TDataType.RECORDTOK) and
-                        (TokenAt(i + 3).Kind = TTokenKind.DOTTOK) then
+                      if (IdentifierAt(IdentIndex).AllocElementType = TDataType.RECORDTOK) and (TokenAt(i + 3).Kind = TTokenKind.DOTTOK) then
                       begin    // var record^.field
 
                         //        DEREFERENCE := true;
@@ -6935,8 +6954,7 @@ begin
                         IdentTemp := RecordSize(IdentIndex, TokenAt(i + 4).Name);
 
                         if IdentTemp < 0 then
-                          Error(i + 4, TMessage.Create(TErrorCode.IdentifierIdentsNoMember,
-                            'Identifier idents no member ''{0}''.', TokenAt(i + 4).Name));
+                          Error(i + 4, TMessage.Create(TErrorCode.IdentifierIdentsNoMember, 'Identifier idents no member ''{0}''.', TokenAt(i + 4).Name));
 
                         AllocElementType := TDataType(IdentTemp shr 16);
 
@@ -6956,12 +6974,10 @@ begin
 
                         //  writeln('^',',', IdentifierAt(IdentIndex).Name,',',IdentifierAt(IdentIndex).DataType,',',IdentifierAt(IdentIndex).AllocElementType,',',IdentifierAt(IdentIndex).NumAllocElements,' / ',IdentifierAt(IdentIndex).NumAllocElements_,' = ',IdentifierAt(IdentIndex).idType,',',IdentifierAt(IdentIndex).PassMethod,',',DEREFERENCE);
 
-                        if (IdentifierAt(IdentIndex).DataType = TDataType.POINTERTOK) and
-                          (IdentifierAt(IdentIndex).NumAllocElements > 0) then
+                        if (IdentifierAt(IdentIndex).DataType = TDataType.POINTERTOK) and (IdentifierAt(IdentIndex).NumAllocElements > 0) then
                         begin
 
-                          if IdentifierAt(IdentIndex).AllocElementType in
-                            [TDataType.RECORDTOK, TDataType.OBJECTTOK] then
+                          if IdentifierAt(IdentIndex).AllocElementType in [TDataType.RECORDTOK, TDataType.OBJECTTOK] then
                           begin
 
                             if IdentifierAt(IdentIndex).NumAllocElements_ = 0 then
@@ -6976,13 +6992,10 @@ begin
 
                         end;
                         //trs
-                        if IdentifierAt(IdentIndex).IsObjectVariable and
-                          (IdentifierAt(IdentIndex).PassMethod = TParameterPassingMethod.VARPASSING) then
-                          Push(IdentifierAt(IdentIndex).Value, ASPOINTERTOPOINTER,
-                            GetDataSize(TDataType.POINTERTOK), IdentIndex)
+                        if IdentifierAt(IdentIndex).IsObjectVariable and (IdentifierAt(IdentIndex).PassMethod = TParameterPassingMethod.VARPASSING) then
+                          Push(IdentifierAt(IdentIndex).Value, ASPOINTERTOPOINTER, GetDataSize(TDataType.POINTERTOK), IdentIndex)
                         else
-                          Push(IdentifierAt(IdentIndex).Value, ASPOINTER, GetDataSize(TDataType.POINTERTOK),
-                            IdentIndex);
+                          Push(IdentifierAt(IdentIndex).Value, ASPOINTER, GetDataSize(TDataType.POINTERTOK), IdentIndex);
 
                         Inc(i);
                       end;
@@ -6998,11 +7011,9 @@ begin
 
                       //  writeln('1: ',IdentifierAt(IdentIndex).Name,',',IdentifierAt(IdentIndex).idType,',',IdentifierAt(IdentIndex).DataType,',',IdentifierAt(IdentIndex).AllocElementType,',',IdentifierAt(IdentIndex).NumAllocElements,'..',IdentifierAt(IdentIndex).NumAllocElements_,',',IdentifierAt(IdentIndex).PassMethod,',',DEREFERENCE,',',varpass,' o ',IdentifierAt(IdentIndex).isAbsolute);
 
-                      if (IdentifierAt(IdentIndex).DataType in [TDataType.RECORDTOK,
-                        TDataType.OBJECTTOK, TDataType.FILETOK, TDataType.TEXTFILETOK]) or
+                      if (IdentifierAt(IdentIndex).DataType in [TDataType.RECORDTOK, TDataType.OBJECTTOK] + FileTypes) or
                         (VarPass and (IdentifierAt(IdentIndex).DataType = TDataType.POINTERTOK) and
-                        (IdentifierAt(IdentIndex).AllocElementType in AllTypes -
-                        [TDataType.PROCVARTOK, TDataType.RECORDTOK, TDataType.OBJECTTOK]) and
+                        (IdentifierAt(IdentIndex).AllocElementType in AllTypes - [TDataType.PROCVARTOK, TDataType.RECORDTOK, TDataType.OBJECTTOK]) and
                         (IdentifierAt(IdentIndex).NumAllocElements = 0)) or
                         ((IdentifierAt(IdentIndex).DataType in Pointers) and
                         (IdentifierAt(IdentIndex).AllocElementType in [TDataType.RECORDTOK, TDataType.OBJECTTOK]) and
@@ -7015,11 +7026,9 @@ begin
                         ((IdentifierAt(IdentIndex).DataType in Pointers) and
                         (IdentifierAt(IdentIndex).idType = TDataType.DATAORIGINOFFSET)) or
                         ((IdentifierAt(IdentIndex).DataType in Pointers) and not
-                        (IdentifierAt(IdentIndex).AllocElementType in [TDataType.UNTYPETOK,
-                        TDataType.RECORDTOK, TDataType.OBJECTTOK, TDataType.PROCVARTOK]) and
+                        (IdentifierAt(IdentIndex).AllocElementType in [TDataType.UNTYPETOK, TDataType.RECORDTOK, TDataType.OBJECTTOK, TDataType.PROCVARTOK]) and
                         (IdentifierAt(IdentIndex).NumAllocElements > 0)) or
-                        ((IdentifierAt(IdentIndex).DataType in Pointers) and
-                        (IdentifierAt(IdentIndex).PassMethod = TParameterPassingMethod.VARPASSING)) then
+                        ((IdentifierAt(IdentIndex).DataType in Pointers) and (IdentifierAt(IdentIndex).PassMethod = TParameterPassingMethod.VARPASSING)) then
 
                         Push(IdentifierAt(IdentIndex).Value, ASPOINTER, GetDataSize(TDataType.POINTERTOK), IdentIndex)
                       else
@@ -7043,8 +7052,7 @@ begin
               else
               begin
 
-                if (IdentifierAt(IdentIndex).DataType in Pointers) and (TokenAt(i + 2).Kind =
-                  TTokenKind.DEREFERENCETOK) then
+                if (IdentifierAt(IdentIndex).DataType in Pointers) and (TokenAt(i + 2).Kind = TTokenKind.DEREFERENCETOK) then
                 begin
                   AllocElementType := IdentifierAt(IdentIndex).AllocElementType;
 
@@ -7473,7 +7481,7 @@ begin
         asm65(#9'lda (:bp2),y');
         asm65(#9'sta :TMP+2');
 
-        asm65(#9'dex');
+        a65(TCode65.subBX);
 
       end
       else
@@ -7491,7 +7499,7 @@ begin
         asm65(#9'lda adr.' + svar + '+1,y');
         asm65(#9'sta :TMP+2');
 
-        asm65(#9'dex');
+        a65(TCode65.subBX);
 
       end;
 
@@ -7569,7 +7577,7 @@ begin
               asm65(#9'lda (:bp2),y');
               asm65(#9'sta :TMP+2');
 
-              asm65(#9'dex');
+              a65(TCode65.subBX);
 
             end
             else
@@ -7586,7 +7594,7 @@ begin
               asm65(#9'lda adr.' + svar + '+1,y');
               asm65(#9'sta :TMP+2');
 
-              asm65(#9'dex');
+              a65(TCode65.subBX);
 
             end;
 
@@ -7693,8 +7701,7 @@ begin
             //  writeln(IdentifierAt(IdentTemp).Kind,',',IdentifierAt(IdentTemp).DataType,',',IdentifierAt(IdentIndex).Param[NumActualParams].DataType);
 
             if IdentifierAt(IdentTemp).DataType in Pointers + [TDataType.DEREFERENCEARRAYTOK] then
-              if not (IdentifierAt(IdentIndex).Param[NumActualParams].DataType in
-                [TDataType.FILETOK, TDataType.TEXTFILETOK]) then
+              if not (IdentifierAt(IdentIndex).Param[NumActualParams].DataType in FileTypes) then
               begin
 
 {
@@ -7706,15 +7713,12 @@ begin
 
                 if IdentifierAt(IdentTemp).PassMethod <> TParameterPassingMethod.VARPASSING then
 
-                  if IdentifierAt(IdentIndex).Param[NumActualParams].DataType in
-                    [TDataType.RECORDTOK, TDataType.OBJECTTOK] then
-                    Error(i, TMessage.Create(TErrorCode.IncompatibleTypes,
-                      'Incompatible types: got "{0}" expected "^{1}".', GetTypeAtIndex(
-                      IdentifierAt(IdentTemp).NumAllocElements).Field[0].Name, GetTypeAtIndex(
-                      IdentifierAt(IdentIndex).Param[NumActualParams].NumAllocElements).Field[0].Name))
+                  if IdentifierAt(IdentIndex).Param[NumActualParams].DataType in [TDataType.RECORDTOK, TDataType.OBJECTTOK] then
+                    Error(i, TMessage.Create(TErrorCode.IncompatibleTypes, 'Incompatible types: got "{0}" expected "^{1}".',
+		      GetTypeAtIndex(IdentifierAt(IdentTemp).NumAllocElements).Field[0].Name,
+		      GetTypeAtIndex(IdentifierAt(IdentIndex).Param[NumActualParams].NumAllocElements).Field[0].Name))
                   else
-                    CheckCommonType(i, IdentifierAt(IdentIndex).Param[NumActualParams].DataType,
-                      IdentifierAt(IdentTemp).DataType);
+                    CheckCommonType(i, IdentifierAt(IdentIndex).Param[NumActualParams].DataType, IdentifierAt(IdentTemp).DataType);
 
               end;
 
@@ -7724,12 +7728,10 @@ begin
             {and (IdentifierAt(IdentIndex).Param[NumActualParams].DataType in [TTokenKind.RECORDTOK, TTokenKind.OBJECTTOK])}
             then
               if (IdentifierAt(IdentIndex).Param[NumActualParams].NumAllocElements > 0) and
-                (IdentifierAt(IdentTemp).NumAllocElements <> IdentifierAt(
-                IdentIndex).Param[NumActualParams].NumAllocElements) then
+                (IdentifierAt(IdentTemp).NumAllocElements <> IdentifierAt(IdentIndex).Param[NumActualParams].NumAllocElements) then
               begin
 
-                if IdentifierAt(IdentTemp).PassMethod <> IdentifierAt(
-                  IdentIndex).Param[NumActualParams].PassMethod then
+                if IdentifierAt(IdentTemp).PassMethod <> IdentifierAt(IdentIndex).Param[NumActualParams].PassMethod then
                   Error(i, TErrorCode.CantAdrConstantExp)
                 else
                   ErrorForIdentifier(i, TErrorCode.IncompatibleTypeOf, IdentTemp);
@@ -7739,29 +7741,24 @@ begin
             if (IdentifierAt(IdentTemp).AllocElementType = TDataType.UNTYPETOK) then
             begin
 
-              CheckCommonType(i, IdentifierAt(IdentIndex).Param[NumActualParams].DataType,
-                IdentifierAt(IdentTemp).DataType);
+              CheckCommonType(i, IdentifierAt(IdentIndex).Param[NumActualParams].DataType, IdentifierAt(IdentTemp).DataType);
 
               if (IdentifierAt(IdentTemp).AllocElementType = TDataType.UNTYPETOK) then
                 if (IdentifierAt(IdentIndex).Param[NumActualParams].DataType <> TDataType.UNTYPETOK) and
                   (IdentifierAt(IdentIndex).Param[NumActualParams].DataType <> IdentifierAt(IdentTemp).DataType) then
-                  ErrorIncompatibleTypes(i, IdentifierAt(IdentTemp).DataType,
-                    IdentifierAt(IdentIndex).Param[NumActualParams].DataType);
+                  ErrorIncompatibleTypes(i, IdentifierAt(IdentTemp).DataType, IdentifierAt(IdentIndex).Param[NumActualParams].DataType);
 
             end
             else
-              if IdentifierAt(IdentIndex).Param[NumActualParams].DataType in Pointers +
-              [TDataType.DEREFERENCEARRAYTOK] then
+              if IdentifierAt(IdentIndex).Param[NumActualParams].DataType in Pointers + [TDataType.DEREFERENCEARRAYTOK] then
               begin
 
                 //     CheckCommonType(i, IdentifierAt(IdentIndex).Param[NumActualParams].AllocElementType, IdentifierAt(IdentTemp).AllocElementType);
 
-                if (IdentifierAt(IdentIndex).Param[NumActualParams].NumAllocElements = 0) and
-                  (IdentifierAt(IdentTemp).NumAllocElements = 0) then
+                if (IdentifierAt(IdentIndex).Param[NumActualParams].NumAllocElements = 0) and (IdentifierAt(IdentTemp).NumAllocElements = 0) then
                 // ok ?
                 else
-                  if IdentifierAt(IdentIndex).Param[NumActualParams].AllocElementType <>
-                    IdentifierAt(IdentTemp).AllocElementType then
+                  if IdentifierAt(IdentIndex).Param[NumActualParams].AllocElementType <> IdentifierAt(IdentTemp).AllocElementType then
                   begin
 
 {
@@ -7772,28 +7769,24 @@ begin
  writeln(IdentifierAt(IdentIndex).Param[NumActualParams].PassMethod,',', IdentifierAt(IdentTemp).PassMethod);
 }
 
-                    if (IdentifierAt(IdentIndex).Param[NumActualParams].AllocElementType =
-                      TDataType.UNTYPETOK) and (IdentifierAt(IdentIndex).Param[NumActualParams].DataType in
-                      [TDataType.POINTERTOK, TDataType.PCHARTOK]) then
+                    if (IdentifierAt(IdentIndex).Param[NumActualParams].AllocElementType = TDataType.UNTYPETOK) and
+		       (IdentifierAt(IdentIndex).Param[NumActualParams].DataType in [TDataType.POINTERTOK, TDataType.PCHARTOK]) then
                     begin
 
                       if IdentifierAt(IdentTemp).AllocElementType in [TDataType.RECORDTOK, TDataType.OBJECTTOK] then
 
                       else
-                        ErrorIdentifierIncompatibleTypesArray(i, IdentTemp,
-                          IdentifierAt(IdentIndex).Param[NumActualParams].DataType);
+                        ErrorIdentifierIncompatibleTypesArray(i, IdentTemp, IdentifierAt(IdentIndex).Param[NumActualParams].DataType);
 
                     end
                     else
-                      ErrorIncompatibleTypes(i, IdentifierAt(IdentTemp).AllocElementType,
-                        IdentifierAt(IdentIndex).Param[NumActualParams].AllocElementType);
+                      ErrorIncompatibleTypes(i, IdentifierAt(IdentTemp).AllocElementType, IdentifierAt(IdentIndex).Param[NumActualParams].AllocElementType);
 
                   end;
 
               end
               else
-                CheckCommonType(i, IdentifierAt(IdentIndex).Param[NumActualParams].DataType,
-                  IdentifierAt(IdentTemp).AllocElementType);
+                CheckCommonType(i, IdentifierAt(IdentIndex).Param[NumActualParams].DataType, IdentifierAt(IdentTemp).AllocElementType);
 
           end
           else
@@ -7836,9 +7829,8 @@ begin
         begin
 
           if (IdentifierAt(IdentIndex).Param[NumActualParams].DataType = TDataType.POINTERTOK) and
-            (IdentifierAt(IdentIndex).Param[NumActualParams].NumAllocElements > 0) and not
-            (IdentifierAt(IdentIndex).Param[NumActualParams].AllocElementType in
-            [TDataType.RECORDTOK, TDataType.OBJECTTOK]) then
+            (IdentifierAt(IdentIndex).Param[NumActualParams].NumAllocElements > 0) and
+	    not (IdentifierAt(IdentIndex).Param[NumActualParams].AllocElementType in [TDataType.RECORDTOK, TDataType.OBJECTTOK]) then
 
             i := CompileAddress(i + 1, ActualParamType, AllocElementType)
           else
@@ -7850,8 +7842,7 @@ begin
           //  writeln(IdentifierAt(IdentIndex).name,',', IdentifierAt(IdentIndex).kind,',',IdentifierAt(IdentIndex).Param[NumActualParams].DataType,',',IdentifierAt(IdentIndex).Param[NumActualParams].NumAllocElements,',',IdentifierAt(IdentIndex).Param[NumActualParams].AllocElementType ,'|',ActualParamType);
 
 
-          if (ActualParamType in IntegerTypes) and (IdentifierAt(IdentIndex).Param[NumActualParams].DataType in
-            RealTypes) then
+          if (ActualParamType in IntegerTypes) and (IdentifierAt(IdentIndex).Param[NumActualParams].DataType in RealTypes) then
           begin
 
             AllocElementType := IdentifierAt(IdentIndex).Param[NumActualParams].DataType;
@@ -7861,50 +7852,44 @@ begin
           end;
 
 
-          if (IdentifierAt(IdentIndex).Param[NumActualParams].DataType in IntegerTypes + RealTypes) and
-            (ActualParamType in RealTypes) then
+          if (IdentifierAt(IdentIndex).Param[NumActualParams].DataType in IntegerTypes + RealTypes) and (ActualParamType in RealTypes) then
             CheckCommonType(i, IdentifierAt(IdentIndex).Param[NumActualParams].DataType, ActualParamType);
 
           if (IdentifierAt(IdentIndex).Param[NumActualParams].DataType = TDataType.POINTERTOK) then
             CheckCommonType(i, IdentifierAt(IdentIndex).Param[NumActualParams].DataType, ActualParamType);
 
-          if (TokenAt(i).Kind = IDENTTOK) and (IdentifierAt(IdentIndex).Param[NumActualParams].DataType =
-            TDataType.ENUMTOK) then
+          if (TokenAt(i).Kind = IDENTTOK) and (IdentifierAt(IdentIndex).Param[NumActualParams].DataType = TDataType.ENUMTOK) then
           begin
             IdentTemp := GetIdentIndex(TokenAt(i).Name);
 
             if GetTypeAtIndex(IdentifierAt(IdentTemp).NumAllocElements).Field[0].Name <>
-              GetTypeAtIndex(IdentifierAt(IdentIndex).Param[NumActualParams].NumAllocElements).Field[0].Name then
-              Error(i, 'Incompatible types: got "' + GetTypeAtIndex(
-                IdentifierAt(IdentTemp).NumAllocElements).Field[0].Name + '" expected "' +
-                GetTypeAtIndex(IdentifierAt(IdentIndex).Param[NumActualParams].NumAllocElements).Field[0].Name + '"');
+               GetTypeAtIndex(IdentifierAt(IdentIndex).Param[NumActualParams].NumAllocElements).Field[0].Name then
+              Error(i, 'Incompatible types: got "' +
+	            GetTypeAtIndex(IdentifierAt(IdentTemp).NumAllocElements).Field[0].Name + '" expected "' +
+                    GetTypeAtIndex(IdentifierAt(IdentIndex).Param[NumActualParams].NumAllocElements).Field[0].Name + '"');
 
             ActualParamType := IdentifierAt(IdentTemp).CastKindToDataType;
 
             //    writeln(IdentifierAt(IdentTemp).Kind,',', IdentifierAt(IdentTemp).NumAllocElements,'/', IdentifierAt(IdentIndex).Param[NumActualParams].NumAllocElements, ',',Types[IdentifierAt(IdentTemp).NumAllocElements].Field[0].name);
           end;
 
-          if (TokenAt(i).Kind = TTokenKind.IDENTTOK) and (ActualParamType in
-            [TDataType.RECORDTOK, TDataType.OBJECTTOK]) and not
-            (IdentifierAt(IdentIndex).Param[NumActualParams].DataType in Pointers) then
+          if (TokenAt(i).Kind = TTokenKind.IDENTTOK) and (ActualParamType in [TDataType.RECORDTOK, TDataType.OBJECTTOK]) and
+	     not (IdentifierAt(IdentIndex).Param[NumActualParams].DataType in Pointers) then
             if IdentifierAt(GetIdentIndex(TokenAt(i).Name)).isNestedFunction then
             begin
 
-              if IdentifierAt(GetIdentIndex(TokenAt(i).Name)).NestedFunctionNumAllocElements <>
-                IdentifierAt(IdentIndex).Param[NumActualParams].NumAllocElements then
+              if IdentifierAt(GetIdentIndex(TokenAt(i).Name)).NestedFunctionNumAllocElements <> IdentifierAt(IdentIndex).Param[NumActualParams].NumAllocElements then
                 ErrorForIdentifier(i, TErrorCode.IncompatibleTypeOf, GetIdentIndex(TokenAt(i).Name));
 
             end
             else
-              if IdentifierAt(GetIdentIndex(TokenAt(i).Name)).NumAllocElements <>
-                IdentifierAt(IdentIndex).Param[NumActualParams].NumAllocElements then
+              if IdentifierAt(GetIdentIndex(TokenAt(i).Name)).NumAllocElements <> IdentifierAt(IdentIndex).Param[NumActualParams].NumAllocElements then
                 ErrorForIdentifier(i, TErrorCode.IncompatibleTypeOf, GetIdentIndex(TokenAt(i).Name));
 
 
           if ((ActualParamType in [TDataType.RECORDTOK, TDataType.OBJECTTOK]) and
             (IdentifierAt(IdentIndex).Param[NumActualParams].DataType in Pointers)) or
-            ((ActualParamType in Pointers) and (IdentifierAt(IdentIndex).Param[NumActualParams].DataType in
-            [TDataType.RECORDTOK, TDataType.OBJECTTOK])) then
+            ((ActualParamType in Pointers) and (IdentifierAt(IdentIndex).Param[NumActualParams].DataType in [TDataType.RECORDTOK, TDataType.OBJECTTOK])) then
             //  jesli wymagany jest POINTER a przekazujemy RECORD (lub na odwrot) to OK
 
           begin
@@ -7960,44 +7945,47 @@ begin
                 begin
 
                   if (IdentifierAt(IdentIndex).Param[NumActualParams].AllocElementType = TDataType.UNTYPETOK) and
-                    (IdentifierAt(IdentIndex).Param[NumActualParams].DataType = TDataType.POINTERTOK) and
-                    ({IdentifierAt(IdentIndex).Param[NumActualParams]} IdentifierAt(
-                    IdentTemp).NumAllocElements > 0) then
+                     (IdentifierAt(IdentIndex).Param[NumActualParams].DataType = TDataType.POINTERTOK) and
+                     (not ((IdentifierAt(IdentTemp).DataType = TDataType.POINTERTOK) and (IdentifierAt(IdentTemp).AllocElementType in [TDataType.RECORDTOK, TDataType.OBJECTTOK]))) and
+		     (IdentifierAt(IdentTemp).NumAllocElements > 1) then
+
                     ErrorIdentifierIncompatibleTypesArray(i, IdentTemp, TDataType.POINTERTOK)
+
                   else
-                    if (IdentifierAt(IdentIndex).Param[NumActualParams].AllocElementType <>
-                      TDataType.PROCVARTOK) and
-                      (IdentifierAt(IdentIndex).Param[NumActualParams].NumAllocElements > 0) then
-                      ErrorIncompatibleTypes(i, AllocElementType,
-                        IdentifierAt(IdentIndex).Param[NumActualParams].AllocElementType);
+                    if (IdentifierAt(IdentIndex).Param[NumActualParams].AllocElementType <> TDataType.PROCVARTOK) and
+		       (IdentifierAt(IdentIndex).Param[NumActualParams].DataType <> IdentifierAt(IdentTemp).DataType) and
+                       (IdentifierAt(IdentIndex).Param[NumActualParams].NumAllocElements > 0) then
+
+
+		      if (IdentifierAt(IdentIndex).Param[NumActualParams].DataType in [TDataType.POINTERTOK, TDataType.DEREFERENCEARRAYTOK]) and
+		         (IdentifierAt(IdentTemp).DataType in [TDataType.POINTERTOK, TDataType.DEREFERENCEARRAYTOK]) then
+
+		      else
+                        ErrorIncompatibleTypes(i, AllocElementType, IdentifierAt(IdentIndex).Param[NumActualParams].AllocElementType);
 
                 end;
 
             end
             else
-              if (IdentifierAt(IdentIndex).Param[NumActualParams].DataType in
-                [TDataType.POINTERTOK, TDataType.STRINGPOINTERTOK]) and (TokenAt(i).Kind = TTokenKind.IDENTTOK) then
+              if (IdentifierAt(IdentIndex).Param[NumActualParams].DataType in [TDataType.POINTERTOK, TDataType.STRINGPOINTERTOK]) and (TokenAt(i).Kind = TTokenKind.IDENTTOK) then
               begin
                 IdentTemp := GetIdentIndex(TokenAt(i).Name);
 
                 //  writeln('1 > ',IdentifierAt(IdentTemp).name,',', IdentifierAt(IdentTemp).DataType,',',IdentifierAt(IdentTemp).AllocElementType,',',IdentifierAt(IdentTemp).NumAllocElements,' | ',IdentifierAt(IdentIndex).Param[NumActualParams].DataType,',',IdentifierAt(IdentIndex).Param[NumActualParams].NumAllocElements );
 
                 if (IdentifierAt(IdentTemp).DataType = TDataType.STRINGPOINTERTOK) and
-                  (IdentifierAt(IdentTemp).NumAllocElements <> 0) and
-                  (IdentifierAt(IdentIndex).Param[NumActualParams].DataType = TDataType.POINTERTOK) and
-                  (IdentifierAt(IdentIndex).Param[NumActualParams].NumAllocElements = 0) then
+                   (IdentifierAt(IdentTemp).NumAllocElements <> 0) and
+                   (IdentifierAt(IdentIndex).Param[NumActualParams].DataType = TDataType.POINTERTOK) and
+                   (IdentifierAt(IdentIndex).Param[NumActualParams].NumAllocElements = 0) then
                   if IdentifierAt(IdentIndex).Param[NumActualParams].AllocElementType = TDataType.UNTYPETOK then
-                    ErrorIncompatibleTypes(i, IdentifierAt(IdentTemp).DataType,
-                      IdentifierAt(IdentIndex).Param[NumActualParams].DataType)
+                    ErrorIncompatibleTypes(i, IdentifierAt(IdentTemp).DataType, IdentifierAt(IdentIndex).Param[NumActualParams].DataType)
                   else
                     if IdentifierAt(IdentIndex).Param[NumActualParams].AllocElementType <> TDataType.BYTETOK then
                       // Exceptionally we accept PBYTE as STRING
-                      ErrorIncompatibleTypes(i, IdentifierAt(IdentTemp).DataType,
-                        IdentifierAt(IdentIndex).Param[NumActualParams].AllocElementType, True);
+                      ErrorIncompatibleTypes(i, IdentifierAt(IdentTemp).DataType, IdentifierAt(IdentIndex).Param[NumActualParams].AllocElementType, True);
 
 
-                CheckCommonType(i, IdentifierAt(IdentIndex).Param[NumActualParams].DataType,
-                  IdentifierAt(IdentTemp).DataType);
+                CheckCommonType(i, IdentifierAt(IdentIndex).Param[NumActualParams].DataType, IdentifierAt(IdentTemp).DataType);
 
               end
               else
@@ -8089,13 +8077,11 @@ begin
 
 
         if (IdentifierAt(IdentIndex).isRecursion = False) and (IdentifierAt(IdentIndex).isStdCall = False) and
-          (ParamIndex > 1) and (IdentifierAt(IdentIndex).Param[NumActualParams].PassMethod <>
-          TParameterPassingMethod.VARPASSING) and (IdentifierAt(IdentIndex).Param[NumActualParams].DataType in
-          [TDataType.RECORDTOK, TDataType.OBJECTTOK] + Pointers) and
+          (ParamIndex > 1) and (IdentifierAt(IdentIndex).Param[NumActualParams].PassMethod <> TParameterPassingMethod.VARPASSING) and
+	  (IdentifierAt(IdentIndex).Param[NumActualParams].DataType in [TDataType.RECORDTOK, TDataType.OBJECTTOK] + Pointers) and
           (IdentifierAt(IdentIndex).Param[NumActualParams].NumAllocElements and $FFFF > 1) then
 
-          if IdentifierAt(IdentIndex).Param[NumActualParams].DataType in
-            [TDataType.RECORDTOK, TDataType.OBJECTTOK] then
+          if IdentifierAt(IdentIndex).Param[NumActualParams].DataType in [TDataType.RECORDTOK, TDataType.OBJECTTOK] then
           begin
 
             if IdentifierAt(IdentIndex).isOverload then
@@ -8116,25 +8102,20 @@ begin
             if j = 256 then
             begin
               asm65(#9'ldy #$00');
-              ;
-              asm65(#9'mva:rne (:bp2),y ' + svar + '.adr.' + IdentifierAt(
-                IdentIndex).Param[NumActualParams].Name + ',y+');
+              asm65(#9'mva:rne (:bp2),y ' + svar + '.adr.' + IdentifierAt(IdentIndex).Param[NumActualParams].Name + ',y+');
             end
             else
               if j <= 128 then
               begin
                 asm65(#9'ldy #$' + IntToHex(j - 1, 2));
-                asm65(#9'mva:rpl (:bp2),y ' + svar + '.adr.' + IdentifierAt(
-                  IdentIndex).Param[NumActualParams].Name + ',y-');
+                asm65(#9'mva:rpl (:bp2),y ' + svar + '.adr.' + IdentifierAt(IdentIndex).Param[NumActualParams].Name + ',y-');
               end
               else
-                asm65(#9'@move ":bp2" #' + svar + '.adr.' + IdentifierAt(IdentIndex).Param[NumActualParams].Name +
-                  ' #' + IntToStr(j));
+                asm65(#9'@move ":bp2" #' + svar + '.adr.' + IdentifierAt(IdentIndex).Param[NumActualParams].Name + ' #' + IntToStr(j));
 
           end
           else
-            if not (IdentifierAt(IdentIndex).Param[NumActualParams].AllocElementType in
-              [TDataType.RECORDTOK, TDataType.OBJECTTOK]) then
+            if not (IdentifierAt(IdentIndex).Param[NumActualParams].AllocElementType in [TDataType.RECORDTOK, TDataType.OBJECTTOK]) then
             begin
 
               if IdentifierAt(IdentIndex).isOverload then
@@ -8148,8 +8129,7 @@ begin
               asm65(#9'sta :bp2+1');
 
               if IdentifierAt(IdentIndex).Param[NumActualParams].NumAllocElements shr 16 <> 0 then
-                j := (IdentifierAt(IdentIndex).Param[NumActualParams].NumAllocElements and $FFFF) *
-                  (IdentifierAt(IdentIndex).Param[NumActualParams].NumAllocElements shr 16)
+                j := (IdentifierAt(IdentIndex).Param[NumActualParams].NumAllocElements and $FFFF) * (IdentifierAt(IdentIndex).Param[NumActualParams].NumAllocElements shr 16)
               else
                 j := IdentifierAt(IdentIndex).Param[NumActualParams].NumAllocElements;
 
@@ -8160,19 +8140,16 @@ begin
               if j = 256 then
               begin
                 asm65(#9'ldy #$00');
-                asm65(#9'mva:rne (:bp2),y ' + svar + '.adr.' + IdentifierAt(
-                  IdentIndex).Param[NumActualParams].Name + ',y+');
+                asm65(#9'mva:rne (:bp2),y ' + svar + '.adr.' + IdentifierAt(IdentIndex).Param[NumActualParams].Name + ',y+');
               end
               else
                 if j <= 128 then
                 begin
                   asm65(#9'ldy #$' + IntToHex(j - 1, 2));
-                  asm65(#9'mva:rpl (:bp2),y ' + svar + '.adr.' +
-                    IdentifierAt(IdentIndex).Param[NumActualParams].Name + ',y-');
+                  asm65(#9'mva:rpl (:bp2),y ' + svar + '.adr.' + IdentifierAt(IdentIndex).Param[NumActualParams].Name + ',y-');
                 end
                 else
-                  asm65(#9'@move ":bp2" #' + svar + '.adr.' + IdentifierAt(IdentIndex).Param[NumActualParams].Name +
-                    ' #' + IntToStr(j));
+                  asm65(#9'@move ":bp2" #' + svar + '.adr.' + IdentifierAt(IdentIndex).Param[NumActualParams].Name + ' #' + IntToStr(j));
 
             end;
 
@@ -8448,7 +8425,7 @@ begin
     (IdentifierAt(IdentIndex).isRecursion = False) then
   begin
 
-    asm65(#9'inx');
+    a65(TCode65.addBX);
 
     ActualParamType := IdentifierAt(IdentIndex).DataType;
     if ActualParamType = TDataType.ENUMTOK then
@@ -8817,8 +8794,7 @@ begin
                   ((IdentifierAt(IdentIndex).DataType in Pointers) and
                     (IdentifierAt(IdentIndex).NumAllocElements > 0)) or
                     ((IdentifierAt(IdentIndex).DataType in Pointers) and
-                    (IdentifierAt(IdentIndex).NumAllocElements = 0) and (TokenAt(i + 3).Kind =
-                    TTokenKind.DEREFERENCETOK)) then
+                    (IdentifierAt(IdentIndex).NumAllocElements = 0) and (TokenAt(i + 3).Kind = TTokenKind.DEREFERENCETOK)) then
                   begin
 
                     if TokenAt(i + 3).Kind = TTokenKind.DEREFERENCETOK then Inc(i);
@@ -9659,13 +9635,14 @@ begin
             asm65(#9'adc :STACKORIGIN+STACKWIDTH,x');
             asm65(#9'sta :STACKORIGIN-1+STACKWIDTH,x');
 
-            asm65(#9'dex');
+            a65(TCode65.subBX);
 
             asm65(#9'lda :STACKORIGIN,x');
             asm65(#9'sta :bp2');
             asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
             asm65(#9'sta :bp2+1');
             asm65(#9'ldy #$00');
+
             // perl
             //     writeln(IdentifierAt(IdentIndex).name,',', GetDataSize(IdentifierAt(IdentIndex).AllocElementType],',', IdentifierAt(IdentIndex).AllocElementType ,',',ValType,',',VarType);
 
@@ -9711,8 +9688,7 @@ begin
             Error(i, TErrorCode.TypeMismatch);
 
 
-          if (ValType = TDataType.POINTERTOK) and not (IdentifierAt(IdentIndex).DataType in
-            [TDataType.POINTERTOK, TDataType.RECORDTOK, TDataType.OBJECTTOK]) then
+          if (ValType = TDataType.POINTERTOK) and not (IdentifierAt(IdentIndex).DataType in [TDataType.POINTERTOK, TDataType.RECORDTOK, TDataType.OBJECTTOK]) then
           begin
             ValType := IdentifierAt(IdentIndex).DataType;
 
@@ -9823,16 +9799,14 @@ begin
 
           CheckTok(j + 1, TTokenKind.CPARTOK);
 
-          if (ValType = TDataType.POINTERTOK) and (IdentifierAt(IdentIndex).AllocElementType =
-            TDataType.PROCVARTOK) then
+          if (ValType = TDataType.POINTERTOK) and (IdentifierAt(IdentIndex).AllocElementType = TDataType.PROCVARTOK) then
           begin
 
             IdentTemp := GetIdentIndex('@FN' + IntToHex(IdentifierAt(IdentIndex).NumAllocElements_, 4));
 
             if IdentifierAt(IdentTemp).IsNestedFunction = False then
               Error(j, TMessage.Create(TErrorCode.VariableConstantOrFunctionExpectedButProcedureFound,
-                'Variable, constant or function name expected but procedure {0} found.',
-                IdentifierAt(IdentIndex).Name));
+                'Variable, constant or function name expected but procedure {0} found.', IdentifierAt(IdentIndex).Name));
 
             if TokenAt(j).Kind <> TTokenKind.IDENTTOK then Error(j, TErrorCode.VariableExpected);
 
@@ -9850,19 +9824,15 @@ begin
 
           end
           else
-            if ((ValType = TDataType.POINTERTOK) and (IdentifierAt(IdentIndex).AllocElementType in
-              OrdinalTypes + RealTypes + [TDataType.RECORDTOK, TDataType.OBJECTTOK])) or
-              ((ValType = TDataType.POINTERTOK) and (IdentifierAt(IdentIndex).DataType in
-              [TDataType.RECORDTOK, TDataType.OBJECTTOK])) then
+            if ((ValType = TDataType.POINTERTOK) and (IdentifierAt(IdentIndex).AllocElementType in OrdinalTypes + RealTypes + [TDataType.RECORDTOK, TDataType.OBJECTTOK])) or
+              ((ValType = TDataType.POINTERTOK) and (IdentifierAt(IdentIndex).DataType in [TDataType.RECORDTOK, TDataType.OBJECTTOK])) then
             begin
 
               yes := False;
 
-              if (IdentifierAt(IdentIndex).DataType in [TDataType.RECORDTOK, TDataType.OBJECTTOK]) and
-                (TokenAt(j).Kind = TTokenKind.DEREFERENCETOK) then yes := True;
+              if (IdentifierAt(IdentIndex).DataType in [TDataType.RECORDTOK, TDataType.OBJECTTOK]) and (TokenAt(j).Kind = TTokenKind.DEREFERENCETOK) then yes := True;
 
-              if (IdentifierAt(IdentIndex).DataType = TDataType.POINTERTOK) and
-                (TokenAt(j + 2).Kind = TTokenKind.DEREFERENCETOK) then yes := True;
+              if (IdentifierAt(IdentIndex).DataType = TDataType.POINTERTOK) and (TokenAt(j + 2).Kind = TTokenKind.DEREFERENCETOK) then yes := True;
 
               //     yes := (TokenAt(j + 2).Kind = TTokenKind.DEREFERENCETOK);
 
@@ -9964,8 +9934,7 @@ begin
 
 
 
-          if (IdentifierAt(IdentIndex).DataType = TDataType.POINTERTOK) and
-            (IdentifierAt(IdentIndex).AllocElementType = TDataType.PROCVARTOK) then
+          if (IdentifierAt(IdentIndex).DataType = TDataType.POINTERTOK) and (IdentifierAt(IdentIndex).AllocElementType = TDataType.PROCVARTOK) then
           begin
 
             //        writeln('!! ',hexstr(IdentifierAt(IdentIndex).NumAllocElements_,8));
@@ -10008,9 +9977,7 @@ begin
           else
 
             if IdentifierAt(IdentIndex).Kind = TTokenKind.PROCEDURETOK then
-              Error(i, TMessage.Create(TErrorCode.VariableConstantOrFunctionExpectedButProcedureFound,
-                'Variable, constant or function name expected but procedure {0} found.',
-                IdentifierAt(IdentIndex).Name))
+              Error(i, TMessage.Create(TErrorCode.VariableConstantOrFunctionExpectedButProcedureFound, 'Variable, constant or function name expected but procedure {0} found.', IdentifierAt(IdentIndex).Name))
             else if IdentifierAt(IdentIndex).Kind = TTokenKind.FUNCTIONTOK then       // Function call
               begin
 
@@ -10024,15 +9991,13 @@ begin
                   begin
 
                     if IdentifierAt(IdentIndex).NumParams <> NumParam then
-                      Error(i, TMessage.Create(TErrorCode.WrongNumberOfParameters,
-                        'Wrong number of parameters specified for {0}.', IdentifierAt(identIndex).Name));
+                      Error(i, TMessage.Create(TErrorCode.WrongNumberOfParameters, 'Wrong number of parameters specified for {0}.', IdentifierAt(identIndex).Name));
 
 
                     ErrorForIdentifier(i, TErrorCode.CantDetermine, IdentIndex);
                   end
                   else
-                    Error(i, TMessage.Create(TErrorCode.WrongNumberOfParameters,
-                      'Wrong number of parameters specified for {0}.', IdentifierAt(identIndex).Name));
+                    Error(i, TMessage.Create(TErrorCode.WrongNumberOfParameters, 'Wrong number of parameters specified for {0}.', IdentifierAt(identIndex).Name));
 
                 IdentIndex := IdentTemp;
 
@@ -10050,8 +10015,8 @@ begin
                 CompileActualParameters(i, IdentIndex);
 
                 ValType := IdentifierAt(IdentIndex).DataType;
-                if (ValType = TDataType.ENUMTOK) then
-                  ValType := IdentifierAt(IdentIndex).NestedFunctionAllocElementType;
+
+                if (ValType = TDataType.ENUMTOK) then ValType := IdentifierAt(IdentIndex).NestedFunctionAllocElementType;
 
                 Dec(run_func);
 
@@ -10065,21 +10030,19 @@ begin
                 // -----------------------------------------------------------------------------
 
                 if (TokenAt(i + 1).Kind = TTokenKind.DEREFERENCETOK) then
-                  if (IdentifierAt(IdentIndex).Kind <> TTokenKind.VARTOK) or not
-                    (IdentifierAt(IdentIndex).DataType in Pointers + [TDataType.DEREFERENCEARRAYTOK]) then
+                  if (IdentifierAt(IdentIndex).Kind <> TTokenKind.VARTOK) or
+                     not (IdentifierAt(IdentIndex).DataType in Pointers + [TDataType.DEREFERENCEARRAYTOK]) then
                     ErrorForIdentifier(i, TErrorCode.IncompatibleTypeOf, IdentIndex)
                   else
                   begin
 
-                    if (IdentifierAt(IdentIndex).DataType = TDataType.STRINGPOINTERTOK) and
-                      (IdentifierAt(IdentIndex).NumAllocElements = 0) then
+                    if (IdentifierAt(IdentIndex).DataType = TDataType.STRINGPOINTERTOK) and (IdentifierAt(IdentIndex).NumAllocElements = 0) then
                       ValType := TDataType.STRINGPOINTERTOK
                     else
                       ValType := IdentifierAt(IdentIndex).AllocElementType;
 
 
-                    if (IdentifierAt(IdentIndex).DataType = TDataType.DEREFERENCEARRAYTOK) and
-                      (TokenAt(i + 2).Kind = TTokenKind.OBRACKETTOK) then
+                    if (IdentifierAt(IdentIndex).DataType in [TDataType.POINTERTOK, TDataType.DEREFERENCEARRAYTOK]) and (TokenAt(i + 2).Kind = TTokenKind.OBRACKETTOK) then
                     begin
 
                       i := CompileArrayIndex(i + 1, IdentIndex, ValType);              // array^[ ]
@@ -10088,8 +10051,7 @@ begin
 
                     end
                     else
-                      if (ValType = TDataType.UNTYPETOK) and (IdentifierAt(IdentIndex).DataType =
-                        TDataType.POINTERTOK) then
+                      if (ValType = TDataType.UNTYPETOK) and (IdentifierAt(IdentIndex).DataType = TDataType.POINTERTOK) then
                       begin
 
                         ValType := TDataType.POINTERTOK;
@@ -10111,40 +10073,32 @@ begin
                             IdentTemp := RecordSize(IdentIndex, TokenAt(i + 3).Name);
 
                             if IdentTemp < 0 then
-                              Error(i + 3, TMessage.Create(TErrorCode.IdentifierIdentsNoMember,
-                                'Identifier idents no member ''{0}''.', TokenAt(i + 3).Name));
+                              Error(i + 3, TMessage.Create(TErrorCode.IdentifierIdentsNoMember, 'Identifier idents no member ''{0}''.', TokenAt(i + 3).Name));
 
                             ValType := TDataType(IdentTemp shr 16);
 
                             Inc(i, 2);
 
 
-                            if (TokenAt(i + 1).Kind = TTokenKind.IDENTTOK) and
-                              (TokenAt(i + 2).Kind = TTokenKind.OBRACKETTOK) then
+                            if (TokenAt(i + 1).Kind = TTokenKind.IDENTTOK) and (TokenAt(i + 2).Kind = TTokenKind.OBRACKETTOK) then
                             begin    // record^.label[x]
 
                               Inc(i);
 
-                              ValType :=
-                                IdentifierAt(GetIdentIndex(IdentifierAt(IdentIndex).Name +
-                                '.' + TokenAt(i).Name)).AllocElementType;
+                              //ValType := IdentifierAt(GetIdentIndex(IdentifierAt(IdentIndex).Name + '.' + TokenAt(i).Name)).AllocElementType;
 
-                              i := CompileArrayIndex(i, GetIdentIndex(IdentifierAt(IdentIndex).Name +
-                                '.' + TokenAt(i).Name), ValType);
+                              i := CompileArrayIndex(i, GetIdentIndex(IdentifierAt(IdentIndex).Name + '.' + TokenAt(i).Name), ValType);
 
-                              Push(IdentifierAt(IdentIndex).Value, ASPOINTERTORECORDARRAYORIGIN,
-                                GetDataSize(ValType), IdentIndex, IdentTemp and $ffff);
+                              Push(IdentifierAt(IdentIndex).Value, ASPOINTERTORECORDARRAYORIGIN, GetDataSize(ValType), IdentIndex, IdentTemp and $ffff);
 
                             end
                             else
 
                               if ValType = TDataType.STRINGPOINTERTOK then
-                                Push(IdentifierAt(IdentIndex).Value, ASPOINTERTORECORD,
-                                  GetDataSize(ValType), IdentIndex, IdentTemp and $ffff)
+                                Push(IdentifierAt(IdentIndex).Value, ASPOINTERTORECORD, GetDataSize(ValType), IdentIndex, IdentTemp and $ffff)
                               // record^.string
                               else
-                                Push(IdentifierAt(IdentIndex).Value, ASPOINTERTOPOINTER,
-                                  GetDataSize(ValType), IdentIndex, IdentTemp and $ffff);
+                                Push(IdentifierAt(IdentIndex).Value, ASPOINTERTOPOINTER, GetDataSize(ValType), IdentIndex, IdentTemp and $ffff);
                             // record_lebel.field^
 
                           end
@@ -10201,8 +10155,7 @@ begin
                         end
                         else
 
-                          if (TokenAt(i + 2).Kind = TTokenKind.DOTTOK) and
-                            (ValType in [TDataType.RECORDTOK, TDataType.OBJECTTOK]) then
+                          if (TokenAt(i + 2).Kind = TTokenKind.DOTTOK) and (ValType in [TDataType.RECORDTOK, TDataType.OBJECTTOK]) then
                           begin
 
                             //  writeln(valType,' / ',IdentifierAt(IdentIndex).name,',',IdentifierAt(IdentIndex).DataType,',',IdentifierAt(IdentIndex).AllocElementType,',',IdentifierAt(IdentIndex).NumAllocElements,',',IdentifierAt(IdentIndex).NumAllocElements_,',',TokenAt(i + 3).Kind );
@@ -10213,30 +10166,23 @@ begin
                             IdentTemp := RecordSize(IdentIndex, TokenAt(i + 3).Name);
 
                             if IdentTemp < 0 then
-                              Error(i + 3, TMessage.Create(TErrorCode.IdentifierIdentsNoMember,
-                                'Identifier idents no member ''{0}''.', TokenAt(i + 3).Name));
+                              Error(i + 3, TMessage.Create(TErrorCode.IdentifierIdentsNoMember, 'Identifier idents no member ''{0}''.', TokenAt(i + 3).Name));
 
                             ValType := TDataType(IdentTemp shr 16);
 
                             Inc(i, 2);
 
 
-                            if (TokenAt(i + 1).Kind = TTokenKind.IDENTTOK) and
-                              (TokenAt(i + 2).Kind = TTokenKind.OBRACKETTOK) then
+                            if (TokenAt(i + 1).Kind = TTokenKind.IDENTTOK) and (TokenAt(i + 2).Kind = TTokenKind.OBRACKETTOK) then
                             begin    // array_of_record_pointers[x].array[i]
 
                               Inc(i);
 
-                              ValType :=
-                                IdentifierAt(GetIdentIndex(IdentifierAt(IdentIndex).Name +
-                                '.' + TokenAt(i).Name)).AllocElementType;
+                              ValType := IdentifierAt(GetIdentIndex(IdentifierAt(IdentIndex).Name + '.' + TokenAt(i).Name)).AllocElementType;
 
                               IndirectionLevel := ASPOINTERTORECORDARRAYORIGIN;
 
-
-                              if (IdentifierAt(IdentIndex).DataType = TDataType.POINTERTOK) and
-                                (IdentifierAt(IdentIndex).AllocElementType in
-                                [TDataType.RECORDTOK, TDataType.OBJECTTOK]) then
+                              if (IdentifierAt(IdentIndex).DataType = TDataType.POINTERTOK) and (IdentifierAt(IdentIndex).AllocElementType in [TDataType.RECORDTOK, TDataType.OBJECTTOK]) then
                               begin
 
                                 //  writeln(ValType,',',IdentifierAt(IdentIndex).Name + '||' + TokenAt(i).Name,',',IdentifierAt(IdentIndex).DataType,',',IdentifierAt(IdentIndex).AllocElementType,',',IdentifierAt(IdentIndex).NumAllocElements,',',IdentifierAt(IdentIndex).NumAllocElements_ );
@@ -10244,38 +10190,31 @@ begin
                                 IdentTemp := RecordSize(IdentIndex, TokenAt(i).Name);
 
                                 if IdentTemp < 0 then
-                                  Error(i, TMessage.Create(TErrorCode.IdentifierIdentsNoMember,
-                                    'Identifier idents no member ''{0}''.', TokenAt(i).Name));
+                                  Error(i, TMessage.Create(TErrorCode.IdentifierIdentsNoMember, 'Identifier idents no member ''{0}''.', TokenAt(i).Name));
 
-                                ValType :=
-                                  IdentifierAt(GetIdentIndex(IdentifierAt(IdentIndex).Name +
-                                  '.' + TokenAt(i).Name)).AllocElementType;
+                                ValType := IdentifierAt(GetIdentIndex(IdentifierAt(IdentIndex).Name + '.' + TokenAt(i).Name)).AllocElementType;
 
                                 IndirectionLevel := ASARRAYORIGINOFPOINTERTORECORDARRAYORIGIN;
 
                               end;
 
 
-                              i := CompileArrayIndex(i, GetIdentIndex(IdentifierAt(IdentIndex).Name +
-                                '.' + TokenAt(i).Name), AllocElementType);
+                              i := CompileArrayIndex(i, GetIdentIndex(IdentifierAt(IdentIndex).Name + '.' + TokenAt(i).Name), AllocElementType);
 
-                              Push(IdentifierAt(IdentIndex).Value, IndirectionLevel, GetDataSize(ValType),
-                                IdentIndex, IdentTemp and $ffff);
+                              Push(IdentifierAt(IdentIndex).Value, IndirectionLevel, GetDataSize(ValType), IdentIndex, IdentTemp and $ffff);
 
                             end
                             else
 
                               if ValType = TDataType.STRINGPOINTERTOK then
                                 // array_of_record_pointers[index].string
-                                Push(0, ASPOINTERTOARRAYRECORDTOSTRING, GetDataSize(ValType),
-                                  IdentIndex, IdentTemp and $ffff)
+                                Push(0, ASPOINTERTOARRAYRECORDTOSTRING, GetDataSize(ValType), IdentIndex, IdentTemp and $ffff)
                               else
                                 Push(0, ASPOINTERTOARRAYRECORD, GetDataSize(ValType), IdentIndex, IdentTemp and $ffff);
 
                           end
                           else
-                            if (TokenAt(i + 2).Kind = TTokenKind.OBRACKETTOK) and
-                              (ValType = TDataType.STRINGPOINTERTOK) then
+                            if (TokenAt(i + 2).Kind = TTokenKind.OBRACKETTOK) and (ValType = TDataType.STRINGPOINTERTOK) then
                             begin
 
                               Error(i, TMessage.Create(TErrorCode.UnderConstruction, 'Under construction'));
@@ -10309,26 +10248,19 @@ begin
 
                                 //  writeln(IdentifierAt(IdentIndex).name,',',IdentifierAt(IdentIndex).DataType,',',IdentifierAt(IdentIndex).NumAllocElements,',',IdentifierAt(IdentIndex).AllocElementType );
 
-                                IdentTemp :=
-                                  GetIdentIndex(copy(IdentifierAt(IdentIndex).Name, 1,
-                                  pos('.', IdentifierAt(IdentIndex).Name) - 1));
+                                IdentTemp := GetIdentIndex(copy(IdentifierAt(IdentIndex).Name, 1, pos('.', IdentifierAt(IdentIndex).Name) - 1));
 
-                                if (IdentifierAt(IdentTemp).DataType = TDataType.POINTERTOK) and
-                                  (IdentifierAt(IdentTemp).AllocElementType in
-                                  [TDataType.RECORDTOK, TDataType.OBJECTTOK]) then
+                                if (IdentifierAt(IdentTemp).DataType = TDataType.POINTERTOK) and (IdentifierAt(IdentTemp).AllocElementType in [TDataType.RECORDTOK, TDataType.OBJECTTOK]) then
                                 begin
 
-                                  svar :=
-                                    copy(IdentifierAt(IdentIndex).Name, pos('.', IdentifierAt(IdentIndex).Name) +
-                                    1, length(IdentifierAt(IdentIndex).Name));
+                                  svar := copy(IdentifierAt(IdentIndex).Name, pos('.', IdentifierAt(IdentIndex).Name) + 1, length(IdentifierAt(IdentIndex).Name));
 
                                   IdentIndex := IdentTemp;
 
                                   IdentTemp := RecordSize(IdentIndex, svar);
 
                                   if IdentTemp < 0 then
-                                    Error(i + 3, TMessage.Create(TErrorCode.IdentifierIdentsNoMember,
-                                      'Identifier idents no member ''{0}''.', svar));
+                                    Error(i + 3, TMessage.Create(TErrorCode.IdentifierIdentsNoMember, 'Identifier idents no member ''{0}''.', svar));
 
                                   IndirectionLevel := ASPOINTERTORECORDARRAYORIGIN;
 
@@ -10339,18 +10271,12 @@ begin
                               end;
 
 
-                              if ValType in [TDataType.RECORDTOK, TDataType.OBJECTTOK] then
-                              begin
-                                ValType := TDataType.POINTERTOK;
-                              end;
+                              if ValType in [TDataType.RECORDTOK, TDataType.OBJECTTOK] then ValType := TDataType.POINTERTOK;
 
                               if VarType <> TDataType.UNTYPETOK then
-                              begin
                                 if GetDataSize(ValType) > GetDataSize(VarType) then ValType := VarType;
-                              end;
 
-                              Push(IdentifierAt(IdentIndex).Value, IndirectionLevel,
-                                GetDataSize(ValType), IdentIndex, IdentTemp and $ff);
+                              Push(IdentifierAt(IdentIndex).Value, IndirectionLevel, GetDataSize(ValType), IdentIndex, IdentTemp and $ff);
 
                               CheckTok(i + 1, TTokenKind.CBRACKETTOK);
 
@@ -10383,8 +10309,7 @@ begin
                       i := j;
 
 
-                      if (IdentifierAt(IdentIndex).PassMethod = TParameterPassingMethod.VARPASSING) and
-                        (IdentifierAt(IdentIndex).NumAllocElements = 0) then
+                      if (IdentifierAt(IdentIndex).PassMethod = TParameterPassingMethod.VARPASSING) and (IdentifierAt(IdentIndex).NumAllocElements = 0) then
                       begin
 
                         //  writeln(IdentifierAt(IdentIndex).Name,',',IdentifierAt(IdentIndex).DataType,',',IdentifierAt(IdentIndex).AllocElementType,',',IdentifierAt(IdentIndex).NumAllocElements,',',IdentifierAt(IdentIndex).NumAllocElements_,',',IdentifierAt(IdentIndex).idType,'/',IdentifierAt(IdentIndex).Kind,' = ',IdentifierAt(IdentIndex).PassMethod ,' | ',ValType,',',TokenAt(j).Kind,',',TokenAt(j+1].kind);
@@ -10426,8 +10351,7 @@ begin
                           ConstVal := IdentifierAt(IdentIndex).Value;
 
 
-                        if (ValType in IntegerTypes) and (VarType in [TDataType.SINGLETOK,
-                          TDataType.HALFSINGLETOK]) then
+                        if (ValType in IntegerTypes) and (VarType in [TDataType.SINGLETOK, TDataType.HALFSINGLETOK]) then
                           ConstVal := FromInt64(ConstVal);
 
                         if (VarType = TDataType.HALFSINGLETOK)
@@ -10455,20 +10379,17 @@ begin
 
                         Push(ConstVal, ASPOINTERTORECORD, GetDataSize(ValType), IdentIndex)
                       else
-                        if (IdentifierAt(IdentIndex).PassMethod = TParameterPassingMethod.VARPASSING) and
-                          (IdentifierAt(IdentIndex).NumAllocElements = 0) then
+                        if (IdentifierAt(IdentIndex).PassMethod = TParameterPassingMethod.VARPASSING) and (IdentifierAt(IdentIndex).NumAllocElements = 0) then
                           Push(ConstVal, ASPOINTERTOPOINTER, GetDataSize(ValType), IdentIndex)
                         else
     {if IdentifierAt(IdentIndex).IdType = TDataType.DEREFERENCETOK then    // !!! test-record\record_dereference_as_val.pas !!!
      Push(ConstVal, ASVALUE, GetDataSize(ValType), IdentIndex)
     else}
-                          Push(ConstVal, Ord(IdentifierAt(IdentIndex).Kind = TTokenKind.VARTOK),
-                            GetDataSize(ValType), IdentIndex);
+                          Push(ConstVal, Ord(IdentifierAt(IdentIndex).Kind = TTokenKind.VARTOK), GetDataSize(ValType), IdentIndex);
 
 
                       if (BlockStackTopIndex = 1) then
-                        if not (IdentifierAt(IdentIndex).isInit or IdentifierAt(IdentIndex).isInitialized or
-                          IdentifierAt(IdentIndex).IsLoopVariable) then
+                        if not (IdentifierAt(IdentIndex).isInit or IdentifierAt(IdentIndex).isInitialized or IdentifierAt(IdentIndex).IsLoopVariable) then
                           WarningVariableNotInitialized(i, IdentIndex);
 
                     end
@@ -11845,13 +11766,11 @@ begin
     begin
       IdentIndex := GetIdentIndex(TokenAt(i).Name);
 
-      if (IdentIndex > 0) and (IdentifierAt(IdentIndex).Kind = TTokenKind.FUNCTIONTOK) and
-        (BlockStackTopIndex > 1) and (TokenAt(i + 1).Kind <> TTokenKind.OPARTOK) then
+      if (IdentIndex > 0) and (IdentifierAt(IdentIndex).Kind = TTokenKind.FUNCTIONTOK) and (BlockStackTopIndex > 1) and (TokenAt(i + 1).Kind <> TTokenKind.OPARTOK) then
         for j := NumIdent downto 1 do
           if (IdentifierAt(j).ProcAsBlockIndex = NumBlocks_) and (IdentifierAt(j).Kind = TTokenKind.FUNCTIONTOK) then
           begin
-            if (IdentifierAt(j).Name = IdentifierAt(IdentIndex).Name) and
-              (IdentifierAt(j).SourceFile.UnitIndex = IdentifierAt(IdentIndex).SourceFile.UnitIndex) then
+            if (IdentifierAt(j).Name = IdentifierAt(IdentIndex).Name) and (IdentifierAt(j).SourceFile.UnitIndex = IdentifierAt(IdentIndex).SourceFile.UnitIndex) then
               IdentIndex := GetIdentResult(NumBlocks_);
             Break;
           end;
@@ -11925,8 +11844,7 @@ begin
               Error(i + 1, TErrorCode.VariableExpected);
 
 
-            if (TokenAt(i + 1).Kind = OPARTOK) and (IdentifierAt(IdentIndex).DataType = TDataType.POINTERTOK) and
-              (Elements(IdentIndex) > 0) then
+            if (TokenAt(i + 1).Kind = OPARTOK) and (IdentifierAt(IdentIndex).DataType = TDataType.POINTERTOK) and (Elements(IdentIndex) > 0) then
             begin
 
               //  writeln('= ',IdentifierAt(IdentIndex).Name,',',IdentifierAt(IdentIndex).DataType,',',IdentifierAt(IdentIndex).AllocElementType,',',IdentifierAt(IdentIndex).NumAllocElements);
@@ -11940,20 +11858,14 @@ begin
 
               //      writeln(ExpressionType,',',VarTYpe,',',Elements(GetIdent(TokenAt(j + 2).Name^)));
 
-              if GetDataSize(VarType) <> Elements(IdentIndex) * GetDataSize(
-                IdentifierAt(IdentIndex).AllocElementType) then
+              if GetDataSize(VarType) <> Elements(IdentIndex) * GetDataSize(IdentifierAt(IdentIndex).AllocElementType) then
                 if VarType = TDataType.UNTYPETOK then
-                  Error(j + 2, 'Illegal type conversion: "POINTER" to "Array[0..' +
-                    IntToStr(Elements(IdentIndex) - 1) + '] Of ' +
-                    InfoAboutDataType(IdentifierAt(IdentIndex).AllocElementType) + '"')
+                  Error(j + 2, 'Illegal type conversion: "POINTER" to "Array[0..' + IntToStr(Elements(IdentIndex) - 1) + '] Of ' + InfoAboutDataType(IdentifierAt(IdentIndex).AllocElementType) + '"')
                 else
                   if Elements(GetIdentIndex(TokenAt(j + 2).Name)) = 0 then
-                    Error(j + 2, 'Illegal type conversion: "' + InfoAboutDataType(VarType) +
-                      '" to "' + IdentifierAt(IdentIndex).Name + '"')
+                    Error(j + 2, 'Illegal type conversion: "' + InfoAboutDataType(VarType) + '" to "' + IdentifierAt(IdentIndex).Name + '"')
                   else
-                    Error(j + 2, 'Illegal type conversion: "Array[0..' +
-                      IntToStr(Elements(GetIdentIndex(TokenAt(j + 2).Name)) - 1) + '] Of ' +
-                      InfoAboutDataType(VarType) + '" to "' + IdentifierAt(IdentIndex).Name + '"');
+                    Error(j + 2, 'Illegal type conversion: "Array[0..' + IntToStr(Elements(GetIdentIndex(TokenAt(j + 2).Name)) - 1) + '] Of ' + InfoAboutDataType(VarType) + '" to "' + IdentifierAt(IdentIndex).Name + '"');
 
               // perl
               CheckTok(i + 1, CPARTOK);
@@ -11975,7 +11887,7 @@ begin
               asm65(#9'adc :STACKORIGIN+STACKWIDTH,x');
               asm65(#9'sta :STACKORIGIN-1+STACKWIDTH,x');
 
-              asm65(#9'dex');
+              a65(TCode65.subBX);
 
             end
             else
@@ -11985,8 +11897,7 @@ begin
 
                 //  writeln('= ',IdentifierAt(IdentIndex).Name,',',IdentifierAt(IdentIndex).Kind,',',IdentifierAt(IdentIndex).DataType,',',IdentifierAt(IdentIndex).AllocElementType);
 
-                if not (IdentifierAt(IdentIndex).DataType in [TDataType.POINTERTOK,
-                  TDataType.RECORDTOK, TDataType.OBJECTTOK]) then
+                if not (IdentifierAt(IdentIndex).DataType in [TDataType.POINTERTOK, TDataType.RECORDTOK, TDataType.OBJECTTOK]) then
                   Error(i, TErrorCode.IllegalExpression);
 
                 if IdentifierAt(IdentIndex).DataType = TDataType.POINTERTOK then
@@ -12000,8 +11911,7 @@ begin
                 CheckTok(i + 1, TTokenKind.CPARTOK);
 
 
-                if (VarType in [TDataType.RECORDTOK, TDataType.OBJECTTOK]) and
-                  (TokenAt(i + 2).Kind = TTokenKind.DOTTOK) then
+                if (VarType in [TDataType.RECORDTOK, TDataType.OBJECTTOK]) and (TokenAt(i + 2).Kind = TTokenKind.DOTTOK) then
                 begin
 
                   IndirectionLevel := ASPOINTERTODEREFERENCE;
@@ -12027,8 +11937,7 @@ begin
 
                     Inc(i);
 
-                    if (VarType in [TDataType.RECORDTOK, TDataType.OBJECTTOK]) and
-                      (TokenAt(i + 2).Kind = TTokenKind.DOTTOK) then
+                    if (VarType in [TDataType.RECORDTOK, TDataType.OBJECTTOK]) and (TokenAt(i + 2).Kind = TTokenKind.DOTTOK) then
                     begin
 
                       CheckTok(i + 3, TTokenKind.IDENTTOK);
@@ -12048,8 +11957,7 @@ begin
                   else
                   begin
 
-                    if (VarType in [TDataType.RECORDTOK, TDataType.OBJECTTOK]) and
-                      (TokenAt(i + 2).Kind = TTokenKind.DOTTOK) then
+                    if (VarType in [TDataType.RECORDTOK, TDataType.OBJECTTOK]) and (TokenAt(i + 2).Kind = TTokenKind.DOTTOK) then
                     begin
 
                       IndirectionLevel := ASPOINTERTODEREFERENCE;
@@ -12078,16 +11986,20 @@ begin
                 if TokenAt(i + 1).Kind = TTokenKind.DEREFERENCETOK then        // With dereferencing '^'
                 begin
 
+		  DEREFERENCE := true;
+
                   if not (IdentifierAt(IdentIndex).DataType in Pointers + [TDataType.DEREFERENCEARRAYTOK]) then
                     ErrorForIdentifier(i + 1, TErrorCode.IncompatibleTypeOf, IdentIndex);
 
-                  if (IdentifierAt(IdentIndex).DataType = TDataType.STRINGPOINTERTOK) and
-                    (IdentifierAt(IdentIndex).NumAllocElements = 0) then
-                    VarType := TDataType.STRINGPOINTERTOK
-                  else
-                    VarType := IdentifierAt(IdentIndex).AllocElementType;
-
                   IndirectionLevel := ASPOINTERTOPOINTER;
+
+                  if (IdentifierAt(IdentIndex).DataType = TDataType.STRINGPOINTERTOK) and (IdentifierAt(IdentIndex).NumAllocElements = 0) then
+		  begin
+                    VarType := TDataType.STRINGPOINTERTOK;
+
+		    IndirectionLevel := ASPOINTER;
+                  end else
+                    VarType := IdentifierAt(IdentIndex).AllocElementType;
 
 
                   //  writeln('= ',IdentifierAt(IdentIndex).name,',',VarTYpe,',',IdentifierAt(IdentIndex).DataType,',',IdentifierAt(IdentIndex).NumAllocElements,'/',IdentifierAt(IdentIndex).NumAllocElements_,',',IdentifierAt(IdentIndex).PassMethod);
@@ -12110,8 +12022,7 @@ begin
                   end
                   else
 
-                    if (VarType in [TDataType.RECORDTOK, TDataType.OBJECTTOK]) and
-                      (TokenAt(i + 2).Kind = TTokenKind.DOTTOK) then
+                    if (VarType in [TDataType.RECORDTOK, TDataType.OBJECTTOK]) and (TokenAt(i + 2).Kind = TTokenKind.DOTTOK) then
                     begin
 
                       CheckTok(i + 3, TTokenKind.IDENTTOK);
@@ -12131,8 +12042,7 @@ begin
 
                         IndirectionLevel := ASPOINTERTORECORDARRAYORIGIN;
 
-                        i := CompileArrayIndex(i + 3, GetIdentIndex(IdentifierAt(IdentIndex).Name +
-                          '.' + TokenAt(i + 3).Name), VarType);
+                        i := CompileArrayIndex(i + 3, GetIdentIndex(IdentifierAt(IdentIndex).Name + '.' + TokenAt(i + 3).Name), VarType);
 
                         CheckTok(i + 1, TTokenKind.CBRACKETTOK);
 
@@ -12186,16 +12096,14 @@ begin
                     if pos('.', IdentifierAt(IdentIndex).Name) > 0 then
                     begin      // record_ptr.field[index] :=
 
-                      IdentTemp := GetIdentIndex(copy(IdentifierAt(IdentIndex).Name, 1,
-                        pos('.', IdentifierAt(IdentIndex).Name) - 1));
+                      IdentTemp := GetIdentIndex(copy(IdentifierAt(IdentIndex).Name, 1, pos('.', IdentifierAt(IdentIndex).Name) - 1));
 
                       if (IdentifierAt(IdentTemp).DataType = TDataType.POINTERTOK) and
                         (IdentifierAt(IdentTemp).AllocElementType in [TDataType.RECORDTOK, TDataType.OBJECTTOK]) then
                       begin
                         IndirectionLevel := ASPOINTERTORECORDARRAYORIGIN;
 
-                        svar := copy(IdentifierAt(IdentIndex).Name, pos('.', IdentifierAt(IdentIndex).Name) +
-                          1, length(IdentifierAt(IdentIndex).Name));
+                        svar := copy(IdentifierAt(IdentIndex).Name, pos('.', IdentifierAt(IdentIndex).Name) + 1, length(IdentifierAt(IdentIndex).Name));
 
                         IdentIndex := IdentTemp;
 
@@ -12238,8 +12146,7 @@ begin
 
                         IndirectionLevel := ASARRAYORIGINOFPOINTERTORECORDARRAYORIGIN;
 
-                        i := CompileArrayIndex(i + 3, GetIdentIndex(IdentifierAt(IdentIndex).Name +
-                          '.' + TokenAt(i + 3).Name), VarType);
+                        i := CompileArrayIndex(i + 3, GetIdentIndex(IdentifierAt(IdentIndex).Name + '.' + TokenAt(i + 3).Name), VarType);
 
                         CheckTok(i + 1, TTokenKind.CBRACKETTOK);
 
@@ -12318,8 +12225,7 @@ begin
 
 
             if (IdentifierAt(IdentIndex).DataType = TDataType.PCHARTOK) and
-              (IndirectionLevel = ASPOINTER) and (TokenAt(i + 2).Kind in
-              [TTokenKind.STRINGLITERALTOK, TTokenKind.CHARLITERALTOK, TTokenKind.IDENTTOK]) then
+              (IndirectionLevel = ASPOINTER) and (TokenAt(i + 2).Kind in [TTokenKind.STRINGLITERALTOK, TTokenKind.CHARLITERALTOK, TTokenKind.IDENTTOK]) then
             begin
 
               {$i include/compile_pchar.inc}
@@ -12333,8 +12239,7 @@ begin
                 ((IndirectionLevel in [ASPOINTER, ASPOINTERTOPOINTER]) or
                 ((IndirectionLevel = ASPOINTERTOARRAYORIGIN) and
                 (IdentifierAt(IdentIndex).PassMethod = TParameterPassingMethod.VARPASSING))) and
-                (TokenAt(i + 2).Kind in [TTokenKind.STRINGLITERALTOK, TTokenKind.CHARLITERALTOK,
-                TTokenKind.IDENTTOK]) then
+                (TokenAt(i + 2).Kind in [TTokenKind.STRINGLITERALTOK, TTokenKind.CHARLITERALTOK, TTokenKind.IDENTTOK]) then
               begin
 
                 {$i include/compile_string.inc}
@@ -12347,18 +12252,14 @@ begin
                   Error(i, 'Assignments to formal parameters and open arrays are not possible');
 
 
-
                 Result := CompileExpression(i + 2, ExpressionType, VarType);  // Right-hand side expression
-
 
 
                 k := i + 2;
 
-
                 RealTypeConversion(VarType, ExpressionType);
 
-                if (VarType in [TDataType.SHORTREALTOK, TDataType.REALTOK]) and
-                  (ExpressionType in [TDataType.SHORTREALTOK, TDataType.REALTOK]) then
+                if (VarType in [TDataType.SHORTREALTOK, TDataType.REALTOK]) and (ExpressionType in [TDataType.SHORTREALTOK, TDataType.REALTOK]) then
                   ExpressionType := VarType;
 
 
@@ -12383,8 +12284,7 @@ begin
                 end;
 
 
-                if (TokenAt(i).Kind = TTokenKind.DEREFERENCETOK) and (VarType = TDataType.POINTERTOK) and
-                  (ExpressionType = TDataType.RECORDTOK) then
+                if (TokenAt(i).Kind = TTokenKind.DEREFERENCETOK) and (VarType = TDataType.POINTERTOK) and (ExpressionType = TDataType.RECORDTOK) then
                 begin
 
                   ExpressionType := TDataType.RECORDTOK;
@@ -12393,10 +12293,10 @@ begin
                 end;
 
 
-                //  if (TokenAt(k).Kind = TTokenKind.IDENTTOK) then
-                //    writeln(IdentifierAt(IdentIndex).Name,'/',TokenAt(k).Name,',', VarType,':', ExpressionType,' - ', IdentifierAt(IdentIndex).DataType,':',IdentifierAt(IdentIndex).AllocElementType,':',IdentifierAt(IdentIndex).NumAllocElements,' | ',IdentifierAt(GetIdentIndex(TokenAt(k).Name)).DataType,':',IdentifierAt(GetIdentIndex(TokenAt(k).Name)).AllocElementType,':',IdentifierAt(GetIdentIndex(TokenAt(k).Name)).NumAllocElements ,' / ',IndirectionLevel)
-                //  else
-                //    writeln(IdentifierAt(IdentIndex).Name,',', VarType,',', ExpressionType,' - ', IdentifierAt(IdentIndex).DataType,':',IdentifierAt(IdentIndex).AllocElementType,':',IdentifierAt(IdentIndex).NumAllocElements,' / ',IndirectionLevel);
+                  if (TokenAt(k).Kind = TTokenKind.IDENTTOK) then
+                    writeln(IdentifierAt(IdentIndex).Name,'/',TokenAt(k).Name,',', VarType,':', ExpressionType,' - ', IdentifierAt(IdentIndex).DataType,':',IdentifierAt(IdentIndex).AllocElementType,':',IdentifierAt(IdentIndex).NumAllocElements,' | ',IdentifierAt(GetIdentIndex(TokenAt(k).Name)).DataType,':',IdentifierAt(GetIdentIndex(TokenAt(k).Name)).AllocElementType,':',IdentifierAt(GetIdentIndex(TokenAt(k).Name)).NumAllocElements ,' / ',IndirectionLevel)
+                  else
+                    writeln(IdentifierAt(IdentIndex).Name,',', VarType,',', ExpressionType,' - ', IdentifierAt(IdentIndex).DataType,':',IdentifierAt(IdentIndex).AllocElementType,':',IdentifierAt(IdentIndex).NumAllocElements,' / ',IndirectionLevel);
 
 
                 if VarType <> ExpressionType then
@@ -12405,8 +12305,7 @@ begin
                       (IdentifierAt(GetIdentIndex(TokenAt(k).Name)).AllocElementType = TDataType.PROCVARTOK) then
                     begin
 
-                      IdentTemp := GetIdentIndex('@FN' + IntToHex(
-                        IdentifierAt(GetIdentIndex(TokenAt(k).Name)).NumAllocElements_, 4));
+                      IdentTemp := GetIdentIndex('@FN' + IntToHex(IdentifierAt(GetIdentIndex(TokenAt(k).Name)).NumAllocElements_, 4));
 
                       //CompileActualParameters(i, IdentTemp, GetIdentIndex(TokenAt(k).Name));
 
@@ -12426,9 +12325,9 @@ begin
                   //  writeln(IdentifierAt(GetIdentIndex(IdentifierAt(IdentIndex).Name)].AllocElementType);
 
 
-                  if (ExpressionType = TDataType.CHARTOK) and (IdentifierAt(IdentIndex).DataType =
-                    TDataType.POINTERTOK) and (IdentifierAt(IdentIndex).AllocElementType =
-                    TDataType.STRINGPOINTERTOK) then
+                  if (ExpressionType = TDataType.CHARTOK) and
+		     (IdentifierAt(IdentIndex).DataType = TDataType.POINTERTOK) and
+		     (IdentifierAt(IdentIndex).AllocElementType = TDataType.STRINGPOINTERTOK) then
 
                     IndirectionLevel := ASSTRINGPOINTER1TOARRAYORIGIN    // tab[ ] := 'a'
 
@@ -12436,8 +12335,7 @@ begin
                     if IdentifierAt(IdentIndex).AllocElementType in [TDataType.RECORDTOK, TDataType.OBJECTTOK] then
                     begin
 
-                      if (IdentifierAt(IdentIndex).DataType = TDataType.POINTERTOK) and
-                        (ExpressionType in [TDataType.RECORDTOK, TDataType.OBJECTTOK]) then
+                      if (IdentifierAt(IdentIndex).DataType = TDataType.POINTERTOK) and (ExpressionType in [TDataType.RECORDTOK, TDataType.OBJECTTOK]) then
 
                       else
                         CheckCommonType(i + 1, IdentifierAt(IdentIndex).DataType, ExpressionType);
@@ -12451,8 +12349,7 @@ begin
                   if (IdentifierAt(IdentIndex).DataType in [TDataType.RECORDTOK, TDataType.OBJECTTOK] + Pointers) then
                   begin
 
-                    if (ExpressionType in Pointers - [TDataType.STRINGPOINTERTOK]) and
-                      (TokenAt(k).Kind = TTokenKind.IDENTTOK) then
+                    if (ExpressionType in Pointers - [TDataType.STRINGPOINTERTOK]) and (TokenAt(k).Kind = TTokenKind.IDENTTOK) then
                     begin
 
                       IdentTemp := GetIdentIndex(TokenAt(k).Name);
@@ -12477,10 +12374,8 @@ begin
                           (TokenAt(k + 1).Kind <> TTokenKind.OBRACKETTOK) then
                         begin
 
-                          if ((IdentifierAt(IdentTemp).NumAllocElements >
-                            0) {and (IdentifierAt(IdentTemp).AllocElementType <> TDataType.RECORDTOK)}) and
-                            ((IdentifierAt(IdentIndex).NumAllocElements >
-                            0) {and (IdentifierAt(IdentIndex).AllocElementType <> TDataType.RECORDTOK)}) then
+                          if ((IdentifierAt(IdentTemp).NumAllocElements > 0) {and (IdentifierAt(IdentTemp).AllocElementType <> TDataType.RECORDTOK)}) and
+                            ((IdentifierAt(IdentIndex).NumAllocElements > 0) {and (IdentifierAt(IdentIndex).AllocElementType <> TDataType.RECORDTOK)}) then
                             ErrorIdentifierIncompatibleTypesArrayIdentifier(k, IdentTemp, IdentIndex)
 
                           else
@@ -12494,9 +12389,7 @@ begin
                               (IdentifierAt(IdentTemp).DataType = TDataType.POINTERTOK) and
                               (IdentifierAt(IdentTemp).AllocElementType <> TDataType.UNTYPETOK) and
                               (IdentifierAt(IdentTemp).NumAllocElements = 0) then
-                              Error(k, 'Incompatible types: got "^' +
-                                InfoAboutDataType(IdentifierAt(IdentTemp).AllocElementType) +
-                                '" expected "^' + InfoAboutDataType(IdentifierAt(IdentIndex).AllocElementType) + '"')
+                              Error(k, 'Incompatible types: got "^' + InfoAboutDataType(IdentifierAt(IdentTemp).AllocElementType) + '" expected "^' + InfoAboutDataType(IdentifierAt(IdentIndex).AllocElementType) + '"')
                             else
                               ErrorIdentifierIncompatibleTypesArray(k, IdentTemp, ExpressionType);
 
@@ -12513,22 +12406,16 @@ begin
 
                         case IndirectionLevel of
                           ASPOINTER:
-                            if (IdentifierAt(IdentIndex).AllocElementType <>
-                              IdentifierAt(IdentTemp).AllocElementType) and not
-                              (IdentifierAt(IdentIndex).DataType in [TDataType.RECORDTOK, TDataType.OBJECTTOK]) then
-                              Error(k, 'Incompatible types: got "' +
-                                GetTypeAtIndex(IdentifierAt(IdentTemp).NumAllocElements).Field[0].Name +
-                                '" expected "^' + GetTypeAtIndex(
-                                IdentifierAt(IdentIndex).NumAllocElements).Field[0].Name + '"');
+                            if (IdentifierAt(IdentIndex).AllocElementType <> IdentifierAt(IdentTemp).AllocElementType) and
+			       not (IdentifierAt(IdentIndex).DataType in [TDataType.RECORDTOK, TDataType.OBJECTTOK]) then
+                              Error(k, 'Incompatible types: got "' + GetTypeAtIndex(IdentifierAt(IdentTemp).NumAllocElements).Field[0].Name +
+                                '" expected "^' + GetTypeAtIndex(IdentifierAt(IdentIndex).NumAllocElements).Field[0].Name + '"');
 
                           ASPOINTERTOPOINTER:
-                            if (IdentifierAt(IdentIndex).AllocElementType <>
-                              IdentifierAt(IdentTemp).AllocElementType) and not
-                              (IdentifierAt(IdentTemp).DataType in [TDataType.RECORDTOK, TDataType.OBJECTTOK]) then
-                              Error(k, 'Incompatible types: got "' +
-                                GetTypeAtIndex(IdentifierAt(IdentTemp).NumAllocElements).Field[0].Name +
-                                '" expected "^' + GetTypeAtIndex(
-                                IdentifierAt(IdentIndex).NumAllocElements).Field[0].Name + '"');
+                            if (IdentifierAt(IdentIndex).AllocElementType <> IdentifierAt(IdentTemp).AllocElementType) and
+			       not (IdentifierAt(IdentTemp).DataType in [TDataType.RECORDTOK, TDataType.OBJECTTOK]) then
+                              Error(k, 'Incompatible types: got "' + GetTypeAtIndex(IdentifierAt(IdentTemp).NumAllocElements).Field[0].Name +
+                                '" expected "^' + GetTypeAtIndex(IdentifierAt(IdentIndex).NumAllocElements).Field[0].Name + '"');
                           else
                             CheckCommonType(i + 1, VarType, ExpressionType);
 
@@ -12548,8 +12435,7 @@ begin
                         else
                           if (VarType in [TDataType.RECORDTOK, TDataType.OBJECTTOK]) then
                             Error(i, 'Incompatible types: got "' + InfoAboutDataType(ExpressionType) +
-                              '" expected "' + GetTypeAtIndex(
-                              IdentifierAt(IdentIndex).NumAllocElements).Field[0].Name + '"')
+                              '" expected "' + GetTypeAtIndex(IdentifierAt(IdentIndex).NumAllocElements).Field[0].Name + '"')
                           else
                             CheckCommonType(i + 1, VarType, ExpressionType);
 
@@ -12568,8 +12454,7 @@ begin
                       if (IdentTemp > 0) and (IdentifierAt(IdentTemp).Kind = TTokenKind.FUNCTIONTOK) then
                         IdentTemp := GetIdentResult(IdentifierAt(IdentTemp).ProcAsBlockIndex);
 
-                      if (IdentTemp > 0) and (IdentifierAt(IdentTemp).Kind = TTokenKind.TYPETOK) and
-                        (IdentifierAt(IdentTemp).DataType = TDataType.ENUMTOK) then
+                      if (IdentTemp > 0) and (IdentifierAt(IdentTemp).Kind = TTokenKind.TYPETOK) and (IdentifierAt(IdentTemp).DataType = TDataType.ENUMTOK) then
                       begin
 
                         if IdentifierAt(IdentIndex).NumAllocElements <> IdentifierAt(IdentTemp).NumAllocElements then
@@ -12588,14 +12473,12 @@ begin
                           if (IdentTemp > 0) and (IdentifierAt(IdentTemp).DataType = TDataType.ENUMTOK) then
                           begin
 
-                            if (IdentifierAt(IdentTemp).NumAllocElements <>
-                              IdentifierAt(IdentIndex).NumAllocElements) then
+                            if (IdentifierAt(IdentTemp).NumAllocElements <> IdentifierAt(IdentIndex).NumAllocElements) then
                               ErrorIncompatibleEnumIdentifiers(i, IdentTemp, IdentIndex);
 
                           end
                           else
-                            if (IdentifierAt(IdentIndex).DataType = TDataType.ENUMTOK) and
-                              (ExpressionType in UnsignedOrdinalTypes + [TDataType.ENUMTOK]) then
+                            if (IdentifierAt(IdentIndex).DataType = TDataType.ENUMTOK) and (ExpressionType in UnsignedOrdinalTypes + [TDataType.ENUMTOK]) then
 
                             else
                               ErrorIncompatibleEnumTypeIdentifier(i, ExpressionType, IdentIndex);
@@ -12603,14 +12486,12 @@ begin
                     else
                     begin
 
-                      if (TokenAt(k).Kind = TTokenKind.IDENTTOK) and (TokenAt(k + 1).Kind =
-                        TTokenKind.SEMICOLONTOK) then
+                      if (TokenAt(k).Kind = TTokenKind.IDENTTOK) and (TokenAt(k + 1).Kind = TTokenKind.SEMICOLONTOK) then
                         IdentTemp := GetIdentIndex(TokenAt(k).Name)
                       else
                         IdentTemp := 0;
 
-                      if (IdentTemp > 0) and ((IdentifierAt(IdentTemp).Kind = TTokenKind.ENUMTOK) or
-                        (IdentifierAt(IdentTemp).DataType = TDataType.ENUMTOK)) then
+                      if (IdentTemp > 0) and ((IdentifierAt(IdentTemp).Kind = TTokenKind.ENUMTOK) or (IdentifierAt(IdentTemp).DataType = TDataType.ENUMTOK)) then
                       begin
 
                         if (IdentifierAt(IdentIndex).NumAllocElements <> IdentifierAt(IdentTemp).NumAllocElements) then
@@ -12639,19 +12520,16 @@ begin
                   (IdentifierAt(IdentIndex).NumAllocElements = 0) and (ExpressionType <> TDataType.POINTERTOK) then
                 begin
 
-                  if (IdentifierAt(IdentIndex).AllocElementType in {IntegerTypes}OrdinalTypes) and
-                    (ExpressionType in {IntegerTypes}OrdinalTypes) then
+                  if (IdentifierAt(IdentIndex).AllocElementType in {IntegerTypes}OrdinalTypes) and (ExpressionType in {IntegerTypes}OrdinalTypes) then
 
                   else
                     if IdentifierAt(IdentIndex).AllocElementType <> TDataType.UNTYPETOK then
                     begin
 
-                      if (ExpressionType in [TDataType.PCHARTOK, TDataType.STRINGPOINTERTOK]) and
-                        (IdentifierAt(IdentIndex).AllocElementType = TDataType.CHARTOK) then
+                      if (ExpressionType in [TDataType.PCHARTOK, TDataType.STRINGPOINTERTOK]) and (IdentifierAt(IdentIndex).AllocElementType = TDataType.CHARTOK) then
 
                       else
-                        Error(i + 1, 'Incompatible types: got "' + InfoAboutDataType(ExpressionType) +
-                          '" expected "' + IdentifierAt(IdentIndex).Name + '"');
+                        Error(i + 1, 'Incompatible types: got "' + InfoAboutDataType(ExpressionType) + '" expected "' + IdentifierAt(IdentIndex).Name + '"');
 
                     end
                     else
@@ -12661,8 +12539,7 @@ begin
 
 
                 if (VarType in [TDataType.RECORDTOK, TDataType.OBJECTTOK]) or
-                  ((VarType = TDataType.POINTERTOK) and (ExpressionType in
-                  [TDataType.RECORDTOK, TDataType.OBJECTTOK])) then
+                  ((VarType = TDataType.POINTERTOK) and (ExpressionType in [TDataType.RECORDTOK, TDataType.OBJECTTOK])) then
                 begin
 
                   ADDRESS := False;
@@ -12681,20 +12558,27 @@ begin
 
                   if IdentifierAt(IdentIndex).PassMethod = IdentifierAt(IdentTemp).PassMethod then
                     case IndirectionLevel of
+
                       ASPOINTER:
                         if (TokenAt(k + 1).Kind <> TTokenKind.DEREFERENCETOK) and
-                          (IdentifierAt(IdentIndex).AllocElementType <> IdentifierAt(IdentTemp).AllocElementType) and
-                          not (IdentifierAt(IdentTemp).DataType in [TDataType.RECORDTOK, TDataType.OBJECTTOK]) then
-                          Error(k, 'Incompatible types: got "^' +
-                            GetTypeAtIndex(IdentifierAt(IdentTemp).NumAllocElements).Field[0].Name +
-                            '" expected "' + GetTypeAtIndex(
-                            IdentifierAt(IdentIndex).NumAllocElements).Field[0].Name + '"');
+                           (IdentifierAt(IdentIndex).AllocElementType <> IdentifierAt(IdentTemp).AllocElementType) and
+                           not (IdentifierAt(IdentTemp).DataType in [TDataType.RECORDTOK, TDataType.OBJECTTOK]) then
+
+			    if (IdentifierAt(IdentTemp).NumAllocElements_ > 0) and (TokenAt(Result).Kind = TTokenKind.DEREFERENCETOK) and
+			       (IdentifierAt(IdentIndex).DataType = TDataType.RECORDTOK) and
+			       ((IdentifierAt(IdentTemp).DataType = TDataType.POINTERTOK) and (IdentifierAt(IdentTemp).AllocElementType = TDataType.RECORDTOK)) and
+			       (IdentifierAt(IdentTemp).NumAllocElements = IdentifierAt(IdentIndex).NumAllocElements)
+			    then
+
+			    else
+                             Error(k, 'Incompatible types: got "^' + GetTypeAtIndex(IdentifierAt(IdentTemp).NumAllocElements).Field[0].Name +
+                                   '" expected "' + GetTypeAtIndex(IdentifierAt(IdentIndex).NumAllocElements).Field[0].Name + '"');
 
                       ASPOINTERTOPOINTER:
                         //         if {(TokenAt(i + 1).Kind <> TTokenKind.DEREFERENCETOK) and }(IdentifierAt(IdentIndex).AllocElementType <> IdentifierAt(IdentTemp).AllocElementType) and not ( IdentifierAt(IdentIndex).DataType in [TDataType.RECORDTOK, TDataType.OBJECTTOK] ) then
                         //          Error(k, 'Incompatible types: got "^' + GetTypeAtIndex(IdentifierAt(IdentTemp).NumAllocElements).Field[0].Name +'" expected "' + GetTypeAtIndex(IdentifierAt(IdentIndex).NumAllocElements).Field[0].Name + '"');
                       else
-                        ;//CheckCommonType(i + 1, VarType, ExpressionType);
+                        CheckCommonType(i + 1, VarType, ExpressionType);
 
                     end;
 
@@ -12707,38 +12591,30 @@ begin
                     //       writeln('2> ',IdentifierAt(IdentIndex).Name,',',IdentifierAt(IdentIndex).DataType,',',IdentifierAt(IdentIndex).AllocElementType,',',IdentifierAt(IdentIndex).NumAllocElements,' | ', IdentifierAt(IdentTemp).DataType,',',IdentifierAt(IdentTemp).AllocElementType,',',IdentifierAt(IdentTemp).NumAllocElements);
 
                     if IdentifierAt(IdentTemp).Kind = TTokenKind.FUNCTIONTOK then
-                      yes := IdentifierAt(IdentIndex).NumAllocElements <>
-                        IdentifierAt(GetIdentResult(IdentifierAt(IdentTemp).ProcAsBlockIndex)).NumAllocElements
+                      yes := IdentifierAt(IdentIndex).NumAllocElements <> IdentifierAt(GetIdentResult(IdentifierAt(IdentTemp).ProcAsBlockIndex)).NumAllocElements
                     else
                       yes := IdentifierAt(IdentIndex).NumAllocElements <> IdentifierAt(IdentTemp).NumAllocElements;
 
 
-                    if yes and (ADDRESS = False) and (ExpressionType in [TDataType.RECORDTOK,
-                      TDataType.OBJECTTOK]) then
+                    if yes and (ADDRESS = False) and (ExpressionType in [TDataType.RECORDTOK, TDataType.OBJECTTOK]) then
                       if (IdentifierAt(IdentTemp).DataType = TDataType.POINTERTOK) and
-                        (IdentifierAt(IdentTemp).AllocElementType in [TDataType.RECORDTOK, TDataType.OBJECTTOK]) then
-                        Error(i, 'Incompatible types: got "^' +
-                          GetTypeAtIndex(IdentifierAt(IdentTemp).NumAllocElements).Field[0].Name +
-                          '" expected "^' + GetTypeAtIndex(
-                          IdentifierAt(IdentIndex).NumAllocElements).Field[0].Name + '"')
+                         (IdentifierAt(IdentTemp).AllocElementType in [TDataType.RECORDTOK, TDataType.OBJECTTOK]) then
+                        Error(i, 'Incompatible types: got "^' + GetTypeAtIndex(IdentifierAt(IdentTemp).NumAllocElements).Field[0].Name +
+                              '" expected "^' + GetTypeAtIndex(IdentifierAt(IdentIndex).NumAllocElements).Field[0].Name + '"')
                       else
-                        Error(i, 'Incompatible types: got "' +
-                          GetTypeAtIndex(IdentifierAt(IdentTemp).NumAllocElements).Field[0].Name +
-                          '" expected "^' + GetTypeAtIndex(
-                          IdentifierAt(IdentIndex).NumAllocElements).Field[0].Name + '"');
+                        Error(i, 'Incompatible types: got "' + GetTypeAtIndex(IdentifierAt(IdentTemp).NumAllocElements).Field[0].Name +
+                              '" expected "^' + GetTypeAtIndex(IdentifierAt(IdentIndex).NumAllocElements).Field[0].Name + '"');
 
                   end;
 
 
                   if (ExpressionType in [TDataType.RECORDTOK, TDataType.OBJECTTOK]) or
-                    ((ExpressionType = TDataType.POINTERTOK) and
-                    (IdentifierAt(IdentTemp).AllocElementType in [TDataType.RECORDTOK, TDataType.OBJECTTOK])) then
+                     ((ExpressionType = TDataType.POINTERTOK) and (IdentifierAt(IdentTemp).AllocElementType in [TDataType.RECORDTOK, TDataType.OBJECTTOK])) then
                   begin
 
                     svar := TokenAt(k).Name;
 
-                    if (IdentifierAt(IdentTemp).DataType = TDataType.RECORDTOK) and
-                      (IdentifierAt(IdentTemp).AllocElementType <> TDataType.RECORDTOK) then
+                    if (IdentifierAt(IdentTemp).DataType = TDataType.RECORDTOK) and (IdentifierAt(IdentTemp).AllocElementType <> TDataType.RECORDTOK) then
                       Name := 'adr.' + svar
                     else
                       Name := svar;
@@ -12785,21 +12661,19 @@ begin
                         // porownanie indeksow do tablicy TYPES
                         //      Error(i, IncompatibleTypeOf, IdentTemp);
                         if (IdentifierAt(IdentIndex).NumAllocElements = 0) then
-                          Error(i, 'Incompatible types: got "' +
-                            GetTypeAtIndex(IdentifierAt(IdentTemp).NumAllocElements).Field[0].Name +
-                            '" expected "' + InfoAboutDataType(IdentifierAt(IdentIndex).DataType) + '"')
+                          Error(i, 'Incompatible types: got "' + GetTypeAtIndex(IdentifierAt(IdentTemp).NumAllocElements).Field[0].Name +
+                                '" expected "' + InfoAboutDataType(IdentifierAt(IdentIndex).DataType) + '"')
                         else
-                          Error(i, 'Incompatible types: got "' +
-                            GetTypeAtIndex(IdentifierAt(IdentTemp).NumAllocElements).Field[0].Name +
-                            '" expected "' + GetTypeAtIndex(
-                            IdentifierAt(IdentIndex).NumAllocElements).Field[0].Name + '"');
+                          Error(i, 'Incompatible types: got "' + GetTypeAtIndex(IdentifierAt(IdentTemp).NumAllocElements).Field[0].Name +
+                                '" expected "' + GetTypeAtIndex(IdentifierAt(IdentIndex).NumAllocElements).Field[0].Name + '"');
 
 
                     a65(TCode65.subBX);
+
+{
                     StopOptimization;
-
                     ResetOpty;
-
+}
 
                     if (IdentifierAt(IdentIndex).DataType = TDataType.RECORDTOK) and
                       (IdentifierAt(IdentTemp).DataType = TDataType.RECORDTOK) and
@@ -12845,8 +12719,7 @@ begin
 
                       end
                       else
-                        asm65(#9'@move ":bp2" ' + GetLocalName(IdentIndex) + ' #' +
-                          IntToStr(RecordSize(IdentIndex)));
+                        asm65(#9'@move ":bp2" ' + GetLocalName(IdentIndex) + ' #' + IntToStr(RecordSize(IdentIndex)));
 
                     end
                     else
@@ -12868,26 +12741,43 @@ begin
                           if RecordSize(IdentIndex) = 1 then
                             asm65(#9' mva ' + Name + ' ' + GetLocalName(IdentIndex, 'adr.'))
                           else
-                            asm65(#9':' + IntToStr(RecordSize(IdentIndex)) + ' mva ' + Name +
-                              '+# ' + GetLocalName(IdentIndex, 'adr.') + '+#');
+                            asm65(#9':' + IntToStr(RecordSize(IdentIndex)) + ' mva ' + Name + '+# ' + GetLocalName(IdentIndex, 'adr.') + '+#');
 
                       end
                       else
-                        if (IdentifierAt(IdentIndex).DataType = TDataType.POINTERTOK) and
-                          (IdentifierAt(IdentTemp).DataType = TDataType.POINTERTOK) then
+                        if (IdentifierAt(IdentIndex).DataType = TDataType.POINTERTOK) and (IdentifierAt(IdentTemp).DataType = TDataType.POINTERTOK) then
                         begin
 
                           //  writeln(IdentifierAt(IdentIndex).Name,',',IdentifierAt(IdentIndex).DataType,',',IdentifierAt(IdentIndex).AllocElementType ,',',IdentifierAt(IdentIndex).NumAllocElements,'/',IdentifierAt(IdentIndex).NumAllocElements_,',',IdentifierAt(IdentIndex).pASSmETHOD);
                           //  writeln(IdentifierAt(IdentTemp).Name,',',IdentifierAt(IdentTemp).DataType,',',IdentifierAt(IdentTemp).AllocElementType ,',',IdentifierAt(IdentTemp).NumAllocElements,'/',IdentifierAt(IdentTemp).NumAllocElements_,',',IdentifierAt(IdentTemp).pASSmETHOD);
                           //  writeln('--- ', IndirectionLevel);
 
-                          asm65(#9'@move ' + Name + ' ' + GetLocalName(IdentIndex) + ' #' +
-                            IntToStr(RecordSize(IdentIndex)));
+			    if IndirectionLevel in [ASPOINTERTOARRAYORIGIN, ASPOINTERTOARRAYORIGIN2] then begin
+
+
+			      if (IdentifierAt(IdentIndex).AllocElementType = TDataType.RECORDTOK) and (IdentifierAt(IdentIndex).NumAllocElements_ > 0) and
+			         (IdentifierAt(IdentTemp).AllocElementType = TDataType.RECORDTOK) and (IdentifierAt(IdentTemp).NumAllocElements_ = 0) then
+			      begin
+
+				  asm65(#9'lda :STACKORIGIN,x');
+			    	  asm65(#9'sta :TMP');
+			    	  asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
+			    	  asm65(#9'sta :TMP+1');
+
+				  a65(TCode65.subBX);
+
+                                  asm65(#9'@move ' + GetLocalName(IdentTemp) + ' ":TMP" #' + IntToStr(RecordSize(IdentIndex)));
+
+			      end else
+                                asm65(#9'@move ' + Name + ' ' + GetLocalName(IdentIndex) + ' #' + IntToStr(RecordSize(IdentIndex)));
+
+
+			    end else
+                              asm65(#9'@move ' + Name + ' ' + GetLocalName(IdentIndex) + ' #' + IntToStr(RecordSize(IdentIndex)));
 
                         end
                         else
-                          if (IdentifierAt(IdentIndex).DataType = TDataType.RECORDTOK) and
-                            (IdentifierAt(IdentTemp).DataType = TDataType.POINTERTOK) then
+                          if (IdentifierAt(IdentIndex).DataType = TDataType.RECORDTOK) and (IdentifierAt(IdentTemp).DataType = TDataType.POINTERTOK) then
                           begin
 
                             //  writeln(IdentifierAt(IdentIndex).Name,',',IdentifierAt(IdentIndex).DataType,',',IdentifierAt(IdentIndex).AllocElementType ,',',IdentifierAt(IdentIndex).NumAllocElements,'/',IdentifierAt(IdentIndex).NumAllocElements_,',',IdentifierAt(IdentIndex).pASSmETHOD);
@@ -12908,24 +12798,42 @@ begin
 
                               end
                               else
-                                asm65(#9'@move ":bp2" #' + GetLocalName(IdentIndex, 'adr.') +
-                                  ' #' + IntToStr(RecordSize(IdentIndex)));
+                                asm65(#9'@move ":bp2" #' + GetLocalName(IdentIndex, 'adr.') + ' #' + IntToStr(RecordSize(IdentIndex)));
 
                             end
-                            else
+                            else begin
 
-                              if RecordSize(IdentIndex) <= 128 then
-                              begin
+			        if (IdentifierAt(IdentTemp).AllocElementType = TDataType.RECORDTOK) and (IdentifierAt(IdentTemp).NumAllocElements_ > 0) then begin
 
-                                asm65(#9'mwy ' + GetLocalName(IdentTemp) + ' :bp2');
+				  asm65(#9'lda :STACKORIGIN+1,x');
+			    	  asm65(#9'sta :TMP');
+			    	  asm65(#9'lda :STACKORIGIN+1+STACKWIDTH,x');
+			    	  asm65(#9'sta :TMP+1');
 
-                                asm65(#9'ldy #$' + IntToHex(RecordSize(IdentIndex) - 1, 2));
-                                asm65(#9'mva:rpl (:bp2),y ' + GetLocalName(IdentIndex, 'adr.') + ',y-');
+                                  if RecordSize(IdentIndex) <= 128 then
+                                  begin
 
-                              end
-                              else
-                                asm65(#9'@move ' + Name + ' #' + GetLocalName(IdentIndex, 'adr.') +
-                                  ' #' + IntToStr(RecordSize(IdentIndex)));
+                                    asm65(#9'ldy #' + HexByte(RecordSize(IdentIndex) - 1));
+                                    asm65(#9'mva:rpl (:TMP),y ' + GetLocalName(IdentIndex, 'adr.') + ',y-');
+
+				  end else
+                                    asm65(#9'@move ":TMP" ' + Name + GetLocalName(IdentIndex, 'adr.') + ' #' + IntToStr(RecordSize(IdentIndex)));
+
+				end else
+
+                                if RecordSize(IdentIndex) <= 128 then
+                                begin
+
+                                  asm65(#9'mwy ' + GetLocalName(IdentTemp) + ' :bp2');
+
+                                  asm65(#9'ldy #' + HexByte(RecordSize(IdentIndex) - 1));
+                                  asm65(#9'mva:rpl (:bp2),y ' + GetLocalName(IdentIndex, 'adr.') + ',y-');
+
+                                end
+                                else
+                                  asm65(#9'@move ' + Name + ' #' + GetLocalName(IdentIndex, 'adr.') + ' #' + IntToStr(RecordSize(IdentIndex)));
+
+			      end;
 
                           end
                           else
@@ -12970,8 +12878,7 @@ begin
 
                               end
                               else
-                                asm65(#9'@move #' + Name + ' ' + GetLocalName(IdentIndex) +
-                                  ' #' + IntToStr(RecordSize(IdentIndex)));
+                                asm65(#9'@move #' + Name + ' ' + GetLocalName(IdentIndex) + ' #' + IntToStr(RecordSize(IdentIndex)));
 
                           end;
 
@@ -12987,24 +12894,33 @@ begin
                   {and (IdentifierAt(IdentIndex).AllocElementType in [TDataType.RECORDTOK, TDataType.OBJECTTOK])} then
                   begin
 
-                    //  writeln(IdentifierAt(IdentIndex).DataType,',',IdentifierAt(IdentIndex).AllocElementType ,',',IdentifierAt(IdentIndex).NumAllocElements,',',IdentifierAt(IdentIndex).Name,',',IndirectionLevel,',',vartype,' || ',IdentifierAt(GetIdentIndex(TokenAt(k).Name)).NumAllocElements,',',IdentifierAt(GetIdentIndex(TokenAt(k).Name)).PassMethod);
+{
+		      if (TokenAt(k).Kind <> TTokenKind.ADDRESSTOK) and (IndirectionLevel in [ASPOINTER, ASPOINTERTOPOINTER]) then begin
 
-                    //  writeln(address,',',TokenAt(k).kind,',',IdentifierAt(IdentIndex).NumAllocElements,',',IdentifierAt(IdentIndex).AllocElementType,' / ', VarType,',',ExpressionType,',',IndirectionLevel);
+		       if (DEREFERENCE = false) and (IdentifierAt(IdentIndex).NumAllocElements = 0) and (TokenAt(k).Kind = TTokenKind.STRINGLITERALTOK) then
+		         Error(i, 'Incompatible types: got "' + InfoAboutToken(TokenAt(k).Kind) + '" expected "^' + IdentifierAt(IdentIndex).Name + '"');
 
+		       if (DEREFERENCE = false) and (IdentifierAt(IdentIndex).NumAllocElements = 0) and (TokenAt(k).Kind = TTokenKind.IDENTTOK) and (IdentifierAt(GetIdentIndex(TokenAt(k).Name)).NumAllocElements > 0) then
+		         Error(i, 'Incompatible types: got "' + InfoAboutToken(IdentifierAt(GetIdentIndex(TokenAt(k).Name)).Kind) + '" expected "' + IdentifierAt(IdentIndex).Name + '"');
 
-                    if (TokenAt(k).Kind <> TTokenKind.ADDRESSTOK) and (IndirectionLevel in
-                      [ASPOINTERTOARRAYORIGIN, ASPOINTERTOARRAYORIGIN2]) and
-                      (IdentifierAt(IdentIndex).AllocElementType = TDataType.STRINGPOINTERTOK) then
+		       if DEREFERENCE and (IdentifierAt(IdentIndex).NumAllocElements = 0) and (TokenAt(k).Kind = TTokenKind.IDENTTOK) and (TokenAt(k + 1).Kind <> TTokenKind.DEREFERENCETOK) and (IdentifierAt(GetIdentIndex(TokenAt(k).Name)).NumAllocElements = 0) then
+		         Error(i, 'Incompatible types: got "^' + InfoAboutToken(IdentifierAt(GetIdentIndex(TokenAt(k).Name)).Kind) + '" expected "' + InfoAboutToken(IdentifierAt(GetIdentIndex(TokenAt(k).Name)).Kind) + '"');
+
+		      end;
+}
+
+                    if (TokenAt(k).Kind <> TTokenKind.ADDRESSTOK) and
+		       (IndirectionLevel in [ASPOINTERTOARRAYORIGIN, ASPOINTERTOARRAYORIGIN2]) and
+                       (IdentifierAt(IdentIndex).AllocElementType = TDataType.STRINGPOINTERTOK) then
                     begin
 
-                      if (TokenAt(k).Kind = TTokenKind.IDENTTOK) and
-                        (IdentifierAt(GetIdentIndex(TokenAt(k).Name)).AllocElementType <> TDataType.UNTYPETOK) then
+                      if (TokenAt(k).Kind = TTokenKind.IDENTTOK) and (IdentifierAt(GetIdentIndex(TokenAt(k).Name)).AllocElementType <> TDataType.UNTYPETOK)
+		      then
                         IndirectionLevel := ASSTRINGPOINTERTOARRAYORIGIN;
 
                       GenerateAssignment(IndirectionLevel, GetDataSize(VarType), IdentIndex);
 
                       StopOptimization;
-
                       ResetOpty;
 
                     end
@@ -13018,14 +12934,11 @@ begin
                   // dla PROC, FUNC -> IdentifierAt(GetIdentIndex(TokenAt(k).Name)).NumAllocElements -> oznacza liczbe parametrow takiej procedury/funkcji
                     if (VarType in Pointers) and ((ExpressionType in Pointers) and
                       (TokenAt(k).Kind = TTokenKind.IDENTTOK)) and
-                      (not (IdentifierAt(IdentIndex).AllocElementType in Pointers +
-                      [TDataType.RECORDTOK, TDataType.OBJECTTOK]) and not
-                      (IdentifierAt(GetIdentIndex(TokenAt(k).Name)).AllocElementType in Pointers +
-                      [TDataType.RECORDTOK, TDataType.OBJECTTOK])) then
+                      (not (IdentifierAt(IdentIndex).AllocElementType in Pointers + [TDataType.RECORDTOK, TDataType.OBJECTTOK]) and
+		      not (IdentifierAt(GetIdentIndex(TokenAt(k).Name)).AllocElementType in Pointers + [TDataType.RECORDTOK, TDataType.OBJECTTOK])) then
                     begin
 
-                      j := Elements(IdentIndex) {IdentifierAt(IdentIndex).NumAllocElements} *
-                        GetDataSize(IdentifierAt(IdentIndex).AllocElementType);
+                      j := Elements(IdentIndex) {IdentifierAt(IdentIndex).NumAllocElements} * GetDataSize(IdentifierAt(IdentIndex).AllocElementType);
 
                       IdentTemp := GetIdentIndex(TokenAt(k).Name);
 
@@ -13055,15 +12968,10 @@ begin
                           //writeln(j,',', Elements(IdentTemp) );
                           // perl
                           if IdentifierAt(IdentTemp).AllocElementType <> TDataType.RECORDTOK then
-                            if (j <> Integer(Elements(IdentTemp) {IdentifierAt(IdentTemp).NumAllocElements} *
-                              GetDataSize(IdentifierAt(IdentTemp).AllocElementType))) then
-                              if (IdentifierAt(IdentIndex).AllocElementType <>
-                                IdentifierAt(IdentTemp).AllocElementType) or
-                                ((IdentifierAt(IdentTemp).NumAllocElements <>
-                                IdentifierAt(IdentIndex).NumAllocElements_) and
-                                (IdentifierAt(IdentTemp).NumAllocElements_ = 0)) or
-                                ((IdentifierAt(IdentIndex).NumAllocElements <> IdentifierAt(
-                                IdentTemp).NumAllocElements_) and (IdentifierAt(IdentIndex).NumAllocElements_ = 0))
+                            if (j <> Integer(Elements(IdentTemp) {IdentifierAt(IdentTemp).NumAllocElements} * GetDataSize(IdentifierAt(IdentTemp).AllocElementType))) then
+                              if (IdentifierAt(IdentIndex).AllocElementType <> IdentifierAt(IdentTemp).AllocElementType) or
+                                ((IdentifierAt(IdentTemp).NumAllocElements <> IdentifierAt(IdentIndex).NumAllocElements_) and (IdentifierAt(IdentTemp).NumAllocElements_ = 0)) or
+                                ((IdentifierAt(IdentIndex).NumAllocElements <> IdentifierAt(IdentTemp).NumAllocElements_) and (IdentifierAt(IdentIndex).NumAllocElements_ = 0))
                               then
                                 ErrorIdentifierIncompatibleTypesArrayIdentifier(i, IdentTemp, IdentIndex);
 
@@ -13074,15 +12982,12 @@ begin
         ResetOpty;
 }
 
-                          if j <> Integer(Elements(IdentTemp) *
-                            GetDataSize(IdentifierAt(IdentTemp).AllocElementType)) then
+                          if j <> Integer(Elements(IdentTemp) * GetDataSize(IdentifierAt(IdentTemp).AllocElementType)) then
                           begin
 
                             if (IdentifierAt(IdentIndex).NumAllocElements_ > 0) and
-                              ((IdentifierAt(IdentIndex).NumAllocElements_ =
-                              IdentifierAt(IdentTemp).NumAllocElements) or
-                              (IdentifierAt(IdentIndex).NumAllocElements_ =
-                              IdentifierAt(IdentTemp).NumAllocElements_)) then
+                              ((IdentifierAt(IdentIndex).NumAllocElements_ = IdentifierAt(IdentTemp).NumAllocElements) or
+                              (IdentifierAt(IdentIndex).NumAllocElements_ = IdentifierAt(IdentTemp).NumAllocElements_)) then
                             begin
 
                               // WriteLn(TokenAt(k].line,',', IdentifierAt(IdentTemp).NumAllocElements_);
@@ -13125,15 +13030,13 @@ begin
 
                               a65(TCode65.subBX);
                               a65(TCode65.subBX);
-                              StopOptimization;
 
+                              StopOptimization;
                               ResetOpty;
 
-                              asm65(#9'lda <' + IntToStr(IdentifierAt(IdentIndex).NumAllocElements_ *
-                                GetDataSize(IdentifierAt(IdentIndex).AllocElementType)));
+                              asm65(#9'lda <' + IntToStr(IdentifierAt(IdentIndex).NumAllocElements_ * GetDataSize(IdentifierAt(IdentIndex).AllocElementType)));
                               asm65(#9'sta @move.cnt');
-                              asm65(#9'lda >' + IntToStr(IdentifierAt(IdentIndex).NumAllocElements_ *
-                                GetDataSize(IdentifierAt(IdentIndex).AllocElementType)));
+                              asm65(#9'lda >' + IntToStr(IdentifierAt(IdentIndex).NumAllocElements_ * GetDataSize(IdentifierAt(IdentIndex).AllocElementType)));
                               asm65(#9'sta @move.cnt+1');
 
                               asm65(#9'jsr @move');
@@ -13158,15 +13061,13 @@ begin
 
                               a65(TCode65.subBX);
                               a65(TCode65.subBX);
-                              StopOptimization;
 
+                              StopOptimization;
                               ResetOpty;
 
-                              asm65(#9'lda <' + IntToStr(IdentifierAt(IdentIndex).NumAllocElements *
-                                GetDataSize(IdentifierAt(IdentIndex).AllocElementType)));
+                              asm65(#9'lda <' + IntToStr(IdentifierAt(IdentIndex).NumAllocElements * GetDataSize(IdentifierAt(IdentIndex).AllocElementType)));
                               asm65(#9'sta @move.cnt');
-                              asm65(#9'lda >' + IntToStr(IdentifierAt(IdentIndex).NumAllocElements *
-                                GetDataSize(IdentifierAt(IdentIndex).AllocElementType)));
+                              asm65(#9'lda >' + IntToStr(IdentifierAt(IdentIndex).NumAllocElements * GetDataSize(IdentifierAt(IdentIndex).AllocElementType)));
                               asm65(#9'sta @move.cnt+1');
 
                               asm65(#9'jsr @move');
@@ -13178,13 +13079,12 @@ begin
                           begin
 
                             a65(TCode65.subBX);
-                            StopOptimization;
 
+                            StopOptimization;
                             ResetOpty;
 
                             if (j <= 4) and (IdentifierAt(IdentTemp).AllocElementType <> TDataType.RECORDTOK) then
-                              asm65(#9':' + IntToStr(j) + ' mva ' + Name + '+# ' +
-                                GetLocalName(IdentIndex, 'adr.') + '+#')
+                              asm65(#9':' + IntToStr(j) + ' mva ' + Name + '+# ' + GetLocalName(IdentIndex, 'adr.') + '+#')
                             else
                               asm65(#9'@move ' + svar + ' ' + GetLocalName(IdentIndex) + ' #' + IntToStr(j));
 
@@ -13210,8 +13110,7 @@ begin
 
 
 
-          TTokenKind.PROCEDURETOK, TTokenKind.FUNCTIONTOK, TTokenKind.CONSTRUCTORTOK,
-          TTokenKind.DESTRUCTORTOK:    // Procedure, Function (without assignment) call
+          TTokenKind.PROCEDURETOK, TTokenKind.FUNCTIONTOK, TTokenKind.CONSTRUCTORTOK, TTokenKind.DESTRUCTORTOK:    // Procedure, Function (without assignment) call
           begin
 
             Param := NumActualParameters(i, IdentIndex, NumParam);
@@ -14676,8 +14575,7 @@ WHILETOK:
                   (IdentifierAt(IdentIndex).AllocElementType = TDataType.CHARTOK) then
                 begin     // string
 
-                  asm65(#9'@move #@buf #' + GetLocalName(IdentIndex, 'adr.') + ' #' +
-                    IntToStr(IdentifierAt(IdentIndex).NumAllocElements));
+                  asm65(#9'@move #@buf #' + GetLocalName(IdentIndex, 'adr.') + ' #' + IntToStr(IdentifierAt(IdentIndex).NumAllocElements));
 
                 end
                 else
@@ -16903,31 +16801,28 @@ end;  //FormalParameterList
 procedure CheckForwardResolutions(typ: Boolean = True);
 var
   TypeIndex, IdentIndex: Integer;
-  Name: String;
 begin
 
   // Search for unresolved forward references
   for TypeIndex := 1 to NumIdent do
-    if (IdentifierAt(TypeIndex).AllocElementType = TDataType.FORWARDTYPE) and
-      (IdentifierAt(TypeIndex).BlockIndex = BlockStackTopBlockIndex) then
+    if (IdentifierAt(TypeIndex).AllocElementType = TDataType.FORWARDTYPE) and (IdentifierAt(TypeIndex).BlockIndex = BlockStackTopBlockIndex) then
     begin
 
-      Name := IdentifierAt(GetIdentIndex(TokenAt(IdentifierAt(TypeIndex).NumAllocElements).Name)).Name;
+      IdentIndex := GetIdentIndex(TokenAt(IdentifierAt(TypeIndex).NumAllocElements).Name);
 
-      if IdentifierAt(GetIdentIndex(TokenAt(IdentifierAt(TypeIndex).NumAllocElements).Name)).Kind =
-        TTokenKind.TYPETOK then
-
-        for IdentIndex := 1 to NumIdent do
-          if (IdentifierAt(IdentIndex).Name = Name) and (IdentifierAt(IdentIndex).BlockIndex =
-            BlockStackTopBlockIndex) then
-          begin
+      if IdentifierAt(IdentIndex).Kind = TTokenKind.TYPETOK then
+      begin
 
             IdentifierAt(TypeIndex).NumAllocElements := IdentifierAt(IdentIndex).NumAllocElements;
             IdentifierAt(TypeIndex).NumAllocElements_ := IdentifierAt(IdentIndex).NumAllocElements_;
             IdentifierAt(TypeIndex).AllocElementType := IdentifierAt(IdentIndex).DataType;
 
-            Break;
-          end;
+	    if (IdentifierAt(TypeIndex).DataType = TDataType.POINTERTOK) and (IdentifierAt(TypeIndex).AllocElementType = TDataType.POINTERTOK) then
+	    begin
+	      IdentifierAt(TypeIndex).DataType := TDataType.DEREFERENCEARRAYTOK;
+	      IdentifierAt(TypeIndex).AllocElementType := IdentifierAt(IdentIndex).AllocElementType;
+	    end;
+      end;
 
     end;
 
@@ -16935,13 +16830,12 @@ begin
   // Search for unresolved forward references
   for TypeIndex := 1 to NumIdent do
     if (IdentifierAt(TypeIndex).AllocElementType = TDataType.FORWARDTYPE) and
-      (IdentifierAt(TypeIndex).BlockIndex = BlockStackTopBlockIndex) then
+       (IdentifierAt(TypeIndex).BlockIndex = BlockStackTopBlockIndex) then
 
       if typ then
         Error(TypeIndex, 'Unresolved forward reference to type ' + IdentifierAt(TypeIndex).Name)
       else
-        Error(TypeIndex, 'Identifier not found "' + IdentifierAt(
-          GetIdentIndex(TokenAt(IdentifierAt(TypeIndex).NumAllocElements).Name)).Name + '"');
+        Error(TypeIndex, 'Identifier not found "' + IdentifierAt(GetIdentIndex(TokenAt(IdentifierAt(TypeIndex).NumAllocElements).Name)).Name + '"');
 
 end;  //CheckForwardResolutions
 
@@ -17508,7 +17402,7 @@ begin
           begin
 
             Assignment := False;
-            asm65(#9'dex');
+            a65(TCode65.subBX);
 
           end
           else
@@ -17516,7 +17410,7 @@ begin
             begin
 
               Assignment := False;
-              asm65(#9'dex');
+              a65(TCode65.subBX);
 
             end;
 
@@ -18547,8 +18441,7 @@ begin
                 varPassMethod := IdentifierAt(GetIdentIndex(TokenAt(i + 1).Name)).PassMethod;
 
                 if (ConstVal < 0) or (ConstVal > $FFFFFF) then
-                  Error(i, 'Range check error while evaluating constants (' + IntToStr(ConstVal) +
-                    ' must be between 0 and ' + IntToStr($FFFFFF) + ')');
+                  Error(i, 'Range check error while evaluating constants (' + IntToStr(ConstVal) + ' must be between 0 and ' + IntToStr($FFFFFF) + ')');
 
 
                 ConstVal := -ConstVal;
@@ -18565,8 +18458,7 @@ begin
                   CheckCommonConstType(i, TDataType.CARDINALTOK, ActualParamType);
 
                 if (ConstVal < 0) or (ConstVal > $FFFFFF) then
-                  Error(i, 'Range check error while evaluating constants (' + IntToStr(ConstVal) +
-                    ' must be between 0 and ' + IntToStr($FFFFFF) + ')');
+                  Error(i, 'Range check error while evaluating constants (' + IntToStr(ConstVal) + ' must be between 0 and ' + IntToStr($FFFFFF) + ')');
               end;
 
               Inc(ConstVal);   // wyjatkowo, aby mozna bylo ustawic adres $0000, DefineIdent zmniejszy wartosc -1
@@ -18600,8 +18492,7 @@ begin
           if VarType = TDataType.ENUMTOK then
           begin
 
-            DefineIdent(i, VarOfSameType[VarOfSameTypeIndex].Name, TTokenKind.VARTOK, AllocElementType, 0,
-              TDataType.UNTYPETOK, 0, IdType);
+            DefineIdent(i, VarOfSameType[VarOfSameTypeIndex].Name, TTokenKind.VARTOK, AllocElementType, 0, TDataType.UNTYPETOK, 0, IdType);
 
             IdentifierAt(NumIdent).DataType := TDataType.ENUMTOK;
             IdentifierAt(NumIdent).AllocElementType := AllocElementType;
@@ -18646,8 +18537,9 @@ begin
             //    writeln(VarType, ' / ', AllocElementType ,' = ',NestedDataType, ',',NestedAllocElementType,',', hexStr(NestedNumAllocElements,8),',',hexStr(NumAllocElements,8));
 
 
-            if (VarType = TDataType.POINTERTOK) and (AllocElementType = TDataType.STRINGPOINTERTOK) and
-              (NestedNumAllocElements > 0) and (NumAllocElements > 1) then
+            if (VarType = TDataType.POINTERTOK) and
+	       (AllocElementType = TDataType.STRINGPOINTERTOK) and
+               (NestedNumAllocElements > 0) and (NumAllocElements > 1) then
             begin  // array [ ][ ] of string;
 
 
@@ -18871,8 +18763,7 @@ begin
                         end
                         else
                         begin
-                          i := ReadDataOpenArray(i, idx, IdentifierAt(NumIdent).AllocElementType,
-                            NumAllocElements, False, TokenAt(i - 2).Kind = TTokenKind.PCHARTOK);
+                          i := ReadDataOpenArray(i, idx, IdentifierAt(NumIdent).AllocElementType, NumAllocElements, False, TokenAt(i - 2).Kind = TTokenKind.PCHARTOK);
 
                           IdentifierAt(NumIdent).NumAllocElements := NumAllocElements;
                         end;
@@ -18902,8 +18793,7 @@ begin
                         end
                         else
                           i := ReadDataArray(i, idx, IdentifierAt(NumIdent).AllocElementType,
-                            IdentifierAt(NumIdent).NumAllocElements or IdentifierAt(NumIdent).NumAllocElements_ shl
-                            16, False, TokenAt(i - 2).Kind = TTokenKind.PCHARTOK);
+                            IdentifierAt(NumIdent).NumAllocElements or IdentifierAt(NumIdent).NumAllocElements_ shl 16, False, TokenAt(i - 2).Kind = TTokenKind.PCHARTOK);
 
                       end;
 
@@ -18916,8 +18806,7 @@ begin
         isVolatile := False;
         isStriped := False;
 
-        if (TokenAt(i + 2).Kind = TTokenKind.OBRACKETTOK) and (TokenAt(i + 3).Kind in
-          [TTokenKind.VOLATILETOK, TTokenKind.STRIPEDTOK]) then
+        if (TokenAt(i + 2).Kind = TTokenKind.OBRACKETTOK) and (TokenAt(i + 3).Kind in [TTokenKind.VOLATILETOK, TTokenKind.STRIPEDTOK]) then
         begin
           CheckTok(i + 4, TTokenKind.CBRACKETTOK);
 
@@ -18939,8 +18828,7 @@ begin
     end;// if TTokenKind.VARTOK
 
 
-    if TokenAt(i).Kind in [TTokenKind.PROCEDURETOK, TTokenKind.FUNCTIONTOK, TTokenKind.CONSTRUCTORTOK,
-      TTokenKind.DESTRUCTORTOK] then
+    if TokenAt(i).Kind in [TTokenKind.PROCEDURETOK, TTokenKind.FUNCTIONTOK, TTokenKind.CONSTRUCTORTOK, TTokenKind.DESTRUCTORTOK] then
       if TokenAt(i + 1).Kind <> TTokenKind.IDENTTOK then
         Error(i + 1, 'Procedure name expected but ' + tokenList.GetTokenSpellingAtIndex(i + 1) + ' found')
       else
@@ -19057,8 +18945,7 @@ begin
             begin
 
               if IdentifierAt(ForwardIdentIndex).NumParams <> ParamIndex then
-                Error(i, 'Wrong number of parameters specified for call to ' + '''' +
-                  IdentifierAt(ForwardIdentIndex).Name + '''');
+                Error(i, 'Wrong number of parameters specified for call to ' + '''' + IdentifierAt(ForwardIdentIndex).Name + '''');
 
               //     function header "arg1" doesn't match forward : var name changes arg2 = arg3
 
@@ -19066,13 +18953,11 @@ begin
                 if ((IdentifierAt(ForwardIdentIndex).Param[ParamIndex].Name <> Param[ParamIndex].Name) or
                   (IdentifierAt(ForwardIdentIndex).Param[ParamIndex].DataType <> Param[ParamIndex].DataType)) then
                   Error(i, 'Function header ''' + IdentifierAt(ForwardIdentIndex).Name +
-                    ''' doesn''t match forward : ' + IdentifierAt(ForwardIdentIndex).Param[ParamIndex].Name +
-                    ' <> ' + Param[ParamIndex].Name);
+                    ''' doesn''t match forward : ' + IdentifierAt(ForwardIdentIndex).Param[ParamIndex].Name + ' <> ' + Param[ParamIndex].Name);
 
               for ParamIndex := 1 to IdentifierAt(ForwardIdentIndex).NumParams do
                 if (IdentifierAt(ForwardIdentIndex).Param[ParamIndex].PassMethod <> Param[ParamIndex].PassMethod) then
-                  Error(i, 'Function header doesn''t match the previous declaration ''' +
-                    IdentifierAt(ForwardIdentIndex).Name + '''');
+                  Error(i, 'Function header doesn''t match the previous declaration ''' + IdentifierAt(ForwardIdentIndex).Name + '''');
 
             end;
 
@@ -19089,16 +18974,14 @@ begin
 
             if Tmp <> TmpResult then
               // TODO: List the difference in the modifiers
-              Error(i, 'Function header doesn''t match the previous declaration ''' +
-                IdentifierAt(ForwardIdentIndex).Name + '''. Different modifiers.');
+              Error(i, 'Function header doesn''t match the previous declaration ''' + IdentifierAt(ForwardIdentIndex).Name + '''. Different modifiers.');
 
 
             if IsNestedFunction then
               if (IdentifierAt(ForwardIdentIndex).DataType <> NestedFunctionResultType) or
                 (IdentifierAt(ForwardIdentIndex).NestedFunctionNumAllocElements <> NestedFunctionNumAllocElements) or
                 (IdentifierAt(ForwardIdentIndex).NestedFunctionAllocElementType <> NestedFunctionAllocElementType) then
-                Error(i, 'Function header doesn''t match the previous declaration ''' +
-                  IdentifierAt(ForwardIdentIndex).Name + '''');
+                Error(i, 'Function header doesn''t match the previous declaration ''' + IdentifierAt(ForwardIdentIndex).Name + '''');
 
 
             CheckTok(i + 2, TTokenKind.SEMICOLONTOK);
@@ -19139,8 +19022,7 @@ begin
   end;// while
 
 
-  OutputDisabled := (Pass = TPass.CODE_GENERATION) and (BlockStackTopBlockIndex <> 1) and
-    (not IdentifierAt(BlockIdentIndex).IsAlive);
+  OutputDisabled := (Pass = TPass.CODE_GENERATION) and (BlockStackTopBlockIndex <> 1) and (not IdentifierAt(BlockIdentIndex).IsAlive);
 
 
   // asm65('@main');
@@ -19185,8 +19067,7 @@ end;
   while (j > 0) and (IdentifierAt(j).BlockIndex = BlockStackTopBlockIndex) do
   begin
     // If procedure or function, delete parameters first
-    if IdentifierAt(j).Kind in [TTokenKind.PROCEDURETOK, TTokenKind.FUNCTIONTOK,
-      TTokenKind.CONSTRUCTORTOK, TTokenKind.DESTRUCTORTOK] then
+    if IdentifierAt(j).Kind in [TTokenKind.PROCEDURETOK, TTokenKind.FUNCTIONTOK, TTokenKind.CONSTRUCTORTOK, TTokenKind.DESTRUCTORTOK] then
       if IdentifierAt(j).IsUnresolvedForward and (IdentifierAt(j).isExternal = False) then
         Error(i, 'Unresolved forward declaration of ' + IdentifierAt(j).Name);
 
@@ -19207,8 +19088,7 @@ end;
     if IdentifierAt(BlockIdentIndex).isStdCall or IdentifierAt(BlockIdentIndex).isRecursion then
     begin
 
-      Push(IdentifierAt(GetIdentIndex('RESULT')).Value, ASPOINTER, GetDataSize(FunctionResultType),
-        GetIdentIndex('RESULT'));
+      Push(IdentifierAt(GetIdentIndex('RESULT')).Value, ASPOINTER, GetDataSize(FunctionResultType), GetIdentIndex('RESULT'));
 
       asm65;
 
@@ -19227,8 +19107,7 @@ end;
 
   end;
 
-  if IdentifierAt(BlockIdentIndex).Kind in [TTokenKind.PROCEDURETOK, TTokenKind.FUNCTIONTOK,
-    TTokenKind.CONSTRUCTORTOK, TTokenKind.DESTRUCTORTOK] then
+  if IdentifierAt(BlockIdentIndex).Kind in [TTokenKind.PROCEDURETOK, TTokenKind.FUNCTIONTOK, TTokenKind.CONSTRUCTORTOK, TTokenKind.DESTRUCTORTOK] then
   begin
 
     if IdentifierAt(BlockIdentIndex).isInline then asm65(#9'.ENDM');
@@ -19240,9 +19119,10 @@ end;
   BlockManager.BlockStack.Pop;
 
   if pass = TPass.CALL_DETERMINATION then
-    if IdentifierAt(BlockIdentIndex).isKeep or IdentifierAt(BlockIdentIndex).isInterrupt or
-      IdentifierAt(BlockIdentIndex).updateResolvedForward then
-      AddCallGraphChild(BlockStackTopBlockIndex, IdentifierAt(BlockIdentIndex).ProcAsBlockIndex);
+    if IdentifierAt(BlockIdentIndex).isKeep or
+       IdentifierAt(BlockIdentIndex).isInterrupt or
+       IdentifierAt(BlockIdentIndex).updateResolvedForward then
+         AddCallGraphChild(BlockStackTopBlockIndex, IdentifierAt(BlockIdentIndex).ProcAsBlockIndex);
 
 
   //Result := j;
@@ -19524,8 +19404,7 @@ begin
   while (j > 0) and (IdentifierAt(j).SourceFile.UnitIndex = 1) do
   begin
     // If procedure or function, delete parameters first
-    if IdentifierAt(j).Kind in [TTokenKind.PROCEDURETOK, TTokenKind.FUNCTIONTOK,
-      TTokenKind.CONSTRUCTORTOK, TTokenKind.DESTRUCTORTOK] then
+    if IdentifierAt(j).Kind in [TTokenKind.PROCEDURETOK, TTokenKind.FUNCTIONTOK, TTokenKind.CONSTRUCTORTOK, TTokenKind.DESTRUCTORTOK] then
       if (IdentifierAt(j).IsUnresolvedForward) and (IdentifierAt(j).isExternal = False) then
         Error(j, 'Unresolved forward declaration of ' + IdentifierAt(j).Name);
 
@@ -19650,8 +19529,7 @@ end;
             end
             else
 
-              Error(NumTok, 'Resource identifier not found: Type = ' + resArray[i].resType +
-                ', Name = ' + resArray[i].resName);
+              Error(NumTok, 'Resource identifier not found: Type = ' + resArray[i].resType + ', Name = ' + resArray[i].resName);
 
     //  asm65(#9+resArray[i].resType+' '''+resArray[i].resFile+''''+','+resArray[i].resName);
 
@@ -19813,13 +19691,10 @@ begin
 
   // Initilize identifiers for predefined constants
 
-  DefineIdent(tokenIndex, 'BLOCKREAD', TTokenKind.FUNCTIONTOK, TDataType.INTEGERTOK, 0,
-    TDataType.UNTYPETOK, $00000000);
-  DefineIdent(tokenIndex, 'BLOCKWRITE', TTokenKind.FUNCTIONTOK, TDataType.INTEGERTOK, 0,
-    TDataType.UNTYPETOK, $00000000);
+  DefineIdent(tokenIndex, 'BLOCKREAD', TTokenKind.FUNCTIONTOK, TDataType.INTEGERTOK, 0, TDataType.UNTYPETOK, $00000000);
+  DefineIdent(tokenIndex, 'BLOCKWRITE', TTokenKind.FUNCTIONTOK, TDataType.INTEGERTOK, 0, TDataType.UNTYPETOK, $00000000);
 
-  DefineIdent(tokenIndex, 'GETRESOURCEHANDLE', TTokenKind.FUNCTIONTOK, TDataType.INTEGERTOK,
-    0, TDataType.UNTYPETOK, $00000000);
+  DefineIdent(tokenIndex, 'GETRESOURCEHANDLE', TTokenKind.FUNCTIONTOK, TDataType.INTEGERTOK, 0, TDataType.UNTYPETOK, $00000000);
 
   DefineIdent(tokenIndex, 'NIL', TTokenKind.CONSTTOK, TDataType.POINTERTOK, 0, TDataType.UNTYPETOK, CODEORIGIN);
 
@@ -19835,10 +19710,8 @@ begin
 
   DefineIdent(tokenIndex, 'PI', TTokenKind.CONSTTOK, TDataType.REALTOK, 0, TDataType.UNTYPETOK, PI_VALUE);
   DefineIdent(tokenIndex, 'NAN', TTokenKind.CONSTTOK, TDataType.SINGLETOK, 0, TDataType.UNTYPETOK, NAN_VALUE);
-  DefineIdent(tokenIndex, 'INFINITY', TTokenKind.CONSTTOK, TDataType.SINGLETOK, 0,
-    TDataType.UNTYPETOK, INFINITY_VALUE);
-  DefineIdent(tokenIndex, 'NEGINFINITY', TTokenKind.CONSTTOK, TDataType.SINGLETOK, 0,
-    TDataType.UNTYPETOK, NEGINFINITY_VALUE);
+  DefineIdent(tokenIndex, 'INFINITY', TTokenKind.CONSTTOK, TDataType.SINGLETOK, 0, TDataType.UNTYPETOK, INFINITY_VALUE);
+  DefineIdent(tokenIndex, 'NEGINFINITY', TTokenKind.CONSTTOK, TDataType.SINGLETOK, 0, TDataType.UNTYPETOK, NEGINFINITY_VALUE);
 end;
 
 // ----------------------------------------------------------------------------

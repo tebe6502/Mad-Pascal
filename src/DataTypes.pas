@@ -24,6 +24,8 @@ const
 
   StringTypes = [TDataType.STRINGPOINTERTOK, TDataType.STRINGLITERALTOK, TDataType.PCHARTOK];
 
+  FileTypes = [TDataType.FILETOK, TDataType.TEXTFILETOK];
+
   function GetDataTypeName(const dataType: TDataType): String;
   function GetDataSize(const dataType: TDataType): Byte;
   function GetValueType(const Value: TInteger): TDataType;
