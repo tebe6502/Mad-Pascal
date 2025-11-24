@@ -57,6 +57,7 @@ var
 
 
 
+//PROFILE-NO
 function IntToStr(const Value: Int64): String;
 begin
   if (Value >= Low(DecimalStringArray)) and (Value <= High(DecimalStringArray)) then
@@ -68,6 +69,7 @@ begin
     str(Value, Result);
   end;
 end;
+//PROFILE-YES
 
 function StrToInt(const a: String): TInteger;
 {$IFNDEF PAS2JS}

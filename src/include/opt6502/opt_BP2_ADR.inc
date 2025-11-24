@@ -135,7 +135,7 @@ begin
 	q:=q * 2;
 
 	if {q < 127} q <= 256-2 then begin
-	  listing[i+6]  := #9'ldy #' + HexByte(q);
+	  listing[i+6]  := #9'ldy #' + HexByte(Byte(q));
 
 	  listing[p-1] := '';
 

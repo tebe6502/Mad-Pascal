@@ -1507,7 +1507,7 @@ begin
      begin
       p := -1 * GetWORD(i+1, i+4) + GetWORD(i+7, i+10);
 
-      listing[i+1] := #9'add #' + HexByte(p and $ff);
+      listing[i+1] := #9'add #' + HexByte(Byte(p) and $ff);
       listing[i+4] := #9'adc #' + HexByte(Byte(p shr 8));
 
       listing[i+2] := listing[i+8];

@@ -639,7 +639,7 @@ begin
 
   if (NumStaticStrChars + len > $FFFF) then
   begin
-    writeln('DefineStaticString: ' + IntToStr(len));
+    writeln('ERROR: DefineStaticString: ' + IntToStr(len));
     RaiseHaltException(EHaltException.COMPILING_ABORTED);
   end;
 

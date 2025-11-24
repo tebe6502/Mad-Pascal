@@ -4,12 +4,13 @@ unit Assembler;
 
 interface
 
-
 // Hexadecimal output of 8-Bit with '$' prefix, 2 digits
-function HexByte(const Value: Byte): String;
+function HexByte(const Value: Byte): String; overload;
+function HexByte(const Value: Int64): String; overload; // For detecting missing downcasts
 
 // Hexadecimal output of 16-Bit with '$' prefix, 4 digits
-function HexWord(const Value: Word): String;
+function HexWord(const Value: Word): String; overload;
+function HexWord(const Value: Int64): String; overload; // For detecting missing downcasts
 
 // Hexadecimal output of 32/64-Bit with '$' prefix, minimum lenght 8 digit
 function HexLongWord(const Value: Int64): String;
@@ -20,7 +21,6 @@ function HexLongWord(const Value: Int64): String;
 implementation
 
 uses SysUtils;
-
 
 var
   HexBytes: array[0..255] of String;
@@ -60,15 +60,34 @@ begin
   WriteLn('DoCount: ', Count);
 end;
 
-function HexByte(const Value: Byte): String;
+function HexByte(const Value: Byte): String; overload;
 begin
   Result := '$' + HexBytes[Value];
+end;
+
+
+function HexByte(const Value: Int64): String; overload;
+const
+  msg = 'HexByte() called with argument datatype larger than Byte';
+begin
+  Writeln('ERROR: ', msg);
+  Assert(False, msg);
+  Result := '$??';
 end;
 
 function HexWord(const Value: Word): String;
 begin
   Result := '$' + HexBytes[(Value shr 8) and $ff] + HexBytes[Value and $ff];
   // DoCount;
+end;
+
+function HexWord(const Value: Int64): String; overload;
+const
+  msg = 'HexWord() called with argument datatype larger than Word';
+begin
+  Writeln('ERROR: ', msg);
+  Assert(False, msg);
+  Result := '$????';
 end;
 
 function HexLongWord(const Value: Int64): String;

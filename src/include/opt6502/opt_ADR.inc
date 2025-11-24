@@ -1,6 +1,8 @@
 
 function opt_ADR(i: integer): Boolean;
-var p, q: integer;
+var p: integer;
+    q: Word;
+    b: Byte;
     tmp: string;
 begin
 
@@ -646,9 +648,9 @@ begin
 											// 					; p+4
        (adc(p+5) = false) then								//~adc					; p+5
       begin
-	q:=GetBYTE(p-2);
+	b:=GetBYTE(p-2);
 
-		LDA_STA_ADR(i,q,'-');
+	LDA_STA_ADR(i,b,'-');
 
 	listing[p-2] := '';
 
@@ -677,9 +679,9 @@ begin
 											// 					; p+4
        (adc(p+5) = false) then								//~adc					; p+5
       begin
-	q:=GetBYTE(p-2);
+	b:=GetBYTE(p-2);
 
-		LDA_STA_ADR(i,q,'+');
+	LDA_STA_ADR(i,b,'+');
 
 	listing[p-2] := '';
 
@@ -799,12 +801,12 @@ begin
      if argMatch(p-3, p+3) then
       begin
 {
-        q:=GetBYTE(p-2);			// !!! wyłączone !!! psuje [ ] [ ]
+        b:=GetBYTE(p-2);			// !!! wyłączone !!! psuje [ ] [ ]
 
 	if add_im(p-2) then
-		LDA_STA_ADR(i,q,'+')
+		LDA_STA_ADR(i,b,'+')
 	else
-		LDA_STA_ADR(i,q,'-');
+		LDA_STA_ADR(i,b,'-');
 }
 	listing[p-3] := '';
 //	listing[p-2] := '';
@@ -837,12 +839,12 @@ begin
      if argMatch(p-3, p+3) then
       begin
 {
-        q:=GetBYTE(p-1);			// !!! wyłączone !!! psuje [ ] [ ]
+        b:=GetBYTE(p-1);			// !!! wyłączone !!! psuje [ ] [ ]
 
 	if add_im(p-1) then
-		LDA_STA_ADR(i,q,'+')
+		LDA_STA_ADR(i,b,'+')
 	else
-		LDA_STA_ADR(i,q,'-');
+		LDA_STA_ADR(i,b,'-');
 }
 	listing[p-3] := '';
 
@@ -1619,16 +1621,16 @@ begin
 	listing[i+4] := '';
 	listing[i+5] := '';
 
-	q:=GetBYTE(i);
+	b:=GetBYTE(i);
 
 	if lda_adr_y(i+6) then begin
 	 delete(listing[i+6], pos(',y', listing[i+6]), 2);
-	 if q<>0 then listing[i+6] := listing[i+6] + '+' + HexByte(q);
+	 if b<>0 then listing[i+6] := listing[i+6] + '+' + HexByte(b);
 	end;
 
 	if sta_adr_y(i+7) then begin
 	 delete(listing[i+7], pos(',y', listing[i+7]), 2);
-	 if q<>0 then listing[i+7] := listing[i+7] + '+' + HexByte(q);
+	 if b<>0 then listing[i+7] := listing[i+7] + '+' + HexByte(b);
 	end;
 
 	listing[i] := '';
@@ -1637,36 +1639,36 @@ begin
 
 	if lda_adr_y(i+8) then begin
 	 delete(listing[i+8], pos(',y', listing[i+8]), 2);
-	 if q<>0 then listing[i+8] := listing[i+8] + '+' + HexByte(q);
+	 if b<>0 then listing[i+8] := listing[i+8] + '+' + HexByte(b);
 	end;
 
 	if sta_adr_y(i+9) then begin
 	 delete(listing[i+9], pos(',y', listing[i+9]), 2);
-	 if q<>0 then listing[i+9] := listing[i+9] + '+' + HexByte(q);
+	 if b<>0 then listing[i+9] := listing[i+9] + '+' + HexByte(b);
 	end;
 
 	if (lda_adr(i+10) = false) and (sta_adr(i+11) = false) then exit(false);
 
 	if lda_adr_y(i+10) then begin
 	 delete(listing[i+10], pos(',y', listing[i+10]), 2);
-	 if q<>0 then listing[i+10] := listing[i+10] + '+' + HexByte(q);
+	 if b<>0 then listing[i+10] := listing[i+10] + '+' + HexByte(b);
 	end;
 
 	if sta_adr_y(i+11) then begin
 	 delete(listing[i+11], pos(',y', listing[i+11]), 2);
-	 if q<>0 then listing[i+11] := listing[i+11] + '+' + HexByte(q);
+	 if b<>0 then listing[i+11] := listing[i+11] + '+' + HexByte(b);
 	end;
 
 	if (lda_adr(i+12) = false) and (sta_adr(i+13) = false) then exit(false);
 
 	if lda_adr_y(i+12) then begin
 	 delete(listing[i+12], pos(',y', listing[i+12]), 2);
-	 if q<>0 then listing[i+12] := listing[i+12] + '+' + HexByte(q);
+	 if b<>0 then listing[i+12] := listing[i+12] + '+' + HexByte(b);
 	end;
 
 	if sta_adr_y(i+13) then begin
 	 delete(listing[i+13], pos(',y', listing[i+13]), 2);
-	 if q<>0 then listing[i+13] := listing[i+13] + '+' + HexByte(q);
+	 if b<>0 then listing[i+13] := listing[i+13] + '+' + HexByte(b);
 	end;
 
 	exit(false);

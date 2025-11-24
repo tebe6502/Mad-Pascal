@@ -22,6 +22,7 @@ type
     procedure EndSection;
 
   private
+  // TODO Make Object, so it also works in PAS2J
   type TEntry = record
       level: TLevel;
       Name: String;
@@ -43,7 +44,7 @@ var
 
 implementation
 
-uses Common, SysUtils;
+uses Common, SysUtils, Utilities;
 
 constructor TProfiler.Create;
 begin

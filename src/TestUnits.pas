@@ -3,6 +3,7 @@ program TestUnits;
 {$I Defines.inc}
 
 uses
+  Assembler,
   Crt,
   Common,
   CommonTypes,
@@ -68,70 +69,97 @@ uses
     EndTest('TestLanguage');
   end;
 
-  procedure TestNativeIO(filePath: TFilePath);
-  var
-    f: TextFile;
-    s: String;
+  procedure TestUnitAssembler;
   begin
-    StartTest('TestFileNativeIO');
+    StartTest('TestUnitAssembler');
 
-    AssignFile(f, filePath);
+    AssertEquals(Assembler.HexByte($00), '$00');
+    AssertEquals(Assembler.HexByte($0f), '$0F');
+    AssertEquals(Assembler.HexByte($80), '$80');
+    AssertEquals(Assembler.HexByte($ff), '$FF');
 
-    try
-      reset(f); // Open the file for reading
-      readln(f, s);
-      writeln('Text read from file: ', s)
 
-    finally
-      CloseFile(f);
-    end;
-    EndTest('TestFileNativeIO');
-  end;
+    AssertEquals(Assembler.HexWord($00), '$0000');
+    AssertEquals(Assembler.HexWord($0f), '$000F');
+    AssertEquals(Assembler.HexWord($8000), '$8000');
+    AssertEquals(Assembler.HexWord($ffee), '$FFEE');
 
-  procedure TestFileIO(filePath: TFilePath);
-  var
-    binFile: IBinaryFile;
-    cachedBinFile: IBinaryFile;
-  var
-    c1, c2: Char;
-  begin
-    StartTest('TestFileIO');
 
-    binFile := TFileSystem.CreateBinaryFile(False);
-    binFile.Assign(filePath);
+    AssertEquals(Assembler.HexLongWord($00), '$00000000');
+    AssertEquals(Assembler.HexLongWord($ffeeddcc), '$FFEEDDCC');
 
-    cachedBinFile := TFileSystem.CreateBinaryFile(True);
-    cachedBinFile.Assign(filePath);
-    try
-      binFile.Reset(1);
-      cachedBinFile.Reset(1);
 
-      AssertEquals(binFile.GetFileSize, cachedBinFile.GetFileSize);
-      while not binFile.EOF do
-      begin
-        if cachedBinFile.EOF then FailTest('End of cached file reached.');
-        c1 := ' ';
-        binFile.Read(c1);
-        Write(c1);
+    AssertEquals(Hex($123456),'$12345'));
 
-        c2 := ' ';
-        cachedBinFile.Read(c2);
-        if (c1 <> c2) then FailTest('Read "' + c2 + '" from cached file instead of "' + c1 + '".');
-
-        // WriteLn(IntToStr(Ord(c)));
-      end;
-      if not cachedBinFile.EOF then FailTest('End of cached file not reached.');
-
-      binFile.Close;
-      cachedBinFile.Close;
-    except
-      FailTest('Failed with Exception.');
-
-    end;
-    EndTest('TestFileIO');
+    EndTest('TestUnitAssembler');
   end;
 
   procedure TestUnitFileIO;
+
+
+    procedure TestNativeIO(filePath: TFilePath);
+    var
+      f: TextFile;
+      s: String;
+    begin
+      StartTest('TestFileNativeIO');
+
+      AssignFile(f, filePath);
+
+      try
+        reset(f); // Open the file for reading
+        readln(f, s);
+        writeln('Text read from file: ', s)
+
+      finally
+        CloseFile(f);
+      end;
+      EndTest('TestFileNativeIO');
+    end;
+
+    procedure TestFileIO(filePath: TFilePath);
+    var
+      binFile: IBinaryFile;
+      cachedBinFile: IBinaryFile;
+    var
+      c1, c2: Char;
+    begin
+      StartTest('TestFileIO');
+
+      binFile := TFileSystem.CreateBinaryFile(False);
+      binFile.Assign(filePath);
+
+      cachedBinFile := TFileSystem.CreateBinaryFile(True);
+      cachedBinFile.Assign(filePath);
+      try
+        binFile.Reset(1);
+        cachedBinFile.Reset(1);
+
+        AssertEquals(binFile.GetFileSize, cachedBinFile.GetFileSize);
+        while not binFile.EOF do
+        begin
+          if cachedBinFile.EOF then FailTest('End of cached file reached.');
+          c1 := ' ';
+          binFile.Read(c1);
+          Write(c1);
+
+          c2 := ' ';
+          cachedBinFile.Read(c2);
+          if (c1 <> c2) then FailTest('Read "' + c2 + '" from cached file instead of "' + c1 + '".');
+
+          // WriteLn(IntToStr(Ord(c)));
+        end;
+        if not cachedBinFile.EOF then FailTest('End of cached file not reached.');
+
+        binFile.Close;
+        cachedBinFile.Close;
+      except
+        FailTest('Failed with Exception.');
+
+      end;
+      EndTest('TestFileIO');
+    end;
+
   const
     TEST_MP_FILE_PATH = '..\src\tests\TestMP.pas';
   var
@@ -360,6 +388,7 @@ begin
   try
     TestLanguage;
     TestUnitFileIO;
+    TestUnitAssembler;
     TestUnitCommon;
     TestUnitDataTypes;
     TestUnitMathEvaluate;
