@@ -512,7 +512,7 @@
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="..\src\Datatypes.pas"/>
+        <Filename Value="..\src\DataTypes.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
