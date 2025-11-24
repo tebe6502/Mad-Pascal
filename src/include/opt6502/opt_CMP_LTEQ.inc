@@ -113,8 +113,8 @@ begin
 
        listing[i+7] := '@';
 
-       if p and $ff <> 0 then
-        listing[i+5] := #9'cmp #' + HexByte(p and $ff)
+       if (p and $ff) <> 0 then
+        listing[i+5] := #9'cmp #' + HexByte(byte(p) and $ff)
        else
         listing[i+5] := '';
 
@@ -159,13 +159,13 @@ begin
 
 	listing[i+1] := #9'cmp #' + HexByte(byte(p shr 8));
 
-	if p and $ff = 0 then begin
+	if (p and $ff) = 0 then begin
 	 listing[i+2] := #9'sne';
 
 	 listing[i+4] := '';
 	 listing[i+5] := '';
 	end else
-	 listing[i+4] := #9'cmp #' + HexByte(p and $ff);
+	 listing[i+4] := #9'cmp #' + HexByte(Byte(p) and $ff);
 
 	listing[i+6] := '';
 	listing[i+7] := #9'jcs ' + copy(listing[i+7], 6, 256);

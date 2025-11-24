@@ -585,7 +585,7 @@ begin
      begin
       p := GetWORD(i, i+3) - GetWORD(i+1, i+4);
 
-      listing[i]   := #9'lda #' + HexByte(p and $ff);
+      listing[i]   := #9'lda #' + HexByte(byte(p) and $ff);
       listing[i+1] := '';
       listing[i+3] := #9'lda #' + HexByte(byte(p shr 8));
       listing[i+4] := '';

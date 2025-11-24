@@ -96,7 +96,7 @@ begin
  	  listing[3] := '';
  	  listing[4] := #9'jmi ' + copy(listing[4], 6, 256);
  	 end else begin
-	  listing[1] := #9'cmp #' + HexByte(k and $ff);
+	  listing[1] := #9'cmp #' + HexByte(Byte(k) and $ff);
 	  listing[2] := '';
 	  listing[3] := '';
 	  listing[4] := #9'jcs ' + copy(listing[4], 6, 256);
