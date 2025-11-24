@@ -114,7 +114,7 @@ begin
        listing[i+7] := '@';
 
        if (p and $ff) <> 0 then
-        listing[i+5] := #9'cmp #' + HexByte(byte(p) and $ff)
+        listing[i+5] := #9'cmp #' + HexByte(Byte(p and $ff))
        else
         listing[i+5] := '';
 
@@ -165,7 +165,7 @@ begin
 	 listing[i+4] := '';
 	 listing[i+5] := '';
 	end else
-	 listing[i+4] := #9'cmp #' + HexByte(Byte(p) and $ff);
+	 listing[i+4] := #9'cmp #' + HexByte(Byte(p and $ff));
 
 	listing[i+6] := '';
 	listing[i+7] := #9'jcs ' + copy(listing[i+7], 6, 256);
@@ -393,7 +393,7 @@ begin
 	 inc(p);
 
 	 listing[i+4] := listing[i+1];
-	 listing[i+5] := #9'sub #' + HexByte(p and $ff);
+	 listing[i+5] := #9'sub #' + HexByte(Byte(p and $ff));
 	 listing[i+6] := #9'svc';
 	 listing[i+7] := #9'eor #$80';
 	 listing[i+8] := #9'bmi @+';
@@ -490,7 +490,7 @@ begin
 	 listing[i+16] := '';
 	end else begin
 	 listing[i+10] := listing[i+4];
-	 listing[i+11] := #9'cmp #' + HexByte(p and $ff);
+	 listing[i+11] := #9'cmp #' + HexByte(Byte(p and $ff));
 	 listing[i+12] := listing[i+1];
 	 listing[i+13] := #9'sbc #' + HexByte(Byte(p shr 8));
 	 listing[i+14] := #9'svc';

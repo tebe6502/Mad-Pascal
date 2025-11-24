@@ -585,7 +585,7 @@ begin
      begin
       p := GetWORD(i, i+3) - GetWORD(i+1, i+4);
 
-      listing[i]   := #9'lda #' + HexByte(byte(p) and $ff);
+      listing[i]   := #9'lda #' + HexByte(Byte(p and $ff));
       listing[i+1] := '';
       listing[i+3] := #9'lda #' + HexByte(byte(p shr 8));
       listing[i+4] := '';
@@ -603,7 +603,7 @@ begin
 
       listing[i] := '';
 
-      listing[i+1] := #9'lda #' + HexByte(p and $ff);
+      listing[i+1] := #9'lda #' + HexByte(Byte(p and $ff));
 
       exit(false);
      end;
@@ -617,7 +617,7 @@ begin
       p := -(GetBYTE(i+1) - GetBYTE(i+2));
 
       listing[i+1] := '';
-      listing[i+2] := #9'sub #' + HexByte(p and $ff);
+      listing[i+2] := #9'sub #' + HexByte(Byte(p and $ff));
 
       exit(false);
      end;
@@ -635,7 +635,7 @@ begin
 
       p := GetWORD(i, i+4) - GetWORD(i+1, i+5);
 
-      listing[i]   := #9'lda #' + HexByte(p and $ff);
+      listing[i]   := #9'lda #' + HexByte(Byte(p and $ff));
       listing[i+1] := '';
 
       listing[i+4] := #9'lda #' + HexByte(byte(p shr 8));
@@ -667,7 +667,7 @@ begin
 
       p := p - q;
 
-      listing[i]   := #9'lda #' + HexByte(p and $ff);
+      listing[i]   := #9'lda #' + HexByte(Byte(p and $ff));
       listing[i+1] := '';
       listing[i+3] := #9'lda #' + HexByte(byte(p shr 8));
       listing[i+4] := '';
@@ -697,7 +697,7 @@ begin
      begin
       p := GetWORD(i+1, i+4) + GetWORD(i+7, i+10);
 
-      listing[i+1] := #9'sub #' + HexByte(p and $ff);
+      listing[i+1] := #9'sub #' + HexByte(Byte(p and $ff));
       listing[i+4] := #9'sbc #' + HexByte(byte(p shr 8));
 
       listing[i+2] := listing[i+8];
@@ -737,7 +737,7 @@ begin
 
 	p := p - q;
 
-	listing[i]   := #9'lda #' + HexByte(p and $ff);
+	listing[i]   := #9'lda #' + HexByte(Byte(p and $ff));
 	listing[i+3] := #9'lda #' + HexByte(byte(p shr 8));
 	listing[i+6] := #9'lda #' + HexByte(byte(p shr 16));
 	listing[i+9] := #9'lda #' + HexByte(Byte(p shr 24));
@@ -771,7 +771,7 @@ begin
 
 	p := p - q;
 
-	listing[i]   := #9'lda #' + HexByte(p and $ff);
+	listing[i]   := #9'lda #' + HexByte(Byte(p and $ff));
 	listing[i+3] := #9'lda #' + HexByte(byte(p shr 8));
 	listing[i+6] := #9'lda #' + HexByte(byte(p shr 16));
 
@@ -822,7 +822,7 @@ begin
 
       p := p + q;
 
-      listing[i+1] := #9'sub #' + HexByte(p and $ff);
+      listing[i+1] := #9'sub #' + HexByte(Byte(p and $ff));
       listing[i+4] := #9'sbc #' + HexByte(byte(p shr 8));
       listing[i+7] := #9'sbc #' + HexByte(byte(p shr 16));
       listing[i+10] := #9'sbc #' + HexByte(Byte(p shr 24));
@@ -888,7 +888,7 @@ begin
 
       p := p - q;
 
-      listing[i+1] := #9'add #' + HexByte(p and $ff);
+      listing[i+1] := #9'add #' + HexByte(Byte(p and $ff));
       listing[i+4] := #9'adc #' + HexByte(byte(p shr 8));
       listing[i+7] := #9'adc #' + HexByte(byte(p shr 16));
       listing[i+10] := #9'adc #' + HexByte(Byte(p shr 24));

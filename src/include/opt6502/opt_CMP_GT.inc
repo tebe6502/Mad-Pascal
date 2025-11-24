@@ -60,7 +60,7 @@ begin
        lda_a(i+9) and										// lda W		; 9
        cmp_im(i+10) then									// cmp #$00		; 10
       begin
-       c := GetDWORD(i+10, i+7, i+4, i+1);
+       c := Cardinal(GetDWORD(i+10, i+7, i+4, i+1));
 
        if c = 0 then begin
         listing[i+1] := '';
@@ -527,7 +527,7 @@ begin
 	 inc(p);
 
 	 listing[i] := listing[i+1];
-	 listing[i+1] := #9'sub #' + HexByte(p and $ff);
+	 listing[i+1] := #9'sub #' + HexByte(Byte(p and $ff));
 	 listing[i+2] := #9'svc';
 	 listing[i+3] := #9'eor #$80';
 	 listing[i+4] := #9'bpl @+';
@@ -616,7 +616,7 @@ begin
 	 inc(p);
 
 	 listing[i+10] := listing[i+4];
-	 listing[i+11] := #9'cmp #' + HexByte(p and $ff);
+	 listing[i+11] := #9'cmp #' + HexByte(Byte(p and $ff));
 	 listing[i+12] := listing[i+1];
 	 listing[i+13] := #9'sbc #' + HexByte(Byte(p shr 8));
 	 listing[i+14] := #9'svc';
