@@ -4,6 +4,8 @@
 // -----------------------------------------------------------------------------
 
 function system_poke: Boolean;
+var v1,v2: Integer;
+var w: Word;
 begin
 
 	Result := false;
@@ -22,14 +24,18 @@ begin
 	end else begin
 
 	  k := GetVAL(GetARG(0, x-1));
-	  if (k > $FFFF) or (k < 0) then exit(true);
+	  if (k < 0) or (k > $FF) then exit(true);
 
-	  listing[l]   := #9'lda #' + HexByte(k and $ff);
+	  listing[l]   := #9'lda #' + HexByte(Byte(k));
 
-	  k := GetVAL(GetARG(0, x)) + GetVAL(GetARG(1, x)) shl 8;
-	  if (k > $FFFF) or (k < 0) then exit(true);
+          v1 := GetVAL(GetARG(0, x));
+          v2 := GetVAL(GetARG(1, x));
+       	  if (v1 < 0) or (v1 > $FF) then exit(true);
+      	  if (v2 < 0) or (v2 > $FF) then exit(true);
 
-	  listing[l+1] := #9'sta ' + HexWord(k);
+	  w := (v2 shl 8) + v1;
+
+	  listing[l+1] := #9'sta ' + HexWord(w);
 
 	  inc(l, 2);
 	end;
@@ -44,6 +50,8 @@ end;
 // -----------------------------------------------------------------------------
 
 function system_dpoke: Boolean;
+var v1,v2: Integer;
+var w: Word;
 begin
 
 	Result := false;
@@ -67,18 +75,21 @@ begin
 	end else begin
 
 	  k := GetVAL(GetARG(0, x-1));
-	  if (k > $FFFF) or (k < 0) then exit(true);
-	  listing[l]   := #9'lda #' + HexByte(k and $ff);
+	  if (k < 0) or (k>$FF) then exit(true);
+	  listing[l]   := #9'lda #' + HexByte(Byte(k));
 
 	  k := GetVAL(GetARG(1, x-1));
-	  if (k > $FFFF) or (k < 0) then exit(true);
-	  listing[l+2] := #9'lda #' + HexByte(k and $ff);
+          if (k < 0) or (k>$FF) then exit(true);
+	  listing[l+2] := #9'lda #' + HexByte(Byte(k));
 
-	  k := GetVAL(GetARG(0, x)) + GetVAL(GetARG(1, x)) shl 8;
-	  if (k > $FFFF) or (k < 0) then exit(true);
+	  v1 := GetVAL(GetARG(0, x));
+          if (v1 < 0) or (v1>$FF) then exit(true);
+          v2 :=  GetVAL(GetARG(1, x));
+          if (v2 < 0) or (v2>$FF) then exit(true);
 
-	  listing[l+1] := #9'sta ' + HexWord(k);
-	  listing[l+3] := #9'sta ' + HexWord(k)+'+1';
+          w:= (v2 shl 8) + v1;
+	  listing[l+1] := #9'sta ' + HexWord(w);
+	  listing[l+3] := #9'sta ' + HexWord(w)+'+1';
 
 	  inc(l, 4);
 	end;

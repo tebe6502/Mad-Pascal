@@ -2,6 +2,7 @@
 function opt_STACK_PRINT(i: integer): Boolean;
 var p: integer;
     tmp: string;
+    w: Word;
 
 
  function fail(i: integer): Boolean;
@@ -28,13 +29,16 @@ begin
        ldy_im(i+1) then										// ldy #				; 1
       begin
         p:=GetWORD(i+0, i+1);
+        if (p>=0)  then
+        begin
+          w:=Word(p);
+	  listing[i+2] := #9'@printPCHAR #' + HexWord(w);
 
-	listing[i+2] := #9'@printPCHAR #' + HexWord(p);
+	  listing[i]   := '';
+	  listing[i+1] := '';
 
-	listing[i]   := '';
-	listing[i+1] := '';
-
- 	exit(false);
+ 	  exit(false);
+          end;
       end;
 
 
@@ -63,13 +67,16 @@ begin
        ldy_im(i+1) then										// ldy #				; 1
       begin
         p:=GetWORD(i+0, i+1);
+        if (p>=0) then
+        begin
+          w:=Word(p);
+          listing[i+2] := #9'@printSTRING #' + HexWord(w);
 
-	listing[i+2] := #9'@printSTRING #' + HexWord(p);
+	  listing[i]   := '';
+	  listing[i+1] := '';
 
-	listing[i]   := '';
-	listing[i+1] := '';
-
- 	exit(false);
+ 	  exit(false);
+        end;
       end;
 
 
