@@ -38,8 +38,8 @@
         </Mode>
         <Mode Name="test">
           <local>
-            <CommandLineParams Value="-iPath:C:\jac\system\Atari800\Programming\Repositories\Mad-Pascal\lib -iPath:C:\jac\system\Atari800\Programming\Repositories\Mad-Pascal\blibs rijndael-tool.pas -pause"/>
-            <WorkingDirectory Value="C:\jac\system\Atari800\Programming\Repositories\Mad-Pascal\samples\a8\math\AES-Rijndael\"/>
+            <CommandLineParams Value="-iPath:C:\jac\system\Atari800\Programming\Repositories\Mad-Pascal\lib -iPath:C:\jac\system\Atari800\Programming\Repositories\Mad-Pascal\blibs YoshBench2.pas -pause -diag"/>
+            <WorkingDirectory Value="C:\jac\system\Atari800\Programming\Repositories\Mad-Pascal\samples\a8\bench"/>
           </local>
         </Mode>
       </Modes>

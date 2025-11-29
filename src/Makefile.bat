@@ -21,8 +21,11 @@ set MP_BIN_FOLDER=%MP_FOLDER%\bin\windows_x86_64
 set MP_EXE=%MP_BIN_FOLDER%\mp.exe
 
 
-set REFERENCE_MP_FOLDER=C:\jac\system\Atari800\Programming\Repositories\Mad-Pascal.174
-set REFERENCE_MP_EXE=%REFERENCE_MP_FOLDER%\bin\windows\mp.exe
+rem set REFERENCE_MP_FOLDER=C:\jac\system\Atari800\Programming\Repositories\Mad-Pascal.174
+rem set REFERENCE_MP_EXE=%REFERENCE_MP_FOLDER%\bin\windows\mp.exe
+
+set REFERENCE_MP_FOLDER=C:\jac\system\Atari800\Programming\Repositories\Mad-Pascal
+set REFERENCE_MP_EXE=%REFERENCE_MP_FOLDER%\bin\windows_x86_64\origin\mp.exe
 
 set TEST_PAS=%MP_SRC_FOLDER%\TestUnits.pas
 rem set TEST_EXE=%MP_SRC_FOLDER%\TestUnits.exe
@@ -68,8 +71,8 @@ set PAS_FILE=suite
 
 cd %MP_FOLDER%\%PAS_FOLDER%
 %REFERENCE_MP_EXE% -ipath %REFERENCE_MP_FOLDER%\lib -ipath %REFERENCE_MP_FOLDER%\blibs %PAS_FILE%.pas
-if exist %PAS_FILE%.a65.174 del %PAS_FILE%.a65.174
-ren %PAS_FILE%.a65 %PAS_FILE%.a65.174
+if exist %PAS_FILE%.a65.ref del %PAS_FILE%.a65.ref
+ren %PAS_FILE%.a65 %PAS_FILE%.a65.ref
 
 %MP_EXE% -ipath %MP_FOLDER%\lib -ipath %MP_FOLDER%\blibs %PAS_FILE%.pas
 

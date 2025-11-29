@@ -9,15 +9,18 @@ rem - Replace "C:\jac\system\Atari800\Programming\Repositories\Mad-Pascal\" with
 cd %~dp0
 setlocal
 set MP_FOLDER=C:\jac\system\Atari800\Programming\Repositories\Mad-Pascal
-set MP_REFERECE_FOLDER=C:\jac\system\Atari800\Programming\Repositories\Mad-Pascal-Reference
+set MP_REFERECE_FOLDER=C:\jac\system\Atari800\Programming\Repositories\Mad-Pascal
+
+rem Ensure the current version is compiled.
+call %MP_FOLDER%\src\Makefile.bat
 
 set MP_EXE_PATH=%MP_FOLDER%\bin\windows_x86_64\mp.exe
 rem For 1.7.4
 rem set MP_REFERENCE_EXE_PATH= %MP_REFERECE_FOLDER%\bin\windows_x86_64\mp.exe
 rem For 1.7.5-master
-set MP_REFERENCE_EXE_PATH= %MP_FOLDER%\bin\windows_x86_64\master\mp.exe
+set MP_REFERENCE_EXE_PATH= %MP_FOLDER%\bin\windows_x86_64\origin\mp.exe
 
-MakeMadPascal.exe -allThreads -allFiles -mpFolderPath .\.. -compileReference -compile -compare -openResults ^
+MakeMadPascal.exe -allThreads -allFiles -mpFolderPath .\.. -compileReferenceX -compile -compare -openResults ^
 -mpExePath          %MP_EXE_PATH% ^
 -referenceMPExePath %MP_REFERENCE_EXE_PATH% ^
 
