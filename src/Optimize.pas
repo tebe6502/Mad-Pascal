@@ -29,7 +29,7 @@ var
 
 implementation
 
-uses SysUtils, Assembler, Common, Console, StringUtilities, Targets, Utilities;
+uses SysUtils, Assembler, Common, Console, Debugger ,StringUtilities, Targets, Utilities;
 
 type
   TTemporaryBufIndex = Integer;
@@ -499,6 +499,8 @@ procedure WriteOut(a: String);
 var
   i: Integer;
 begin
+
+  Debugger.debugger.WriteOut(a);
 
   if (pos(#9'jsr ', a) = 1) or (a = '#asm') then ResetOpty;
 
@@ -3212,7 +3214,7 @@ begin        // OptimizeASM
   (* -------------------------------------------------------------------------- *)
 
   if ((x = 0) and inxUse) then
-  begin   // succesfull
+  begin   // succesful
 
     if optimize.line <> optimize.oldLine then
     begin

@@ -12815,7 +12815,7 @@ begin
                                   if RecordSize(IdentIndex) <= 128 then
                                   begin
 
-                                    asm65(#9'ldy #' + HexByte(RecordSize(IdentIndex) - 1));
+                                    asm65(#9'ldy #' + HexByte(Byte(RecordSize(IdentIndex) - 1)));
                                     asm65(#9'mva:rpl (:TMP),y ' + GetLocalName(IdentIndex, 'adr.') + ',y-');
 
 				  end else
@@ -12828,7 +12828,7 @@ begin
 
                                   asm65(#9'mwy ' + GetLocalName(IdentTemp) + ' :bp2');
 
-                                  asm65(#9'ldy #' + HexByte(RecordSize(IdentIndex) - 1));
+                                  asm65(#9'ldy #' + HexByte(Byte(RecordSize(IdentIndex) - 1)));
                                   asm65(#9'mva:rpl (:bp2),y ' + GetLocalName(IdentIndex, 'adr.') + ',y-');
 
                                 end

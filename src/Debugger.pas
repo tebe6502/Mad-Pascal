@@ -11,6 +11,8 @@ type
     procedure DefineIdent(const tokenIndex: TTokenIndex; const Name: TIdentifierName;
       const Kind: TTokenKind; const DataType: TDataType; const NumAllocElements: TNumAllocElements;
       const AllocElementType: TDataType; const Data: Int64; const IdType: TDataType);
+
+    procedure WriteOut(const a: String);
   end;
 
 type
@@ -23,7 +25,11 @@ type
       const Kind: TTokenKind; const DataType: TDataType; const NumAllocElements: TNumAllocElements;
       const AllocElementType: TDataType; const Data: Int64; const IdType: TDataType);
 
+   procedure WriteOut(const a: String);
+
   private
+    var WriteOutLine: Integer;
+
     function isActive: Boolean;
     function TokenToStr(const tokenIndex: TTokenIndex): String;
     function TokenLocationToStr(const tokenIndex: TTokenIndex): String;
@@ -109,6 +115,15 @@ begin
       [TokenToStr(tokenIndex), Name, GetTokenSpelling(Kind), InfoAboutDataType(DataType),
       NumAllocElements, InfoAboutDataType(AllocElementType), Data, InfoAboutDataType(IdType),
       TokenLocationToStr(tokenIndex)]));
+  end;
+end;
+
+procedure TDebugger.WriteOut(const a: String);
+begin
+  Inc(WriteOutLine);
+  if isActive then
+  begin
+    if (a<>'') then LogDebug(Format('WriteOut Line %d: ''%s''', [WriteOutLine, a]));
   end;
 end;
 
