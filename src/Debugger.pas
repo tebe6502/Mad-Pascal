@@ -6,6 +6,7 @@ uses SysUtils, Common, CompilerTypes, DataTypes, Parser, Tokens;
 
 type
   IDebugger = interface
+    procedure BeginPass(const pass: TPass);
     procedure CompileStatement(const tokenIndex: TTokenIndex; const isAsm: Boolean);
     procedure CompileExpression(const tokenIndex: TTokenIndex; const ValType: TDataType; const VarType: TDataType);
     procedure DefineIdent(const tokenIndex: TTokenIndex; const Name: TIdentifierName;
@@ -19,16 +20,19 @@ type
   TDebugger = class(TInterfacedObject, IDebugger)
   public
     constructor Create;
+
+    procedure BeginPass(const pass: TPass);
     procedure CompileStatement(const tokenIndex: TTokenIndex; const isAsm: Boolean);
     procedure CompileExpression(const tokenIndex: TTokenIndex; const ValType: TDataType; const VarType: TDataType);
     procedure DefineIdent(const tokenIndex: TTokenIndex; const Name: TIdentifierName;
       const Kind: TTokenKind; const DataType: TDataType; const NumAllocElements: TNumAllocElements;
       const AllocElementType: TDataType; const Data: Int64; const IdType: TDataType);
 
-   procedure WriteOut(const a: String);
+    procedure WriteOut(const a: String);
 
   private
-    var WriteOutLine: Integer;
+  var
+    WriteOutLine: Integer;
 
     function isActive: Boolean;
     function TokenToStr(const tokenIndex: TTokenIndex): String;
@@ -37,7 +41,7 @@ type
   end;
 
 
-// Currently global, because COmpiler, Parser,... share it.
+  // Currently global, because COmpiler, Parser,... share it.
 var
   debugger: IDebugger;
 
@@ -50,7 +54,7 @@ end;
 
 function TDebugger.isActive: Boolean;
 begin
-  Result:=DiagMode;
+  Result := DiagMode;
 end;
 
 procedure TDebugger.LogDebug(const message: String);
@@ -85,6 +89,11 @@ begin
     token.SourceLocation.Line, token.SourceLocation.Column]);
 end;
 
+procedure TDebugger.BeginPass(const pass: TPass);
+begin
+  LogDebug(Format('Pass %d', [Ord(pass)]));
+end;
+
 procedure TDebugger.CompileStatement(const tokenIndex: TTokenIndex; const isAsm: Boolean);
 begin
   if isActive then
@@ -100,7 +109,8 @@ begin
   if isActive then
   begin
     LogDebug(Format('CompileExpression(tokenIndex: %s; out ValType: %s; VarType: %s) in %s',
-      [TokenToStr(tokenIndex), InfoAboutDataType(ValType), InfoAboutDataType(VarType), TokenLocationToStr(tokenIndex)]));
+      [TokenToStr(tokenIndex), InfoAboutDataType(ValType), InfoAboutDataType(VarType),
+      TokenLocationToStr(tokenIndex)]));
   end;
 end;
 
@@ -123,7 +133,8 @@ begin
   Inc(WriteOutLine);
   if isActive then
   begin
-    if (a<>'') then LogDebug(Format('WriteOut Line %d: ''%s''', [WriteOutLine, a]));
+    // if (a<>'') then
+    LogDebug(Format('WriteOut Line %d: ''%s''', [WriteOutLine, a]));
   end;
 end;
 

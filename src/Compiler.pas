@@ -19372,6 +19372,7 @@ var
 begin
 
   WriteLn(Format('Pass %d', [Ord(pass)]));
+  Debugger.debugger.BeginPass(pass);
   Common.pass := pass;
   ResetOpty;
 
@@ -19666,7 +19667,7 @@ end;
   asm65;
   asm65(#9'end');
 
-  Optimize.FlushTemporaryBuf;
+  if pass = TPass.CODE_GENERATION then Optimize.FlushTemporaryBuf;
 
 end;
 
