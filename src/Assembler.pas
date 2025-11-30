@@ -11,6 +11,7 @@ function HexByte(const Value: Int64): String; overload; // For detecting missing
 // Hexadecimal output of 16-Bit with '$' prefix, 4 digits
 function HexWord(const Value: Word): String; overload;
 function HexWord(const Value: Int64): String; overload; // For detecting missing downcasts
+function HexWord2(const Value: Word): String;
 
 // Hexadecimal output of 32/64-Bit with '$' prefix, minimum lenght 8 digit
 function HexLongWord(const Value: Int64): String;
@@ -78,7 +79,18 @@ end;
 function HexWord(const Value: Word): String;
 begin
   Result := '$' + HexBytes[(Value shr 8) and $ff] + HexBytes[Value and $ff];
+  if value = 2 then
+    begin
+      // WriteLn;
+      end
   // DoCount;
+end;
+
+
+// TODO: Temporary compatibility with Origin
+function HexWord2(const Value: Word): String;
+begin
+  if value<$100 then Result:=HexByte(Byte(value)) else Result:=HexWord(value);
 end;
 
 function HexWord(const Value: Int64): String; overload;
