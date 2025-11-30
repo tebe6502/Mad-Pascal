@@ -4481,13 +4481,13 @@ begin
 	listing[i+5] := #9'lda ' + HexWord(w);
 	listing[i+7] := '';
 
-	listing[i+8] := #9'lda ' + HexWord(w+1);
+	listing[i+8] := #9'lda ' + HexWord(Word(w+1));
 	listing[i+10]:= '';
 
-	listing[i+11]:= #9'lda ' + HexWord(w+2);
+	listing[i+11]:= #9'lda ' + HexWord(Word(w+2));
 	listing[i+13]:= '';
 
-	listing[i+14]:= #9'lda ' + HexWord(w+3);
+	listing[i+14]:= #9'lda ' + HexWord(Word(w+3));
 
 	exit(false);
        end;
@@ -4518,7 +4518,7 @@ begin
 	listing[i+5] := #9'lda ' + HexWord(w);
 	listing[i+7] := '';
 
-	listing[i+8] := #9'lda ' + HexWord(w+1);
+	listing[i+8] := #9'lda ' + HexWord(Word(w+1));
 
 	exit(false);
        end;
@@ -4554,13 +4554,13 @@ begin
 	listing[i+6] := #9'sta ' + HexWord(w);
 	listing[i+7] := '';
 
-	listing[i+9] := #9'sta ' + HexWord(w+1);
+	listing[i+9] := #9'sta ' + HexWord(Word(w+1));
 	listing[i+10]:= '';
 
-	listing[i+12]:= #9'sta ' + HexWord(w+2);
+	listing[i+12]:= #9'sta ' + HexWord(Word(w+2));
 	listing[i+13]:= '';
 
-	listing[i+15]:= #9'sta ' + HexWord(w+3);
+	listing[i+15]:= #9'sta ' + HexWord(Word(w+3));
 
 	exit(false);
        end;
@@ -4591,7 +4591,7 @@ begin
 	listing[i+6] := #9'sta ' + HexWord(w);
 	listing[i+7] := '';
 
-	listing[i+9] := #9'sta ' + HexWord(w+1);
+	listing[i+9] := #9'sta ' + HexWord(Word(w+1));
 
 	exit(false);
        end;
@@ -4625,9 +4625,9 @@ begin
 
 	listing[i+7] := #9'sta ' + HexWord(w);
 	listing[i+8] := '';
-	listing[i+9] := #9'lda ' + HexWord(w+1);
+	listing[i+9] := #9'lda ' + HexWord(Word(w+1));
 
-	listing[i+11] := #9'sta ' + HexWord(w+1);
+	listing[i+11] := #9'sta ' + HexWord(Word(w+1));
 
 	exit(false);
        end;
@@ -4667,14 +4667,14 @@ begin
 	listing[i+5] := #9'lda ' + HexWord(w);
 	listing[i+7] := #9'sta ' + HexWord(w);
 	listing[i+8] := '';
-	listing[i+9] := #9'lda ' + HexWord(w+1);
-	listing[i+11]:= #9'sta ' + HexWord(w+1);
+	listing[i+9] := #9'lda ' + HexWord(Word(w+1));
+	listing[i+11]:= #9'sta ' + HexWord(Word(w+1));
 	listing[i+12] := '';
-	listing[i+13]:= #9'lda ' + HexWord(w+2);
-	listing[i+15]:= #9'sta ' + HexWord(w+2);
+	listing[i+13]:= #9'lda ' + HexWord(Word(w+2));
+	listing[i+15]:= #9'sta ' + HexWord(Word(w+2));
 	listing[i+16] := '';
-	listing[i+17]:= #9'lda ' + HexWord(w+3);
-	listing[i+19]:= #9'sta ' + HexWord(w+3);
+	listing[i+17]:= #9'lda ' + HexWord(Word(w+3));
+	listing[i+19]:= #9'sta ' + HexWord(Word(w+3));
 
 	exit(false);
        end;

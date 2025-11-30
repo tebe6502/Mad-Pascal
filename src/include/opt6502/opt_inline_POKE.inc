@@ -68,11 +68,11 @@ begin
 
 	  k := GetVAL(GetARG(0, x-1));
 	  if (k > $FFFF) or (k < 0) then exit(true);
-	  listing[l]   := #9'lda #' + HexByte(k);
+	  listing[l]   := #9'lda #' + HexByte(Byte(k));
 
 	  k := GetVAL(GetARG(1, x-1));
 	  if (k > $FFFF) or (k < 0) then exit(true);
-	  listing[l+2] := #9'lda #' + HexByte(k);
+	  listing[l+2] := #9'lda #' + HexByte(Byte(k));
 
 	  k := GetVAL(GetARG(0, x)) + GetVAL(GetARG(1, x)) shl 8;
 	  if (k > $FFFF) or (k < 0) then exit(true);
