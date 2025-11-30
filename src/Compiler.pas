@@ -15757,23 +15757,23 @@ var
           begin
 
             if IdentifierAt(IdentIndex).Value < 0 then
-              Result := #9'= DATAORIGIN+$' + IntToHex(abs(IdentifierAt(IdentIndex).Value), 4)
+              Result := #9'= DATAORIGIN+' + HexValue(abs(IdentifierAt(IdentIndex).Value),4)
             else
               if abs(IdentifierAt(IdentIndex).Value) < 256 then
-                Result := #9'= $' + IntToHex(Byte(IdentifierAt(IdentIndex).Value), 2)
+                Result := #9'= ' + HexValue(Byte(IdentifierAt(IdentIndex).Value),2)
               else
-                Result := #9'= $' + IntToHex(IdentifierAt(IdentIndex).Value, 4);
+                Result := #9'= ' + HexValue(IdentifierAt(IdentIndex).Value,4);
 
           end
           else
 
             if IdentifierAt(IdentIndex).NumAllocElements > 0 then
-              Result := #9'= CODEORIGIN+$' + IntToHex(IdentifierAt(IdentIndex).Value - CODEORIGIN_BASE - CODEORIGIN, 4)
+              Result := #9'= CODEORIGIN+' + HexValue(IdentifierAt(IdentIndex).Value - CODEORIGIN_BASE - CODEORIGIN, 4)
             else
               if abs(v) < 256 then
-                Result := #9'= $' + IntToHex(Byte(v), 2)
+                Result := #9'= ' + HexValue(Byte(v),2)
               else
-                Result := #9'= $' + IntToHex(v, 4);
+                Result := #9'= ' + HexValue(v,4);
 
   end;
 
