@@ -421,12 +421,12 @@ end;
         TemporaryBuf[1] := #9'sta :bp2';
         TemporaryBuf[3] := #9'sta :bp2+1';
 
-        TemporaryBuf[4] := #9'ldy #$' + IntToHex(p - 1, 2);
+        TemporaryBuf[4] := #9'ldy #' + HexValue(p - 1, 2);
         TemporaryBuf[5] := #9'mva:rpl (:bp2),y adr.' + tmp + ',y-';
       end
       else
       begin
-        TemporaryBuf[4] := #9'@move ' + tmp + ' #adr.' + tmp + ' #$' + IntToHex(p, 2);
+        TemporaryBuf[4] := #9'@move ' + tmp + ' #adr.' + tmp + ' #' + HexValue(p, 2);
         TemporaryBuf[5] := '~';
       end;
 
