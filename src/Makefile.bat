@@ -66,13 +66,13 @@ set PATH=%FPP_MASTER%\fpp;%FPP_MASTER%\fppview;%PATH%
 set PAS_FOLDER=samples\a8\math\AES-Rijndael
 set PAS_FILE=rijndael-test
 
-set PAS_FOLDER=samples\a8\bench\suite
-set PAS_FILE=suite
+set PAS_FOLDER=samples\tests\tests-debug
+set PAS_FILE=debug
 
 cd %MP_FOLDER%\%PAS_FOLDER%
 %REFERENCE_MP_EXE% -ipath %REFERENCE_MP_FOLDER%\lib -ipath %REFERENCE_MP_FOLDER%\blibs %PAS_FILE%.pas
-if exist %PAS_FILE%.a65.ref del %PAS_FILE%.a65.ref
-ren %PAS_FILE%.a65 %PAS_FILE%.a65.ref
+if exist %PAS_FILE%-Reference.a65         del %PAS_FILE%-Reference.a65
+ren %PAS_FILE%.a65 %PAS_FILE%-Reference.a65
 
 %MP_EXE% -ipath %MP_FOLDER%\lib -ipath %MP_FOLDER%\blibs %PAS_FILE%.pas
 
