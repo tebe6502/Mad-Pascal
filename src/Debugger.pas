@@ -45,6 +45,7 @@ type
     function TokenToStr(const tokenIndex: TTokenIndex): String;
     function TokenLocationToStr(const tokenIndex: TTokenIndex): String;
     procedure LogDebug(const message: String);
+    procedure StopAtBreakPoint;
   end;
 
 
@@ -67,6 +68,11 @@ end;
 procedure TDebugger.LogDebug(const message: String);
 begin
   LogTrace('Debug: ' + message);
+end;
+
+procedure TDebugger.StopAtBreakPoint;
+begin
+
 end;
 
 function TDebugger.TokenToStr(const tokenIndex: TTokenIndex): String;
@@ -107,6 +113,10 @@ begin
   begin
     LogDebug(Format('CompileStatement (tokenIndex: %s; isAsm: %s) in %s',
       [TokenToStr(tokenIndex), BoolToStr(isAsm, True), TokenLocationToStr(tokenIndex)]));
+    if (tokenIndex = 9978) then
+    begin
+      StopAtBreakPoint;
+    end;
   end;
 end;
 
@@ -137,28 +147,29 @@ end;
 
 procedure TDebugger.asm65(const a: String; const comment: String);
 begin
-  (*
+
   LogDebug(Format('asm65(''%s'',''%s''', [a, comment]));
-  if pos('jsr SYSTEM.POKE', a) > 0 then
+
+  if pos('$BBA', a) > 0 then
   begin
-    WriteLn('Found');
+    StopAtBreakPoint;
   end;
-  *)
+
 end;
 
 procedure TDebugger.WriteOut(const a: String);
 begin
-  (*
+
   Inc(WriteOutLine);
   if isActive then
   begin
     // if (a<>'') then
     LogDebug(Format('WriteOut Line %d: ''%s''', [WriteOutLine, a]));
-    if pos('jsr SYSTEM.POKE', a) > 0 then
+    if pos('3002', a) > 0 then
     begin
-      WriteLn('FOund');
+      StopAtBreakPoint;
     end;
-  end;  *)
+  end;
 end;
 
 end.
