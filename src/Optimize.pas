@@ -29,6 +29,7 @@ var
 
 implementation
 
+// TODO: Check what is actually used from "Common"
 uses SysUtils, Assembler, Common, Console, Debugger ,StringUtilities, Targets, Utilities;
 
 type
@@ -3400,6 +3401,25 @@ end;
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 
+procedure LogState(const a: String = ''; const comment: String = '');
+var
+  l: Integer;
+  i: Integer;
+begin
+  LogTrace(Format('a=%s comment=%s', [a,comment]));
+  LogTrace(Format('optimize.use=%d', [Ord(optimize.use)]));
+  //LogTrace(Format('optimize.SourceFile.Name=%s', [optimize.SourceFile.Name]));
+  //LogTrace(Format('optimize.Line=%d', [optimize.line]));
+  //LogTrace(Format('optimize.OldLine=%d', [optimize.oldLine]));
+  l := High(OptimizeBuf);
+  LogTrace(Format('High(OptimizeBuf)=%d', [l]));
+  for i:=0 to l do   LogTrace(Format('OptimizeBuf[%d]=%s', [i, OptimizeBuf[i]]));
+end;
+
+
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+
 
 procedure asm65(const a: String = ''; const comment: String = '');
 var
@@ -3415,10 +3435,10 @@ begin
   {$ENDIF}
 
   if not OutputDisabled then
-
     if pass = TPass.CODE_GENERATION then
     begin
 
+      // LogState(a,comment);
       if optimize_code and optimize.use then
       begin
 

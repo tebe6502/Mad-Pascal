@@ -6,6 +6,8 @@ uses SysUtils, Common, CompilerTypes, DataTypes, Parser, Tokens;
 
 type
   IDebugger = interface
+
+    // Debugging unit "Compiler".
     procedure BeginPass(const pass: TPass);
     procedure CompileStatement(const tokenIndex: TTokenIndex; const isAsm: Boolean);
     procedure CompileExpression(const tokenIndex: TTokenIndex; const ValType: TDataType; const VarType: TDataType);
@@ -13,7 +15,10 @@ type
       const Kind: TTokenKind; const DataType: TDataType; const NumAllocElements: TNumAllocElements;
       const AllocElementType: TDataType; const Data: Int64; const IdType: TDataType);
 
+    // Debugging unit "Optimize".
+    procedure asm65(const a: String; const comment: String);
     procedure WriteOut(const a: String);
+
   end;
 
 type
@@ -21,6 +26,7 @@ type
   public
     constructor Create;
 
+
     procedure BeginPass(const pass: TPass);
     procedure CompileStatement(const tokenIndex: TTokenIndex; const isAsm: Boolean);
     procedure CompileExpression(const tokenIndex: TTokenIndex; const ValType: TDataType; const VarType: TDataType);
@@ -28,6 +34,7 @@ type
       const Kind: TTokenKind; const DataType: TDataType; const NumAllocElements: TNumAllocElements;
       const AllocElementType: TDataType; const Data: Int64; const IdType: TDataType);
 
+    procedure asm65(const a: String; const comment: String);
     procedure WriteOut(const a: String);
 
   private
@@ -128,14 +135,30 @@ begin
   end;
 end;
 
+procedure TDebugger.asm65(const a: String; const comment: String);
+begin
+  (*
+  LogDebug(Format('asm65(''%s'',''%s''', [a, comment]));
+  if pos('jsr SYSTEM.POKE', a) > 0 then
+  begin
+    WriteLn('Found');
+  end;
+  *)
+end;
+
 procedure TDebugger.WriteOut(const a: String);
 begin
+  (*
   Inc(WriteOutLine);
   if isActive then
   begin
     // if (a<>'') then
     LogDebug(Format('WriteOut Line %d: ''%s''', [WriteOutLine, a]));
-  end;
+    if pos('jsr SYSTEM.POKE', a) > 0 then
+    begin
+      WriteLn('FOund');
+    end;
+  end;  *)
 end;
 
 end.
