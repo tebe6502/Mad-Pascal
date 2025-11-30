@@ -13139,7 +13139,7 @@ begin
             if (IdentifierAt(IdentIndex).isStdCall = False) then
               StartOptimization(i)
             else
-              if optimize.IsOptimizationActive then StartOptimization(i);
+              if optimize.IsOptimizationActive = False then StartOptimization(i);
 
 
             Inc(run_func);
