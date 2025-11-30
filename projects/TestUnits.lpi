@@ -105,6 +105,10 @@
         <Filename Value="..\src\Assembler.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit>
+      <Unit>
+        <Filename Value="..\src\OptimizeTest.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
@@ -141,6 +145,9 @@
         <DebugInfoType Value="dsDwarf2Set"/>
       </Debugging>
     </Linking>
+    <Other>
+      <CustomOptions Value="-dUSETRACEFILE"/>
+    </Other>
   </CompilerOptions>
   <Debugging>
     <Exceptions>
