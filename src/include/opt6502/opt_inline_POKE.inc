@@ -4,8 +4,6 @@
 // -----------------------------------------------------------------------------
 
 function system_poke: Boolean;
-var v1,v2: Integer;
-var w: Word;
 begin
 
 	Result := false;
@@ -24,18 +22,14 @@ begin
 	end else begin
 
 	  k := GetVAL(GetARG(0, x-1));
-	  if (k < 0) or (k > $FF) then exit(true);
+	  if (k > $FFFF) or (k < 0) then exit(true);
 
 	  listing[l]   := #9'lda #' + HexByte(Byte(k));
 
-          v1 := GetVAL(GetARG(0, x));
-          v2 := GetVAL(GetARG(1, x));
-       	  if (v1 < 0) or (v1 > $FF) then exit(true);
-      	  if (v2 < 0) or (v2 > $FF) then exit(true);
+	  k := GetVAL(GetARG(0, x)) + GetVAL(GetARG(1, x)) shl 8;
+	  if (k > $FFFF) or (k < 0) then exit(true);
 
-	  w := (v2 shl 8) + v1;
-
-	  listing[l+1] := #9'sta ' + HexWord(w);
+	  listing[l+1] := #9'sta ' + HexWord(Word(k));
 
 	  inc(l, 2);
 	end;
@@ -50,8 +44,6 @@ end;
 // -----------------------------------------------------------------------------
 
 function system_dpoke: Boolean;
-var v1,v2: Integer;
-var w: Word;
 begin
 
 	Result := false;
@@ -75,21 +67,18 @@ begin
 	end else begin
 
 	  k := GetVAL(GetARG(0, x-1));
-	  if (k < 0) or (k>$FF) then exit(true);
-	  listing[l]   := #9'lda #' + HexByte(Byte(k));
+	  if (k > $FFFF) or (k < 0) then exit(true);
+	  listing[l]   := #9'lda #' + HexByte(k);
 
 	  k := GetVAL(GetARG(1, x-1));
-          if (k < 0) or (k>$FF) then exit(true);
-	  listing[l+2] := #9'lda #' + HexByte(Byte(k));
+	  if (k > $FFFF) or (k < 0) then exit(true);
+	  listing[l+2] := #9'lda #' + HexByte(k);
 
-	  v1 := GetVAL(GetARG(0, x));
-          if (v1 < 0) or (v1>$FF) then exit(true);
-          v2 :=  GetVAL(GetARG(1, x));
-          if (v2 < 0) or (v2>$FF) then exit(true);
+	  k := GetVAL(GetARG(0, x)) + GetVAL(GetARG(1, x)) shl 8;
+	  if (k > $FFFF) or (k < 0) then exit(true);
 
-          w:= (v2 shl 8) + v1;
-	  listing[l+1] := #9'sta ' + HexWord(w);
-	  listing[l+3] := #9'sta ' + HexWord(w)+'+1';
+	  listing[l+1] := #9'sta ' + HexWord(Word(k));
+	  listing[l+3] := #9'sta ' + HexWord(Word(k))+'+1';
 
 	  inc(l, 4);
 	end;
