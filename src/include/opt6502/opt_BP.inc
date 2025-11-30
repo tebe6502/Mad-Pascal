@@ -2028,7 +2028,7 @@ begin
 	 listing[i+3]  := listing[i+14];
 	 listing[i+4]  := #9'iny';
 	 listing[i+5]  := listing[i+15];
-	 listing[i+6]  := #9'adc (:bp2,y)';
+	 listing[i+6]  := #9'adc (:bp2,y)'; // TODO: Really?
 	 listing[i+7]  := listing[i+17];
 	 listing[i+8]  := #9'iny';
 	 listing[i+9]  := listing[i+18];
