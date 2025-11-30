@@ -123,7 +123,7 @@ function HexValue(const Value: Int64; const digits: Integer): String;
 begin
   if (Value < $100) and (digits = 2) then
     Result := HexByte(Byte(Value))
-  else if (Value < $10000) and (digits = 4) then
+  else if (Value < $10000) and ((digits = 2) or (digits = 4)) then
       Result := HexWord(Word(Value))
     else if Value < $1000000 then
         Result := '$' + HexBytes[(Value shr 16) and $ff] + HexBytes[(Value shr 8) and $ff] + HexBytes[Value and $ff]
