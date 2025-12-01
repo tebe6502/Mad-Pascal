@@ -11,10 +11,13 @@ function HexByte(const Value: Int64): String; overload; // For detecting missing
 // Hexadecimal output of 16-Bit with '$' prefix, 4 digits
 function HexWord(const Value: Word): String; overload;
 function HexWord(const Value: Int64): String; overload; // For detecting missing downcasts
+function HexWord2(const Value: Word): String;
 
-// Hexadecimal output of 32/64-Bit with '$' prefix, minimum lenght 8 digit
+// Hexadecimal output of 32/64-Bit with '$' prefix, minimum length 8 digits
 function HexLongWord(const Value: Int64): String;
 
+// Hexadecimal output of 32/64-Bit with '$' prefix, dynamic length 2/4/6/8/any digits
+function HexValue(const Value: Int64; const digits: Integer): String;
 
 // ----------------------------------------------------------------------------
 
@@ -78,7 +81,20 @@ end;
 function HexWord(const Value: Word): String;
 begin
   Result := '$' + HexBytes[(Value shr 8) and $ff] + HexBytes[Value and $ff];
+  if Value = 2 then
+  begin
+    // WriteLn;
+  end;
   // DoCount;
+end;
+
+
+// TODO: Temporary compatibility with Origin
+function HexWord2(const Value: Word): String;
+begin
+  if Value < $100 then Result := HexByte(Byte(Value))
+  else
+    Result := HexWord(Value);
 end;
 
 function HexWord(const Value: Int64): String; overload;
@@ -98,6 +114,21 @@ begin
   else
     Result := IntToHex(Value, 8);
   // DoCount;
+end;
+
+
+
+// TODO: Temporary compatibility with Origin
+function HexValue(const Value: Int64; const digits: Integer): String;
+begin
+  if (Value < $100) and (digits = 2) then
+    Result := HexByte(Byte(Value))
+  else if (Value < $10000) and ((digits = 2) or (digits = 4)) then
+      Result := HexWord(Word(Value))
+    else if Value < $1000000 then
+        Result := '$' + HexBytes[(Value shr 16) and $ff] + HexBytes[(Value shr 8) and $ff] + HexBytes[Value and $ff]
+      else
+        Result := HexLongWord(Value);
 end;
 
 procedure InitializeStrings;

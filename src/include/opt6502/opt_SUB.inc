@@ -24,10 +24,10 @@ begin
      begin
 	p := GetWORD(i+1, i+4);
 
-	if p <> 0 then listing[i] := listing[i] + '-' + HexByte(p);
+	if p <> 0 then listing[i] := listing[i] + '-' + HexWord2(p);
 	listing[i+1] := '';
 
-	if p <> 0 then listing[i+3] := listing[i+3] + '-' + HexByte(p);
+	if p <> 0 then listing[i+3] := listing[i+3] + '-' + HexWord2(p);
 	listing[i+4] := '';
 
 	exit(false);
@@ -68,7 +68,7 @@ begin
        if lda_im(i) then begin
 	p := GetBYTE(i);
 
-	listing[i]   := #9'lda #' + HexByte((p-1) and $ff);
+	listing[i]   := #9'lda #' + HexByte(Byte(p-1));
 	listing[i+1] := '';
        end else begin
 	listing[i]   := #9'ldy '+copy(listing[i], 6, 256);

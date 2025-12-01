@@ -29,9 +29,9 @@ begin
 
     if w <> 0 then
     begin
-      listing[i] := listing[i] + '+' + HexWord(w);
+      listing[i] := listing[i] + '+' + HexWord2(w);
 
-      listing[i + 3] := listing[i + 3] + '+' + HexWord(w);
+      listing[i + 3] := listing[i + 3] + '+' + HexWord2(w);
     end;
 
     listing[i + 1] := '';
@@ -84,9 +84,9 @@ begin
 
       if w <> 0 then
       begin
-        listing[i] := listing[i] + '+' + HexWord(w);
+        listing[i] := listing[i] + '+' + HexWord2(w);
 
-        listing[i + 3] := listing[i + 3] + '+' + HexWord(w);
+        listing[i + 3] := listing[i + 3] + '+' + HexWord2(w);
       end;
 
       listing[i + 6] := '';
@@ -118,9 +118,9 @@ begin
 
       if w <> 0 then
       begin
-        listing[i] := listing[i] + '+' + HexWord(w);
+        listing[i] := listing[i] + '+' + HexWord2(w);
 
-        listing[i + 2] := listing[i + 2] + '+' + HexWord(w);
+        listing[i + 2] := listing[i + 2] + '+' + HexWord2(w);
       end;
 
       listing[i + 5] := '';

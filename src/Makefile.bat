@@ -21,8 +21,11 @@ set MP_BIN_FOLDER=%MP_FOLDER%\bin\windows_x86_64
 set MP_EXE=%MP_BIN_FOLDER%\mp.exe
 
 
-set REFERENCE_MP_FOLDER=C:\jac\system\Atari800\Programming\Repositories\Mad-Pascal.174
-set REFERENCE_MP_EXE=%REFERENCE_MP_FOLDER%\bin\windows\mp.exe
+rem set REFERENCE_MP_FOLDER=C:\jac\system\Atari800\Programming\Repositories\Mad-Pascal.174
+rem set REFERENCE_MP_EXE=%REFERENCE_MP_FOLDER%\bin\windows\mp.exe
+
+set REFERENCE_MP_FOLDER=C:\jac\system\Atari800\Programming\Repositories\Mad-Pascal
+set REFERENCE_MP_EXE=%REFERENCE_MP_FOLDER%\bin\windows_x86_64\origin\mp.exe
 
 set TEST_PAS=%MP_SRC_FOLDER%\TestUnits.pas
 rem set TEST_EXE=%MP_SRC_FOLDER%\TestUnits.exe
@@ -63,13 +66,13 @@ set PATH=%FPP_MASTER%\fpp;%FPP_MASTER%\fppview;%PATH%
 set PAS_FOLDER=samples\a8\math\AES-Rijndael
 set PAS_FILE=rijndael-test
 
-set PAS_FOLDER=samples\a8\bench\suite
-set PAS_FILE=suite
+set PAS_FOLDER=samples\tests\tests-debug
+set PAS_FILE=debug
 
 cd %MP_FOLDER%\%PAS_FOLDER%
 %REFERENCE_MP_EXE% -ipath %REFERENCE_MP_FOLDER%\lib -ipath %REFERENCE_MP_FOLDER%\blibs %PAS_FILE%.pas
-if exist %PAS_FILE%.a65.174 del %PAS_FILE%.a65.174
-ren %PAS_FILE%.a65 %PAS_FILE%.a65.174
+if exist %PAS_FILE%-Reference.a65         del %PAS_FILE%-Reference.a65
+ren %PAS_FILE%.a65 %PAS_FILE%-Reference.a65
 
 %MP_EXE% -ipath %MP_FOLDER%\lib -ipath %MP_FOLDER%\blibs %PAS_FILE%.pas
 

@@ -1,3 +1,5 @@
+// Working directory must be the project directory
+
 program TestUnits;
 
 {$I Defines.inc}
@@ -9,10 +11,12 @@ uses
   CommonTypes,
   CompilerTypes,
   DataTypes,
+  Debugger,
   FileIO,
   MathEvaluate,
   Messages,
   Optimize,
+  OptimizeTest,
   Tokens,
   Utilities,
   StringUtilities,
@@ -73,23 +77,23 @@ uses
   begin
     StartTest('TestUnitAssembler');
 
-    AssertEquals(Assembler.HexByte($00), '$00');
-    AssertEquals(Assembler.HexByte($0f), '$0F');
-    AssertEquals(Assembler.HexByte($80), '$80');
-    AssertEquals(Assembler.HexByte($ff), '$FF');
+    AssertEquals(Assembler.HexByte(Byte($00)), '$00');
+    AssertEquals(Assembler.HexByte(Byte($0f)), '$0F');
+    AssertEquals(Assembler.HexByte(Byte($80)), '$80');
+    AssertEquals(Assembler.HexByte(Byte($ff)), '$FF');
 
 
-    AssertEquals(Assembler.HexWord($00), '$0000');
-    AssertEquals(Assembler.HexWord($0f), '$000F');
-    AssertEquals(Assembler.HexWord($8000), '$8000');
-    AssertEquals(Assembler.HexWord($ffee), '$FFEE');
+    AssertEquals(Assembler.HexWord(Word($0000)), '$0000');
+    AssertEquals(Assembler.HexWord(Word($000f)), '$000F');
+    AssertEquals(Assembler.HexWord(Word($8000)), '$8000');
+    AssertEquals(Assembler.HexWord(Word($ffee)), '$FFEE');
 
 
     AssertEquals(Assembler.HexLongWord($00), '$00000000');
     AssertEquals(Assembler.HexLongWord($ffeeddcc), '$FFEEDDCC');
 
 
-    AssertEquals(Hex($123456),'$12345'));
+    AssertEquals(HexLongWord($00123456), '$00123456');
 
     EndTest('TestUnitAssembler');
   end;
@@ -384,6 +388,21 @@ type
     EndTest('TestUnitStringUtilities');
   end;
 
+
+  procedure TestUnitOptimize;
+  begin
+    StartTest('TestUnitOptimize');
+    TraceFile:=TFileSystem.CreateTextFile;
+    traceFile.Assign('..\samples\tests\tests-debug\debug.log');
+    traceFile.Rewrite();
+    Debugger.debugger := TDebugger.Create;
+    pass := TPass.CODE_GENERATION;
+   // OutFile.Flush;
+    OptimizeTest.Test;
+    traceFile.Close;
+    EndTest('TestUnitOptimize');
+  end;
+
 begin
   try
     TestLanguage;
@@ -394,6 +413,7 @@ begin
     TestUnitMathEvaluate;
     TestUnitMessages;
     TestUnitStringUtilities;
+    TestUnitOptimize;
   except
     on e: Exception do
     begin

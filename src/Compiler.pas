@@ -12815,7 +12815,7 @@ begin
                                   if RecordSize(IdentIndex) <= 128 then
                                   begin
 
-                                    asm65(#9'ldy #' + HexByte(RecordSize(IdentIndex) - 1));
+                                    asm65(#9'ldy #' + HexByte(Byte(RecordSize(IdentIndex) - 1)));
                                     asm65(#9'mva:rpl (:TMP),y ' + GetLocalName(IdentIndex, 'adr.') + ',y-');
 
 				  end else
@@ -12828,7 +12828,7 @@ begin
 
                                   asm65(#9'mwy ' + GetLocalName(IdentTemp) + ' :bp2');
 
-                                  asm65(#9'ldy #' + HexByte(RecordSize(IdentIndex) - 1));
+                                  asm65(#9'ldy #' + HexByte(Byte(RecordSize(IdentIndex) - 1)));
                                   asm65(#9'mva:rpl (:bp2),y ' + GetLocalName(IdentIndex, 'adr.') + ',y-');
 
                                 end
@@ -13139,7 +13139,7 @@ begin
             if (IdentifierAt(IdentIndex).isStdCall = False) then
               StartOptimization(i)
             else
-              if optimize.IsOptimizationActive then StartOptimization(i);
+              if optimize.IsOptimizationActive = False then StartOptimization(i);
 
 
             Inc(run_func);
@@ -15757,23 +15757,23 @@ var
           begin
 
             if IdentifierAt(IdentIndex).Value < 0 then
-              Result := #9'= DATAORIGIN+$' + IntToHex(abs(IdentifierAt(IdentIndex).Value), 4)
+              Result := #9'= DATAORIGIN+' + HexValue(abs(IdentifierAt(IdentIndex).Value),4)
             else
               if abs(IdentifierAt(IdentIndex).Value) < 256 then
-                Result := #9'= $' + IntToHex(Byte(IdentifierAt(IdentIndex).Value), 2)
+                Result := #9'= ' + HexValue(Byte(IdentifierAt(IdentIndex).Value),2)
               else
-                Result := #9'= $' + IntToHex(IdentifierAt(IdentIndex).Value, 4);
+                Result := #9'= ' + HexValue(IdentifierAt(IdentIndex).Value,4);
 
           end
           else
 
             if IdentifierAt(IdentIndex).NumAllocElements > 0 then
-              Result := #9'= CODEORIGIN+$' + IntToHex(IdentifierAt(IdentIndex).Value - CODEORIGIN_BASE - CODEORIGIN, 4)
+              Result := #9'= CODEORIGIN+' + HexValue(IdentifierAt(IdentIndex).Value - CODEORIGIN_BASE - CODEORIGIN, 4)
             else
               if abs(v) < 256 then
-                Result := #9'= $' + IntToHex(Byte(v), 2)
+                Result := #9'= ' + HexValue(Byte(v),2)
               else
-                Result := #9'= $' + IntToHex(v, 4);
+                Result := #9'= ' + HexValue(v,4);
 
   end;
 
@@ -19372,6 +19372,7 @@ var
 begin
 
   WriteLn(Format('Pass %d', [Ord(pass)]));
+  Debugger.debugger.BeginPass(pass);
   Common.pass := pass;
   ResetOpty;
 
@@ -19666,7 +19667,7 @@ end;
   asm65;
   asm65(#9'end');
 
-  Optimize.FlushTemporaryBuf;
+  if pass = TPass.CODE_GENERATION then Optimize.FlushTemporaryBuf;
 
 end;
 

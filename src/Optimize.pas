@@ -29,7 +29,8 @@ var
 
 implementation
 
-uses SysUtils, Assembler, Common, Console, StringUtilities, Targets, Utilities;
+// TODO: Check what is actually used from "Common"
+uses SysUtils, Assembler, Common, Console, Debugger ,StringUtilities, Targets, Utilities;
 
 type
   TTemporaryBufIndex = Integer;
@@ -109,6 +110,35 @@ begin
 
   if High(OptimizeBuf) > 0 then asm65;
 
+end;
+
+
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+
+procedure LogState(const a: String = ''; const comment: String = '');
+begin
+  LogTrace(Format('asm65(''%s'', ''%s'' )', [a,comment]));
+  DEbugger.debugger.asm65(a,comment);
+  // LogTrace(Format('optimize.use=%d', [Ord(optimize.use)]));
+  //LogTrace(Format('optimize.SourceFile.Name=%s', [optimize.SourceFile.Name]));
+  //LogTrace(Format('optimize.Line=%d', [optimize.line]));
+  //LogTrace(Format('optimize.OldLine=%d', [optimize.oldLine]));
+  // LogOptimizeBuf();
+end;
+
+
+procedure LogStringArray(const name: String; const stringArray: TStringArray);
+var l,i: Integer;
+begin
+l := High(stringArray);
+LogTrace(Format('High(%s)=%d', [name, l]));
+for i:=0 to l do   LogTrace(Format('%s[%d]=%s', [name, i, stringArray[i]]));
+end;
+
+procedure LogOptimizeBuf();
+begin
+  LogStringArray('OptimizeBuf', OptimizeBuf);
 end;
 
 function GetVAL(a: String): Integer;
@@ -291,6 +321,7 @@ if (pos('#for:dec', TemporaryBuf[10]) > 0) then begin
 end;
 }
 
+  LogTrace('OptimizeTemporaryBuf');
 
   opt_TEMP_BOOLEAN_OR;
   opt_TEMP_ORD;
@@ -403,10 +434,10 @@ end;
 	 TemporaryBuf[1] := #9'sta :bp2';
 	 TemporaryBuf[3] := #9'sta :bp2+1';
 
-	 TemporaryBuf[4] := #9'ldy #' + HexByte(byte(p-1));
+	 TemporaryBuf[4] := #9'ldy #' + HexByte(Byte(p-1));
      	 TemporaryBuf[5] := #9'mva:rpl (:bp2),y adr.' + tmp + ',y-';
     	end else begin
-     	 TemporaryBuf[4] := #9'@move ' + tmp + ' #adr.' + tmp + ' #' + HexByte(byte(p));
+     	 TemporaryBuf[4] := #9'@move ' + tmp + ' #adr.' + tmp + ' #' + HexValue(p,2);
      	 TemporaryBuf[5] := '~';
 	end;
 
@@ -510,6 +541,8 @@ procedure WriteOut(a: String);
 var
   i: Integer;
 begin
+
+  Debugger.debugger.WriteOut(a);
 
   if (pos(#9'jsr ', a) = 1) or (a = '#asm') then ResetOpty;
 
@@ -1574,7 +1607,7 @@ end;
     {$i include/opt6502/opt_FORTMP.inc}
 
 
-    function PeepholeOptimization: Boolean;
+    function _PeepholeOptimization: Boolean;
     var
       i: Integer;
     begin
@@ -1627,6 +1660,24 @@ end;
       end;
 
     end;      // Peepholeoptimization
+
+
+
+    procedure LogListing(const name: String; const stringArray: TListing);
+    var i: Integer;
+    begin
+
+    LogTrace(Format('High(%s)=%d', [name, l]));
+    for i:=0 to l do   LogTrace(Format('%s[%d]=%s', [name, i, stringArray[i]]));
+    end;
+
+    function PeepholeOptimization: Boolean;
+    begin
+        Result:=_PeepholeOptimization();
+        // LogTrace(Format('PeepholeOptimization=%d', [Ord(Result)]));
+        LogListing('listing', listing);
+
+    end;
 
   begin      // OptimizeAssignment
 
@@ -3217,7 +3268,7 @@ begin        // OptimizeASM
   (* -------------------------------------------------------------------------- *)
 
   if ((x = 0) and inxUse) then
-  begin   // succesfull
+  begin   // succesful
 
     if optimize.line <> optimize.oldLine then
     begin
@@ -3418,10 +3469,10 @@ begin
   {$ENDIF}
 
   if not OutputDisabled then
-
     if pass = TPass.CODE_GENERATION then
     begin
 
+      LogState(a,comment);
       if optimize_code and optimize.use then
       begin
 
@@ -3435,8 +3486,13 @@ begin
       begin
 
         if High(OptimizeBuf) > 0 then
-
-          OptimizeASM
+        begin
+          LogTrace('OptimizeASM - LogOptimizeBuf: Before');
+          LogOptimizeBuf;
+          OptimizeASM ;
+          LogTrace('OptimizeASM- LogOptimizeBuf: After');
+          LogOptimizeBuf;
+        end
 
         else
         begin
