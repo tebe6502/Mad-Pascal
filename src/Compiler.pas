@@ -11689,6 +11689,34 @@ end;
 
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
+procedure LogDebug(const message: String);
+begin
+  WriteLn(StdErr,message);
+end;
+
+procedure StopAtBreakPoint;
+begin
+
+end;
+
+procedure DebugCompileStatement(tokenIndex: Integer; isAsm: Boolean );
+var s: String;
+begin
+ // if isActive then
+ // begin
+  s:=InfoAboutToken( TokenAt(TokenIndex).Kind);
+
+    LogDebug(Format('CompileStatement (tokenIndex: %d - %s; isAsm: %s) in %s',
+      [tokenIndex, s, BoolToStr(isAsm, True),TokenAt(TokenIndex).SourceLocation.SourceFile.Name]));
+    if (tokenIndex = 940) then
+    begin
+      StopAtBreakPoint;
+    end;
+  //end;
+end;
+
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 function CompileStatement(i: TTokenIndex; isAsm: Boolean = False): Integer;
 var
@@ -11709,7 +11737,8 @@ var
   Name, EnumName, svar, par1, par2: String;
   forBPL: Byte;
 begin
-  Debugger.debugger.CompileStatement(i, isAsm);
+  // Debugger.debugger.CompileStatement(i, isAsm);
+  DebugCompileStatement(i, isAsm);
 
   Result := i;
 

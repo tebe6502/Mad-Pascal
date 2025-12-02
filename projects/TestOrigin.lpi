@@ -476,6 +476,12 @@
       <Item>
         <Name Value="EFOpenError"/>
       </Item>
+      <Item>
+        <Name Value="RunError(100)"/>
+      </Item>
+      <Item>
+        <Name Value="EInOutError"/>
+      </Item>
     </Exceptions>
   </Debugging>
 </CONFIG>
