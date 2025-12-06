@@ -82,7 +82,7 @@ var
       if optimize.SourceFile<>nil then l:=Format('%s:%d', [optimize.SourceFile.Name, optimize.line]);
       s:=Format('Debug: %s: Call %d with ''%s''. (optyA=''%s'', optyY=''%s'', optyBP2=''%s'', SourceLocation:%s)', [name, DebugCount, message, _optyA, optyY, optyBP2, l ]);
       WriteLn(StdErr, s);
-      if DebugCount = 8704 then
+      if DebugCount = 8811 then
       begin
           BreakpointHit:=true;
       end;
@@ -93,7 +93,7 @@ var
        Result:=false;
        if BreakpointHit then
        begin
-          DebugCall('ExitTrick', Format('%d in %s at %s:%s',[i, currentRoutine, fileName, lineNumber]));
+          DebugCall('ExitTrick', Format('i=%d in %s at %s:%s',[i, currentRoutine, fileName, lineNumber]));
        end;
      end;
 
@@ -955,10 +955,22 @@ var
 
   // -----------------------------------------------------------------------------
 
+  function DebugListing(const l: TListing ): String;
+  var i: Integer;
+  begin
+    result:='';
+    for i:=Low(l) to High(l) do result:=result+l[i]+'/';
+
+  end;
+
   procedure Rebuild;
   var
     k, i: Integer;
+    oldListing, newListing: String;
   begin
+
+
+    oldListing := DebugListing(listing);
 
     k := 0;
     for i := 0 to l - 1 do
@@ -1134,7 +1146,9 @@ var
     listing[k + 2] := '';
     listing[k + 3] := '';
 
-    DebugCall('Rebuild', Format('Changing l from %d to %d', [l, k]));
+
+    newListing := DebugListing(listing);
+    DebugCall('Rebuild', Format('Changing l from %d to %d: oldListing=%s / newListing=%s', [l, k, oldListing, newListing]));
     l := k;
 
   end;
