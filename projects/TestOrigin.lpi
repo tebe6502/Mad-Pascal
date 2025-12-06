@@ -446,6 +446,10 @@
         <Filename Value="..\..\Mad-Pascal.origin\src\include\opt65c02\opt_STZ.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit>
+      <Unit>
+        <Filename Value="..\src\OptimizeDebug.inc"/>
+        <IsPartOfProject Value="True"/>
+      </Unit>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
