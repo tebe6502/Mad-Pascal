@@ -599,7 +599,7 @@ sk0
 sk1
 	bcc ok1
 
-	mwa MAIN.SYSTEM.ScreenWidth x0
+	mwa WIN_RIGHT x0
 
 ok1	lda x1+1
 	bmi error
@@ -610,7 +610,7 @@ ok1	lda x1+1
 sk2
 	bcc ok2
 
-	mwa MAIN.SYSTEM.ScreenWidth x1
+	mwa WIN_RIGHT x1
 	clc
 ok2
 	ldy y
@@ -805,7 +805,7 @@ sk0
 sk1
 	bcc ok1
 
-	mwa MAIN.SYSTEM.ScreenHeight y0
+	mwa WIN_BOTTOM y0
 
 ok1	lda x+1
 	bmi error
@@ -814,9 +814,9 @@ ok1	lda x+1
 	lda x
 	cmp MAIN.SYSTEM.ScreenWidth
 sk2
-	bcc ok2
+	bcs error
 
-	mwa MAIN.SYSTEM.ScreenWidth x
+	mwa WIN_RIGHT x
 	clc
 ok2
 	ldy y0
@@ -1106,27 +1106,15 @@ _0
 	sta x
 	sta x+1
 _1
-	cpw y main.system.ScreenHeight
+	cpw y MAIN.SYSTEM.ScreenHeight
 	bcc _2
 
-	lda main.system.ScreenHeight
-	ldy main.system.ScreenHeight+1
-	sbc #1
-	scs
-	dey
-	sta y
-	sty y+1
+	mwa WIN_BOTTOM y
 _2
-	cpw x main.system.ScreenWidth
+	cpw x MAIN.SYSTEM.ScreenWidth
 	bcc _3
 
-	lda main.system.ScreenWidth
-	ldy main.system.ScreenWidth+1
-	sbc #1
-	scs
-	dey
-	sta x
-	sty x+1	
+	mwa WIN_RIGHT x
 _3
 	mwa x CurrentX
 	mwa y CurrentY
@@ -1173,15 +1161,15 @@ _0
 	sta x
 	sta x+1
 _1
-	cpw y main.system.ScreenHeight
+	cpw y MAIN.SYSTEM.ScreenHeight
 	bcc _2
 
-	sbw main.system.ScreenHeight #1 y
+	mwa WIN_BOTTOM y
 _2
-	cpw x main.system.ScreenWidth
+	cpw x MAIN.SYSTEM.ScreenWidth
 	bcc _3
 
-	sbw main.system.ScreenWidth #1 x
+	mwa WIN_RIGHT x
 _3
 end;
 

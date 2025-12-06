@@ -987,7 +987,11 @@ begin
    begin
 //      Image1.Canvas.Pen.Color := clGreen;
 
-      fLine(x1, y1, x2, y2);
+	case GraphMode and $0f of
+	  7, 15: fLine(x1, y1, x2, y2)
+	else
+          Line(x1, y1, x2, y2);
+	end;
    end
    else
    begin
@@ -1045,7 +1049,12 @@ begin
       begin
 //         Image1.Canvas.Pen.Color := clBlue;
 
-         fLine(x1, y1, x2, y2);
+	 case GraphMode and $0f of
+	  7, 15: fLine(x1, y1, x2, y2)
+	 else
+          Line(x1, y1, x2, y2);
+	 end;
+	 
       end
 //      else
 //      begin

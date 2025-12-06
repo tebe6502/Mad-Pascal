@@ -625,7 +625,7 @@ var sp: ^shortreal;
     c: word;
 begin
 
-	if x <= 0.0 then exit(shortreal(0.0));
+	if (x <= 0.0) then exit(shortreal(0.0));
 
 	sp:=@c;
 
@@ -668,11 +668,11 @@ Sqrt returns the square root of its argument X, which must be positive
 
 @returns: Real (Q24.8)
 *)
-
-var r, t, q, b: cardinal;
+var r, t, q: cardinal;
+    b: integer;
 begin
 
-    if (x <= 0) then exit(0.0);
+    if (x <= 0.0) then exit(0.0);
 
     r:=(PCardinal(@x)^) shr 8;
 
@@ -697,62 +697,6 @@ begin
 
     Result:=PReal(@q)^;
 end;
-
-
-{
-var sp: ^real;
-    c: cardinal;
-
-begin
-
-	if x <= 0.0 then exit(0.0);
-
-	sp:=@c;
-
-	//c:=cardinal(x);
-
-	c := cardinal(x) shr 8 + $100;
-
-	Result := sp^;
-
-	Result:=(Result + x/Result); //* 0.5;
-
-	asm
-	 lsr Result+3
-	 ror Result+2
-	 ror Result+1
-	 ror Result
-	end;
-
-	Result:=(Result + x/Result); //* 0.5;
-
-	asm
-	 lsr Result+3
-	 ror Result+2
-	 ror Result+1
-	 ror Result
-	end;
-
-	Result:=(Result + x/Result); //* 0.5;
-
-	asm
-	 lsr Result+3
-	 ror Result+2
-	 ror Result+1
-	 ror Result
-	end;
-
-	Result:=(Result + x/Result); //* 0.5;
-
-	asm
-	 lsr Result+3
-	 ror Result+2
-	 ror Result+1
-	 ror Result
-	end;
-
-end;
-}
 
 
 function Sqrt(x: Single): Single; overload;
@@ -1826,10 +1770,10 @@ begin
     i := trunc(x);
 
     { Fixes negative part, needed to calculate "fractional" part }
-    if x<0 then dec(i);
+    //if x < 0 then dec(i);
 
     { And finally get's fractional part }
-    x := x - shortint(i);
+    x := x - integer(i);
 
     { If we need cosine, adds pi/2 }
     if sc then inc(i);
@@ -1892,7 +1836,7 @@ begin
     i := trunc(x);
 
     { Fixes negative part, needed to calculate "fractional" part }
-    if x<0 then dec(i);
+    //if x < 0 then dec(i);
 
     { And finally get's fractional part }
     x := x - shortint(i);
@@ -1959,10 +1903,10 @@ begin
     i := trunc(x);
 
     { Fixes negative part, needed to calculate "fractional" part }
-    if integer(x) < 0 then dec(i); { this is shorter than "x < 0" }
+    //if integer(x) < 0 then dec(i); { this is shorter than "x < 0" }
 
     { And finally get's fractional part }
-    x := x - shortint(i);
+    x := x - integer(i);
 
     { If we need cosine, adds pi/2 }
     if sc then inc(i);
@@ -2024,10 +1968,10 @@ begin
     i := trunc(x);
 
     { Fixes negative part, needed to calculate "fractional" part }
-    if smallint(x) < 0 then dec(i); { this is shorter than "x < 0" }
+    //if smallint(x) < 0 then dec(i); { this is shorter than "x < 0" }
 
     { And finally get's fractional part }
-    x := x - i ;
+    x := x - smallint(i);
 
     { If we need cosine, adds pi/2 }
     if sc then inc(i);
