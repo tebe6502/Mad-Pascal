@@ -53,7 +53,6 @@ var
 
 
   const
-  BreakPointDebugCount = 8811;
 {$I 'OptimizeDebug.inc'}
 
 
@@ -222,7 +221,7 @@ var
   end;
 
 
-  function SKIP(const i: TTemporaryBufIndex): Boolean;
+  function SKIP(i: integer): Boolean;
   begin
 
       Result :=	seq(i) or sne(i) or
@@ -748,14 +747,15 @@ var
   end;
 
 
-  function SKIP(i: Integer): Boolean;
+  function SKIP(i: integer): Boolean;
   begin
 
     if (i < 0) or (listing[i] = '') then
       Result := False
     else
-      Result := seq(i) or sne(i) or spl(i) or smi(i) or scc(i) or scs(i) or jeq(i) or jne(i) or
-        jpl(i) or jmi(i) or jcc(i) or jcs(i) or beq(i) or bne(i) or bpl(i) or bmi(i) or bcc(i) or bcs(i);
+      Result := seq(i) or sne(i) or spl(i) or smi(i) or scc(i) or scs(i) or
+	        jeq(i) or jne(i) or jpl(i) or jmi(i) or jcc(i) or jcs(i) or
+	        beq(i) or bne(i) or bpl(i) or bmi(i) or bcc(i) or bcs(i);
   end;
 
 
@@ -922,11 +922,11 @@ var
 
   end;
 
-  procedure Rebuild;
+  procedure Rebuild(const context: String);
   var
     k, i: Integer;
     oldListing, newListing: String;
-  begin
+   begin
 
 
     oldListing := DebugListing(listing);
@@ -1107,7 +1107,7 @@ var
 
 
     newListing := DebugListing(listing);
-    DebugCall('Rebuild', Format('Changing l from %d to %d: oldListing=%s / newListing=%s', [l, k, oldListing, newListing]));
+    DebugCall(Format('Rebuild(%s)', [context]), Format('Changing l from %d to %d: oldListing=%s / newListing=%s', [l, k, oldListing, newListing]));
     l := k;
 
   end;
@@ -1322,7 +1322,7 @@ var
 
     // szukamy pojedynczych odwolan do :STACKORIGIN+N
 
-    Rebuild;
+    Rebuild('RemoveUnusedSTACK');
 
     Clear;
 
@@ -1463,7 +1463,7 @@ var
     end;
 
 
-    Rebuild;
+    Rebuild('PeepholeOptimization_STACK');
 
     for i := 0 to l - 1 do
     begin
@@ -1575,7 +1575,7 @@ end;
 
       Result := True;
 
-      Rebuild;
+      Rebuild('PeepholeOptimization_END');
 
       tmp := '';
       old := '';
@@ -1598,7 +1598,7 @@ end;
 
       Result := True;
 
-      Rebuild;
+      Rebuild('PeepholeOptimization_STA');
 
       for i := 0 to l - 1 do
       begin
@@ -1612,13 +1612,13 @@ if (pos('lda adr.ROW1+$20,y', listing[i]) > 0) then begin
 end;
 }
 
-        if opt_STA_ADD(i) = False then exit(ExitTrick(i, {$include %file%} ,{$include %line%} ,{$include %currentroutine%}));
-        if opt_STA_LDY(i) = False then exit(ExitTrick(i, {$include %file%} ,{$include %line%} ,{$include %currentroutine%}));
-        if opt_STA_BP(i) = False then exit(ExitTrick(i, {$include %file%} ,{$include %line%} ,{$include %currentroutine%}));
-        if opt_STA_LSR(i) = False then exit(ExitTrick(i, {$include %file%} ,{$include %line%} ,{$include %currentroutine%}));
-        if opt_STA_IMUL(i) = False then exit(ExitTrick(i, {$include %file%} ,{$include %line%} ,{$include %currentroutine%}));
-        if opt_STA_IMUL_CX(i) = False then exit(ExitTrick(i, {$include %file%} ,{$include %line%} ,{$include %currentroutine%}));
-        if opt_STA_ZTMP(i) = False then exit(ExitTrick(i, {$include %file%} ,{$include %line%} ,{$include %currentroutine%}));
+        if opt_STA_ADD(i) = False then exit(ExitTrick('opt_STA_ADD', i, {$include %file%} ,{$include %line%} ,{$include %currentroutine%}));
+        if opt_STA_LDY(i) = False then exit(ExitTrick( 'opt_STA_LDY', i, {$include %file%} ,{$include %line%} ,{$include %currentroutine%}));
+        if opt_STA_BP(i) = False then exit(ExitTrick( 'opt_STA_BP', i, {$include %file%} ,{$include %line%} ,{$include %currentroutine%}));
+        if opt_STA_LSR(i) = False then exit(ExitTrick( 'opt_STA_LSR', i, {$include %file%} ,{$include %line%} ,{$include %currentroutine%}));
+        if opt_STA_IMUL(i) = False then exit(ExitTrick( 'opt_STA_IMUL', i, {$include %file%} ,{$include %line%} ,{$include %currentroutine%}));
+        if opt_STA_IMUL_CX(i) = False then exit(ExitTrick( 'opt_STA_IMUL_CX', i, {$include %file%} ,{$include %line%} ,{$include %currentroutine%}));
+        if opt_STA_ZTMP(i) = False then exit(ExitTrick('opt_STA_ZTMP', i, {$include %file%} ,{$include %line%} ,{$include %currentroutine%}));
 
       end;
 
@@ -1653,7 +1653,7 @@ end;
 
       Result := True;
 
-      Rebuild;
+      Rebuild('PeepholeOptimization');
       DebugCall('OptimizeASM:PeepholeOptimization', ListingToString);
 
       for i := 0 to l - 1 do
@@ -1668,32 +1668,32 @@ if (pos('DST+1', listing[i]) > 0) then begin
 end;
 }
 
-        if opt_FORTMP(i) = False then exit(ExitTrick(i, {$include %file%} ,{$include %line%} ,{$include %currentroutine%}));
+        if opt_FORTMP(i) = False then exit(ExitTrick('opt_FORTMP', i, {$include %file%} ,{$include %line%} ,{$include %currentroutine%}));
 
-        if opt_STA_0(i) = False then exit(ExitTrick(i, {$include %file%} ,{$include %line%} ,{$include %currentroutine%}));
+        if opt_STA_0(i) = False then exit(ExitTrick('opt_STA_0', i, {$include %file%} ,{$include %line%} ,{$include %currentroutine%}));
 
-        if opt_LDA(i) = False then exit(ExitTrick(i, {$include %file%} ,{$include %line%} ,{$include %currentroutine%}));
-        if opt_TAY(i) = False then exit(ExitTrick(i, {$include %file%} ,{$include %line%} ,{$include %currentroutine%}));
-        if opt_LDY(i) = False then exit(ExitTrick(i, {$include %file%} ,{$include %line%} ,{$include %currentroutine%}));
-        if opt_BP(i) = False then exit(ExitTrick(i, {$include %file%} ,{$include %line%} ,{$include %currentroutine%}));
-        if opt_AND(i) = False then exit(ExitTrick(i, {$include %file%} ,{$include %line%} ,{$include %currentroutine%}));
-        if opt_ORA(i) = False then exit(ExitTrick(i, {$include %file%} ,{$include %line%} ,{$include %currentroutine%}));
-        if opt_EOR(i) = False then exit(ExitTrick(i, {$include %file%} ,{$include %line%} ,{$include %currentroutine%}));
-        if opt_NOT(i) = False then exit(ExitTrick(i, {$include %file%} ,{$include %line%} ,{$include %currentroutine%}));
-        if opt_ADD(i) = False then exit(ExitTrick(i, {$include %file%} ,{$include %line%} ,{$include %currentroutine%}));
-        if opt_SUB(i) = False then exit(ExitTrick(i, {$include %file%} ,{$include %line%} ,{$include %currentroutine%}));
-        if opt_LSR(i) = False then exit(ExitTrick(i, {$include %file%} ,{$include %line%} ,{$include %currentroutine%}));
-        if opt_ASL(i) = False then exit(ExitTrick(i, {$include %file%} ,{$include %line%} ,{$include %currentroutine%}));
-        if opt_SPL(i) = False then exit(ExitTrick(i, {$include %file%} ,{$include %line%} ,{$include %currentroutine%}));
-        if opt_ADR(i) = False then exit(ExitTrick(i, {$include %file%} ,{$include %line%} ,{$include %currentroutine%}));
-        if opt_BP_ADR(i) = False then exit(ExitTrick(i, {$include %file%} ,{$include %line%} ,{$include %currentroutine%}));
-        if opt_BP2_ADR(i) = False then exit(ExitTrick(i, {$include %file%} ,{$include %line%} ,{$include %currentroutine%}));
-        if opt_POKE(i) = False then exit(ExitTrick(i, {$include %file%} ,{$include %line%} ,{$include %currentroutine%}));
+        if opt_LDA(i) = False then exit(ExitTrick('opt_LDA', i, {$include %file%} ,{$include %line%} ,{$include %currentroutine%}));
+        if opt_TAY(i) = False then exit(ExitTrick('opt_TAY', i, {$include %file%} ,{$include %line%} ,{$include %currentroutine%}));
+        if opt_LDY(i) = False then exit(ExitTrick('opt_LDY', i, {$include %file%} ,{$include %line%} ,{$include %currentroutine%}));
+        if opt_BP(i) = False then exit(ExitTrick('opt_BP', i, {$include %file%} ,{$include %line%} ,{$include %currentroutine%}));
+        if opt_AND(i) = False then exit(ExitTrick('opt_AND', i, {$include %file%} ,{$include %line%} ,{$include %currentroutine%}));
+        if opt_ORA(i) = False then exit(ExitTrick('opt_ORA', i, {$include %file%} ,{$include %line%} ,{$include %currentroutine%}));
+        if opt_EOR(i) = False then exit(ExitTrick('opt_EOR', i, {$include %file%} ,{$include %line%} ,{$include %currentroutine%}));
+        if opt_NOT(i) = False then exit(ExitTrick('opt_NOT', i, {$include %file%} ,{$include %line%} ,{$include %currentroutine%}));
+        if opt_ADD(i) = False then exit(ExitTrick('opt_ADD', i, {$include %file%} ,{$include %line%} ,{$include %currentroutine%}));
+          if opt_SUB(i) = False then exit(ExitTrick('opt_SUB', i, {$include %file%} ,{$include %line%} ,{$include %currentroutine%}));
+        if opt_LSR(i) = False then exit(ExitTrick('opt_LSR', i, {$include %file%} ,{$include %line%} ,{$include %currentroutine%}));
+        if opt_ASL(i) = False then exit(ExitTrick('opt_ASL', i, {$include %file%} ,{$include %line%} ,{$include %currentroutine%}));
+        if opt_SPL(i) = False then exit(ExitTrick('opt_SPL', i, {$include %file%} ,{$include %line%} ,{$include %currentroutine%}));
+        if opt_ADR(i) = False then exit(ExitTrick('opt_ADR', i, {$include %file%} ,{$include %line%} ,{$include %currentroutine%}));
+        if opt_BP_ADR(i) = False then exit(ExitTrick('opt_BP_ADR', i, {$include %file%} ,{$include %line%} ,{$include %currentroutine%}));
+        if opt_BP2_ADR(i) = False then exit(ExitTrick('opt_BP2_ADR', i, {$include %file%} ,{$include %line%} ,{$include %currentroutine%}));
+        if opt_POKE(i) = False then exit(ExitTrick('opt_POKE', i, {$include %file%} ,{$include %line%} ,{$include %currentroutine%}));
 
         if target.cpu <> TCPU.CPU_6502 then
         begin
 
-          if opt_STZ(i) = False then exit(ExitTrick(i, {$include %file%} ,{$include %line%} ,{$include %currentroutine%}));
+          if opt_STZ(i) = False then exit(ExitTrick('opt_STZ', i, {$include %file%} ,{$include %line%} ,{$include %currentroutine%}));
 
         end;
 
@@ -1741,7 +1741,7 @@ end;
           (sty_stack(p) and lab_a(p-1) and lda_stack(p+1)) or
 	  (sty_stack(p) and lab_a(p-1) and ldy_1(p+1) and lda_stack(p+2) and argMatch(p, p+2)) or
           (sty_stack(p) and lab_a(p-1) and (argMatch(p, i+2) = false)) or
-          (tya(p) and (lab_a(p-1) = false) and (ora_stack(p+1) = false)) then exit(ExitTrick(i, {$include %file%} ,{$include %line%} ,{$include %currentroutine%}));
+          (tya(p) and (lab_a(p-1) = false) and (ora_stack(p+1) = false)) then exit(ExitTrick('test_AND', i, {$include %file%} ,{$include %line%} ,{$include %currentroutine%}));
 
 
     end;
@@ -1760,7 +1760,7 @@ end;
           (sty_stack(p) and lab_a(p-1) and lda_stack(p+1)) or
 	  (sty_stack(p) and lab_a(p-1) and ldy_1(p+1) and lda_stack(p+2) and argMatch(p, p+2)) or
           (sty_stack(p) and lab_a(p-1) and (argMatch(p, i+2) = false)) or
-          (tya(p) and (lab_a(p-1) = false) and (ora_stack(p+1) = false)) then exit(ExitTrick(i, {$include %file%} ,{$include %line%} ,{$include %currentroutine%}));
+          (tya(p) and (lab_a(p-1) = false) and (ora_stack(p+1) = false)) then exit(ExitTrick('test_ORA', i, {$include %file%} ,{$include %line%} ,{$include %currentroutine%}));
 
     end;
 
@@ -1776,7 +1776,7 @@ end;
     end;
 
 
-    Rebuild;
+    Rebuild('OptimizeRelation');
 
     for i := 0 to l - 1 do
     begin
@@ -1790,20 +1790,20 @@ if (pos('cmp #$29', listing[i]) > 0) then begin
 end;
 }
 
-      if opt_CMP_0(i) = False then exit(ExitTrick(i, {$include %file%} ,{$include %line%} ,{$include %currentroutine%}));
+      if opt_CMP_0(i) = False then exit(ExitTrick('opt_CMP_0', i, {$include %file%} ,{$include %line%} ,{$include %currentroutine%}));
 
-      if opt_LOCAL(i) = False then exit(ExitTrick(i, {$include %file%} ,{$include %line%} ,{$include %currentroutine%}));
+      if opt_LOCAL(i) = False then exit(ExitTrick('opt_LOCAL', i, {$include %file%} ,{$include %line%} ,{$include %currentroutine%}));
 
-      if opt_LT_GTEQ(i) = False then exit(ExitTrick(i, {$include %file%} ,{$include %line%} ,{$include %currentroutine%}));
-      if opt_LTEQ(i) = False then exit(ExitTrick(i, {$include %file%} ,{$include %line%} ,{$include %currentroutine%}));
-      if opt_GT(i) = False then exit(ExitTrick(i, {$include %file%} ,{$include %line%} ,{$include %currentroutine%}));
-      if opt_NE_EQ(i) = False then exit(ExitTrick(i, {$include %file%} ,{$include %line%} ,{$include %currentroutine%}));
+      if opt_LT_GTEQ(i) = False then exit(ExitTrick('opt_LT_GTEQ', i, {$include %file%} ,{$include %line%} ,{$include %currentroutine%}));
+      if opt_LTEQ(i) = False then exit(ExitTrick('opt_LTEQ', i, {$include %file%} ,{$include %line%} ,{$include %currentroutine%}));
+      if opt_GT(i) = False then exit(ExitTrick('opt_GT', i, {$include %file%} ,{$include %line%} ,{$include %currentroutine%}));
+      if opt_NE_EQ(i) = False then exit(ExitTrick('opt_NE_EQ', i, {$include %file%} ,{$include %line%} ,{$include %currentroutine%}));
 
-      if opt_CMP(i) = False then exit(ExitTrick(i, {$include %file%} ,{$include %line%} ,{$include %currentroutine%}));
-      if opt_CMP_BP2(i) = False then exit(ExitTrick(i, {$include %file%} ,{$include %line%} ,{$include %currentroutine%}));
+      if opt_CMP(i) = False then exit(ExitTrick('opt_CMP', i, {$include %file%} ,{$include %line%} ,{$include %currentroutine%}));
+      if opt_CMP_BP2(i) = False then exit(ExitTrick('opt_CMP_BP2', i, {$include %file%} ,{$include %line%} ,{$include %currentroutine%}));
 
       // JAC! 2025-12-06 TODO
-      if opt_BRANCH(i) = False then exit(ExitTrick(i, {$include %file%} ,{$include %line%} ,{$include %currentroutine%}));
+      if opt_BRANCH(i) = False then exit(ExitTrick('opt_BRANCH', i, {$include %file%} ,{$include %line%} ,{$include %currentroutine%}));
 
       // -----------------------------------------------------------------------------
 
@@ -1909,7 +1909,10 @@ begin        // OptimizeASM
   for i := 0 to High(OptimizeBuf) - 1 do
   begin
     a := OptimizeBuf[i];
-
+    if BreakpointHit then
+    begin
+         DebugCall('OptimizeASM', Format('i=%d a=''%s''', [i,a]));
+    end;
     if (a <> '') and (pos(';', a) = 0) then
     begin
 

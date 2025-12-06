@@ -1,4 +1,6 @@
   // JAC!
+BreakPointDebugCount = 8811;
+
 var
   DebugCount: Integer;
 
@@ -16,7 +18,11 @@ var
   i: Integer;
 begin
   Result := '';
+  {$IFDEF MP175}
   for i := 0 to TemporaryBufIndex - 1 do Result := Result + TemporaryBuf[i] + '/';
+  {$ELSE}
+  for i := 0 to iOut - 1 do Result := Result + TemporaryBuf[i] + '/';
+  {$ENDIF}
 end;
 
 
@@ -28,8 +34,14 @@ var
   l, s: String;
 begin
   Inc(DebugCount);
-  l := '';
+  l := '';    // Because of line differences between versions
+  {$IFDEF MP175}
   if optimize.SourceFile <> nil then l := Format('%s:%d', [optimize.SourceFile.Name, optimize.line]);
+  {$ELSE}
+  if Common.optimize.unitIndex <> 0 then
+    l := Format('%s:%d', [UnitName[Common.optimize.unitIndex].Name, Common.optimize.line]);
+  {$ENDIF}
+
   s := Format('Debug: %s: Call %d with ''%s''. (optyA=''%s'', optyY=''%s'', optyBP2=''%s'', SourceLocation:%s)',
     [Name, DebugCount, message, _optyA, optyY, optyBP2, l]);
   WriteLn(StdErr, s);
@@ -39,13 +51,13 @@ begin
   end;
 end;
 
-function ExitTrick(const i: Integer; const fileName: String; const lineNumber: String;
+function ExitTrick(const optRoutine: String; const i: Integer; const fileName: String; lineNumber: String;
   const currentRoutine: String): Boolean;
 begin
   Result := False;
+  lineNumber := ''; // TODO
   if BreakpointHit then
   begin
-    DebugCall('ExitTrick', Format('i=%d in %s at %s:%s', [i, currentRoutine, fileName, lineNumber]));
+    DebugCall('ExitTrick', Format('%s(%d) in %s at %s:%s', [optRoutine, i, currentRoutine, fileName, lineNumber]));
   end;
 end;
-
