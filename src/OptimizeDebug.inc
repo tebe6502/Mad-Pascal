@@ -22,7 +22,7 @@ var
   i: Integer;
 begin
   Result := '';
-  {$IFDEF MP175}
+  {$IFDEF MP175_TEST}
   for i := 0 to TemporaryBufIndex - 1 do Result := Result + TemporaryBuf[i] + '/';
   {$ELSE}
   for i := 0 to iOut - 1 do Result := Result + TemporaryBuf[i] + '/';
@@ -46,7 +46,7 @@ begin
 
   Inc(DebugCallCount);
   l := '';    // Because of line differences between versions
-  {$IFDEF MP175}
+  {$IFDEF MP175_TEST}
   if optimize.SourceFile <> nil then l := Format('%s:%d', [optimize.SourceFile.Name, optimize.line]);
   {$ELSE}
   if Common.optimize.unitIndex <> 0 then
@@ -54,7 +54,7 @@ begin
   {$ENDIF}
 
   s := Format('Debug: %s: Call %d with ''%s''. (optyA=''%s'', optyY=''%s'', optyBP2=''%s'', SourceLocation:%s)',
-    [Name, DebugCallCount, message, _optyA, optyY, optyBP2, l]);
+    [Name, DebugCallCount, message, optyA, optyY, optyBP2, l]);
   LogTrace(s);
   if DebugCallCount = DebugCallCountBreakPoint then
   begin
@@ -63,7 +63,7 @@ begin
 end;
 
 
-procedure LogState(const a: String = ''; const comment: String = '');
+procedure LogASM65(const a: String = ''; const comment: String = '');
 begin
 
   if DebugCallCountBreakPoint <= 0 then exit;

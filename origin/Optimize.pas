@@ -25,19 +25,25 @@ uses Crt, SysUtils, Common;
 var
   TemporaryBuf: array [0..511] of String;
 
+  {$I '..\src\OptimizeDebug.inc'}
 
 // ----------------------------------------------------------------------------
+
+procedure SetOptyA(const value: TString);
+begin
+  optyA:= value;
+  DebugCall( 'SetOptyA', value);
+end;
 
 
 procedure ResetOpty;
 begin
-
-  optyA := '';
+  DebugCall('ResetOpty');
+  SetOptyA('');
   optyY := '';
   optyBP2 := '';
 
 end;
-
 
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
@@ -473,7 +479,9 @@ begin
   else
   begin
 
+    // DebugCall('OptimizeTemporaryBuf.Before',  a+'/'+TemporaryBufToString);
     OptimizeTemporaryBuf;
+    // DebugCall('OptimizeTemporaryBuf.After ', a+'/'+TemporaryBufToString);
 
     if TemporaryBuf[iOut] <> '' then
     begin
@@ -537,8 +545,8 @@ end;
 
 procedure OptimizeASM;
 (* -------------------------------------------------------------------------- *)
-(* optymalizacja powiodla sie jesli na wyjsciu X=0
-(* peephole optimization
+(* optymalizacja powiodla sie jesli na wyjsciu X=0                            *)
+(* peephole optimization                                                      *)
 (* -------------------------------------------------------------------------- *)
 type
     TListing = array [0..1023] of string;
@@ -560,6 +568,12 @@ var inxUse, found: Boolean;
 
 // -----------------------------------------------------------------------------
 
+  function ListingToString: String;
+  var i: Integer;
+  begin
+    Result:='';
+    for i:=0 to l-1 do Result:=Result+listing[i]+'/';
+  end;
 
   function GetBYTE(i: Integer): Integer;
   begin
@@ -804,9 +818,20 @@ var inxUse, found: Boolean;
 
 // -----------------------------------------------------------------------------
 
-   procedure Rebuild;
+  function DebugListing(const l: TListing ): String;
+  var i: Integer;
+  begin
+    Result:='';
+    for i:=Low(l) to High(l) do result:=result+l[i]+'/';
+
+  end;
+
+  procedure Rebuild(const context: String);
    var k, i: integer;
+   // oldListing, newListing: String;
    begin
+
+    // oldListing := DebugListing(listing);
 
     k:=0;
     for i := 0 to l - 1 do
@@ -979,6 +1004,8 @@ var inxUse, found: Boolean;
     listing[k+2] := '';
     listing[k+3] := '';
 
+    // newListing := DebugListing(listing);
+    // DebugCall(Format('Rebuild(%s)', [context]), Format('Changing l from %d to %d: oldListing=%s / newListing=%s', [l, k, oldListing, newListing]));
     l := k;
 
    end;  //Rebuild
@@ -1175,7 +1202,7 @@ var inxUse, found: Boolean;
 
     // szukamy pojedynczych odwolan do :STACKORIGIN+N
 
-    Rebuild;
+    Rebuild('RemoveUnusedSTACK');
 
     Clear;
 
@@ -1278,7 +1305,7 @@ var inxUse, found: Boolean;
     end;
 
 
-    Rebuild;
+    Rebuild('PeepholeOptimization_STACK');
 
     for i := 0 to l - 1 do
     begin
@@ -1381,7 +1408,7 @@ end;
 
       Result := True;
 
-      Rebuild;
+      Rebuild('PeepholeOptimization_END');
 
       tmp := '';
       old := '';
@@ -1403,7 +1430,7 @@ end;
 
       Result := True;
 
-      Rebuild;
+      Rebuild('PeepholeOptimization_STA');;
 
       for i := 0 to l - 1 do
       begin
@@ -1460,7 +1487,8 @@ end;
 
       Result := True;
 
-      Rebuild;
+      Rebuild('PeepholeOptimization');
+      // DebugCall('OptimizeASM:PeepholeOptimization', ListingToString);
 
       for i := 0 to l - 1 do
       begin
@@ -1527,8 +1555,9 @@ end;
     tmp: String;
 
 
-    function test_AND(i: integer): Boolean;
-    var p: integer;
+    function test_AND(i: Integer): Boolean;
+    var
+      p: Integer;
     begin
 
       Result := True;
@@ -1573,7 +1602,7 @@ end;
     end;
 
 
-    Rebuild;
+    Rebuild('OptimizeRelation');
 
     for i := 0 to l - 1 do
     begin
@@ -1708,6 +1737,11 @@ begin        // OptimizeASM
   for i := 0 to High(OptimizeBuf) - 1 do
   begin
     a := OptimizeBuf[i];
+
+    if DebugCallCountBreakPointHit then
+    begin
+         DebugCall('OptimizeASM', Format('i=%d a=''%s''', [i,a]));
+    end;
 
     if (a <> '') and (pos(';', a) = 0) then
     begin
@@ -2826,8 +2860,10 @@ begin        // OptimizeASM
 
   (* -------------------------------------------------------------------------- *)
 
+  // DebugCall('OptimizeASM.l', IntToStr(l));
+
   if ((x = 0) and inxUse) then
-  begin   // succesfull
+  begin   // succesful
 
     if common.optimize.line <> common.optimize.old then
     begin
@@ -2872,8 +2908,13 @@ begin        // OptimizeASM
   (* -------------------------------------------------------------------------- *)
 
     for i := 0 to l - 1 do
-      if listing[i] <> '' then WriteInstruction(i);
-
+  begin
+    if listing[i] <> '' then
+    begin
+         // DebugCall('OptimizeASM.WriteInstruction',Format('listing[%d/%d]=%s', [i, l-1, listing[i]]));
+         WriteInstruction(i);
+    end;
+  end;
   (* -------------------------------------------------------------------------- *)
 
   end
@@ -2881,6 +2922,7 @@ begin        // OptimizeASM
   begin
 
     l := High(OptimizeBuf);
+    // DebugCall('OptimizeASM.l', IntToStr(l));
 
     if l > High(listing) then
     begin
@@ -2907,7 +2949,7 @@ begin        // OptimizeASM
           lda_a(i) or mva(i) or mwa(i) or tya(i) or lab_a(i) or jsr(i) or (pos(#9'jmp ', listing[i]) > 0) or
           (pos(#9'.if', listing[i]) > 0) then
         begin
-          optyA := '';
+          SetOptyA ('');
           Break;
         end;
 
@@ -2964,7 +3006,11 @@ begin        // OptimizeASM
 
     (* -------------------------------------------------------------------------- *)
 
-    for i := 0 to l - 1 do WriteInstruction(i);
+    for i := 0 to l - 1 do
+     begin
+          // DebugCall('OptimizeASM.WriteInstruction',Format('listing[%d/%d]=%s', [i, l-1, listing[i]]));
+          WriteInstruction(i);
+     end;
 
     (* -------------------------------------------------------------------------- *)
 
@@ -3018,6 +3064,7 @@ begin
 
  if Pass = CODEGENERATIONPASS then begin
 
+  LogAsm65(a,comment);
   if optimize_code and common.optimize.use then begin
 
    i:=High(OptimizeBuf);
@@ -3028,8 +3075,11 @@ begin
   end else begin
 
    if High(OptimizeBuf) > 0 then
-
-     OptimizeASM
+   begin
+    // DebugCall('OptimizeASM.Begin',OptimizeBufToString );
+    OptimizeASM ;
+    // DebugCall('OptimizeASM.End',OptimizeBufToString );
+   end
 
    else begin
 

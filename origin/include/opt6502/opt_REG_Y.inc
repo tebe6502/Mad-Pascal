@@ -7,7 +7,7 @@ begin
 //				     REG Y.
 // -------------------------------------------------------------------------- //
 
-  Rebuild;
+  Rebuild('opt_REG_Y');
 
    for i := 0 to l - 1 do
     if ldy_val(i) {and (iny(i+1) = false) and (dey(i+1) = false)} then begin

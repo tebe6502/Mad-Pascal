@@ -1146,9 +1146,6 @@ begin
     svar := '';
   end;
 
-  if (pass = TPass.CODE_GENERATION) and (IdentIndex=580) then
-  WriteLn(IdentIndex); // TODO
-
   svara := svar;
   if pos('.', svar) > 0 then
     svara := GetLocalName(IdentIndex, 'adr.')

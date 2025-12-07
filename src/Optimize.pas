@@ -49,19 +49,14 @@ var
 
   optyFOR0, optyFOR1, optyFOR2, optyFOR3: TString;
 
-  _optyA: TString;
+  optyA: TString;
 
   {$I 'OptimizeDebug.inc'}
 
 
-function optyA: TString;
-begin
-  Result:=_optyA;
-  end;
-
 procedure SetOptyA(const value: TString);
 begin
-  _optyA:= value;
+  optyA:= value;
   DebugCall( 'SetOptyA', value);
   end;
 
@@ -901,7 +896,7 @@ var
    begin
 
 
-    oldListing := DebugListing(listing);
+    oldListing := ListingToString(listing);
 
     k := 0;
     for i := 0 to l - 1 do
@@ -1078,7 +1073,7 @@ var
     listing[k + 3] := '';
 
 
-    newListing := DebugListing(listing);
+    newListing := ListingToString(listing);
     DebugCall(Format('Rebuild(%s)', [context]), Format('Changing l from %d to %d: oldListing=%s / newListing=%s', [l, k, oldListing, newListing]));
     l := k;
 
@@ -3491,7 +3486,7 @@ begin
     if pass = TPass.CODE_GENERATION then
     begin
 
-      LogState(a,comment);
+      LogASM65(a,comment);
       if optimize_code and optimize.use then
       begin
 
