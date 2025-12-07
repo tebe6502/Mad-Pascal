@@ -16,7 +16,7 @@ set PATH=%WUDSN_TOOLS_FOLDER%\PAS\FPC.jac;%WUDSN_TOOLS_FOLDER%\ASM\MADS\bin\wind
 call :normalize_path %~dp0..
 set MP_FOLDER=%RETVAL%
 set MP_SRC_FOLDER=%MP_FOLDER%\src
-set MP_PAS_FILE=mp.pas
+set MP_PAS_FILE=mp
 set MP_BIN_FOLDER=%MP_FOLDER%\bin\windows_x86_64
 set MP_EXE_FILE=mp.exe
 set MP_EXE=%MP_BIN_FOLDER%\%MP_EXE_FILE%
@@ -52,14 +52,20 @@ rem Default regression test sample.
 set PAS_FOLDER=samples\tests\tests-debug
 set PAS_FILE=debug
 
+rem Delete previous output files
+if exist %PAS_FILE%-Reference.a65 del if %PAS_FILE%-Reference.a65
+if exist stderr-Reference.log del stderr-Reference.log
+if exist %PAS_FILE%.a65 del if %PAS_FILE%.a65
+if exist stderr.log del stderr.log
+
 cd %MP_FOLDER%\%PAS_FOLDER%
-%REFERENCE_MP_EXE% -ipath %REFERENCE_MP_FOLDER%\lib -ipath %REFERENCE_MP_FOLDER%\blibs %PAS_FILE%.pas
+%REFERENCE_MP_EXE% -ipath %REFERENCE_MP_FOLDER%\lib -ipath %REFERENCE_MP_FOLDER%\blibs %PAS_FILE%.pas 2>stderr-Reference.log
 if errorlevel 1 goto :eof
 
 if exist %PAS_FILE%-Reference.a65 del %PAS_FILE%-Reference.a65
 ren %PAS_FILE%.a65 %PAS_FILE%-Reference.a65
 
-%MP_EXE% -ipath %MP_FOLDER%\lib -ipath %MP_FOLDER%\blibs %PAS_FILE%.pas
+%MP_EXE% -ipath %MP_FOLDER%\lib -ipath %MP_FOLDER%\blibs %PAS_FILE%.pas 2>stderr.log
 if errorlevel 1 goto :eof
 
 start .
@@ -78,14 +84,14 @@ setlocal
 echo on
 set SRC_FOLDER=%1
 set BIN_FOLDER=%2
-set PAS=%SRC_FOLDER%\%MP_PAS_FILE%
+set PAS=%SRC_FOLDER%\%MP_PAS_FILE%.pas
 set EXE_FILE=%MP_EXE_FILE%
 set EXE=%BIN_FOLDER%\%MP_EXE_FILE%
 
 cd /d %SRC_FOLDER%
 
 if not "%EXE_FILE%"=="" (
-  echo INFO: Compiling %PAS% to %EXE%.
+  echo INFO: Compiling %PAS%.pas to %EXE%.
   if exist "%EXE%" del "%EXE%"
   call fpc.bat %PAS%
   if errorlevel 1 goto :eof
