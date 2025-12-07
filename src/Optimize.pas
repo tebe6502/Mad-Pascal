@@ -3486,7 +3486,7 @@ begin
     if pass = TPass.CODE_GENERATION then
     begin
 
-      LogState(a,comment);
+      LogASM65(a,comment);
       if optimize_code and optimize.use then
       begin
 

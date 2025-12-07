@@ -63,7 +63,7 @@ begin
 end;
 
 
-procedure LogState(const a: String = ''; const comment: String = '');
+procedure LogASM65(const a: String = ''; const comment: String = '');
 begin
 
   if DebugCallCountBreakPoint <= 0 then exit;
