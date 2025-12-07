@@ -81,7 +81,6 @@ rem call :make_exe <SRC_FOLDER> <BIN_FOLDER>
 rem Uses: %MP_PAS_FILE%, %MP_EXE_FILE%
 :make_exe
 setlocal
-echo on
 set SRC_FOLDER=%1
 set BIN_FOLDER=%2
 set PAS=%SRC_FOLDER%\%MP_PAS_FILE%.pas
