@@ -24,12 +24,12 @@ begin
 	  k := GetVAL(GetARG(0, x-1));
 	  if (k > $FFFF) or (k < 0) then exit(true);
 
-	  listing[l]   := #9'lda #' + HexByte(Byte(k));
+	  listing[l]   := #9'lda #' + HexByte(k);
 
 	  k := GetVAL(GetARG(0, x)) + GetVAL(GetARG(1, x)) shl 8;
 	  if (k > $FFFF) or (k < 0) then exit(true);
 
-	  listing[l+1] := #9'sta ' + HexWord(Word(k));
+	  listing[l+1] := #9'sta ' + Hex(k, 4);
 
 	  inc(l, 2);
 	end;
@@ -68,17 +68,17 @@ begin
 
 	  k := GetVAL(GetARG(0, x-1));
 	  if (k > $FFFF) or (k < 0) then exit(true);
-	  listing[l]   := #9'lda #' + HexByte(Byte(k));
+	  listing[l]   := #9'lda #' + HexByte(k);
 
 	  k := GetVAL(GetARG(1, x-1));
 	  if (k > $FFFF) or (k < 0) then exit(true);
-	  listing[l+2] := #9'lda #' + HexByte(Byte(k));
+	  listing[l+2] := #9'lda #' + HexByte(k);
 
 	  k := GetVAL(GetARG(0, x)) + GetVAL(GetARG(1, x)) shl 8;
 	  if (k > $FFFF) or (k < 0) then exit(true);
 
-	  listing[l+1] := #9'sta ' + HexWord(Word(k));
-	  listing[l+3] := #9'sta ' + HexWord(Word(k))+'+1';
+	  listing[l+1] := #9'sta ' + Hex(k, 4);
+	  listing[l+3] := #9'sta ' + Hex(k, 4)+'+1';
 
 	  inc(l, 4);
 	end;

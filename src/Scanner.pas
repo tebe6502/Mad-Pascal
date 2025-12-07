@@ -6,7 +6,7 @@ interface
 
 uses CommonTypes, CompilerTypes, Tokens;
 
-// ----------------------------------------------------------------------------
+  // ----------------------------------------------------------------------------
 
 type
   IScanner = interface
@@ -34,11 +34,12 @@ implementation
 
 uses Classes, SysUtils, Common, DataTypes, Messages, FileIO, Memory, Optimize, StringUtilities, Targets, Utilities;
 
-const SCANNER_CACHED = true;
+const
+  SCANNER_CACHED = True;
 
-// ----------------------------------------------------------------------------
-// Class TScanner Implementation
-// ----------------------------------------------------------------------------
+  // ----------------------------------------------------------------------------
+  // Class TScanner Implementation
+  // ----------------------------------------------------------------------------
 
 procedure ErrorOrdinalExpExpected(i: TTokenIndex);
 begin
@@ -1815,20 +1816,30 @@ var
       begin
         RaiseHaltException(e.GetExitCode());
       end;
-      on e: EInOutError do    // EOF reached
-        if Text <> '' then
-        begin
-          if Text = 'END.' then
+      on e: EInOutError do
+      begin // EOF reached
+       // if e.ErrorCode > 0 then  // TODO: Distinguish EOF from other EInOutError by their ErroCode
+       // begin
+          if Text <> '' then
           begin
-            AddToken(TTokenKind.ENDTOK, ActiveSourceFile, Line, 3, 0);
-            AddToken(TTokenKind.DOTTOK, ActiveSourceFile, Line, 1, 0);
-          end
-          else
-          begin
-            AddToken(GetStandardToken(Text), ActiveSourceFile, Line, length(Text) + Spaces, 0);
-            Spaces := 0;
+            if Text = 'END.' then
+            begin
+              AddToken(TTokenKind.ENDTOK, ActiveSourceFile, Line, 3, 0);
+              AddToken(TTokenKind.DOTTOK, ActiveSourceFile, Line, 1, 0);
+            end
+            else
+            begin
+              AddToken(GetStandardToken(Text), ActiveSourceFile, Line, length(Text) + Spaces, 0);
+              Spaces := 0;
+            end;
           end;
         end;
+        //else
+       // begin
+       //   WriteLn('ERROR: EInOutError ' + e.message);
+       //   RaiseHaltException(-1);
+      //  end;
+      //end;
     end;// try
     InFile.Close;
   end;

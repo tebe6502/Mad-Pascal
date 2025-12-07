@@ -1,29 +1,41 @@
-// 7348446
-// 5715458
-// 2274519
-// 2799408
+program A_Dynamic_Storage_Record;
 
-// 1373 bytes
+const
+  Number_Of_Friends = 50;
 
-uses crt;
+type
+  Full_Name = record
+    First_Name: String[12];
+    Initial: Char;
+    Last_Name: String[15];
+  end;
+
+  Date = record
+    Day: Byte;
+    Month: Byte;
+    Year: Integer;
+  end;
+
+  Person_Id = ^Person;
+
+  Person = record
+    Name: Full_Name;
+    City: String[15];
+    State: String[2];
+    Zipcode: String[5];
+    Birthday: Date;
+  end;
 
 var
-  p0: array [0..63] of cardinal;
-  p1     : PCardinal;
-  p2     : PCardinal absolute $e0;
+  Friend: array[0..Number_Of_Friends] of Person_Id;
+  Self, Mother, Father: Person_Id;
+  Index: Byte;
 
-  i      : byte;
+begin  (* main program *)
+  for Index := 0 to Number_Of_Friends - 1 do
+  begin
+    Friend[Index]^ := Mother^;
+  end;
 
-begin
-
-
-  p1:=@p0;
-  p2:=@p0;
-
-  i:=11;
-
-  p1^ := p1[i+3] + p1[i+2]+ p1[i+1]+ p1[i+63];
-  writeln(p1^);
-
-
+  
 end.

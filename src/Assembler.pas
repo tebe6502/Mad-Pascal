@@ -4,6 +4,8 @@ unit Assembler;
 
 interface
 
+function Hex(Value: Cardinal; nibbles: Shortint): String;
+
 // Hexadecimal output of 8-Bit with '$' prefix, 2 digits
 function HexByte(const Value: Byte): String; overload;
 function HexByte(const Value: Int64): String; overload; // For detecting missing downcasts
@@ -29,11 +31,8 @@ var
   HexBytes: array[0..255] of String;
   Count: Longint;
 
-// Conversion to hexadecimal notation
-// The parameter 'nibbles' specifies the maximum number of nibbles to be converted.
-// This must be an even number.
-// if there are any values left, continue the conversion
-function Hex(Value: Cardinal; nibbles: Shortint): String;
+
+function _Hex(Value: Cardinal; nibbles: Shortint): String;
 var
   v: Byte;
 const
@@ -56,6 +55,17 @@ begin
 end;
 
 
+// Conversion to hexadecimal notation
+// The parameter 'nibbles' specifies the maximum number of nibbles to be converted.
+// This must be an even number.
+// if there are any values left, continue the conversion
+function Hex(Value: Cardinal; nibbles: Shortint): String;
+begin
+  Result := _Hex(Value, nibbles);
+
+  Result := '$' + Result;
+end;
+
 // TODO JAC! Disable after optimization
 procedure DoCount;
 begin
@@ -73,9 +83,10 @@ function HexByte(const Value: Int64): String; overload;
 const
   msg = 'HexByte() called with argument datatype larger than Byte';
 begin
-  Writeln('ERROR: ', msg);
-  Assert(False, msg);
-  Result := '$??';
+  //Writeln('ERROR: ', msg);
+  //Assert(False, msg);
+  // Result := '$??';
+  Result := Hex(Value, 2);
 end;
 
 function HexWord(const Value: Word): String;
@@ -101,9 +112,10 @@ function HexWord(const Value: Int64): String; overload;
 const
   msg = 'HexWord() called with argument datatype larger than Word';
 begin
-  Writeln('ERROR: ', msg);
-  Assert(False, msg);
-  Result := '$????';
+  //Writeln('ERROR: ', msg);
+  //Assert(False, msg);
+  //Result := '$????';
+  Result := Hex(Value, 4);
 end;
 
 function HexLongWord(const Value: Int64): String;
@@ -137,7 +149,7 @@ var
 begin
   for i := Low(HexBytes) to High(HexBytes) do
   begin
-    HexBytes[i] := Hex(i, 2);
+    HexBytes[i] := _Hex(i, 2);
   end;
   Count := 0;
 end;

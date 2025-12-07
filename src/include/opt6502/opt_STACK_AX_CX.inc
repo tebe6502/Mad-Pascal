@@ -31,7 +31,7 @@ begin
        else
         p:=p - q;
 
-       listing[i+1] := #9'mva #' + HexByte(Byte(p and $ff)) + ' :STACKORIGIN,x';
+       listing[i+1] := #9'mva #' + HexByte(byte(p)) + ' :STACKORIGIN,x';
        listing[i+2] := #9'mva #' + HexByte(byte(p shr 8)) + ' :STACKORIGIN+STACKWIDTH,x';
 
        listing[i+3] := '';
@@ -64,7 +64,7 @@ begin
        else
         p:=p - q;
 
-       listing[i+1] := #9'mva #' + HexByte(Byte(p and $ff)) + ' :STACKORIGIN,x';
+       listing[i+1] := #9'mva #' + HexByte(byte(p)) + ' :STACKORIGIN,x';
        listing[i+2] := #9'mva #' + HexByte(byte(p shr 8)) + ' :STACKORIGIN+STACKWIDTH,x';
 
        listing[i+3] := '';

@@ -58,7 +58,7 @@ begin
 	q:=q * 4;
 
 	if {q < 63} q <= 256-4 then begin
-	  listing[i+6]  := #9'ldy #' + HexByte(Byte(q));
+	  listing[i+6]  := #9'ldy #' + HexByte(q);
 
 	  listing[p-1] := '';
 
@@ -88,7 +88,7 @@ begin
 	q:=q * 4;
 
 	if {q < 63} q <= 256-4 then begin
-	  listing[i+6]  := #9'ldy #' + HexByte(Byte(q));
+	  listing[i+6]  := #9'ldy #' + HexByte(q);
 
 	  listing[p-2] := '';
 	  listing[p-1] := #9'lda ' + copy(listing[p-1], 6, 256);
@@ -135,7 +135,7 @@ begin
 	q:=q * 2;
 
 	if {q < 127} q <= 256-2 then begin
-	  listing[i+6]  := #9'ldy #' + HexByte(Byte(q));
+	  listing[i+6]  := #9'ldy #' + HexByte(q);
 
 	  listing[p-1] := '';
 
@@ -164,7 +164,7 @@ begin
 	q:=q * 2;
 
 	if {q < 127} q <= 256-2 then begin
-	  listing[i+6]  := #9'ldy #' + HexByte(Byte(q));
+	  listing[i+6]  := #9'ldy #' + HexByte(q);
 
 	  listing[p-2] := '';
 	  listing[p-1] := #9'lda ' + copy(listing[p-1], 6, 256);

@@ -1053,16 +1053,8 @@ end;// GenerateInterrupt
 // ----------------------------------------------------------------------------
 
 
-
-procedure StartOptimization(const tokenIndex: TTokenIndex);
-begin
-
-  StopOptimization;
-  Optimize.StartOptimization(TokenAt(tokenIndex).SourceLocation);
-
-end;
-
 // ----------------------------------------------------------------------------
+// This procedure must be defined before StartOptimization, so the compiler finds the correct method!
 // ----------------------------------------------------------------------------
 
 procedure StopOptimization;
@@ -1072,6 +1064,14 @@ begin
 
 end;
 
+
+procedure StartOptimization(const tokenIndex: TTokenIndex);
+begin
+
+  StopOptimization;
+  Optimize.StartOptimization(TokenAt(tokenIndex).SourceLocation);
+
+end;
 
 
 // ----------------------------------------------------------------------------
@@ -1145,6 +1145,9 @@ begin
     NumAllocElements := 0;
     svar := '';
   end;
+
+  if (pass = TPass.CODE_GENERATION) and (IdentIndex=580) then
+  WriteLn(IdentIndex); // TODO
 
   svara := svar;
   if pos('.', svar) > 0 then
@@ -11689,6 +11692,34 @@ end;
 
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
+procedure LogDebug(const message: String);
+begin
+  // WriteLn(StdErr,message);
+end;
+
+procedure StopAtBreakPoint;
+begin
+
+end;
+
+procedure DebugCompileStatement(tokenIndex: Integer; isAsm: Boolean );
+var s: String;
+begin
+ // if isActive then
+ // begin
+  s:=InfoAboutToken( TokenAt(TokenIndex).Kind);
+
+    LogDebug(Format('CompileStatement (tokenIndex: %d - %s; isAsm: %s) in %s',
+      [tokenIndex, s, BoolToStr(isAsm, True),TokenAt(TokenIndex).SourceLocation.SourceFile.Name]));
+    if (tokenIndex = 940) then
+    begin
+      StopAtBreakPoint;
+    end;
+  //end;
+end;
+
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 function CompileStatement(i: TTokenIndex; isAsm: Boolean = False): Integer;
 var
@@ -11709,7 +11740,8 @@ var
   Name, EnumName, svar, par1, par2: String;
   forBPL: Byte;
 begin
-  Debugger.debugger.CompileStatement(i, isAsm);
+  // Debugger.debugger.CompileStatement(i, isAsm);
+  DebugCompileStatement(i, isAsm);
 
   Result := i;
 
@@ -12076,19 +12108,20 @@ begin
 
                     i := CompileArrayIndex(i, IdentIndex, VarType);
 
+                   if (TokenAt(i + 2).Kind = DEREFERENCETOK) and (VarType in [TDataType.RECORDTOK, TDataType.OBJECTTOK]) then
+                    begin
+                      Inc(i);
+
+ 	            if TokenAt(i + 2).Kind <> DOTTOK then
+      		       Push(0, ASPOINTERTORECORDARRAYORIGIN, GetDataSize(VarType), IdentIndex, 0);
+//		     else
+//		       Push(0, ASPOINTERTOARRAYORIGIN2, GetDataSize(VarType), IdentIndex, 0);
+                    end;
+
                     if VarType = TDataType.ARRAYTOK then
                     begin
                       IndirectionLevel := ASPOINTER;
                       VarType := TDataType.POINTERTOK;
-                    end;
-
-
-                    if TokenAt(i + 2).Kind = TTokenKind.DEREFERENCETOK then
-                    begin
-                      Inc(i);
-
-                      Push(0, ASPOINTERTOARRAYORIGIN2, GetDataSize(VarType), IdentIndex, 0);
-
                     end;
 
                     // label.field[index] -> label + field[index]

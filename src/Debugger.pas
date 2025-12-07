@@ -165,7 +165,7 @@ begin
   begin
     // if (a<>'') then
     LogDebug(Format('WriteOut Line %d: ''%s''', [WriteOutLine, a]));
-    if pos('3002', a) > 0 then
+    if pos('lda #$FF', a) > 0 then
     begin
       StopAtBreakPoint;
     end;

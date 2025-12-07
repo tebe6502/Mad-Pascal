@@ -93,7 +93,7 @@ begin
       begin
 	p := GetWORD(i+1, i);
 
-	listing[i+3] := #9'sta ' + HexWord(Word(p));
+	listing[i+3] := #9'sta ' + Hex(p, 4);
 
 	listing[i]   := '';
 	listing[i+1] := '';
@@ -109,7 +109,7 @@ begin
       begin
         p:=GetBYTE(i);
 
-	listing[i+3] := #9'sta ' + HexByte(Word(p)) + '00,y';
+	listing[i+3] := #9'sta ' + Hex(p, 2) + '00,y';
 
 	listing[i] := '';
 
@@ -125,7 +125,7 @@ begin
       begin
 	p := GetWORD(i+2, i);
 
-	listing[i+4] := #9'sta ' + HexWord(Word(p));
+	listing[i+4] := #9'sta ' + Hex(p, 4);
 
 	listing[i]   := '';
 	listing[i+1] := '';
@@ -142,7 +142,7 @@ begin
       begin
 	p := GetWORD(i+2, i);
 
-	listing[i+3] := #9'sta ' + HexWord(Word(p));
+	listing[i+3] := #9'sta ' + Hex(p, 4);
 
 	listing[i]   := '';
 	listing[i+1] := '';
@@ -168,7 +168,7 @@ begin
 
 	 listing[i+2] := '';
 	end else
-	 listing[i+4] := #9'sta ' + HexByte(Byte(p)) + '00,y';
+	 listing[i+4] := #9'sta ' + Hex(p, 2) + '00,y';
 
 	exit(false);
       end;
@@ -186,7 +186,7 @@ begin
 
 	 listing[i+2] := '';
 	end else
- 	 listing[i+3] := #9'sta ' + HexByte(Byte(p)) + '00,y';
+ 	 listing[i+3] := #9'sta ' + Hex(p, 2) + '00,y';
 
 	listing[i] := '';
 	listing[i+1] := '';
@@ -211,7 +211,7 @@ begin
         p:=GetBYTE(i+2);
 
 	listing[i+7] := #9'ldy ' + copy(listing[i], 6, 256);
-	listing[i+8] := #9'sta ' + HexByte(Byte(p)) + '00,y';
+	listing[i+8] := #9'sta ' + Hex(p, 2) + '00,y';
 
 	listing[i] := '';
 	listing[i+1] := '';
@@ -237,7 +237,7 @@ begin
         p:=GetBYTE(i+2);
 
 	listing[i+6] := #9'ldy ' + copy(listing[i], 6, 256);
-	listing[i+7] := #9'sta ' + HexByte(Byte(p)) + '00,y';
+	listing[i+7] := #9'sta ' + Hex(p, 2) + '00,y';
 
 	listing[i] := '';
 	listing[i+1] := '';
@@ -261,7 +261,7 @@ begin
         p:=GetBYTE(i+2);
 
 	listing[i+4] := #9'ldy ' + copy(listing[i], 6, 256);
-	listing[i+5] := #9'lda ' + HexByte(Byte(p)) + '00,y';
+	listing[i+5] := #9'lda ' + Hex(p, 2) + '00,y';
 
 	listing[i] := '';
 	listing[i+1] := '';
@@ -290,7 +290,7 @@ begin
 	listing[i+3] := '';
 	listing[i+4] := '';
 
-	listing[i+6] := #9'sta ' + HexWord(Word(p)) + ',y';
+	listing[i+6] := #9'sta ' + Hex(p, 4) + ',y';
 
 	exit(false);
       end;

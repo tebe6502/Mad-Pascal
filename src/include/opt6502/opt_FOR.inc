@@ -12,8 +12,8 @@ begin
    found := false;
 
    for i := 0 to l - 1 do
-    if (pos('@FORTMP_', listing[i]) > 0) then		// the FOR loop counter cannot be modified inside the loop
-     if mva_im(i) then begin				// !!! Just MVA_IM !!!
+    if (pos('@FORTMP_', listing[i]) > 0) then		// licznik petli FOR nie moze byc modyfikowany podczas jej dzialania
+     if mva_im(i) then begin				// !!! tylko MVA_IM !!!
 
       found := true;
 
@@ -48,7 +48,7 @@ begin
 
      if found then begin
 
-      Rebuild;
+      Rebuild('opt_FOR');
 
       if l > 0 then begin
 
@@ -63,7 +63,7 @@ begin
 	end;
 
 
-       if (l = 5) and					// BYTE swap places
+       if (l = 5) and					// BYTE zamien miejscami
           lda_a(0) and
           cmp(1) and (cmp_im(1) = false) and
 	  (listing[2] = #9'bcc *+7') and
@@ -96,7 +96,7 @@ begin
  	  listing[3] := '';
  	  listing[4] := #9'jmi ' + copy(listing[4], 6, 256);
  	 end else begin
-	  listing[1] := #9'cmp #' + HexByte(Byte(k and $ff));
+	  listing[1] := #9'cmp #' + HexByte(byte(k));
 	  listing[2] := '';
 	  listing[3] := '';
 	  listing[4] := #9'jcs ' + copy(listing[4], 6, 256);
@@ -144,7 +144,7 @@ begin
         k := GetBYTE(1) + 1;
 
 	 if k <> $80 then begin
-	  listing[1] := #9'sub #' + HexByte(Byte(k and $ff));
+	  listing[1] := #9'sub #' + HexByte(byte(k));
 
 	  listing[4] := #9'asl @';
 	  listing[5] := #9'jcc ' + copy(listing[6], 6, 256);
@@ -232,7 +232,7 @@ begin
         end;
 
 
-       if (l = 15) and					// CARDINAL swap places
+       if (l = 15) and					// CARDINAL zamien miejscami
           lda_a(0) and
           cmp(1) and (cmp_im(1) = false) and
 	  bne_a(2) and
@@ -363,9 +363,9 @@ begin
          k := GetBYTE(2) shl 8 + GetBYTE(5) + 1;
 
          if k <> $8000 then begin
-	  listing[5] := #9'cmp #' + HexByte(Byte(k and $ff));
+	  listing[5] := #9'cmp #' + HexByte(byte(k));
 	  listing[6] := listing[1];
-	  listing[7] := #9'sbc #' + HexByte(Byte(k shr 8));
+	  listing[7] := #9'sbc #' + HexByte(byte(k shr 8));
 	  listing[8] := #9'svc';
 	  listing[9] := #9'eor #$80';
 	  listing[10] := #9'asl @';
@@ -412,9 +412,9 @@ begin
          k := GetBYTE(2) shl 8 + GetBYTE(5);
 
          if k <> $8000 then begin
-	  listing[5] := #9'cmp #' + HexByte(Byte(k and $ff));
+	  listing[5] := #9'cmp #' + HexByte(byte(k));
 	  listing[6] := listing[1];
-	  listing[7] := #9'sbc #' + HexByte(Byte(k shr 8));
+	  listing[7] := #9'sbc #' + HexByte(byte(k shr 8));
 	  listing[8] := #9'svc';
 	  listing[9] := #9'eor #$80';
 	  listing[10] := #9'jmi ' + copy(listing[18], 6, 256);

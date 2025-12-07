@@ -7,7 +7,7 @@ begin
 //				     REG Y.
 // -------------------------------------------------------------------------- //
 
-  Rebuild;
+  Rebuild('opt_REG_Y');
 
    for i := 0 to l - 1 do
     if ldy_val(i) {and (iny(i+1) = false) and (dey(i+1) = false)} then begin
@@ -47,7 +47,7 @@ begin
 
       if optyY <> '' then
        if (optyY[1] = '#') and (optyY[2] = '$') then
-        optyY:='#' + HexByte( byte( StrToInt(copy(optyY,2,256)) + 1))						// #$xx
+        optyY:='#' + Hex( byte( StrToInt(copy(optyY,2,256)) + 1), 2)						// #$xx
        else
         optyY:='+#$01'+optyY;											// +#$01
 
@@ -63,7 +63,7 @@ begin
 
       if optyY <> '' then
        if (optyY[1] = '#') and (optyY[2] = '$') then
-        optyY:='#' + HexByte( byte( StrToInt(copy(optyY,2,256)) - 1))						// #$xx
+        optyY:='#' + Hex( byte( StrToInt(copy(optyY,2,256)) - 1), 2)						// #$xx
        else
         optyY:='-#$01'+optyY;											// -#$01
 

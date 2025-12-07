@@ -1,6 +1,6 @@
 
 function opt_CMP_BP2(i: integer): Boolean;
-var p: byte;
+var p: integer;
 begin
 
     Result := true;
