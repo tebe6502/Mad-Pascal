@@ -25,6 +25,7 @@ uses Crt, SysUtils, Common;
 var
   TemporaryBuf: array [0..511] of String;
 
+  {$I '..\src\OptimizeDebug.inc'}
 
 // ----------------------------------------------------------------------------
 
@@ -804,7 +805,7 @@ var inxUse, found: Boolean;
 
 // -----------------------------------------------------------------------------
 
-   procedure Rebuild;
+   procedure Rebuild(const context: String = '');
    var k, i: integer;
    begin
 
