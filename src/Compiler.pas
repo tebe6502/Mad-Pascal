@@ -1054,7 +1054,7 @@ end;// GenerateInterrupt
 
 
 // ----------------------------------------------------------------------------
-// This mist be defined before StartOptimization, so the compiler finds the correct method!
+// This procedure must be defined before StartOptimization, so the compiler finds the correct method!
 // ----------------------------------------------------------------------------
 
 procedure StopOptimization;
@@ -1145,6 +1145,9 @@ begin
     NumAllocElements := 0;
     svar := '';
   end;
+
+  if (pass = TPass.CODE_GENERATION) and (IdentIndex=580) then
+  WriteLn(IdentIndex); // TODO
 
   svara := svar;
   if pos('.', svar) > 0 then
@@ -12105,19 +12108,20 @@ begin
 
                     i := CompileArrayIndex(i, IdentIndex, VarType);
 
+                   if (TokenAt(i + 2).Kind = DEREFERENCETOK) and (VarType in [TDataType.RECORDTOK, TDataType.OBJECTTOK]) then
+                    begin
+                      Inc(i);
+
+ 	            if TokenAt(i + 2).Kind <> DOTTOK then
+      		       Push(0, ASPOINTERTORECORDARRAYORIGIN, GetDataSize(VarType), IdentIndex, 0);
+//		     else
+//		       Push(0, ASPOINTERTOARRAYORIGIN2, GetDataSize(VarType), IdentIndex, 0);
+                    end;
+
                     if VarType = TDataType.ARRAYTOK then
                     begin
                       IndirectionLevel := ASPOINTER;
                       VarType := TDataType.POINTERTOK;
-                    end;
-
-
-                    if TokenAt(i + 2).Kind = TTokenKind.DEREFERENCETOK then
-                    begin
-                      Inc(i);
-
-                      Push(0, ASPOINTERTOARRAYORIGIN2, GetDataSize(VarType), IdentIndex, 0);
-
                     end;
 
                     // label.field[index] -> label + field[index]
