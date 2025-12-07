@@ -24,3 +24,6 @@
 {$ELSE}
 {$DEFINE UPCASE_STRING}
 {$ENDIF}
+
+// For sharing code with origin
+{$DEFINE MP175_TEST}

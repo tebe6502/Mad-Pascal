@@ -49,19 +49,14 @@ var
 
   optyFOR0, optyFOR1, optyFOR2, optyFOR3: TString;
 
-  _optyA: TString;
+  optyA: TString;
 
   {$I 'OptimizeDebug.inc'}
 
 
-function optyA: TString;
-begin
-  Result:=_optyA;
-  end;
-
 procedure SetOptyA(const value: TString);
 begin
-  _optyA:= value;
+  optyA:= value;
   DebugCall( 'SetOptyA', value);
   end;
 
