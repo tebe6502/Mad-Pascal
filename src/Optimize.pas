@@ -896,7 +896,7 @@ var
    begin
 
 
-    oldListing := DebugListing(listing);
+    oldListing := ListingToString(listing);
 
     k := 0;
     for i := 0 to l - 1 do
@@ -1073,7 +1073,7 @@ var
     listing[k + 3] := '';
 
 
-    newListing := DebugListing(listing);
+    newListing := ListingToString(listing);
     DebugCall(Format('Rebuild(%s)', [context]), Format('Changing l from %d to %d: oldListing=%s / newListing=%s', [l, k, oldListing, newListing]));
     l := k;
 
