@@ -7,7 +7,7 @@ begin
 //				      REG A.
 // -------------------------------------------------------------------------- //
 
-   Rebuild('opt_REG_A');
+   Rebuild('opt_REG_A');;
 
    for i := 0 to l - 1 do
     if mva_im(i) or
@@ -49,7 +49,7 @@ begin
        arg0 := copy(arg0, k+1, 256);
       end;
 
-       SetOptyA(arg0);
+      SetOptyA(arg0);
 
      end else
      if tya(i) or and_ora_eor(i) or add_sub(i) or adc_sbc(i) or asl(i) or lsr(i) or rol(i) or ror(i) then begin
