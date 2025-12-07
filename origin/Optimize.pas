@@ -3064,6 +3064,7 @@ begin
 
  if Pass = CODEGENERATIONPASS then begin
 
+  LogAsm65(a,comment);
   if optimize_code and common.optimize.use then begin
 
    i:=High(OptimizeBuf);
