@@ -636,7 +636,7 @@ var
 
   // -----------------------------------------------------------------------------
 
-  function ListingToString: String;
+  function ListingToString(const listing: TListing): String;
   var i: Integer;
   begin
     Result:='';
@@ -880,14 +880,6 @@ var
   end;
 
   // -----------------------------------------------------------------------------
-
-  function DebugListing(const l: TListing ): String;
-  var i: Integer;
-  begin
-    result:='';
-    for i:=Low(l) to High(l) do result:=result+l[i]+'/';
-
-  end;
 
   procedure Rebuild(const context: String);
   var
@@ -1621,7 +1613,7 @@ end;
       Result := True;
 
       Rebuild('PeepholeOptimization');
-      DebugCall('OptimizeASM:PeepholeOptimization', ListingToString);
+      DebugCall('OptimizeASM:PeepholeOptimization', ListingToString(listing));
 
       for i := 0 to l - 1 do
       begin
@@ -1672,15 +1664,15 @@ end;
 
 
     repeat until PeepholeOptimization;
-    DebugCall('OptimizeASM:OptimizeAssignment.PeepholeOptimization', ListingToString);
+    DebugCall('OptimizeASM:OptimizeAssignment.PeepholeOptimization', ListingToString(listing));
     while RemoveUnusedSTACK do repeat until PeepholeOptimization;
 
     repeat until PeepholeOptimization_STA;
-    DebugCall('OptimizeASM:OptimizeAssignment.PeepholeOptimization_STA', ListingToString);
+    DebugCall('OptimizeASM:OptimizeAssignment.PeepholeOptimization_STA', ListingToString(listing));
     while RemoveUnusedSTACK do repeat until PeepholeOptimization;
 
     repeat until PeepholeOptimization_END;
-    DebugCall('OptimizeASM:OptimizeAssignment.PeepholeOptimization_END', ListingToString);
+    DebugCall('OptimizeASM:OptimizeAssignment.PeepholeOptimization_END', ListingToString(listing));
     while RemoveUnusedSTACK do repeat until PeepholeOptimization;
   end;
 
