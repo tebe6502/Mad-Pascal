@@ -38,15 +38,16 @@
         </Mode>
         <Mode Name="test">
           <local>
-            <CommandLineParams Value="-ipath:C:\jac\system\Atari800\Programming\Repositories\Mad-Pascal\blibs -ipath:C:\jac\system\Atari800\Programming\Repositories\Mad-Pascal\samples\a8\sound\mod sortalg.pas -diag -pause"/>
-            <WorkingDirectory Value="C:\jac\system\Atari800\Programming\Repositories\Mad-Pascal\samples\a8\math\sorting\"/>
+            <CommandLineParams Value="-ipath:C:\jac\system\Atari800\Programming\Repositories\Mad-Pascal\blibs -ipath:C:\jac\system\Atari800\Programming\Repositories\Mad-Pascal\samples\a8\sound\mod bin2csv.pas -diag -pause"/>
+            <WorkingDirectory Value="C:\jac\system\Atari800\Programming\Repositories\Mad-Pascal\samples\a8\bin2csv\"/>
           </local>
         </Mode>
         <Mode Name="debug-test">
           <local>
-            <CommandLineParams Value="debug.pas -diag"/>
+            <CommandLineParams Value="debug.pas -diag -pause"/>
             <WorkingDirectory Value="C:\jac\system\Atari800\Programming\Repositories\Mad-Pascal\samples\tests\tests-debug\"/>
-            <FileNameStdOut Value="C:\jac\system\Atari800\Programming\Repositories\Mad-Pascal\projects\TestMadPascal.log"/>
+            <RedirectStdErr Value="rprOverwrite"/>
+            <FileNameStdErr Value="stderr.log"/>
           </local>
         </Mode>
       </Modes>
@@ -562,6 +563,10 @@
         <Filename Value="..\src\Assembler.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit>
+      <Unit>
+        <Filename Value="..\src\OptimizeDebug.inc"/>
+        <IsPartOfProject Value="True"/>
+      </Unit>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
@@ -612,7 +617,8 @@
 -dSIMULATED_FILE_IO2
 -dUSEOPTFILE2
 -dUSETRACEFILE
--dPROFILE"/>
+-dPROFILE
+-dMP175"/>
     </Other>
   </CompilerOptions>
   <Debugging>
