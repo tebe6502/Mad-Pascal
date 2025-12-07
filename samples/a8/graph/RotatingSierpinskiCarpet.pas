@@ -6,7 +6,7 @@ program RotatingSierpinskiCarpet;
 uses atari, crt, fastgraph, math, sysutils;
 
 type
-  IntVector = record x, y: SmallInt end;
+  IntVector = record x, y: word end;
   IntVectorPtr = ^IntVector;
 
   Vector = record x, y: Float16 end;
@@ -30,7 +30,7 @@ const
 
 var
   data: array [0 .. cN - 1, 0 .. sN * SizeOf(Square) - 1] of Byte;
-  carpets: array [0 .. cN - 1] of CarpetPtr;
+  [striped] carpets: array [0 .. cN - 1] of CarpetPtr;
   currentSquare: ^Square;
   sinA, cosA: Float16;
   ticksAnim: Word;
@@ -162,7 +162,7 @@ end;
 procedure DrawCurrentSquare();
 var
   v, d: ^IntVector;
-  x, y: SmallInt;
+  x, y: word;
 begin
   v := Pointer(@currentSquare.v);
   d := Pointer(@currentSquare.d);
@@ -190,7 +190,7 @@ procedure DrawCarpet(c: CarpetPtr);
 var s: Byte;
 begin
   currentSquare := Pointer(c);
-  for s := 0 to sN - 1 do begin
+  for s := sN - 1 downto 0 do begin
     DrawCurrentSquare();
     Inc(currentSquare);
   end;
@@ -233,5 +233,3 @@ begin
   WriteLn(ticksAnim);
   ReadKey();
 end.
-
-// 1598

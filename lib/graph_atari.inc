@@ -338,24 +338,12 @@ _1
 	cpw y main.system.ScreenHeight
 	bcc _2
 
-	lda main.system.ScreenHeight
-	ldy main.system.ScreenHeight+1
-	sbc #1
-	scs
-	dey
-	sta y
-	sty y+1
+	mwa WIN_BOTTOM y
 _2
 	cpw x main.system.ScreenWidth
 	bcc _3
 
-	lda main.system.ScreenWidth
-	ldy main.system.ScreenWidth+1
-	sbc #1
-	scs
-	dey
-	sta x
-	sty x+1
+	mwa WIN_RIGHT x
 _3
 	stx @sp
 
