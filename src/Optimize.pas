@@ -1881,7 +1881,7 @@ begin        // OptimizeASM
   for i := 0 to High(OptimizeBuf) - 1 do
   begin
     a := OptimizeBuf[i];
-    if BreakpointDebugCountHit then
+    if DebugCallCountBreakPointHit then
     begin
          DebugCall('OptimizeASM', Format('i=%d a=''%s''', [i,a]));
     end;
