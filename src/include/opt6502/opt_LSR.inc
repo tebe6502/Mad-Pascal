@@ -140,7 +140,7 @@ begin
 	   begin
             p:=GetBYTE(i);
 
-	    listing[i] := #9'ldy #' + HexByte(Byte(p + 1));
+	    listing[i] := #9'ldy #' + Hex(byte(p) + 1, 2);
 
 	    listing[i+2] := listing[i+5];
 	    listing[i+3] := #9'dey';
@@ -169,7 +169,7 @@ begin
 	   begin
             p:=GetBYTE(i);
 
-	    listing[i] := #9'ldy #' + HexByte(byte(p + 1));
+	    listing[i] := #9'ldy #' + Hex(byte(p) + 1, 2);
 
 	    listing[i+2] := listing[i+5];
 	    listing[i+3] := #9'dey';
@@ -194,7 +194,7 @@ begin
 	   begin
             p:=GetBYTE(i);
 
-	    listing[i] := #9'ldy #' + HexByte(byte(p + 1));
+	    listing[i] := #9'ldy #' + Hex(byte(p) + 1, 2);
 
 	    listing[i+2] := listing[i+5];
 	    listing[i+3] := #9'dey';
@@ -215,7 +215,7 @@ begin
 	   begin
             p:=GetBYTE(i);
 
-	    listing[i] := #9'ldy #' + HexByte(Byte(p + 1));
+	    listing[i] := #9'ldy #' + Hex(byte(p) + 1, 2);
 
 	    listing[i+2] := listing[i+5];
 	    listing[i+3] := #9'dey';

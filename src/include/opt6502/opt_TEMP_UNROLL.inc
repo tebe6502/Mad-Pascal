@@ -22,7 +22,7 @@ begin
       p:=GetBYTE(4) + 1;
 
      delete(TemporaryBuf[2], pos(',y', TemporaryBuf[2]), 2);
-     TemporaryBuf[2] := TemporaryBuf[2] + '+' + HexByte(p);
+     TemporaryBuf[2] := TemporaryBuf[2] + '+' + Hex(p, 2);
 
      TemporaryBuf[0] := '~';
    end;
@@ -43,7 +43,7 @@ begin
       p:=GetBYTE(4) + 1;
 
      delete(TemporaryBuf[2], pos(',y', TemporaryBuf[2]), 2);
-     TemporaryBuf[2] := TemporaryBuf[2] + '+' + HexByte(p);
+     TemporaryBuf[2] := TemporaryBuf[2] + '+' + Hex(p, 2);
 
      TemporaryBuf[1] := '~';
    end;
@@ -66,7 +66,7 @@ begin
       p:=GetBYTE(6) + 1;
 
      delete(TemporaryBuf[4], pos(',y', TemporaryBuf[4]), 2);
-     TemporaryBuf[4] := TemporaryBuf[4] + '+' + HexByte(p) + ',y';
+     TemporaryBuf[4] := TemporaryBuf[4] + '+' + Hex(p, 2) + ',y';
 
      TemporaryBuf[0] := #9'ldy ' + copy(TemporaryBuf[0], 6, 256);
      TemporaryBuf[1] := '~';
@@ -94,7 +94,7 @@ begin
 	 p:=GetBYTE(1);
 
 	 delete(TemporaryBuf[5], pos(',y', TemporaryBuf[5]), 2);
-	 TemporaryBuf[5] := TemporaryBuf[5] + '+' + HexByte(p);
+	 TemporaryBuf[5] := TemporaryBuf[5] + '+' + Hex(p, 2);
 
 	 TemporaryBuf[1] := '~';
 	 TemporaryBuf[2] := '~';
@@ -114,7 +114,7 @@ begin
 	 p:=GetBYTE(1);
 
 	 delete(TemporaryBuf[5], pos(',y', TemporaryBuf[5]), 2);
-	 TemporaryBuf[5] := TemporaryBuf[5] + '+' + HexByte(p);
+	 TemporaryBuf[5] := TemporaryBuf[5] + '+' + Hex(p, 2);
 
 	 TemporaryBuf[1] := '~';
 	 TemporaryBuf[2] := '~';
@@ -136,7 +136,7 @@ begin
 	 p:=GetBYTE(1);
 
 	 delete(TemporaryBuf[7], pos(',y', TemporaryBuf[7]), 2);
-	 TemporaryBuf[7] := TemporaryBuf[7] + '+' + HexByte(p) + ',y';
+	 TemporaryBuf[7] := TemporaryBuf[7] + '+' + Hex(p, 2) + ',y';
 
 	 TemporaryBuf[1] := '~';
 	 TemporaryBuf[2] := '~';

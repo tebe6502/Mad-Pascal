@@ -97,19 +97,19 @@ if JSR_SYSTEM_MOVE(11) or (LOCAL_SYSTEM_MOVE(11) and mINLINE(12) and ENDL(13)) t
 
 	  if k <= 16 then begin
 
-	   TemporaryBuf[10] := #9':' + IntToStr(k) + ' mva ' + HexWord(p) + '+# ' + HexWord(q) + '+#';
+	   TemporaryBuf[10] := #9':' + IntToStr(k) + ' mva ' + Hex(p, 4) + '+# ' + Hex(q, 4) + '+#';
 	   TemporaryBuf[11] := '';
 
 	  end else
 	  if k <= 128 then begin
 
-	  TemporaryBuf[10] := #9'ldy #' + HexByte(Byte(k-1));
-	  TemporaryBuf[11] := #9'mva:rpl ' + HexWord(Word(p)) + ',y ' + HexWord(Word(q)) + ',y-';
+	  TemporaryBuf[10] := #9'ldy #' + HexByte(k-1);
+	  TemporaryBuf[11] := #9'mva:rpl ' + Hex(p, 4) + ',y ' + Hex(q, 4) + ',y-';
 
 	  end else begin
 
 	  TemporaryBuf[10] := #9'ldy #256-'+IntToStr(k);
-	  TemporaryBuf[11] := #9'mva:rne ' + HexWord(Word(p)) + '+' + IntToStr(k) + '-256,y ' + HexWord(Word(q)) + '+' + IntToStr(k) + '-256,y+';
+	  TemporaryBuf[11] := #9'mva:rne ' + Hex(p, 4) + '+' + IntToStr(k) + '-256,y ' + Hex(q, 4) + '+' + IntToStr(k) + '-256,y+';
 	  end;
 
 	  TemporaryBuf[0] := '~';
@@ -174,19 +174,19 @@ end;
 
 	  if k <= 16 then begin
 
-	    TemporaryBuf[11] := #9':' + IntToStr(k) + ' mva ' + HexWord(Word(p)) + '+# ' + HexWord(Word(q)) + '+#';
+	    TemporaryBuf[11] := #9':' + IntToStr(k) + ' mva ' + Hex(p, 4) + '+# ' + Hex(q, 4) + '+#';
 	    TemporaryBuf[12] := '';
 
 	  end else
 	  if k <= 128 then begin
 
-	    TemporaryBuf[11] := #9'ldy #' + HexByte(Byte(k-1));
-	    TemporaryBuf[12] := #9'mva:rpl ' + HexWord(Word(p)) + ',y ' + HexWord(Word(q)) + ',y-';
+	    TemporaryBuf[11] := #9'ldy #' + HexByte(k-1);
+	    TemporaryBuf[12] := #9'mva:rpl ' + Hex(p, 4) + ',y ' + Hex(q, 4) + ',y-';
 
 	  end else begin
 
 	    TemporaryBuf[11] := #9'ldy #256-'+IntToStr(k);
-	    TemporaryBuf[12] := #9'mva:rne ' + HexWord(Word(p)) + '+' + IntToStr(k) + '-256,y ' + HexWord(Word(q)) + '+' + IntToStr(k) + '-256,y+';
+	    TemporaryBuf[12] := #9'mva:rne ' + Hex(p, 4) + '+' + IntToStr(k) + '-256,y ' + Hex(q, 4) + '+' + IntToStr(k) + '-256,y+';
 
 	  end;
 
@@ -248,8 +248,8 @@ end;
 	  TemporaryBuf[1] := #9'sta :bp2';
 
 	  TemporaryBuf[3] := #9'sta :bp2+1';
-	  TemporaryBuf[4] := #9'ldy #' + HexByte(Byte(k-1));
-	  TemporaryBuf[5] := #9'mva:rpl (:bp2),y ' + HexWord(Word(q)) + ',y-';
+	  TemporaryBuf[4] := #9'ldy #' + HexByte(k-1);
+	  TemporaryBuf[5] := #9'mva:rpl (:bp2),y ' + Hex(q, 4) + ',y-';
 
 	  TemporaryBuf[6] := '~';
 	  TemporaryBuf[7] := '~';
@@ -305,8 +305,8 @@ end;
 	  TemporaryBuf[0] := #9'sta :TMP';
 
 	  TemporaryBuf[3] := #9'sta :TMP+1';
-	  TemporaryBuf[4] := #9'ldy #' + HexByte(Byte(k-1));
-	  TemporaryBuf[5] := #9'mva:rpl (:TMP),y ' + HexWord(Word(q)) + ',y-';
+	  TemporaryBuf[4] := #9'ldy #' + HexByte(k-1);
+	  TemporaryBuf[5] := #9'mva:rpl (:TMP),y ' + Hex(q, 4) + ',y-';
 	  TemporaryBuf[6] := '~';
 	  TemporaryBuf[7] := '~';
 	  TemporaryBuf[8] := '~';
@@ -359,8 +359,8 @@ end;
 	  TemporaryBuf[0] := #9'sta :bp2';
 
 	  TemporaryBuf[3] := #9'sta :bp2+1';
-	  TemporaryBuf[4] := #9'ldy #' + HexByte(Byte(k-1));
-	  TemporaryBuf[5] := #9'mva:rpl ' + HexWord(Word(p)) + ',y (:bp2),y-';
+	  TemporaryBuf[4] := #9'ldy #' + HexByte(k-1);
+	  TemporaryBuf[5] := #9'mva:rpl ' + Hex(p, 4) + ',y (:bp2),y-';
 	  TemporaryBuf[6] := '~';
 	  TemporaryBuf[7] := '~';
 	  TemporaryBuf[8] := '~';
@@ -413,8 +413,8 @@ end;
 	  TemporaryBuf[0] := #9'sta :bp2';
 
 	  TemporaryBuf[3] := #9'sta :bp2+1';
-	  TemporaryBuf[4] := #9'ldy #' + HexByte(Byte(k-1));
-	  TemporaryBuf[5] := #9'mva:rpl (:bp2),y ' + HexWord(Word(q)) + ',y-';
+	  TemporaryBuf[4] := #9'ldy #' + HexByte(k-1);
+	  TemporaryBuf[5] := #9'mva:rpl (:bp2),y ' + Hex(q, 4) + ',y-';
 	  TemporaryBuf[6] := '~';
 	  TemporaryBuf[7] := '~';
 	  TemporaryBuf[8] := '~';

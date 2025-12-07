@@ -60,7 +60,7 @@ begin
        lda_a(i+9) and										// lda W		; 9
        cmp_im(i+10) then									// cmp #$00		; 10
       begin
-       c := Cardinal(GetDWORD(i+10, i+7, i+4, i+1));
+       c := GetDWORD(i+10, i+7, i+4, i+1);
 
        if c = 0 then begin
         listing[i+1] := '';
@@ -82,13 +82,13 @@ begin
         exit(false);
        end else
        if c < $FFFFFFFF then begin
-        listing[i+1] := #9'cmp #' + HexByte(byte((c+1) shr 24));
+        listing[i+1] := #9'cmp #' + Hex(byte((c+1) shr 24), 2);
 
-        listing[i+4] := #9'cmp #' + HexByte(byte((c+1) shr 16));
+        listing[i+4] := #9'cmp #' + Hex(byte((c+1) shr 16), 2);
 
-        listing[i+7] := #9'cmp #' + HexByte(byte((c+1) shr 8));
+        listing[i+7] := #9'cmp #' + Hex(byte((c+1) shr 8), 2);
 
-        listing[i+10] := #9'cmp #' + HexByte(byte(c+1));
+        listing[i+10] := #9'cmp #' + Hex(byte(c+1), 2);
 
 	listing[i+13] := '';
 
@@ -192,9 +192,9 @@ begin
 	 exit(false);
         end else
 	if c < $FFFF then begin									// faster than by SUB
-	 listing[i+1] := #9'cmp #' + HexByte(byte((c+1) shr 8));
+	 listing[i+1] := #9'cmp #' + Hex(byte((c+1) shr 8),2);
 
-	 listing[i+4] := #9'cmp #' + HexByte(byte(c+1));
+	 listing[i+4] := #9'cmp #' + Hex(byte(c+1),2);
 
 	 listing[i+7] := '';
 
@@ -242,9 +242,9 @@ begin
 	 exit(false);
         end else
 	if c < $FFFF then begin
-	 listing[i+1] := #9'cmp #' + HexByte(byte((c+1) shr 8));
+	 listing[i+1] := #9'cmp #' + Hex(byte((c+1) shr 8),2);
 
-	 listing[i+4] := #9'cmp #' + HexByte(byte(c+1));
+	 listing[i+4] := #9'cmp #' + Hex(byte(c+1),2);
 
 	 listing[i+6] := '';
 
@@ -320,9 +320,9 @@ begin
 	 exit(false);
         end else
 	if c < $FFFF then begin
-	 listing[i+1] := #9'cmp #' + HexByte(Byte((c+1) shr 8));
+	 listing[i+1] := #9'cmp #' + Hex(byte((c+1) shr 8),2);
 
-	 listing[i+4] := #9'cmp #' + HexByte(Byte(c+1));
+	 listing[i+4] := #9'cmp #' + Hex(byte(c+1),2);
 
 	 listing[i+6] := '';
 
@@ -378,7 +378,7 @@ begin
 	c:=GetByte(i+1);
 
 	if c < 255 then begin
-	 listing[i+1] := #9'cmp #' + HexByte(Byte(c + 1));
+	 listing[i+1] := #9'cmp #' + Hex(byte(c+1), 2);
 
 	 listing[i+3] := '';
 
@@ -416,7 +416,7 @@ begin
 	c:=GetByte(i+1);
 
 	if c < 255 then begin
-	 listing[i+1] := #9'cmp #' + HexByte(Byte(c+1));
+	 listing[i+1] := #9'cmp #' + Hex(byte(c+1), 2);
 
 	 listing[i+2] := '';
 
@@ -527,7 +527,7 @@ begin
 	 inc(p);
 
 	 listing[i] := listing[i+1];
-	 listing[i+1] := #9'sub #' + HexByte(Byte(p and $ff));
+	 listing[i+1] := #9'sub #' + HexByte(byte(p));
 	 listing[i+2] := #9'svc';
 	 listing[i+3] := #9'eor #$80';
 	 listing[i+4] := #9'bpl @+';
@@ -616,9 +616,9 @@ begin
 	 inc(p);
 
 	 listing[i+10] := listing[i+4];
-	 listing[i+11] := #9'cmp #' + HexByte(Byte(p and $ff));
+	 listing[i+11] := #9'cmp #' + HexByte(byte(p));
 	 listing[i+12] := listing[i+1];
-	 listing[i+13] := #9'sbc #' + HexByte(Byte(p shr 8));
+	 listing[i+13] := #9'sbc #' + HexByte(byte(p shr 8));
 	 listing[i+14] := #9'svc';
 	 listing[i+15] := #9'eor #$80';
 	 listing[i+16] := '';

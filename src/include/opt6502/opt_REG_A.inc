@@ -7,7 +7,7 @@ begin
 //				      REG A.
 // -------------------------------------------------------------------------- //
 
-   Rebuild;
+   Rebuild('opt_REG_A');
 
    for i := 0 to l - 1 do
     if mva_im(i) or
@@ -33,7 +33,7 @@ begin
       else
        listing[i] := '';
 
-     optyA := arg0;
+     SetOptyA(arg0);
 
     end else
      if (mva(i) and (iy(i)=false)) then begin
@@ -49,7 +49,7 @@ begin
        arg0 := copy(arg0, k+1, 256);
       end;
 
-      optyA := arg0;
+       SetOptyA(arg0);
 
      end else
      if tya(i) or and_ora_eor(i) or add_sub(i) or adc_sbc(i) or asl(i) or lsr(i) or rol(i) or ror(i) then begin
@@ -59,13 +59,13 @@ begin
        else
         arg0 := '';
 
-       optyA := arg0;
+       SetOptyA(arg0);
 
      end else
      if ((optyA <> '') and sty(i) and (listing[i] = #9'sty ' + optyA)) or
         lda_a(i) or mva(i) or mwa(i) or tya(i) or lab_a(i) or jsr(i) or
         lab_l(i) or lab_b(i) or lab_c(i) or //SKIP(i) or
-	_for(i) or _if(i) then begin arg0 := ''; optyA := '' end;
+	_for(i) or _if(i) then begin arg0 := ''; SetOptyA('') end;
 
 
 end;		// procedure

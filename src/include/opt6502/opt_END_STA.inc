@@ -10,7 +10,7 @@
 	for p:=i-1 downto 1 do
 	 if (pos(tmp, listing[p]) > 0) then begin
 
-	  if ((p>1) and sta_stack(p) and lda_a(p-1) and (lda_stack(p-1) = false) and (SKIP(p-2) = false) {and (iy(p-1) = false)}) or
+	  if ((p>1) and sta_stack(p) and lda_a(p-1) and (lda_stack(p-1) = false) and (SKIP(p-2) = false) and (lda_bp2_y(p-1) = false)) or
 	     ((p=1) and sta_stack(1) and lda_a(0) and (lda_stack(0) = false) and (iy(0) = false)) then
 	  begin
 
@@ -134,7 +134,7 @@
 	 if (pos(tmp, listing[p]) > 0) then begin
 
 	  if ((p>1) and sta_stack(p) and lda_a(p-1) and (lda_stack(p-1) = false) and (SKIP(p-2) = false) and (iy(p-1) = false) and (argMatch(p-1, i+1) = false)) or
-	     ((p=1) and sta_stack(1) and lda_a(0) and (lda_stack(0) = false) and (iy(0) = false) and (argMatch(p-1, i+1) = false)) then begin
+	     ((p=1) and sta_stack(1) and lda_a(0) and (lda_stack(0) = false) and (iy(0) = false) and (argMatch(0, i+1) = false)) then begin
 
 
 	   ok := false;
