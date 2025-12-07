@@ -525,7 +525,7 @@ type
     begin
 
       fileResultMessages[1] := TFileResultMessages.Create('samples\common\math\ElfHash\elf_test.pas');
-      fileResultMessages[1].AddMessage('Error: Expected BYTE, SHORTINT, CHAR or BOOLEAN as CASE selector');
+      fileResultMessages[1].AddMessage('Error: Expected BYTE, SHORTINT, CHAR, or BOOLEAN as CASE selector');
 
       fileResultMessages[2] := TFileResultMessages.Create('samples\tests\tests-basic\directives.pas');
       fileResultMessages[2].AddMessage('User defined: Some info');
