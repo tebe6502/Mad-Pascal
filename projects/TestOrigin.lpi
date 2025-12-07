@@ -31,419 +31,419 @@
         <UnitName Value="MADPASCAL"/>
       </Unit>
       <Unit>
-        <Filename Value="..\..\Mad-Pascal.origin\src\Common.pas"/>
+        <Filename Value="..\origin\Common.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="..\..\Mad-Pascal.origin\src\Compiler.pas"/>
+        <Filename Value="..\origin\Compiler.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="..\..\Mad-Pascal.origin\src\Diagnostic.pas"/>
+        <Filename Value="..\origin\Diagnostic.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="..\..\Mad-Pascal.origin\src\MathEvaluate.pas"/>
+        <Filename Value="..\origin\MathEvaluate.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="..\..\Mad-Pascal.origin\src\Messages.pas"/>
+        <Filename Value="..\origin\Messages.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="..\..\Mad-Pascal.origin\src\mp.pas"/>
+        <Filename Value="..\origin\mp.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="..\..\Mad-Pascal.origin\src\Optimize.pas"/>
+        <Filename Value="..\origin\Optimize.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="..\..\Mad-Pascal.origin\src\Parser.pas"/>
+        <Filename Value="..\origin\Parser.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="..\..\Mad-Pascal.origin\src\Scanner.pas"/>
+        <Filename Value="..\origin\Scanner.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="..\..\Mad-Pascal.origin\src\SplitString.pas"/>
+        <Filename Value="..\origin\SplitString.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="..\..\Mad-Pascal.origin\src\define.inc"/>
+        <Filename Value="..\origin\define.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="..\..\Mad-Pascal.origin\src\include\cmd_listing.inc"/>
+        <Filename Value="..\origin\include\cmd_listing.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="..\..\Mad-Pascal.origin\src\include\cmd_temporary.inc"/>
+        <Filename Value="..\origin\include\cmd_temporary.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="..\..\Mad-Pascal.origin\src\include\compile_pchar.inc"/>
+        <Filename Value="..\origin\include\compile_pchar.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="..\..\Mad-Pascal.origin\src\include\compile_string.inc"/>
+        <Filename Value="..\origin\include\compile_string.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="..\..\Mad-Pascal.origin\src\include\doevaluate.inc"/>
+        <Filename Value="..\origin\include\doevaluate.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="..\..\Mad-Pascal.origin\src\include\for_in_ident.inc"/>
+        <Filename Value="..\origin\include\for_in_ident.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="..\..\Mad-Pascal.origin\src\include\for_in_stringliteral.inc"/>
+        <Filename Value="..\origin\include\for_in_stringliteral.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="..\..\Mad-Pascal.origin\src\include\syntax.inc"/>
+        <Filename Value="..\origin\include\syntax.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="..\..\Mad-Pascal.origin\src\include\opt6502\opt_ADD.inc"/>
+        <Filename Value="..\origin\include\opt6502\opt_ADD.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="..\..\Mad-Pascal.origin\src\include\opt6502\opt_ADR.inc"/>
+        <Filename Value="..\origin\include\opt6502\opt_ADR.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="..\..\Mad-Pascal.origin\src\include\opt6502\opt_AND.inc"/>
+        <Filename Value="..\origin\include\opt6502\opt_AND.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="..\..\Mad-Pascal.origin\src\include\opt6502\opt_ASL.inc"/>
+        <Filename Value="..\origin\include\opt6502\opt_ASL.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="..\..\Mad-Pascal.origin\src\include\opt6502\opt_BOOLEAN_AND.inc"/>
+        <Filename Value="..\origin\include\opt6502\opt_BOOLEAN_AND.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="..\..\Mad-Pascal.origin\src\include\opt6502\opt_BOOLEAN_OR.inc"/>
+        <Filename Value="..\origin\include\opt6502\opt_BOOLEAN_OR.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="..\..\Mad-Pascal.origin\src\include\opt6502\opt_BP.inc"/>
+        <Filename Value="..\origin\include\opt6502\opt_BP.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="..\..\Mad-Pascal.origin\src\include\opt6502\opt_BP_ADR.inc"/>
+        <Filename Value="..\origin\include\opt6502\opt_BP_ADR.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="..\..\Mad-Pascal.origin\src\include\opt6502\opt_BP2_ADR.inc"/>
+        <Filename Value="..\origin\include\opt6502\opt_BP2_ADR.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="..\..\Mad-Pascal.origin\src\include\opt6502\opt_BYTE_DIV.inc"/>
+        <Filename Value="..\origin\include\opt6502\opt_BYTE_DIV.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="..\..\Mad-Pascal.origin\src\include\opt6502\opt_CMP.inc"/>
+        <Filename Value="..\origin\include\opt6502\opt_CMP.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="..\..\Mad-Pascal.origin\src\include\opt6502\opt_CMP_0.inc"/>
+        <Filename Value="..\origin\include\opt6502\opt_CMP_0.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="..\..\Mad-Pascal.origin\src\include\opt6502\opt_CMP_BP2.inc"/>
+        <Filename Value="..\origin\include\opt6502\opt_CMP_BP2.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="..\..\Mad-Pascal.origin\src\include\opt6502\opt_CMP_BRANCH.inc"/>
+        <Filename Value="..\origin\include\opt6502\opt_CMP_BRANCH.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="..\..\Mad-Pascal.origin\src\include\opt6502\opt_CMP_GT.inc"/>
+        <Filename Value="..\origin\include\opt6502\opt_CMP_GT.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="..\..\Mad-Pascal.origin\src\include\opt6502\opt_CMP_LOCAL.inc"/>
+        <Filename Value="..\origin\include\opt6502\opt_CMP_LOCAL.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="..\..\Mad-Pascal.origin\src\include\opt6502\opt_CMP_LT_GTEQ.inc"/>
+        <Filename Value="..\origin\include\opt6502\opt_CMP_LT_GTEQ.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="..\..\Mad-Pascal.origin\src\include\opt6502\opt_CMP_LTEQ.inc"/>
+        <Filename Value="..\origin\include\opt6502\opt_CMP_LTEQ.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="..\..\Mad-Pascal.origin\src\include\opt6502\opt_CMP_NE_EQ.inc"/>
+        <Filename Value="..\origin\include\opt6502\opt_CMP_NE_EQ.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="..\..\Mad-Pascal.origin\src\include\opt6502\opt_END_STA.inc"/>
+        <Filename Value="..\origin\include\opt6502\opt_END_STA.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="..\..\Mad-Pascal.origin\src\include\opt6502\opt_EOR.inc"/>
+        <Filename Value="..\origin\include\opt6502\opt_EOR.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="..\..\Mad-Pascal.origin\src\include\opt6502\opt_FOR.inc"/>
+        <Filename Value="..\origin\include\opt6502\opt_FOR.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="..\..\Mad-Pascal.origin\src\include\opt6502\opt_FORTMP.inc"/>
+        <Filename Value="..\origin\include\opt6502\opt_FORTMP.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="..\..\Mad-Pascal.origin\src\include\opt6502\opt_IF_AND.inc"/>
+        <Filename Value="..\origin\include\opt6502\opt_IF_AND.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="..\..\Mad-Pascal.origin\src\include\opt6502\opt_IF_OR.inc"/>
+        <Filename Value="..\origin\include\opt6502\opt_IF_OR.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="..\..\Mad-Pascal.origin\src\include\opt6502\opt_IMUL_CL.inc"/>
+        <Filename Value="..\origin\include\opt6502\opt_IMUL_CL.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="..\..\Mad-Pascal.origin\src\include\opt6502\opt_inline_PEEK.inc"/>
+        <Filename Value="..\origin\include\opt6502\opt_inline_PEEK.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="..\..\Mad-Pascal.origin\src\include\opt6502\opt_inline_POKE.inc"/>
+        <Filename Value="..\origin\include\opt6502\opt_inline_POKE.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="..\..\Mad-Pascal.origin\src\include\opt6502\opt_LDA.inc"/>
+        <Filename Value="..\origin\include\opt6502\opt_LDA.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="..\..\Mad-Pascal.origin\src\include\opt6502\opt_LDY.inc"/>
+        <Filename Value="..\origin\include\opt6502\opt_LDY.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="..\..\Mad-Pascal.origin\src\include\opt6502\opt_LSR.inc"/>
+        <Filename Value="..\origin\include\opt6502\opt_LSR.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="..\..\Mad-Pascal.origin\src\include\opt6502\opt_NOT.inc"/>
+        <Filename Value="..\origin\include\opt6502\opt_NOT.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="..\..\Mad-Pascal.origin\src\include\opt6502\opt_ORA.inc"/>
+        <Filename Value="..\origin\include\opt6502\opt_ORA.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="..\..\Mad-Pascal.origin\src\include\opt6502\opt_POKE.inc"/>
+        <Filename Value="..\origin\include\opt6502\opt_POKE.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="..\..\Mad-Pascal.origin\src\include\opt6502\opt_REG_A.inc"/>
+        <Filename Value="..\origin\include\opt6502\opt_REG_A.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="..\..\Mad-Pascal.origin\src\include\opt6502\opt_REG_BP2.inc"/>
+        <Filename Value="..\origin\include\opt6502\opt_REG_BP2.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="..\..\Mad-Pascal.origin\src\include\opt6502\opt_REG_Y.inc"/>
+        <Filename Value="..\origin\include\opt6502\opt_REG_Y.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="..\..\Mad-Pascal.origin\src\include\opt6502\opt_SHL_BYTE.inc"/>
+        <Filename Value="..\origin\include\opt6502\opt_SHL_BYTE.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="..\..\Mad-Pascal.origin\src\include\opt6502\opt_SHL_CARD.inc"/>
+        <Filename Value="..\origin\include\opt6502\opt_SHL_CARD.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="..\..\Mad-Pascal.origin\src\include\opt6502\opt_SHL_WORD.inc"/>
+        <Filename Value="..\origin\include\opt6502\opt_SHL_WORD.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="..\..\Mad-Pascal.origin\src\include\opt6502\opt_SHR_BYTE.inc"/>
+        <Filename Value="..\origin\include\opt6502\opt_SHR_BYTE.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="..\..\Mad-Pascal.origin\src\include\opt6502\opt_SHR_CARD.inc"/>
+        <Filename Value="..\origin\include\opt6502\opt_SHR_CARD.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="..\..\Mad-Pascal.origin\src\include\opt6502\opt_SHR_WORD.inc"/>
+        <Filename Value="..\origin\include\opt6502\opt_SHR_WORD.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="..\..\Mad-Pascal.origin\src\include\opt6502\opt_SPL.inc"/>
+        <Filename Value="..\origin\include\opt6502\opt_SPL.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="..\..\Mad-Pascal.origin\src\include\opt6502\opt_STA_0.inc"/>
+        <Filename Value="..\origin\include\opt6502\opt_STA_0.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="..\..\Mad-Pascal.origin\src\include\opt6502\opt_STA_ADD.inc"/>
+        <Filename Value="..\origin\include\opt6502\opt_STA_ADD.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="..\..\Mad-Pascal.origin\src\include\opt6502\opt_STA_BP.inc"/>
+        <Filename Value="..\origin\include\opt6502\opt_STA_BP.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="..\..\Mad-Pascal.origin\src\include\opt6502\opt_STA_IMUL.inc"/>
+        <Filename Value="..\origin\include\opt6502\opt_STA_IMUL.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="..\..\Mad-Pascal.origin\src\include\opt6502\opt_STA_IMUL_CX.inc"/>
+        <Filename Value="..\origin\include\opt6502\opt_STA_IMUL_CX.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="..\..\Mad-Pascal.origin\src\include\opt6502\opt_STA_LDY.inc"/>
+        <Filename Value="..\origin\include\opt6502\opt_STA_LDY.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="..\..\Mad-Pascal.origin\src\include\opt6502\opt_STA_LSR.inc"/>
+        <Filename Value="..\origin\include\opt6502\opt_STA_LSR.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="..\..\Mad-Pascal.origin\src\include\opt6502\opt_STA_ZTMP.inc"/>
+        <Filename Value="..\origin\include\opt6502\opt_STA_ZTMP.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="..\..\Mad-Pascal.origin\src\include\opt6502\opt_STACK.inc"/>
+        <Filename Value="..\origin\include\opt6502\opt_STACK.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="..\..\Mad-Pascal.origin\src\include\opt6502\opt_STACK_ADD.inc"/>
+        <Filename Value="..\origin\include\opt6502\opt_STACK_ADD.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="..\..\Mad-Pascal.origin\src\include\opt6502\opt_STACK_ADR.inc"/>
+        <Filename Value="..\origin\include\opt6502\opt_STACK_ADR.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="..\..\Mad-Pascal.origin\src\include\opt6502\opt_STACK_AL_CL.inc"/>
+        <Filename Value="..\origin\include\opt6502\opt_STACK_AL_CL.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="..\..\Mad-Pascal.origin\src\include\opt6502\opt_STACK_AX_CX.inc"/>
+        <Filename Value="..\origin\include\opt6502\opt_STACK_AX_CX.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="..\..\Mad-Pascal.origin\src\include\opt6502\opt_STACK_CMP.inc"/>
+        <Filename Value="..\origin\include\opt6502\opt_STACK_CMP.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="..\..\Mad-Pascal.origin\src\include\opt6502\opt_STACK_EAX_ECX.inc"/>
+        <Filename Value="..\origin\include\opt6502\opt_STACK_EAX_ECX.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="..\..\Mad-Pascal.origin\src\include\opt6502\opt_STACK_INX.inc"/>
+        <Filename Value="..\origin\include\opt6502\opt_STACK_INX.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="..\..\Mad-Pascal.origin\src\include\opt6502\opt_STACK_PRINT.inc"/>
+        <Filename Value="..\origin\include\opt6502\opt_STACK_PRINT.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="..\..\Mad-Pascal.origin\src\include\opt6502\opt_SUB.inc"/>
+        <Filename Value="..\origin\include\opt6502\opt_SUB.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="..\..\Mad-Pascal.origin\src\include\opt6502\opt_TAY.inc"/>
+        <Filename Value="..\origin\include\opt6502\opt_TAY.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="..\..\Mad-Pascal.origin\src\include\opt6502\opt_TEMP.inc"/>
+        <Filename Value="..\origin\include\opt6502\opt_TEMP.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="..\..\Mad-Pascal.origin\src\include\opt6502\opt_TEMP_BOOLEAN_OR.inc"/>
+        <Filename Value="..\origin\include\opt6502\opt_TEMP_BOOLEAN_OR.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="..\..\Mad-Pascal.origin\src\include\opt6502\opt_TEMP_CMP.inc"/>
+        <Filename Value="..\origin\include\opt6502\opt_TEMP_CMP.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="..\..\Mad-Pascal.origin\src\include\opt6502\opt_TEMP_CMP_0.inc"/>
+        <Filename Value="..\origin\include\opt6502\opt_TEMP_CMP_0.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="..\..\Mad-Pascal.origin\src\include\opt6502\opt_TEMP_EAX.inc"/>
+        <Filename Value="..\origin\include\opt6502\opt_TEMP_EAX.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="..\..\Mad-Pascal.origin\src\include\opt6502\opt_TEMP_FILL.inc"/>
+        <Filename Value="..\origin\include\opt6502\opt_TEMP_FILL.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="..\..\Mad-Pascal.origin\src\include\opt6502\opt_TEMP_FOR.inc"/>
+        <Filename Value="..\origin\include\opt6502\opt_TEMP_FOR.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="..\..\Mad-Pascal.origin\src\include\opt6502\opt_TEMP_FORDEC.inc"/>
+        <Filename Value="..\origin\include\opt6502\opt_TEMP_FORDEC.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="..\..\Mad-Pascal.origin\src\include\opt6502\opt_TEMP_IFTMP.inc"/>
+        <Filename Value="..\origin\include\opt6502\opt_TEMP_IFTMP.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="..\..\Mad-Pascal.origin\src\include\opt6502\opt_TEMP_IMUL_CX.inc"/>
+        <Filename Value="..\origin\include\opt6502\opt_TEMP_IMUL_CX.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="..\..\Mad-Pascal.origin\src\include\opt6502\opt_TEMP_JMP.inc"/>
+        <Filename Value="..\origin\include\opt6502\opt_TEMP_JMP.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="..\..\Mad-Pascal.origin\src\include\opt6502\opt_TEMP_MOVE.inc"/>
+        <Filename Value="..\origin\include\opt6502\opt_TEMP_MOVE.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="..\..\Mad-Pascal.origin\src\include\opt6502\opt_TEMP_ORD.inc"/>
+        <Filename Value="..\origin\include\opt6502\opt_TEMP_ORD.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="..\..\Mad-Pascal.origin\src\include\opt6502\opt_TEMP_TAIL_CASE.inc"/>
+        <Filename Value="..\origin\include\opt6502\opt_TEMP_TAIL_CASE.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="..\..\Mad-Pascal.origin\src\include\opt6502\opt_TEMP_TAIL_IF.inc"/>
+        <Filename Value="..\origin\include\opt6502\opt_TEMP_TAIL_IF.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="..\..\Mad-Pascal.origin\src\include\opt6502\opt_TEMP_UNROLL.inc"/>
+        <Filename Value="..\origin\include\opt6502\opt_TEMP_UNROLL.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="..\..\Mad-Pascal.origin\src\include\opt6502\opt_TEMP_WHILE.inc"/>
+        <Filename Value="..\origin\include\opt6502\opt_TEMP_WHILE.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="..\..\Mad-Pascal.origin\src\include\opt6502\opt_TEMP_X.inc"/>
+        <Filename Value="..\origin\include\opt6502\opt_TEMP_X.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="..\..\Mad-Pascal.origin\src\include\opt6502\opt_TEMP_ZTMP.inc"/>
+        <Filename Value="..\origin\include\opt6502\opt_TEMP_ZTMP.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="..\..\Mad-Pascal.origin\src\include\opt6502\opt_WHILE_AND.inc"/>
+        <Filename Value="..\origin\include\opt6502\opt_WHILE_AND.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="..\..\Mad-Pascal.origin\src\include\opt6502\opt_WHILE_OR.inc"/>
+        <Filename Value="..\origin\include\opt6502\opt_WHILE_OR.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="..\..\Mad-Pascal.origin\src\include\opt65c02\opt_STZ.inc"/>
+        <Filename Value="..\origin\include\opt65c02\opt_STZ.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
@@ -459,8 +459,8 @@
       <Filename Value="TestOrigin"/>
     </Target>
     <SearchPaths>
-      <IncludeFiles Value="$(ProjOutDir);..\..\Mad-Pascal.origin\src"/>
-      <OtherUnitFiles Value="..\..\Mad-Pascal.origin\src"/>
+      <IncludeFiles Value="$(ProjOutDir);..\origin"/>
+      <OtherUnitFiles Value="..\origin"/>
       <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
     <Linking>
