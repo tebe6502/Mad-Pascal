@@ -787,12 +787,27 @@ end;
 
 procedure TCachedBinaryFile.Rewrite();
 begin
-  raise EInOutError.Create('Not implemented.');
+  Assert(False, 'Not implemented.');
 end;
 
 procedure TCachedBinaryFile.BlockRead(var Buf; const Count: TFileSize; var Result: TFileSize);
+var
+  i: Integer;
+  p: ^Char;
+  c: Char;
 begin
-  raise EInOutError.Create('Not implemented.');
+  p := @Buf;
+  Result := 0;
+  for i := 0 to Count - 1 do
+  begin
+    if filePosition = fileSize then exit;
+
+    Read(c);
+
+    p[i] := c;
+    Inc(Result);
+  end;
+
 end;
 
 function TCachedBinaryFile.FilePos(): TFilePosition;
