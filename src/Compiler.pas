@@ -1053,16 +1053,8 @@ end;// GenerateInterrupt
 // ----------------------------------------------------------------------------
 
 
-
-procedure StartOptimization(const tokenIndex: TTokenIndex);
-begin
-
-  StopOptimization;
-  Optimize.StartOptimization(TokenAt(tokenIndex).SourceLocation);
-
-end;
-
 // ----------------------------------------------------------------------------
+// This mist be defined before StartOptimization, so the compiler finds the correct method!
 // ----------------------------------------------------------------------------
 
 procedure StopOptimization;
@@ -1072,6 +1064,14 @@ begin
 
 end;
 
+
+procedure StartOptimization(const tokenIndex: TTokenIndex);
+begin
+
+  StopOptimization;
+  Optimize.StartOptimization(TokenAt(tokenIndex).SourceLocation);
+
+end;
 
 
 // ----------------------------------------------------------------------------
@@ -11691,7 +11691,7 @@ end;
 // ----------------------------------------------------------------------------
 procedure LogDebug(const message: String);
 begin
-  WriteLn(StdErr,message);
+  // WriteLn(StdErr,message);
 end;
 
 procedure StopAtBreakPoint;
