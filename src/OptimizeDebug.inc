@@ -1,9 +1,16 @@
   // JAC!
-BreakPointDebugCount = 8811;
+var
+  BreakPointDebugCount: Integer = 2016;
+  BreakPointASM65Count: Integer = 590;
 
 var
   DebugCount: Integer;
+  ASM65Count: Integer;
 
+
+var
+  BreakpointDebugCountHit: Boolean;
+  BreakpointASM65CountHit: Boolean;
 
 function OptimizeBufToString: String;
 var
@@ -26,13 +33,17 @@ begin
 end;
 
 
-var
-  BreakpointHit: Boolean;
+procedure LogTrace(const message: String);
+begin
+  WriteLn(StdErr, message);
+end;
 
 procedure DebugCall(const Name: String; const message: String = '');
 var
   l, s: String;
 begin
+  if BreakPointDebugCount <= 0 then exit;
+
   Inc(DebugCount);
   l := '';    // Because of line differences between versions
   {$IFDEF MP175}
@@ -44,20 +55,50 @@ begin
 
   s := Format('Debug: %s: Call %d with ''%s''. (optyA=''%s'', optyY=''%s'', optyBP2=''%s'', SourceLocation:%s)',
     [Name, DebugCount, message, _optyA, optyY, optyBP2, l]);
-  WriteLn(StdErr, s);
+  LogTrace(s);
   if DebugCount = BreakPointDebugCount then
   begin
-    BreakpointHit := True;
+    BreakpointDebugCountHit := True;
   end;
 end;
 
-function ExitTrick(const optRoutine: String; const i: Integer; const fileName: String; lineNumber: String;
-  const currentRoutine: String): Boolean;
+
+procedure LogState(const a: String = ''; const comment: String = '');
+begin
+
+  if BreakPointDebugCount <= 0 then exit;
+  Inc(ASM65Count);
+  LogTrace(Format('asm65(%d, ''%s'', ''%s'' )', [ASM65Count, a, comment]));
+  if ASM65Count = BreakPointASM65Count then
+  begin
+    BreakpointASM65CountHit := True;
+  end;
+end;
+// ----------------------------------------------------------------------------
+
+
+function ExitTrick(const optRoutine: String; const i: Integer; const fileName: String;
+  lineNumber: String; const currentRoutine: String): Boolean;
 begin
   Result := False;
   lineNumber := ''; // TODO
-  if BreakpointHit then
+  if BreakpointDebugCountHit then
   begin
     DebugCall('ExitTrick', Format('%s(%d) in %s at %s:%s', [optRoutine, i, currentRoutine, fileName, lineNumber]));
   end;
+end;
+
+
+procedure LogStringArray(const Name: String; const stringArray: TStringArray);
+var
+  l, i: Integer;
+begin
+  l := High(stringArray);
+  LogTrace(Format('High(%s)=%d', [Name, l]));
+  for i := 0 to l do LogTrace(Format('%s[%d]=%s', [Name, i, stringArray[i]]));
+end;
+
+procedure LogOptimizeBuf();
+begin
+  LogStringArray('OptimizeBuf', OptimizeBuf);
 end;

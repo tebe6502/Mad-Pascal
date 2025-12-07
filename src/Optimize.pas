@@ -51,9 +51,7 @@ var
 
   _optyA: TString;
 
-
-  const
-{$I 'OptimizeDebug.inc'}
+  {$I 'OptimizeDebug.inc'}
 
 
 function optyA: TString;
@@ -132,32 +130,6 @@ end;
 
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
-
-procedure LogState(const a: String = ''; const comment: String = '');
-begin
-  WriteLn(StdErr,(Format('asm65(''%s'', ''%s'' )', [a,comment])));
-  // LogTrace(Format('asm65(''%s'', ''%s'' )', [a,comment]));
-  // DEbugger.debugger.asm65(a,comment);
-  // LogTrace(Format('optimize.use=%d', [Ord(optimize.use)]));
-  //LogTrace(Format('optimize.SourceFile.Name=%s', [optimize.SourceFile.Name]));
-  //LogTrace(Format('optimize.Line=%d', [optimize.line]));
-  //LogTrace(Format('optimize.OldLine=%d', [optimize.oldLine]));
-  // LogOptimizeBuf();
-end;
-
-
-procedure LogStringArray(const name: String; const stringArray: TStringArray);
-var l,i: Integer;
-begin
-l := High(stringArray);
-LogTrace(Format('High(%s)=%d', [name, l]));
-for i:=0 to l do   LogTrace(Format('%s[%d]=%s', [name, i, stringArray[i]]));
-end;
-
-procedure LogOptimizeBuf();
-begin
-  LogStringArray('OptimizeBuf', OptimizeBuf);
-end;
 
 function GetVAL(a: String): Integer;
 var
@@ -1909,7 +1881,7 @@ begin        // OptimizeASM
   for i := 0 to High(OptimizeBuf) - 1 do
   begin
     a := OptimizeBuf[i];
-    if BreakpointHit then
+    if BreakpointDebugCountHit then
     begin
          DebugCall('OptimizeASM', Format('i=%d a=''%s''', [i,a]));
     end;
