@@ -83,8 +83,6 @@ var
   NumPredefIdent, NumStaticStrChars, run_func, NumProc, CodeSize, NumStaticStrCharsTmp, IfCnt,
   CaseCnt, IfdefLevel: Integer;
 
-  ShrShlCnt: Integer; // Counter, used only for label generation in Optimize TODO: Move to Optimize (for pass2)
-
   pass: TPass;
 
   ActiveSourceFile: TSourceFile; // Initialized in Scanner.TokenizeProgramInitialization

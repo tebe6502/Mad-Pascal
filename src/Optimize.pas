@@ -54,6 +54,8 @@ var
 
   optyA: TString;
 
+  ShrShlCnt: Integer; // Counter, used only for label generation in Optimize
+
   {$I 'OptimizeDebug.inc'}
 
 // Reset temporary variables for FOR optimizations.
@@ -89,6 +91,8 @@ begin
 
   ResetForTmp;
   ResetOpty;
+
+  ShrShlCnt:=0;
 end;
 
 procedure ResetOpty;

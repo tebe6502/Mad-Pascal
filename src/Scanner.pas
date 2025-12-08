@@ -73,7 +73,6 @@ begin
   CodePosStackTop := 0;
   CaseCnt := 0;
   IfCnt := 0;
-  ShrShlCnt := 0;
   NumTypes := 0;
   run_func := 0;
   NumProc := 0;
