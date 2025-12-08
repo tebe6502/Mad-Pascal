@@ -13,7 +13,7 @@ procedure Initialize;
 procedure ResetForTmp;
 procedure ResetOpty;
 
-procedure asm65(const a: String = ''; const comment: String = '');
+procedure ASM65Internal(const a: String ; const comment: String );
 
 procedure SetOptimizationActive(active: Boolean);
 function IsOptimizationActive: Boolean;
@@ -118,7 +118,7 @@ begin
 
   optimize.use := False;
 
-  if High(OptimizeBuf) > 0 then asm65;
+  if High(OptimizeBuf) > 0 then ASM65Internal('', '');
 
 end;
 
@@ -3461,7 +3461,7 @@ end;
 // ----------------------------------------------------------------------------
 
 
-procedure asm65(const a: String = ''; const comment: String = '');
+procedure ASM65Internal(const a: String; const comment: String);
 var
   len, i: Integer;
   optimize_code: Boolean;

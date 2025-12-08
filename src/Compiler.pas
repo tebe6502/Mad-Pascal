@@ -594,6 +594,11 @@ end;
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 
+procedure asm65(const a: String = ''; const comment: String = '');
+begin
+
+  Optimize.ASM65Internal(a,comment);
+end;
 
 procedure asm65separator(a: Boolean = True);
 begin
