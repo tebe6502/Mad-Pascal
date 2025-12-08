@@ -20022,6 +20022,7 @@ var
 begin
 
   Common.unitPathList := unitPathList;
+
   evaluationContext := TEvaluationContext.Create;
   debugger.debugger := TDebugger.Create;
   Profiler.profiler := TProfiler.Create;
@@ -20113,9 +20114,13 @@ begin
   PublicSection := True;
 
   // The optimizer is only used in the code generation pass.
-  optimizerLogFile:=TFileSystem.CreateTextFile();
-  optimizerLogFile.Assign(OutFile.GetAbsoluteFilePath+'-opt.log');
-  optimizerLogFile.Rewrite;
+  if OptimizerLogActive then
+  begin
+    optimizerLogFile := TFileSystem.CreateTextFile();
+    optimizerLogFile.Assign(ChangeFileExt(OutFile.GetAbsoluteFilePath, '') + '-opt.log');
+    optimizerLogFile.Rewrite;
+  end;
+
   optimization.Optimizer := Optimizer.CreateDefaultOptimizer(optimizerLogFile);
   optimization.Optimizer.Initialize(OutFile, AsmBlock, target);
 
@@ -20124,8 +20129,7 @@ begin
   Profiler.profiler.EndSection();
 
   optimization.Optimizer := nil;
-  optimizerLogFile.Close;
-
+  if optimizerLogFile <> nil then optimizerLogFile.Close;
 end;
 
 procedure Free;
