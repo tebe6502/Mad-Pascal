@@ -32,7 +32,6 @@ var
   ZPAGE_BASE: Integer = -1;
   STACK_BASE: Integer = -1;
 
-  OptimizerLogActive: Boolean;
   OutFile: ITextFile;
 
   PROGRAM_NAME: String = 'Program';

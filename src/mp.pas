@@ -282,7 +282,6 @@ uses
       ZPAGE_BASE := -1;
       STACK_BASE := -1;
       outputFilePath := '';
-      OptimizerLogActive := False;
       DiagMode := False;
       PauseMode := False;
 

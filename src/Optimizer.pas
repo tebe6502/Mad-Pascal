@@ -10,7 +10,7 @@ uses CompilerTypes, FileIO, Targets;
 type
   IOptimizer = interface
 
-    procedure Initialize(const aOutFile: ITextFile; const aAsmBlockArray: TAsmBlockArray; const aTarget: TTarget);
+    procedure Initialize(const OutFile: ITextFile; const AsmBlockArray: TAsmBlockArray; const AsmBlockArrayHigh: Integer; const Target: TTarget);
 
     procedure StartOptimization(SourceLocation: TSourceLocation);
 
@@ -45,7 +45,7 @@ type
   public
     constructor Create;
 
-    procedure Initialize(const aOutFile: ITextFile; const aAsmBlockArray: TAsmBlockArray; const aTarget: TTarget);
+    procedure Initialize(const OutFile: ITextFile; const AsmBlockArray: TAsmBlockArray;  const AsmBlockArrayHigh: Integer; const Target: TTarget);
 
     procedure StartOptimization(SourceLocation: TSourceLocation);
 
@@ -70,8 +70,8 @@ constructor TDummyOptimizer.Create;
 begin
 end;
 
-procedure TDummyOptimizer.Initialize(const aOutFile: ITextFile; const aAsmBlockArray: TAsmBlockArray;
-  const aTarget: TTarget);
+procedure TDummyOptimizer.Initialize(const OutFile: ITextFile; const AsmBlockArray: TAsmBlockArray;
+   const AsmBlockArrayHigh: Integer; const Target: TTarget);
 begin
 end;
 
@@ -120,7 +120,7 @@ type
   public
     constructor Create(LogFile: ITextFile);
 
-    procedure Initialize(const aOutFile: ITextFile; const aAsmBlockArray: TAsmBlockArray; const aTarget: TTarget);
+    procedure Initialize(const OutFile: ITextFile; const AsmBlockArray: TAsmBlockArray;  const AsmBlockArrayHigh: Integer; const Target: TTarget);
 
     procedure StartOptimization(SourceLocation: TSourceLocation);
 
@@ -147,10 +147,20 @@ begin
   Self.logFile := LogFile;
 end;
 
-procedure TOptimizer.Initialize(const aOutFile: ITextFile; const aAsmBlockArray: TAsmBlockArray;
-  const aTarget: TTarget);
+procedure TOptimizer.Initialize(const OutFile: ITextFile; const AsmBlockArray: TAsmBlockArray; const AsmBlockArrayHigh: Integer;
+  const Target: TTarget);
+var
+  i: Integer;
 begin
-  Optimize.Initialize(aOutFile, aAsmBlockArray, aTarget);
+  if (logFile <> nil) then
+  begin
+    LogFile.WriteLn(Format('Initialize(AsmBlockArray=[%d..%d])', [Low(AsmBlockArray), AsmBlockArrayHigh]));
+    for i := Low(AsmBlockArray) to AsmBlockArrayHigh do
+    begin
+      LogFile.WriteLn(Format('AsmBlockArray[%d]=''%s'')', [i, AsmBlockArray[i]]));
+    end;
+  end;
+  Optimize.Initialize(OutFile, AsmBlockArray, Target);
 end;
 
 procedure TOptimizer.StartOptimization(SourceLocation: TSourceLocation);

@@ -20114,7 +20114,7 @@ begin
   PublicSection := True;
 
   // The optimizer is only used in the code generation pass.
-  if OptimizerLogActive then
+  if DiagMode then
   begin
     optimizerLogFile := TFileSystem.CreateTextFile();
     optimizerLogFile.Assign(ChangeFileExt(OutFile.GetAbsoluteFilePath, '') + '-opt.log');
@@ -20122,7 +20122,7 @@ begin
   end;
 
   optimization.Optimizer := Optimizer.CreateDefaultOptimizer(optimizerLogFile);
-  optimization.Optimizer.Initialize(OutFile, AsmBlock, target);
+  optimization.Optimizer.Initialize(OutFile, AsmBlock, AsmBlockIndex, target);
 
   Profiler.profiler.BeginSection('CompileProgram(TPass.CODE_GENERATION);');
   CompileProgram(TPass.CODE_GENERATION);
