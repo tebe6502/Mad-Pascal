@@ -42,8 +42,8 @@ if not "%TEST_EXE%"=="" (
 call :make_exe %MP_SRC_FOLDER% %MP_BIN_FOLDER%
 if errorlevel 1 goto :eof
 
-rem call :make_exe %REFERENCE_MP_SRC_FOLDER% %REFERENCE_MP_BIN_FOLDER%
-rem if errorlevel 1 goto :eof
+call :make_exe %REFERENCE_MP_SRC_FOLDER% %REFERENCE_MP_BIN_FOLDER%
+if errorlevel 1 goto :eof
 
 set PAS_FOLDER=samples\a8\math\AES-Rijndael
 set PAS_FILE=rijndael-test
