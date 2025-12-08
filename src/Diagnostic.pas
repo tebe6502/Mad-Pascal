@@ -25,7 +25,7 @@ var
 begin
 
   DiagFile := TFileSystem.CreateTextFile;
-  DiagFile.Assign(ChangeFileExt(ProgramUnit.Name, '-diag.txt'));
+  DiagFile.Assign(ChangeFileExt(ProgramUnit.Name, '-diag.log'));
   DiagFile.Rewrite;
 
   DiagFile.WriteLn;
