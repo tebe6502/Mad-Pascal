@@ -13,7 +13,7 @@ procedure Initialize;
 procedure ResetForTmp;
 procedure ResetOpty;
 
-procedure ASM65Internal(const a: String ; const comment: String );
+procedure ASM65Internal(const a: String ; const comment: String; const optimizeCode: Boolean);
 
 procedure SetOptimizationActive(active: Boolean);
 function IsOptimizationActive: Boolean;
@@ -42,7 +42,7 @@ var
   OptimizeBuf: TStringArray;
 
   optimize: record
-    use: Boolean;
+    active: Boolean;
     SourceFile: TSourceFile;
     line, oldLine: Integer;
     end;
@@ -95,19 +95,19 @@ end;
 
 procedure SetOptimizationActive(active: Boolean);
 begin
-  optimize.use := active;
+  optimize.active := active;
 end;
 
 function IsOptimizationActive: Boolean;
 begin
-  Result := optimize.use;
+  Result := optimize.active;
 end;
 
 
 procedure StartOptimization(SourceLocation: TSourceLocation);
 begin
 
-  optimize.use := True;
+  optimize.active := True;
   optimize.SourceFile := SourceLocation.SourceFile;
   optimize.line := SourceLocation.Line;
 
@@ -116,9 +116,9 @@ end;
 procedure StopOptimization;
 begin
 
-  optimize.use := False;
+  optimize.active := False;
 
-  if High(OptimizeBuf) > 0 then ASM65Internal('', '');
+  if High(OptimizeBuf) > 0 then ASM65Internal('', '', False);
 
 end;
 
@@ -3461,25 +3461,18 @@ end;
 // ----------------------------------------------------------------------------
 
 
-procedure ASM65Internal(const a: String; const comment: String);
+procedure ASM65Internal(const a: String; const comment: String; const optimizeCode: Boolean);
 var
   len, i: Integer;
-  optimize_code: Boolean;
   str: String;
 begin
-
-  {$IFDEF OPTIMIZECODE}
-  optimize_code := True;
-  {$ELSE}
-  optimize_code := False;
-  {$ENDIF}
 
   if not OutputDisabled then
     if pass = TPass.CODE_GENERATION then
     begin
 
       LogASM65(a,comment);
-      if optimize_code and optimize.use then
+      if optimizeCode and optimize.active then
       begin
 
         i := High(OptimizeBuf);

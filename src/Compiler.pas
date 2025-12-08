@@ -595,9 +595,22 @@ end;
 // ----------------------------------------------------------------------------
 
 procedure asm65(const a: String = ''; const comment: String = '');
+var optimizeCode: Boolean;
 begin
 
-  Optimize.ASM65Internal(a,comment);
+    if not OutputDisabled then
+    if pass = TPass.CODE_GENERATION then
+    begin
+
+      {$IFDEF OPTIMIZECODE}
+      optimizeCode := True;
+      {$ELSE}
+      optimizeCode := False;
+      {$ENDIF}
+
+      Optimize.ASM65Internal(a,comment, optimizeCode);
+    end;
+
 end;
 
 procedure asm65separator(a: Boolean = True);
