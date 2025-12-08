@@ -110,7 +110,7 @@ begin
     optimization.active := False;
 
     // Flush the buffer?
-    if not optimization.Optimizer.IsASM65BufferEmpty then ASM65('', '');
+    if not optimization.Optimizer.IsAssemblyBufferEmpty then ASM65('', '');
   end;
 end;
 
@@ -667,7 +667,7 @@ begin
       optimizeCode := False;
     {$ENDIF}
 
-    optimization.Optimizer.ASM65Internal(a, comment, optimizeCode and IsOptimizationActive, CodeSize, IsInterrupt);
+    optimization.Optimizer.AssembleLine(a, comment, optimizeCode and IsOptimizationActive, CodeSize, IsInterrupt);
   end;
 
 end;
@@ -6905,7 +6905,7 @@ begin
 
               //AllocElementType := IdentifierAt(IdentIndex).AllocElementType;
 
-              //  WritelLn(IdentifierAt(IdentIndex).name,',',IdentifierAt(IdentIndex).DataType,',',IdentifierAt(IdentIndex).AllocElementType,',',IdentifierAt(IdentIndex).NumAllocElements,',',IdentifierAt(IdentIndex).PassMethod,',',VarPass ,',',rec,',',IdentifierAt(IdentIndex).idType);
+              //  WriteLn(IdentifierAt(IdentIndex).name,',',IdentifierAt(IdentIndex).DataType,',',IdentifierAt(IdentIndex).AllocElementType,',',IdentifierAt(IdentIndex).NumAllocElements,',',IdentifierAt(IdentIndex).PassMethod,',',VarPass ,',',rec,',',IdentifierAt(IdentIndex).idType);
 
               if rec then
               begin              // record.array[]
@@ -20018,6 +20018,7 @@ procedure Main(const programUnit: TSourceFile; const unitPathList: TPathList);
 var
   scanner: IScanner;
   i: Integer;
+  optimizerLogFile: ITextFile;
 begin
 
   Common.unitPathList := unitPathList;
@@ -20112,7 +20113,10 @@ begin
   PublicSection := True;
 
   // The optimizer is only used in the code generation pass.
-  optimization.Optimizer := Optimizer.CreateDefaultOptimizer;
+  optimizerLogFile:=TFileSystem.CreateTextFile();
+  optimizerLogFile.Assign(OutFile.GetAbsoluteFilePath+'-opt.log');
+  optimizerLogFile.Rewrite;
+  optimization.Optimizer := Optimizer.CreateDefaultOptimizer(optimizerLogFile);
   optimization.Optimizer.Initialize(OutFile, AsmBlock, target);
 
   Profiler.profiler.BeginSection('CompileProgram(TPass.CODE_GENERATION);');
@@ -20120,6 +20124,7 @@ begin
   Profiler.profiler.EndSection();
 
   optimization.Optimizer := nil;
+  optimizerLogFile.Close;
 
 end;
 

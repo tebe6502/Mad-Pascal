@@ -521,6 +521,9 @@ type
   TIdentIndex = Integer;
   TArrayIndex = Integer;
 
+
+function SourceLocationToString(const SourceLocation: TSourceLocation): String;
+
 // ----------------------------------------------------------------------------
 // Map modifier codes to the bits in the method status.
 // ----------------------------------------------------------------------------
@@ -533,6 +536,15 @@ function GetIOBits(const ioCode: TIOCode): TIOBits;
 
 implementation
 
+// ----------------------------------------------------------------------------
+// Record TSourceLocation
+// ----------------------------------------------------------------------------
+
+function SourceLocationToString(const SourceLocation: TSourceLocation): String;
+begin
+  Result := Format('%s (line %d, column %d)', [SourceLocation.SourceFile.Path, SourceLocation.Line,
+    SourceLocation.Column]);
+end;
 
 // ----------------------------------------------------------------------------
 // Class TBlock

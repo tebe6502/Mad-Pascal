@@ -14,16 +14,16 @@ type
 
     procedure StartOptimization(SourceLocation: TSourceLocation);
 
-    // Re/Set temporary varitables for register optimizations.
+    // Re/Set temporary variables for register optimizations.
     procedure ResetOpty;
     procedure SetOptyY(const Value: TString);
     function GetOptyBP2(): TString;
     procedure SetOptyBP2(const Value: TString);
 
-    procedure ASM65Internal(const a: String; const comment: String; const optimizeCode: Boolean;
+    procedure AssembleLine(const Line: String; const Comment: String; const OptimizeCode: Boolean;
       const CodeSize: Integer; const IsInterrupt: Boolean);
 
-    function IsASM65BufferEmpty: Boolean;
+    function IsAssemblyBufferEmpty: Boolean;
 
     procedure Finalize;
 
@@ -33,11 +33,11 @@ type
 function CreateDummyOptimizer: IOptimizer;
 
 // Default optimizer for pass 2
-function CreateDefaultOptimizer: IOptimizer;
+function CreateDefaultOptimizer(logFile: ITextFile = nil): IOptimizer;
 
 implementation
 
-uses Optimize;
+uses SysUtils, Optimize;
 
 type
   TDummyOptimizer = class(TInterfacedObject, IOptimizer)
@@ -49,16 +49,16 @@ type
 
     procedure StartOptimization(SourceLocation: TSourceLocation);
 
-    // Re/Set temporary varitables for register optimizations.
+    // Re/Set temporary variables for register optimizations.
     procedure ResetOpty;
     procedure SetOptyY(const Value: TString);
     function GetOptyBP2(): TString;
     procedure SetOptyBP2(const Value: TString);
 
-    procedure ASM65Internal(const a: String; const comment: String; const optimizeCode: Boolean;
+    procedure AssembleLine(const Line: String; const Comment: String; const OptimizeCode: Boolean;
       const CodeSize: Integer; const IsInterrupt: Boolean);
 
-    function IsASM65BufferEmpty: Boolean;
+    function IsAssemblyBufferEmpty: Boolean;
 
     procedure Finalize;
 
@@ -90,7 +90,7 @@ end;
 
 function TDummyOptimizer.GetOptyBP2(): TString;
 begin
-
+  Result := '';
 end;
 
 procedure TDummyOptimizer.SetOptyBP2(const Value: TString);
@@ -98,13 +98,13 @@ begin
 
 end;
 
-procedure TDummyOptimizer.ASM65Internal(const A: String; const Comment: String;
+procedure TDummyOptimizer.AssembleLine(const Line: String; const Comment: String;
   const OptimizeCode: Boolean; const CodeSize: Integer; const IsInterrupt: Boolean);
 begin
 
 end;
 
-function TDummyOptimizer.IsASM65BufferEmpty: Boolean;
+function TDummyOptimizer.IsAssemblyBufferEmpty: Boolean;
 begin
   Result := True;
 end;
@@ -118,31 +118,33 @@ type
   TOptimizer = class(TInterfacedObject, IOptimizer)
 
   public
-    constructor Create;
+    constructor Create(LogFile: ITextFile);
 
     procedure Initialize(const aOutFile: ITextFile; const aAsmBlockArray: TAsmBlockArray; const aTarget: TTarget);
 
     procedure StartOptimization(SourceLocation: TSourceLocation);
 
-    // Re/Set temporary varitables for register optimizations.
+    // Re/Set temporary variables for register optimizations.
     procedure ResetOpty;
     procedure SetOptyY(const Value: TString);
     function GetOptyBP2(): TString;
     procedure SetOptyBP2(const Value: TString);
 
-    procedure ASM65Internal(const a: String; const comment: String; const optimizeCode: Boolean;
+    procedure AssembleLine(const Line: String; const Comment: String; const OptimizeCode: Boolean;
       const CodeSize: Integer; const IsInterrupt: Boolean);
 
-    function IsASM65BufferEmpty: Boolean;
+    function IsAssemblyBufferEmpty: Boolean;
 
     procedure Finalize;
 
   private
+    LogFile: ITextFile;
 
   end;
 
-constructor TOptimizer.Create;
+constructor TOptimizer.Create(LogFile: ITextFile);
 begin
+  Self.logFile := LogFile;
 end;
 
 procedure TOptimizer.Initialize(const aOutFile: ITextFile; const aAsmBlockArray: TAsmBlockArray;
@@ -153,12 +155,22 @@ end;
 
 procedure TOptimizer.StartOptimization(SourceLocation: TSourceLocation);
 begin
+  if (logFile <> nil) then
+  begin
+    LogFile.WriteLn(Format('StartOptimization(SourceLocation=%s)', [SourceLocationToString(SourceLocation)]));
+  end;
+
   Optimize.StartOptimization(SourceLocation);
 end;
 
-// Re/Set temporary varitables for register optimizations.
+// Re/Set temporary varitbles for register optimizations.
 procedure TOptimizer.ResetOpty;
 begin
+  if (logFile <> nil) then
+  begin
+    LogFile.WriteLn('ResetOpty()');
+  end;
+
   Optimize.ResetOpty;
 end;
 
@@ -178,13 +190,18 @@ begin
   Optimize.SetOptyBP2(Value);
 end;
 
-procedure TOptimizer.ASM65Internal(const A: String; const Comment: String; const OptimizeCode: Boolean;
+procedure TOptimizer.AssembleLine(const Line: String; const Comment: String; const OptimizeCode: Boolean;
   const CodeSize: Integer; const IsInterrupt: Boolean);
 begin
-  Optimize.ASM65Internal(A, Comment, OptimizeCode, CodeSize, IsInterrupt);
+  if (LogFile <> nil) then
+  begin
+    LogFile.WriteLn(Format('AssembleLine(Line=''%s'', Comment=''%s'', OptimizeCode=%s, CodeSize=%d, IsInterrupt=%s)',
+      [Line, Comment, BoolToStr(OptimizeCode, True), CodeSize, BoolToStr(IsInterrupt, True)]));
+  end;
+  Optimize.ASM65Internal(Line, Comment, OptimizeCode, CodeSize, IsInterrupt);
 end;
 
-function TOptimizer.IsASM65BufferEmpty: Boolean;
+function TOptimizer.IsAssemblyBufferEmpty: Boolean;
 begin
   Result := Optimize.IsASM65BufferEmpty;
 end;
@@ -201,9 +218,9 @@ begin
   Result := TDummyOptimizer.Create;
 end;
 
-function CreateDefaultOptimizer: IOptimizer;
+function CreateDefaultOptimizer(LogFile: ITextFile = nil): IOptimizer;
 begin
-  Result := TOptimizer.Create;
+  Result := TOptimizer.Create(LogFile);
 end;
 
 
