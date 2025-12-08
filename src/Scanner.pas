@@ -86,12 +86,6 @@ begin
 
   NumDefines := AddDefines;
 
-  // TODO Remove from here
-
-  // Do NOT put this into ResetOpty!
-  ResetForTmp;
-  ResetOpty;
-
   for i := 0 to High(AsmBlock) do AsmBlock[i] := '';
 
 end;

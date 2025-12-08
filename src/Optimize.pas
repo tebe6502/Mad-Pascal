@@ -4,31 +4,34 @@ unit Optimize;
 
 interface
 
-uses CompilerTypes, SysUtils;
+uses CompilerTypes, FileIO;
 
   // ----------------------------------------------------------------------------
 
-procedure Initialize;
+procedure Initialize(const aOutFile: ITextFile);
 
-procedure ResetForTmp;
+procedure StartOptimization(SourceLocation: TSourceLocation);
+
+// Reset temoporary varitables for register optimizations.
 procedure ResetOpty;
 
 procedure ASM65Internal(const a: String ; const comment: String; const optimizeCode: Boolean);
 
-procedure StartOptimization(SourceLocation: TSourceLocation);
+function IsASM65BufferEmpty: Boolean;
 
 procedure FlushTemporaryBuf;
 
 var
   optyY, optyBP2: TString;  // Initialized in ResetOpty
-  OptimizeBuf: TStringArray; // TODO Private
 
 // ----------------------------------------------------------------------------
 
 implementation
 
 // TODO: Check what is actually used from "Common"
-uses Assembler, Common, Console, Debugger ,StringUtilities, Targets, Utilities;
+uses SysUtils, Assembler, Common, Console, Debugger ,StringUtilities, Targets, Utilities;
+
+var OutFile: ITextFile;
 
 type
   TTemporaryBufIndex = Integer;
@@ -37,7 +40,9 @@ var
   TemporaryBuf: array [0..511] of String;
   TemporaryBufIndex: TTemporaryBufIndex;
   LastTempBuf0: TString;
-  // OptimizeBuf: TStringArray;
+
+var
+  OptimizeBuf: TStringArray;
 
   optimize: record
     SourceFile: TSourceFile;
@@ -50,6 +55,15 @@ var
 
   {$I 'OptimizeDebug.inc'}
 
+// Reset temporary variables for FOR optimizations.
+procedure ResetForTmp;
+begin
+   optyFOR0:='';
+   optyFOR1:='';
+   optyFOR2:='';
+   optyFOR3:='';
+end;
+
 
 procedure SetOptyA(const value: TString);
 begin
@@ -60,24 +74,19 @@ begin
   // ----------------------------------------------------------------------------
 
 
-procedure Initialize;
+procedure Initialize(const aOutFile: ITextFile);
 var
   i: TTemporaryBufIndex;
 begin
+  OutFile:=aOutFile;
   for i := Low(TemporaryBuf) to High(TemporaryBuf) do TemporaryBuf[i] := '';
   TemporaryBufIndex := -1;
   LastTempBuf0 := '';
 
   SetLength(OptimizeBuf, 1);
-end;
 
-
-procedure ResetForTmp;
-begin
-   optyFOR0:='';
-   optyFOR1:='';
-   optyFOR2:='';
-   optyFOR3:='';
+  ResetForTmp;
+  ResetOpty;
 end;
 
 procedure ResetOpty;
@@ -3436,7 +3445,10 @@ end;
 
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
-
+function IsASM65BufferEmpty: Boolean;
+begin
+  Result:= High(OptimizeBuf) = 0;
+end;
 
 procedure ASM65Internal(const a: String; const comment: String; const optimizeCode: Boolean);
 const TAB_WIDTH = 8;
@@ -3445,9 +3457,6 @@ var
   len, i: Integer;
   str: String;
 begin
-
-  if OutputDisabled or (pass<> TPass.CODE_GENERATION)
-  then exit;
 
   LogASM65(a,comment);
   if optimizeCode then

@@ -106,11 +106,10 @@ begin
 
   if run_func = 0 then
   begin
-    // Optimize.StopOptimization;
-
       optimization.active := False;
 
-      if High(OptimizeBuf) > 0 then ASM65('', '');
+      // Flush the buffer?
+      if not Optimize.IsASM65BufferEmpty then ASM65('', '');
   end;
 end;
 
@@ -647,8 +646,7 @@ procedure asm65(const a: String = ''; const comment: String = '');
 var optimizeCode: Boolean;
 begin
 
-    if not OutputDisabled then
-    if pass = TPass.CODE_GENERATION then
+    if (pass = TPass.CODE_GENERATION) and not OutputDisabled then
     begin
 
       {$IFDEF OPTIMIZECODE}
@@ -19880,9 +19878,6 @@ begin
 
   NumStaticStrChars := NumStaticStrCharsTmp;
 
-  ResetForTmp;
-  ResetOpty;
-
   LIBRARY_USE := LIBRARYTOK_USE;
 
   LIBRARYTOK_USE := False;
@@ -19890,7 +19885,8 @@ begin
   INTERFACETOK_USE := False;
   PublicSection := True;
 
-  Optimize.Initialize;
+  // The optimizer is only used in the code generation pass.
+  Optimize.Initialize(OutFile);
 
   Profiler.profiler.BeginSection('CompileProgram(TPass.CODE_GENERATION);');
   CompileProgram(TPass.CODE_GENERATION);
