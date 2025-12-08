@@ -655,7 +655,7 @@ begin
       optimizeCode := False;
       {$ENDIF}
 
-      Optimize.ASM65Internal(a,comment, optimizeCode and IsOptimizationActive, CodeSize, IsInterrupt);
+      Optimize.ASM65Internal(a,comment, optimizeCode and IsOptimizationActive);
     end;
 
 end;
@@ -13569,7 +13569,7 @@ begin
         GenerateElseCondition;      // Satisfied if expression is zero
         GenerateIfThenProlog;
 
-        SetOptyBP2('');
+        optyBP2 := '';
 
         j := CompileStatement(j + 2);
         GenerateIfThenEpilog;
@@ -14112,7 +14112,7 @@ WHILETOK:
 
                       asm65('===unroll===');
 
-                      SetOptyY('');
+                      optyY := '';
 
                       case GetDataSize(ActualParamType) of
                         1: begin
@@ -15130,7 +15130,7 @@ WHILETOK:
             begin      // Alloc Element Type
               ExpressionType := TDataType.WORDTOK;
 
-              if pos('mw? ' + TokenAt(i).Name, GetOptyBP2) > 0 then SetOptyBP2('');
+              if pos('mw? ' + TokenAt(i).Name, optyBP2) > 0 then optyBP2 := '';
             end;
 
           end;
@@ -19736,7 +19736,7 @@ end;
   asm65;
   asm65(#9'end');
 
-  if pass = TPass.CODE_GENERATION then Optimize.Finalize;
+  if pass = TPass.CODE_GENERATION then Optimize.FlushTemporaryBuf;
 
 end;
 
