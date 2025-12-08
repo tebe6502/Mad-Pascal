@@ -3462,68 +3462,65 @@ end;
 
 
 procedure ASM65Internal(const a: String; const comment: String; const optimizeCode: Boolean);
+const TAB_WIDTH = 8;
+const COMMENT_COLUMN = 7*TAB_WIDTH;
 var
   len, i: Integer;
   str: String;
 begin
 
-  if not OutputDisabled then
-    if pass = TPass.CODE_GENERATION then
-    begin
+  if OutputDisabled or (pass<> TPass.CODE_GENERATION) then exit;
 
-      LogASM65(a,comment);
-      if optimizeCode and optimize.active then
+  LogASM65(a,comment);
+  if optimizeCode and optimize.active then
+  begin
+    // Add to the optimize buffer.
+    i := High(OptimizeBuf);
+    OptimizeBuf[i] := a;
+    SetLength(OptimizeBuf, i + 2);
+
+  end
+  else
+  begin
+
+    if High(OptimizeBuf) > 0
+    then
       begin
-
-        i := High(OptimizeBuf);
-        OptimizeBuf[i] := a;
-
-        SetLength(OptimizeBuf, i + 2);
-
+        DebugCall('OptimizeASM.Begin',OptimizeBufToString );
+        OptimizeASM ;
+        DebugCall('OptimizeASM.End',OptimizeBufToString );
       end
-      else
+    else
       begin
 
-        if High(OptimizeBuf) > 0 then
-        begin
-          DebugCall('OptimizeASM.Begin',OptimizeBufToString );
-          OptimizeASM ;
-          DebugCall('OptimizeASM.End',OptimizeBufToString );
-        end
+        str := a;
 
-        else
+        // Align comment to existing spaces and tabs
+        if comment <> '' then
         begin
 
-          str := a;
+          len := 0;
 
-          if comment <> '' then
+          for i := 1 to length(a) do
+            if a[i] = #9 then
+              Inc(len, TAB_WIDTH - (len mod TAB_WIDTH))
+            else
+              if not (a[i] in [CR, LF]) then Inc(len);
+
+          while len < COMMENT_COLUMN do
           begin
-
-            len := 0;
-
-            for i := 1 to length(a) do
-              if a[i] = #9 then
-                Inc(len, 8 - (len mod 8))
-              else
-                if not (a[i] in [CR, LF]) then Inc(len);
-
-            while len < 56 do
-            begin
-              str := str + #9;
-              Inc(len, 8);
-            end;
-
-            str := str + comment;
-
+            str := str + #9;
+            Inc(len, TAB_WIDTH);
           end;
 
-          WriteOut(str);
+          str := str + comment;
 
         end;
 
-      end;
+        WriteOut(str);
 
-    end;
+      end;
+  end;
 
 end;
 
