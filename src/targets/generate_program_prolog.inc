@@ -1,3 +1,4 @@
+// Included in Compiler.pas
 procedure GenerateProgramProlog;
 var i, j: Integer;
     wasOptimizationActive: Boolean;
@@ -6,8 +7,8 @@ begin
 
 if Pass = TPass.CODE_GENERATION then begin
 
- wasOptimizationActive := Optimize.IsOptimizationActive;
- Optimize.SetOptimizationActive(false);
+ wasOptimizationActive := IsOptimizationActive;
+ SetOptimizationActive(false);
 
  Gen;
 
@@ -398,7 +399,7 @@ end;
  asm65(#9'UNITINITIALIZATION');
  asm65;
 
-  optimize.SetOptimizationActive(wasOptimizationActive);
+  SetOptimizationActive(wasOptimizationActive);
 end;
 
 end;
