@@ -38,7 +38,7 @@ var
   LIBRARY_NAME: String;
 
   AsmBlockIndex: Integer;
-  AsmBlock: array [0..4095] of String;
+  AsmBlock: TAsmBlockArray;
 
   _DataSegment: TWordMemory;
   _VarDataSize: Integer;

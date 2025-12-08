@@ -8,7 +8,7 @@ uses CompilerTypes, FileIO;
 
   // ----------------------------------------------------------------------------
 
-procedure Initialize(const aOutFile: ITextFile);
+procedure Initialize(const aOutFile: ITextFile; const aAsmBlockArray:TAsmBlockArray);
 
 procedure StartOptimization(SourceLocation: TSourceLocation);
 
@@ -32,6 +32,7 @@ implementation
 uses SysUtils, Assembler, Common, Console, Debugger ,StringUtilities, Targets, Utilities;
 
 var OutFile: ITextFile;
+  var AsmBlockArray: TAsmBlockArray;
 
 type
   TTemporaryBufIndex = Integer;
@@ -74,11 +75,12 @@ begin
   // ----------------------------------------------------------------------------
 
 
-procedure Initialize(const aOutFile: ITextFile);
+procedure Initialize(const aOutFile: ITextFile; const aAsmBlockArray:TAsmBlockArray);
 var
   i: TTemporaryBufIndex;
 begin
   OutFile:=aOutFile;
+  AsmBlockArray:=aAsmBlockArray;
   for i := Low(TemporaryBuf) to High(TemporaryBuf) do TemporaryBuf[i] := '';
   TemporaryBufIndex := -1;
   LastTempBuf0 := '';
@@ -427,7 +429,7 @@ end;
   if TemporaryBuf[0].IndexOf('#asm:') = 0 then
   begin
 
-    OutFile.WriteLn(AsmBlock[StrToInt(copy(TemporaryBuf[0], 6, 256))]);
+    OutFile.WriteLn(AsmBlockArray[StrToInt(copy(TemporaryBuf[0], 6, 256))]);
 
     TemporaryBuf[0] := '~';
 

@@ -232,6 +232,8 @@ type
     Block0: TBlock;
   end;
 
+  TAsmBlock = String;
+  TAsmBlockArray = array [0..4095] of TAsmBlock;
 
   TVariableList = array [1..MAXVARS] of TParam;
   TFieldName = TName;

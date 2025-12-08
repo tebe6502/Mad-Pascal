@@ -19886,7 +19886,7 @@ begin
   PublicSection := True;
 
   // The optimizer is only used in the code generation pass.
-  Optimize.Initialize(OutFile);
+  Optimize.Initialize(OutFile, AsmBlock);
 
   Profiler.profiler.BeginSection('CompileProgram(TPass.CODE_GENERATION);');
   CompileProgram(TPass.CODE_GENERATION);
