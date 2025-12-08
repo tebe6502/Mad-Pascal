@@ -38,7 +38,7 @@
         </Mode>
         <Mode Name="test">
           <local>
-            <CommandLineParams Value="-ipath:C:\jac\system\Atari800\Programming\Repositories\Mad-Pascal\blibs -ipath:C:\jac\system\Atari800\Programming\Repositories\Mad-Pascal\samples\a8\sound\mod tower_e80.pas -diag -pause"/>
+            <CommandLineParams Value="-ipath:C:\jac\system\Atari800\Programming\Repositories\Mad-Pascal\blibs -ipath:C:\jac\system\Atari800\Programming\Repositories\Mad-Pascal\samples\a8\sound\mod tower_e80.pas  -pause"/>
             <WorkingDirectory Value="C:\jac\system\Atari800\Programming\Repositories\Mad-Pascal\samples\a8\con80\"/>
           </local>
         </Mode>
@@ -569,6 +569,10 @@
       </Unit>
       <Unit>
         <Filename Value="..\src\Optimizer.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\src\CommonIO.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit>
     </Units>
