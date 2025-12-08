@@ -142,7 +142,7 @@ begin
           // TODO Have message for special case empty unit path
           Error(NumTok, TMessage.Create(TErrorCode.ResourceFileNotFound,
             'Cannot find resource file ''{0}'' for resource {1} of type {2} unit path ''{3}''.',
-            res.resFile, res.resName, unitPathList.ToString));
+            res.resFile, res.resName, res.resType, unitPathList.ToString));
         end;
 
         for j := 1 to MAXPARAMS do
