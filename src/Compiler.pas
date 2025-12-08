@@ -78,6 +78,55 @@ end;
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 
+var
+   optimization: record
+     active: Boolean;
+   end;
+
+procedure SetOptimizationActive(active: Boolean);
+begin
+  optimization.active := active;
+end;
+
+function IsOptimizationActive: Boolean;
+begin
+  Result := optimization.active;
+end;
+
+
+// Forward declaration
+procedure asm65(const a: String = ''; const comment: String = '');  forward;
+
+// ----------------------------------------------------------------------------
+// This procedure must be defined before StartOptimization, so the compiler finds the correct method!
+// ----------------------------------------------------------------------------
+
+procedure StopOptimization;
+begin
+
+  if run_func = 0 then
+  begin
+    // Optimize.StopOptimization;
+
+      optimization.active := False;
+
+      if High(OptimizeBuf) > 0 then ASM65('', '');
+  end;
+end;
+
+
+procedure StartOptimization(const tokenIndex: TTokenIndex);
+begin
+
+  StopOptimization;
+  Optimize.StartOptimization(TokenAt(tokenIndex).SourceLocation);
+  optimization.active := True;
+
+end;
+
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+
 
 function GetIdentResult(ProcAsBlock: TBlockIndex): TIdentIndex;
 var
@@ -608,7 +657,7 @@ begin
       optimizeCode := False;
       {$ENDIF}
 
-      Optimize.ASM65Internal(a,comment, optimizeCode);
+      Optimize.ASM65Internal(a,comment, optimizeCode and IsOptimizationActive);
     end;
 
 end;
@@ -1065,32 +1114,6 @@ begin
 
 end;// GenerateInterrupt
 *)
-
-
-// ----------------------------------------------------------------------------
-// ----------------------------------------------------------------------------
-
-
-// ----------------------------------------------------------------------------
-// This procedure must be defined before StartOptimization, so the compiler finds the correct method!
-// ----------------------------------------------------------------------------
-
-procedure StopOptimization;
-begin
-
-  if run_func = 0 then Optimize.StopOptimization;
-
-end;
-
-
-procedure StartOptimization(const tokenIndex: TTokenIndex);
-begin
-
-  StopOptimization;
-  Optimize.StartOptimization(TokenAt(tokenIndex).SourceLocation);
-
-end;
-
 
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
@@ -6530,7 +6553,7 @@ var
   yes, ShortArrayIndex: Boolean;
 begin
 
-  if Optimize.IsOptimizationActive = False then StartOptimization(i);
+  if IsOptimizationActive = False then StartOptimization(i);
 
 
   if (IdentifierAt(IdentIndex).isStriped) then
@@ -10025,7 +10048,7 @@ begin
                 if (IdentifierAt(IdentIndex).isStdCall = False) then
                   StartOptimization(i)
                 else
-                  if Optimize.IsOptimizationActive = False then StartOptimization(i);
+                  if IsOptimizationActive = False then StartOptimization(i);
 
 
                 Inc(run_func);
@@ -13187,7 +13210,7 @@ begin
             if (IdentifierAt(IdentIndex).isStdCall = False) then
               StartOptimization(i)
             else
-              if optimize.IsOptimizationActive = False then StartOptimization(i);
+              if IsOptimizationActive = False then StartOptimization(i);
 
 
             Inc(run_func);
@@ -19424,7 +19447,7 @@ begin
   Common.pass := pass;
   ResetOpty;
 
-  Optimize.SetOptimizationActive(False);
+  SetOptimizationActive(False);
 
   SetVarDataSize(0, 0);
 

@@ -4,7 +4,7 @@ unit Optimize;
 
 interface
 
-uses CompilerTypes;
+uses CompilerTypes, SysUtils;
 
   // ----------------------------------------------------------------------------
 
@@ -15,22 +15,20 @@ procedure ResetOpty;
 
 procedure ASM65Internal(const a: String ; const comment: String; const optimizeCode: Boolean);
 
-procedure SetOptimizationActive(active: Boolean);
-function IsOptimizationActive: Boolean;
 procedure StartOptimization(SourceLocation: TSourceLocation);
-procedure StopOptimization;
 
 procedure FlushTemporaryBuf;
 
 var
   optyY, optyBP2: TString;  // Initialized in ResetOpty
+  OptimizeBuf: TStringArray; // TODO Private
 
 // ----------------------------------------------------------------------------
 
 implementation
 
 // TODO: Check what is actually used from "Common"
-uses SysUtils, Assembler, Common, Console, Debugger ,StringUtilities, Targets, Utilities;
+uses Assembler, Common, Console, Debugger ,StringUtilities, Targets, Utilities;
 
 type
   TTemporaryBufIndex = Integer;
@@ -39,10 +37,9 @@ var
   TemporaryBuf: array [0..511] of String;
   TemporaryBufIndex: TTemporaryBufIndex;
   LastTempBuf0: TString;
-  OptimizeBuf: TStringArray;
+  // OptimizeBuf: TStringArray;
 
   optimize: record
-    active: Boolean;
     SourceFile: TSourceFile;
     line, oldLine: Integer;
     end;
@@ -93,32 +90,12 @@ begin
 
 end;
 
-procedure SetOptimizationActive(active: Boolean);
-begin
-  optimize.active := active;
-end;
-
-function IsOptimizationActive: Boolean;
-begin
-  Result := optimize.active;
-end;
-
 
 procedure StartOptimization(SourceLocation: TSourceLocation);
 begin
 
-  optimize.active := True;
   optimize.SourceFile := SourceLocation.SourceFile;
   optimize.line := SourceLocation.Line;
-
-end;
-
-procedure StopOptimization;
-begin
-
-  optimize.active := False;
-
-  if High(OptimizeBuf) > 0 then ASM65Internal('', '', False);
 
 end;
 
@@ -3469,10 +3446,11 @@ var
   str: String;
 begin
 
-  if OutputDisabled or (pass<> TPass.CODE_GENERATION) then exit;
+  if OutputDisabled or (pass<> TPass.CODE_GENERATION)
+  then exit;
 
   LogASM65(a,comment);
-  if optimizeCode and optimize.active then
+  if optimizeCode then
   begin
     // Add to the optimize buffer.
     i := High(OptimizeBuf);
