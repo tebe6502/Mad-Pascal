@@ -4,11 +4,11 @@ unit Optimize;
 
 interface
 
-uses CompilerTypes, FileIO, Targets;
+uses CompilerTypes, CommonIO, Targets;
 
   // ----------------------------------------------------------------------------
 
-procedure Initialize(const aOutFile: ITextFile; const aAsmBlockArray:TAsmBlockArray; const aTarget: TTarget);
+procedure Initialize(const aWriter: IWriter; const aAsmBlockArray:TAsmBlockArray; const aTarget: TTarget);
 
 procedure StartOptimization(SourceLocation: TSourceLocation);
 
@@ -30,7 +30,7 @@ implementation
 
 uses SysUtils, Assembler, Console, Debugger ,StringUtilities, Utilities;
 
-var OutFile: ITextFile;
+var Writer: IWriter;
    AsmBlockArray: TAsmBlockArray;
    Target:TTarget;
 
@@ -103,11 +103,11 @@ end;
 
 // ----------------------------------------------------------------------------
 
-procedure Initialize(const aOutFile: ITextFile; const aAsmBlockArray:TAsmBlockArray; const aTarget: TTarget);
+procedure Initialize(const aWriter: IWriter; const aAsmBlockArray:TAsmBlockArray; const aTarget: TTarget);
 var
   i: TTemporaryBufIndex;
 begin
-  OutFile:=aOutFile;
+  Writer:=aWriter;
   AsmBlockArray:=aAsmBlockArray;
   target:=aTarget;
 
@@ -450,7 +450,7 @@ end;
   if TemporaryBuf[0].IndexOf('#asm:') = 0 then
   begin
 
-    OutFile.WriteLn(AsmBlockArray[StrToInt(copy(TemporaryBuf[0], 6, 256))]);
+    Writer.WriteLn(AsmBlockArray[StrToInt(copy(TemporaryBuf[0], 6, 256))]);
 
     TemporaryBuf[0] := '~';
 
@@ -573,7 +573,7 @@ begin
 
     if TemporaryBuf[0] <> '~' then
     begin
-      if (TemporaryBuf[0] <> '') or (LastTempBuf0 <> TemporaryBuf[0]) then OutFile.WriteLn(TemporaryBuf[0]);
+      if (TemporaryBuf[0] <> '') or (LastTempBuf0 <> TemporaryBuf[0]) then Writer.WriteLn(TemporaryBuf[0]);
 
       LastTempBuf0 := TemporaryBuf[0];
     end;

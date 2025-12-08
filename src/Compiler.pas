@@ -18,6 +18,7 @@ uses
   Math, // Required for Min(), do not remove
   Assembler,
   Common,
+  CommonIO,
   CommonTypes,
   Console,
   DataTypes,
@@ -20019,6 +20020,7 @@ var
   scanner: IScanner;
   i: Integer;
   optimizerLogFile: ITextFile;
+  optimizerLogFileWriter: IWriter;
 begin
 
   Common.unitPathList := unitPathList;
@@ -20119,10 +20121,11 @@ begin
     optimizerLogFile := TFileSystem.CreateTextFile();
     optimizerLogFile.Assign(ChangeFileExt(OutFile.GetAbsoluteFilePath, '') + '-opt.log');
     optimizerLogFile.Rewrite;
+    optimizerLogFileWriter:=TFileWriter.Create(optimizerLogFile);
   end;
 
-  optimization.Optimizer := Optimizer.CreateDefaultOptimizer(optimizerLogFile);
-  optimization.Optimizer.Initialize(OutFile, AsmBlock, AsmBlockIndex, target);
+  optimization.Optimizer := Optimizer.CreateDefaultOptimizer(optimizerLogFileWriter);
+  optimization.Optimizer.Initialize(TFileWriter.Create(OutFile), AsmBlock, AsmBlockIndex, target);
 
   Profiler.profiler.BeginSection('CompileProgram(TPass.CODE_GENERATION);');
   CompileProgram(TPass.CODE_GENERATION);
