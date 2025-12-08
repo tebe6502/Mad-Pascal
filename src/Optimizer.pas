@@ -36,6 +36,7 @@ function CreateDummyOptimizer: IOptimizer;
 // Default optimizer for pass 2
 function CreateDefaultOptimizer(LogWriter: IWriter = nil): IOptimizer;
 
+
 implementation
 
 uses SysUtils, Optimize;
@@ -168,6 +169,7 @@ end;
 
 procedure TOptimizer.StartOptimization(SourceLocation: TSourceLocation);
 begin
+  Assert(SourceLocation.SourceFile <> nil, 'SourceLocation.SourceFile must not be nil.');
   if (LogWriter <> nil) then
   begin
     LogWriter.WriteLn(Format('StartOptimization(SourceLocation=%s)', [SourceLocationToString(SourceLocation)]));
