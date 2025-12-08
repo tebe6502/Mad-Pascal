@@ -304,6 +304,9 @@ var
   {$i include/opt6502/opt_TEMP_ZTMP.inc}
   {$i include/opt6502/opt_TEMP_UNROLL.inc}
   {$i include/opt6502/opt_TEMP_BOOLEAN_OR.inc}
+
+// -----------------------------------------------------------------------------
+
 begin
 
 {
@@ -474,61 +477,50 @@ end;
 
   if (pos('@FORTMP_', TemporaryBuf[0]) > 1) then
 
-    if lda(0) then
-    begin
+    if lda(0) then begin
 
       if (pos('::#$00', TemporaryBuf[0]) = 0) then TemporaryBuf[0] := #9'lda ' + fortmp(GetSTRING(0)) + '::#$00';
 
-    end
-    else
-      if cmp(0) then
-      begin
+    end else
+    if cmp(0) then begin
 
         if (pos('::#$00', TemporaryBuf[0]) = 0) then TemporaryBuf[0] := #9'cmp ' + fortmp(GetSTRING(0)) + '::#$00';
 
-      end
-      else
-        if sub(0) then
-        begin
+    end else
+    if sub(0) then begin
 
           if (pos('::#$00', TemporaryBuf[0]) = 0) then TemporaryBuf[0] := #9'sub ' + fortmp(GetSTRING(0)) + '::#$00';
 
-        end
-        else
-          if sbc(0) then
-          begin
+    end else
+    if sbc(0) then begin
 
             if (pos('::#$00', TemporaryBuf[0]) = 0) then TemporaryBuf[0] := #9'sbc ' + fortmp(GetSTRING(0)) + '::#$00';
 
-          end
-          else
+    end else
             if sta(0) then
               TemporaryBuf[0] := #9'sta ' + fortmp(GetSTRING(0))
             else
               if sty(0) then
                 TemporaryBuf[0] := #9'sty ' + fortmp(GetSTRING(0))
               else
-                if mva(0) and (pos('mva @FORTMP_', TemporaryBuf[0]) = 0) then
-                begin
+    if mva(0) and (pos('mva @FORTMP_', TemporaryBuf[0]) = 0) then begin
                   tmp := copy(TemporaryBuf[0], pos('@FORTMP_', TemporaryBuf[0]), 256);
 
                   TemporaryBuf[0] := copy(TemporaryBuf[0], 1, pos(' @FORTMP_', TemporaryBuf[0])) + fortmp(tmp);
-                end
-                else
+    end else
                   writeln('Unassigned: ' + TemporaryBuf[0]);
 
   //  tmp:=copy(TemporaryBuf[0], pos('@FORTMP_', TemporaryBuf[0]), 256);
   //   TemporaryBuf[0] := copy(TemporaryBuf[0], 1, pos(' @FORTMP_', TemporaryBuf[0]) ) + ':' + fortmp(tmp);
 
-
-end;
+end;  //OptimizeTemporaryBuf
 
 
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 
 
-procedure WriteOut(a: String);
+procedure WriteOut(const a: String);
 var
   i: Integer;
 begin
@@ -622,10 +614,10 @@ end;
 
 
 procedure OptimizeASM(const CodeSize: Integer; const IsInterrupt: Boolean);
-(* --------------------------------------------------------------------------
-  optymalizacja powiodla sie jesli na wyjsciu X=0
-  peephole optimization
-  -------------------------------------------------------------------------- *)
+(* -------------------------------------------------------------------------- *)
+(* optymalizacja powiodla sie jesli na wyjsciu X=0                            *)
+(* peephole optimization                                                      *)
+(* -------------------------------------------------------------------------- *)
 type
   TListingIndex = Integer;
   TListing = array [0..1023] of String;
