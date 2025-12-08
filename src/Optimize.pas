@@ -12,24 +12,23 @@ procedure Initialize(const aOutFile: ITextFile; const aAsmBlockArray:TAsmBlockAr
 
 procedure StartOptimization(SourceLocation: TSourceLocation);
 
-// Reset temoporary varitables for register optimizations.
+// Re/Set temoporary varitables for register optimizations.
 procedure ResetOpty;
+procedure SetOptyY(const value: TString);
+function GetOptyBP2(): TString;
+procedure SetOptyBP2(const value: TString);
 
-procedure ASM65Internal(const a: String ; const comment: String; const optimizeCode: Boolean);
+procedure ASM65Internal(const a: String ; const comment: String; const optimizeCode: Boolean; const CodeSize: Integer; const IsInterrupt: Boolean);
 
 function IsASM65BufferEmpty: Boolean;
 
-procedure FlushTemporaryBuf;
-
-var
-  optyY, optyBP2: TString;  // Initialized in ResetOpty
+procedure Finalize;
 
 // ----------------------------------------------------------------------------
 
 implementation
 
-// TODO: Check what is actually used from "Common"
-uses SysUtils, Assembler, Console, Common, Debugger ,StringUtilities, Utilities;
+uses SysUtils, Assembler, Console, Debugger ,StringUtilities, Utilities;
 
 var OutFile: ITextFile;
    AsmBlockArray: TAsmBlockArray;
@@ -53,7 +52,7 @@ var
 
   optyFOR0, optyFOR1, optyFOR2, optyFOR3: TString;
 
-  optyA: TString;
+  optyA, optyY, optyBP2: TString;  // Initialized in ResetOpty
 
   ShrShlCnt: Integer; // Counter, used only for label generation in Optimize
 
@@ -73,10 +72,36 @@ procedure SetOptyA(const value: TString);
 begin
   optyA:= value;
   DebugCall( 'SetOptyA', value);
-  end;
+end;
 
-  // ----------------------------------------------------------------------------
+procedure SetOptyY(const value: TString);
+begin
+  optyY:= value;
+  DebugCall( 'SetOptyY', value);
+end;
 
+function GetOptyBP2(): TString;
+begin
+  result:=optyBP2;
+end;
+
+procedure SetOptyBP2(const value: TString);
+begin
+  optyBP2:= value;
+  DebugCall( 'SetOptyBP2', value);
+end;
+
+procedure ResetOpty;
+begin
+  DebugCall('ResetOpty');
+
+  SetOptyA('');
+  SetOptyY('');
+  SetOptyBP2('');
+
+end;
+
+// ----------------------------------------------------------------------------
 
 procedure Initialize(const aOutFile: ITextFile; const aAsmBlockArray:TAsmBlockArray; const aTarget: TTarget);
 var
@@ -97,17 +122,6 @@ begin
 
   ShrShlCnt:=0;
 end;
-
-procedure ResetOpty;
-begin
-  DebugCall('ResetOpty');
-
-  SetOptyA('');
-  optyY := '';
-  optyBP2 := '';
-
-end;
-
 
 procedure StartOptimization(SourceLocation: TSourceLocation);
 begin
@@ -576,7 +590,7 @@ end;
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 
-procedure FlushTemporaryBuf;
+procedure Finalize;
 var
   i: Integer;
 begin
@@ -607,7 +621,7 @@ begin
 end;
 
 
-procedure OptimizeASM;
+procedure OptimizeASM(const CodeSize: Integer; const IsInterrupt: Boolean);
 (* --------------------------------------------------------------------------
   optymalizacja powiodla sie jesli na wyjsciu X=0
   peephole optimization
@@ -1677,7 +1691,7 @@ end;
   // ----------------------------------------------------------------------------
 
 
-  function OptimizeRelation: Boolean;
+  function OptimizeRelation(const CodeSize: Integer): Boolean;
   var
     i, p: Integer;
     tmp: String;
@@ -3279,11 +3293,11 @@ begin        // OptimizeASM
       OptimizeAssignment;
 
       repeat
-      until OptimizeRelation;
+      until OptimizeRelation(CodeSize);
 
       OptimizeAssignment;
 
-    until OptimizeRelation;
+    until OptimizeRelation(CodeSize);
 
 
     if OptimizeEAX then
@@ -3460,7 +3474,7 @@ begin
   Result:= High(OptimizeBuf) = 0;
 end;
 
-procedure ASM65Internal(const a: String; const comment: String; const optimizeCode: Boolean);
+procedure ASM65Internal(const a: String; const comment: String; const optimizeCode: Boolean; const CodeSize: Integer; const IsInterrupt: Boolean);
 const TAB_WIDTH = 8;
 const COMMENT_COLUMN = 7*TAB_WIDTH;
 var
@@ -3484,7 +3498,7 @@ begin
     then
       begin
         DebugCall('OptimizeASM.Begin',OptimizeBufToString );
-        OptimizeASM ;
+        OptimizeASM(CodeSize, IsInterrupt);
         DebugCall('OptimizeASM.End',OptimizeBufToString );
       end
     else
