@@ -103,8 +103,6 @@ var
 
   WithName: TStringArray;
 
-  // Optimizer Settings
-
   codealign: record
     proc, loop, link: Integer;
     end;
