@@ -4,11 +4,11 @@ unit Optimize;
 
 interface
 
-uses CompilerTypes, FileIO;
+uses CompilerTypes, FileIO, Targets;
 
   // ----------------------------------------------------------------------------
 
-procedure Initialize(const aOutFile: ITextFile; const aAsmBlockArray:TAsmBlockArray);
+procedure Initialize(const aOutFile: ITextFile; const aAsmBlockArray:TAsmBlockArray; const aTarget: TTarget);
 
 procedure StartOptimization(SourceLocation: TSourceLocation);
 
@@ -29,10 +29,11 @@ var
 implementation
 
 // TODO: Check what is actually used from "Common"
-uses SysUtils, Assembler, Common, Console, Debugger ,StringUtilities, Targets, Utilities;
+uses SysUtils, Assembler, Console, Common, Debugger ,StringUtilities, Utilities;
 
 var OutFile: ITextFile;
-  var AsmBlockArray: TAsmBlockArray;
+   AsmBlockArray: TAsmBlockArray;
+   Target:TTarget;
 
 type
   TTemporaryBufIndex = Integer;
@@ -77,12 +78,14 @@ begin
   // ----------------------------------------------------------------------------
 
 
-procedure Initialize(const aOutFile: ITextFile; const aAsmBlockArray:TAsmBlockArray);
+procedure Initialize(const aOutFile: ITextFile; const aAsmBlockArray:TAsmBlockArray; const aTarget: TTarget);
 var
   i: TTemporaryBufIndex;
 begin
   OutFile:=aOutFile;
   AsmBlockArray:=aAsmBlockArray;
+  target:=aTarget;
+
   for i := Low(TemporaryBuf) to High(TemporaryBuf) do TemporaryBuf[i] := '';
   TemporaryBufIndex := -1;
   LastTempBuf0 := '';
@@ -610,6 +613,7 @@ procedure OptimizeASM;
   peephole optimization
   -------------------------------------------------------------------------- *)
 type
+  TListingIndex = Integer;
   TListing = array [0..1023] of String;
   TListing_tmp = array [0..127] of String;
   TString0_3_Array = array [0..3] of String;
@@ -671,20 +675,20 @@ var
   end;
 
 
-  function onBreak(i: Integer): Boolean;
+  function onBreak(i: TListingIndex): Boolean;
   begin
     Result := (listing[i] = '@') or (pos(#9'jsr ', listing[i]) = 1) or (listing[i] = #9'eif');
     // !!! eif !!! koniecznie
   end;
 
 
-  function argMatch(i, j: Integer): Boolean;
+  function argMatch(i, j: TListingIndex): Boolean;
   begin
     Result := copy(listing[i], 6, 256) = copy(listing[j], 6, 256);
   end;
 
 
-  procedure WriteInstruction(i: Integer);
+  procedure WriteInstruction(i: TListingIndex);
   begin
 
     if isInterrupt and ((pos(' :bp', listing[i]) > 0) or (pos(' :STACK', listing[i]) > 0)) then
@@ -706,7 +710,7 @@ var
   end;
 
 
-  function SKIP(i: integer): Boolean;
+  function SKIP(i: TListingIndex): Boolean;
   begin
 
     if (i < 0) or (listing[i] = '') then
@@ -719,7 +723,7 @@ var
 
 
 
-  function LabelIsUsed(i: Integer): Boolean;                  // issue #91 fixed
+  function LabelIsUsed(i: TListingIndex): Boolean;                  // issue #91 fixed
 
 (*
 
@@ -769,7 +773,7 @@ var
   end;
 
 
-  function IFDEF_MUL8(i: Integer): Boolean;
+  function IFDEF_MUL8(i: TListingIndex): Boolean;
   begin
     Result :=  //(listing[i+4] = #9'eif') and
       //(listing[i+3] = #9'imulCL') and
@@ -777,7 +781,7 @@ var
       (listing[i + 1] = #9'fmulu_8') and (listing[i] = #9'.ifdef fmulinit');
   end;
 
-  function IFDEF_MUL16(i: Integer): Boolean;
+  function IFDEF_MUL16(i: TListingIndex): Boolean;
   begin
     Result :=  //(listing[i+4] = #9'eif') and
       //(listing[i+3] = #9'imulCX') and
@@ -786,7 +790,7 @@ var
   end;
 
 
-  function LDA_STA_BP(i: Integer): Boolean;
+  function LDA_STA_BP(i: TListingIndex): Boolean;
   begin
 
     Result := (lda_bp_y(i) and sta_a(i + 1)) or (lda_a(i) and sta_bp_y(i + 1));
@@ -794,7 +798,7 @@ var
   end;
 
 
-  procedure LDA_STA_ADR(i, q: Integer; op: Char);
+  procedure LDA_STA_ADR(i: TListingIndex; q: Integer; op: Char);
   begin
 
     if lda_adr(i + 6) and iy(i + 6) then
@@ -855,7 +859,7 @@ var
 
   // -----------------------------------------------------------------------------
 
-  procedure Expand(i, e: Integer);
+  procedure Expand(i, e: TListingIndex);
   var
     k: Integer;
   begin
@@ -875,7 +879,7 @@ var
 
   procedure Rebuild(const context: String);
   var
-    k, i: Integer;
+    k, i: TListingIndex;
     oldListing, newListing: String;
    begin
 
@@ -1083,7 +1087,7 @@ var
   end;
 
 
-  function GetString(j: Integer): String; overload;
+  function GetString(j: TListingIndex): String; overload;
   var
     i: Integer;
     a: String;
@@ -1104,7 +1108,7 @@ var
   end;
 
 
-  function GetStringLast(j: Integer): String; overload;
+  function GetStringLast(j: TListingIndex): String; overload;
   var
     i: Integer;
     a: String;
@@ -2484,7 +2488,7 @@ begin        // OptimizeASM
                                           begin  // imulCARD, mulINTEGER
                                             t := '';
 
-                                            if (target.id = TTargetID.NEO) then
+                                            if (Target.ID = TTargetID.NEO) then
                                             begin
 
                                               listing[l] := #9'lda ' + GetARG(0, x);
