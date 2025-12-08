@@ -15,8 +15,8 @@ uses
   FileIO,
   MathEvaluate,
   Messages,
-  Optimize,
-  OptimizeTest,
+  Optimizer,
+  OptimizerTest,
   Tokens,
   Utilities,
   StringUtilities,
@@ -389,18 +389,18 @@ type
   end;
 
 
-  procedure TestUnitOptimize;
+  procedure TestUnitOptimizer;
   begin
-    StartTest('TestUnitOptimize');
-    TraceFile:=TFileSystem.CreateTextFile;
-    traceFile.Assign('..\samples\tests\tests-debug\debug.log');
+    StartTest('TestUnitOptimizer');
+    TraceFile := TFileSystem.CreateTextFile;
+    traceFile.Assign('..\samples\tests\tests-debug\debug-trace.log');
     traceFile.Rewrite();
     Debugger.debugger := TDebugger.Create;
     pass := TPass.CODE_GENERATION;
-   // OutFile.Flush;
-    OptimizeTest.Test;
+    // OutFile.Flush;
+    OptimizerTest.Test;
     traceFile.Close;
-    EndTest('TestUnitOptimize');
+    EndTest('TestUnitOptimizer');
   end;
 
 begin
@@ -413,7 +413,7 @@ begin
     TestUnitMathEvaluate;
     TestUnitMessages;
     TestUnitStringUtilities;
-    TestUnitOptimize;
+    TestUnitOptimizer;
   except
     on e: Exception do
     begin
