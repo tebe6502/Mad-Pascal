@@ -9248,7 +9248,7 @@ end;
 
 
     if DataSize[SelectorType]<>1 then
-     Error(i, 'Expected BYTE, SHORTINT, CHAR or BOOLEAN as CASE selector');
+     Error(i, 'Expected BYTE, SHORTINT, CHAR, or BOOLEAN as CASE selector');
 
     if not (SelectorType in OrdinalTypes) then
       Error(i, 'Ordinal variable expected as ''CASE'' selector');
@@ -13037,7 +13037,7 @@ end;
 
         if SelectorType <> ENUMTYPE then
           if DataSize[SelectorType] <> 1 then
-            Error(i, 'Expected BYTE, SHORTINT, CHAR or BOOLEAN as ''CASE'' selector');
+            Error(i, 'Expected BYTE, SHORTINT, CHAR, or BOOLEAN as ''CASE'' selector');
 
         if not (SelectorType in OrdinalTypes + [ENUMTYPE]) then
           Error(i, 'Ordinal variable expected as ''CASE'' selector');

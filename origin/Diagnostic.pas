@@ -23,7 +23,7 @@ var
   DiagFile: textfile;
 begin
 
-  AssignFile(DiagFile, ChangeFileExt(UnitName[1].Name, '.txt'));
+  AssignFile(DiagFile, ChangeFileExt(UnitName[1].Name, '-diag.log'));
   Rewrite(DiagFile);
 
   WriteLn(DiagFile);

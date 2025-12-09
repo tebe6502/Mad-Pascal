@@ -4,33 +4,35 @@ unit Optimize;
 
 interface
 
-uses CompilerTypes;
+uses CompilerTypes, CommonIO, Targets;
 
   // ----------------------------------------------------------------------------
 
-procedure Initialize;
+procedure Initialize(const aWriter: IWriter; const aAsmBlockArray:TAsmBlockArray; const aTarget: TTarget);
 
-procedure ResetForTmp;
-procedure ResetOpty;
-
-procedure asm65(const a: String = ''; const comment: String = '');
-
-procedure SetOptimizationActive(active: Boolean);
-function IsOptimizationActive: Boolean;
 procedure StartOptimization(SourceLocation: TSourceLocation);
-procedure StopOptimization;
 
-procedure FlushTemporaryBuf;
+// Re/Set temoporary varitables for register optimizations.
+procedure ResetOpty;
+procedure SetOptyY(const value: TString);
+function GetOptyBP2(): TString;
+procedure SetOptyBP2(const value: TString);
 
-var
-  optyY, optyBP2: TString;  // Initialized in ResetOpty
+procedure ASM65Internal(const a: String ; const comment: String; const optimizeCode: Boolean; const CodeSize: Integer; const IsInterrupt: Boolean);
+
+function IsASM65BufferEmpty: Boolean;
+
+procedure Finalize;
 
 // ----------------------------------------------------------------------------
 
 implementation
 
-// TODO: Check what is actually used from "Common"
-uses SysUtils, Assembler, Common, Console, Debugger ,StringUtilities, Targets, Utilities;
+uses SysUtils, Assembler, Console, Debugger ,StringUtilities, Utilities;
+
+var Writer: IWriter;
+   AsmBlockArray: TAsmBlockArray;
+   Target:TTarget;
 
 type
   TTemporaryBufIndex = Integer;
@@ -39,42 +41,24 @@ var
   TemporaryBuf: array [0..511] of String;
   TemporaryBufIndex: TTemporaryBufIndex;
   LastTempBuf0: TString;
+
+var
   OptimizeBuf: TStringArray;
 
   optimize: record
-    use: Boolean;
     SourceFile: TSourceFile;
     line, oldLine: Integer;
     end;
 
   optyFOR0, optyFOR1, optyFOR2, optyFOR3: TString;
 
-  optyA: TString;
+  optyA, optyY, optyBP2: TString;  // Initialized in ResetOpty
+
+  ShrShlCnt: Integer; // Counter, used only for label generation in Optimize
 
   {$I 'OptimizeDebug.inc'}
 
-
-procedure SetOptyA(const value: TString);
-begin
-  optyA:= value;
-  DebugCall( 'SetOptyA', value);
-  end;
-
-  // ----------------------------------------------------------------------------
-
-
-procedure Initialize;
-var
-  i: TTemporaryBufIndex;
-begin
-  for i := Low(TemporaryBuf) to High(TemporaryBuf) do TemporaryBuf[i] := '';
-  TemporaryBufIndex := -1;
-  LastTempBuf0 := '';
-
-  SetLength(OptimizeBuf, 1);
-end;
-
-
+// Reset temporary variables for FOR optimizations.
 procedure ResetForTmp;
 begin
    optyFOR0:='';
@@ -83,42 +67,67 @@ begin
    optyFOR3:='';
 end;
 
+
+procedure SetOptyA(const value: TString);
+begin
+  optyA:= value;
+  DebugCall( 'SetOptyA', value);
+end;
+
+procedure SetOptyY(const value: TString);
+begin
+  optyY:= value;
+  DebugCall( 'SetOptyY', value);
+end;
+
+function GetOptyBP2(): TString;
+begin
+  result:=optyBP2;
+end;
+
+procedure SetOptyBP2(const value: TString);
+begin
+  optyBP2:= value;
+  DebugCall( 'SetOptyBP2', value);
+end;
+
 procedure ResetOpty;
 begin
   DebugCall('ResetOpty');
 
   SetOptyA('');
-  optyY := '';
-  optyBP2 := '';
+  SetOptyY('');
+  SetOptyBP2('');
 
 end;
 
-procedure SetOptimizationActive(active: Boolean);
+// ----------------------------------------------------------------------------
+
+procedure Initialize(const aWriter: IWriter; const aAsmBlockArray:TAsmBlockArray; const aTarget: TTarget);
+var
+  i: TTemporaryBufIndex;
 begin
-  optimize.use := active;
-end;
+  Writer:=aWriter;
+  AsmBlockArray:=aAsmBlockArray;
+  target:=aTarget;
 
-function IsOptimizationActive: Boolean;
-begin
-  Result := optimize.use;
-end;
+  for i := Low(TemporaryBuf) to High(TemporaryBuf) do TemporaryBuf[i] := '';
+  TemporaryBufIndex := -1;
+  LastTempBuf0 := '';
 
+  SetLength(OptimizeBuf, 1);
+
+  ResetForTmp;
+  ResetOpty;
+
+  ShrShlCnt:=0;
+end;
 
 procedure StartOptimization(SourceLocation: TSourceLocation);
 begin
 
-  optimize.use := True;
   optimize.SourceFile := SourceLocation.SourceFile;
   optimize.line := SourceLocation.Line;
-
-end;
-
-procedure StopOptimization;
-begin
-
-  optimize.use := False;
-
-  if High(OptimizeBuf) > 0 then asm65;
 
 end;
 
@@ -295,6 +304,9 @@ var
   {$i include/opt6502/opt_TEMP_ZTMP.inc}
   {$i include/opt6502/opt_TEMP_UNROLL.inc}
   {$i include/opt6502/opt_TEMP_BOOLEAN_OR.inc}
+
+// -----------------------------------------------------------------------------
+
 begin
 
 {
@@ -441,7 +453,7 @@ end;
   if TemporaryBuf[0].IndexOf('#asm:') = 0 then
   begin
 
-    OutFile.WriteLn(AsmBlock[StrToInt(copy(TemporaryBuf[0], 6, 256))]);
+    Writer.WriteLn(AsmBlockArray[StrToInt(copy(TemporaryBuf[0], 6, 256))]);
 
     TemporaryBuf[0] := '~';
 
@@ -465,61 +477,50 @@ end;
 
   if (pos('@FORTMP_', TemporaryBuf[0]) > 1) then
 
-    if lda(0) then
-    begin
+    if lda(0) then begin
 
       if (pos('::#$00', TemporaryBuf[0]) = 0) then TemporaryBuf[0] := #9'lda ' + fortmp(GetSTRING(0)) + '::#$00';
 
-    end
-    else
-      if cmp(0) then
-      begin
+    end else
+    if cmp(0) then begin
 
         if (pos('::#$00', TemporaryBuf[0]) = 0) then TemporaryBuf[0] := #9'cmp ' + fortmp(GetSTRING(0)) + '::#$00';
 
-      end
-      else
-        if sub(0) then
-        begin
+    end else
+    if sub(0) then begin
 
           if (pos('::#$00', TemporaryBuf[0]) = 0) then TemporaryBuf[0] := #9'sub ' + fortmp(GetSTRING(0)) + '::#$00';
 
-        end
-        else
-          if sbc(0) then
-          begin
+    end else
+    if sbc(0) then begin
 
             if (pos('::#$00', TemporaryBuf[0]) = 0) then TemporaryBuf[0] := #9'sbc ' + fortmp(GetSTRING(0)) + '::#$00';
 
-          end
-          else
+    end else
             if sta(0) then
               TemporaryBuf[0] := #9'sta ' + fortmp(GetSTRING(0))
             else
               if sty(0) then
                 TemporaryBuf[0] := #9'sty ' + fortmp(GetSTRING(0))
               else
-                if mva(0) and (pos('mva @FORTMP_', TemporaryBuf[0]) = 0) then
-                begin
+    if mva(0) and (pos('mva @FORTMP_', TemporaryBuf[0]) = 0) then begin
                   tmp := copy(TemporaryBuf[0], pos('@FORTMP_', TemporaryBuf[0]), 256);
 
                   TemporaryBuf[0] := copy(TemporaryBuf[0], 1, pos(' @FORTMP_', TemporaryBuf[0])) + fortmp(tmp);
-                end
-                else
+    end else
                   writeln('Unassigned: ' + TemporaryBuf[0]);
 
   //  tmp:=copy(TemporaryBuf[0], pos('@FORTMP_', TemporaryBuf[0]), 256);
   //   TemporaryBuf[0] := copy(TemporaryBuf[0], 1, pos(' @FORTMP_', TemporaryBuf[0]) ) + ':' + fortmp(tmp);
 
-
-end;
+end;  //OptimizeTemporaryBuf
 
 
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 
 
-procedure WriteOut(a: String);
+procedure WriteOut(const a: String);
 var
   i: Integer;
 begin
@@ -564,7 +565,7 @@ begin
 
     if TemporaryBuf[0] <> '~' then
     begin
-      if (TemporaryBuf[0] <> '') or (LastTempBuf0 <> TemporaryBuf[0]) then OutFile.WriteLn(TemporaryBuf[0]);
+      if (TemporaryBuf[0] <> '') or (LastTempBuf0 <> TemporaryBuf[0]) then Writer.WriteLn(TemporaryBuf[0]);
 
       LastTempBuf0 := TemporaryBuf[0];
     end;
@@ -581,7 +582,7 @@ end;
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 
-procedure FlushTemporaryBuf;
+procedure Finalize;
 var
   i: Integer;
 begin
@@ -612,12 +613,13 @@ begin
 end;
 
 
-procedure OptimizeASM;
-(* --------------------------------------------------------------------------
-  optymalizacja powiodla sie jesli na wyjsciu X=0
-  peephole optimization
-  -------------------------------------------------------------------------- *)
+procedure OptimizeASM(const CodeSize: Integer; const IsInterrupt: Boolean);
+(* -------------------------------------------------------------------------- *)
+(* optymalizacja powiodla sie jesli na wyjsciu X=0                            *)
+(* peephole optimization                                                      *)
+(* -------------------------------------------------------------------------- *)
 type
+  TListingIndex = Integer;
   TListing = array [0..1023] of String;
   TListing_tmp = array [0..127] of String;
   TString0_3_Array = array [0..3] of String;
@@ -636,7 +638,7 @@ var
 
   // -----------------------------------------------------------------------------
 
-  function ListingToString: String;
+  function ListingToString(const listing: TListing): String;
   var i: Integer;
   begin
     Result:='';
@@ -679,20 +681,20 @@ var
   end;
 
 
-  function onBreak(i: Integer): Boolean;
+  function onBreak(i: TListingIndex): Boolean;
   begin
     Result := (listing[i] = '@') or (pos(#9'jsr ', listing[i]) = 1) or (listing[i] = #9'eif');
     // !!! eif !!! koniecznie
   end;
 
 
-  function argMatch(i, j: Integer): Boolean;
+  function argMatch(i, j: TListingIndex): Boolean;
   begin
     Result := copy(listing[i], 6, 256) = copy(listing[j], 6, 256);
   end;
 
 
-  procedure WriteInstruction(i: Integer);
+  procedure WriteInstruction(i: TListingIndex);
   begin
 
     if isInterrupt and ((pos(' :bp', listing[i]) > 0) or (pos(' :STACK', listing[i]) > 0)) then
@@ -714,7 +716,7 @@ var
   end;
 
 
-  function SKIP(i: integer): Boolean;
+  function SKIP(i: TListingIndex): Boolean;
   begin
 
     if (i < 0) or (listing[i] = '') then
@@ -727,7 +729,7 @@ var
 
 
 
-  function LabelIsUsed(i: Integer): Boolean;                  // issue #91 fixed
+  function LabelIsUsed(i: TListingIndex): Boolean;                  // issue #91 fixed
 
 (*
 
@@ -777,7 +779,7 @@ var
   end;
 
 
-  function IFDEF_MUL8(i: Integer): Boolean;
+  function IFDEF_MUL8(i: TListingIndex): Boolean;
   begin
     Result :=  //(listing[i+4] = #9'eif') and
       //(listing[i+3] = #9'imulCL') and
@@ -785,7 +787,7 @@ var
       (listing[i + 1] = #9'fmulu_8') and (listing[i] = #9'.ifdef fmulinit');
   end;
 
-  function IFDEF_MUL16(i: Integer): Boolean;
+  function IFDEF_MUL16(i: TListingIndex): Boolean;
   begin
     Result :=  //(listing[i+4] = #9'eif') and
       //(listing[i+3] = #9'imulCX') and
@@ -794,7 +796,7 @@ var
   end;
 
 
-  function LDA_STA_BP(i: Integer): Boolean;
+  function LDA_STA_BP(i: TListingIndex): Boolean;
   begin
 
     Result := (lda_bp_y(i) and sta_a(i + 1)) or (lda_a(i) and sta_bp_y(i + 1));
@@ -802,7 +804,7 @@ var
   end;
 
 
-  procedure LDA_STA_ADR(i, q: Integer; op: Char);
+  procedure LDA_STA_ADR(i: TListingIndex; q: Integer; op: Char);
   begin
 
     if lda_adr(i + 6) and iy(i + 6) then
@@ -863,7 +865,7 @@ var
 
   // -----------------------------------------------------------------------------
 
-  procedure Expand(i, e: Integer);
+  procedure Expand(i, e: TListingIndex);
   var
     k: Integer;
   begin
@@ -881,17 +883,9 @@ var
 
   // -----------------------------------------------------------------------------
 
-  function DebugListing(const l: TListing ): String;
-  var i: Integer;
-  begin
-    result:='';
-    for i:=Low(l) to High(l) do result:=result+l[i]+'/';
-
-  end;
-
   procedure Rebuild(const context: String);
   var
-    k, i: Integer;
+    k, i: TListingIndex;
     oldListing, newListing: String;
    begin
 
@@ -1099,7 +1093,7 @@ var
   end;
 
 
-  function GetString(j: Integer): String; overload;
+  function GetString(j: TListingIndex): String; overload;
   var
     i: Integer;
     a: String;
@@ -1120,7 +1114,7 @@ var
   end;
 
 
-  function GetStringLast(j: Integer): String; overload;
+  function GetStringLast(j: TListingIndex): String; overload;
   var
     i: Integer;
     a: String;
@@ -1621,7 +1615,7 @@ end;
       Result := True;
 
       Rebuild('PeepholeOptimization');
-      DebugCall('OptimizeASM:PeepholeOptimization', ListingToString);
+      DebugCall('OptimizeASM:PeepholeOptimization', ListingToString(listing));
 
       for i := 0 to l - 1 do
       begin
@@ -1672,15 +1666,15 @@ end;
 
 
     repeat until PeepholeOptimization;
-    DebugCall('OptimizeASM:OptimizeAssignment.PeepholeOptimization', ListingToString);
+    DebugCall('OptimizeASM:OptimizeAssignment.PeepholeOptimization', ListingToString(listing));
     while RemoveUnusedSTACK do repeat until PeepholeOptimization;
 
     repeat until PeepholeOptimization_STA;
-    DebugCall('OptimizeASM:OptimizeAssignment.PeepholeOptimization_STA', ListingToString);
+    DebugCall('OptimizeASM:OptimizeAssignment.PeepholeOptimization_STA', ListingToString(listing));
     while RemoveUnusedSTACK do repeat until PeepholeOptimization;
 
     repeat until PeepholeOptimization_END;
-    DebugCall('OptimizeASM:OptimizeAssignment.PeepholeOptimization_END', ListingToString);
+    DebugCall('OptimizeASM:OptimizeAssignment.PeepholeOptimization_END', ListingToString(listing));
     while RemoveUnusedSTACK do repeat until PeepholeOptimization;
   end;
 
@@ -1689,7 +1683,7 @@ end;
   // ----------------------------------------------------------------------------
 
 
-  function OptimizeRelation: Boolean;
+  function OptimizeRelation(const CodeSize: Integer): Boolean;
   var
     i, p: Integer;
     tmp: String;
@@ -2500,7 +2494,7 @@ begin        // OptimizeASM
                                           begin  // imulCARD, mulINTEGER
                                             t := '';
 
-                                            if (target.id = TTargetID.NEO) then
+                                            if (Target.ID = TTargetID.NEO) then
                                             begin
 
                                               listing[l] := #9'lda ' + GetARG(0, x);
@@ -3291,11 +3285,11 @@ begin        // OptimizeASM
       OptimizeAssignment;
 
       repeat
-      until OptimizeRelation;
+      until OptimizeRelation(CodeSize);
 
       OptimizeAssignment;
 
-    until OptimizeRelation;
+    until OptimizeRelation(CodeSize);
 
 
     if OptimizeEAX then
@@ -3467,78 +3461,69 @@ end;
 
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
+function IsASM65BufferEmpty: Boolean;
+begin
+  Result:= High(OptimizeBuf) = 0;
+end;
 
-
-procedure asm65(const a: String = ''; const comment: String = '');
+procedure ASM65Internal(const a: String; const comment: String; const optimizeCode: Boolean; const CodeSize: Integer; const IsInterrupt: Boolean);
+const TAB_WIDTH = 8;
+const COMMENT_COLUMN = 7*TAB_WIDTH;
 var
   len, i: Integer;
-  optimize_code: Boolean;
   str: String;
 begin
 
-  {$IFDEF OPTIMIZECODE}
-  optimize_code := True;
-  {$ELSE}
-  optimize_code := False;
-  {$ENDIF}
+  LogASM65(a,comment);
+  if optimizeCode then
+  begin
+    // Add to the optimize buffer.
+    i := High(OptimizeBuf);
+    OptimizeBuf[i] := a;
+    SetLength(OptimizeBuf, i + 2);
 
-  if not OutputDisabled then
-    if pass = TPass.CODE_GENERATION then
-    begin
+  end
+  else
+  begin
 
-      LogASM65(a,comment);
-      if optimize_code and optimize.use then
+    if High(OptimizeBuf) > 0
+    then
       begin
-
-        i := High(OptimizeBuf);
-        OptimizeBuf[i] := a;
-
-        SetLength(OptimizeBuf, i + 2);
-
+        DebugCall('OptimizeASM.Begin',OptimizeBufToString );
+        OptimizeASM(CodeSize, IsInterrupt);
+        DebugCall('OptimizeASM.End',OptimizeBufToString );
       end
-      else
+    else
       begin
 
-        if High(OptimizeBuf) > 0 then
-        begin
-          DebugCall('OptimizeASM.Begin',OptimizeBufToString );
-          OptimizeASM ;
-          DebugCall('OptimizeASM.End',OptimizeBufToString );
-        end
+        str := a;
 
-        else
+        // Align comment to existing spaces and tabs
+        if comment <> '' then
         begin
 
-          str := a;
+          len := 0;
 
-          if comment <> '' then
+          for i := 1 to length(a) do
+            if a[i] = #9 then
+              Inc(len, TAB_WIDTH - (len mod TAB_WIDTH))
+            else
+              if not (a[i] in [CR, LF]) then Inc(len);
+
+          while len < COMMENT_COLUMN do
           begin
-
-            len := 0;
-
-            for i := 1 to length(a) do
-              if a[i] = #9 then
-                Inc(len, 8 - (len mod 8))
-              else
-                if not (a[i] in [CR, LF]) then Inc(len);
-
-            while len < 56 do
-            begin
-              str := str + #9;
-              Inc(len, 8);
-            end;
-
-            str := str + comment;
-
+            str := str + #9;
+            Inc(len, TAB_WIDTH);
           end;
 
-          WriteOut(str);
+          str := str + comment;
 
         end;
 
-      end;
+        WriteOut(str);
 
-    end;
+      end;
+  end;
 
 end;
 

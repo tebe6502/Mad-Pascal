@@ -1,4 +1,4 @@
-unit OptimizeTest;
+unit OptimizerTest;
 
 
 interface
@@ -9,7 +9,7 @@ procedure Test;
 
 implementation
 
-uses SysUtils, CompilerTypes, FileIO, Common, Optimize;
+uses SysUtils, CompilerTypes, FileIO, Common, Optimizer;
 
 type
   TDummyTextFile = class(TInterfacedObject, ITextFile)
@@ -153,17 +153,20 @@ end;
 
 procedure Test;
 var
+  target: TTarget;
   SourceLocation: TSourceLocation;
   DummyTextFile: TDummyTextFile;
   lineArray: TStringArray;
 begin
+  Target := TTargets.Initialize(TTargetID.A8);
   Optimize.Initialize;
   Optimize.ResetForTmp;
   Optimize.ResetOpty;
   sourceLocation := Default(TSourceLocation);
+  sourceLocation.Line := 1;
   dummyTextFile := TDummyTextFile.Create;
   Common.OutFile := DummyTextFile;
-  Optimize.StartOptimization(sourceLocation);
+  Optimizer.StartOptimization(sourceLocation);
   asm65(#9'inx', '');
   asm65(#9'mva P :STACKORIGIN,x', '');
   asm65(#9'mva #$00 :STACKORIGIN+STACKWIDTH,x', '');

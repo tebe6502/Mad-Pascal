@@ -36,7 +36,7 @@
         </Mode>
         <Mode Name="all">
           <local>
-            <CommandLineParams Value="-allThreads -allFiles -compileReference -compile -compare -openResults -waitForKey -inputFilePattern suite"/>
+            <CommandLineParams Value="-allThreads -allFiles -compileReference -compile -compare -openResults -waitForKey -inputFilePattern ElfHash"/>
           </local>
         </Mode>
       </Modes>

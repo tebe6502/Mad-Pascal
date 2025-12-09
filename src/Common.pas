@@ -38,7 +38,7 @@ var
   LIBRARY_NAME: String;
 
   AsmBlockIndex: Integer;
-  AsmBlock: array [0..4095] of String;
+  AsmBlock: TAsmBlockArray;
 
   _DataSegment: TWordMemory;
   _VarDataSize: Integer;
@@ -83,8 +83,6 @@ var
   NumPredefIdent, NumStaticStrChars, run_func, NumProc, CodeSize, NumStaticStrCharsTmp, IfCnt,
   CaseCnt, IfdefLevel: Integer;
 
-  ShrShlCnt: Integer; // Counter, used only for label generation in Optimize TODO: Move to Optimize (for pass2)
-
   pass: TPass;
 
   ActiveSourceFile: TSourceFile; // Initialized in Scanner.TokenizeProgramInitialization
@@ -104,8 +102,6 @@ var
   unitPathList: IPathList;
 
   WithName: TStringArray;
-
-  // Optimizer Settings
 
   codealign: record
     proc, loop, link: Integer;

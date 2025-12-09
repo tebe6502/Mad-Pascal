@@ -98,8 +98,7 @@ var
   token: TToken;
 begin
   token := TokenAt(tokenIndex);
-  Result := Format('%s (line %d, column %d)', [token.SourceLocation.SourceFile.Path,
-    token.SourceLocation.Line, token.SourceLocation.Column]);
+  Result := SourceLocationToString(token.SourceLocation);
 end;
 
 procedure TDebugger.BeginPass(const pass: TPass);

@@ -232,7 +232,7 @@ uses
     targetID: TTargetID;
     cpu: TCPU;
 
-    outputFilePath: TFilePath;
+    OutputFilePath: TFilePath;
 
     StartTime: QWord;
     seconds: ValReal;
@@ -282,7 +282,6 @@ uses
       ZPAGE_BASE := -1;
       STACK_BASE := -1;
       outputFilePath := '';
-
       DiagMode := False;
       PauseMode := False;
 

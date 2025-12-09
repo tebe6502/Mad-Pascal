@@ -73,7 +73,6 @@ begin
   CodePosStackTop := 0;
   CaseCnt := 0;
   IfCnt := 0;
-  ShrShlCnt := 0;
   NumTypes := 0;
   run_func := 0;
   NumProc := 0;
@@ -85,12 +84,6 @@ begin
   AsmBlockIndex := 0;
 
   NumDefines := AddDefines;
-
-  // TODO Remove from here
-
-  // Do NOT put this into ResetOpty!
-  ResetForTmp;
-  ResetOpty;
 
   for i := 0 to High(AsmBlock) do AsmBlock[i] := '';
 
@@ -149,7 +142,7 @@ begin
           // TODO Have message for special case empty unit path
           Error(NumTok, TMessage.Create(TErrorCode.ResourceFileNotFound,
             'Cannot find resource file ''{0}'' for resource {1} of type {2} unit path ''{3}''.',
-            res.resFile, res.resName, unitPathList.ToString));
+            res.resFile, res.resName, res.resType, unitPathList.ToString));
         end;
 
         for j := 1 to MAXPARAMS do

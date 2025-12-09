@@ -525,7 +525,7 @@ type
     begin
 
       fileResultMessages[1] := TFileResultMessages.Create('samples\common\math\ElfHash\elf_test.pas');
-      fileResultMessages[1].AddMessage('Error: Expected BYTE, SHORTINT, CHAR or BOOLEAN as CASE selector');
+      fileResultMessages[1].AddMessage('Error: Expected BYTE, SHORTINT, CHAR, or BOOLEAN as CASE selector');
 
       fileResultMessages[2] := TFileResultMessages.Create('samples\tests\tests-basic\directives.pas');
       fileResultMessages[2].AddMessage('User defined: Some info');
@@ -691,8 +691,8 @@ type
 
     if (operation.verbose) then
     begin
-      Log(Format('Processing program %s with action %s and MP path %s.',
-        [filePath, operation.GetActionString(), operation.mpExePath]));
+      Log(Format('Processing program %s with action %s and MP path %s.', [filePath,
+        operation.GetActionString(), operation.mpExePath]));
     end;
 
     curDir := ExtractFilePath(FilePath);
@@ -782,7 +782,9 @@ type
     startTickCount: QWord;
     endTickCount: QWord;
     seconds: QWord;
+    secondsunit: String;
     secondsPerFile: QWord;
+    secondsPerFileUnit: String;
 
     i: Integer;
     parallelData: TParallelData;
@@ -821,11 +823,14 @@ type
     end;
 
     endTickCount := GetTickCount64;
-    seconds := trunc((endTickCount - startTickCount)+999 / 1000);
+    seconds := trunc((endTickCount - startTickCount) + 999 / 1000);
+    secondsUnit := 'seconds';
+    if seconds = 1 then secondsUnit := 'second';
     secondsPerFile := trunc(seconds / ProgramFiles.Count);
-    operation.logMessages.Insert(0, Format(
-      'INFO: Operation %s for %d files completed in %d seconds (%d seconds/file).',
-      [operation.GetActionString(), ProgramFiles.Count, seconds, secondsPerFile]));
+    secondsPerFileUnit := 'seconds';
+    if secondsPerFile = 1 then secondsPerFileUnit := 'second';
+    operation.logMessages.Insert(0, Format('INFO: Operation %s for %d files completed in %d %s (%d %s/file).',
+      [operation.GetActionString(), ProgramFiles.Count, seconds, secondsUnit, secondsPerFile, secondsPerFileUnit]));
   end;
 
   procedure GetNextParam(var i: Integer; var Value: String);
