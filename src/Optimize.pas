@@ -67,6 +67,7 @@ begin
    optyFOR3:='';
 end;
 
+// ----------------------------------------------------------------------------
 
 procedure SetOptyA(const value: TString);
 begin
@@ -101,6 +102,7 @@ begin
 
 end;
 
+// ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 
 procedure Initialize(const aWriter: IWriter; const aAsmBlockArray:TAsmBlockArray; const aTarget: TTarget);
@@ -235,7 +237,7 @@ var
   end;
 
 
-  function fortmp(a: String): String;
+  function fortmp(const a: String): String;
     // @FORTMP_xxxx
     // @FORTMP_xxxx+1
   begin
@@ -284,6 +286,7 @@ var
 
   end;
 
+// -----------------------------------------------------------------------------
 
   {$i include/opt6502/opt_TEMP_MOVE.inc}
   {$i include/opt6502/opt_TEMP_FILL.inc}
@@ -576,7 +579,7 @@ begin
 
   end;
 
-end;
+end;  //WriteOut
 
 
 // ----------------------------------------------------------------------------
@@ -657,14 +660,12 @@ var
 
   function GetTRIPLE(i, j, k: Integer): Integer;
   begin
-    Result := GetVAL(copy(listing[i], 6, 4)) + GetVAL(copy(listing[j], 6, 4)) shl 8 +
-      GetVAL(copy(listing[k], 6, 4)) shl 16;
+    Result := GetVAL(copy(listing[i], 6, 4)) + GetVAL(copy(listing[j], 6, 4)) shl 8 + GetVAL(copy(listing[k], 6, 4)) shl 16;
   end;
 
   function GetDWORD(i, j, k, l: Integer): Integer;
   begin
-    Result := GetVAL(copy(listing[i], 6, 4)) + GetVAL(copy(listing[j], 6, 4)) shl 8 +
-      GetVAL(copy(listing[k], 6, 4)) shl 16 + GetVAL(copy(listing[l], 6, 4)) shl 24;
+    Result := GetVAL(copy(listing[i], 6, 4)) + GetVAL(copy(listing[j], 6, 4)) shl 8 + GetVAL(copy(listing[k], 6, 4)) shl 16 + GetVAL(copy(listing[l], 6, 4)) shl 24;
   end;
 
 
@@ -713,7 +714,7 @@ var
 
     WriteOut(listing[i]);
 
-  end;
+  end;  //WriteInstruction
 
 
   function SKIP(i: TListingIndex): Boolean;
@@ -754,8 +755,7 @@ var
         '+', '-': Result := (listing[i] = mne + copy(optyY, 6, 256));
 
         '*': if optyY[2] in ['+', '-'] then
-            Result := (listing[i] = mne + copy(optyY, 6, pos('|', optyY) - 6)) or
-              (listing[i] = mne + copy(optyY, pos('|', optyY) + 1, 256))
+	          Result := (listing[i] = mne + copy(optyY,6,pos('|',optyY) - 6)) or (listing[i] = mne + copy(optyY,pos('|',optyY) + 1,256))
           else
             Result := (listing[i] = mne + copy(optyY, 6, 256));
 
@@ -776,12 +776,13 @@ var
         else
           if dec_(i) then LabelTest(#9'dec ');
 
-  end;
+  end;  //LabelIsUsed
 
 
   function IFDEF_MUL8(i: TListingIndex): Boolean;
   begin
-    Result :=  //(listing[i+4] = #9'eif') and
+    Result :=
+      //(listing[i+4] = #9'eif') and
       //(listing[i+3] = #9'imulCL') and
       //(listing[i+2] = #9'els') and
       (listing[i + 1] = #9'fmulu_8') and (listing[i] = #9'.ifdef fmulinit');
@@ -789,7 +790,8 @@ var
 
   function IFDEF_MUL16(i: TListingIndex): Boolean;
   begin
-    Result :=  //(listing[i+4] = #9'eif') and
+    Result :=
+      //(listing[i+4] = #9'eif') and
       //(listing[i+3] = #9'imulCX') and
       //(listing[i+2] = #9'els') and
       (listing[i + 1] = #9'fmulu_16') and (listing[i] = #9'.ifdef fmulinit');
@@ -861,7 +863,7 @@ var
       listing[i + 13] := listing[i + 13] + op + '$' + IntToHex(q, 2) + ',y';
     end;
 
-  end;
+  end;  //LDA_STA_ADR
 
   // -----------------------------------------------------------------------------
 
@@ -903,7 +905,7 @@ var
         begin
 
           if dex(k) and                             // inx      ; k-1
-            inx(k - 1) then                        // dex      ; k
+             inx(k - 1) then                        // dex      ; k
           begin
             listing[k - 1] := '';
             listing[k] := '';
@@ -1012,9 +1014,9 @@ var
 
 
             if sta_im_0(i + 1) and                  /// sta #$00    ; i+1
-              sta_im_0(i + 2) and                  /// sta #$00    ; i+2
-              sta_im_0(i + 3) and                  /// sta #$00    ; i+3
-              lda_a(i + 4) then                    /// lda         ; i+4
+               sta_im_0(i + 2) and                  /// sta #$00    ; i+2
+               sta_im_0(i + 3) and                  /// sta #$00    ; i+3
+               lda_a(i + 4) then                    /// lda         ; i+4
             begin
               listing[k - 1] := '';
               listing[k] := '';
@@ -1028,8 +1030,8 @@ var
 
 
             if sta_im_0(i + 1) and                  /// sta #$00    ; i+1
-              sta_im_0(i + 2) and                  //// sta #$00    ; i+2
-              lda_a(i + 3) then                    /// lda         ; i+3
+               sta_im_0(i + 2) and                  /// sta #$00    ; i+2
+               lda_a(i + 3) then                    /// lda         ; i+3
             begin
               listing[k - 1] := '';
               listing[k] := '';
@@ -1056,26 +1058,23 @@ var
 
         end;  // if k > 0
 
-
         Inc(k);
       end;
-
 
     listing[k] := '';
     listing[k + 1] := '';
     listing[k + 2] := '';
     listing[k + 3] := '';
 
-
     newListing := ListingToString(listing);
     DebugCall(Format('Rebuild(%s)', [context]), Format('Changing l from %d to %d: oldListing=%s / newListing=%s', [l, k, oldListing, newListing]));
     l := k;
 
-  end;
+   end;  //Rebuild
 
   // -----------------------------------------------------------------------------
 
-  function GetString(a: String): String; overload;
+  function GetString(const a: String): String; overload;
   var
     i: Integer;
   begin
@@ -1133,7 +1132,7 @@ var
       Result := copy(a, i + 1, 256);
     end;
 
-  end;
+  end;  //GetStringLast
 
 
   function GetARG(n: Byte; x: Shortint; reset: Boolean = True): String;
@@ -1178,7 +1177,7 @@ var
 
     end;
 
-  end;
+  end;	//GetARG
 
 
   function RemoveUnusedSTACK: Boolean;
@@ -1371,6 +1370,8 @@ var
 
   end;    // RemoveUnusedSTACK
 
+// -----------------------------------------------------------------------------
+
   {$i include/opt6502/opt_SHR_BYTE.inc}
   {$i include/opt6502/opt_SHR_WORD.inc}
   {$i include/opt6502/opt_SHR_CARD.inc}
@@ -1399,6 +1400,7 @@ var
   {$i include/opt6502/opt_CMP.inc}
   {$i include/opt6502/opt_CMP_0.inc}
 
+// -----------------------------------------------------------------------------
 
   function PeepholeOptimization_STACK: Boolean;
   var
@@ -1475,17 +1477,14 @@ end;
 
         tmp := copy(listing[i], 6, 256);
 
-        if tmp = ':eax' then listing[i] := copy(listing[i], 1, 5) + ':STACKORIGIN+16'
-        else
-          if tmp = ':eax+1' then listing[i] := copy(listing[i], 1, 5) + ':STACKORIGIN+STACKWIDTH+16'
-          else
-            if tmp = ':eax+2' then listing[i] := copy(listing[i], 1, 5) + ':STACKORIGIN+STACKWIDTH*2+16'
-            else
+        if tmp = ':eax' then listing[i] := copy(listing[i], 1, 5) + ':STACKORIGIN+16' else
+         if tmp = ':eax+1' then listing[i] := copy(listing[i], 1, 5) + ':STACKORIGIN+STACKWIDTH+16' else
+          if tmp = ':eax+2' then listing[i] := copy(listing[i], 1, 5) + ':STACKORIGIN+STACKWIDTH*2+16' else
               if tmp = ':eax+3' then listing[i] := copy(listing[i], 1, 5) + ':STACKORIGIN+STACKWIDTH*3+16';
 
       end;
 
-  end;
+  end;  //OptimizeEAX
 
 
   procedure OptimizeEAX_OFF;
@@ -1500,17 +1499,13 @@ end;
       begin
         tmp := copy(listing[i], 6, 256);
 
-        if tmp = ':STACKORIGIN+16' then listing[i] := copy(listing[i], 1, 5) + ':eax'
-        else
-          if tmp = ':STACKORIGIN+STACKWIDTH+16' then listing[i] := copy(listing[i], 1, 5) + ':eax+1'
-          else
-            if tmp = ':STACKORIGIN+STACKWIDTH*2+16' then listing[i] := copy(listing[i], 1, 5) + ':eax+2'
-            else
+        if tmp = ':STACKORIGIN+16' then listing[i] := copy(listing[i], 1, 5) + ':eax' else
+         if tmp = ':STACKORIGIN+STACKWIDTH+16' then listing[i] := copy(listing[i], 1, 5) + ':eax+1' else
+          if tmp = ':STACKORIGIN+STACKWIDTH*2+16' then listing[i] := copy(listing[i], 1, 5) + ':eax+2' else
               if tmp = ':STACKORIGIN+STACKWIDTH*3+16' then listing[i] := copy(listing[i], 1, 5) + ':eax+3';
-
       end;
 
-  end;
+  end;  //OptimizeEAX_OFF
 
 
   procedure OptimizeAssignment;
@@ -1550,7 +1545,7 @@ end;
 
     end;  //PeepholeOptimization_END
 
-
+// -----------------------------------------------------------------------------
 
     function PeepholeOptimization_STA: Boolean;
     var
@@ -1585,6 +1580,8 @@ end;
 
     end;  //PeepholeOptimization_STA
 
+// -----------------------------------------------------------------------------
+
     {$i include/opt65c02/opt_STZ.inc}
 
     {$i include/opt6502/opt_LDA.inc}
@@ -1606,6 +1603,7 @@ end;
     {$i include/opt6502/opt_ADR.inc}
     {$i include/opt6502/opt_FORTMP.inc}
 
+// -----------------------------------------------------------------------------
 
     function PeepholeOptimization: Boolean;
     var
@@ -3430,7 +3428,7 @@ begin        // OptimizeASM
 
   {$IFDEF USEOPTFILE}
 
- OptFile.writeln(StringOfChar('-', 32));
+ OptFile.writeln( StringOfChar('-', 32));
  OptFile.writeln( 'SOURCE');
  OptFile.writeln( StringOfChar('-', 32));
 
@@ -3482,9 +3480,7 @@ begin
     OptimizeBuf[i] := a;
     SetLength(OptimizeBuf, i + 2);
 
-  end
-  else
-  begin
+  end else begin
 
     if High(OptimizeBuf) > 0
     then
@@ -3526,6 +3522,8 @@ begin
   end;
 
 end;
+
+end;  //asm65
 
 
 // ----------------------------------------------------------------------------
