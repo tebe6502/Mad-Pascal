@@ -516,9 +516,9 @@ begin
 
     if TemporaryBuf[0] <> '~' then
     begin
-      if (TemporaryBuf[0] <> '') or (outTmp <> TemporaryBuf[0]) then writeln(OutFile, TemporaryBuf[0]);
+      if (TemporaryBuf[0] <> '') or (LastTempBuf0 <> TemporaryBuf[0]) then writeln(OutFile, TemporaryBuf[0]);
 
-      outTmp := TemporaryBuf[0];
+      LastTempBuf0 := TemporaryBuf[0];
     end;
 
     for i := 1 to TemporaryBufIndex do TemporaryBuf[i - 1] := TemporaryBuf[i];

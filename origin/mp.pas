@@ -603,8 +603,8 @@ begin
   INTERFACETOK_USE := False;
   PublicSection := True;
 
-  iOut := -1;
-  outTmp := '';
+  TemporaryBufIndex := -1;
+  LastTempBuf0 := '';
 
   SetLength(OptimizeBuf, 1);
 
