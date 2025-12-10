@@ -1160,7 +1160,7 @@ procedure LDA_STA_ADR(i: TListingIndex; q: Integer; op: Char);
 
    procedure Clear;
    var
-      i: byte;
+      i: Byte;
    begin
 
     for i := 0 to 15 do

@@ -635,9 +635,9 @@ var
   listing: TListing;
   listing_tmp: TListing_tmp;
 
-  a, t, arg0: String;
-
   s: array [0..15] of TString0_3_Array;
+
+  a, t, arg0: String;
 
   // -----------------------------------------------------------------------------
 
@@ -684,7 +684,7 @@ var
 
   function onBreak(i: TListingIndex): Boolean;
   begin
-    Result := (listing[i] = '@') or (pos(#9'jsr ', listing[i]) = 1) or (listing[i] = #9'eif');
+    Result := lab_a(i) or jsr(i) or eif(i);
     // !!! eif !!! koniecznie
   end;
 
