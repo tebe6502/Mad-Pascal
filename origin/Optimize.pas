@@ -1148,6 +1148,8 @@ procedure LDA_STA_ADR(i: TListingIndex; q: Integer; op: Char);
   const
     last_j = 3;
   type
+    TArray0_3Boolean = array[min_j..last_j] of Boolean;
+  type
       tStack = array [0..last_i_plus_one, min_j..last_j] of Boolean;
 
   var j: byte;
@@ -1184,7 +1186,7 @@ procedure LDA_STA_ADR(i: TListingIndex; q: Integer; op: Char);
 
      for j := 0 to 7 do
       for k := 0 to 3 do
-       if pos(GetARG(k, j, false), listing[i]) > 0 then exit( (cnt_s[j, k] and (cnt_l[j, k] = false)) or		// sa zapisy, brak odczytow
+       if pos(GetARG(k, j, False), listing[i]) > 0 then exit( (cnt_s[j, k] and (cnt_l[j, k] = False)) or		// sa zapisy, brak odczytow
 	                                                      ((cnt_s[j, k] = false) and cnt_l[j, k]) );		// brak zapisow, sa odczyty
 
 
@@ -2837,7 +2839,8 @@ begin        // OptimizeASM
   end; // if (pos('(:bp),', t) = 0)
 
 
-   if (pos(':STACKORIGIN,', t) = 6) then begin
+   if (pos(':STACKORIGIN,', t) = 6) then
+   begin
     //k:=pos(':STACK', t);  writeln(k);
     Delete(t, 6, 14);
 
@@ -2891,7 +2894,6 @@ begin        // OptimizeASM
     Inc(l);
 
    end;
-
 
   end;
 
@@ -3096,6 +3098,8 @@ end;
 
 
 procedure asm65(const a: string = ''; const comment : string ='');
+const TAB_WIDTH = 8;
+const COMMENT_COLUMN = 7*TAB_WIDTH;
 var len, i: integer;
     optimize_code: Boolean;
     str: string;
@@ -3114,35 +3118,42 @@ begin
   LogAsm65(a,comment);
   if optimize_code and common.optimize.use then begin
 
+   // Add to the optimize buffer.
    i:=High(OptimizeBuf);
    OptimizeBuf[i] := a;
    SetLength(OptimizeBuf, i+2);
 
   end else begin
 
-   if High(OptimizeBuf) > 0 then
-   begin
-    // DebugCall('OptimizeASM.Begin',OptimizeBufToString );
-    OptimizeASM ;
-    // DebugCall('OptimizeASM.End',OptimizeBufToString );
-   end
-
-   else begin
+    if High(OptimizeBuf) > 0
+    then
+	   begin
+	    // DebugCall('OptimizeASM.Begin',OptimizeBufToString );
+	    OptimizeASM ;
+	    // DebugCall('OptimizeASM.End',OptimizeBufToString );
+	   end
+     else
+      begin
 
     str:=a;
 
     // Align comment to existing spaces and tabs
-    if comment<>'' then begin
+    if comment <> '' then
+    begin
 
      len:=0;
 
      for i := 1 to length(a) do
       if a[i] = #9 then
-       Inc(len, 8-(len mod 8))
+       Inc(len, TAB_WIDTH-(len mod TAB_WIDTH))
       else
        if not(a[i] in [CR, LF]) then Inc(len);
 
-     while len < 56 do begin str:=str+#9; Inc(len, 8) end;
+     while len < COMMENT_COLUMN do
+     begin
+       str:=str+#9;
+       Inc(len, TAB_WIDTH);
+     end;
 
      str:=str + comment;
 

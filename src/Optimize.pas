@@ -698,7 +698,7 @@ var
   procedure WriteInstruction(i: TListingIndex);
   begin
 
-    if isInterrupt and ((pos(' :bp', listing[i]) > 0) or (pos(' :STACK', listing[i]) > 0)) then
+    if isInterrupt and (bp(i) or stack(i)) then
     begin
       //       WritelnMsg;
 
@@ -807,61 +807,68 @@ var
 
 
   procedure LDA_STA_ADR(i: TListingIndex; q: Integer; op: Char);
-  begin
 
-    if lda_adr(i + 6) and iy(i + 6) then
+   procedure update(i: integer);
     begin
-      Delete(listing[i + 6], pos(',y', listing[i + 6]), 2);
-      listing[i + 6] := listing[i + 6] + op + '$' + IntToHex(q, 2) + ',y';
+      Delete(listing[i], pos(',y', listing[i]), 2);
+      listing[i] := listing[i] + op + Hex(q, 2) + ',y';
     end;
 
-    if sta_adr(i + 7) and iy(i + 7) then
     begin
-      Delete(listing[i + 7], pos(',y', listing[i + 7]), 2);
-      listing[i + 7] := listing[i + 7] + op + '$' + IntToHex(q, 2) + ',y';
-    end;
+
+    if lda_adr(i + 6) and iy(i + 6) then update(i+6);
+//    begin
+//      Delete(listing[i + 6], pos(',y', listing[i + 6]), 2);
+//      listing[i + 6] := listing[i + 6] + op + '$' + IntToHex(q, 2) + ',y';
+//    end;
+
+    if sta_adr(i + 7) and iy(i + 7) then update(i+7);
+//    begin
+//      Delete(listing[i + 7], pos(',y', listing[i + 7]), 2);
+//      listing[i + 7] := listing[i + 7] + op + '$' + IntToHex(q, 2) + ',y';
+//    end;
 
     if (lda_adr(i + 8) = False) and (sta_adr(i + 9) = False) then exit;
 
-    if lda_adr(i + 8) and iy(i + 8) then
-    begin
-      Delete(listing[i + 8], pos(',y', listing[i + 8]), 2);
-      listing[i + 8] := listing[i + 8] + op + '$' + IntToHex(q, 2) + ',y';
-    end;
+    if lda_adr(i + 8) and iy(i + 8) then update(i+8);
+//    begin
+//      Delete(listing[i + 8], pos(',y', listing[i + 8]), 2);
+//      listing[i + 8] := listing[i + 8] + op + '$' + IntToHex(q, 2) + ',y';
+//    end;
 
-    if sta_adr(i + 9) and iy(i + 9) then
-    begin
-      Delete(listing[i + 9], pos(',y', listing[i + 9]), 2);
-      listing[i + 9] := listing[i + 9] + op + '$' + IntToHex(q, 2) + ',y';
-    end;
+    if sta_adr(i + 9) and iy(i + 9) then update(i+9);
+//    begin
+//      Delete(listing[i + 9], pos(',y', listing[i + 9]), 2);
+//      listing[i + 9] := listing[i + 9] + op + '$' + IntToHex(q, 2) + ',y';
+//    end;
 
     if (lda_adr(i + 10) = False) and (sta_adr(i + 11) = False) then exit;
 
-    if lda_adr(i + 10) and iy(i + 10) then
-    begin
-      Delete(listing[i + 10], pos(',y', listing[i + 10]), 2);
-      listing[i + 10] := listing[i + 10] + op + '$' + IntToHex(q, 2) + ',y';
-    end;
+    if lda_adr(i + 10) and iy(i + 10) then update(i+10);
+//    begin
+//      Delete(listing[i + 10], pos(',y', listing[i + 10]), 2);
+//      listing[i + 10] := listing[i + 10] + op + '$' + IntToHex(q, 2) + ',y';
+//    end;
 
-    if sta_adr(i + 11) and iy(i + 11) then
-    begin
-      Delete(listing[i + 11], pos(',y', listing[i + 11]), 2);
-      listing[i + 11] := listing[i + 11] + op + '$' + IntToHex(q, 2) + ',y';
-    end;
+    if sta_adr(i + 11) and iy(i + 11) then update(i+11);
+//    begin
+//      Delete(listing[i + 11], pos(',y', listing[i + 11]), 2);
+//      listing[i + 11] := listing[i + 11] + op + '$' + IntToHex(q, 2) + ',y';
+//    end;
 
     if (lda_adr(i + 12) = False) and (sta_adr(i + 13) = False) then exit;
 
-    if lda_adr(i + 12) and iy(i + 12) then
-    begin
-      Delete(listing[i + 12], pos(',y', listing[i + 12]), 2);
-      listing[i + 12] := listing[i + 12] + op + '$' + IntToHex(q, 2) + ',y';
-    end;
+    if lda_adr(i + 12) and iy(i + 12) then update(i+12);
+//    begin
+//      Delete(listing[i + 12], pos(',y', listing[i + 12]), 2);
+//      listing[i + 12] := listing[i + 12] + op + '$' + IntToHex(q, 2) + ',y';
+//    end;
 
-    if sta_adr(i + 13) and iy(i + 13) then
-    begin
-      Delete(listing[i + 13], pos(',y', listing[i + 13]), 2);
-      listing[i + 13] := listing[i + 13] + op + '$' + IntToHex(q, 2) + ',y';
-    end;
+    if sta_adr(i + 13) and iy(i + 13) then update(i+13);
+//    begin
+//      Delete(listing[i + 13], pos(',y', listing[i + 13]), 2);
+//      listing[i + 13] := listing[i + 13] + op + '$' + IntToHex(q, 2) + ',y';
+//    end;
 
   end;  //LDA_STA_ADR
 
@@ -1179,6 +1186,7 @@ var
 
   end;	//GetARG
 
+// -----------------------------------------------------------------------------
 
   function RemoveUnusedSTACK: Boolean;
   const
@@ -1231,18 +1239,15 @@ var
 
       for j := 0 to 7 do
         for k := 0 to 3 do
-          if pos(GetARG(k, j, False), listing[i]) > 0 then
-            exit((cnt_s[j, k] and (cnt_l[j, k] = False)) or    // sa zapisy, brak odczytow
-              ((cnt_s[j, k] = False) and cnt_l[j, k]));
-      // brak zapisow, sa odczyty
+       if pos(GetARG(k, j, False), listing[i]) > 0 then exit( (cnt_s[j, k] and (cnt_l[j, k] = False)) or		// sa zapisy, brak odczytow
+	                                                      ((cnt_s[j, k] = false) and cnt_l[j, k]) );		// brak zapisow, sa odczyty
 
 
-      // wyjatek dla :STACKORIGIN+16 (cnt_s[8,k] ; cnt_l[8,k]) ktory mapuje :EAX
+    // wyjatek dla :STACKORIGIN+16 (cnt_s[8,k] ; cnt_l[8,k]) ktory mapuje :EAX
 
       for k := 0 to 3 do
-        if pos(GetARG(k, 8, False), listing[i]) > 0 then                 // sa zapisy, brak odczytu
-          exit((cnt_s[8, 0] or cnt_s[8, 1] or cnt_s[8, 2] or cnt_s[8, 3] = True) and
-            (cnt_l[8, 0] or cnt_l[8, 1] or cnt_l[8, 2] or cnt_l[8, 3] = False));
+       if pos(GetARG(k, 8, False), listing[i]) > 0 then 								// sa zapisy, brak odczytu
+         exit( (cnt_s[8, 0] or cnt_s[8 ,1] or cnt_s[8, 2] or cnt_s[8, 3] = True ) and (cnt_l[8, 0] or cnt_l[8, 1] or cnt_l[8, 2] or cnt_l[8, 3] = False) );
 
 {
 ;----  4x zapis :EAX, 1x odczyt :EAX
@@ -1291,71 +1296,33 @@ var
     // jesli mamy tylko zapisy bez odczytow to kasujemy takie odwolanie
     // !!!!!!!!!!!!!!!!!!!!
 
-    for i := 0 to l - 1 do          // zliczamy odwolania do :STACKORIGIN+N
-      if (pos(' :STACK', listing[i]) > 0) then
+    for i := 0 to l - 1 do 	       // zliczamy odwolania do :STACKORIGIN+N
+     if stack(i) then
 
-        if sta_stack(i) or sty_stack(i) then
-        begin
+       if sta_stack(i) or sty_stack(i) then
+       begin
 
-          for j := 0 to 7 + 1 do
-            if pos(GetARG(0, j, False), listing[i]) > 0 then
-            begin
-              cnt_s[j, 0] := True;
-              Break;
-            end
-            else
-              if pos(GetARG(1, j, False), listing[i]) > 0 then
-              begin
-                cnt_s[j, 1] := True;
-                Break;
-              end
-              else
-                if pos(GetARG(2, j, False), listing[i]) > 0 then
-                begin
-                  cnt_s[j, 2] := True;
-                  Break;
-                end
-                else
-                  if pos(GetARG(3, j, False), listing[i]) > 0 then
-                  begin
-                    cnt_s[j, 3] := True;
-                    Break;
-                  end;
+        for j := 0 to 7+1 do
+         if pos(GetARG(0, j, false), listing[i]) > 0 then begin cnt_s[j, 0] := True; Break end else
+          if pos(GetARG(1, j, false), listing[i]) > 0 then begin cnt_s[j, 1] := True; Break end else
+           if pos(GetARG(2, j, false), listing[i]) > 0 then begin cnt_s[j, 2] := True; Break end else
+            if pos(GetARG(3, j, false), listing[i]) > 0 then begin cnt_s[j, 3] := True; Break end;
 
-        end
-        else
-        begin
+       end
+       else
+       begin
 
-          for j := 0 to 7 + 1 do
-            if pos(GetARG(0, j, False), listing[i]) > 0 then
-            begin
-              cnt_l[j, 0] := True;
-              Break;
-            end
-            else
-              if pos(GetARG(1, j, False), listing[i]) > 0 then
-              begin
-                cnt_l[j, 1] := True;
-                Break;
-              end
-              else
-                if pos(GetARG(2, j, False), listing[i]) > 0 then
-                begin
-                  cnt_l[j, 2] := True;
-                  Break;
-                end
-                else
-                  if pos(GetARG(3, j, False), listing[i]) > 0 then
-                  begin
-                    cnt_l[j, 3] := True;
-                    Break;
-                  end;
+        for j := 0 to 7+1 do
+         if pos(GetARG(0, j, false), listing[i]) > 0 then begin cnt_l[j, 0] := True; Break end else
+          if pos(GetARG(1, j, false), listing[i]) > 0 then begin cnt_l[j, 1] := True; Break end else
+           if pos(GetARG(2, j, false), listing[i]) > 0 then begin cnt_l[j, 2] := True; Break end else
+            if pos(GetARG(3, j, false), listing[i]) > 0 then begin cnt_l[j, 3] := True; Break end;
 
-        end;
+       end;
 
 
     for i := 0 to l - 1 do
-      if (pos(' :STACK', listing[i]) > 0) then
+      if stack(i) then
         if unrelated(i) then
         begin
           a := listing[i];    // zamieniamy na potencjalne 'illegal instruction'
@@ -1368,7 +1335,7 @@ var
           Result := True;
         end;
 
-  end;    // RemoveUnusedSTACK
+  end;	//RemoveUnusedSTACK
 
 // -----------------------------------------------------------------------------
 
@@ -1480,7 +1447,7 @@ end;
         if tmp = ':eax' then listing[i] := copy(listing[i], 1, 5) + ':STACKORIGIN+16' else
          if tmp = ':eax+1' then listing[i] := copy(listing[i], 1, 5) + ':STACKORIGIN+STACKWIDTH+16' else
           if tmp = ':eax+2' then listing[i] := copy(listing[i], 1, 5) + ':STACKORIGIN+STACKWIDTH*2+16' else
-              if tmp = ':eax+3' then listing[i] := copy(listing[i], 1, 5) + ':STACKORIGIN+STACKWIDTH*3+16';
+           if tmp = ':eax+3' then listing[i] := copy(listing[i], 1, 5) + ':STACKORIGIN+STACKWIDTH*3+16';
 
       end;
 
@@ -1502,7 +1469,7 @@ end;
         if tmp = ':STACKORIGIN+16' then listing[i] := copy(listing[i], 1, 5) + ':eax' else
          if tmp = ':STACKORIGIN+STACKWIDTH+16' then listing[i] := copy(listing[i], 1, 5) + ':eax+1' else
           if tmp = ':STACKORIGIN+STACKWIDTH*2+16' then listing[i] := copy(listing[i], 1, 5) + ':eax+2' else
-              if tmp = ':STACKORIGIN+STACKWIDTH*3+16' then listing[i] := copy(listing[i], 1, 5) + ':eax+3';
+           if tmp = ':STACKORIGIN+STACKWIDTH*3+16' then listing[i] := copy(listing[i], 1, 5) + ':eax+3';
       end;
 
   end;  //OptimizeEAX_OFF
@@ -1524,9 +1491,9 @@ end;
 
     function PeepholeOptimization_END: Boolean;
     var
-      i, p, k: Integer;
-      tmp, old: String;
-      yes, ok: Boolean;
+        i, p, k: Integer;
+        tmp, old: String;
+        yes, ok: Boolean;
     begin
 
       Result := True;
@@ -1694,7 +1661,7 @@ end;
 
       Result := True;
 
-      for p := i - 1 downto 1 do
+      for p := i-1 downto 1 do
        if and_stack(p) or local(p) or
           (sty_stack(p) and lab_a(p-1) and lda(p+1) and ora_stack(p+2)) or
           (sty_stack(p) and lab_a(p-1) and lda_stack(p+1)) or
@@ -1727,7 +1694,7 @@ end;
 
     Result := True;
 
-    // usuwamy puste '@'
+    // we remove empty '@', '@-' are not present
     for i := 0 to l - 1 do
     begin
       if (pos('@+', listing[i]) > 0) then Break;
@@ -1748,6 +1715,8 @@ if (pos('cmp #$29', listing[i]) > 0) then begin
 
 end;
 }
+
+// -----------------------------------------------------------------------------
 
       if opt_CMP_0(i) = False then exit(ExitTrick('opt_CMP_0', i, {$include %file%} ,{$include %line%} ,{$include %currentroutine%}));
 
@@ -1777,7 +1746,7 @@ end;
 
     end;   // for
 
-  end;  // OptimizeRelation
+  end;  //OptimizeRelation
 
 
   procedure index(k: Byte; x: Integer; msb: Boolean = True);
@@ -1788,7 +1757,7 @@ end;
     if msb then
     begin
 
-      listing[l] := #9'lda ' + GetARG(0, x);
+      listing[l]     := #9'lda ' + GetARG(0, x);
       listing[l + 1] := #9'sta ' + GetARG(0, x);
       listing[l + 2] := #9'lda ' + GetARG(1, x);
 
@@ -1797,13 +1766,13 @@ end;
       for m := 0 to k - 1 do
       begin
 
-        listing[l] := #9'asl ' + GetARG(0, x);
+        listing[l]     := #9'asl ' + GetARG(0, x);
         listing[l + 1] := #9'rol @';
 
         Inc(l, 2);
       end;
 
-      listing[l] := #9'sta ' + GetARG(1, x);
+      listing[l]     := #9'sta ' + GetARG(1, x);
       listing[l + 1] := #9'lda ' + GetARG(0, x);
       listing[l + 2] := #9'sta ' + GetARG(0, x);
 
@@ -1811,7 +1780,7 @@ end;
     else
     begin
 
-      listing[l] := #9'lda ' + GetARG(1, x);
+      listing[l]     := #9'lda ' + GetARG(1, x);
       listing[l + 1] := #9'sta ' + GetARG(1, x);
       listing[l + 2] := #9'lda ' + GetARG(0, x);
 
@@ -1820,13 +1789,13 @@ end;
       for m := 0 to k - 1 do
       begin
 
-        listing[l] := #9'asl @';
+        listing[l]     := #9'asl @';
         listing[l + 1] := #9'rol ' + GetARG(1, x);
 
         Inc(l, 2);
       end;
 
-      listing[l] := #9'sta ' + GetARG(0, x);
+      listing[l]     := #9'sta ' + GetARG(0, x);
       listing[l + 1] := #9'lda ' + GetARG(1, x);
       listing[l + 2] := #9'sta ' + GetARG(1, x);
 
@@ -1834,7 +1803,8 @@ end;
 
     Inc(l, 3);
 
-  end;  // index
+  end;  //index
+
 
 
   {$i include/opt6502/opt_IMUL_CL.inc}
@@ -1845,6 +1815,7 @@ end;
   {$i include/opt6502/opt_FOR.inc}
   {$i include/opt6502/opt_REG_A.inc}
   {$i include/opt6502/opt_REG_BP2.inc}
+  //{$i include/opt6502/opt_REG_TMP.inc}
   {$i include/opt6502/opt_REG_Y.inc}
 begin        // OptimizeASM
 
@@ -1868,45 +1839,30 @@ begin        // OptimizeASM
   for i := 0 to High(OptimizeBuf) - 1 do
   begin
     a := OptimizeBuf[i];
+
     if DebugCallCountBreakPointHit then
     begin
          DebugCall('OptimizeASM', Format('i=%d a=''%s''', [i,a]));
     end;
+
     if (a <> '') and (pos(';', a) = 0) then
     begin
 
       t := a;
 
-      if (a = #9'inx') then
-      begin
-        Inc(x);
-        inxUse := True;
-        t := '';
-        continue;
-      end;
-      if (a = #9'dex') then
-      begin
-        Dec(x);
-        t := '';
-        continue;
-      end;
+      if (a = #9'inx') then begin Inc(x); inxUse:=True; t:=''; continue end;
+      if (a = #9'dex') then begin dec(x); t:=''; continue end;
 
+      if (pos('@print', a) > 0) then begin x:=51; arg0:='@print'; resetOpty; Break end;		// zakoncz optymalizacje niepowodzeniem
 
-      if (pos('@print', a) > 0) then
-      begin
-        x := 51;
-        arg0 := '@print';
-        resetOpty;
-        Break;
-      end;    // zakoncz optymalizacje niepowodzeniem
 
       if (pos(#9'jsr ', a) > 0) or (pos('m@', a) > 0) then
       begin
 
-        if (pos(#9'jsr ', a) > 0) then
-          arg0 := copy(a, 6, 256)
-        else
-          arg0 := copy(a, 2, 256);
+      if (pos(#9'jsr ', a) > 0) then
+        arg0 := copy(a, 6, 256)
+      else
+        arg0 := copy(a, 2, 256);
 
 
         if length(arg0) > 20 then
@@ -3259,7 +3215,6 @@ begin        // OptimizeASM
 
   (* -------------------------------------------------------------------------- *)
 
-
   DebugCall('OptimizeASM.l', IntToStr(l));
 
   if ((x = 0) and inxUse) then
@@ -3350,8 +3305,7 @@ begin        // OptimizeASM
 
     if optyA <> '' then
       for i := 0 to l - 1 do
-        if (listing[i] = #9'inc ' + optyA) or (listing[i] = #9'dec ' + optyA) or
-          //((optyY <> '') and (optyA = optyY)) or
+        if (listing[i] = #9'inc ' + optyA) or (listing[i] = #9'dec ' + optyA) or //((optyY <> '') and (optyA = optyY)) or
           lda_a(i) or mva(i) or mwa(i) or tya(i) or lab_a(i) or jsr(i) or (pos(#9'jmp ', listing[i]) > 0) or
           (pos(#9'.if', listing[i]) > 0) then
         begin
@@ -3401,11 +3355,9 @@ begin        // OptimizeASM
       WriteOut('');
 
       if x = 51 then
-        WriteOut('; optimize FAIL (' + '''' + arg0 + '''' + ', ' + optimize.SourceFile.Name +
-          '), line = ' + IntToStr(optimize.line))
+        WriteOut('; optimize FAIL (' + '''' + arg0 + '''' + ', ' + optimize.SourceFile.Name +'), line = ' + IntToStr(optimize.line))
       else
-        WriteOut('; optimize FAIL (' + IntToStr(x) + ', ' + optimize.SourceFile.Name +
-          '), line = ' + IntToStr(optimize.line));
+        WriteOut('; optimize FAIL (' + IntToStr(x) + ', ' + optimize.SourceFile.Name +'), line = ' + IntToStr(optimize.line));
 
       WriteOut('');
 
@@ -3520,8 +3472,6 @@ begin
 
       end;
   end;
-
-end;
 
 end;  //asm65
 
