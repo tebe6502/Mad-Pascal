@@ -551,7 +551,7 @@ var
   BlockStackTop, CodeSize, CodePosStackTop, BreakPosStackTop, _VarDataSize, Pass, ShrShlCnt,
   NumStaticStrCharsTmp, AsmBlockIndex, IfCnt, CaseCnt, IfdefLevel, run_func: Integer;
 
-  iOut: Integer = -1;
+  TemporaryBufIndex: Integer = -1;
 
   start_time: QWord;
 

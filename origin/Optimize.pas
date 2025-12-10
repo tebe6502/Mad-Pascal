@@ -480,21 +480,21 @@ begin
   if (pos(#9'jsr ', a) = 1) or (a = '#asm') then ResetOpty;
 
 
-  if iOut < High(TemporaryBuf) then
+  if TemporaryBufIndex < High(TemporaryBuf) then
   begin
 
-    if (iOut >= 0) and (TemporaryBuf[iOut] <> '') then
+    if (TemporaryBufIndex >= 0) and (TemporaryBuf[TemporaryBufIndex] <> '') then
     begin
 
-      if TemporaryBuf[iOut] = '; --- ForToDoCondition' then
+      if TemporaryBuf[TemporaryBufIndex] = '; --- ForToDoCondition' then
         if (a = '') or (pos('; optimize ', a) > 0) then exit;
 
-      if (pos(#9'#for', TemporaryBuf[iOut]) > 0) then
+      if (pos(#9'#for', TemporaryBuf[TemporaryBufIndex]) > 0) then
         if (a = '') or (pos('; optimize ', a) > 0) then exit;
     end;
 
-    Inc(iOut);
-    TemporaryBuf[iOut] := a;
+    Inc(TemporaryBufIndex);
+    TemporaryBuf[TemporaryBufIndex] := a;
 
   end
   else
@@ -504,13 +504,13 @@ begin
     OptimizeTemporaryBuf;
     // DebugCall('OptimizeTemporaryBuf.After ', a+'/'+TemporaryBufToString);
 
-    if TemporaryBuf[iOut] <> '' then
+    if TemporaryBuf[TemporaryBufIndex] <> '' then
     begin
 
-      if TemporaryBuf[iOut] = '; --- ForToDoCondition' then
+      if TemporaryBuf[TemporaryBufIndex] = '; --- ForToDoCondition' then
         if (a = '') or (pos('; optimize ', a) > 0) then exit;
 
-      if (pos(#9'#for', TemporaryBuf[iOut]) > 0) then
+      if (pos(#9'#for', TemporaryBuf[TemporaryBufIndex]) > 0) then
         if (a = '') or (pos('; optimize ', a) > 0) then exit;
     end;
 
@@ -521,9 +521,9 @@ begin
       outTmp := TemporaryBuf[0];
     end;
 
-    for i := 1 to iOut do TemporaryBuf[i - 1] := TemporaryBuf[i];
+    for i := 1 to TemporaryBufIndex do TemporaryBuf[i - 1] := TemporaryBuf[i];
 
-    TemporaryBuf[iOut] := a;
+    TemporaryBuf[TemporaryBufIndex] := a;
 
   end;
 
@@ -1284,33 +1284,33 @@ procedure LDA_STA_ADR(i: TListingIndex; q: Integer; op: Char);
 
 // -----------------------------------------------------------------------------
 
-{$i include/opt6502/opt_SHR_BYTE.inc}
-{$i include/opt6502/opt_SHR_WORD.inc}
-{$i include/opt6502/opt_SHR_CARD.inc}
-{$i include/opt6502/opt_SHL_BYTE.inc}
-{$i include/opt6502/opt_SHL_WORD.inc}
-{$i include/opt6502/opt_SHL_CARD.inc}
-{$i include/opt6502/opt_BYTE_DIV.inc}
+  {$i include/opt6502/opt_SHR_BYTE.inc}
+  {$i include/opt6502/opt_SHR_WORD.inc}
+  {$i include/opt6502/opt_SHR_CARD.inc}
+  {$i include/opt6502/opt_SHL_BYTE.inc}
+  {$i include/opt6502/opt_SHL_WORD.inc}
+  {$i include/opt6502/opt_SHL_CARD.inc}
+  {$i include/opt6502/opt_BYTE_DIV.inc}
 
-{$i include/opt6502/opt_STA_0.inc}
-{$i include/opt6502/opt_STACK.inc}
-{$i include/opt6502/opt_STACK_INX.inc}
-{$i include/opt6502/opt_STACK_ADD.inc}
-{$i include/opt6502/opt_STACK_CMP.inc}
-{$i include/opt6502/opt_STACK_ADR.inc}
-{$i include/opt6502/opt_STACK_AL_CL.inc}
-{$i include/opt6502/opt_STACK_AX_CX.inc}
-{$i include/opt6502/opt_STACK_EAX_ECX.inc}
-{$i include/opt6502/opt_STACK_PRINT.inc}
-{$i include/opt6502/opt_CMP_BRANCH.inc}
-{$i include/opt6502/opt_CMP_BP2.inc}
-{$i include/opt6502/opt_CMP_LOCAL.inc}
-{$i include/opt6502/opt_CMP_LT_GTEQ.inc}
-{$i include/opt6502/opt_CMP_LTEQ.inc}
-{$i include/opt6502/opt_CMP_GT.inc}
-{$i include/opt6502/opt_CMP_NE_EQ.inc}
-{$i include/opt6502/opt_CMP.inc}
-{$i include/opt6502/opt_CMP_0.inc}
+  {$i include/opt6502/opt_STA_0.inc}
+  {$i include/opt6502/opt_STACK.inc}
+  {$i include/opt6502/opt_STACK_INX.inc}
+  {$i include/opt6502/opt_STACK_ADD.inc}
+  {$i include/opt6502/opt_STACK_CMP.inc}
+  {$i include/opt6502/opt_STACK_ADR.inc}
+  {$i include/opt6502/opt_STACK_AL_CL.inc}
+  {$i include/opt6502/opt_STACK_AX_CX.inc}
+  {$i include/opt6502/opt_STACK_EAX_ECX.inc}
+  {$i include/opt6502/opt_STACK_PRINT.inc}
+  {$i include/opt6502/opt_CMP_BRANCH.inc}
+  {$i include/opt6502/opt_CMP_BP2.inc}
+  {$i include/opt6502/opt_CMP_LOCAL.inc}
+  {$i include/opt6502/opt_CMP_LT_GTEQ.inc}
+  {$i include/opt6502/opt_CMP_LTEQ.inc}
+  {$i include/opt6502/opt_CMP_GT.inc}
+  {$i include/opt6502/opt_CMP_NE_EQ.inc}
+  {$i include/opt6502/opt_CMP.inc}
+  {$i include/opt6502/opt_CMP_0.inc}
 
 // -----------------------------------------------------------------------------
 
@@ -1425,13 +1425,13 @@ end;
     k: Integer;
 
 
-{$i include/opt6502/opt_STA_ADD.inc}
-{$i include/opt6502/opt_STA_LDY.inc}
-{$i include/opt6502/opt_STA_BP.inc}
-{$i include/opt6502/opt_STA_LSR.inc}
-{$i include/opt6502/opt_STA_IMUL.inc}
-{$i include/opt6502/opt_STA_IMUL_CX.inc}
-{$i include/opt6502/opt_STA_ZTMP.inc}
+    {$i include/opt6502/opt_STA_ADD.inc}
+    {$i include/opt6502/opt_STA_LDY.inc}
+    {$i include/opt6502/opt_STA_BP.inc}
+    {$i include/opt6502/opt_STA_LSR.inc}
+    {$i include/opt6502/opt_STA_IMUL.inc}
+    {$i include/opt6502/opt_STA_IMUL_CX.inc}
+    {$i include/opt6502/opt_STA_ZTMP.inc}
 
 
     function PeepholeOptimization_END: Boolean;
@@ -1451,7 +1451,7 @@ end;
       for i := 0 to l - 1 do
       begin
 
-{$i include/opt6502/opt_END_STA.inc}
+        {$i include/opt6502/opt_END_STA.inc}
 
       end;
 
@@ -1582,8 +1582,8 @@ end;
   end;
 
 
-// ----------------------------------------------------------------------------
-// ----------------------------------------------------------------------------
+  // ----------------------------------------------------------------------------
+  // ----------------------------------------------------------------------------
 
 
   function OptimizeRelation: Boolean;
@@ -1653,7 +1653,6 @@ if (pos('cmp #$29', listing[i]) > 0) then begin
 
 end;
 }
-
 
 // -----------------------------------------------------------------------------
 
@@ -1744,16 +1743,16 @@ end;
   end;  //index
 
 
-{$i include/opt6502/opt_IMUL_CL.inc}
+  {$i include/opt6502/opt_IMUL_CL.inc}
 
-{$i include/opt6502/opt_inline_POKE.inc}
-{$i include/opt6502/opt_inline_PEEK.inc}
+  {$i include/opt6502/opt_inline_POKE.inc}
+  {$i include/opt6502/opt_inline_PEEK.inc}
 
-{$i include/opt6502/opt_FOR.inc}
-{$i include/opt6502/opt_REG_A.inc}
-{$i include/opt6502/opt_REG_BP2.inc}
-//{$i include/opt6502/opt_REG_TMP.inc}
-{$i include/opt6502/opt_REG_Y.inc}
+  {$i include/opt6502/opt_FOR.inc}
+  {$i include/opt6502/opt_REG_A.inc}
+  {$i include/opt6502/opt_REG_BP2.inc}
+  //{$i include/opt6502/opt_REG_TMP.inc}
+  {$i include/opt6502/opt_REG_Y.inc}
 
 
 begin        // OptimizeASM
@@ -2840,31 +2839,34 @@ begin        // OptimizeASM
 
    if (pos(':STACKORIGIN,', t) = 6) then begin
     //k:=pos(':STACK', t);  writeln(k);
-    delete(t, 6, 14);
+    Delete(t, 6, 14);
 
     arg0 := GetARG(0, x);
     insert(arg0, t, 6);
    end;
 
-   if (pos(':STACKORIGIN+STACKWIDTH,', t) = 6) then begin
+   if (pos(':STACKORIGIN+STACKWIDTH,', t) = 6) then
+   begin
     //k:=pos(':STACK', t);
-    delete(t, 6, 25);
+    Delete(t, 6, 25);
 
     arg0 := GetARG(1, x);
     insert(arg0, t, 6);
    end;
 
-   if (pos(':STACKORIGIN+STACKWIDTH*2,', t) = 6) then begin
+   if (pos(':STACKORIGIN+STACKWIDTH*2,', t) = 6) then
+   begin
     //k:=pos(':STACK', t);
-    delete(t, 6, 27);
+    Delete(t, 6, 27);
 
     arg0 := GetARG(2, x);
     insert(arg0, t, 6);
    end;
 
-   if (pos(':STACKORIGIN+STACKWIDTH*3,', t) = 6) then begin
+   if (pos(':STACKORIGIN+STACKWIDTH*3,', t) = 6) then
+   begin
     //k:=pos(':STACK', t);
-    delete(t, 6, 27);
+    Delete(t, 6, 27);
 
     arg0 := GetARG(3, x);
     insert(arg0, t, 6);
@@ -2882,7 +2884,8 @@ begin        // OptimizeASM
    if (pos(':STACKORIGIN+1+STACKWIDTH*3,', t) = 6) then	t:=copy(a, 1, 5) + GetARG(3, x+1);
 
 
-   if t <> '' then begin
+   if t <> '' then
+   begin
 
     listing[l] := t;
     Inc(l);
@@ -2926,7 +2929,8 @@ begin        // OptimizeASM
   until OptimizeRelation;
 
 
-  if OptimizeEAX then begin
+    if OptimizeEAX then
+    begin
     OptimizeAssignment;
 
     OptimizeEAX_OFF;
