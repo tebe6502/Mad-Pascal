@@ -22,11 +22,7 @@ var
   i: Integer;
 begin
   Result := '';
-  {$IFDEF MP175_TEST}
   for i := 0 to TemporaryBufIndex - 1 do Result := Result + TemporaryBuf[i] + '/';
-  {$ELSE}
-  for i := 0 to iOut - 1 do Result := Result + TemporaryBuf[i] + '/';
-  {$ENDIF}
 end;
 
 

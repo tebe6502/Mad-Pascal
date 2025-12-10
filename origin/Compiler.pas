@@ -19107,7 +19107,7 @@ end;
     asm65;
     asm65(#9'end');
 
-    flushTempBuf;      // flush TemporaryBuf
+    Finalize;      // flush TemporaryBuf
 
   end;  //CompileProgram
 

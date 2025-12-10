@@ -551,7 +551,7 @@ var
   BlockStackTop, CodeSize, CodePosStackTop, BreakPosStackTop, _VarDataSize, Pass, ShrShlCnt,
   NumStaticStrCharsTmp, AsmBlockIndex, IfCnt, CaseCnt, IfdefLevel, run_func: Integer;
 
-  iOut: Integer = -1;
+  TemporaryBufIndex: Integer = -1;
 
   start_time: QWord;
 
@@ -572,7 +572,7 @@ var
   resArray: array of TResource;
 
   MainPath, FilePath, optyA, optyY, optyBP2,
-  optyFOR0, optyFOR1, optyFOR2, optyFOR3, outTmp, outputFile: TString;
+  optyFOR0, optyFOR1, optyFOR2, optyFOR3, LastTempBuf0, outputFile: TString;
 
   msgWarning, msgNote, msgUser, UnitPath, OptimizeBuf, LinkObj, WithName: TArrayString;
 
