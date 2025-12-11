@@ -8,6 +8,7 @@ uses Common;
 
 // ----------------------------------------------------------------------------
 
+// Re/Set temoporary variables for register optimizations.
 procedure ResetOpty;
 procedure SetOptyY(const value: TString);
 function GetOptyBP2(): TString;
@@ -15,9 +16,9 @@ procedure SetOptyBP2(const value: TString);
 
 procedure asm65(const a: String = ''; const comment: String = '');      // OptimizeASM
 
-procedure OptimizeProgram(MainProcedureIndex: Integer);
+function IsASM65BufferEmpty: Boolean;
 
-procedure WriteOut(const a: String);       		   		 // OptimizeTemporaryBuf
+procedure OptimizeProgram(MainProcedureIndex: Integer);
 
 procedure Finalize;
 
@@ -1604,7 +1605,7 @@ end;
   // ----------------------------------------------------------------------------
 
 
-  function OptimizeRelation: Boolean;
+  function OptimizeRelation(const CodeSize: Integer): Boolean;
   var
     i, p: Integer;
     tmp: String;
@@ -2940,11 +2941,11 @@ begin        // OptimizeASM
 
     OptimizeAssignment;
 
-    repeat until OptimizeRelation;
+    repeat until OptimizeRelation(CodeSize);
 
     OptimizeAssignment;
 
-  until OptimizeRelation;
+  until OptimizeRelation(CodeSize);
 
 
     if OptimizeEAX then
@@ -3111,6 +3112,10 @@ end;
 
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
+function IsASM65BufferEmpty: Boolean;
+begin
+  Result:= High(OptimizeBuf) = 0;
+end;
 
 
 procedure asm65(const a: string = ''; const comment : string ='');
@@ -3141,7 +3146,7 @@ begin
 
   end else begin
 
-    if High(OptimizeBuf) > 0
+    if not IsASM65BufferEmpty
     then
 	   begin
 	    // DebugCall('OptimizeASM.Begin',OptimizeBufToString );

@@ -12,7 +12,7 @@ procedure Initialize(const aWriter: IWriter; const aAsmBlockArray:TAsmBlockArray
 
 procedure StartOptimization(SourceLocation: TSourceLocation);
 
-// Re/Set temoporary varitables for register optimizations.
+// Re/Set temoporary variables for register optimizations.
 procedure ResetOpty;
 procedure SetOptyY(const value: TString);
 function GetOptyBP2(): TString;
@@ -1904,12 +1904,7 @@ begin        // OptimizeASM
         arg0 := copy(a, 2, 256);
 
 
-        if length(arg0) > 20 then
-        begin
-          x := 51;
-          resetOpty;
-          Break;
-        end;
+      if length(arg0) > 20 then begin x := 51; resetOpty; Break; end;
 
 
         elf := ElfHash(arg0);
@@ -2882,101 +2877,66 @@ begin        // OptimizeASM
      end;
 
 
+  if t <> '' then begin
 
-      if t <> '' then
-      begin
+  if (pos('(:bp),', t) = 0) then begin
 
-        if (pos('(:bp),', t) = 0) then
-        begin
+   if (pos(':STACKORIGIN,', t) > 7) then begin	// kiedy odczytujemy tablice
+    s[x][0]:=copy(a, 1, pos(' :STACK', a));
+    t:='';
 
-          if (pos(':STACKORIGIN,', t) > 7) then
-          begin  // kiedy odczytujemy tablice
-            s[x][0] := copy(a, 1, pos(' :STACK', a));
-            t := '';
+    if pos(',y', s[x][0]) > 0 then begin
+     listing[l]   := #9'lda ' + GetARG(0, x);
+     listing[l+1] := #9'sta ' + GetARG(0, x);
 
-            if pos(',y', s[x][0]) > 0 then
-            begin
-              listing[l] := #9'lda ' + GetARG(0, x);
-              listing[l + 1] := #9'sta ' + GetARG(0, x);
+     Inc(l, 2);
+    end;
+   end;
 
-              Inc(l, 2);
-            end;
-          end;
+   if (pos(':STACKORIGIN+STACKWIDTH,', t) > 7) then begin
+    s[x][1]:=copy(a, 1, pos(' :STACK', a));
+    t:='';
 
-          if (pos(':STACKORIGIN+STACKWIDTH,', t) > 7) then
-          begin
-            s[x][1] := copy(a, 1, pos(' :STACK', a));
-            t := '';
+    if pos(',y', s[x][1]) > 0 then begin
+     listing[l]   := #9'lda ' + GetARG(1, x);
+     listing[l+1] := #9'sta ' + GetARG(1, x);
 
-            if pos(',y', s[x][1]) > 0 then
-            begin
-              listing[l] := #9'lda ' + GetARG(1, x);
-              listing[l + 1] := #9'sta ' + GetARG(1, x);
+     Inc(l, 2);
+    end;
+   end;
 
-              Inc(l, 2);
-            end;
-          end;
+   if (pos(':STACKORIGIN+STACKWIDTH*2,', t) > 7) then begin
+    s[x][2]:=copy(a, 1, pos(' :STACK', a));
+    t:='';
 
-          if (pos(':STACKORIGIN+STACKWIDTH*2,', t) > 7) then
-          begin
-            s[x][2] := copy(a, 1, pos(' :STACK', a));
-            t := '';
+    if pos(',y', s[x][2]) > 0 then begin
+     listing[l]   := #9'lda ' + GetARG(2, x);
+     listing[l+1] := #9'sta ' + GetARG(2, x);
 
-            if pos(',y', s[x][2]) > 0 then
-            begin
-              listing[l] := #9'lda ' + GetARG(2, x);
-              listing[l + 1] := #9'sta ' + GetARG(2, x);
+     Inc(l, 2);
+    end;
+   end;
 
-              Inc(l, 2);
-            end;
-          end;
+   if (pos(':STACKORIGIN+STACKWIDTH*3,', t) > 7) then begin
+    s[x][3]:=copy(a, 1, pos(' :STACK', a));
+    t:='';
 
-          if (pos(':STACKORIGIN+STACKWIDTH*3,', t) > 7) then
-          begin
-            s[x][3] := copy(a, 1, pos(' :STACK', a));
-            t := '';
+    if pos(',y', s[x][3]) > 0 then begin
+     listing[l]   := #9'lda ' + GetARG(3, x);
+     listing[l+1] := #9'sta ' + GetARG(3, x);
 
-            if pos(',y', s[x][3]) > 0 then
-            begin
-              listing[l] := #9'lda ' + GetARG(3, x);
-              listing[l + 1] := #9'sta ' + GetARG(3, x);
-
-              Inc(l, 2);
-            end;
-          end;
+     Inc(l, 2);
+    end;
+   end;
 
 
-          if (pos(':STACKORIGIN-1+STACKWIDTH,', t) > 7) then
-          begin
-            s[x - 1][1] := copy(a, 1, pos(' :STACK', a));
-            t := '';
-          end;
-          if (pos(':STACKORIGIN-1+STACKWIDTH*2,', t) > 7) then
-          begin
-            s[x - 1][2] := copy(a, 1, pos(' :STACK', a));
-            t := '';
-          end;
-          if (pos(':STACKORIGIN-1+STACKWIDTH*3,', t) > 7) then
-          begin
-            s[x - 1][3] := copy(a, 1, pos(' :STACK', a));
-            t := '';
-          end;
+   if (pos(':STACKORIGIN-1+STACKWIDTH,', t) > 7)   then begin s[x-1][1]:=copy(a, 1, pos(' :STACK', a)); t:='' end;
+   if (pos(':STACKORIGIN-1+STACKWIDTH*2,', t) > 7) then begin s[x-1][2]:=copy(a, 1, pos(' :STACK', a)); t:='' end;
+   if (pos(':STACKORIGIN-1+STACKWIDTH*3,', t) > 7) then begin s[x-1][3]:=copy(a, 1, pos(' :STACK', a)); t:='' end;
 
-          if (pos(':STACKORIGIN+1+STACKWIDTH,', t) > 7) then
-          begin
-            s[x + 1][1] := copy(a, 1, pos(' :STACK', a));
-            t := '';
-          end;
-          if (pos(':STACKORIGIN+1+STACKWIDTH*2,', t) > 7) then
-          begin
-            s[x + 1][2] := copy(a, 1, pos(' :STACK', a));
-            t := '';
-          end;
-          if (pos(':STACKORIGIN+1+STACKWIDTH*3,', t) > 7) then
-          begin
-            s[x + 1][3] := copy(a, 1, pos(' :STACK', a));
-            t := '';
-          end;
+   if (pos(':STACKORIGIN+1+STACKWIDTH,', t) > 7)   then begin s[x+1][1]:=copy(a, 1, pos(' :STACK', a)); t:='' end;
+   if (pos(':STACKORIGIN+1+STACKWIDTH*2,', t) > 7) then begin s[x+1][2]:=copy(a, 1, pos(' :STACK', a)); t:='' end;
+   if (pos(':STACKORIGIN+1+STACKWIDTH*3,', t) > 7) then begin s[x+1][3]:=copy(a, 1, pos(' :STACK', a)); t:='' end;
 
         end; // if (pos('(:bp),', t) = 0)
 
@@ -3067,8 +3027,7 @@ begin        // OptimizeASM
 
       OptimizeAssignment;
 
-      repeat
-      until OptimizeRelation(CodeSize);
+      repeat until OptimizeRelation(CodeSize);
 
       OptimizeAssignment;
 
@@ -3164,8 +3123,7 @@ begin        // OptimizeASM
       begin
 
         if (optyBP2 <> '') and (sta_a(i) or sty(i) or asl(i) or rol(i) or lsr(i) or ror(i) or inc_(i) or dec_(i)) then
-          if (pos('? ' + copy(listing[i], 6, 256) + ' ', optyBP2) > 0) or
-            (pos(';' + copy(listing[i], 6, 256) + ';', optyBP2) > 0) then
+          if (pos('? ' + copy(listing[i], 6, 256) + ' ', optyBP2) > 0) or (pos(';' + copy(listing[i], 6, 256) + ';', optyBP2) > 0) then
           begin
             optyBP2 := '';
             Break;
@@ -3264,7 +3222,7 @@ begin
 
   end else begin
 
-    if High(OptimizeBuf) > 0
+    if not IsASM65BufferEmpty
     then
       begin
         DebugCall('OptimizeASM.Begin',OptimizeBufToString );
