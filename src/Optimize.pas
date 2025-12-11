@@ -1768,7 +1768,6 @@ end;
       if opt_CMP(i) = False then exit(ExitTrick('opt_CMP', i, {$include %file%} ,{$include %line%} ,{$include %currentroutine%}));
       if opt_CMP_BP2(i) = False then exit(ExitTrick('opt_CMP_BP2', i, {$include %file%} ,{$include %line%} ,{$include %currentroutine%}));
 
-      // JAC! 2025-12-06 TODO
       if opt_CMP_BRANCH(i) = False then exit(ExitTrick('opt_BRANCH', i, {$include %file%} ,{$include %line%} ,{$include %currentroutine%}));
 
       // -----------------------------------------------------------------------------
@@ -1844,7 +1843,6 @@ end;
   end;  //index
 
 
-
   {$i include/opt6502/opt_IMUL_CL.inc}
 
   {$i include/opt6502/opt_inline_POKE.inc}
@@ -1855,6 +1853,7 @@ end;
   {$i include/opt6502/opt_REG_BP2.inc}
   //{$i include/opt6502/opt_REG_TMP.inc}
   {$i include/opt6502/opt_REG_Y.inc}
+
 begin        // OptimizeASM
 
   InitializeOptimizerSteps;
@@ -1916,1182 +1915,973 @@ begin        // OptimizeASM
         elf := ElfHash(arg0);
 
 
-        if elf = $08D58F81 then
-        begin    // @expandSHORT2SMALL1
-          t := '';
-
-          listing[l] := #9'ldy #$00';
-          listing[l + 1] := #9'lda ' + GetARG(0, x - 1);
-          listing[l + 2] := #9'spl';
-          listing[l + 3] := #9'dey';
-          listing[l + 4] := #9'sty ' + GetARG(1, x - 1);
-          listing[l + 5] := #9'sta ' + GetARG(0, x - 1);
-
-          Inc(l, 6);
-        end
-        else
-          if elf = $078D58FC then
-          begin    // @expandSHORT2SMALL
-            t := '';
-
-            listing[l] := #9'ldy #$00';
-            listing[l + 1] := #9'lda ' + GetARG(0, x);
-            listing[l + 2] := #9'spl';
-            listing[l + 3] := #9'dey';
-            listing[l + 4] := #9'sty ' + GetARG(1, x);
-            listing[l + 5] := #9'sta ' + GetARG(0, x);
-
-            Inc(l, 6);
-          end
-          else
-            if elf = $0A4BEA14 then
-            begin    // @expandToCARD.SHORT
-              t := '';
-
-              if (s[x][1] = '') and (s[x][2] = '') and (s[x][3] = '') then
-              begin
-
-                listing[l] := #9'ldy #$00';
-                listing[l + 1] := #9'lda ' + GetARG(0, x);
-                listing[l + 2] := #9'spl';
-                listing[l + 3] := #9'dey';
-                listing[l + 4] := #9'sta ' + GetARG(0, x);
-                listing[l + 5] := #9'sty ' + GetARG(1, x);
-                listing[l + 6] := #9'sty ' + GetARG(2, x);
-                listing[l + 7] := #9'sty ' + GetARG(3, x);
-
-                Inc(l, 8);
-              end;
-
-            end
-            else
-              if elf = $05F632F4 then
-              begin    // @expandToCARD1.SHORT
-                t := '';
-
-                if (s[x - 1][1] = '') and (s[x - 1][2] = '') and (s[x - 1][3] = '') then
-                begin
-
-                  listing[l] := #9'ldy #$00';
-                  listing[l + 1] := #9'lda ' + GetARG(0, x - 1);
-                  listing[l + 2] := #9'spl';
-                  listing[l + 3] := #9'dey';
-                  listing[l + 4] := #9'sta ' + GetARG(0, x - 1);
-                  listing[l + 5] := #9'sty ' + GetARG(1, x - 1);
-                  listing[l + 6] := #9'sty ' + GetARG(2, x - 1);
-                  listing[l + 7] := #9'sty ' + GetARG(3, x - 1);
-
-                  Inc(l, 8);
-                end;
-
-              end
-              else
-                if elf = $0A4C0C6C then
-                begin    // @expandToCARD.SMALL
-                  t := '';
-
-                  if (s[x][2] = '') and (s[x][3] = '') then
-                  begin
-
-                    listing[l] := #9'lda ' + GetARG(0, x);
-                    listing[l + 1] := #9'sta ' + GetARG(0, x);
-                    listing[l + 2] := #9'ldy #$00';
-                    listing[l + 3] := #9'lda ' + GetARG(1, x);
-                    listing[l + 4] := #9'spl';
-                    listing[l + 5] := #9'dey';
-                    listing[l + 6] := #9'sta ' + GetARG(1, x);
-                    listing[l + 7] := #9'sty ' + GetARG(2, x);
-                    listing[l + 8] := #9'sty ' + GetARG(3, x);
-
-                    Inc(l, 9);
-                  end;
-
-                end
-                else
-                  if elf = $05F7F48C then
-                  begin    // @expandToCARD1.SMALL
-                    t := '';
-
-                    if (s[x - 1][2] = '') and (s[x - 1][3] = '') then
-                    begin
-
-                      listing[l] := #9'lda ' + GetARG(0, x - 1);
-                      listing[l + 1] := #9'sta ' + GetARG(0, x - 1);
-                      listing[l + 2] := #9'ldy #$00';
-                      listing[l + 3] := #9'lda ' + GetARG(1, x - 1);
-                      listing[l + 4] := #9'spl';
-                      listing[l + 5] := #9'dey';
-                      listing[l + 6] := #9'sta ' + GetARG(1, x - 1);
-                      listing[l + 7] := #9'sty ' + GetARG(2, x - 1);
-                      listing[l + 8] := #9'sty ' + GetARG(3, x - 1);
-
-                      Inc(l, 9);
-                    end;
-
-                  end
-                  else
-                    if elf = $0F7B015C then
-                    begin    // @expandToREAL
-                      t := '';
-
-                      s[x][3] := '';          // -> :STACKORIGIN+STACKWIDTH*3
-
-                      listing[l] := #9'lda ' + GetARG(2, x);
-                      listing[l + 1] := #9'sta ' + GetARG(3, x);
-                      listing[l + 2] := #9'lda ' + GetARG(1, x);
-                      listing[l + 3] := #9'sta ' + GetARG(2, x);
-                      listing[l + 4] := #9'lda ' + GetARG(0, x);
-                      listing[l + 5] := #9'sta ' + GetARG(1, x);
-                      listing[l + 6] := #9'lda #$00';
-
-                      s[x][0] := '';          // -> :STACKORIGIN
-                      listing[l + 7] := #9'sta ' + GetARG(0, x);
-
-                      Inc(l, 8);
-
-                    end
-                    else
-                      if elf = $07B01501 then
-                      begin    // @expandToREAL1
-                        t := '';
-
-                        s[x - 1][3] := '';        // -> :STACKORIGIN-1+STACKWIDTH*3
-
-                        listing[l] := #9'lda ' + GetARG(2, x - 1);
-                        listing[l + 1] := #9'sta ' + GetARG(3, x - 1);
-                        listing[l + 2] := #9'lda ' + GetARG(1, x - 1);
-                        listing[l + 3] := #9'sta ' + GetARG(2, x - 1);
-                        listing[l + 4] := #9'lda ' + GetARG(0, x - 1);
-                        listing[l + 5] := #9'sta ' + GetARG(1, x - 1);
-                        listing[l + 6] := #9'lda #$00';
-
-                        s[x - 1][0] := '';        // -> :STACKORIGIN-1
-                        listing[l + 7] := #9'sta ' + GetARG(0, x - 1);
-
-                        Inc(l, 8);
-
-                      end
-                      else
-                        if elf = $06ED7EC5 then
-                        begin    // @hiBYTE
-                          t := '';
-
-                          listing[l] := #9'lda ' + GetARG(0, x);
-                          listing[l + 1] := #9':4 lsr @';
-                          listing[l + 2] := #9'sta ' + GetARG(0, x);
-
-                          Inc(l, 3);
-                        end
-                        else
-
-                          if elf = $06EEC424 then
-                          begin    // @hiWORD
-                            t := '';
-
-                            listing[l] := #9'lda ' + GetARG(1, x);
-                            s[x][0] := '';
-                            listing[l + 1] := #9'sta ' + GetARG(0, x);
-
-                            Inc(l, 2);
-                          end
-                          else
-                            if elf = $06ED7624 then
-                            begin    // @hiCARD
-                              t := '';
-
-                              s[x][0] := '';
-                              s[x][1] := '';
-
-                              listing[l] := #9'lda ' + GetARG(3, x);
-                              listing[l + 1] := #9'sta ' + GetARG(1, x);
-
-                              listing[l + 2] := #9'lda ' + GetARG(2, x);
-                              listing[l + 3] := #9'sta ' + GetARG(0, x);
-
-                              Inc(l, 4);
-                            end
-                            else
-
-                              if elf = $0D523E88 then
-                              begin    // @movZTMP_aBX
-                                t := '';
-
-                                s[x - 1, 0] := '';
-                                s[x - 1, 1] := '';
-                                s[x - 1, 2] := '';
-                                s[x - 1, 3] := '';
+     if elf = $08D58F81 then begin		// @expandSHORT2SMALL1
+       t:='';
+
+       listing[l]   := #9'ldy #$00';
+       listing[l+1] := #9'lda '+GetARG(0, x-1);
+       listing[l+2] := #9'spl';
+       listing[l+3] := #9'dey';
+       listing[l+4] := #9'sty '+GetARG(1, x-1);
+       listing[l+5] := #9'sta '+GetARG(0, x-1);
+
+       Inc(l, 6);
+      end else
+      if elf = $078D58FC then begin		// @expandSHORT2SMALL
+       t:='';
+
+       listing[l]   := #9'ldy #$00';
+       listing[l+1] := #9'lda '+GetARG(0, x);
+       listing[l+2] := #9'spl';
+       listing[l+3] := #9'dey';
+       listing[l+4] := #9'sty '+GetARG(1, x);
+       listing[l+5] := #9'sta '+GetARG(0, x);
+
+       Inc(l, 6);
+      end else
+      if elf = $0A4BEA14 then begin		// @expandToCARD.SHORT
+	t:='';
+
+	if (s[x][1]='') and (s[x][2]='') and (s[x][3]='') then begin
+
+	listing[l]   := #9'ldy #$00';
+	listing[l+1] := #9'lda '+GetARG(0, x);
+	listing[l+2] := #9'spl';
+	listing[l+3] := #9'dey';
+	listing[l+4] := #9'sta '+GetARG(0, x);
+	listing[l+5] := #9'sty '+GetARG(1, x);
+	listing[l+6] := #9'sty '+GetARG(2, x);
+	listing[l+7] := #9'sty '+GetARG(3, x);
+
+	Inc(l, 8);
+	end;
+
+      end else
+      if elf = $05F632F4 then begin		// @expandToCARD1.SHORT
+	t:='';
+
+	if (s[x-1][1]='') and (s[x-1][2]='') and (s[x-1][3]='') then begin
+
+	listing[l]   := #9'ldy #$00';
+	listing[l+1] := #9'lda '+GetARG(0, x-1);
+	listing[l+2] := #9'spl';
+	listing[l+3] := #9'dey';
+	listing[l+4] := #9'sta '+GetARG(0, x-1);
+	listing[l+5] := #9'sty '+GetARG(1, x-1);
+	listing[l+6] := #9'sty '+GetARG(2, x-1);
+	listing[l+7] := #9'sty '+GetARG(3, x-1);
+
+	Inc(l, 8);
+	end;
+
+      end else
+      if elf = $0A4C0C6C then begin		// @expandToCARD.SMALL
+	t:='';
+
+	if (s[x][2]='') and (s[x][3]='') then begin
+
+	listing[l]   := #9'lda '+GetARG(0, x);
+	listing[l+1] := #9'sta '+GetARG(0, x);
+	listing[l+2] := #9'ldy #$00';
+	listing[l+3] := #9'lda '+GetARG(1, x);
+	listing[l+4] := #9'spl';
+	listing[l+5] := #9'dey';
+	listing[l+6] := #9'sta '+GetARG(1, x);
+	listing[l+7] := #9'sty '+GetARG(2, x);
+	listing[l+8] := #9'sty '+GetARG(3, x);
+
+	Inc(l, 9);
+	end;
+
+      end else
+      if elf = $05F7F48C then begin		// @expandToCARD1.SMALL
+	t:='';
+
+	if (s[x-1][2]='') and (s[x-1][3]='') then begin
+
+	listing[l]   := #9'lda '+GetARG(0, x-1);
+	listing[l+1] := #9'sta '+GetARG(0, x-1);
+	listing[l+2] := #9'ldy #$00';
+	listing[l+3] := #9'lda '+GetARG(1, x-1);
+	listing[l+4] := #9'spl';
+	listing[l+5] := #9'dey';
+	listing[l+6] := #9'sta '+GetARG(1, x-1);
+	listing[l+7] := #9'sty '+GetARG(2, x-1);
+	listing[l+8] := #9'sty '+GetARG(3, x-1);
+
+	Inc(l, 9);
+	end;
+
+      end else
+      if elf = $0F7B015C then begin		// @expandToREAL
+	t:='';
+
+	s[x][3] := '';					// -> :STACKORIGIN+STACKWIDTH*3
 
-                                listing[l] := #9'lda :ztmp8';
-                                listing[l + 1] := #9'sta ' + GetARG(0, x - 1);
-                                listing[l + 2] := #9'lda :ztmp9';
-                                listing[l + 3] := #9'sta ' + GetARG(1, x - 1);
-                                listing[l + 4] := #9'lda :ztmp10';
-                                listing[l + 5] := #9'sta ' + GetARG(2, x - 1);
-                                listing[l + 6] := #9'lda :ztmp11';
-                                listing[l + 7] := #9'sta ' + GetARG(3, x - 1);
+	listing[l]   := #9'lda ' + GetARG(2, x);
+	listing[l+1] := #9'sta ' + GetARG(3, x);
+	listing[l+2] := #9'lda ' + GetARG(1, x);
+	listing[l+3] := #9'sta ' + GetARG(2, x);
+	listing[l+4] := #9'lda ' + GetARG(0, x);
+	listing[l+5] := #9'sta ' + GetARG(1, x);
+	listing[l+6] := #9'lda #$00';
 
-                                Inc(l, 8);
+	s[x][0] := '';					// -> :STACKORIGIN
+	listing[l+7] := #9'sta ' + GetARG(0, x);
 
-                              end
-                              else
+	Inc(l,8);
 
-                                if elf = $053B7FA8 then
-                                begin    // @movaBX_EAX
-                                  t := '';
+      end else
+      if elf = $07B01501 then begin		// @expandToREAL1
+	t:='';
 
-                                  s[x - 1, 0] := '';
-                                  s[x - 1, 1] := '';
-                                  s[x - 1, 2] := '';
-                                  s[x - 1, 3] := '';
+	s[x-1][3] := '';				// -> :STACKORIGIN-1+STACKWIDTH*3
 
-                                  listing[l] := #9'lda :eax';
-                                  listing[l + 1] := #9'sta ' + GetARG(0, x - 1);
-                                  listing[l + 2] := #9'lda :eax+1';
-                                  listing[l + 3] := #9'sta ' + GetARG(1, x - 1);
-                                  listing[l + 4] := #9'lda :eax+2';
-                                  listing[l + 5] := #9'sta ' + GetARG(2, x - 1);
-                                  listing[l + 6] := #9'lda :eax+3';
-                                  listing[l + 7] := #9'sta ' + GetARG(3, x - 1);
+	listing[l]   := #9'lda ' + GetARG(2, x-1);
+	listing[l+1] := #9'sta ' + GetARG(3, x-1);
+	listing[l+2] := #9'lda ' + GetARG(1, x-1);
+	listing[l+3] := #9'sta ' + GetARG(2, x-1);
+	listing[l+4] := #9'lda ' + GetARG(0, x-1);
+	listing[l+5] := #9'sta ' + GetARG(1, x-1);
+	listing[l+6] := #9'lda #$00';
 
-                                  Inc(l, 8);
+	s[x-1][0] := '';				// -> :STACKORIGIN-1
+	listing[l+7] := #9'sta ' + GetARG(0, x-1);
 
-                                end
-                                else
+	Inc(l,8);
 
-                                  if (elf = $0E887644) then
-                                  begin    // @BYTE.MOD
-                                    t := '';
+      end else
+      if elf = $06ED7EC5 then begin		// @hiBYTE
+       t:='';
 
-                                    if (l > 3) and lda_im(l - 4) then
-                                      k := GetBYTE(l - 4)
-                                    else
-                                      k := 0;
+       listing[l]   := #9'lda '+GetARG(0, x);
+       listing[l+1] := #9':4 lsr @';
+       listing[l+2] := #9'sta '+GetARG(0, x);
 
-                                    if k in [2, 4, 8, 16, 32, 64, 128] then
-                                    begin
+       Inc(l, 3);
+      end else
 
-                                      listing[l - 4] := listing[l - 2];
+      if elf = $06EEC424 then begin		// @hiWORD
+       t:='';
 
-                                      Dec(l, 4);
+       listing[l]   := #9'lda '+GetARG(1, x);
+       s[x][0] := '';
+       listing[l+1] := #9'sta '+GetARG(0, x);
 
-                                      case k of
-                                        2: listing[l + 1] := #9'and #$01';
-                                        4: listing[l + 1] := #9'and #$03';
-                                        8: listing[l + 1] := #9'and #$07';
-                                        16: listing[l + 1] := #9'and #$0F';
-                                        32: listing[l + 1] := #9'and #$1F';
-                                        64: listing[l + 1] := #9'and #$3F';
-                                        128: listing[l + 1] := #9'and #$7F';
-                                      end;
+       Inc(l, 2);
+      end else
+      if elf = $06ED7624 then begin		// @hiCARD
+       t:='';
 
-                                      listing[l + 2] := #9'jsr #$00';
+       s[x][0] := '';
+       s[x][1] := '';
 
-                                      Inc(l, 3);
+       listing[l]   := #9'lda '+GetARG(3, x);
+       listing[l+1] := #9'sta '+GetARG(1, x);
 
-                                    end
-                                    else
-                                    begin
+       listing[l+2] := #9'lda '+GetARG(2, x);
+       listing[l+3] := #9'sta '+GetARG(0, x);
 
-                                      listing[l] := #9'jsr @BYTE.MOD';
+       Inc(l, 4);
+      end else
 
-                                      Inc(l, 1);
+      if elf = $0D523E88 then begin		// @movZTMP_aBX
+	t:='';
 
-                                    end;
+	s[x-1, 0] := '';
+	s[x-1, 1] := '';
+	s[x-1, 2] := '';
+	s[x-1, 3] := '';
 
-                                  end
-                                  else
+	listing[l]   := #9'lda :ztmp8';
+	listing[l+1] := #9'sta ' + GetARG(0, x-1);
+	listing[l+2] := #9'lda :ztmp9';
+	listing[l+3] := #9'sta ' + GetARG(1, x-1);
+	listing[l+4] := #9'lda :ztmp10';
+	listing[l+5] := #9'sta ' + GetARG(2, x-1);
+	listing[l+6] := #9'lda :ztmp11';
+	listing[l+7] := #9'sta ' + GetARG(3, x-1);
 
-                                    if (elf = $0E886C96) then
-                                    begin    // @BYTE.DIV
-                                      t := '';
+	Inc(l, 8);
 
-                                      if (l > 3) and lda_im(l - 4) then
-                                        k := GetBYTE(l - 4)
-                                      else
-                                        k := 0;
+      end else
 
-                                      if k in [2..32] then
-                                      begin
+      If elf = $053B7FA8 then begin		// @movaBX_EAX
+	t:='';
 
-                                        listing[l - 4] := listing[l - 2];
+	s[x-1, 0] := '';
+	s[x-1, 1] := '';
+	s[x-1, 2] := '';
+	s[x-1, 3] := '';
 
-                                        Dec(l, 4);
+	listing[l]   := #9'lda :eax';
+	listing[l+1] := #9'sta ' + GetARG(0, x-1);
+	listing[l+2] := #9'lda :eax+1';
+	listing[l+3] := #9'sta ' + GetARG(1, x-1);
+	listing[l+4] := #9'lda :eax+2';
+	listing[l+5] := #9'sta ' + GetARG(2, x-1);
+	listing[l+6] := #9'lda :eax+3';
+	listing[l+7] := #9'sta ' + GetARG(3, x-1);
 
+	Inc(l, 8);
 
-                                        opt_BYTE_DIV(k);
+      end else
 
+      if (elf = $0E887644) then begin		// @BYTE.MOD
+	t:='';
 
-                                        listing[l] := #9'lda ' + GetARG(0, x - 1);
-                                        listing[l + 1] := #9'sta :eax';
+	if (l > 3) and lda_im(l-4) then
+	  k := GetBYTE(l-4)
+	else
+	  k:=0;
 
-                                        Inc(l, 2);
+	if k in [2,4,8,16,32,64,128] then begin
 
-                                      end
-                                      else
-                                      begin
+	 listing[l-4] := listing[l-2];
 
-                                        listing[l] := #9'jsr @BYTE.DIV';
+	 dec(l, 4);
 
-                                        Inc(l, 1);
+	 case k of
+	    2: listing[l+1] := #9'and #$01';
+	    4: listing[l+1] := #9'and #$03';
+	    8: listing[l+1] := #9'and #$07';
+	   16: listing[l+1] := #9'and #$0F';
+	   32: listing[l+1] := #9'and #$1F';
+	   64: listing[l+1] := #9'and #$3F';
+	  128: listing[l+1] := #9'and #$7F';
+	 end;
 
-                                      end;
+	 listing[l+2] := #9'jsr #$00';
 
-                                    end
-                                    else
+	 Inc(l, 3);
 
-                                      if (elf = $04C07985) or (elf = $0D334D44) then
-                                      begin  // imulBYTE, mulSHORTINT
-                                        t := '';
+	end else begin
 
-                                        s[x, 1] := '';
-                                        s[x, 2] := '';
-                                        s[x, 3] := '';
+	 listing[l] := #9'jsr @BYTE.MOD';
 
-                                        s[x - 1, 1] := '';
-                                        s[x - 1, 2] := '';
-                                        s[x - 1, 3] := '';
+	 Inc(l, 1);
 
-                                        m := l;
+	end;
 
-                                        listing[l] := #9'lda ' + GetARG(0, x);
-                                        listing[l + 1] := #9'sta :ecx';
+      end else
 
-                                        if elf = $0D334D44 then
-                                        begin    // mulSHORTINT
-                                          listing[l + 2] := #9'sta :ztmp8';
-                                          Inc(l);
-                                        end;
+      if (elf = $0E886C96) then begin		// @BYTE.DIV
+	t:='';
 
-                                        listing[l + 2] := #9'lda ' + GetARG(0, x - 1);
-                                        listing[l + 3] := #9'sta :eax';
+	if (l > 3) and lda_im(l-4) then
+	  k := GetBYTE(l-4)
+	else
+	  k:=0;
 
-                                        if elf = $0D334D44 then
-                                        begin    // mulSHORTINT
-                                          listing[l + 4] := #9'sta :ztmp10';
-                                          Inc(l);
-                                        end;
+	if k in [2..32] then begin
 
-                                        listing[l + 4] := #9'.ifdef fmulinit';
-                                        listing[l + 5] := #9'fmulu_8';
-                                        listing[l + 6] := #9'els';
-                                        listing[l + 7] := #9'imulCL';
-                                        listing[l + 8] := #9'eif';
+	 listing[l-4] := listing[l-2];
 
+	 dec(l, 4);
 
-                                        if lda_im(l) and          // #const
-                                          (listing[l + 1] = #9'sta :ecx') and lda_im(l + 2) and             // #const
-                                          sta_eax(l + 3) then
-                                        begin
 
-                                          k := GetBYTE(l) * GetBYTE(l + 2);
+         opt_BYTE_DIV(k);
 
-                                          listing[l] := #9'lda #$' + IntToHex(k and $ff, 2);
-                                          listing[l + 1] := #9'sta :eax';
-                                          listing[l + 2] := #9'lda #$' + IntToHex(Byte(k shr 8), 2);
-                                          listing[l + 3] := #9'sta :eax+1';
 
-                                          Inc(l, 4);
+	 listing[l]   := #9'lda ' + GetARG(0, x-1);
+	 listing[l+1] := #9'sta :eax';
 
-                                        end
-                                        else
-                                          if imulCL_opt then Inc(l, 9);
+	 Inc(l, 2);
 
+	end else begin
 
-                                        if elf = $0D334D44 then
-                                        begin    // mulSHORTINT
+	 listing[l]   := #9'jsr @BYTE.DIV';
 
-                                          listing[l] := #9'lda :ztmp10';
-                                          listing[l + 1] := #9'bpl @+';
-                                          listing[l + 2] := #9'lda :eax+1';
-                                          listing[l + 3] := #9'sub :ztmp8';
-                                          listing[l + 4] := #9'sta :eax+1';
+	 Inc(l, 1);
 
-                                          listing[l + 5] := '@';
+	end;
 
-                                          listing[l + 6] := #9'lda :ztmp8';
-                                          listing[l + 7] := #9'bpl @+';
-                                          listing[l + 8] := #9'lda :eax+1';
-                                          listing[l + 9] := #9'sub :ztmp10';
-                                          listing[l + 10] := #9'sta :eax+1';
+      end else
 
-                                          listing[l + 11] := '@';
+      if (elf = $04C07985) or (elf = $0D334D44) then begin	// imulBYTE, mulSHORTINT
+	t:='';
 
-                                          listing[l + 12] := #9'lda :eax';
-                                          listing[l + 13] := #9'sta ' + GetARG(0, x - 1);
-                                          listing[l + 14] := #9'lda :eax+1';
-                                          listing[l + 15] := #9'sta ' + GetARG(1, x - 1);
-                                          listing[l + 16] := #9'lda #$00';
-                                          listing[l + 17] := #9'sta ' + GetARG(2, x - 1);
-                                          listing[l + 18] := #9'lda #$00';
-                                          listing[l + 19] := #9'sta ' + GetARG(3, x - 1);
+	s[x, 1] := '';
+	s[x, 2] := '';
+	s[x, 3] := '';
 
-                                          Inc(l, 20);
-                                        end;
+	s[x-1, 1] := '';
+	s[x-1, 2] := '';
+	s[x-1, 3] := '';
 
-                                      end
-                                      else
+	m:=l;
 
-                                        if (elf = $04C1C364) or (elf = $0135CDB4) then
-                                        begin  // imulWORD, mulSMALLINT
-                                          t := '';
+	listing[l]   := #9'lda '+GetARG(0, x);
+	listing[l+1] := #9'sta :ecx';
 
-                                          s[x, 2] := '';
-                                          s[x, 3] := '';
+	if elf = $0D334D44 then begin		// mulSHORTINT
+	 listing[l+2] := #9'sta :ztmp8';
+	 Inc(l);
+	end;
 
-                                          s[x - 1, 2] := '';
-                                          s[x - 1, 3] := '';
+	listing[l+2]  := #9'lda '+GetARG(0, x-1);
+	listing[l+3]  := #9'sta :eax';
 
-                                          m := l;
+	if elf = $0D334D44 then begin		// mulSHORTINT
+	 listing[l+4] := #9'sta :ztmp10';
+	 Inc(l);
+	end;
 
-                                          listing[l] := #9'lda ' + GetARG(0, x);
-                                          listing[l + 1] := #9'sta :ecx';
+	listing[l+4] := #9'.ifdef fmulinit';
+	listing[l+5] := #9'fmulu_8';
+	listing[l+6] := #9'els';
+	listing[l+7] := #9'imulCL';
+	listing[l+8] := #9'eif';
 
-                                          if elf = $0135CDB4 then
-                                          begin    // mulSMALLINT
-                                            listing[l + 2] := #9'sta :ztmp8';
-                                            Inc(l);
-                                          end;
 
-                                          listing[l + 2] := #9'lda ' + GetARG(1, x);
-                                          listing[l + 3] := #9'sta :ecx+1';
+	if lda_im(l) and					// #const
+	   (listing[l+1] = #9'sta :ecx') and
+	   lda_im(l+2) and	   				// #const
+	   sta_eax(l+3) then
+	begin
 
-                                          if elf = $0135CDB4 then
-                                          begin    // mulSMALLINT
-                                            listing[l + 4] := #9'sta :ztmp9';
-                                            Inc(l);
-                                          end;
+	  k := GetBYTE(l) * GetBYTE(l+2);
 
-                                          listing[l + 4] := #9'lda ' + GetARG(0, x - 1);
-                                          listing[l + 5] := #9'sta :eax';
+      	  listing[l]  := #9'lda #' + Hex(k and $ff, 2);
+      	  listing[l+1]:= #9'sta :eax';
+      	  listing[l+2]:= #9'lda #' + Hex(byte(k shr 8), 2);
+      	  listing[l+3]:= #9'sta :eax+1';
 
-                                          if elf = $0135CDB4 then
-                                          begin    // mulSMALLINT
-                                            listing[l + 6] := #9'sta :ztmp10';
-                                            Inc(l);
-                                          end;
-
-                                          listing[l + 6] := #9'lda ' + GetARG(1, x - 1);
-                                          listing[l + 7] := #9'sta :eax+1';
+	  Inc(l, 4);
 
-                                          if elf = $0135CDB4 then
-                                          begin    // mulSMALLINT
-                                            listing[l + 8] := #9'sta :ztmp11';
-                                            Inc(l);
-                                          end;
+	end else
+	 if imulCL_opt then Inc(l, 9);
 
 
-                                          if lda_im(l) and (listing[l + 1] = #9'sta :ecx') and
-                                            lda_im(l + 2) and (listing[l + 3] = #9'sta :ecx+1') and
-                                            lda_im(l + 4) and sta_eax(l + 5) and lda_im(l + 6) and
-                                            sta_eax_1(l + 7) then
-                                          begin
+	if elf = $0D334D44 then begin		// mulSHORTINT
 
-                                            k := GetWORD(l, l + 2) * GetWORD(l + 4, l + 6);
+	 listing[l]   := #9'lda :ztmp10';
+	 listing[l+1] := #9'bpl @+';
+	 listing[l+2] := #9'lda :eax+1';
+	 listing[l+3] := #9'sub :ztmp8';
+  	 listing[l+4] := #9'sta :eax+1';
 
-                                            listing[l] := #9'lda #$' + IntToHex(k and $ff, 2);
-                                            listing[l + 1] := #9'sta :eax';
-                                            listing[l + 2] := #9'lda #$' + IntToHex(Byte(k shr 8), 2);
-                                            listing[l + 3] := #9'sta :eax+1';
-                                            listing[l + 4] := #9'lda #$' + IntToHex(Byte(k shr 16), 2);
-                                            listing[l + 5] := #9'sta :eax+2';
-                                            listing[l + 6] := #9'lda #$' + IntToHex(Byte(k shr 24), 2);
-                                            listing[l + 7] := #9'sta :eax+3';
-                                            listing[l + 8] := '';
-                                            listing[l + 9] := '';
-                                            listing[l + 10] := '';
-                                            listing[l + 11] := '';
-                                            listing[l + 12] := '';
-
-                                          end
-                                          else
-                                          begin
-
-                                            listing[l + 8] := #9'.ifdef fmulinit';
-                                            listing[l + 9] := #9'fmulu_16';
-                                            listing[l + 10] := #9'els';
-                                            listing[l + 11] := #9'imulCX';
-                                            listing[l + 12] := #9'eif';
-
-                                          end;
-
-                                          Inc(l, 13);
-
-                                          if elf = $0135CDB4 then
-                                          begin    // mulSMALLINT
-
-                                            listing[l] := #9'lda :ztmp11';
-                                            listing[l + 1] := #9'bpl @+';
-                                            listing[l + 2] := #9'lda :eax+2';
-                                            listing[l + 3] := #9'sub :ztmp8';
-                                            listing[l + 4] := #9'sta :eax+2';
-                                            listing[l + 5] := #9'lda :eax+3';
-                                            listing[l + 6] := #9'sbc :ztmp9';
-                                            listing[l + 7] := #9'sta :eax+3';
-
-                                            listing[l + 8] := '@';
-
-                                            listing[l + 9] := #9'lda :ztmp9';
-                                            listing[l + 10] := #9'bpl @+';
-                                            listing[l + 11] := #9'lda :eax+2';
-                                            listing[l + 12] := #9'sub :ztmp10';
-                                            listing[l + 13] := #9'sta :eax+2';
-                                            listing[l + 14] := #9'lda :eax+3';
-                                            listing[l + 15] := #9'sbc :ztmp11';
-                                            listing[l + 16] := #9'sta :eax+3';
-
-                                            listing[l + 17] := '@';
-
-                                            listing[l + 18] := #9'lda :eax';
-                                            listing[l + 19] := #9'sta ' + GetARG(0, x - 1);
-                                            listing[l + 20] := #9'lda :eax+1';
-                                            listing[l + 21] := #9'sta ' + GetARG(1, x - 1);
-                                            listing[l + 22] := #9'lda :eax+2';
-                                            listing[l + 23] := #9'sta ' + GetARG(2, x - 1);
-                                            listing[l + 24] := #9'lda :eax+3';
-                                            listing[l + 25] := #9'sta ' + GetARG(3, x - 1);
-
-                                            Inc(l, 26);
-                                          end;
-
-
-                                          if //lda_a(m) and {(lda_stack(m) = false) and}          // lda          ; 0
-                                          (listing[m + 1] = #9'sta :ecx') and             // sta :ecx        ; 1
-                                            lda_im_0(m + 2) and                // lda #$00        ; 2
-                                            (listing[m + 3] = #9'sta :ecx+1') and             // sta :ecx+1        ; 3
-                                            lda_a(m + 4) and {(lda_stack(m+4) = false) and}
-                                            // lda           ; 4
-                                            sta_eax(m + 5) and                  // sta :eax        ; 5
-                                            lda_im_0(m + 6) and                // lda #$00        ; 6
-                                            sta_eax_1(m + 7) and                // sta :eax+1        ; 7
-
-                                            IFDEF_MUL16(m + 8) then                // .ifdef fmulinit      ; 8
-                                            // fmulu_16        ; 9
-                                          begin
-                                            listing[m + 2] := listing[m + 4];
-                                            listing[m + 3] := listing[m + 5];
-
-                                            listing[m + 4] := listing[m + 8];
-                                            listing[m + 5] := #9'fmulu_8';
-                                            listing[m + 6] := listing[m + 10];
-                                            listing[m + 7] := #9'imulCL';
-                                            listing[m + 8] := listing[m + 12];
-
-                                            l := m + 9;
-
-                                            imulCL_opt;
-                                          end;
-
-                                        end
-                                        else
-
-                                          if (elf = $04C07164) or (elf = $0E3FD7A2) then
-                                          begin  // imulCARD, mulINTEGER
-                                            t := '';
-
-                                            if (Target.ID = TTargetID.NEO) then
-                                            begin
-
-                                              listing[l] := #9'lda ' + GetARG(0, x);
-                                              listing[l + 1] := #9'sta VAR1_B0';
-                                              listing[l + 2] := #9'lda ' + GetARG(1, x);
-                                              listing[l + 3] := #9'sta VAR1_B1';
-                                              listing[l + 4] := #9'lda ' + GetARG(2, x);
-                                              listing[l + 5] := #9'sta VAR1_B2';
-                                              listing[l + 6] := #9'lda ' + GetARG(3, x);
-                                              listing[l + 7] := #9'sta VAR1_B3';
-
-                                              listing[l + 8] := #9'lda ' + GetARG(0, x - 1);
-                                              listing[l + 9] := #9'sta VAR2_B0';
-                                              listing[l + 10] := #9'lda ' + GetARG(1, x - 1);
-                                              listing[l + 11] := #9'sta VAR2_B1';
-                                              listing[l + 12] := #9'lda ' + GetARG(2, x - 1);
-                                              listing[l + 13] := #9'sta VAR2_B2';
-                                              listing[l + 14] := #9'lda ' + GetARG(3, x - 1);
-                                              listing[l + 15] := #9'sta VAR2_B3';
-
-                                            end
-                                            else
-                                            begin
-
-                                              listing[l] := #9'lda ' + GetARG(0, x);
-                                              listing[l + 1] := #9'sta :ecx';
-                                              listing[l + 2] := #9'lda ' + GetARG(1, x);
-                                              listing[l + 3] := #9'sta :ecx+1';
-                                              listing[l + 4] := #9'lda ' + GetARG(2, x);
-                                              listing[l + 5] := #9'sta :ecx+2';
-                                              listing[l + 6] := #9'lda ' + GetARG(3, x);
-                                              listing[l + 7] := #9'sta :ecx+3';
-
-                                              listing[l + 8] := #9'lda ' + GetARG(0, x - 1);
-                                              listing[l + 9] := #9'sta :eax';
-                                              listing[l + 10] := #9'lda ' + GetARG(1, x - 1);
-                                              listing[l + 11] := #9'sta :eax+1';
-                                              listing[l + 12] := #9'lda ' + GetARG(2, x - 1);
-                                              listing[l + 13] := #9'sta :eax+2';
-                                              listing[l + 14] := #9'lda ' + GetARG(3, x - 1);
-                                              listing[l + 15] := #9'sta :eax+3';
-
-                                            end;
-
-                                            listing[l + 16] := #9'jsr imulECX';
-
-                                            Inc(l, 17);
-
-                                            if elf = $0E3FD7A2 then
-                                            begin    // mulINTEGER
-                                              listing[l] := #9'lda :eax';
-                                              listing[l + 1] := #9'sta ' + GetARG(0, x - 1);
-                                              listing[l + 2] := #9'lda :eax+1';
-                                              listing[l + 3] := #9'sta ' + GetARG(1, x - 1);
-                                              listing[l + 4] := #9'lda :eax+2';
-                                              listing[l + 5] := #9'sta ' + GetARG(2, x - 1);
-                                              listing[l + 6] := #9'lda :eax+3';
-                                              listing[l + 7] := #9'sta ' + GetARG(3, x - 1);
-
-                                              if sta_im_0(l + 1) then
-                                              begin
-                                                listing[l] := '';
-                                                listing[l + 1] := '';
-                                              end;
-
-                                              if sta_im_0(l + 3) then
-                                              begin
-                                                listing[l + 2] := '';
-                                                listing[l + 3] := '';
-                                              end;
-
-                                              if sta_im_0(l + 5) then
-                                              begin
-                                                listing[l + 4] := '';
-                                                listing[l + 5] := '';
-                                              end;
-
-                                              if sta_im_0(l + 7) then
-                                              begin
-                                                listing[l + 6] := '';
-                                                listing[l + 7] := '';
-                                              end;
-
-                                              Inc(l, 8);
-                                            end;
-
-                                          end
-                                          else
-                                            if elf = $09BBA11B then
-                                            begin    // SYSTEM.PEEK
-
-                                              if system_peek then
-                                              begin
-                                                x := 50;
-                                                Break;
-                                              end;
-
-                                            end
-                                            else
-                                              if elf = $09BBBB75 then
-                                              begin    // SYSTEM.POKE
-
-                                                if system_poke then
-                                                begin
-                                                  x := 50;
-                                                  Break;
-                                                end;
-
-                                              end
-                                              else
-                                                if elf = $0BA7C10B then
-                                                begin    // SYSTEM.DPEEK
-
-                                                  if system_dpeek then
-                                                  begin
-                                                    x := 50;
-                                                    Break;
-                                                  end;
-
-                                                end
-                                                else
-                                                  if elf = $0BA7DB65 then
-                                                  begin    // SYSTEM.DPOKE
-
-                                                    if system_dpoke then
-                                                    begin
-                                                      x := 50;
-                                                      Break;
-                                                    end;
-
-                                                  end
-                                                  else
-                                                    if elf = $0F6664EC then
-                                                    begin    // @shrAL_CL
-
-                                                      if opt_SHR_BYTE then
-                                                      begin
-                                                        x := 50;
-                                                        Break;
-                                                      end;
-
-                                                    end
-                                                    else
-                                                      if elf = $0F66A4EC then
-                                                      begin    // @shrAX_CL
-
-                                                        opt_SHR_WORD;
-
-                                                      end
-                                                      else
-                                                        if elf = $0692BA8C then
-                                                        begin    // @shrEAX_CL
-
-                                                          opt_SHR_CARD;
-
-                                                        end
-                                                        else
-                                                          if elf = $08FB5525 then
-                                                          begin    // @shlEAX_CL.BYTE
-
-                                                            opt_SHL_BYTE;
-
-                                                          end
-                                                          else
-                                                            if elf = $08FAAFC4 then
-                                                            begin    // @shlEAX_CL.WORD
-
-                                                              if opt_SHL_WORD then
-                                                              begin
-                                                                x := 50;
-                                                                Break;
-                                                              end;
-
-                                                            end
-                                                            else
-                                                              if elf = $08FB5DC4 then
-                                                              begin    // @shlEAX_CL.CARD
-
-                                                                opt_SHL_CARD;
-
-                                                              end
-                                                              else
-
-
-                                                                if (pos('add', arg0) > 0) or
-                                                                  (pos('sub', arg0) > 0) then
-                                                                begin
-
-                                                                  t := '';
-
-                                                                  if (elf = $0B6624DC) then
-                                                                  begin    // subAL_CL
-
-                                                                    s[x][1] := '';
-                                                                    s[x][2] := '';
-                                                                    s[x][3] := '';
-
-                                                                    s[x - 1][1] := #9'mva #$00';
-                                                                    s[x - 1][2] := #9'mva #$00';
-                                                                    s[x - 1][3] := #9'mva #$00';
-
-                                                                    listing[l] := #9'lda ' + GetARG(0, x - 1);
-                                                                    listing[l + 1] := #9'sub ' + GetARG(0, x);
-                                                                    listing[l + 2] := #9'sta ' + GetARG(0, x - 1);
-
-                                                                    listing[l + 3] := #9'lda ' + GetARG(1, x - 1);
-                                                                    listing[l + 4] := #9'sbc #$00';
-                                                                    listing[l + 5] := #9'sta ' + GetARG(1, x - 1);
-
-                                                                    listing[l + 6] := #9'lda ' + GetARG(2, x - 1);
-                                                                    listing[l + 7] := #9'sbc #$00';
-                                                                    listing[l + 8] := #9'sta ' + GetARG(2, x - 1);
-
-                                                                    listing[l + 9] := #9'lda ' + GetARG(3, x - 1);
-                                                                    listing[l + 10] := #9'sbc #$00';
-                                                                    listing[l + 11] := #9'sta ' + GetARG(3, x - 1);
-
-                                                                    listing[l + 3] := '';
-                                                                    listing[l + 4] := '';
-                                                                    listing[l + 5] := '';
-                                                                    listing[l + 6] := '';
-                                                                    listing[l + 7] := '';
-                                                                    listing[l + 8] := '';
-                                                                    listing[l + 9] := '';
-                                                                    listing[l + 10] := '';
-                                                                    listing[l + 11] := '';
-
-                                                                    Inc(l, 3);
-                                                                  end;
-
-                                                                  if (elf = $0B66E428) then
-                                                                  begin    // subAX_CX
-
-                                                                    s[x][2] := '';
-                                                                    s[x][3] := '';
-
-                                                                    s[x - 1][2] := #9'mva #$00';
-                                                                    s[x - 1][3] := #9'mva #$00';
-
-                                                                    listing[l] := #9'lda ' + GetARG(0, x - 1);
-                                                                    listing[l + 1] := #9'sub ' + GetARG(0, x);
-                                                                    listing[l + 2] := #9'sta ' + GetARG(0, x - 1);
-
-                                                                    listing[l + 3] := #9'lda ' + GetARG(1, x - 1);
-                                                                    listing[l + 4] := #9'sbc ' + GetARG(1, x);
-                                                                    listing[l + 5] := #9'sta ' + GetARG(1, x - 1);
-
-                                                                    listing[l + 6] := #9'lda ' + GetARG(2, x - 1);
-                                                                    listing[l + 7] := #9'sbc #$00';
-                                                                    listing[l + 8] := #9'sta ' + GetARG(2, x - 1);
-
-                                                                    listing[l + 9] := #9'lda ' + GetARG(3, x - 1);
-                                                                    listing[l + 10] := #9'sbc #$00';
-                                                                    listing[l + 11] := #9'sta ' + GetARG(3, x - 1);
-
-                                                                    listing[l + 6] := '';
-                                                                    listing[l + 7] := '';
-                                                                    listing[l + 8] := '';
-                                                                    listing[l + 9] := '';
-                                                                    listing[l + 10] := '';
-                                                                    listing[l + 11] := '';
-
-                                                                    Inc(l, 6);
-                                                                  end;
-
-                                                                  if (elf = $096B92E8) then
-                                                                  begin    // subEAX_ECX
-
-                                                                    listing[l] := #9'lda ' + GetARG(0, x - 1);
-                                                                    listing[l + 1] := #9'sub ' + GetARG(0, x);
-                                                                    listing[l + 2] := #9'sta ' + GetARG(0, x - 1);
-
-                                                                    listing[l + 3] := #9'lda ' + GetARG(1, x - 1);
-                                                                    listing[l + 4] := #9'sbc ' + GetARG(1, x);
-                                                                    listing[l + 5] := #9'sta ' + GetARG(1, x - 1);
-
-                                                                    listing[l + 6] := #9'lda ' + GetARG(2, x - 1);
-                                                                    listing[l + 7] := #9'sbc ' + GetARG(2, x);
-                                                                    listing[l + 8] := #9'sta ' + GetARG(2, x - 1);
-
-                                                                    listing[l + 9] := #9'lda ' + GetARG(3, x - 1);
-                                                                    listing[l + 10] := #9'sbc ' + GetARG(3, x);
-                                                                    listing[l + 11] := #9'sta ' + GetARG(3, x - 1);
-
-                                                                    Inc(l, 12);
-                                                                  end;
-
-                                                                  if elf = $0A86250C then
-                                                                  begin    // addAL_CL
-
-                                                                    if (pos(',y', s[x - 1][0]) > 0) or
-                                                                      (pos(',y', s[x][0]) > 0) then
-                                                                    begin
-                                                                      x := 30;
-                                                                      Break;
-                                                                    end;
-
-                                                                    s[x][1] := '';
-                                                                    s[x][2] := '';
-                                                                    s[x][3] := '';
-
-                                                                    s[x - 1][1] := #9'mva #$00';
-                                                                    s[x - 1][2] := #9'mva #$00';
-                                                                    s[x - 1][3] := #9'mva #$00';
-
-                                                                    listing[l] := #9'lda ' + GetARG(0, x - 1);
-                                                                    listing[l + 1] := #9'add ' + GetARG(0, x);
-                                                                    listing[l + 2] := #9'sta ' + GetARG(0, x - 1);
-
-                                                                    listing[l + 3] := #9'lda ' + GetARG(1, x - 1);
-                                                                    listing[l + 4] := #9'adc #$00';
-                                                                    listing[l + 5] := #9'sta ' + GetARG(1, x - 1);
-
-                                                                    listing[l + 6] := #9'lda ' + GetARG(2, x - 1);
-                                                                    listing[l + 7] := #9'adc #$00';
-                                                                    listing[l + 8] := #9'sta ' + GetARG(2, x - 1);
-
-                                                                    listing[l + 9] := #9'lda ' + GetARG(3, x - 1);
-                                                                    listing[l + 10] := #9'adc #$00';
-                                                                    listing[l + 11] := #9'sta ' + GetARG(3, x - 1);
-
-                                                                    listing[l + 3] := '';
-                                                                    listing[l + 4] := '';
-                                                                    listing[l + 5] := '';
-                                                                    listing[l + 6] := '';
-                                                                    listing[l + 7] := '';
-                                                                    listing[l + 8] := '';
-                                                                    listing[l + 9] := '';
-                                                                    listing[l + 10] := '';
-                                                                    listing[l + 11] := '';
-
-                                                                    Inc(l, 3);
-                                                                  end;
-
-                                                                  if elf = $0A86E5F8 then
-                                                                  begin    // addAX_CX
-
-                                                                    s[x][2] := '';
-                                                                    s[x][3] := '';
-
-                                                                    s[x - 1][2] := #9'mva #$00';
-                                                                    s[x - 1][3] := #9'mva #$00';
-
-                                                                    listing[l] := #9'lda ' + GetARG(0, x - 1);
-                                                                    listing[l + 1] := #9'add ' + GetARG(0, x);
-                                                                    listing[l + 2] := #9'sta ' + GetARG(0, x - 1);
-
-                                                                    listing[l + 3] := #9'lda ' + GetARG(1, x - 1);
-                                                                    listing[l + 4] := #9'adc ' + GetARG(1, x);
-                                                                    listing[l + 5] := #9'sta ' + GetARG(1, x - 1);
-
-                                                                    listing[l + 6] := #9'lda ' + GetARG(2, x - 1);
-                                                                    listing[l + 7] := #9'adc #$00';
-                                                                    listing[l + 8] := #9'sta ' + GetARG(2, x - 1);
-
-                                                                    listing[l + 9] := #9'lda ' + GetARG(3, x - 1);
-                                                                    listing[l + 10] := #9'adc #$00';
-                                                                    listing[l + 11] := #9'sta ' + GetARG(3, x - 1);
-
-                                                                    listing[l + 6] := '';
-                                                                    listing[l + 7] := '';
-                                                                    listing[l + 8] := '';
-                                                                    listing[l + 9] := '';
-                                                                    listing[l + 10] := '';
-                                                                    listing[l + 11] := '';
-
-                                                                    Inc(l, 6);
-                                                                  end;
-
-                                                                  if (elf = $096C4308) then
-                                                                  begin    // addEAX_ECX
-
-                                                                    listing[l] := #9'lda ' + GetARG(0, x - 1);
-                                                                    listing[l + 1] := #9'add ' + GetARG(0, x);
-                                                                    listing[l + 2] := #9'sta ' + GetARG(0, x - 1);
-
-                                                                    listing[l + 3] := #9'lda ' + GetARG(1, x - 1);
-                                                                    listing[l + 4] := #9'adc ' + GetARG(1, x);
-                                                                    listing[l + 5] := #9'sta ' + GetARG(1, x - 1);
-
-                                                                    listing[l + 6] := #9'lda ' + GetARG(2, x - 1);
-                                                                    listing[l + 7] := #9'adc ' + GetARG(2, x);
-                                                                    listing[l + 8] := #9'sta ' + GetARG(2, x - 1);
-
-                                                                    listing[l + 9] := #9'lda ' + GetARG(3, x - 1);
-                                                                    listing[l + 10] := #9'adc ' + GetARG(3, x);
-                                                                    listing[l + 11] := #9'sta ' + GetARG(3, x - 1);
-
-                                                                    Inc(l, 12);
-
-                                                                  end;
-
-                                                                end
-                                                                else
-
-
-                                                                  if elf = $004746C5 then    // @move    accepted
-                                                                  else
-
-                                                                    if elf = $058D0867 then
-                                                                    // @cmpSTRING    accepted
-                                                                    else
-                                                                      if elf = $03CEEED7 then
-                                                                      // @cmpCHAR2STRING  accepted
-                                                                      else
-                                                                        if elf = $06FEACE2 then
-                                                                        // @cmpSTRING2CHAR  accepted
-                                                                        else
-                                                                          if elf = $044A824C then
-                                                                          // @FCMPL    accepted
-                                                                          else
-
-                                                                            if elf = $0044B931 then
-                                                                            // @FTOA    accepted
-                                                                            else
-
-                                                                              if elf = $094C6F26 then
-                                                                              // @SHORTINT.DIV  accepted
-                                                                              else
-                                                                                if elf = $09B849A6 then
-                                                                                // @SMALLINT.DIV  accepted
-                                                                                else
-                                                                                  if elf = $0FEB1076 then
-                                                                                  // @INTEGER.DIV    accepted
-                                                                                  else
-                                                                                    if elf = $094C77F4 then
-                                                                                    // @SHORTINT.MOD  accepted
-                                                                                    else
-                                                                                      if elf = $09B85174 then
-                                                                                      // @SMALLINT.MOD  accepted
-                                                                                      else
-                                                                                        if elf = $0FEB2AA4 then
-                                                                                        // @INTEGER.MOD    accepted
-                                                                                        else
-
-                                                                                          if elf = $0E886C96 then
-                                                                                          // @BYTE.DIV    accepted
-                                                                                          else
-                                                                                            if elf = $04676D26 then
-                                                                                            // @WORD.DIV    accepted
-                                                                                            else
-                                                                                              if elf = $06294046 then
-                                                                                              // @CARDINAL.DIV  accepted
-                                                                                              else
-                                                                                                if elf = $0E887644 then
-                                                                                                // @BYTE.MOD    accepted
-                                                                                                else
-                                                                                                  if elf =
-                                                                                                    $046775F4 then
-                                                                                                  // @WORD.MOD    accepted
-                                                                                                  else
-                                                                                                    if elf =
-                                                                                                      $06295A94 then
-                                                                                                    // @CARDINAL.MOD  accepted
-                                                                                                    else
-
-                                                                                                      if elf =
-                                                                                                        $0E965FAC then
-                                                                                                      // @SHORTREAL_MUL  accepted
-                                                                                                      else
-                                                                                                        if elf =
-                                                                                                          $096287FC then
-                                                                                                        // @REAL_MUL    accepted
-                                                                                                        else
-                                                                                                          if elf =
-                                                                                                            $0E9645D6 then
-                                                                                                          // @SHORTREAL_DIV  accepted
-                                                                                                          else
-                                                                                                            if elf =
-                                                                                                              $09627D86 then
-                                                                                                            // @REAL_DIV    accepted
-                                                                                                            else
-
-                                                                                                              if elf =
-                                                                                                                $02042144
-                                                                                                              then    // @REAL_ROUND    accepted
-                                                                                                              else
-                                                                                                                if
-                                                                                                                elf =
-                                                                                                                  $063448B3 then    // @SHORTREAL_TRUNC  accepted
-                                                                                                                else
-                                                                                                                  if elf
-                                                                                                                    = $020C1143
-                                                                                                                  then    // @REAL_TRUNC    accepted
-                                                                                                                  else
-                                                                                                                    if
-                                                                                                                    elf =
-                                                                                                                      $0627E0C3 then    // @REAL_FRAC    accepted
-                                                                                                                    else
-
-                                                                                                                      if
-                                                                                                                      elf
-                                                                                                                        =
-                                                                                                                        $0044B29C then    // @FMUL    accepted
-                                                                                                                      else
-                                                                                                                        if
-                                                                                                                        elf
-                                                                                                                          =
-                                                                                                                          $0044A8E6 then    // @FDIV    accepted
-                                                                                                                        else
-                                                                                                                          if
-                                                                                                                          elf
-                                                                                                                            = $0044A584 then    // @FADD    accepted
-                                                                                                                          else
-                                                                                                                            if
-                                                                                                                            elf
-                                                                                                                              = $0044B892 then    // @FSUB    accepted
-                                                                                                                            else
-                                                                                                                              if
-                                                                                                                              elf
-                                                                                                                                = $00044C66 then    // @I2F      accepted
-                                                                                                                              else
-                                                                                                                                if
-                                                                                                                                elf
-                                                                                                                                  =
-                                                                                                                                  $00044969 then    // @F2I      accepted
-                                                                                                                                else
-                                                                                                                                  if
-                                                                                                                                  elf
-                                                                                                                                    =
-                                                                                                                                    $044AB653 then    // @FFRAC    accepted
-                                                                                                                                  else
-                                                                                                                                    if
-                                                                                                                                    elf
-                                                                                                                                      =
-                                                                                                                                      $04B74A64 then    // @FROUND    accepted
-                                                                                                                                    else
-
-                                                                                                                                      if
-                                                                                                                                      elf
-                                                                                                                                        =
-                                                                                                                                        $094C3D21 then    // @F16_F2A    accepted
-                                                                                                                                      else
-                                                                                                                                        if
-                                                                                                                                        elf
-                                                                                                                                          =
-                                                                                                                                          $094C31C4 then    // @F16_ADD    accepted
-                                                                                                                                        else
-                                                                                                                                          if
-                                                                                                                                          elf
-                                                                                                                                            =
-                                                                                                                                            $094C4CD2 then     // @F16_SUB    accepted
-                                                                                                                                          else
-                                                                                                                                            if
-                                                                                                                                            elf
-                                                                                                                                              =
-                                                                                                                                              $094C46DC then    // @F16_MUL    accepted
-                                                                                                                                            else
-                                                                                                                                              if
-                                                                                                                                              elf
-                                                                                                                                                =
-                                                                                                                                                $094C3CA6 then    // @F16_DIV    accepted
-                                                                                                                                              else
-                                                                                                                                                if
-                                                                                                                                                elf
-                                                                                                                                                  =
-                                                                                                                                                  $094C3A74 then    // @F16_INT    accepted
-                                                                                                                                                else
-                                                                                                                                                  if
-                                                                                                                                                  elf
-                                                                                                                                                    =
-                                                                                                                                                    $0C430164 then    // @F16_ROUND    accepted
-                                                                                                                                                  else
-                                                                                                                                                    if
-                                                                                                                                                    elf
-                                                                                                                                                      =
-                                                                                                                                                      $04C3F2C3 then    // @F16_FRAC    accepted
-                                                                                                                                                    else
-                                                                                                                                                      if
-                                                                                                                                                      elf
-                                                                                                                                                        =
-                                                                                                                                                        $094C3826 then    // @F16_I2F    accepted
-                                                                                                                                                      else
-                                                                                                                                                        if
-                                                                                                                                                        elf
-                                                                                                                                                          =
-                                                                                                                                                          $0494C3E1 then    // @F16_EQ    accepted
-                                                                                                                                                        else
-                                                                                                                                                          if
-                                                                                                                                                          elf =
-                                                                                                                                                            $0494C384 then    // @F16_GT    accepted
-                                                                                                                                                          else
-                                                                                                                                                            if
-                                                                                                                                                            elf =
-                                                                                                                                                              $094C38C5 then    // @F16_GTE    accepted
-
-
-                                                                                                                                                            else
-                                                                                                                                                            begin
-
-                                                                                                                                                              {$IFDEF USEOPTFILE}
+	 listing[l+5] := '@';
+
+	 listing[l+6] := #9'lda :ztmp8';
+	 listing[l+7] := #9'bpl @+';
+	 listing[l+8] := #9'lda :eax+1';
+	 listing[l+9] := #9'sub :ztmp10';
+	 listing[l+10]:= #9'sta :eax+1';
+
+	 listing[l+11] := '@';
+
+	 listing[l+12] := #9'lda :eax';
+	 listing[l+13] := #9'sta '+GetARG(0, x-1);
+	 listing[l+14] := #9'lda :eax+1';
+	 listing[l+15] := #9'sta '+GetARG(1, x-1);
+	 listing[l+16] := #9'lda #$00';
+	 listing[l+17] := #9'sta '+GetARG(2, x-1);
+	 listing[l+18] := #9'lda #$00';
+	 listing[l+19] := #9'sta '+GetARG(3, x-1);
+
+	 Inc(l, 20);
+	end;
+
+      end else
+
+      if (elf = $04C1C364) or (elf = $0135CDB4) then begin	// imulWORD, mulSMALLINT
+	t:='';
+
+	s[x, 2] := '';
+	s[x, 3] := '';
+
+	s[x-1, 2] := '';
+	s[x-1, 3] := '';
+
+	m:=l;
+
+	listing[l]   := #9'lda '+GetARG(0, x);
+	listing[l+1] := #9'sta :ecx';
+
+	if elf = $0135CDB4 then begin		// mulSMALLINT
+	 listing[l+2] := #9'sta :ztmp8';
+	 Inc(l);
+	end;
+
+	listing[l+2]  := #9'lda '+GetARG(1, x);
+	listing[l+3]  := #9'sta :ecx+1';
+
+	if elf = $0135CDB4 then begin		// mulSMALLINT
+	 listing[l+4] := #9'sta :ztmp9';
+	 Inc(l);
+	end;
+
+	listing[l+4]  := #9'lda '+GetARG(0, x-1);
+	listing[l+5]  := #9'sta :eax';
+
+	if elf = $0135CDB4 then begin		// mulSMALLINT
+	 listing[l+6] := #9'sta :ztmp10';
+	 Inc(l);
+	end;
+
+	listing[l+6]  := #9'lda '+GetARG(1, x-1);
+	listing[l+7]  := #9'sta :eax+1';
+
+	if elf = $0135CDB4 then begin		// mulSMALLINT
+	 listing[l+8] := #9'sta :ztmp11';
+	 Inc(l);
+	end;
+
+
+        if lda_im(l) and
+	   (listing[l+1] = #9'sta :ecx') and
+	   lda_im(l+2) and
+	   (listing[l+3] = #9'sta :ecx+1') and
+	   lda_im(l+4) and
+	   sta_eax(l+5) and
+	   lda_im(l+6) and
+	   sta_eax_1(l+7) then
+	begin
+
+	 k := GetWORD(l, l+2) * GetWORD(l+4, l+6);
+
+         listing[l]   := #9'lda #' + Hex(k and $ff, 2);
+	 listing[l+1] := #9'sta :eax';
+         listing[l+2] := #9'lda #' + Hex(byte(k shr 8), 2);
+	 listing[l+3] := #9'sta :eax+1';
+         listing[l+4] := #9'lda #' + Hex(byte(k shr 16), 2);
+	 listing[l+5] := #9'sta :eax+2';
+         listing[l+6] := #9'lda #' + Hex(byte(k shr 24), 2);
+	 listing[l+7] := #9'sta :eax+3';
+         listing[l+8] := '';
+         listing[l+9] := '';
+         listing[l+10]:= '';
+         listing[l+11]:= '';
+         listing[l+12]:= '';
+
+	end else begin
+
+	 listing[l+8]  := #9'.ifdef fmulinit';
+	 listing[l+9]  := #9'fmulu_16';
+	 listing[l+10] := #9'els';
+	 listing[l+11] := #9'imulCX';
+	 listing[l+12] := #9'eif';
+
+	end;
+
+	Inc(l, 13);
+
+	if elf = $0135CDB4 then begin		// mulSMALLINT
+
+	listing[l]   := #9'lda :ztmp11';
+	listing[l+1] := #9'bpl @+';
+	listing[l+2] := #9'lda :eax+2';
+	listing[l+3] := #9'sub :ztmp8';
+  	listing[l+4] := #9'sta :eax+2';
+	listing[l+5] := #9'lda :eax+3';
+	listing[l+6] := #9'sbc :ztmp9';
+	listing[l+7] := #9'sta :eax+3';
+
+	listing[l+8] := '@';
+
+	listing[l+9]  := #9'lda :ztmp9';
+	listing[l+10] := #9'bpl @+';
+	listing[l+11] := #9'lda :eax+2';
+	listing[l+12] := #9'sub :ztmp10';
+	listing[l+13] := #9'sta :eax+2';
+	listing[l+14] := #9'lda :eax+3';
+	listing[l+15] := #9'sbc :ztmp11';
+	listing[l+16] := #9'sta :eax+3';
+
+	listing[l+17] := '@';
+
+	listing[l+18] := #9'lda :eax';
+	listing[l+19] := #9'sta '+GetARG(0, x-1);
+	listing[l+20] := #9'lda :eax+1';
+	listing[l+21] := #9'sta '+GetARG(1, x-1);
+	listing[l+22] := #9'lda :eax+2';
+	listing[l+23] := #9'sta '+GetARG(2, x-1);
+	listing[l+24] := #9'lda :eax+3';
+	listing[l+25] := #9'sta '+GetARG(3, x-1);
+
+	Inc(l, 26);
+	end;
+
+
+    if //lda_a(m) and {(lda_stack(m) = false) and}					// lda					; 0
+       (listing[m+1] = #9'sta :ecx') and 						// sta :ecx				; 1
+       lda_im_0(m+2) and								// lda #$00				; 2
+       (listing[m+3] = #9'sta :ecx+1') and 						// sta :ecx+1				; 3
+       lda_a(m+4) and {(lda_stack(m+4) = false) and}					// lda 					; 4
+       sta_eax(m+5) and									// sta :eax				; 5
+       lda_im_0(m+6) and								// lda #$00				; 6
+       sta_eax_1(m+7) and								// sta :eax+1				; 7
+
+       IFDEF_MUL16(m+8) then								// .ifdef fmulinit			; 8
+       											// fmulu_16				; 9
+     begin
+      listing[m+2] := listing[m+4];
+      listing[m+3] := listing[m+5];
+
+      listing[m+4] := listing[m+8];
+      listing[m+5] := #9'fmulu_8';
+      listing[m+6] := listing[m+10];
+      listing[m+7] := #9'imulCL';
+      listing[m+8] := listing[m+12];
+
+      l:=m+9;
+
+      imulCL_opt;
+     end;
+
+
+      end else
+
+      if (elf = $04C07164) or (elf = $0E3FD7A2) then begin	// imulCARD, mulINTEGER
+	t:='';
+
+        if (target.id = TTargetID.NEO) then begin
+
+          listing[l]    := #9'lda '+GetARG(0, x);
+          listing[l+1]  := #9'sta VAR1_B0';
+          listing[l+2]  := #9'lda '+GetARG(1, x);
+          listing[l+3]  := #9'sta VAR1_B1';
+          listing[l+4]  := #9'lda '+GetARG(2, x);
+          listing[l+5]  := #9'sta VAR1_B2';
+          listing[l+6]  := #9'lda '+GetARG(3, x);
+          listing[l+7]  := #9'sta VAR1_B3';
+
+          listing[l+8]  := #9'lda '+GetARG(0, x-1);
+          listing[l+9]  := #9'sta VAR2_B0';
+          listing[l+10] := #9'lda '+GetARG(1, x-1);
+          listing[l+11] := #9'sta VAR2_B1';
+          listing[l+12] := #9'lda '+GetARG(2, x-1);
+          listing[l+13] := #9'sta VAR2_B2';
+          listing[l+14] := #9'lda '+GetARG(3, x-1);
+          listing[l+15] := #9'sta VAR2_B3';
+
+        end else begin
+
+          listing[l]    := #9'lda '+GetARG(0, x);
+          listing[l+1]  := #9'sta :ecx';
+          listing[l+2]  := #9'lda '+GetARG(1, x);
+          listing[l+3]  := #9'sta :ecx+1';
+          listing[l+4]  := #9'lda '+GetARG(2, x);
+          listing[l+5]  := #9'sta :ecx+2';
+          listing[l+6]  := #9'lda '+GetARG(3, x);
+          listing[l+7]  := #9'sta :ecx+3';
+
+          listing[l+8]  := #9'lda '+GetARG(0, x-1);
+          listing[l+9]  := #9'sta :eax';
+          listing[l+10] := #9'lda '+GetARG(1, x-1);
+          listing[l+11] := #9'sta :eax+1';
+          listing[l+12] := #9'lda '+GetARG(2, x-1);
+          listing[l+13] := #9'sta :eax+2';
+          listing[l+14] := #9'lda '+GetARG(3, x-1);
+          listing[l+15] := #9'sta :eax+3';
+
+        end;
+
+	listing[l+16] := #9'jsr imulECX';
+
+	Inc(l, 17);
+
+	if elf = $0E3FD7A2 then begin		// mulINTEGER
+	listing[l]   := #9'lda :eax';
+	listing[l+1] := #9'sta '+GetARG(0, x-1);
+	listing[l+2] := #9'lda :eax+1';
+	listing[l+3] := #9'sta '+GetARG(1, x-1);
+	listing[l+4] := #9'lda :eax+2';
+	listing[l+5] := #9'sta '+GetARG(2, x-1);
+	listing[l+6] := #9'lda :eax+3';
+	listing[l+7] := #9'sta '+GetARG(3, x-1);
+
+	if sta_im_0(l+1) then begin
+	 listing[l]   := '';
+	 listing[l+1] := '';
+	end;
+
+	if sta_im_0(l+3) then begin
+	 listing[l+2] := '';
+	 listing[l+3] := '';
+	end;
+
+	if sta_im_0(l+5) then begin
+	 listing[l+4] := '';
+	 listing[l+5] := '';
+	end;
+
+	if sta_im_0(l+7) then begin
+	 listing[l+6] := '';
+	 listing[l+7] := '';
+	end;
+
+	Inc(l, 8);
+	end;
+
+      end else
+      if (pos('add', arg0) > 0) or (pos('sub', arg0) > 0) then begin
+
+      t:='';
+
+      if (elf = $0B6624DC) then begin		// subAL_CL
+
+       s[x][1] := '';
+       s[x][2] := '';
+       s[x][3] := '';
+
+       s[x-1][1] := #9'mva #$00';
+       s[x-1][2] := #9'mva #$00';
+       s[x-1][3] := #9'mva #$00';
+
+       listing[l]   := #9'lda '+GetARG(0, x-1);
+       listing[l+1] := #9'sub '+GetARG(0, x);
+       listing[l+2] := #9'sta '+GetARG(0, x-1);
+
+       listing[l+3] := #9'lda '+GetARG(1, x-1);
+       listing[l+4] := #9'sbc #$00';
+       listing[l+5] := #9'sta '+GetARG(1, x-1);
+
+       listing[l+6] := #9'lda '+GetARG(2, x-1);
+       listing[l+7] := #9'sbc #$00';
+       listing[l+8] := #9'sta '+GetARG(2, x-1);
+
+       listing[l+9] := #9'lda '+GetARG(3, x-1);
+       listing[l+10] := #9'sbc #$00';
+       listing[l+11] := #9'sta '+GetARG(3, x-1);
+
+       listing[l+3] := '';
+       listing[l+4] := '';
+       listing[l+5] := '';
+       listing[l+6] := '';
+       listing[l+7] := '';
+       listing[l+8] := '';
+       listing[l+9] := '';
+       listing[l+10] := '';
+       listing[l+11] := '';
+
+       Inc(l, 3);
+      end;
+
+      if (elf = $0B66E428) then begin		// subAX_CX
+
+       s[x][2] := '';
+       s[x][3] := '';
+
+       s[x-1][2] := #9'mva #$00';
+       s[x-1][3] := #9'mva #$00';
+
+       listing[l]   := #9'lda '+GetARG(0, x-1);
+       listing[l+1] := #9'sub '+GetARG(0, x);
+       listing[l+2] := #9'sta '+GetARG(0, x-1);
+
+       listing[l+3] := #9'lda '+GetARG(1, x-1);
+       listing[l+4] := #9'sbc '+GetARG(1, x);
+       listing[l+5] := #9'sta '+GetARG(1, x-1);
+
+       listing[l+6] := #9'lda '+GetARG(2, x-1);
+       listing[l+7] := #9'sbc #$00';
+       listing[l+8] := #9'sta '+GetARG(2, x-1);
+
+       listing[l+9] := #9'lda '+GetARG(3, x-1);
+       listing[l+10] := #9'sbc #$00';
+       listing[l+11] := #9'sta '+GetARG(3, x-1);
+
+       listing[l+6] := '';
+       listing[l+7] := '';
+       listing[l+8] := '';
+       listing[l+9] := '';
+       listing[l+10] := '';
+       listing[l+11] := '';
+
+       Inc(l, 6);
+      end;
+
+      if (elf = $096B92E8) then begin		// subEAX_ECX
+
+       listing[l]   := #9'lda '+GetARG(0, x-1);
+       listing[l+1] := #9'sub '+GetARG(0, x);
+       listing[l+2] := #9'sta '+GetARG(0, x-1);
+
+       listing[l+3] := #9'lda '+GetARG(1, x-1);
+       listing[l+4] := #9'sbc '+GetARG(1, x);
+       listing[l+5] := #9'sta '+GetARG(1, x-1);
+
+       listing[l+6] := #9'lda '+GetARG(2, x-1);
+       listing[l+7] := #9'sbc '+GetARG(2, x);
+       listing[l+8] := #9'sta '+GetARG(2, x-1);
+
+       listing[l+9]  := #9'lda '+GetARG(3, x-1);
+       listing[l+10] := #9'sbc '+GetARG(3, x);
+       listing[l+11] := #9'sta '+GetARG(3, x-1);
+
+       Inc(l, 12);
+      end;
+
+      if elf = $0A86250C then begin		// addAL_CL
+
+       if (pos(',y', s[x-1][0]) >0 ) or (pos(',y', s[x][0]) >0 ) then begin x:=30; Break end;
+
+       s[x][1] := '';
+       s[x][2] := '';
+       s[x][3] := '';
+
+       s[x-1][1] := #9'mva #$00';
+       s[x-1][2] := #9'mva #$00';
+       s[x-1][3] := #9'mva #$00';
+
+       listing[l]   := #9'lda '+GetARG(0, x-1);
+       listing[l+1] := #9'add '+GetARG(0, x);
+       listing[l+2] := #9'sta '+GetARG(0, x-1);
+
+       listing[l+3] := #9'lda '+GetARG(1, x-1);
+       listing[l+4] := #9'adc #$00';
+       listing[l+5] := #9'sta '+GetARG(1, x-1);
+
+       listing[l+6] := #9'lda '+GetARG(2, x-1);
+       listing[l+7] := #9'adc #$00';
+       listing[l+8] := #9'sta '+GetARG(2, x-1);
+
+       listing[l+9] := #9'lda '+GetARG(3, x-1);
+       listing[l+10] := #9'adc #$00';
+       listing[l+11] := #9'sta '+GetARG(3, x-1);
+
+       listing[l+3] := '';
+       listing[l+4] := '';
+       listing[l+5] := '';
+       listing[l+6] := '';
+       listing[l+7] := '';
+       listing[l+8] := '';
+       listing[l+9] := '';
+       listing[l+10] := '';
+       listing[l+11] := '';
+
+       Inc(l, 3);
+      end;
+
+      if elf = $0A86E5F8 then begin		// addAX_CX
+
+       s[x][2] := '';
+       s[x][3] := '';
+
+       s[x-1][2] := #9'mva #$00';
+       s[x-1][3] := #9'mva #$00';
+
+       listing[l]   := #9'lda '+GetARG(0, x-1);
+       listing[l+1] := #9'add '+GetARG(0, x);
+       listing[l+2] := #9'sta '+GetARG(0, x-1);
+
+       listing[l+3] := #9'lda '+GetARG(1, x-1);
+       listing[l+4] := #9'adc '+GetARG(1, x);
+       listing[l+5] := #9'sta '+GetARG(1, x-1);
+
+       listing[l+6] := #9'lda '+GetARG(2, x-1);
+       listing[l+7] := #9'adc #$00';
+       listing[l+8] := #9'sta '+GetARG(2, x-1);
+
+       listing[l+9] := #9'lda '+GetARG(3, x-1);
+       listing[l+10] := #9'adc #$00';
+       listing[l+11] := #9'sta '+GetARG(3, x-1);
+
+       listing[l+6] := '';
+       listing[l+7] := '';
+       listing[l+8] := '';
+       listing[l+9] := '';
+       listing[l+10] := '';
+       listing[l+11] := '';
+
+       Inc(l, 6);
+      end;
+
+      if (elf = $096C4308) then begin		// addEAX_ECX
+
+       listing[l]   := #9'lda '+GetARG(0, x-1);
+       listing[l+1] := #9'add '+GetARG(0, x);
+       listing[l+2] := #9'sta '+GetARG(0, x-1);
+
+       listing[l+3] := #9'lda '+GetARG(1, x-1);
+       listing[l+4] := #9'adc '+GetARG(1, x);
+       listing[l+5] := #9'sta '+GetARG(1, x-1);
+
+       listing[l+6] := #9'lda '+GetARG(2, x-1);
+       listing[l+7] := #9'adc '+GetARG(2, x);
+       listing[l+8] := #9'sta '+GetARG(2, x-1);
+
+       listing[l+9] := #9'lda '+GetARG(3, x-1);
+       listing[l+10]:= #9'adc '+GetARG(3, x);
+       listing[l+11]:= #9'sta '+GetARG(3, x-1);
+
+       Inc(l, 12);
+
+      end;
+
+    end else
+
+      if elf = $09BBA11B then begin		// SYSTEM.PEEK
+
+	if system_peek then begin x:=50; Break end;
+
+      end else
+      if elf = $09BBBB75 then begin		// SYSTEM.POKE
+
+	if system_poke then begin x:=50; Break end;
+
+      end else
+      if elf = $0BA7C10B then begin		// SYSTEM.DPEEK
+
+	if system_dpeek then begin x:=50; Break end;
+
+      end else
+      if elf = $0BA7DB65 then begin		// SYSTEM.DPOKE
+
+	if system_dpoke then begin x:=50; Break end;
+
+      end else
+      if elf = $0F6664EC then begin		// @shrAL_CL
+
+        if opt_SHR_BYTE then begin x:=50; Break end;
+
+      end else
+      if elf = $0F66A4EC then begin		// @shrAX_CL
+
+	opt_SHR_WORD;
+
+      end else
+      if elf = $0692BA8C then begin		// @shrEAX_CL
+
+	opt_SHR_CARD;
+
+      end else
+      if elf = $08FB5525 then begin		// @shlEAX_CL.BYTE
+
+        opt_SHL_BYTE;
+
+      end else
+      if elf = $08FAAFC4 then begin		// @shlEAX_CL.WORD
+
+	if opt_SHL_WORD then begin x:=50; Break end;
+
+      end else
+      if elf = $08FB5DC4 then begin		// @shlEAX_CL.CARD
+
+        opt_SHL_CARD;
+
+      end else
+
+
+      if elf = $004746C5 then		// @move		accepted
+      else
+
+      if elf = $058D0867 then		// @cmpSTRING		accepted
+      else
+      if elf = $03CEEED7 then		// @cmpCHAR2STRING	accepted
+      else
+      if elf = $06FEACE2 then		// @cmpSTRING2CHAR	accepted
+      else
+
+      if elf = $044A824C then		// @FCMPL		accepted
+      else
+
+      if elf = $0044B931 then		// @FTOA		accepted
+      else
+
+      if elf = $094C6F26 then		// @SHORTINT.DIV	accepted
+      else
+      if elf = $09B849A6 then		// @SMALLINT.DIV	accepted
+      else
+      if elf = $0FEB1076 then		// @INTEGER.DIV		accepted
+      else
+      if elf = $094C77F4 then		// @SHORTINT.MOD	accepted
+      else
+      if elf = $09B85174 then		// @SMALLINT.MOD	accepted
+      else
+      if elf = $0FEB2AA4 then		// @INTEGER.MOD		accepted
+      else
+
+      if elf = $0E886C96 then		// @BYTE.DIV		accepted
+      else
+      if elf = $04676D26 then		// @WORD.DIV		accepted
+      else
+      if elf = $06294046 then		// @CARDINAL.DIV	accepted
+      else
+      if elf = $0E887644 then		// @BYTE.MOD		accepted
+      else
+      if elf = $046775F4 then		// @WORD.MOD		accepted
+      else
+      if elf = $06295A94 then		// @CARDINAL.MOD	accepted
+      else
+
+      if elf = $0E965FAC then		// @SHORTREAL_MUL	accepted
+      else
+      if elf = $096287FC then		// @REAL_MUL		accepted
+      else
+      if elf = $0E9645D6 then		// @SHORTREAL_DIV	accepted
+      else
+      if elf = $09627D86 then		// @REAL_DIV		accepted
+      else
+
+      if elf = $02042144 then		// @REAL_ROUND		accepted
+      else
+      if elf = $063448B3 then		// @SHORTREAL_TRUNC	accepted
+      else
+      if elf = $020C1143 then		// @REAL_TRUNC		accepted
+      else
+      if elf = $0627E0C3 then		// @REAL_FRAC		accepted
+      else
+
+      if elf = $0044B29C then		// @FMUL		accepted
+      else
+      if elf = $0044A8E6 then		// @FDIV		accepted
+      else
+      if elf = $0044A584 then		// @FADD		accepted
+      else
+      if elf = $0044B892 then		// @FSUB		accepted
+      else
+      if elf = $00044C66 then		// @I2F			accepted
+      else
+      if elf = $00044969 then		// @F2I			accepted
+      else
+      if elf = $044AB653 then		// @FFRAC		accepted
+      else
+      if elf = $04B74A64 then		// @FROUND		accepted
+      else
+
+      if elf = $094C3D21 then		// @F16_F2A		accepted
+      else
+      if elf = $094C31C4 then		// @F16_ADD		accepted
+      else
+      if elf = $094C4CD2 then 		// @F16_SUB		accepted
+      else
+      if elf = $094C46DC then		// @F16_MUL		accepted
+      else
+      if elf = $094C3CA6 then		// @F16_DIV		accepted
+      else
+      if elf = $094C3A74 then		// @F16_INT		accepted
+      else
+      if elf = $0C430164 then		// @F16_ROUND		accepted
+      else
+      if elf = $04C3F2C3 then		// @F16_FRAC		accepted
+      else
+      if elf = $094C3826 then		// @F16_I2F		accepted
+      else
+      if elf = $0494C3E1 then		// @F16_EQ		accepted
+      else
+      if elf = $0494C384 then		// @F16_GT		accepted
+      else
+      if elf = $094C38C5 then		// @F16_GTE		accepted
+
+
+      else begin
+
+{$IFDEF USEOPTFILE}
 
 	writeln(arg0);
 
-                                                                                                                                                              {$ENDIF}
+{$ENDIF}
 
-                                                                                                                                                              x :=
-                                                                                                                                                                51;
-                                                                                                                                                              Break;
-
-                                                                                                                                                            end;
+	x:=51; Break;
 
       end;
+
+     end;
+
+
 
       if t <> '' then
       begin
