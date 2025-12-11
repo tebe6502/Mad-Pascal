@@ -163,6 +163,16 @@ begin
 
 end;
 
+function GetSourceFileName: String;
+begin
+  Result := optimize.SourceFile.Name;
+end;
+
+function GetSourceFileLine: Integer;
+begin
+  Result:=optimize.line;
+end;
+
 
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
@@ -708,7 +718,7 @@ var
 
       TextColor(LIGHTRED);
 
-      WriteLn(optimize.SourceFile.Path + ' (' + IntToStr(optimize.line) +
+      WriteLn(GetSourceFileName + ' (' + IntToStr(GetSourceFileLine) +
         ') Error: Illegal instruction in INTERRUPT block ''' + copy(listing[i], 2, 256) + '''');
 
       NormVideo;
@@ -3010,14 +3020,13 @@ begin        // OptimizeASM
   if ((x = 0) and inxUse) then
   begin   // succesful
 
-    if optimize.line <> optimize.oldLine then
+    if GetSourceFileLine <> optimize.oldLine then
     begin
       WriteOut('');
-      WriteOut('; optimize OK (' + optimize.SourceFile.Name + '), line = ' +
-        IntToStr(optimize.line));
+      WriteOut('; optimize OK (' + GetSourceFileName + '), line = ' + IntToStr(GetSourceFileLine));
       WriteOut('');
 
-      optimize.oldLine := optimize.line;
+      optimize.oldLine := GetSourceFileLine;
     end;
 
 
@@ -3138,18 +3147,18 @@ begin        // OptimizeASM
       end;
 
 
-    if optimize.line <> optimize.oldLine then
+    if GetSourceFileLine <> optimize.oldLine then
     begin
       WriteOut('');
 
       if x = 51 then
-        WriteOut('; optimize FAIL (' + '''' + arg0 + '''' + ', ' + optimize.SourceFile.Name +'), line = ' + IntToStr(optimize.line))
+        WriteOut('; optimize FAIL (' + '''' + arg0 + '''' + ', ' + GetSourceFileName +'), line = ' + IntToStr(GetSourceFileLine))
       else
-        WriteOut('; optimize FAIL (' + IntToStr(x) + ', ' + optimize.SourceFile.Name +'), line = ' + IntToStr(optimize.line));
+        WriteOut('; optimize FAIL (' + IntToStr(x) + ', ' + GetSourceFileName +'), line = ' + IntToStr(GetSourceFileLine));
 
       WriteOut('');
 
-      optimize.oldLine := optimize.line;
+      optimize.oldLine := GetSourceFileLine;
     end;
 
 
@@ -3178,7 +3187,7 @@ begin        // OptimizeASM
   end;
 
  OptFile.writeln( StringOfChar('-', 32));
- OptFile.writeln( 'OPTIMIZE '+BoolToStr((x = 0) and inxUse)+', x='+IntToStr(x)+', ('+common.optimize.SourceFile.Name+') line = ',IntToStr(common.optimize.line));
+ OptFile.writeln( 'OPTIMIZE '+BoolToStr((x = 0) and inxUse)+', x='+IntToStr(x)+', ('+GetSourceFileName+') line = ',IntToStr(GetSourceFileLine));
  OptFile.writeln( StringOfChar('-', 32));
 
   for i := 0 to l - 1 do
