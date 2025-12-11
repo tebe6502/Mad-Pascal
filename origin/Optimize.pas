@@ -8,7 +8,7 @@ uses Common;
 
 // ----------------------------------------------------------------------------
 
-// Re/Set temoporary variables for register optimizations.
+// Re/Set temporary variables for register optimizations.
 procedure ResetOpty;
 procedure SetOptyY(const value: TString);
 function GetOptyBP2(): TString;
@@ -124,13 +124,15 @@ end;  //OptimizeProgram
 
 function GetSourceFileName: String;
 begin
-  Result := optimize.SourceFile.Name;
+  Result := UnitName[Common.optimize.unitIndex].Name;
 end;
 
 function GetSourceFileLine: Integer;
 begin
-  Result:=optimize.line;
+  Result:=Common.optimize.line;
 end;
+
+
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 
@@ -608,7 +610,6 @@ var
   elf: Cardinal;
 
     listing: TListing;
-    listing_tmp: TListing_tmp;
 
     s: TStack;
 
@@ -1793,7 +1794,6 @@ begin        // OptimizeASM
   inxUse := False;
 
   listing := Default(TListing);
-  listing_tmp := Default(TListing_tmp);
 
   s := Default(TStack);
 
@@ -3158,7 +3158,7 @@ begin
     then
 	   begin
 	    // DebugCall('OptimizeASM.Begin',OptimizeBufToString );
-	    OptimizeASM(CodeSize, isInterrupt) ;
+	    OptimizeASM(CodeSize, IsInterrupt) ;
 	    // DebugCall('OptimizeASM.End',OptimizeBufToString );
 	   end
      else
