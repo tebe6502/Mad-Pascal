@@ -1,6 +1,7 @@
 
 function opt_LDA(i: integer): Boolean;
 var tmp: string;
+    listing_tmp: TListing_tmp;
 begin
 
     Result := true;
