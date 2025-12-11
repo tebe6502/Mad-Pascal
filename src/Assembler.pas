@@ -21,6 +21,9 @@ function HexLongWord(const Value: Int64): String;
 // Hexadecimal output of 32/64-Bit with '$' prefix, dynamic length 2/4/6/8/any digits
 function HexValue(const Value: Int64; const digits: Integer): String;
 
+// Get the value of an immediate value string "#123" or "#$1234"
+function GetVAL(const a: String): Integer;
+
 // ----------------------------------------------------------------------------
 
 implementation
@@ -141,6 +144,32 @@ begin
         Result := '$' + HexBytes[(Value shr 16) and $ff] + HexBytes[(Value shr 8) and $ff] + HexBytes[Value and $ff]
       else
         Result := HexLongWord(Value);
+end;
+
+// ----------------------------------------------------------------------------
+// Get the value of an immediate string "#abc" or
+// ----------------------------------------------------------------------------
+
+function GetVAL(const a: String): Integer;
+var
+  err: Integer;
+begin
+
+  Result := -1;
+
+  if a <> '' then
+    if a[1] = '#' then
+    begin
+      val(copy(a, 2, length(a)), Result, err);
+
+      if err > 0 then
+      begin
+        Result := -1;
+        // TODO Writeln('ERROR: Cannot get value of ' + a);
+      end;
+
+    end;
+
 end;
 
 procedure InitializeStrings;

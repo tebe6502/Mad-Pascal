@@ -30,7 +30,11 @@ procedure LogTrace(const message: String);
 begin
   if (ASM65CountBreakPoint > 0) or (DebugCallCountBreakPoint > 0) then
   begin
+    {$IFNDEF PAS2JS}
     WriteLn(StdErr, message);
+    {$ELSE}
+    WriteLn(message);
+    {$ENDIF}
   end;
 end;
 

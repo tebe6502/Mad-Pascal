@@ -1,5 +1,5 @@
 
-function opt_GT(i: integer): Boolean;
+function opt_CMP_GT(i: integer): Boolean;
 var p: integer;
     c: cardinal;
     tmp: string;

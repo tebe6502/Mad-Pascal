@@ -1,6 +1,7 @@
 
 function opt_TAY(i: integer): Boolean;
 var p: integer;
+    listing_tmp: TListing_tmp;
 begin
 
     Result := true;

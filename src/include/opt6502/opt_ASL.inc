@@ -2,6 +2,7 @@
 function opt_ASL(i: integer): Boolean;
 var p: integer;
     yes: Boolean;
+    listing_tmp: TListing_tmp;
 begin
 
     Result := true;

@@ -4,15 +4,21 @@ interface
 
 {$i define.inc}
 
+uses Common;
+
 // ----------------------------------------------------------------------------
 
+// Re/Set temporary variables for register optimizations.
 procedure ResetOpty;
+procedure SetOptyY(const value: TString);
+function GetOptyBP2(): TString;
+procedure SetOptyBP2(const value: TString);
 
 procedure asm65(const a: String = ''; const comment: String = '');      // OptimizeASM
 
-procedure OptimizeProgram(MainProcedureIndex: Integer);
+function IsASM65BufferEmpty: Boolean;
 
-procedure WriteOut(const a: String);       		   		 // OptimizeTemporaryBuf
+procedure OptimizeProgram(MainProcedureIndex: Integer);
 
 procedure Finalize;
 
@@ -20,7 +26,7 @@ procedure Finalize;
 
 implementation
 
-uses Crt, SysUtils, Common;
+uses Crt, SysUtils;
 type
   TTemporaryBufIndex = Integer;
 
@@ -28,6 +34,16 @@ var
   TemporaryBuf: array [0..511] of String;
 
   {$I '..\src\OptimizeDebug.inc'}
+
+
+// Reset temporary variables for FOR optimizations.
+procedure ResetForTmp;
+begin
+   optyFOR0:='';
+   optyFOR1:='';
+   optyFOR2:='';
+   optyFOR3:='';
+end;
 
 // ----------------------------------------------------------------------------
 
@@ -57,6 +73,7 @@ end;
 procedure ResetOpty;
 begin
   DebugCall('ResetOpty');
+
   SetOptyA('');
   SetOptyY('');
   SetOptyBP2('');
@@ -104,6 +121,16 @@ begin
  MarkNotDead(MainProcedureIndex);
 
 end;  //OptimizeProgram
+
+function GetSourceFileName: String;
+begin
+  Result := UnitName[Common.optimize.unitIndex].Name;
+end;
+
+function GetSourceFileLine: Integer;
+begin
+  Result:=Common.optimize.line;
+end;
 
 
 // ----------------------------------------------------------------------------
@@ -564,7 +591,7 @@ begin
 end;
 
 
-procedure OptimizeASM;
+procedure OptimizeASM(const CodeSize: Integer; const IsInterrupt: Boolean);
 (* -------------------------------------------------------------------------- *)
 (* optymalizacja powiodla sie jesli na wyjsciu X=0                            *)
 (* peephole optimization                                                      *)
@@ -583,7 +610,6 @@ var
   elf: Cardinal;
 
     listing: TListing;
-    listing_tmp: TListing_tmp;
 
     s: TStack;
 
@@ -654,7 +680,7 @@ var
 
       TextColor(LIGHTRED);
 
-      WriteLn(UnitName[Common.optimize.unitIndex].Name + ' (' + IntToStr(Common.optimize.line) +
+      WriteLn(GetSourceFileName + ' (' + IntToStr(GetSourceFileLine) +
         ') Error: Illegal instruction in INTERRUPT block ''' + copy(listing[i], 2, 256) + '''');
 
       NormVideo;
@@ -1354,12 +1380,12 @@ if (pos('mva RESOLVECOLLISIONS.RESULT', listing[i]) > 0) then begin
 end;
 }
 
-      if opt_LT_GTEQ(i) = False then exit(False);
-      if opt_LTEQ(i) = False then exit(False);
-      if opt_GT(i) = False then exit(False);
-      if opt_NE_EQ(i) = False then exit(False);
+      if opt_CMP_LT_GTEQ(i) = False then exit(False);
+      if opt_CMP_LTEQ(i) = False then exit(False);
+      if opt_CMP_GT(i) = False then exit(False);
+      if opt_CMP_NE_EQ(i) = False then exit(False);
       if opt_CMP(i) = False then exit(False);
-      if opt_BRANCH(i) = False then exit(False);
+      if opt_CMP_BRANCH(i) = False then exit(False);
       if opt_STACK(i) = False then exit(False);
       if opt_STACK_INX(i) = False then exit(False);
       if opt_STACK_ADD(i) = False then exit(False);
@@ -1588,7 +1614,7 @@ end;
   // ----------------------------------------------------------------------------
 
 
-  function OptimizeRelation: Boolean;
+  function OptimizeRelation(const CodeSize: Integer): Boolean;
   var
     i, p: Integer;
     tmp: String;
@@ -1658,19 +1684,19 @@ end;
 
 // -----------------------------------------------------------------------------
 
-     if opt_CMP_0(i) = false then exit(false);
+     if opt_CMP_0(i) = False then exit(False);
 
-     if opt_LOCAL(i) = false then exit(false);
+     if opt_CMP_LOCAL(i) = False then exit(False);
 
-     if opt_LT_GTEQ(i) = false then exit(false);
-     if opt_LTEQ(i) = false then exit(false);
-     if opt_GT(i) = false then exit(false);
-     if opt_NE_EQ(i) = false then exit(false);
+     if opt_CMP_LT_GTEQ(i) = False then exit(False);
+     if opt_CMP_LTEQ(i) = False then exit(False);
+     if opt_CMP_GT(i) = False then exit(False);
+     if opt_CMP_NE_EQ(i) = False then exit(False);
 
-     if opt_CMP(i) = false then exit(false);
-     if opt_CMP_BP2(i) = false then exit(false);
+     if opt_CMP(i) = False then exit(False);
+     if opt_CMP_BP2(i) = False then exit(False);
 
-     if opt_BRANCH(i) = false then exit(false);
+     if opt_CMP_BRANCH(i) = False then exit(False);
 
 // -----------------------------------------------------------------------------
 
@@ -1768,7 +1794,6 @@ begin        // OptimizeASM
   inxUse := False;
 
   listing := Default(TListing);
-  listing_tmp := Default(TListing_tmp);
 
   s := Default(TStack);
 
@@ -2908,13 +2933,13 @@ begin        // OptimizeASM
   if ((x = 0) and inxUse) then
   begin   // succesful
 
-    if Common.optimize.line <> Common.optimize.old then
+    if GetSourceFileLine <> Common.optimize.old then
     begin
       WriteOut('');
-      WriteOut('; optimize OK (' + UnitName[common.optimize.unitIndex].Name + '), line = ' + IntToStr(common.optimize.line));
+      WriteOut('; optimize OK (' + GetSourceFileName + '), line = ' + IntToStr(GetSourceFileLine));
       WriteOut('');
 
-      common.optimize.old := common.optimize.line;
+      common.optimize.old := GetSourceFileLine;
     end;
 
 
@@ -2924,11 +2949,11 @@ begin        // OptimizeASM
 
     OptimizeAssignment;
 
-    repeat until OptimizeRelation;
+    repeat until OptimizeRelation(CodeSize);
 
     OptimizeAssignment;
 
-  until OptimizeRelation;
+  until OptimizeRelation(CodeSize);
 
 
     if OptimizeEAX then
@@ -3034,18 +3059,18 @@ begin        // OptimizeASM
       end;
 
 
-    if common.optimize.line <> common.optimize.old then
+    if GetSourceFileLine <> common.optimize.old then
     begin
       WriteOut('');
 
       if x = 51 then
-        WriteOut('; optimize FAIL (' + '''' + arg0 + '''' + ', ' + UnitName[common.optimize.unitIndex].Name + '), line = ' + IntToStr(common.optimize.line))
+        WriteOut('; optimize FAIL (' + '''' + arg0 + '''' + ', ' + GetSourceFileName + '), line = ' + IntToStr(GetSourceFileLine))
       else
-        WriteOut('; optimize FAIL (' + IntToStr(x) + ', ' + UnitName[common.optimize.unitIndex].Name + '), line = ' + IntToStr(common.optimize.line));
+        WriteOut('; optimize FAIL (' + IntToStr(x) + ', ' + GetSourceFileName + '), line = ' + IntToStr(GetSourceFileLine));
 
       WriteOut('');
 
-      common.optimize.old := common.optimize.line;
+      common.optimize.old := GetSourceFileLine;
     end;
 
 
@@ -3074,7 +3099,7 @@ begin        // OptimizeASM
   end;
 
  writeln(OptFile, StringOfChar('-', 32));
- writeln(OptFile, 'OPTIMIZE ',((x = 0) and inxUse),', x=',x,', ('+UnitName[common.optimize.unitIndex].Name+') line = ',common.optimize.line);
+ writeln(OptFile, 'OPTIMIZE ',((x = 0) and inxUse),', x=',x,', ('+GetSourceFileName+') line = ',GetSourceFileLine);
  writeln(OptFile, StringOfChar('-', 32));
 
   for i := 0 to l - 1 do
@@ -3095,6 +3120,10 @@ end;
 
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
+function IsASM65BufferEmpty: Boolean;
+begin
+  Result:= High(OptimizeBuf) = 0;
+end;
 
 
 procedure asm65(const a: string = ''; const comment : string ='');
@@ -3125,11 +3154,11 @@ begin
 
   end else begin
 
-    if High(OptimizeBuf) > 0
+    if not IsASM65BufferEmpty
     then
 	   begin
 	    // DebugCall('OptimizeASM.Begin',OptimizeBufToString );
-	    OptimizeASM ;
+	    OptimizeASM(CodeSize, IsInterrupt) ;
 	    // DebugCall('OptimizeASM.End',OptimizeBufToString );
 	   end
      else

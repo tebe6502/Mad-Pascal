@@ -791,6 +791,7 @@ begin
 end;
 
 procedure TCachedBinaryFile.BlockRead(var Buf; const Count: TFileSize; var Result: TFileSize);
+{$IFNDEF SIMULATED_FILE_IO}
 var
   i: Integer;
   p: ^Char;
@@ -809,6 +810,11 @@ begin
   end;
 
 end;
+{$ELSE}
+begin
+  Assert(False, 'Not implemented yet. No pointers in PAS2JS');
+end;
+{$ENDIF}
 
 function TCachedBinaryFile.FilePos(): TFilePosition;
 begin
