@@ -59,21 +59,49 @@ uses
   end;
 
   procedure TestLanguage();
-  var
-    i, j: Integer;
+
+    procedure TestFor;
+    var
+      i, j: Integer;
+    begin
+      j := 1;
+      for i := 1 to 10 do
+      begin
+        AssertEquals(i, j);
+        j := j + 1;
+      end;
+      AssertEquals(i, 10);
+    end;
+
+    procedure TestVal(const s: String; const ExpectedValue: Integer; const ExpectedCode: Integer);
+    var
+      ActualValue, ActualCode: Integer;
+    begin
+      System.Val(s, ActualValue, ActualCode);
+      AssertEquals(ActualValue, ActualValue);
+      AssertEquals(ActualCode, ExpectedCode);
+    end;
+
   begin
     StartTest('TestLanguage');
-    j := 1;
-    for i := 1 to 10 do
-    begin
-      AssertEquals(i, j);
-      j := j + 1;
-    end;
-    AssertEquals(i, 10);
+    TestFor;
+
+
+    TestVal('1234', 1234, 0);
+    TestVal('$1234', $1234, 0);
     EndTest('TestLanguage');
   end;
 
   procedure TestUnitAssembler;
+
+    procedure TestGetVAL(const s: String; const ExpectedValue: Integer);
+    var
+      ActualValue: Integer;
+    begin
+      ActualValue := Assembler.GetVAL(s);
+      AssertEquals(ActualValue, ExpectedValue);
+    end;
+
   begin
     StartTest('TestUnitAssembler');
 
@@ -94,6 +122,14 @@ uses
 
 
     AssertEquals(HexLongWord($00123456), '$00123456');
+
+    TestGetVAL('', -1);
+    TestGetVAL('1234', -1);
+    TestGetVAL('$1234', -1);
+    TestGetVAL('#1234', 1234);
+    TestGetVAL('#$1234', $1234);
+    TestGetVAL('#-1234', -1234);
+    TestGetVAL('#-$1234', -$1234);
 
     EndTest('TestUnitAssembler');
   end;

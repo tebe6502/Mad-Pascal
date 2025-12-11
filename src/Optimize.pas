@@ -30,6 +30,21 @@ implementation
 
 uses SysUtils, Assembler, Console, Debugger ,StringUtilities, Utilities;
 
+type
+  TOptimizerFunction = function(i:Integer): Boolean;
+
+type
+  TOptimizerFunctionPtr = ^TOptimizerFunction;
+type
+  TOptimizerStep = record
+    Name: String;
+    OptimizerFunction: TOptimizerFunctionPtr;
+  end;
+
+type TOptimizerStepArray = array of TOptimizerStep;
+
+var OptimizeBufStepArray: TOptimizerStepArray;
+
 var Writer: IWriter;
    AsmBlockArray: TAsmBlockArray;
    Target:TTarget;
@@ -105,6 +120,19 @@ end;
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 
+procedure InitializeStep(const Name: String; const OptimizerFunction: TOptimizerFunctionPtr);
+var i: Integer;
+    OptimizerStep: TOptimizerStep;
+begin
+
+  OptimizerStep.Name := Name;
+  OptimizerStep.OptimizerFunction := OptimizerFunction;
+  i := Length(OptimizeBufStepArray);
+  SetLength(OptimizeBufStepArray, i+1);
+  OptimizeBufStepArray[i] := OptimizerStep;
+
+end;
+
 procedure Initialize(const aWriter: IWriter; const aAsmBlockArray:TAsmBlockArray; const aTarget: TTarget);
 var
   i: TTemporaryBufIndex;
@@ -123,6 +151,8 @@ begin
   ResetOpty;
 
   ShrShlCnt:=0;
+
+  OptimizeBufStepArray:=nil;
 end;
 
 procedure StartOptimization(SourceLocation: TSourceLocation);
@@ -130,32 +160,6 @@ begin
 
   optimize.SourceFile := SourceLocation.SourceFile;
   optimize.line := SourceLocation.Line;
-
-end;
-
-
-// ----------------------------------------------------------------------------
-// ----------------------------------------------------------------------------
-
-function GetVAL(a: String): Integer;
-var
-  err: Integer;
-begin
-
-  Result := -1;
-
-  if a <> '' then
-    if a[1] = '#' then
-    begin
-      val(copy(a, 2, length(a)), Result, err);
-
-      if err > 0 then
-      begin
-        Result := -1;
-        // TODO Writeln('ERROR: Cannot get value of ' + a);
-      end;
-
-    end;
 
 end;
 
@@ -1367,6 +1371,40 @@ var
   {$i include/opt6502/opt_CMP.inc}
   {$i include/opt6502/opt_CMP_0.inc}
 
+  procedure InitializeOptimizerSteps;
+  begin
+    if OptimizeBufStepArray = nil then
+    begin
+      InitializeStep('opt_SHR_BYTE', @opt_SHR_BYTE);
+      InitializeStep('opt_SHR_WORD', @opt_SHR_WORD);
+      InitializeStep('opt_SHR_CARD', @opt_SHR_CARD);
+      InitializeStep('opt_SHL_BYTE', @opt_SHL_BYTE);
+      InitializeStep('opt_SHL_WORD', @opt_SHL_WORD);
+      InitializeStep('opt_SHL_CARD', @opt_SHL_CARD);
+      InitializeStep('opt_BYTE_DIV', @opt_BYTE_DIV);
+
+      InitializeStep('opt_STA_0', @opt_STA_0);
+      InitializeStep('opt_STACK', @opt_STACK);
+      InitializeStep('opt_STACK_INX', @opt_STACK_INX);
+      InitializeStep('opt_STACK_ADD', @opt_STACK_ADD);
+      InitializeStep('opt_STACK_CMP', @opt_STACK_CMP);
+      InitializeStep('opt_STACK_ADR', @opt_STACK_ADR);
+      InitializeStep('opt_STACK_AL_CL', @opt_STACK_AL_CL);
+      InitializeStep('opt_STACK_AX_CX', @opt_STACK_AX_CX);
+      InitializeStep('opt_STACK_EAX_ECX', @opt_STACK_EAX_ECX);
+      InitializeStep('opt_STACK_PRINT', @opt_STACK_PRINT);
+      InitializeStep('opt_CMP_BRANCH', @opt_CMP_BRANCH);
+      InitializeStep('opt_CMP_BP2', @opt_CMP_BP2);
+      InitializeStep('opt_CMP_LOCAL', @opt_LOCAL); // TODO Name does not match file
+      InitializeStep('opt_CMP_LT_GTEQ', @opt_LT_GTEQ); // TODO Name does not match file
+      InitializeStep('opt_CMP_LTEQ', @opt_LTEQ); // TODO Name does not match file
+      InitializeStep('opt_CMP_GT', @opt_GT); // TODO Name does not match file
+      InitializeStep('opt_CMP_NE_EQ', @opt_NE_EQ); // TODO Name does not match file
+      InitializeStep('opt_CMP', @opt_CMP); // TODO Name does not match file
+      InitializeStep('opt_CMP_0', @opt_CMP_0); // TODO Name does not match file
+    end;
+  end;
+
 // -----------------------------------------------------------------------------
 
   function PeepholeOptimization_STACK: Boolean;
@@ -1412,7 +1450,7 @@ end;
       if opt_GT(i) = False then exit(False);
       if opt_NE_EQ(i) = False then exit(False);
       if opt_CMP(i) = False then exit(False);
-      if opt_BRANCH(i) = False then exit(False);
+      if opt_CMP_BRANCH(i) = False then exit(False);
       if opt_STACK(i) = False then exit(False);
       if opt_STACK_INX(i) = False then exit(False);
       if opt_STACK_ADD(i) = False then exit(False);
@@ -1731,7 +1769,7 @@ end;
       if opt_CMP_BP2(i) = False then exit(ExitTrick('opt_CMP_BP2', i, {$include %file%} ,{$include %line%} ,{$include %currentroutine%}));
 
       // JAC! 2025-12-06 TODO
-      if opt_BRANCH(i) = False then exit(ExitTrick('opt_BRANCH', i, {$include %file%} ,{$include %line%} ,{$include %currentroutine%}));
+      if opt_CMP_BRANCH(i) = False then exit(ExitTrick('opt_BRANCH', i, {$include %file%} ,{$include %line%} ,{$include %currentroutine%}));
 
       // -----------------------------------------------------------------------------
 
@@ -1818,6 +1856,8 @@ end;
   //{$i include/opt6502/opt_REG_TMP.inc}
   {$i include/opt6502/opt_REG_Y.inc}
 begin        // OptimizeASM
+
+  InitializeOptimizerSteps;
 
   l := 0;
   x := 0;
