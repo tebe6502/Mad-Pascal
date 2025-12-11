@@ -1395,13 +1395,13 @@ var
       InitializeStep('opt_STACK_PRINT', @opt_STACK_PRINT);
       InitializeStep('opt_CMP_BRANCH', @opt_CMP_BRANCH);
       InitializeStep('opt_CMP_BP2', @opt_CMP_BP2);
-      InitializeStep('opt_CMP_LOCAL', @opt_LOCAL); // TODO Name does not match file
-      InitializeStep('opt_CMP_LT_GTEQ', @opt_LT_GTEQ); // TODO Name does not match file
-      InitializeStep('opt_CMP_LTEQ', @opt_LTEQ); // TODO Name does not match file
-      InitializeStep('opt_CMP_GT', @opt_GT); // TODO Name does not match file
-      InitializeStep('opt_CMP_NE_EQ', @opt_NE_EQ); // TODO Name does not match file
-      InitializeStep('opt_CMP', @opt_CMP); // TODO Name does not match file
-      InitializeStep('opt_CMP_0', @opt_CMP_0); // TODO Name does not match file
+      InitializeStep('opt_CMP_LOCAL', @opt_CMP_LOCAL);
+      InitializeStep('opt_CMP_LT_GTEQ', @opt_CMP_LT_GTEQ);
+      InitializeStep('opt_CMP_LTEQ', @opt_CMP_LTEQ);
+      InitializeStep('opt_CMP_GT', @opt_CMP_GT);
+      InitializeStep('opt_CMP_NE_EQ', @opt_CMP_NE_EQ);
+      InitializeStep('opt_CMP', @opt_CMP);
+      InitializeStep('opt_CMP_0', @opt_CMP_0);
     end;
   end;
 
@@ -1445,10 +1445,10 @@ if (pos('mva RESOLVECOLLISIONS.RESULT', listing[i]) > 0) then begin
 end;
 }
 
-      if opt_LT_GTEQ(i) = False then exit(False);
-      if opt_LTEQ(i) = False then exit(False);
-      if opt_GT(i) = False then exit(False);
-      if opt_NE_EQ(i) = False then exit(False);
+      if opt_CMP_LT_GTEQ(i) = False then exit(False);
+      if opt_CMP_LTEQ(i) = False then exit(False);
+      if opt_CMP_GT(i) = False then exit(False);
+      if opt_CMP_NE_EQ(i) = False then exit(False);
       if opt_CMP(i) = False then exit(False);
       if opt_CMP_BRANCH(i) = False then exit(False);
       if opt_STACK(i) = False then exit(False);
@@ -1758,12 +1758,12 @@ end;
 
       if opt_CMP_0(i) = False then exit(ExitTrick('opt_CMP_0', i, {$include %file%} ,{$include %line%} ,{$include %currentroutine%}));
 
-      if opt_LOCAL(i) = False then exit(ExitTrick('opt_LOCAL', i, {$include %file%} ,{$include %line%} ,{$include %currentroutine%}));
+      if opt_CMP_LOCAL(i) = False then exit(ExitTrick('opt_LOCAL', i, {$include %file%} ,{$include %line%} ,{$include %currentroutine%}));
 
-      if opt_LT_GTEQ(i) = False then exit(ExitTrick('opt_LT_GTEQ', i, {$include %file%} ,{$include %line%} ,{$include %currentroutine%}));
-      if opt_LTEQ(i) = False then exit(ExitTrick('opt_LTEQ', i, {$include %file%} ,{$include %line%} ,{$include %currentroutine%}));
-      if opt_GT(i) = False then exit(ExitTrick('opt_GT', i, {$include %file%} ,{$include %line%} ,{$include %currentroutine%}));
-      if opt_NE_EQ(i) = False then exit(ExitTrick('opt_NE_EQ', i, {$include %file%} ,{$include %line%} ,{$include %currentroutine%}));
+      if opt_CMP_LT_GTEQ(i) = False then exit(ExitTrick('opt_LT_GTEQ', i, {$include %file%} ,{$include %line%} ,{$include %currentroutine%}));
+      if opt_CMP_LTEQ(i) = False then exit(ExitTrick('opt_LTEQ', i, {$include %file%} ,{$include %line%} ,{$include %currentroutine%}));
+      if opt_CMP_GT(i) = False then exit(ExitTrick('opt_GT', i, {$include %file%} ,{$include %line%} ,{$include %currentroutine%}));
+      if opt_CMP_NE_EQ(i) = False then exit(ExitTrick('opt_NE_EQ', i, {$include %file%} ,{$include %line%} ,{$include %currentroutine%}));
 
       if opt_CMP(i) = False then exit(ExitTrick('opt_CMP', i, {$include %file%} ,{$include %line%} ,{$include %currentroutine%}));
       if opt_CMP_BP2(i) = False then exit(ExitTrick('opt_CMP_BP2', i, {$include %file%} ,{$include %line%} ,{$include %currentroutine%}));
