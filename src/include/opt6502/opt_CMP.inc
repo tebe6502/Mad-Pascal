@@ -1,6 +1,7 @@
 
 function opt_CMP(i: integer): Boolean;
 var p: integer;
+    listing_tmp: TListing;
 begin
 
     Result := true;
