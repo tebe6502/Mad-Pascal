@@ -4,9 +4,14 @@ interface
 
 {$i define.inc}
 
+uses Common;
+
 // ----------------------------------------------------------------------------
 
 procedure ResetOpty;
+procedure SetOptyY(const value: TString);
+function GetOptyBP2(): TString;
+procedure SetOptyBP2(const value: TString);
 
 procedure asm65(const a: String = ''; const comment: String = '');      // OptimizeASM
 
@@ -20,7 +25,7 @@ procedure Finalize;
 
 implementation
 
-uses Crt, SysUtils, Common;
+uses Crt, SysUtils;
 type
   TTemporaryBufIndex = Integer;
 
@@ -28,6 +33,16 @@ var
   TemporaryBuf: array [0..511] of String;
 
   {$I '..\src\OptimizeDebug.inc'}
+
+
+// Reset temporary variables for FOR optimizations.
+procedure ResetForTmp;
+begin
+   optyFOR0:='';
+   optyFOR1:='';
+   optyFOR2:='';
+   optyFOR3:='';
+end;
 
 // ----------------------------------------------------------------------------
 
@@ -57,6 +72,7 @@ end;
 procedure ResetOpty;
 begin
   DebugCall('ResetOpty');
+
   SetOptyA('');
   SetOptyY('');
   SetOptyBP2('');
@@ -564,7 +580,7 @@ begin
 end;
 
 
-procedure OptimizeASM;
+procedure OptimizeASM(const CodeSize: Integer; const IsInterrupt: Boolean);
 (* -------------------------------------------------------------------------- *)
 (* optymalizacja powiodla sie jesli na wyjsciu X=0                            *)
 (* peephole optimization                                                      *)
@@ -1354,12 +1370,12 @@ if (pos('mva RESOLVECOLLISIONS.RESULT', listing[i]) > 0) then begin
 end;
 }
 
-      if opt_LT_GTEQ(i) = False then exit(False);
-      if opt_LTEQ(i) = False then exit(False);
-      if opt_GT(i) = False then exit(False);
-      if opt_NE_EQ(i) = False then exit(False);
+      if opt_CMP_LT_GTEQ(i) = False then exit(False);
+      if opt_CMP_LTEQ(i) = False then exit(False);
+      if opt_CMP_GT(i) = False then exit(False);
+      if opt_CMP_NE_EQ(i) = False then exit(False);
       if opt_CMP(i) = False then exit(False);
-      if opt_BRANCH(i) = False then exit(False);
+      if opt_CMP_BRANCH(i) = False then exit(False);
       if opt_STACK(i) = False then exit(False);
       if opt_STACK_INX(i) = False then exit(False);
       if opt_STACK_ADD(i) = False then exit(False);
@@ -1658,19 +1674,19 @@ end;
 
 // -----------------------------------------------------------------------------
 
-     if opt_CMP_0(i) = false then exit(false);
+     if opt_CMP_0(i) = False then exit(False);
 
-     if opt_LOCAL(i) = false then exit(false);
+     if opt_CMP_LOCAL(i) = False then exit(False);
 
-     if opt_LT_GTEQ(i) = false then exit(false);
-     if opt_LTEQ(i) = false then exit(false);
-     if opt_GT(i) = false then exit(false);
-     if opt_NE_EQ(i) = false then exit(false);
+     if opt_CMP_LT_GTEQ(i) = False then exit(False);
+     if opt_CMP_LTEQ(i) = False then exit(False);
+     if opt_CMP_GT(i) = False then exit(False);
+     if opt_CMP_NE_EQ(i) = False then exit(False);
 
-     if opt_CMP(i) = false then exit(false);
-     if opt_CMP_BP2(i) = false then exit(false);
+     if opt_CMP(i) = False then exit(False);
+     if opt_CMP_BP2(i) = False then exit(False);
 
-     if opt_BRANCH(i) = false then exit(false);
+     if opt_CMP_BRANCH(i) = False then exit(False);
 
 // -----------------------------------------------------------------------------
 
@@ -3129,7 +3145,7 @@ begin
     then
 	   begin
 	    // DebugCall('OptimizeASM.Begin',OptimizeBufToString );
-	    OptimizeASM ;
+	    OptimizeASM(CodeSize, isInterrupt) ;
 	    // DebugCall('OptimizeASM.End',OptimizeBufToString );
 	   end
      else
