@@ -465,6 +465,10 @@
         <Filename Value="..\src\include\opt6502\opt_WHILE_OR.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit>
+      <Unit>
+        <Filename Value="..\src\OptimizeASM.inc"/>
+        <IsPartOfProject Value="True"/>
+      </Unit>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

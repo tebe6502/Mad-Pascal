@@ -60,6 +60,8 @@ uses
 
   procedure TestLanguage();
 
+    var global: Integer;
+
     procedure TestFor;
     var
       i, j: Integer;
@@ -78,17 +80,97 @@ uses
       ActualValue, ActualCode: Integer;
     begin
       System.Val(s, ActualValue, ActualCode);
-      AssertEquals(ActualValue, ActualValue);
+      AssertEquals(ActualValue, ExpectedValue);
       AssertEquals(ActualCode, ExpectedCode);
+    end;
+
+    // https://www.freepascal.org/docs-html/ref/refsu69.html
+    procedure TestArrayOfConst;
+    type
+      TListing = array[1..12] of String;
+    var
+      Listing: TListing;
+
+      procedure DisplayArrayOfConst(const Args: array of const);
+      var
+        I: Longint;
+      begin
+        if High(Args) < 0 then
+        begin
+          Writeln('No aguments');
+          exit;
+        end;
+        Writeln('Got ', High(Args) + 1, ' arguments :');
+        for i := 0 to High(Args) do
+        begin
+          Write('Argument ', i, ' has type ');
+          case Args[i].vtype of
+            vtinteger:
+              Writeln('Integer, Value :', args[i].vinteger);
+            vtboolean:
+              Writeln('Boolean, Value :', args[i].vboolean);
+            vtchar:
+              Writeln('Char, value : ', args[i].vchar);
+            vtextended:
+              Writeln('Extended, value : ', args[i].VExtended^);
+            vtString:
+              Writeln('ShortString, value :', args[i].VString^);
+            vtPointer:
+              Writeln('Pointer, value : ', Longint(Args[i].VPointer));
+            vtPChar:
+              Writeln('PChar, value : ', Args[i].VPChar);
+            vtObject:
+              Writeln('Object, name : ', Args[i].VObject.ClassName);
+            vtClass:
+              Writeln('Class reference, name :', Args[i].VClass.ClassName);
+            vtAnsiString:
+              Writeln('AnsiString, value :', Ansistring(Args[I].VAnsiString));
+            else
+              Writeln('(Unknown) : ', args[i].vtype);
+          end;
+        end;
+      end;
+
+      function TestVarArgs(const fmt: String; args: array of const): String;
+      begin
+        Result := Format(fmt, args);
+      end;
+
+    begin
+      AssertEquals(TestVarArgs('%d', [1]), '1');
+      DisplayArrayOfConst([1, 'String', @listing]);
+    end;
+
+    function TestFunction(const i: Integer): Boolean;
+    begin
+      Result := (i > global);
+    end;
+
+
+    procedure TestFunctionPointer;
+    type
+      TFunction = function(const i: Integer): Boolean;
+    var
+      f: TFunction;
+    begin
+
+      f := @TestFunction;
+      global:=0;
+      Assert(f(1)= True);
     end;
 
   begin
     StartTest('TestLanguage');
-    TestFor;
 
+    TestFor;
 
     TestVal('1234', 1234, 0);
     TestVal('$1234', $1234, 0);
+
+    TestArrayofConst;
+
+    TestFunctionPointer;
+
     EndTest('TestLanguage');
   end;
 
@@ -426,6 +508,192 @@ type
 
 
   procedure TestUnitOptimizer;
+  var
+    ShrShlCnt: Integer;
+  type
+    TListingIndex = Integer;
+    TListing = array [0..1023] of String;
+    TListing_tmp = array [0..127] of String;
+    TString0_3_Array = array [0..3] of String;
+  var
+
+    listing: TListing;
+
+    s: array [0..15] of TString0_3_Array;
+  var
+    l: Integer;
+    x: Integer;
+    t: String;
+
+    function GetString(const a: String): String; overload;
+    var
+      i: Integer;
+    begin
+
+      Result := '';
+      i := 6;
+
+      if a <> '' then
+        while not (a[i] in [' ', #9]) and (i <= length(a)) do
+        begin
+          Result := Result + a[i];
+          Inc(i);
+        end;
+
+    end;
+
+
+    function GetString(j: TListingIndex): String; overload;
+    var
+      i: Integer;
+      a: String;
+    begin
+
+      Result := '';
+      i := 6;
+
+      a := listing[j];
+
+      if a <> '' then
+        while (i <= length(a)) and not (a[i] in [' ', #9]) do
+        begin
+          Result := Result + a[i];
+          Inc(i);
+        end;
+
+    end;
+
+
+    function GetStringLast(j: TListingIndex): String; overload;
+    var
+      i: Integer;
+      a: String;
+    begin
+
+      Result := '';
+
+      a := listing[j];
+
+      if a <> '' then
+      begin
+        i := length(a);
+
+        while not (a[i] in [' ', #9]) and (i > 0) do Dec(i);
+
+        Result := copy(a, i + 1, 256);
+      end;
+
+    end;  //GetStringLast
+
+    function GetBYTE(i: Integer): Integer;
+    begin
+      Result := GetVAL(copy(listing[i], 6, 4));
+    end;
+
+    function GetWORD(i, j: Integer): Integer;
+    begin
+      Result := GetVAL(copy(listing[i], 6, 4)) + GetVAL(copy(listing[j], 6, 4)) shl 8;
+    end;
+
+    function GetTRIPLE(i, j, k: Integer): Integer;
+    begin
+      Result := GetVAL(copy(listing[i], 6, 4)) + GetVAL(copy(listing[j], 6, 4)) shl 8 +
+        GetVAL(copy(listing[k], 6, 4)) shl 16;
+    end;
+
+    function GetDWORD(i, j, k, l: Integer): Integer;
+    begin
+      Result := GetVAL(copy(listing[i], 6, 4)) + GetVAL(copy(listing[j], 6, 4)) shl 8 +
+        GetVAL(copy(listing[k], 6, 4)) shl 16 + GetVAL(copy(listing[l], 6, 4)) shl 24;
+    end;
+
+
+    function GetARG(const n: Byte; const x: Shortint; reset: Boolean = True): String;
+    var
+      i: Integer;
+      a: String;
+    begin
+
+      Result := '';
+
+      if x < 0 then exit;
+
+      a := s[x][n];
+
+      if (a = '') then
+      begin
+
+        Result := IntToStr(Shortint(x + 8));
+
+        case n of
+          0: Result := ':STACKORIGIN+' + Result;
+          1: Result := ':STACKORIGIN+STACKWIDTH+' + Result;
+          2: Result := ':STACKORIGIN+STACKWIDTH*2+' + Result;
+          3: Result := ':STACKORIGIN+STACKWIDTH*3+' + Result;
+        end;
+
+      end
+      else
+      begin
+
+        i := 6;
+
+        while a[i] in [' ', #9] do Inc(i);
+
+        while (i <= length(a)) and not (a[i] in [' ', #9]) do
+        begin
+          Result := Result + a[i];
+          Inc(i);
+        end;
+
+        if reset then s[x][n] := '';
+
+      end;
+
+    end;  //GetARG
+
+    {$i include/cmd_listing.inc}
+
+    function SKIP(i: TListingIndex): Boolean;
+    begin
+
+      if (i < 0) or (listing[i] = '') then
+        Result := False
+      else
+        Result := seq(i) or sne(i) or spl(i) or smi(i) or scc(i) or scs(i) or jeq(i) or
+          jne(i) or jpl(i) or jmi(i) or jcc(i) or jcs(i) or beq(i) or bne(i) or bpl(i) or bmi(i) or bcc(i) or bcs(i);
+    end;
+
+    function argMatch(i, j: TListingIndex): Boolean;
+    begin
+      Result := copy(listing[i], 6, 256) = copy(listing[j], 6, 256);
+    end;
+
+
+    procedure Expand(i, e: TListingIndex);
+    var
+      k: Integer;
+    begin
+
+      for k := l - 1 downto i do
+      begin
+
+        listing[k + e] := listing[k];
+
+      end;
+
+      Inc(l, e);
+
+    end;
+
+    procedure TestOptimizeASM;
+    {$i OptimizeASM.inc}
+    begin
+
+      t := '';
+      opt_BYTE_DIV(0);
+    end;
+
   begin
     StartTest('TestUnitOptimizer');
     TraceFile := TFileSystem.CreateTextFile;
