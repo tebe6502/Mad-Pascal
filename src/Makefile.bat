@@ -22,9 +22,16 @@ set MP_EXE_FILE=mp.exe
 set MP_EXE=%MP_BIN_FOLDER%\%MP_EXE_FILE%
 
 set REFERENCE_MP_FOLDER=C:\jac\system\Atari800\Programming\Repositories\Mad-Pascal
-set REFERENCE_MP_SRC_FOLDER=%REFERENCE_MP_FOLDER%\origin
-set REFERENCE_MP_BIN_FOLDER=%MP_FOLDER%\bin\windows_x86_64\origin
+set REFERENCE_MP_SRC_FOLDER=%REFERENCE_MP_FOLDER%\src
+set REFERENCE_MP_BIN_FOLDER=%REFERENCE_MP_FOLDER%\bin\windows_x86_64\origin
 set REFERENCE_MP_EXE=%REFERENCE_MP_BIN_FOLDER%\mp.exe
+
+goto :skip_174
+set REFERENCE_MP_FOLDER=C:\jac\system\Atari800\Programming\Repositories\Mad-Pascal.174
+set REFERENCE_MP_SRC_FOLDER=%REFERENCE_MP_FOLDER%\src
+set REFERENCE_MP_BIN_FOLDER=%REFERENCE_MP_FOLDER%\bin\windows
+set REFERENCE_MP_EXE=%REFERENCE_MP_BIN_FOLDER%\mp.exe
+:skip_174
 
 set TEST_PAS=%MP_SRC_FOLDER%\TestUnits.pas
 rem set TEST_EXE=%MP_SRC_FOLDER%\TestUnits.exe
@@ -42,7 +49,7 @@ if not "%TEST_EXE%"=="" (
 call :make_exe %MP_SRC_FOLDER% %MP_BIN_FOLDER%
 if errorlevel 1 goto :eof
 
-call :make_exe %REFERENCE_MP_SRC_FOLDER% %REFERENCE_MP_BIN_FOLDER%
+rem call :make_exe %REFERENCE_MP_SRC_FOLDER% %REFERENCE_MP_BIN_FOLDER%
 if errorlevel 1 goto :eof
 
 set PAS_FOLDER=samples\a8\math\AES-Rijndael
