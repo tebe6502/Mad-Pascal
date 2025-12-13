@@ -1,5 +1,7 @@
 unit Optimize;
 
+// TODO JAC! Use "array of const" for debugger output, incl. callback function for formatting TListing etc.
+// See https://forum.lazarus.freepascal.org/index.php?topic=61986.0
 {$I Defines.inc}
 
 interface
@@ -12,13 +14,13 @@ procedure Initialize(const aWriter: IWriter; const aAsmBlockArray:TAsmBlockArray
 
 procedure StartOptimization(SourceLocation: TSourceLocation);
 
-// Re/Set temoporary variables for register optimizations.
+// Re/Set temporary variables for register optimizations.
 procedure ResetOpty;
 procedure SetOptyY(const value: TString);
 function GetOptyBP2(): TString;
 procedure SetOptyBP2(const value: TString);
 
-procedure ASM65Internal(const a: String ; const comment: String; const optimizeCode: Boolean; const CodeSize: Integer; const IsInterrupt: Boolean);
+procedure ASM65Internal(const a: String; const comment: String; const optimizeCode: Boolean; const CodeSize: Integer; const IsInterrupt: Boolean);
 
 function IsASM65BufferEmpty: Boolean;
 
@@ -34,11 +36,9 @@ type
   TOptimizerFunction = function(i:Integer): Boolean;
 
 type
-  TOptimizerFunctionPtr = ^TOptimizerFunction;
-type
   TOptimizerStep = record
     Name: String;
-    OptimizerFunction: TOptimizerFunctionPtr;
+    OptimizerFunction: TOptimizerFunction;
   end;
 
 type TOptimizerStepArray = array of TOptimizerStep;
@@ -120,7 +120,7 @@ end;
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 
-procedure InitializeStep(const Name: String; const OptimizerFunction: TOptimizerFunctionPtr);
+procedure InitializeStep(const Name: String; const OptimizerFunction: TOptimizerFunction);
 var i: Integer;
     OptimizerStep: TOptimizerStep;
 begin
@@ -640,6 +640,7 @@ type
   TListing = array [0..1023] of String;
   TListing_tmp = array [0..127] of String;
   TString0_3_Array = array [0..3] of String;
+  TStack = array [0..15] of TString0_3_Array;
 var
   inxUse, found: Boolean;
   i, l, k, m, x: Integer;
@@ -647,37 +648,36 @@ var
   elf: Cardinal;
 
   listing: TListing;
-  listing_tmp: TListing_tmp;
 
-  s: array [0..15] of TString0_3_Array;
+  s: TStack;
 
   a, t, arg0: String;
 
   // -----------------------------------------------------------------------------
 
   function ListingToString(const listing: TListing): String;
-  var i: Integer;
+  var i: TListingIndex;
   begin
     Result:='';
     for i:=0 to l-1 do Result:=Result+listing[i]+'/';
   end;
 
-  function GetBYTE(i: Integer): Integer;
+  function GetBYTE(const i: TListingIndex): Integer;
   begin
     Result := GetVAL(copy(listing[i], 6, 4));
   end;
 
-  function GetWORD(i, j: Integer): Integer;
+  function GetWORD(const i, j: TListingIndex): Integer;
   begin
     Result := GetVAL(copy(listing[i], 6, 4)) + GetVAL(copy(listing[j], 6, 4)) shl 8;
   end;
 
-  function GetTRIPLE(i, j, k: Integer): Integer;
+  function GetTRIPLE(const i, j, k: TListingIndex): Integer;
   begin
     Result := GetVAL(copy(listing[i], 6, 4)) + GetVAL(copy(listing[j], 6, 4)) shl 8 + GetVAL(copy(listing[k], 6, 4)) shl 16;
   end;
 
-  function GetDWORD(i, j, k, l: Integer): Integer;
+  function GetDWORD(const i, j, k, l: TListingIndex): Integer;
   begin
     Result := GetVAL(copy(listing[i], 6, 4)) + GetVAL(copy(listing[j], 6, 4)) shl 8 + GetVAL(copy(listing[k], 6, 4)) shl 16 + GetVAL(copy(listing[l], 6, 4)) shl 24;
   end;
@@ -688,7 +688,7 @@ var
 
   // !!! kolejny rozkaz po UNUSED_A na pozycji 'i+1' musi koniecznie byc conajmniej 'LDA ' !!!
 
-  function UNUSED_A(i: Integer): Boolean;
+  function UNUSED_A(const i: TListingIndex): Boolean;
   begin
     Result := sty_stack(i) or lda_stack(i) or sta_stack(i) or
       {!!! (pos(#9'lda :eax', listing[i]) = 1) or (pos(#9'sta :eax', listing[i]) = 1) or} lda_im(i) or
@@ -696,20 +696,20 @@ var
   end;
 
 
-  function onBreak(i: TListingIndex): Boolean;
+  function onBreak(const i: TListingIndex): Boolean;
   begin
     Result := lab_a(i) or jsr(i) or eif(i);
     // !!! eif !!! koniecznie
   end;
 
 
-  function argMatch(i, j: TListingIndex): Boolean;
+  function argMatch(const i, j: TListingIndex): Boolean;
   begin
     Result := copy(listing[i], 6, 256) = copy(listing[j], 6, 256);
   end;
 
 
-  procedure WriteInstruction(i: TListingIndex);
+  procedure WriteInstruction(const i: TListingIndex);
   begin
 
     if isInterrupt and (bp(i) or stack(i)) then
@@ -731,7 +731,7 @@ var
   end;  //WriteInstruction
 
 
-  function SKIP(i: TListingIndex): Boolean;
+  function SKIP(const i: TListingIndex): Boolean;
   begin
 
     if (i < 0) or (listing[i] = '') then
@@ -744,7 +744,7 @@ var
 
 
 
-  function LabelIsUsed(i: TListingIndex): Boolean;                  // issue #91 fixed
+  function LabelIsUsed(const i: TListingIndex): Boolean;                  // issue #91 fixed
 
 (*
 
@@ -793,7 +793,7 @@ var
   end;  //LabelIsUsed
 
 
-  function IFDEF_MUL8(i: TListingIndex): Boolean;
+  function IFDEF_MUL8(const i: TListingIndex): Boolean;
   begin
     Result :=
       //(listing[i+4] = #9'eif') and
@@ -802,7 +802,7 @@ var
       (listing[i + 1] = #9'fmulu_8') and (listing[i] = #9'.ifdef fmulinit');
   end;
 
-  function IFDEF_MUL16(i: TListingIndex): Boolean;
+  function IFDEF_MUL16(const i: TListingIndex): Boolean;
   begin
     Result :=
       //(listing[i+4] = #9'eif') and
@@ -812,7 +812,7 @@ var
   end;
 
 
-  function LDA_STA_BP(i: TListingIndex): Boolean;
+  function LDA_STA_BP(const i: TListingIndex): Boolean;
   begin
 
     Result := (lda_bp_y(i) and sta_a(i + 1)) or (lda_a(i) and sta_bp_y(i + 1));
@@ -820,7 +820,7 @@ var
   end;
 
 
-  procedure LDA_STA_ADR(i: TListingIndex; q: Integer; op: Char);
+  procedure LDA_STA_ADR(const i: TListingIndex; q: Integer; op: Char);
 
    procedure update(i: integer);
     begin
@@ -888,7 +888,7 @@ var
 
   // -----------------------------------------------------------------------------
 
-  procedure Expand(i, e: TListingIndex);
+  procedure Expand(const i, e: TListingIndex);
   var
     k: Integer;
   begin
@@ -1113,7 +1113,7 @@ var
   end;
 
 
-  function GetString(j: TListingIndex): String; overload;
+  function GetString(const j: TListingIndex): String; overload;
   var
     i: Integer;
     a: String;
@@ -1134,7 +1134,7 @@ var
   end;
 
 
-  function GetStringLast(j: TListingIndex): String; overload;
+  function GetStringLast(const j: TListingIndex): String; overload;
   var
     i: Integer;
     a: String;
@@ -1156,7 +1156,7 @@ var
   end;  //GetStringLast
 
 
-  function GetARG(n: Byte; x: Shortint; reset: Boolean = True): String;
+  function GetARG(const n: Byte; const x: Shortint; const reset: Boolean = True): String;
   var
     i: Integer;
     a: String;
@@ -1244,7 +1244,7 @@ var
     end;
 
 
-    function unrelated(i: Integer): Boolean;  // unrelated stack references
+    function unrelated(const i: TListingIndex): Boolean;  // unrelated stack references
     var
       j, k: Byte;
     begin
@@ -1353,45 +1353,52 @@ var
 
 // -----------------------------------------------------------------------------
 
-  {$i include/opt6502/opt_SHR_BYTE.inc}
-  {$i include/opt6502/opt_SHR_WORD.inc}
-  {$i include/opt6502/opt_SHR_CARD.inc}
-  {$i include/opt6502/opt_SHL_BYTE.inc}
-  {$i include/opt6502/opt_SHL_WORD.inc}
-  {$i include/opt6502/opt_SHL_CARD.inc}
-  {$i include/opt6502/opt_BYTE_DIV.inc}
+  //{$i OptimizeASM.inc}
+   {$i include/opt6502/opt_SHR_BYTE.inc}
+   {$i include/opt6502/opt_SHR_WORD.inc}
+   {$i include/opt6502/opt_SHR_CARD.inc}
+   {$i include/opt6502/opt_SHL_BYTE.inc}
+   {$i include/opt6502/opt_SHL_WORD.inc}
+   {$i include/opt6502/opt_SHL_CARD.inc}
+   {$i include/opt6502/opt_BYTE_DIV.inc}
 
-  {$i include/opt6502/opt_STA_0.inc}
-  {$i include/opt6502/opt_STACK.inc}
-  {$i include/opt6502/opt_STACK_INX.inc}
-  {$i include/opt6502/opt_STACK_ADD.inc}
-  {$i include/opt6502/opt_STACK_CMP.inc}
-  {$i include/opt6502/opt_STACK_ADR.inc}
-  {$i include/opt6502/opt_STACK_AL_CL.inc}
-  {$i include/opt6502/opt_STACK_AX_CX.inc}
-  {$i include/opt6502/opt_STACK_EAX_ECX.inc}
-  {$i include/opt6502/opt_STACK_PRINT.inc}
-  {$i include/opt6502/opt_CMP_BRANCH.inc}
-  {$i include/opt6502/opt_CMP_BP2.inc}
-  {$i include/opt6502/opt_CMP_LOCAL.inc}
-  {$i include/opt6502/opt_CMP_LT_GTEQ.inc}
-  {$i include/opt6502/opt_CMP_LTEQ.inc}
-  {$i include/opt6502/opt_CMP_GT.inc}
-  {$i include/opt6502/opt_CMP_NE_EQ.inc}
-  {$i include/opt6502/opt_CMP.inc}
-  {$i include/opt6502/opt_CMP_0.inc}
+   {$i include/opt6502/opt_STA_0.inc}
+   {$i include/opt6502/opt_STACK.inc}
+   {$i include/opt6502/opt_STACK_INX.inc}
+   {$i include/opt6502/opt_STACK_ADD.inc}
+   {$i include/opt6502/opt_STACK_CMP.inc}
+   {$i include/opt6502/opt_STACK_ADR.inc}
+   {$i include/opt6502/opt_STACK_AL_CL.inc}
+   {$i include/opt6502/opt_STACK_AX_CX.inc}
+   {$i include/opt6502/opt_STACK_EAX_ECX.inc}
+   {$i include/opt6502/opt_STACK_PRINT.inc}
+   {$i include/opt6502/opt_CMP_BRANCH.inc}
+   {$i include/opt6502/opt_CMP_BP2.inc}
+   {$i include/opt6502/opt_CMP_LOCAL.inc}
+   {$i include/opt6502/opt_CMP_LT_GTEQ.inc}
+   {$i include/opt6502/opt_CMP_LTEQ.inc}
+   {$i include/opt6502/opt_CMP_GT.inc}
+   {$i include/opt6502/opt_CMP_NE_EQ.inc}
+   {$i include/opt6502/opt_CMP.inc}
+   {$i include/opt6502/opt_CMP_0.inc}
 
   procedure InitializeOptimizerSteps;
+  var i: Integer;
+    returnValue: Boolean;
   begin
     if OptimizeBufStepArray = nil then
     begin
+(* Procedures with no input parameters
       InitializeStep('opt_SHR_BYTE', @opt_SHR_BYTE);
       InitializeStep('opt_SHR_WORD', @opt_SHR_WORD);
       InitializeStep('opt_SHR_CARD', @opt_SHR_CARD);
       InitializeStep('opt_SHL_BYTE', @opt_SHL_BYTE);
       InitializeStep('opt_SHL_WORD', @opt_SHL_WORD);
       InitializeStep('opt_SHL_CARD', @opt_SHL_CARD);
+*)
+(* Procedures with other input parameters
       InitializeStep('opt_BYTE_DIV', @opt_BYTE_DIV);
+*)
 
       InitializeStep('opt_STA_0', @opt_STA_0);
       InitializeStep('opt_STACK', @opt_STACK);
@@ -1412,6 +1419,11 @@ var
       InitializeStep('opt_CMP_NE_EQ', @opt_CMP_NE_EQ);
       InitializeStep('opt_CMP', @opt_CMP);
       InitializeStep('opt_CMP_0', @opt_CMP_0);
+
+       for i:=0 to High(OptimizeBufStepArray) do
+       begin
+           // TODO returnValue:=OptimizeBufStepArray[i].OptimizerFunction^(0);
+       end;
     end;
   end;
 
@@ -1419,7 +1431,7 @@ var
 
   function PeepholeOptimization_STACK: Boolean;
   var
-    i: Integer;
+    i: TListingIndex;
     tmp: String;
   begin
 
@@ -1478,7 +1490,7 @@ end;
 
   function OptimizeEAX: Boolean;
   var
-    i: Integer;
+    i: TListingIndex;
     tmp: String;
   begin
 
@@ -1504,7 +1516,7 @@ end;
 
   procedure OptimizeEAX_OFF;
   var
-    i: Integer;
+    i: TListingIndex;
     tmp: String;
   begin
 
@@ -1877,8 +1889,8 @@ begin        // OptimizeASM
   inxUse := False;
 
   listing := Default(TListing);
-  listing_tmp := Default(TListing_tmp);
 
+  s := Default(TStack);
   for i := 0 to High(s) do
     for k := 0 to 3 do s[i][k] := '';
 
