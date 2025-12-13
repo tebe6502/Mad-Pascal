@@ -1891,10 +1891,6 @@ begin        // OptimizeASM
   listing := Default(TListing);
 
   s := Default(TStack);
-  for i := 0 to High(s) do
-    for k := 0 to 3 do s[i][k] := '';
-
-  // for i := 0 to High(listing) do listing[i]:='';
 
 
   for i := 0 to High(OptimizeBuf) - 1 do

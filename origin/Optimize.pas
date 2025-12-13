@@ -426,7 +426,6 @@ end;
    opt_TEMP_TAIL_IF;
    opt_TEMP_TAIL_CASE;
 
-
  // #asm
 
   if TemporaryBuf[0].IndexOf('#asm:') = 0 then
@@ -601,45 +600,44 @@ type
     TListing = array [0..1023] of String;
     TListing_tmp = array [0..127] of String;
     TString0_3_Array = array [0..3] of String;
-    TStack = array [0..15, 0..3] of String;
-
+  TStack = array [0..15] of TString0_3_Array;
 var
     inxUse, found: Boolean;
-  i, l, k, m, x: Integer;
+    i, l, k, m, x: Integer;
 
-  elf: Cardinal;
+    elf: Cardinal;
 
     listing: TListing;
 
     s: TStack;
 
-    a, t, arg0: string;
+    a, t, arg0: String;
 
 // -----------------------------------------------------------------------------
 
   function ListingToString(const listing: TListing): String;
-  var i: Integer;
+  var i: TListingIndex;
   begin
     Result:='';
     for i:=0 to l-1 do Result:=Result+listing[i]+'/';
   end;
 
-  function GetBYTE(i: Integer): Integer;
+  function GetBYTE(const i: TListingIndex): Integer;
   begin
     Result := GetVAL(copy(listing[i], 6, 4));
   end;
 
-  function GetWORD(i, j: Integer): Integer;
+  function GetWORD(const i, j: TListingIndex): Integer;
   begin
     Result := GetVAL(copy(listing[i], 6, 4)) + GetVAL(copy(listing[j], 6, 4)) shl 8;
   end;
 
-  function GetTRIPLE(i, j, k: Integer): Integer;
+  function GetTRIPLE(const i, j, k: TListingIndex): Integer;
   begin
     Result := GetVAL(copy(listing[i], 6, 4)) + GetVAL(copy(listing[j], 6, 4)) shl 8 + GetVAL(copy(listing[k], 6, 4)) shl 16;
   end;
 
-  function GetDWORD(i, j, k, l: Integer): Integer;
+  function GetDWORD(const i, j, k, l: TListingIndex): Integer;
   begin
     Result := GetVAL(copy(listing[i], 6, 4)) + GetVAL(copy(listing[j], 6, 4)) shl 8 + GetVAL(copy(listing[k], 6, 4)) shl 16 + GetVAL(copy(listing[l], 6, 4)) shl 24;
   end;
@@ -650,7 +648,7 @@ var
 
   // !!! kolejny rozkaz po UNUSED_A na pozycji 'i+1' musi koniecznie byc conajmniej 'LDA ' !!!
 
-  function UNUSED_A(i: Integer): Boolean;
+  function UNUSED_A(const i: TListingIndex): Boolean;
   begin
     Result := sty_stack(i) or lda_stack(i) or sta_stack(i) or
       {!!! (pos(#9'lda :eax', listing[i]) = 1) or (pos(#9'sta :eax', listing[i]) = 1) or} lda_im(i) or
@@ -658,20 +656,20 @@ var
   end;
 
 
-  function onBreak(i: TListingIndex): Boolean;
+  function onBreak(const i: TListingIndex): Boolean;
   begin
     Result := lab_a(i) or jsr(i) or eif(i);
     // !!! eif !!! koniecznie
   end;
 
 
-  function argMatch(i, j: TListingIndex): Boolean;
+  function argMatch(const i, j: TListingIndex): Boolean;
   begin
     Result := copy(listing[i], 6, 256) = copy(listing[j], 6, 256);
   end;
 
 
-  procedure WriteInstruction(i: TListingIndex);
+  procedure WriteInstruction(const i: TListingIndex);
   begin
 
     if isInterrupt and (bp(i) or stack(i)) then
@@ -693,7 +691,7 @@ var
   end;  //WriteInstruction
 
 
-  function SKIP(i: TListingIndex): Boolean;
+  function SKIP(const i: TListingIndex): Boolean;
   begin
 
     if (i < 0) or (listing[i] = '') then
@@ -706,7 +704,7 @@ var
 
 
 
-  function LabelIsUsed(i: TListingIndex): Boolean;                  // issue #91 fixed
+  function LabelIsUsed(const i: TListingIndex): Boolean;                  // issue #91 fixed
 
 (*
 
@@ -756,7 +754,7 @@ var
   end;  //LabelIsUsed
 
 
-  function IFDEF_MUL8(i: TListingIndex): Boolean;
+  function IFDEF_MUL8(const i: TListingIndex): Boolean;
   begin
     Result :=
       //(listing[i+4] = #9'eif') and
@@ -765,7 +763,7 @@ var
       (listing[i + 1] = #9'fmulu_8') and (listing[i] = #9'.ifdef fmulinit');
   end;
 
-  function IFDEF_MUL16(i: TListingIndex): Boolean;
+  function IFDEF_MUL16(const i: TListingIndex): Boolean;
   begin
     Result :=
       //(listing[i+4] = #9'eif') and
@@ -775,7 +773,7 @@ var
   end;
 
 
-  function LDA_STA_BP(i: TListingIndex): Boolean;
+  function LDA_STA_BP(const i: TListingIndex): Boolean;
   begin
 
     Result := (lda_bp_y(i) and sta_a(i + 1)) or (lda_a(i) and sta_bp_y(i + 1));
@@ -783,7 +781,7 @@ var
   end;
 
 
-procedure LDA_STA_ADR(i: TListingIndex; q: Integer; op: Char);
+  procedure LDA_STA_ADR(const i: TListingIndex; q: Integer; op: Char);
 
    procedure update(i: integer);
    begin
@@ -851,7 +849,7 @@ procedure LDA_STA_ADR(i: TListingIndex; q: Integer; op: Char);
 
 // -----------------------------------------------------------------------------
 
-  procedure Expand(i, e: TListingIndex);
+  procedure Expand(const i, e: TListingIndex);
   var
     k: Integer;
   begin
@@ -1096,7 +1094,7 @@ procedure LDA_STA_ADR(i: TListingIndex; q: Integer; op: Char);
   end;
 
 
-  function GetStringLast(j: TListingIndex): String; overload;
+  function GetStringLast(const j: TListingIndex): String; overload;
   var
     i: Integer;
     a: String;
@@ -1118,7 +1116,7 @@ procedure LDA_STA_ADR(i: TListingIndex; q: Integer; op: Char);
   end;  //GetStringLast
 
 
-  function GetARG(n: Byte; x: Shortint; reset: Boolean = True): String;
+  function GetARG(const n: Byte; const x: Shortint; const reset: Boolean = True): String;
   var
     i: Integer;
     a: String;
@@ -1203,7 +1201,7 @@ procedure LDA_STA_ADR(i: TListingIndex; q: Integer; op: Char);
    end;
 
 
-    function unrelated(i: Integer): Boolean;  // unrelated stack references
+    function unrelated(const i: TListingIndex): Boolean;  // unrelated stack references
     var
        j, k: Byte;
     begin
@@ -1344,7 +1342,7 @@ procedure LDA_STA_ADR(i: TListingIndex; q: Integer; op: Char);
 
   function PeepholeOptimization_STACK: Boolean;
   var
-    i: Integer;
+    i: TListingIndex;
     tmp: String;
   begin
 
@@ -1403,7 +1401,7 @@ end;
 
   function OptimizeEAX: Boolean;
   var
-    i: Integer;
+    i: TListingIndex;
     tmp: String;
   begin
 
@@ -1429,7 +1427,7 @@ end;
 
   procedure OptimizeEAX_OFF;
   var
-    i: Integer;
+    i: TListingIndex;
     tmp: String;
   begin
 
@@ -1654,7 +1652,6 @@ end;
           (tya(p) and (lab_a(p-1) = false) and (ora_stack(p+1) = false)) then exit(False);
 
     end;
-
 
   begin
 
