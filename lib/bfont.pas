@@ -6,9 +6,12 @@ unit bfont;
  @version: 1.2
 
  @description:
- Unit designed to read and interpret Borland CHR stroked file and write to the screen using unit graph
+ A unit designed to read and interpret Borland CHR stroked font files and write to the screen using the unit graph,
 
  The CHR files are scalable fonts used by the Borland graphics interface (BGI) to display fonts in graphics mode.
+
+ This 'Vector Font Editor' supports Microsoft FON vector format and Borland CHR format:
+ https://github.com/RetroNick2020/VectorFontEditor
 
  OFFSET              Count TYPE   Description
  0000h                   4 char   ID='PK',08,08

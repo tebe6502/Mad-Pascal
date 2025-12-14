@@ -53,6 +53,7 @@
       <Unit>
         <Filename Value="..\origin\mp.pas"/>
         <IsPartOfProject Value="True"/>
+        <UnitName Value="MADPASCAL"/>
       </Unit>
       <Unit>
         <Filename Value="..\origin\Optimize.pas"/>
@@ -468,6 +469,9 @@
         <DebugInfoType Value="dsDwarf3"/>
       </Debugging>
     </Linking>
+    <Other>
+      <CustomOptions Value="-dPROFILE"/>
+    </Other>
   </CompilerOptions>
   <Debugging>
     <Exceptions>
