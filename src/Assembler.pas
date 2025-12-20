@@ -4,22 +4,22 @@ unit Assembler;
 
 interface
 
-function Hex(Value: Cardinal; nibbles: Shortint): String;
+// Hexadecimal output of an unsigned 32-Bit with '$' prefix, specified number of digits (must be a multiple of 2)
+function Hex(const Value: DWord; const nibbles: Byte): String;
 
-// Hexadecimal output of 8-Bit with '$' prefix, 2 digits
+// Hexadecimal output of an unsigned 8-Bit with '$' prefix, 2 digits
 function HexByte(const Value: Byte): String; overload;
 function HexByte(const Value: Int64): String; overload; // For detecting missing downcasts
 
-// Hexadecimal output of 16-Bit with '$' prefix, 4 digits
+// Hexadecimal output of an unsigned 16-Bit number with '$' prefix, 4 digits
 function HexWord(const Value: Word): String; overload;
 function HexWord(const Value: Int64): String; overload; // For detecting missing downcasts
-function HexWord2(const Value: Word): String;
 
-// Hexadecimal output of 32/64-Bit with '$' prefix, minimum length 8 digits
+// Hexadecimal output of a 32/64-bit number with '$' prefix, minimum length 8 digits
 function HexLongWord(const Value: Int64): String;
 
-// Hexadecimal output of 32/64-Bit with '$' prefix, dynamic length 2/4/6/8/any digits
-function HexValue(const Value: Int64; const digits: Integer): String;
+// Hexadecimal output of a 32/64-bit number with '$' prefix, dynamic length 2/4/6/8/any digits
+function HexValue(const Value: Int64; const digits: Byte): String;
 
 // Get the value of an immediate value string "#123" or "#$1234"
 function GetVAL(const a: String): Integer;
@@ -62,7 +62,7 @@ end;
 // The parameter 'nibbles' specifies the maximum number of nibbles to be converted.
 // This must be an even number.
 // if there are any values left, continue the conversion
-function Hex(Value: Cardinal; nibbles: Shortint): String;
+function Hex(const Value: DWord; const nibbles: Byte): String;
 begin
   Result := _Hex(Value, nibbles);
 
@@ -102,15 +102,6 @@ begin
   // DoCount;
 end;
 
-
-// TODO: Temporary compatibility with Origin
-function HexWord2(const Value: Word): String;
-begin
-  if Value < $100 then Result := HexByte(Byte(Value))
-  else
-    Result := HexWord(Value);
-end;
-
 function HexWord(const Value: Int64): String; overload;
 const
   msg = 'HexWord() called with argument datatype larger than Word';
@@ -134,7 +125,7 @@ end;
 
 
 // TODO: Temporary compatibility with Origin
-function HexValue(const Value: Int64; const digits: Integer): String;
+function HexValue(const Value: Int64; const digits: Byte): String;
 begin
   if (Value < $100) and (digits = 2) then
     Result := HexByte(Byte(Value))
