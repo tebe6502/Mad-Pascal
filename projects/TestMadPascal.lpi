@@ -42,7 +42,7 @@
             <WorkingDirectory Value="C:\jac\system\Atari800\Programming\Repositories\Mad-Pascal\samples\a8\con80\"/>
           </local>
         </Mode>
-        <Mode Name="debug-test">
+        <Mode Name="test-debug">
           <local>
             <CommandLineParams Value="debug.pas -diag -pause"/>
             <WorkingDirectory Value="C:\jac\system\Atari800\Programming\Repositories\Mad-Pascal\samples\tests\tests-debug\"/>
@@ -573,6 +573,10 @@
       </Unit>
       <Unit>
         <Filename Value="..\src\CommonIO.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\src\OptimizeASM.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit>
     </Units>

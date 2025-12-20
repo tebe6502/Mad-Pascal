@@ -1,5 +1,5 @@
 
-function opt_NE_EQ(i: integer): Boolean;
+function opt_CMP_NE_EQ(i: integer): Boolean;
 var p: integer;
 begin
 

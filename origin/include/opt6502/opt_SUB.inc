@@ -1,6 +1,7 @@
 
 function opt_SUB(i: integer): Boolean;
 var p, q: integer;
+    listing_tmp: TListing_tmp;
 begin
 
     Result := true;

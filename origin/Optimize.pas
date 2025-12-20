@@ -4,15 +4,21 @@ interface
 
 {$i define.inc}
 
+uses Common;
+
 // ----------------------------------------------------------------------------
 
+// Re/Set temporary variables for register optimizations.
 procedure ResetOpty;
+procedure SetOptyY(const value: TString);
+function GetOptyBP2(): TString;
+procedure SetOptyBP2(const value: TString);
 
 procedure asm65(const a: String = ''; const comment: String = '');      // OptimizeASM
 
-procedure OptimizeProgram(MainProcedureIndex: Integer);
+function IsASM65BufferEmpty: Boolean;
 
-procedure WriteOut(const a: String);       		   		 // OptimizeTemporaryBuf
+procedure OptimizeProgram(MainProcedureIndex: Integer);
 
 procedure Finalize;
 
@@ -20,7 +26,7 @@ procedure Finalize;
 
 implementation
 
-uses Crt, SysUtils, Common;
+uses Crt, SysUtils;
 type
   TTemporaryBufIndex = Integer;
 
@@ -28,6 +34,16 @@ var
   TemporaryBuf: array [0..511] of String;
 
   {$I '..\src\OptimizeDebug.inc'}
+
+
+// Reset temporary variables for FOR optimizations.
+procedure ResetForTmp;
+begin
+   optyFOR0:='';
+   optyFOR1:='';
+   optyFOR2:='';
+   optyFOR3:='';
+end;
 
 // ----------------------------------------------------------------------------
 
@@ -57,6 +73,7 @@ end;
 procedure ResetOpty;
 begin
   DebugCall('ResetOpty');
+
   SetOptyA('');
   SetOptyY('');
   SetOptyBP2('');
@@ -104,6 +121,16 @@ begin
  MarkNotDead(MainProcedureIndex);
 
 end;  //OptimizeProgram
+
+function GetSourceFileName: String;
+begin
+  Result := UnitName[Common.optimize.unitIndex].Name;
+end;
+
+function GetSourceFileLine: Integer;
+begin
+  Result:=Common.optimize.line;
+end;
 
 
 // ----------------------------------------------------------------------------
@@ -399,7 +426,6 @@ end;
    opt_TEMP_TAIL_IF;
    opt_TEMP_TAIL_CASE;
 
-
  // #asm
 
   if TemporaryBuf[0].IndexOf('#asm:') = 0 then
@@ -564,7 +590,7 @@ begin
 end;
 
 
-procedure OptimizeASM;
+procedure OptimizeASM(const CodeSize: Integer; const IsInterrupt: Boolean);
 (* -------------------------------------------------------------------------- *)
 (* optymalizacja powiodla sie jesli na wyjsciu X=0                            *)
 (* peephole optimization                                                      *)
@@ -574,46 +600,44 @@ type
     TListing = array [0..1023] of String;
     TListing_tmp = array [0..127] of String;
     TString0_3_Array = array [0..3] of String;
-    TStack = array [0..15, 0..3] of String;
-
+  TStack = array [0..15] of TString0_3_Array;
 var
     inxUse, found: Boolean;
-  i, l, k, m, x: Integer;
+    i, l, k, m, x: Integer;
 
-  elf: Cardinal;
+    elf: Cardinal;
 
     listing: TListing;
-    listing_tmp: TListing_tmp;
 
     s: TStack;
 
-    a, t, arg0: string;
+    a, t, arg0: String;
 
 // -----------------------------------------------------------------------------
 
   function ListingToString(const listing: TListing): String;
-  var i: Integer;
+  var i: TListingIndex;
   begin
     Result:='';
     for i:=0 to l-1 do Result:=Result+listing[i]+'/';
   end;
 
-  function GetBYTE(i: Integer): Integer;
+  function GetBYTE(const i: TListingIndex): Integer;
   begin
     Result := GetVAL(copy(listing[i], 6, 4));
   end;
 
-  function GetWORD(i, j: Integer): Integer;
+  function GetWORD(const i, j: TListingIndex): Integer;
   begin
     Result := GetVAL(copy(listing[i], 6, 4)) + GetVAL(copy(listing[j], 6, 4)) shl 8;
   end;
 
-  function GetTRIPLE(i, j, k: Integer): Integer;
+  function GetTRIPLE(const i, j, k: TListingIndex): Integer;
   begin
     Result := GetVAL(copy(listing[i], 6, 4)) + GetVAL(copy(listing[j], 6, 4)) shl 8 + GetVAL(copy(listing[k], 6, 4)) shl 16;
   end;
 
-  function GetDWORD(i, j, k, l: Integer): Integer;
+  function GetDWORD(const i, j, k, l: TListingIndex): Integer;
   begin
     Result := GetVAL(copy(listing[i], 6, 4)) + GetVAL(copy(listing[j], 6, 4)) shl 8 + GetVAL(copy(listing[k], 6, 4)) shl 16 + GetVAL(copy(listing[l], 6, 4)) shl 24;
   end;
@@ -624,7 +648,7 @@ var
 
   // !!! kolejny rozkaz po UNUSED_A na pozycji 'i+1' musi koniecznie byc conajmniej 'LDA ' !!!
 
-  function UNUSED_A(i: Integer): Boolean;
+  function UNUSED_A(const i: TListingIndex): Boolean;
   begin
     Result := sty_stack(i) or lda_stack(i) or sta_stack(i) or
       {!!! (pos(#9'lda :eax', listing[i]) = 1) or (pos(#9'sta :eax', listing[i]) = 1) or} lda_im(i) or
@@ -632,20 +656,20 @@ var
   end;
 
 
-  function onBreak(i: TListingIndex): Boolean;
+  function onBreak(const i: TListingIndex): Boolean;
   begin
     Result := lab_a(i) or jsr(i) or eif(i);
     // !!! eif !!! koniecznie
   end;
 
 
-  function argMatch(i, j: TListingIndex): Boolean;
+  function argMatch(const i, j: TListingIndex): Boolean;
   begin
     Result := copy(listing[i], 6, 256) = copy(listing[j], 6, 256);
   end;
 
 
-  procedure WriteInstruction(i: TListingIndex);
+  procedure WriteInstruction(const i: TListingIndex);
   begin
 
     if isInterrupt and (bp(i) or stack(i)) then
@@ -654,7 +678,7 @@ var
 
       TextColor(LIGHTRED);
 
-      WriteLn(UnitName[Common.optimize.unitIndex].Name + ' (' + IntToStr(Common.optimize.line) +
+      WriteLn(GetSourceFileName + ' (' + IntToStr(GetSourceFileLine) +
         ') Error: Illegal instruction in INTERRUPT block ''' + copy(listing[i], 2, 256) + '''');
 
       NormVideo;
@@ -667,7 +691,7 @@ var
   end;  //WriteInstruction
 
 
-  function SKIP(i: TListingIndex): Boolean;
+  function SKIP(const i: TListingIndex): Boolean;
   begin
 
     if (i < 0) or (listing[i] = '') then
@@ -680,7 +704,7 @@ var
 
 
 
-  function LabelIsUsed(i: TListingIndex): Boolean;                  // issue #91 fixed
+  function LabelIsUsed(const i: TListingIndex): Boolean;                  // issue #91 fixed
 
 (*
 
@@ -730,7 +754,7 @@ var
   end;  //LabelIsUsed
 
 
-  function IFDEF_MUL8(i: TListingIndex): Boolean;
+  function IFDEF_MUL8(const i: TListingIndex): Boolean;
   begin
     Result :=
       //(listing[i+4] = #9'eif') and
@@ -739,7 +763,7 @@ var
       (listing[i + 1] = #9'fmulu_8') and (listing[i] = #9'.ifdef fmulinit');
   end;
 
-  function IFDEF_MUL16(i: TListingIndex): Boolean;
+  function IFDEF_MUL16(const i: TListingIndex): Boolean;
   begin
     Result :=
       //(listing[i+4] = #9'eif') and
@@ -749,7 +773,7 @@ var
   end;
 
 
-  function LDA_STA_BP(i: TListingIndex): Boolean;
+  function LDA_STA_BP(const i: TListingIndex): Boolean;
   begin
 
     Result := (lda_bp_y(i) and sta_a(i + 1)) or (lda_a(i) and sta_bp_y(i + 1));
@@ -757,7 +781,7 @@ var
   end;
 
 
-procedure LDA_STA_ADR(i: TListingIndex; q: Integer; op: Char);
+  procedure LDA_STA_ADR(const i: TListingIndex; q: Integer; op: Char);
 
    procedure update(i: integer);
    begin
@@ -825,7 +849,7 @@ procedure LDA_STA_ADR(i: TListingIndex; q: Integer; op: Char);
 
 // -----------------------------------------------------------------------------
 
-  procedure Expand(i, e: TListingIndex);
+  procedure Expand(const i, e: TListingIndex);
   var
     k: Integer;
   begin
@@ -1070,7 +1094,7 @@ procedure LDA_STA_ADR(i: TListingIndex; q: Integer; op: Char);
   end;
 
 
-  function GetStringLast(j: TListingIndex): String; overload;
+  function GetStringLast(const j: TListingIndex): String; overload;
   var
     i: Integer;
     a: String;
@@ -1092,7 +1116,7 @@ procedure LDA_STA_ADR(i: TListingIndex; q: Integer; op: Char);
   end;  //GetStringLast
 
 
-  function GetARG(n: Byte; x: Shortint; reset: Boolean = True): String;
+  function GetARG(const n: Byte; const x: Shortint; const reset: Boolean = True): String;
   var
     i: Integer;
     a: String;
@@ -1177,7 +1201,7 @@ procedure LDA_STA_ADR(i: TListingIndex; q: Integer; op: Char);
    end;
 
 
-    function unrelated(i: Integer): Boolean;  // unrelated stack references
+    function unrelated(const i: TListingIndex): Boolean;  // unrelated stack references
     var
        j, k: Byte;
     begin
@@ -1318,7 +1342,7 @@ procedure LDA_STA_ADR(i: TListingIndex; q: Integer; op: Char);
 
   function PeepholeOptimization_STACK: Boolean;
   var
-    i: Integer;
+    i: TListingIndex;
     tmp: String;
   begin
 
@@ -1354,12 +1378,12 @@ if (pos('mva RESOLVECOLLISIONS.RESULT', listing[i]) > 0) then begin
 end;
 }
 
-      if opt_LT_GTEQ(i) = False then exit(False);
-      if opt_LTEQ(i) = False then exit(False);
-      if opt_GT(i) = False then exit(False);
-      if opt_NE_EQ(i) = False then exit(False);
+      if opt_CMP_LT_GTEQ(i) = False then exit(False);
+      if opt_CMP_LTEQ(i) = False then exit(False);
+      if opt_CMP_GT(i) = False then exit(False);
+      if opt_CMP_NE_EQ(i) = False then exit(False);
       if opt_CMP(i) = False then exit(False);
-      if opt_BRANCH(i) = False then exit(False);
+      if opt_CMP_BRANCH(i) = False then exit(False);
       if opt_STACK(i) = False then exit(False);
       if opt_STACK_INX(i) = False then exit(False);
       if opt_STACK_ADD(i) = False then exit(False);
@@ -1377,7 +1401,7 @@ end;
 
   function OptimizeEAX: Boolean;
   var
-    i: Integer;
+    i: TListingIndex;
     tmp: String;
   begin
 
@@ -1403,7 +1427,7 @@ end;
 
   procedure OptimizeEAX_OFF;
   var
-    i: Integer;
+    i: TListingIndex;
     tmp: String;
   begin
 
@@ -1588,7 +1612,7 @@ end;
   // ----------------------------------------------------------------------------
 
 
-  function OptimizeRelation: Boolean;
+  function OptimizeRelation(const CodeSize: Integer): Boolean;
   var
     i, p: Integer;
     tmp: String;
@@ -1629,7 +1653,6 @@ end;
 
     end;
 
-
   begin
 
     Result := True;
@@ -1658,19 +1681,19 @@ end;
 
 // -----------------------------------------------------------------------------
 
-     if opt_CMP_0(i) = false then exit(false);
+     if opt_CMP_0(i) = False then exit(False);
 
-     if opt_LOCAL(i) = false then exit(false);
+     if opt_CMP_LOCAL(i) = False then exit(False);
 
-     if opt_LT_GTEQ(i) = false then exit(false);
-     if opt_LTEQ(i) = false then exit(false);
-     if opt_GT(i) = false then exit(false);
-     if opt_NE_EQ(i) = false then exit(false);
+     if opt_CMP_LT_GTEQ(i) = False then exit(False);
+     if opt_CMP_LTEQ(i) = False then exit(False);
+     if opt_CMP_GT(i) = False then exit(False);
+     if opt_CMP_NE_EQ(i) = False then exit(False);
 
-     if opt_CMP(i) = false then exit(false);
-     if opt_CMP_BP2(i) = false then exit(false);
+     if opt_CMP(i) = False then exit(False);
+     if opt_CMP_BP2(i) = False then exit(False);
 
-     if opt_BRANCH(i) = false then exit(false);
+     if opt_CMP_BRANCH(i) = False then exit(False);
 
 // -----------------------------------------------------------------------------
 
@@ -1768,7 +1791,6 @@ begin        // OptimizeASM
   inxUse := False;
 
   listing := Default(TListing);
-  listing_tmp := Default(TListing_tmp);
 
   s := Default(TStack);
 
@@ -2908,13 +2930,13 @@ begin        // OptimizeASM
   if ((x = 0) and inxUse) then
   begin   // succesful
 
-    if Common.optimize.line <> Common.optimize.old then
+    if GetSourceFileLine <> Common.optimize.old then
     begin
       WriteOut('');
-      WriteOut('; optimize OK (' + UnitName[common.optimize.unitIndex].Name + '), line = ' + IntToStr(common.optimize.line));
+      WriteOut('; optimize OK (' + GetSourceFileName + '), line = ' + IntToStr(GetSourceFileLine));
       WriteOut('');
 
-      common.optimize.old := common.optimize.line;
+      common.optimize.old := GetSourceFileLine;
     end;
 
 
@@ -2924,11 +2946,11 @@ begin        // OptimizeASM
 
     OptimizeAssignment;
 
-    repeat until OptimizeRelation;
+    repeat until OptimizeRelation(CodeSize);
 
     OptimizeAssignment;
 
-  until OptimizeRelation;
+  until OptimizeRelation(CodeSize);
 
 
     if OptimizeEAX then
@@ -3034,18 +3056,18 @@ begin        // OptimizeASM
       end;
 
 
-    if common.optimize.line <> common.optimize.old then
+    if GetSourceFileLine <> common.optimize.old then
     begin
       WriteOut('');
 
       if x = 51 then
-        WriteOut('; optimize FAIL (' + '''' + arg0 + '''' + ', ' + UnitName[common.optimize.unitIndex].Name + '), line = ' + IntToStr(common.optimize.line))
+        WriteOut('; optimize FAIL (' + '''' + arg0 + '''' + ', ' + GetSourceFileName + '), line = ' + IntToStr(GetSourceFileLine))
       else
-        WriteOut('; optimize FAIL (' + IntToStr(x) + ', ' + UnitName[common.optimize.unitIndex].Name + '), line = ' + IntToStr(common.optimize.line));
+        WriteOut('; optimize FAIL (' + IntToStr(x) + ', ' + GetSourceFileName + '), line = ' + IntToStr(GetSourceFileLine));
 
       WriteOut('');
 
-      common.optimize.old := common.optimize.line;
+      common.optimize.old := GetSourceFileLine;
     end;
 
 
@@ -3074,7 +3096,7 @@ begin        // OptimizeASM
   end;
 
  writeln(OptFile, StringOfChar('-', 32));
- writeln(OptFile, 'OPTIMIZE ',((x = 0) and inxUse),', x=',x,', ('+UnitName[common.optimize.unitIndex].Name+') line = ',common.optimize.line);
+ writeln(OptFile, 'OPTIMIZE ',((x = 0) and inxUse),', x=',x,', ('+GetSourceFileName+') line = ',GetSourceFileLine);
  writeln(OptFile, StringOfChar('-', 32));
 
   for i := 0 to l - 1 do
@@ -3095,6 +3117,10 @@ end;
 
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
+function IsASM65BufferEmpty: Boolean;
+begin
+  Result:= High(OptimizeBuf) = 0;
+end;
 
 
 procedure asm65(const a: string = ''; const comment : string ='');
@@ -3125,11 +3151,11 @@ begin
 
   end else begin
 
-    if High(OptimizeBuf) > 0
+    if not IsASM65BufferEmpty
     then
 	   begin
 	    // DebugCall('OptimizeASM.Begin',OptimizeBufToString );
-	    OptimizeASM ;
+	    OptimizeASM(CodeSize, IsInterrupt) ;
 	    // DebugCall('OptimizeASM.End',OptimizeBufToString );
 	   end
      else

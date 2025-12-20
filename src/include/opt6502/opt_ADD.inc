@@ -2,6 +2,7 @@
 function opt_ADD(i: integer): Boolean;
 var p, q: integer;
     tmp: string;
+    listing_tmp: TListing_tmp;
 begin
 
     Result := true;

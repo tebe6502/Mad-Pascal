@@ -3,7 +3,7 @@
 #
 # Start Git Bash Shell
 #   cd /c/jac/system/Atari800/Programming/Repositories/Mad-Pascal/src 
-#   export PATH=/c/jac/system/Windows/Tools/PAS/PAS2JS/pas2js-win64-x86_64-3.2.0/bin/:$PATH
+#   export PATH=/c/jac/system/Windows/Tools/PAS/PAS2JS/pas2js-win64-x86_64-3.2.0/bin:$PATH
 #   make -f Makefile.pas2js
 #   start C:\jac\system\Atari800\Programming\Repositories\Mad-Pascal\bin\javascript\mp.html
 # 
