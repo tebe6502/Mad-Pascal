@@ -28,7 +28,13 @@ begin
   DiagFile.Assign(ChangeFileExt(ProgramUnit.Name, '-diag.log'));
   DiagFile.Rewrite;
 
+
+  DiagFile.WriteLn(Common.TITLE);
+  {$MACRO ON}
+  DiagFile.WriteLn(Format('Compiled with FPC %d.%d.%d.', [FPC_VERSION, FPC_RELEASE, FPC_PATCH]));
+  {$MACRO OFF}
   DiagFile.WriteLn;
+
   DiagFile.WriteLn('Token list: ');
   DiagFile.WriteLn;
   // DiagFile.WriteLn('#' : 6, 'Unit': 30, 'Line': 6, 'Token': 30);
