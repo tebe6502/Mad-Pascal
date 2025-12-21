@@ -4549,10 +4549,7 @@ end;
   function CompilerTitle: String;
   begin
 
-      {$MACRO ON}
-  Result := Format('Mad Pascal Compiler version %s [%s, FPC %d.%d.%d] for MOS 6502 CPU',
-    [title, {$I %DATE%}, FPC_VERSION, FPC_RELEASE, FPC_PATCH]);
-  {$MACRO OFF}
+    Result := 'Mad Pascal Compiler version ' + title + ' [' + {$I %DATE%} + '] for MOS 6502 CPU';
 
   end;
 
