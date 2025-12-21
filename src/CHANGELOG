@@ -1,14 +1,17 @@
+21.12.2025
+- added FPC version output in diag file
+
 06.12.2025
-- poprawki FASTGRAPH, GRAPH
+- amendments in FASTGRAPH, GRAPH
 
 02.11.2025
-- optymalizacja cmd_listing.inc (JAC!)
+- optimization of cmd_listing.inc (JAC!)
 
 01.11.2025
-- poprawiona alokacja RECORD, ^RECORD w procedurze/funkcji dla działania rekurencji
+- fixed RECORD, ^RECORD allocation in procedure/function for recursion operation
 
 29.10.2025
-- wydzielony unit Compiler
+- dedicated unit Compiler
 
 21.10.2025
 - include/opt6502 optimization
@@ -40,29 +43,29 @@
 - optimizations
 
 30.08.2025
-- dodana konwersja parametru procedury/funkcji INTEGER -> REAL
-- szybsza wersja 'FUNCTION SQRT(REAL): REAL' (unit SYSTEM)
+- added procedure/function parameter conversion INTEGER -> REAL
+- faster version of 'FUNCTION SQRT(REAL): REAL' (unit SYSTEM)
 
 27.08.2025
 - bugfixes and optimizations
 
 24.08.2025
-- nowy unit SAM
-- nowy unit PACKFIRE
+- new unit SAM
+- new unit PACKFIRE
 
 22.08.2025
 - poprawione parsowanie wartości rzeczywistych, akceptuje dodatkowe znaki 'E', '-', np. 6.1858296469E-02
 
 21.08.2025
-- optymalizacje @cmpCHAR2STRING, @cmpSTRING2CHAR
+- optimizations @cmpCHAR2STRING, @cmpSTRING2CHAR
 
 18.08.2025
-- dodane zasoby MD1, MD1PLAY
-- nowy unit MD1
+- added resources MD1, MD1PLAY
+- new unit MD1
 
 16.08.2025
-- poprawione przekazywanie typu ENUM w procedurze/funkcji
-- dodana obsługa instrukcji WITH
+- improved ENUM type passing in procedures/functions
+- added support for instruction WITH
 
 09.08.2025
 - optimizations opt_TAY, opt_EOR
@@ -78,16 +81,16 @@
 - nowy unit GIF, odczytuje obrazki max 336x240 GIF87, GIF89, wymaga VBXE
 
 26.07.2025
-- optymalizacje
+- optimizations
 - poprawione definiowane ObjectVariable
 
 24.07.2025
 - opt_IMUL_CL dodana optymalizacja dla mnożenia *6
-- nowy unit SHA256
+- new unit SHA256
 
 14.07.2025
-- nowy unit AES
-- nowy unit BFONT (CHR Borland)
+- new unit AES
+- new unit BFONT (CHR Borland)
 - poprawiony błąd uniemożliwiający działanie LENGHT dla USERTYPE
 - dodane rzutowanie tablicy tablicą (AES)
 - poprawiony test limitu 256 bajtów na rekord, poprzednio zgłaszał błąd przy 255 bajtów

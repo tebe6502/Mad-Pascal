@@ -1,3 +1,4 @@
+//PROFILE-NO
 
 var
   ASM65Count: Integer;
@@ -103,3 +104,6 @@ procedure LogOptimizeBuf();
 begin
   LogStringArray('OptimizeBuf', OptimizeBuf);
 end;
+
+//PROFILE-YES
+
