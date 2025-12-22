@@ -103,7 +103,7 @@ end;
 
 procedure Initialize(const aTarget: TTarget; const anOptimizeTemporary: IOptimizeTemporary);
 begin
-  target:=aTarget;
+  Target:=aTarget;
   OptimizeTemporary:=anOptimizeTemporary;
   OptimizerStepList:=TOptimizerStepList.Create;
 
@@ -461,11 +461,11 @@ var
   procedure Rebuild(const context: String);
   var
     k, i: TListingIndex;
-    oldListing, newListing: String;
+    // oldListing, newListing: String;
    begin
 
 
-    oldListing := ListingToString(listing);
+    // oldListing := ListingToString(listing);
 
     k := 0;
     for i := 0 to l - 1 do
@@ -639,8 +639,8 @@ var
     listing[k + 2] := '';
     listing[k + 3] := '';
 
-    newListing := ListingToString(listing);
-    DebugCall(Format('Rebuild(%s)', [context]), Format('Changing l from %d to %d: oldListing=%s / newListing=%s', [l, k, oldListing, newListing]));
+    // newListing := ListingToString(listing);
+    // DebugCall(Format('Rebuild(%s)', [context]), Format('Changing l from %d to %d: oldListing=%s / newListing=%s', [l, k, oldListing, newListing]));
     l := k;
 
    end;  //Rebuild
@@ -1120,7 +1120,7 @@ end;
       Result := True;
 
       Rebuild('PeepholeOptimization');
-      DebugCall('OptimizeASM:PeepholeOptimization', ListingToString(listing));
+      // DebugCall('OptimizeASM:PeepholeOptimization', ListingToString(listing));
 
       for i := 0 to l - 1 do
       begin
@@ -2503,7 +2503,7 @@ begin        // OptimizeASM
 
   (* -------------------------------------------------------------------------- *)
 
-  DebugCall('OptimizeASM.l', IntToStr(l));
+  // DebugCall('OptimizeASM.l', IntToStr(l));
 
   if ((x = 0) and inxUse) then
   begin   // succesful
@@ -2555,7 +2555,7 @@ begin        // OptimizeASM
     begin
       if listing[i] <> '' then
       begin
-            DebugCall('OptimizeASM.WriteInstruction',Format('listing[%d/%d]=%s', [i, l-1, listing[i]]));
+           // DebugCall('OptimizeASM.WriteInstruction',Format('listing[%d/%d]=%s', [i, l-1, listing[i]]));
            WriteInstruction(i);
       end;
     end;
@@ -2567,7 +2567,7 @@ begin        // OptimizeASM
   begin
 
     l := High(OptimizeBuf);
-    DebugCall('OptimizeASM.l', IntToStr(l));
+    // DebugCall('OptimizeASM.l', IntToStr(l));
 
     if l > High(listing) then
     begin
@@ -2654,7 +2654,7 @@ begin        // OptimizeASM
 
     for i := 0 to l - 1 do
     begin
-          DebugCall('OptimizeASM.WriteInstruction',Format('listing[%d/%d]=%s', [i, l-1, listing[i]]));
+         // DebugCall('OptimizeASM.WriteInstruction',Format('listing[%d/%d]=%s', [i, l-1, listing[i]]));
          WriteInstruction(i);
     end;
 
@@ -2722,9 +2722,9 @@ begin
     if not IsASM65BufferEmpty
     then
       begin
-        DebugCall('OptimizeASM.Begin',OptimizeBufToString );
+        // DebugCall('OptimizeASM.Begin',OptimizeBufToString );
         OptimizeASM(CodeSize, IsInterrupt);
-        DebugCall('OptimizeASM.End',OptimizeBufToString );
+        // DebugCall('OptimizeASM.End',OptimizeBufToString );
       end
     else
       begin
