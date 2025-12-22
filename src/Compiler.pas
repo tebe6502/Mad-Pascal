@@ -20125,7 +20125,7 @@ begin
   end;
 
   optimization.Optimizer := Optimizer.CreateDefaultOptimizer(optimizerLogFileWriter);
-  optimization.Optimizer.Initialize(TFileWriter.Create(OutFile), AsmBlock, AsmBlockIndex, target);
+  optimization.Optimizer.Initialize(target, AsmBlock, AsmBlockIndex, TFileWriter.Create(OutFile));
 
   Profiler.profiler.BeginSection('CompileProgram(TPass.CODE_GENERATION);');
   CompileProgram(TPass.CODE_GENERATION);

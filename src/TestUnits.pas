@@ -3,6 +3,7 @@
 program TestUnits;
 
 {$I Defines.inc}
+{$MODESWITCH NESTEDPROCVARS}
 
 uses
   Assembler,
@@ -17,6 +18,8 @@ uses
   Messages,
   Optimizer,
   OptimizerTest,
+  OptimizeTemporary,
+  OptimizerTypes,
   Tokens,
   Utilities,
   StringUtilities,
@@ -60,7 +63,6 @@ uses
 
   procedure TestLanguage();
 
-    var global: Integer;
 
     procedure TestFor;
     var
@@ -141,19 +143,23 @@ uses
       DisplayArrayOfConst([1, 'String', @listing]);
     end;
 
+
+    procedure TestFunctionPointer;
+    var
+      global: Integer;
+
     function TestFunction(const i: Integer): Boolean;
     begin
       Result := (i > global);
     end;
 
-
-    procedure TestFunctionPointer;
     type
       TFunction = function(const i: Integer): Boolean;
     var
       f: TFunction;
     begin
 
+      Assert(TestFunction(1) = True);
       f := @TestFunction;
       global:=0;
       Assert(f(1)= True);
@@ -688,14 +694,27 @@ type
 
     procedure TestOptimizeASM;
     {$i OptimizeASM.inc}
+    procedure opt_TEST(const i: TListingIndex);
     begin
 
+    end;
+
+    var
+      OptimizerStepList: TOptimizerStepList;
+    begin
+      OptimizerStepList := TOptimizerStepList.Create;
+      // InitializeOptimizerSteps(OptimizerStepList);
+      OptimizerStepList.AddOptimizerStep('TestStep', @opt_TEST);
       t := '';
-      opt_BYTE_DIV(0);
+      OptimizerStepList.Optimize(1);
+      FreeAndNil(OptimizerStepList);
     end;
 
   begin
     StartTest('TestUnitOptimizer');
+
+    TestOptimizeASM;
+
     TraceFile := TFileSystem.CreateTextFile;
     traceFile.Assign('..\samples\tests\tests-debug\debug-trace.log');
     traceFile.Rewrite();

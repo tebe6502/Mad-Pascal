@@ -10,8 +10,8 @@ uses CompilerTypes, CommonIO, Targets;
 type
   IOptimizer = interface
 
-    procedure Initialize(const Writer: IWriter; const AsmBlockArray: TAsmBlockArray;
-      const AsmBlockArrayHigh: Integer; const Target: TTarget);
+    procedure Initialize(const Target: TTarget; const AsmBlockArray: TAsmBlockArray;
+      const AsmBlockArrayHigh: Integer; const Writer: IWriter);
 
     procedure StartOptimization(SourceLocation: TSourceLocation);
 
@@ -39,7 +39,7 @@ function CreateDefaultOptimizer(LogWriter: IWriter = nil): IOptimizer;
 
 implementation
 
-uses SysUtils, Optimize;
+uses SysUtils, Optimize, OptimizeTemporary;
 
 type
   TDummyOptimizer = class(TInterfacedObject, IOptimizer)
@@ -47,8 +47,8 @@ type
   public
     constructor Create;
 
-    procedure Initialize(const Writer: IWriter; const AsmBlockArray: TAsmBlockArray;
-      const AsmBlockArrayHigh: Integer; const Target: TTarget);
+    procedure Initialize(const Target: TTarget;
+  const AsmBlockArray: TAsmBlockArray; const AsmBlockArrayHigh: Integer; const Writer: IWriter);
 
     procedure StartOptimization(SourceLocation: TSourceLocation);
 
@@ -73,8 +73,8 @@ constructor TDummyOptimizer.Create;
 begin
 end;
 
-procedure TDummyOptimizer.Initialize(const Writer: IWriter; const AsmBlockArray: TAsmBlockArray;
-  const AsmBlockArrayHigh: Integer; const Target: TTarget);
+procedure TDummyOptimizer.Initialize(const Target: TTarget;
+  const AsmBlockArray: TAsmBlockArray; const AsmBlockArrayHigh: Integer; const Writer: IWriter);
 begin
 end;
 
@@ -123,8 +123,8 @@ type
   public
     constructor Create(LogWriter: IWriter);
 
-    procedure Initialize(const Writer: IWriter; const AsmBlockArray: TAsmBlockArray;
-      const AsmBlockArrayHigh: Integer; const Target: TTarget);
+    procedure Initialize(const Target: TTarget;
+  const AsmBlockArray: TAsmBlockArray; const AsmBlockArrayHigh: Integer; const Writer: IWriter);
 
     procedure StartOptimization(SourceLocation: TSourceLocation);
 
@@ -151,10 +151,11 @@ begin
   Self.LogWriter := LogWriter;
 end;
 
-procedure TOptimizer.Initialize(const Writer: IWriter; const AsmBlockArray: TAsmBlockArray;
-  const AsmBlockArrayHigh: Integer; const Target: TTarget);
+procedure TOptimizer.Initialize(const Target: TTarget;
+  const AsmBlockArray: TAsmBlockArray; const AsmBlockArrayHigh: Integer; const Writer: IWriter);
 var
   i: Integer;
+  OptimizeTemporary: IOptimizeTemporary;
 begin
   if (LogWriter <> nil) then
   begin
@@ -164,7 +165,9 @@ begin
       LogWriter.WriteLn(Format('AsmBlockArray[%d]=''%s'')', [i, AsmBlockArray[i]]));
     end;
   end;
-  Optimize.Initialize(Writer, AsmBlockArray, Target);
+  OptimizeTemporary := TOptimizeTemporary.Create;
+  OptimizeTemporary.Initialize(AsmBlockArray, Writer);
+  Optimize.Initialize(Target, OptimizeTemporary);
 end;
 
 procedure TOptimizer.StartOptimization(SourceLocation: TSourceLocation);
