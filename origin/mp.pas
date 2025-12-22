@@ -454,6 +454,12 @@ uses
 //                                 Main program
 // ----------------------------------------------------------------------------
 
+var
+optimization: record
+  Optimizer: IOptimizer;
+  active: Boolean;
+  end;
+
 begin
 
 {$IFDEF WINDOWS}
@@ -609,6 +615,10 @@ begin
   SetLength(OptimizeBuf, 1);
 
   Pass := CODEGENERATIONPASS;
+
+  optimization.Optimizer := Optimizer.CreateDefaultOptimizer(optimizerLogFileWriter);
+  optimization.Optimizer.Initialize(target, AsmBlock, AsmBlockIndex, TFileWriter.Create(OutFile));
+
   CompileProgram;
 
   Flush(OutFile);
