@@ -9,6 +9,7 @@ uses
   Assembler,
   Crt,
   Common,
+  CommonIO,
   CommonTypes,
   CompilerTypes,
   DataTypes,
@@ -34,16 +35,27 @@ uses
 
   procedure AssertEquals(actual, expected: Longint); overload;
   begin
-    Assert(actual = expected, 'The actual value ''' + IntToStr(actual) +
-      ''' is not equal to the expected value ''' + IntToStr(expected) + '''.');
+    Assert(actual = expected, Format('The actual value ''%d'' is not equal to the expected value ''%d''.',
+      [actual, expected]));
   end;
 
   procedure AssertEquals(actual, expected: TDataType); overload;
   begin
-    Assert(actual = expected, 'The actual value ''' + GetDataTypeName(actual) +
-      ''' is not equal to the expected value ''' + GetDataTypeName(expected) + '''.');
+    Assert(actual = expected, Format('The actual value ''%s'' is not equal to the expected value ''%s''.',
+      [GetDataTypeName(actual), GetDataTypeName(expected)]));
   end;
 
+  procedure AssertEquals(actual, expected: TStringArray); overload;
+var i: Integer;
+  begin
+    Assert(Length(actual) = Length(expected),
+      Format('The actual array length ''%d'' is not equal to the expected array length ''%d''.',
+      [Length(actual), Length(expected)]));
+    for i:=Low(actual) to High(actual) do
+    begin
+       AssertEquals(actual[i], expected[i]);
+    end;
+  end;
 
   procedure StartTest(Name: String);
   begin
@@ -148,10 +160,10 @@ uses
     var
       global: Integer;
 
-    function TestFunction(const i: Integer): Boolean;
-    begin
-      Result := (i > global);
-    end;
+      function TestFunction(const i: Integer): Boolean;
+      begin
+        Result := (i > global);
+      end;
 
     type
       TFunction = function(const i: Integer): Boolean;
@@ -161,8 +173,8 @@ uses
 
       Assert(TestFunction(1) = True);
       f := @TestFunction;
-      global:=0;
-      Assert(f(1)= True);
+      global := 0;
+      Assert(f(1) = True);
     end;
 
   begin
@@ -514,213 +526,55 @@ type
 
 
   procedure TestUnitOptimizer;
-  var
-    ShrShlCnt: Integer;
-  type
-    TListingIndex = Integer;
-    TListing = array [0..1023] of String;
-    TListing_tmp = array [0..127] of String;
-    TString0_3_Array = array [0..3] of String;
-  var
 
-    listing: TListing;
-
-    s: array [0..15] of TString0_3_Array;
-  var
-    l: Integer;
-    x: Integer;
-    t: String;
-
-    function GetString(const a: String): String; overload;
-    var
-      i: Integer;
-    begin
-
-      Result := '';
-      i := 6;
-
-      if a <> '' then
-        while not (a[i] in [' ', #9]) and (i <= length(a)) do
-        begin
-          Result := Result + a[i];
-          Inc(i);
-        end;
-
-    end;
-
-
-    function GetString(j: TListingIndex): String; overload;
-    var
-      i: Integer;
-      a: String;
-    begin
-
-      Result := '';
-      i := 6;
-
-      a := listing[j];
-
-      if a <> '' then
-        while (i <= length(a)) and not (a[i] in [' ', #9]) do
-        begin
-          Result := Result + a[i];
-          Inc(i);
-        end;
-
-    end;
-
-
-    function GetStringLast(j: TListingIndex): String; overload;
-    var
-      i: Integer;
-      a: String;
-    begin
-
-      Result := '';
-
-      a := listing[j];
-
-      if a <> '' then
-      begin
-        i := length(a);
-
-        while not (a[i] in [' ', #9]) and (i > 0) do Dec(i);
-
-        Result := copy(a, i + 1, 256);
-      end;
-
-    end;  //GetStringLast
-
-    function GetBYTE(i: Integer): Integer;
-    begin
-      Result := GetVAL(copy(listing[i], 6, 4));
-    end;
-
-    function GetWORD(i, j: Integer): Integer;
-    begin
-      Result := GetVAL(copy(listing[i], 6, 4)) + GetVAL(copy(listing[j], 6, 4)) shl 8;
-    end;
-
-    function GetTRIPLE(i, j, k: Integer): Integer;
-    begin
-      Result := GetVAL(copy(listing[i], 6, 4)) + GetVAL(copy(listing[j], 6, 4)) shl 8 +
-        GetVAL(copy(listing[k], 6, 4)) shl 16;
-    end;
-
-    function GetDWORD(i, j, k, l: Integer): Integer;
-    begin
-      Result := GetVAL(copy(listing[i], 6, 4)) + GetVAL(copy(listing[j], 6, 4)) shl 8 +
-        GetVAL(copy(listing[k], 6, 4)) shl 16 + GetVAL(copy(listing[l], 6, 4)) shl 24;
-    end;
-
-
-    function GetARG(const n: Byte; const x: Shortint; reset: Boolean = True): String;
-    var
-      i: Integer;
-      a: String;
-    begin
-
-      Result := '';
-
-      if x < 0 then exit;
-
-      a := s[x][n];
-
-      if (a = '') then
-      begin
-
-        Result := IntToStr(Shortint(x + 8));
-
-        case n of
-          0: Result := ':STACKORIGIN+' + Result;
-          1: Result := ':STACKORIGIN+STACKWIDTH+' + Result;
-          2: Result := ':STACKORIGIN+STACKWIDTH*2+' + Result;
-          3: Result := ':STACKORIGIN+STACKWIDTH*3+' + Result;
-        end;
-
-      end
-      else
-      begin
-
-        i := 6;
-
-        while a[i] in [' ', #9] do Inc(i);
-
-        while (i <= length(a)) and not (a[i] in [' ', #9]) do
-        begin
-          Result := Result + a[i];
-          Inc(i);
-        end;
-
-        if reset then s[x][n] := '';
-
-      end;
-
-    end;  //GetARG
-
-    {$i include/cmd_listing.inc}
-
-    function SKIP(i: TListingIndex): Boolean;
-    begin
-
-      if (i < 0) or (listing[i] = '') then
-        Result := False
-      else
-        Result := seq(i) or sne(i) or spl(i) or smi(i) or scc(i) or scs(i) or jeq(i) or
-          jne(i) or jpl(i) or jmi(i) or jcc(i) or jcs(i) or beq(i) or bne(i) or bpl(i) or bmi(i) or bcc(i) or bcs(i);
-    end;
-
-    function argMatch(i, j: TListingIndex): Boolean;
-    begin
-      Result := copy(listing[i], 6, 256) = copy(listing[j], 6, 256);
-    end;
-
-
-    procedure Expand(i, e: TListingIndex);
-    var
-      k: Integer;
-    begin
-
-      for k := l - 1 downto i do
-      begin
-
-        listing[k + e] := listing[k];
-
-      end;
-
-      Inc(l, e);
-
-    end;
 
     procedure TestOptimizeASM;
-    {$i OptimizeASM.inc}
-    procedure opt_TEST(const i: TListingIndex);
-    begin
 
-    end;
+      procedure opt_TEST(const i: TListingIndex);
+      begin
+
+      end;
 
     var
       OptimizerStepList: TOptimizerStepList;
     begin
       OptimizerStepList := TOptimizerStepList.Create;
-      // InitializeOptimizerSteps(OptimizerStepList);
       OptimizerStepList.AddOptimizerStep('TestStep', @opt_TEST);
-      t := '';
       OptimizerStepList.Optimize(1);
       FreeAndNil(OptimizerStepList);
+    end;
+
+    procedure TestOptimizeTemporary;
+    var
+      AsmBlockArray: TAsmBlockArray;
+      ActualWriter: TStringArrayWriter;
+      OptimizeTemporary: IOptimizeTemporary;
+      ExpectedWriter: TStringArrayWriter;
+    begin
+      AsmBlockArray := Default(TAsmBlockArray);
+      ActualWriter := TStringArrayWriter.Create;
+      OptimizeTemporary := TOptimizeTemporary.Create;
+      OptimizeTemporary.Initialize(asmBlockArray, ActualWriter);
+      OptimizeTemporary.WriteOut('; Test');
+      OptimizeTemporary.Finalize;
+
+      ExpectedWriter := TStringArrayWriter.Create;
+      ExpectedWriter.WriteLn('; Test');
+
+      AssertEquals(ActualWriter.GetLines(), ExpectedWriter.GetLines);
     end;
 
   begin
     StartTest('TestUnitOptimizer');
 
     TestOptimizeASM;
+    TestOptimizeTemporary;
 
     TraceFile := TFileSystem.CreateTextFile;
     traceFile.Assign('..\samples\tests\tests-debug\debug-trace.log');
     traceFile.Rewrite();
     Debugger.debugger := TDebugger.Create;
     pass := TPass.CODE_GENERATION;
-    // OutFile.Flush;
     OptimizerTest.Test;
     traceFile.Close;
     EndTest('TestUnitOptimizer');

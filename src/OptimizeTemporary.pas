@@ -4,6 +4,8 @@ interface
 
 uses CommonIO, CompilerTypes;
 
+// Public Interface
+// Note that due to the usage of the global unit variables, only on instance mustbe used a at a time currently.
 type
   IOptimizeTemporary = interface
     procedure Initialize(const aAsmBlockArray: TAsmBlockArray; const aWriter: IWriter);
@@ -13,6 +15,9 @@ type
 
 type
   TOptimizeTemporary = class(TInterfacedObject, IOptimizeTemporary)
+
+    public
+
     procedure Initialize(const aAsmBlockArray: TAsmBlockArray; const aWriter: IWriter);
     procedure WriteOut(const a: String);
     procedure Finalize;
@@ -34,7 +39,7 @@ var
   TemporaryBufIndex: TTemporaryBufIndex;
   LastTempBuf0: TString;
 
-procedure TOptimizeTemporary.Initialize( const aAsmBlockArray:TAsmBlockArray; const aWriter: IWriter);
+procedure TOptimizeTemporary.Initialize(const aAsmBlockArray: TAsmBlockArray; const aWriter: IWriter);
 var
   i: TTemporaryBufIndex;
 begin
