@@ -301,7 +301,7 @@ var i: Integer;
     end;
 
   const
-    TEST_MP_FILE_PATH = '..\src\tests\TestMP.pas';
+    TEST_MP_FILE_PATH = '..' + DirectorySeparator + 'src' + DirectorySeparator + 'tests' + DirectorySeparator + 'TestMP.pas';
   var
     pathList: TPathList;
   begin
