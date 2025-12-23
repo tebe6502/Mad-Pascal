@@ -35,7 +35,7 @@ begin
   OutFile.Rewrite();
 
   Writer := TFileWriter.Create(OutFile); // TStringArrayWriter.Create;
-  Optimizer.Initialize(Writer, AsmBlockArray, 0, Target);
+  Optimizer.Initialize(Target, AsmBlockArray, 0, Writer);
 
   sourceLocation := Default(TSourceLocation);
   SourceLocation.SourceFile := SourceFile;

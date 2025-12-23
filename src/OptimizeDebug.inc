@@ -18,15 +18,6 @@ begin
   for i := 0 to Length(OptimizeBuf) - 1 do Result := Result + OptimizeBuf[i] + '/';
 end;
 
-function TemporaryBufToString: String;
-var
-  i: Integer;
-begin
-  Result := '';
-  for i := 0 to TemporaryBufIndex - 1 do Result := Result + TemporaryBuf[i] + '/';
-end;
-
-
 procedure LogTrace(const message: String);
 begin
   if (ASM65CountBreakPoint > 0) or (DebugCallCountBreakPoint > 0) then

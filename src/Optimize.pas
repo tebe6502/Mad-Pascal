@@ -6,11 +6,11 @@ unit Optimize;
 
 interface
 
-uses CompilerTypes, CommonIO, Targets;
+uses CompilerTypes, CommonIO, OptimizeTemporary, Targets;
 
   // ----------------------------------------------------------------------------
 
-procedure Initialize(const aWriter: IWriter; const aAsmBlockArray:TAsmBlockArray; const aTarget: TTarget);
+procedure Initialize(const aTarget: TTarget; const anOptimizeTemporary: IOptimizeTemporary);
 
 procedure StartOptimization(SourceLocation: TSourceLocation);
 
@@ -30,32 +30,13 @@ procedure Finalize;
 
 implementation
 
-uses SysUtils, Assembler, Console, Debugger ,StringUtilities, Utilities;
+uses SysUtils, Assembler, Console, Debugger, OptimizerTypes, StringUtilities , Utilities;
 
-type
-  TOptimizerFunction = function(i:Integer): Boolean;
 
-type
-  TOptimizerStep = record
-    Name: String;
-    OptimizerFunction: TOptimizerFunction;
-  end;
+var OptimizeTemporary: IOptimizeTemporary;
+var Target:TTarget;
 
-type TOptimizerStepArray = array of TOptimizerStep;
-
-var OptimizeBufStepArray: TOptimizerStepArray;
-
-var Writer: IWriter;
-   AsmBlockArray: TAsmBlockArray;
-   Target:TTarget;
-
-type
-  TTemporaryBufIndex = Integer;
-
-var
-  TemporaryBuf: array [0..511] of String;
-  TemporaryBufIndex: TTemporaryBufIndex;
-  LastTempBuf0: TString;
+var OptimizerStepList: TOptimizerStepList;
 
 var
   OptimizeBuf: TStringArray;
@@ -120,30 +101,13 @@ end;
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 
-procedure InitializeStep(const Name: String; const OptimizerFunction: TOptimizerFunction);
-var i: Integer;
-    OptimizerStep: TOptimizerStep;
+procedure Initialize(const aTarget: TTarget; const anOptimizeTemporary: IOptimizeTemporary);
 begin
+  Target:=aTarget;
+  OptimizeTemporary:=anOptimizeTemporary;
+  OptimizerStepList:=TOptimizerStepList.Create;
 
-  OptimizerStep.Name := Name;
-  OptimizerStep.OptimizerFunction := OptimizerFunction;
-  i := Length(OptimizeBufStepArray);
-  SetLength(OptimizeBufStepArray, i+1);
-  OptimizeBufStepArray[i] := OptimizerStep;
 
-end;
-
-procedure Initialize(const aWriter: IWriter; const aAsmBlockArray:TAsmBlockArray; const aTarget: TTarget);
-var
-  i: TTemporaryBufIndex;
-begin
-  Writer:=aWriter;
-  AsmBlockArray:=aAsmBlockArray;
-  target:=aTarget;
-
-  for i := Low(TemporaryBuf) to High(TemporaryBuf) do TemporaryBuf[i] := '';
-  TemporaryBufIndex := -1;
-  LastTempBuf0 := '';
 
   SetLength(OptimizeBuf, 1);
 
@@ -151,8 +115,6 @@ begin
   ResetOpty;
 
   ShrShlCnt:=0;
-
-  OptimizeBufStepArray:=nil;
 end;
 
 procedure StartOptimization(SourceLocation: TSourceLocation);
@@ -173,425 +135,18 @@ begin
   Result:=optimize.line;
 end;
 
-
-// ----------------------------------------------------------------------------
-// ----------------------------------------------------------------------------
-
-
-procedure OptimizeTemporaryBuf;
-var
-  p, k, q: Integer;
-  tmp: String;
-  yes: Boolean;
-
-
-  {$i include\cmd_temporary.inc}
-
-
-  function argMatch(const i, j: TTemporaryBufIndex): Boolean;
-  begin
-    Result := copy(TemporaryBuf[i], 6, 256) = copy(TemporaryBuf[j], 6, 256);
-  end;
-
-
-  function fail(i: Integer): Boolean;
-  begin
-
-        if (pos('#asm:', TemporaryBuf[i]) = 1) or
-
-	   ldy(i) or
-           jsr(i) or
-           iny(i) or
-           dey(i) or
-           tay(i) or
-           tya(i) or
-           mwy(i) or
-	   mwy(i) or
-           (pos(#9'.if', TemporaryBuf[i]) > 0) or
-           (pos(#9'.LOCAL ', TemporaryBuf[i]) > 0) or
-           (pos(#9'@print', TemporaryBuf[i]) > 0) then Result:=true else Result:=false;
-  end;
-
-
-  function SKIP(i: integer): Boolean;
-  begin
-
-      Result :=	seq(i) or sne(i) or
-		spl(i) or smi(i) or
-		scc(i) or scs(i) or
-		svc(i) or svs(i) or
-
-		jne(i) or jeq(i) or
-		jcc(i) or jcs(i) or
-		jmi(i) or jpl(i) or
-
-		(pos(#9'bne ', TemporaryBuf[i]) = 1) or (pos(#9'beq ', TemporaryBuf[i]) = 1) or
-		(pos(#9'bcc ', TemporaryBuf[i]) = 1) or (pos(#9'bcs ', TemporaryBuf[i]) = 1) or
-		(pos(#9'bmi ', TemporaryBuf[i]) = 1) or (pos(#9'bpl ', TemporaryBuf[i]) = 1);
-  end;
-
-
-  function IFDEF_MUL8(const i: TTemporaryBufIndex): Boolean;
-  begin
-      Result :=	//(TemporaryBuf[i+4] = #9'eif') and
-      		//(TemporaryBuf[i+3] = #9'imulCL') and
-      		//(TemporaryBuf[i+2] = #9'els') and
-		(TemporaryBuf[i+1] = #9'fmulu_8') and
-		(TemporaryBuf[i]   = #9'.ifdef fmulinit');
-  end;
-
-
-  function IFDEF_MUL16(const i: TTemporaryBufIndex): Boolean;
-  begin
-      Result :=	//(TemporaryBuf[i+4] = #9'eif') and
-      		//(TemporaryBuf[i+3] = #9'imulCX') and
-      		//(TemporaryBuf[i+2] = #9'els') and
-		(TemporaryBuf[i+1] = #9'fmulu_16') and
-		(TemporaryBuf[i]   = #9'.ifdef fmulinit');
-  end;
-
-
-  function fortmp(const a: String): String;
-    // @FORTMP_xxxx
-    // @FORTMP_xxxx+1
-  begin
-
-    Result := a;
-
-    //    Result[8] := '?';
-
-    if length(Result) > 12 then
-      Result[13] := '_'
-    else
-      Result := Result + '_0';
-
-  end;
-
-
-  function GetBYTE(const i: TTemporaryBufIndex): Integer;
-  begin
-    Result := GetVAL(copy(TemporaryBuf[i], 6, 4));
-  end;
-
-  // TODO: The functions below do not handle errors situations (-1) correctly
-  function GetWORD(const i, j: TTemporaryBufIndex): Integer;
-  begin
-    Result := GetVAL(copy(TemporaryBuf[i], 6, 4)) + GetVAL(copy(TemporaryBuf[j], 6, 4)) * 256;
-  end;
-
-
-  function GetSTRING(const j: TTemporaryBufIndex): String;
-  var
-    i: Integer;
-    a: String;
-  begin
-
-    Result := '';
-    i := 6;
-
-    a := TemporaryBuf[j];
-
-    if a <> '' then
-      while (i <= length(a)) and not (a[i] in [' ', #9]) do
-      begin
-        Result := Result + a[i];
-        Inc(i);
-      end;
-
-  end;
-
-// -----------------------------------------------------------------------------
-
-  {$i include/opt6502/opt_TEMP_MOVE.inc}
-  {$i include/opt6502/opt_TEMP_FILL.inc}
-  {$i include/opt6502/opt_TEMP_TAIL_IF.inc}
-  {$i include/opt6502/opt_TEMP_TAIL_CASE.inc}
-  {$i include/opt6502/opt_TEMP.inc}
-  {$i include/opt6502/opt_TEMP_CMP.inc}
-  {$i include/opt6502/opt_TEMP_CMP_0.inc}
-  {$i include/opt6502/opt_TEMP_WHILE.inc}
-  {$i include/opt6502/opt_TEMP_FOR.inc}
-  {$i include/opt6502/opt_TEMP_FORDEC.inc}
-  {$i include/opt6502/opt_TEMP_IMUL_CX.inc}
-  {$i include/opt6502/opt_TEMP_IFTMP.inc}
-  {$i include/opt6502/opt_TEMP_ORD.inc}
-  {$i include/opt6502/opt_TEMP_X.inc}
-  {$i include/opt6502/opt_TEMP_EAX.inc}
-  {$i include/opt6502/opt_TEMP_JMP.inc}
-  {$i include/opt6502/opt_TEMP_ZTMP.inc}
-  {$i include/opt6502/opt_TEMP_UNROLL.inc}
-  {$i include/opt6502/opt_TEMP_BOOLEAN_OR.inc}
-
-// -----------------------------------------------------------------------------
-
-begin
-
-{
-if (pos('#for:dec', TemporaryBuf[10]) > 0) then begin
-
-      for p:=0 to 30 do writeln(TemporaryBuf[p]);
-      writeln('-------');
-
-end;
-}
-
-  opt_TEMP_BOOLEAN_OR;
-  opt_TEMP_ORD;
-  opt_TEMP_CMP;
-  opt_TEMP_CMP_0;
-  opt_TEMP;
-  opt_TEMP_IMUL_CX;
-  opt_TEMP_WHILE;
-  opt_TEMP_FORDEC;
-  opt_TEMP_FOR;
-  opt_TEMP_X;
-  opt_TEMP_EAX;
-  opt_TEMP_JMP;
-  opt_TEMP_ZTMP;
-  opt_TEMP_UNROLL;
-
-// -----------------------------------------------------------------------------
-
-    if (pos('@move ":bp2" ', TemporaryBuf[4]) > 1) and					// @move ":bp2"				; 4
-
-       lda(0) and									// lda A				; 0
-       sta_bp2(1) and									// sta :bp2				; 1
-       (TemporaryBuf[2] = TemporaryBuf[0] + '+1') and					// lda A+1				; 2
-       sta_bp2_1(3) then								// sta :bp2+1				; 3
-       begin
-	TemporaryBuf[4] := #9'@move ' + GetSTRING(0) + ' ' +  copy(TemporaryBuf[4], 15, 256);
-
-	TemporaryBuf[0] := '~';
-	TemporaryBuf[1] := '~';
-	TemporaryBuf[2] := '~';
-	TemporaryBuf[3] := '~';
-       end;
-
-
-    if (pos('mva:rpl (:bp2),y ', TemporaryBuf[5]) > 1) and				// mva:rpl (:bp2),y			; 5
-
-       lda_im(0) and									// lda #				; 0
-       sta_bp2(1) and									// sta :bp2				; 1
-       lda_im(2) and									// lda #				; 2
-       sta_bp2_1(3) and									// sta :bp2+1				; 3
-       ldy_im(4) then									// ldy #				; 4
-       begin
-	p := GetWORD(0, 2);
-
-	TemporaryBuf[0] := '~';
-	TemporaryBuf[1] := '~';
-	TemporaryBuf[2] := '~';
-	TemporaryBuf[3] := '~';
-
-	TemporaryBuf[5] := #9'mva:rpl ' + HexWord(word(p)) + ',y ' +  copy(TemporaryBuf[5], 19, 256);
-       end;
-
-
-    if (pos('mva:rne (:bp2),y ', TemporaryBuf[5]) > 1) and				// mva:rne (:bp2),y			; 5
-
-       lda_im(0) and									// lda #				; 0
-       sta_bp2(1) and									// sta :bp2				; 1
-       lda_im(2) and									// lda #				; 2
-       sta_bp2_1(3) and									// sta :bp2+1				; 3
-       ldy_im(4) then									// ldy #				; 4
-       begin
-	p := GetWORD(0, 2);
-
-	TemporaryBuf[0] := '~';
-	TemporaryBuf[1] := '~';
-	TemporaryBuf[2] := '~';
-	TemporaryBuf[3] := '~';
-
-	TemporaryBuf[5] := #9'mva:rne ' + HexWord(word(p)) + ',y ' +  copy(TemporaryBuf[5], 19, 256);
-       end;
-
-// -----------------------------------------------------------------------------
-
-    if (TemporaryBuf[0] = #9'jsr #$00') and						// jsr #$00				; 0
-       (TemporaryBuf[1] = #9'lda @BYTE.MOD.RESULT') then				// lda @BYTE.MOD.RESULT			; 1
-       begin
-	TemporaryBuf[0] := '~';
-	TemporaryBuf[1] := '~';
-       end;
-
-    if (TemporaryBuf[0] = #9'jsr #$00') and						// jsr #$00				; 0
-       (TemporaryBuf[1] = #9'ldy @BYTE.MOD.RESULT') then				// ldy @BYTE.MOD.RESULT			; 1
-       begin
-	TemporaryBuf[0] := #9'tay';
-	TemporaryBuf[1] := '~';
-       end;
-
-// -----------------------------------------------------------------------------
-
-    if (TemporaryBuf[0] = #9'lda :STACKORIGIN,x') and					// lda :STACKORIGIN,x			; 0
-       sta(1) and									// sta F				; 1
-       (TemporaryBuf[2] = #9'lda :STACKORIGIN+STACKWIDTH,x') and			// lda :STACKORIGIN+STACKWIDTH,x	; 2
-       sta(3) and									// sta F+1				; 3
-       dex(4) and									// dex					; 2
-       (TemporaryBuf[5] = ':move') then							//:move					; 3
-       begin
-
-	tmp:=TemporaryBuf[6];
-	p:=StrToInt(TemporaryBuf[7]);
-
-	if p = 256 then begin
-	 TemporaryBuf[1] := #9'sta :bp2';
-	 TemporaryBuf[3] := #9'sta :bp2+1';
-
-     	 TemporaryBuf[4] := #9'ldy #$00';
-     	 TemporaryBuf[5] := #9'mva:rne (:bp2),y adr.' + tmp + ',y+';
-    	end else
-    	if p <= 128 then begin
-	 TemporaryBuf[1] := #9'sta :bp2';
-	 TemporaryBuf[3] := #9'sta :bp2+1';
-
-	 TemporaryBuf[4] := #9'ldy #' + HexByte(Byte(p-1));
-     	 TemporaryBuf[5] := #9'mva:rpl (:bp2),y adr.' + tmp + ',y-';
-    	end else begin
-     	 TemporaryBuf[4] := #9'@move ' + tmp + ' #adr.' + tmp + ' #' + HexValue(p,2);
-     	 TemporaryBuf[5] := '~';
-	end;
-
-     	TemporaryBuf[6] := '~';//' #9'mwa #adr.'+tmp+' '+tmp;
-     	TemporaryBuf[7] := #9'dex';
-       end;
-
-// -----------------------------------------------------------------------------
-
-  opt_TEMP_MOVE;
-  opt_TEMP_FILL;
-
-  opt_TEMP_IFTMP;
-  opt_TEMP_TAIL_IF;
-  opt_TEMP_TAIL_CASE;
-
-  // #asm
-
-  if TemporaryBuf[0].IndexOf('#asm:') = 0 then
-  begin
-
-    Writer.WriteLn(AsmBlockArray[StrToInt(copy(TemporaryBuf[0], 6, 256))]);
-
-    TemporaryBuf[0] := '~';
-
-  end;
-
-
-  // #lib:label
-
-  if TemporaryBuf[0].IndexOf('#lib:') = 0 then
-    TemporaryBuf[0] := #9'm@lib ' + copy(TemporaryBuf[0], 6, 256);
-
-
-  // @PARAM?
-
-  if TemporaryBuf[0] = #9'sta @PARAM?' then TemporaryBuf[0] := '~';
-
-  if TemporaryBuf[0] = #9'sty @PARAM?' then TemporaryBuf[0] := #9'tya';
-
-
-  // @FORTMP?
-
-  if (pos('@FORTMP_', TemporaryBuf[0]) > 1) then
-
-    if lda(0) then begin
-
-      if (pos('::#$00', TemporaryBuf[0]) = 0) then TemporaryBuf[0] := #9'lda ' + fortmp(GetSTRING(0)) + '::#$00';
-
-    end else
-    if cmp(0) then begin
-
-        if (pos('::#$00', TemporaryBuf[0]) = 0) then TemporaryBuf[0] := #9'cmp ' + fortmp(GetSTRING(0)) + '::#$00';
-
-    end else
-    if sub(0) then begin
-
-          if (pos('::#$00', TemporaryBuf[0]) = 0) then TemporaryBuf[0] := #9'sub ' + fortmp(GetSTRING(0)) + '::#$00';
-
-    end else
-    if sbc(0) then begin
-
-            if (pos('::#$00', TemporaryBuf[0]) = 0) then TemporaryBuf[0] := #9'sbc ' + fortmp(GetSTRING(0)) + '::#$00';
-
-    end else
-            if sta(0) then
-              TemporaryBuf[0] := #9'sta ' + fortmp(GetSTRING(0))
-            else
-              if sty(0) then
-                TemporaryBuf[0] := #9'sty ' + fortmp(GetSTRING(0))
-              else
-    if mva(0) and (pos('mva @FORTMP_', TemporaryBuf[0]) = 0) then begin
-                  tmp := copy(TemporaryBuf[0], pos('@FORTMP_', TemporaryBuf[0]), 256);
-
-                  TemporaryBuf[0] := copy(TemporaryBuf[0], 1, pos(' @FORTMP_', TemporaryBuf[0])) + fortmp(tmp);
-    end else
-                  writeln('Unassigned: ' + TemporaryBuf[0]);
-
-  //  tmp:=copy(TemporaryBuf[0], pos('@FORTMP_', TemporaryBuf[0]), 256);
-  //   TemporaryBuf[0] := copy(TemporaryBuf[0], 1, pos(' @FORTMP_', TemporaryBuf[0]) ) + ':' + fortmp(tmp);
-
-end;  //OptimizeTemporaryBuf
-
-
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 
 
 procedure WriteOut(const a: String);
-var
-  i: Integer;
 begin
 
-  Debugger.debugger.WriteOut(a);
+  // Debugger.debugger.WriteOut(a);
 
   if (pos(#9'jsr ', a) = 1) or (a = '#asm') then ResetOpty;
 
-  if TemporaryBufIndex < High(TemporaryBuf) then
-  begin
-
-    if (TemporaryBufIndex >= 0) and (TemporaryBuf[TemporaryBufIndex] <> '') then
-    begin
-
-      if TemporaryBuf[TemporaryBufIndex] = '; --- ForToDoCondition' then
-        if (a = '') or (pos('; optimize ', a) > 0) then exit;
-
-      if (pos(#9'#for', TemporaryBuf[TemporaryBufIndex]) > 0) then
-        if (a = '') or (pos('; optimize ', a) > 0) then exit;
-    end;
-
-    Inc(TemporaryBufIndex);
-    TemporaryBuf[TemporaryBufIndex] := a;
-
-  end
-  else
-  begin
-
-    DebugCall('OptimizeTemporaryBuf.Before',  a+'/'+TemporaryBufToString);
-    OptimizeTemporaryBuf;
-    DebugCall('OptimizeTemporaryBuf.After ', a+'/'+TemporaryBufToString);
-
-    if TemporaryBuf[TemporaryBufIndex] <> '' then
-    begin
-
-      if TemporaryBuf[TemporaryBufIndex] = '; --- ForToDoCondition' then
-        if (a = '') or (pos('; optimize ', a) > 0) then exit;
-
-      if (pos(#9'#for', TemporaryBuf[TemporaryBufIndex]) > 0) then
-        if (a = '') or (pos('; optimize ', a) > 0) then exit;
-    end;
-
-    if TemporaryBuf[0] <> '~' then
-    begin
-      if (TemporaryBuf[0] <> '') or (LastTempBuf0 <> TemporaryBuf[0]) then Writer.WriteLn(TemporaryBuf[0]);
-
-      LastTempBuf0 := TemporaryBuf[0];
-    end;
-
-    for i := 1 to TemporaryBufIndex do TemporaryBuf[i - 1] := TemporaryBuf[i];
-
-    TemporaryBuf[TemporaryBufIndex] := a;
-
-  end;
+  OptimizeTemporary.WriteOut(a);
 
 end;  //WriteOut
 
@@ -600,12 +155,11 @@ end;  //WriteOut
 // ----------------------------------------------------------------------------
 
 procedure Finalize;
-var
-  i: Integer;
 begin
 
-  for i := 0 to High(TemporaryBuf) do WriteOut('');    // flush TemporaryBuf
-
+  FreeAndNil(OptimizerStepList);
+  OptimizeTemporary.Finalize;
+  OptimizeTemporary := nil;
 end;
 
 
@@ -636,8 +190,6 @@ procedure OptimizeASM(const CodeSize: Integer; const IsInterrupt: Boolean);
 (* peephole optimization                                                      *)
 (* -------------------------------------------------------------------------- *)
 type
-  TListingIndex = Integer;
-  TListing = array [0..1023] of String;
   TListing_tmp = array [0..127] of String;
   TString0_3_Array = array [0..3] of String;
   TStack = array [0..15] of TString0_3_Array;
@@ -909,11 +461,11 @@ var
   procedure Rebuild(const context: String);
   var
     k, i: TListingIndex;
-    oldListing, newListing: String;
+    // oldListing, newListing: String;
    begin
 
 
-    oldListing := ListingToString(listing);
+    // oldListing := ListingToString(listing);
 
     k := 0;
     for i := 0 to l - 1 do
@@ -1087,8 +639,8 @@ var
     listing[k + 2] := '';
     listing[k + 3] := '';
 
-    newListing := ListingToString(listing);
-    DebugCall(Format('Rebuild(%s)', [context]), Format('Changing l from %d to %d: oldListing=%s / newListing=%s', [l, k, oldListing, newListing]));
+    // newListing := ListingToString(listing);
+    // DebugCall(Format('Rebuild(%s)', [context]), Format('Changing l from %d to %d: oldListing=%s / newListing=%s', [l, k, oldListing, newListing]));
     l := k;
 
    end;  //Rebuild
@@ -1353,79 +905,7 @@ var
 
 // -----------------------------------------------------------------------------
 
-  //{$i OptimizeASM.inc}
-   {$i include/opt6502/opt_SHR_BYTE.inc}
-   {$i include/opt6502/opt_SHR_WORD.inc}
-   {$i include/opt6502/opt_SHR_CARD.inc}
-   {$i include/opt6502/opt_SHL_BYTE.inc}
-   {$i include/opt6502/opt_SHL_WORD.inc}
-   {$i include/opt6502/opt_SHL_CARD.inc}
-   {$i include/opt6502/opt_BYTE_DIV.inc}
-
-   {$i include/opt6502/opt_STA_0.inc}
-   {$i include/opt6502/opt_STACK.inc}
-   {$i include/opt6502/opt_STACK_INX.inc}
-   {$i include/opt6502/opt_STACK_ADD.inc}
-   {$i include/opt6502/opt_STACK_CMP.inc}
-   {$i include/opt6502/opt_STACK_ADR.inc}
-   {$i include/opt6502/opt_STACK_AL_CL.inc}
-   {$i include/opt6502/opt_STACK_AX_CX.inc}
-   {$i include/opt6502/opt_STACK_EAX_ECX.inc}
-   {$i include/opt6502/opt_STACK_PRINT.inc}
-   {$i include/opt6502/opt_CMP_BRANCH.inc}
-   {$i include/opt6502/opt_CMP_BP2.inc}
-   {$i include/opt6502/opt_CMP_LOCAL.inc}
-   {$i include/opt6502/opt_CMP_LT_GTEQ.inc}
-   {$i include/opt6502/opt_CMP_LTEQ.inc}
-   {$i include/opt6502/opt_CMP_GT.inc}
-   {$i include/opt6502/opt_CMP_NE_EQ.inc}
-   {$i include/opt6502/opt_CMP.inc}
-   {$i include/opt6502/opt_CMP_0.inc}
-
-  procedure InitializeOptimizerSteps;
-  var i: Integer;
-    returnValue: Boolean;
-  begin
-    if OptimizeBufStepArray = nil then
-    begin
-(* Procedures with no input parameters
-      InitializeStep('opt_SHR_BYTE', @opt_SHR_BYTE);
-      InitializeStep('opt_SHR_WORD', @opt_SHR_WORD);
-      InitializeStep('opt_SHR_CARD', @opt_SHR_CARD);
-      InitializeStep('opt_SHL_BYTE', @opt_SHL_BYTE);
-      InitializeStep('opt_SHL_WORD', @opt_SHL_WORD);
-      InitializeStep('opt_SHL_CARD', @opt_SHL_CARD);
-*)
-(* Procedures with other input parameters
-      InitializeStep('opt_BYTE_DIV', @opt_BYTE_DIV);
-*)
-
-      InitializeStep('opt_STA_0', @opt_STA_0);
-      InitializeStep('opt_STACK', @opt_STACK);
-      InitializeStep('opt_STACK_INX', @opt_STACK_INX);
-      InitializeStep('opt_STACK_ADD', @opt_STACK_ADD);
-      InitializeStep('opt_STACK_CMP', @opt_STACK_CMP);
-      InitializeStep('opt_STACK_ADR', @opt_STACK_ADR);
-      InitializeStep('opt_STACK_AL_CL', @opt_STACK_AL_CL);
-      InitializeStep('opt_STACK_AX_CX', @opt_STACK_AX_CX);
-      InitializeStep('opt_STACK_EAX_ECX', @opt_STACK_EAX_ECX);
-      InitializeStep('opt_STACK_PRINT', @opt_STACK_PRINT);
-      InitializeStep('opt_CMP_BRANCH', @opt_CMP_BRANCH);
-      InitializeStep('opt_CMP_BP2', @opt_CMP_BP2);
-      InitializeStep('opt_CMP_LOCAL', @opt_CMP_LOCAL);
-      InitializeStep('opt_CMP_LT_GTEQ', @opt_CMP_LT_GTEQ);
-      InitializeStep('opt_CMP_LTEQ', @opt_CMP_LTEQ);
-      InitializeStep('opt_CMP_GT', @opt_CMP_GT);
-      InitializeStep('opt_CMP_NE_EQ', @opt_CMP_NE_EQ);
-      InitializeStep('opt_CMP', @opt_CMP);
-      InitializeStep('opt_CMP_0', @opt_CMP_0);
-
-       for i:=0 to High(OptimizeBufStepArray) do
-       begin
-           // TODO returnValue:=OptimizeBufStepArray[i].OptimizerFunction^(0);
-       end;
-    end;
-  end;
+  {$i OptimizeASM.inc}
 
 // -----------------------------------------------------------------------------
 
@@ -1640,7 +1120,7 @@ end;
       Result := True;
 
       Rebuild('PeepholeOptimization');
-      DebugCall('OptimizeASM:PeepholeOptimization', ListingToString(listing));
+      // DebugCall('OptimizeASM:PeepholeOptimization', ListingToString(listing));
 
       for i := 0 to l - 1 do
       begin
@@ -1878,7 +1358,7 @@ end;
 
 begin        // OptimizeASM
 
-  InitializeOptimizerSteps;
+  // InitializeOptimizerSteps;
 
   l := 0;
   x := 0;
@@ -3023,7 +2503,7 @@ begin        // OptimizeASM
 
   (* -------------------------------------------------------------------------- *)
 
-  DebugCall('OptimizeASM.l', IntToStr(l));
+  // DebugCall('OptimizeASM.l', IntToStr(l));
 
   if ((x = 0) and inxUse) then
   begin   // succesful
@@ -3075,7 +2555,7 @@ begin        // OptimizeASM
     begin
       if listing[i] <> '' then
       begin
-            DebugCall('OptimizeASM.WriteInstruction',Format('listing[%d/%d]=%s', [i, l-1, listing[i]]));
+           // DebugCall('OptimizeASM.WriteInstruction',Format('listing[%d/%d]=%s', [i, l-1, listing[i]]));
            WriteInstruction(i);
       end;
     end;
@@ -3087,7 +2567,7 @@ begin        // OptimizeASM
   begin
 
     l := High(OptimizeBuf);
-    DebugCall('OptimizeASM.l', IntToStr(l));
+    // DebugCall('OptimizeASM.l', IntToStr(l));
 
     if l > High(listing) then
     begin
@@ -3174,7 +2654,7 @@ begin        // OptimizeASM
 
     for i := 0 to l - 1 do
     begin
-          DebugCall('OptimizeASM.WriteInstruction',Format('listing[%d/%d]=%s', [i, l-1, listing[i]]));
+         // DebugCall('OptimizeASM.WriteInstruction',Format('listing[%d/%d]=%s', [i, l-1, listing[i]]));
          WriteInstruction(i);
     end;
 
@@ -3242,9 +2722,9 @@ begin
     if not IsASM65BufferEmpty
     then
       begin
-        DebugCall('OptimizeASM.Begin',OptimizeBufToString );
+        // DebugCall('OptimizeASM.Begin',OptimizeBufToString );
         OptimizeASM(CodeSize, IsInterrupt);
-        DebugCall('OptimizeASM.End',OptimizeBufToString );
+        // DebugCall('OptimizeASM.End',OptimizeBufToString );
       end
     else
       begin
