@@ -202,10 +202,12 @@ uses
 {$ENDIF}
 
   Common,
+  CommonIO,
   Messages,
   Compiler,
   Scanner,
   Parser,
+  OptimizeTemporary,
   Optimize,
   Diagnostic;
 
@@ -456,8 +458,8 @@ uses
 
 var
 optimization: record
-  Optimizer: IOptimizer;
-  active: Boolean;
+  Writer: IWriter;
+  OptimizeTemporary: IOptimizeTemporary;
   end;
 
 begin
@@ -616,8 +618,12 @@ begin
 
   Pass := CODEGENERATIONPASS;
 
-  optimization.Optimizer := Optimizer.CreateDefaultOptimizer(optimizerLogFileWriter);
-  optimization.Optimizer.Initialize(target, AsmBlock, AsmBlockIndex, TFileWriter.Create(OutFile));
+//  optimization.Optimizer := Optimizer.CreateDefaultOptimizer(optimizerLogFileWriter);
+//  optimization.Optimizer.Initialize(target, AsmBlock, AsmBlockIndex, TFileWriter.Create(OutFile));
+  optimization.OptimizeTemporary := TOptimizeTemporary.Create;
+  optimization.Writer :=TTextFileWriter.Create(OutFile);
+  optimization.OptimizeTemporary.Initialize(AsmBlock,   optimization.Writer);
+  Optimize.Initialize(Target, optimization.OptimizeTemporary);
 
   CompileProgram;
 

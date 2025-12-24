@@ -460,7 +460,7 @@
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="..\origin\Optimizer.pas"/>
+        <Filename Value="..\origin\CompilerTypes.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit>
     </Units>

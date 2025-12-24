@@ -14,7 +14,7 @@ procedure CompileProgram;
 
 implementation
 
-uses Crt, SysUtils, Common, Messages, Scanner, Parser, Optimize, MathEvaluate;
+uses Crt, SysUtils, Common, CompilerTypes, Messages, Scanner, Parser, Optimize, MathEvaluate;
 
 // ---------------------------------------------------------------------------
 
