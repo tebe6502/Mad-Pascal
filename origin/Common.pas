@@ -8,6 +8,8 @@ interface
 
 // ----------------------------------------------------------------------------
 
+uses CompilerTypes;
+
 const
 
   title = '1.7.5';
@@ -246,7 +248,6 @@ const
 
   MAXNAMELENGTH = 32;
   MAXTOKENNAMES = 200;
-  MAXSTRLENGTH = 255;
   MAXFIELDS = 256;
   MAXTYPES = 1024;
   //  MAXTOKENS    = 32768;
@@ -370,7 +371,6 @@ type
 
     );
 
-  TString = String [MAXSTRLENGTH];
   TName = String [MAXNAMELENGTH];
 
   TDefinesParam = array [1..MAXPARAMS] of TString;
@@ -526,7 +526,7 @@ var
   PROGRAM_NAME: String = 'Program';
   LIBRARY_NAME: String;
 
-  AsmBlock: array [0..4095] of String;
+  AsmBlock: TAsmBlockArray;
 
   Data, DataSegment, StaticStringData: array [0..$FFFF] of Word;
 

@@ -2,121 +2,45 @@ unit CommonIO;
 
 interface
 
-uses FileIO, SysUtils;
+uses SysUtils;
 
 type
 
   TText = String;
 
-  IReader = interface
-    function ReadLn(var Text: TText): Boolean;
-  end;
-
   IWriter = interface
-    procedure WriteLn(const Text: TText);
+    procedure WriteLn(const aTextFile: TText);
   end;
 
 
 type
-
-  TFileReader = class(TInterfacedObject, IReader)
-
+  TTextFileWriter = class(TInterfacedObject, IWriter)
   public
-    constructor Create(const textFile: ITextFile);
-
-    function ReadLn(var Text: TText): Boolean;
-
-  private
-  var
-    TextFile: ITextFile;
-  end;
-
-  TFileWriter = class(TInterfacedObject, IWriter)
-
-  public
-    constructor Create(const textFile: ITextFile);
-
+    constructor Create(var aTextFile: Text);
     procedure WriteLn(const Text: TText);
 
   private
   var
-    TextFile: ITextFile;
-  end;
-
-type
-  TStringArrayWriter = class(TInterfacedObject, IWriter)
-  public
-    procedure WriteLn(const Text: TText);
-
-    function GetLines: TStringArray;
-
-  private
-  var
-    lineArray: TStringArray;
+    textFile: ^Text;
   end;
 
 implementation
 
-// ----------------------------------------------------------------------------
-// Class TFileReader
-// ----------------------------------------------------------------------------
-
-constructor TFileReader.Create(const textFile: ITextFile);
-begin
-  Self.TextFile := TextFile;
-end;
-
-
-function TFileReader.ReadLn(var Text: TText): Boolean;
-begin
-  Result := True;
-  try
-    TextFile.ReadLn(Text);
-  except
-    on e: EInOutError do
-    begin
-      Text := '';
-      Result := False;
-
-    end;
-
-  end;
-
-end;
-
-// ----------------------------------------------------------------------------
-// Class TFileWriter
-// ----------------------------------------------------------------------------
-
-constructor TFileWriter.Create(const textFile: ITextFile);
-begin
-  Self.TextFile := TextFile;
-end;
-
-
-procedure TFileWriter.WriteLn(const Text: TText);
-begin
-  TextFile.WriteLn(Text);
-end;
-
 
 
 // ----------------------------------------------------------------------------
-// Class TStringArrayWriter
+// Class TTextFileWriter
 // ----------------------------------------------------------------------------
 
-procedure TStringArrayWriter.WriteLn(const Text: TText);
-var
-  l: Integer;
+constructor TTextFileWriter.Create(var aTextFile: Text);
 begin
-  l := High(lineArray) + 1;
-  SetLength(lineArray, l + 1);
-  lineArray[l] := Text;
+  textFile := @aTextFile;
 end;
 
-function TStringArrayWriter.GetLines: TStringArray;
+procedure TTextFileWriter.WriteLn(const Text: TText);
 begin
-  Result := lineArray;
+  System.WriteLn(textFile^, text);
 end;
+
 
 end.
