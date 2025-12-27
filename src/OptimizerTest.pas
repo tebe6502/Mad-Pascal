@@ -1,22 +1,20 @@
 unit OptimizerTest;
 
-
 interface
-
 
 procedure Test;
 
 
 implementation
 
-uses SysUtils, CommonIO, CompilerTypes, FileIO, Common, Optimizer;
+uses SysUtils, Common, CommonIO, CompilerTypes, Debugger, FileIO, Optimizer, OptimizerTypes;
 
-procedure Test;
+procedure TestPass;
 var
   SourceFile: TSourceFile;
   SourceLocation: TSourceLocation;
   OutFile: ITextFile;
-  LineArray: TStringArray;
+  // LineArray: TStringArray;
   AsmBlockArray: TAsmBlockArray;
   Writer: IWriter; // TStringArrayWriter;
   Optimizer: IOptimizer;
@@ -31,7 +29,8 @@ begin
   AsmBlockArray := Default(TAsmBlockArray);
   Optimizer := CreateDefaultOptimizer();
   OutFile := TFileSystem.CreateTextFile();
-  OutFile.Assign('..\samples\tests\tests-debug\debug-unittest.a65');
+  OutFile.Assign('..' + DirectorySeparator + 'samples' + DirectorySeparator + 'tests' +
+    DirectorySeparator + 'tests-debug' + DirectorySeparator + 'debug-unittest.a65');
   OutFile.Rewrite();
 
   Writer := TFileWriter.Create(OutFile); // TStringArrayWriter.Create;
@@ -104,5 +103,40 @@ begin
   //lineArray := Writer.GetLines;
 
 end;
+
+
+procedure Test;
+
+
+  procedure TestOptimizeASM;
+
+    function opt_TEST(const i: TListingIndex): TListingIndex;
+    begin
+      Result := i;
+    end;
+
+  var
+    OptimizerStepList: TOptimizerStepList;
+  begin
+    OptimizerStepList := TOptimizerStepList.Create;
+    OptimizerStepList.AddOptimizerStep('TestStep', @opt_TEST);
+    OptimizerStepList.Optimize(1);
+    FreeAndNil(OptimizerStepList);
+  end;
+
+begin
+
+  TestOptimizeASM;
+
+  TraceFile := TFileSystem.CreateTextFile;
+  traceFile.Assign('..' + DirectorySeparator + 'samples' + DirectorySeparator + 'tests' +
+    DirectorySeparator + 'tests-debug' + DirectorySeparator + 'debug-trace.log');
+  traceFile.Rewrite();
+  Debugger.debugger := TDebugger.Create;
+  pass := TPass.CODE_GENERATION;
+  TestPass;
+  traceFile.Close;
+end;
+
 
 end.
