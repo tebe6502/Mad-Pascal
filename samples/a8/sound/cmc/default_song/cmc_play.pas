@@ -1,40 +1,47 @@
-uses crt, cmc;
+program cmc_play;
 
-{$define romoff}
+uses
+  crt,
+  cmc,
+  SysUtils;
+
+  {$define romoff}
 
 const
-	cmc_player = $e000;
-	cmc_modul = $4000;
+  cmc_player = $f000;
+  cmc_modul = $4000;
 
 var
-	msx: TCMC;
+  msx: TCMC;
 
-	ch: char;
+  ch: Char;
 
-{$r 'cmc_play.rc'}
+  {$r 'cmc_play.rc'}
 
 
 begin
 
-	while true do begin
+  while True do
+  begin
 
-	msx.player:=pointer(cmc_player);
-	msx.modul:=pointer(cmc_modul);
+    msx.player := pointer(cmc_player);
+    msx.modul := pointer(cmc_modul);
 
-	msx.init;
+    msx.init;
 
-	writeln('Pascal CMC player example');
+    writeln('Pascal CMC player example.');
+    writeln(Concat(Concat('Player under OS ROM at $', IntToHex(msx.player, 4)), '.'));
+    repeat
+      pause;
 
-	repeat
-		pause;
+      msx.play;
 
-		msx.play;
+    until keypressed;
+    writeln('Song stopped. Press any key.');
+    ch := readkey();
 
-	until keypressed;
-	ch:=readkey();
+    msx.stop;
 
-	msx.stop;
-
-	end;
+  end;
 
 end.
