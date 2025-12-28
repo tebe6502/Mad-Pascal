@@ -1,11 +1,24 @@
+<<<<<<< Updated upstream
 *
 !/**/
 !*.*
 
 *.bak
+=======
+- Ignore binary and temporary files
+>>>>>>> Stashed changes
 *.exe
 *.log
 *.lps
+
+# Ignore Winmerge and other backup files
+*.bak
+
+# Ignore Lazarus backup folders
+backup/
+
+# Ignore Lazarus output folders
+lib/
 
 # Ignore ProLaza64 files
 *.ini
@@ -16,5 +29,5 @@
 *.nev
 *.pmr
 
-backup/
-lib/
+
+

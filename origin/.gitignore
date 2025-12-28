@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 *.bak
 *.exe
 *.xex
@@ -6,3 +7,12 @@
 *.lps
 backup/
 lib/
+=======
+# Ignore Winmerge and other backup files
+*.bak
+
+# Ignore Lazarus backup folders
+backup/
+
+
+>>>>>>> Stashed changes
