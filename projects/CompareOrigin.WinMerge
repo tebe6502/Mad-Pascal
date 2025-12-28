@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+	<paths>
+		<left>C:\jac\system\Atari800\Programming\Repositories\Mad-Pascal\origin</left>
+		<right>C:\jac\system\Atari800\Programming\Repositories\Mad-Pascal\src</right>
+		<filter>*.*</filter>
+		<subfolders>1</subfolders>
+		<left-readonly>0</left-readonly>
+		<right-readonly>0</right-readonly>
+		<white-spaces>2</white-spaces>
+		<ignore-blank-lines>1</ignore-blank-lines>
+		<ignore-case>0</ignore-case>
+		<ignore-carriage-return-diff>1</ignore-carriage-return-diff>
+		<ignore-numbers>0</ignore-numbers>
+		<ignore-codepage-diff>0</ignore-codepage-diff>
+		<ignore-missing-trailing-eol>0</ignore-missing-trailing-eol>
+		<ignore-comment-diff>0</ignore-comment-diff>
+		<compare-method>0</compare-method>
+	</paths>
+</project>
