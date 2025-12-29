@@ -1,11 +1,27 @@
+# Ignore all files without extensions, e.g. Unix binaries
 *
 !/**/
 !*.*
 
-*.bak
+# Ignore Windows binaries and logs 
 *.exe
 *.log
+
+# Ignore Laraus temporary files
 *.lps
+
+# Ignore Winmerge and other backup files
+*.bak
+
+# Ignore Lazarus backup folders
+backup/
+
+# Ignore Lazarus output folders
+lib/
+
+# Ignore Lazarus output files
+ppas.sh
+*.res
 
 # Ignore ProLaza64 files
 *.ini
@@ -15,6 +31,3 @@
 *.tx3
 *.nev
 *.pmr
-
-backup/
-lib/
