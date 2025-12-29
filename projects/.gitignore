@@ -1,14 +1,13 @@
-<<<<<<< Updated upstream
+# Ignore all files without extensions, e.g. Unix binaries
 *
 !/**/
 !*.*
 
-*.bak
-=======
-- Ignore binary and temporary files
->>>>>>> Stashed changes
+# Ignore Windows binaries and logs 
 *.exe
 *.log
+
+# Ignore Laraus temporary files
 *.lps
 
 # Ignore Winmerge and other backup files
@@ -20,6 +19,10 @@ backup/
 # Ignore Lazarus output folders
 lib/
 
+# Ignore Lazarus output files
+ppas.sh
+*.res
+
 # Ignore ProLaza64 files
 *.ini
 *.asc
@@ -28,6 +31,3 @@ lib/
 *.tx3
 *.nev
 *.pmr
-
-
-
