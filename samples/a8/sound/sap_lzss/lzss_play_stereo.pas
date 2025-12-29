@@ -38,7 +38,6 @@ begin
   writeln('modul_r length: ', len, ', address: $', hexStr(Word(p), 4));
 
   msx_r.modul := p;
-  //  msr_r.modul := pointer(mod_r);
   msx_r.player := pointer(play_r);
 
   SizeofResource(len, 'mod_l');
@@ -46,7 +45,6 @@ begin
   writeln('modul_l length: ', len, ', address: $', hexStr(Word(p), 4));
 
   msx_l.modul := p;
-  //  msr_l.modul := pointer(mod_l);
   msx_l.player := pointer(play_l);
 
   while True do
