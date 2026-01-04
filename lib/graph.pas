@@ -47,6 +47,7 @@ FloodFill
 FloodFillH
 MoveRel
 NewBuffer
+OutTextXY
 PieSlice
 Rectangle
 SetArcCoords
@@ -186,6 +187,7 @@ var
 	procedure Line(x1, y1, x2, y2: real); overload;
 	procedure MoveRel(Dx, Dy: smallint);
 	procedure MoveTo(x, y: smallint); assembler;
+	procedure OutTextXY(x,y: smallint; s: string);
 	procedure PieSlice(X, Y, StAngle, EndAngle, Radius: Word);
 	procedure Rectangle(x1, y1, x2, y2: Smallint); overload;
 	procedure Rectangle(Rect: TRect); overload;
@@ -377,6 +379,33 @@ Draw a line between 2 points
 begin
 
  Line(x0,y0,x1,y1);
+
+end;
+
+
+procedure OutTextXY(x,y: smallint; s: string);
+var i, j, k, v: byte;
+    w: word;
+begin
+
+ for i:=1 to length(s) do begin
+  v:= ord(ata2int(s[i]));
+
+  w:= v shl 3 + mem[756]*256;
+
+  for j:=0 to 7 do begin
+  v:=mem[w + j];
+
+   for k:=0 to 7 do begin
+    if v and $80 <> 0 then PutPixel(x+k, y+j);
+    v:=v shl 1;
+   end;
+
+  end;
+
+  inc(x, 8);
+
+ end;
 
 end;
 
