@@ -2,7 +2,6 @@
 function opt_ADD(i: integer): Boolean;
 var p, q: integer;
     tmp: string;
-    listing_tmp: TListing_tmp;
 begin
 
     Result := true;
@@ -778,7 +777,9 @@ begin
        sta_stack(i+14) and								// sta :STACKORIGIN+STACKWIDTH*2	; 14
        lda_stack(i+15) and								// lda :STACKORIGIN			; 15
        sta_stack(i+16) then								// sta :STACKORIGIN+STACKWIDTH		; 16
-     if argMatch(i+1, i+15) and
+     if (argMatch(i+4, i+2) = false) and
+     
+        argMatch(i+1, i+15) and
 	argMatch(i+4, i+13) and
 	argMatch(i+7, i+11) and
 	argMatch(i+10, i+12) and
@@ -791,8 +792,8 @@ begin
 
 	listing[i+7] := listing[i+10];
 
-	listing[i+8] := '';
-	listing[i+9] := '';
+	listing[i+8]:= '';
+	listing[i+9]:= '';
 	listing[i+10]:= '';
 	listing[i+11]:= '';
 	listing[i+12]:= '';
