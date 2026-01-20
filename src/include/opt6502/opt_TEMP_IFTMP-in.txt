@@ -1,9 +1,0 @@
-;
-l_xxxx			; 0
-	lda IFTMP_xxxx	; 1
-	jne l_xxxx	; 2
-;
-l_xxxx			; 1
-	lda IFTMP_xxxx	; 2
-	beq *+5		; 3
-	jmp l_xxxx	; 4
