@@ -2,7 +2,7 @@ unit Parser;
 
 interface
 
-uses Common, CompilerTypes;
+uses Common;
 
 {$i define.inc}
 

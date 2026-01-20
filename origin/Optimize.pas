@@ -4,82 +4,40 @@ interface
 
 {$i define.inc}
 
-uses Common, CompilerTypes, OptimizerTypes, OptimizeTemporary;
-
 // ----------------------------------------------------------------------------
 
-procedure Initialize(const aTarget: TTarget; const anOptimizeTemporary: IOptimizeTemporary);
-// Re/Set temporary variables for register optimizations.
 procedure ResetOpty;
-procedure SetOptyY(const value: TString);
-function GetOptyBP2(): TString;
-procedure SetOptyBP2(const value: TString);
 
 procedure asm65(const a: String = ''; const comment: String = '');      // OptimizeASM
 
-function IsASM65BufferEmpty: Boolean;
-
 procedure OptimizeProgram(MainProcedureIndex: Integer);
 
-procedure Finalize;
+procedure WriteOut(const a: String);       		   		 // OptimizeTemporaryBuf
+
+procedure FlushTempBuf;
 
 // ----------------------------------------------------------------------------
 
 implementation
 
-uses Crt, SysUtils;
+uses Crt, SysUtils, Common;
 
-var OptimizeTemporary1: IOptimizeTemporary;
-var Target:TTarget;
+var
+  TemporaryBuf: array [0..511] of String;
 
-
-
-  {$I '..\src\OptimizeDebug.inc'}
-
-
-// Reset temporary variables for FOR optimizations.
-procedure ResetForTmp;
-begin
-   optyFOR0:='';
-   optyFOR1:='';
-   optyFOR2:='';
-   optyFOR3:='';
-end;
 
 // ----------------------------------------------------------------------------
 
-procedure SetOptyA(const value: TString);
-begin
-  optyA:= value;
-  DebugCall( 'SetOptyA', value);
-end;
-
-procedure SetOptyY(const value: TString);
-begin
-  optyY:= value;
-  DebugCall( 'SetOptyY', value);
-end;
-
-function GetOptyBP2(): TString;
-begin
-  result:=optyBP2;
-end;
-
-procedure SetOptyBP2(const value: TString);
-begin
-  optyBP2:= value;
-  DebugCall( 'SetOptyBP2', value);
-end;
 
 procedure ResetOpty;
 begin
-  DebugCall('ResetOpty');
 
-  SetOptyA('');
-  SetOptyY('');
-  SetOptyBP2('');
+  optyA := '';
+  optyY := '';
+  optyBP2 := '';
 
 end;
+
 
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
@@ -123,34 +81,422 @@ begin
 
 end;  //OptimizeProgram
 
-procedure Initialize(const aTarget: TTarget; const anOptimizeTemporary: IOptimizeTemporary);
-begin
-  Target:=aTarget;
-  OptimizeTemporary1:=anOptimizeTemporary;
-end;
-  
-function GetSourceFileName: String;
-begin
-  Result := UnitName[Common.optimize.unitIndex].Name;
-end;
 
-function GetSourceFileLine: Integer;
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+
+
+procedure OptimizeTemporaryBuf;
+var p, k , q: integer;
+    tmp: string;
+    yes: Boolean;
+
+
+{$i include\cmd_temporary.inc}
+
+
+  function argMatch(i, j: Integer): Boolean;
+  begin
+    Result := copy(TemporaryBuf[i], 6, 256) = copy(TemporaryBuf[j], 6, 256);
+  end;
+
+
+  function fail(i: integer): Boolean;
+  begin
+
+        if (pos('#asm:', TemporaryBuf[i]) = 1) or
+
+	   ldy(i) or
+           jsr(i) or
+           iny(i) or
+           dey(i) or
+           tay(i) or
+           tya(i) or
+           mwy(i) or
+	   mwy(i) or
+           (pos(#9'.if', TemporaryBuf[i]) > 0) or
+           (pos(#9'.LOCAL ', TemporaryBuf[i]) > 0) or
+           (pos(#9'@print', TemporaryBuf[i]) > 0) then Result:=true else Result:=false;
+  end;
+
+
+  function SKIP(i: integer): Boolean;
+  begin
+
+      Result :=	seq(i) or sne(i) or
+		spl(i) or smi(i) or
+		scc(i) or scs(i) or
+		svc(i) or svs(i) or
+
+		jne(i) or jeq(i) or
+		jcc(i) or jcs(i) or
+		jmi(i) or jpl(i) or
+
+		(pos(#9'bne ', TemporaryBuf[i]) = 1) or (pos(#9'beq ', TemporaryBuf[i]) = 1) or
+		(pos(#9'bcc ', TemporaryBuf[i]) = 1) or (pos(#9'bcs ', TemporaryBuf[i]) = 1) or
+		(pos(#9'bmi ', TemporaryBuf[i]) = 1) or (pos(#9'bpl ', TemporaryBuf[i]) = 1);
+  end;
+
+
+  function IFDEF_MUL8(i: integer): Boolean;
+  begin
+      Result :=	//(TemporaryBuf[i+4] = #9'eif') and
+      		//(TemporaryBuf[i+3] = #9'imulCL') and
+      		//(TemporaryBuf[i+2] = #9'els') and
+		(TemporaryBuf[i+1] = #9'fmulu_8') and
+		(TemporaryBuf[i]   = #9'.ifdef fmulinit');
+  end;
+
+
+  function IFDEF_MUL16(i: integer): Boolean;
+  begin
+      Result :=	//(TemporaryBuf[i+4] = #9'eif') and
+      		//(TemporaryBuf[i+3] = #9'imulCX') and
+      		//(TemporaryBuf[i+2] = #9'els') and
+		(TemporaryBuf[i+1] = #9'fmulu_16') and
+		(TemporaryBuf[i]   = #9'.ifdef fmulinit');
+  end;
+
+
+  function fortmp(const a: String): String;
+    // @FORTMP_xxxx
+    // @FORTMP_xxxx+1
+  begin
+
+    Result := a;
+
+    //    Result[8] := '?';
+
+    if length(Result) > 12 then
+      Result[13] := '_'
+    else
+      Result := Result + '_0';
+
+  end;
+
+
+  function GetBYTE(const i: Integer): Integer;
+  begin
+    Result := GetVAL(copy(TemporaryBuf[i], 6, 4));
+  end;
+
+  function GetWORD(const i, j: Integer): Integer;
+  begin
+    Result := GetVAL(copy(TemporaryBuf[i], 6, 4)) + GetVAL(copy(TemporaryBuf[j], 6, 4)) * 256;
+  end;
+
+
+  function GetSTRING(const j: Integer): String;
+  var
+    i: Integer;
+    a: String;
+  begin
+
+    Result := '';
+    i := 6;
+
+    a := TemporaryBuf[j];
+
+    if a <> '' then
+      while not (a[i] in [' ', #9]) and (i <= length(a)) do
+      begin
+        Result := Result + a[i];
+        Inc(i);
+      end;
+
+  end;
+
+// -----------------------------------------------------------------------------
+
+{$i include/opt6502/opt_TEMP_MOVE.inc}
+{$i include/opt6502/opt_TEMP_FILL.inc}
+{$i include/opt6502/opt_TEMP_TAIL_IF.inc}
+{$i include/opt6502/opt_TEMP_TAIL_CASE.inc}
+{$i include/opt6502/opt_TEMP.inc}
+{$i include/opt6502/opt_TEMP_CMP.inc}
+{$i include/opt6502/opt_TEMP_CMP_0.inc}
+{$i include/opt6502/opt_TEMP_WHILE.inc}
+{$i include/opt6502/opt_TEMP_FOR.inc}
+{$i include/opt6502/opt_TEMP_FORDEC.inc}
+{$i include/opt6502/opt_TEMP_IMUL_CX.inc}
+{$i include/opt6502/opt_TEMP_IFTMP.inc}
+{$i include/opt6502/opt_TEMP_ORD.inc}
+{$i include/opt6502/opt_TEMP_X.inc}
+{$i include/opt6502/opt_TEMP_EAX.inc}
+{$i include/opt6502/opt_TEMP_JMP.inc}
+{$i include/opt6502/opt_TEMP_ZTMP.inc}
+{$i include/opt6502/opt_TEMP_UNROLL.inc}
+{$i include/opt6502/opt_TEMP_BOOLEAN_OR.inc}
+
+// -----------------------------------------------------------------------------
+
 begin
-  Result:=Common.optimize.line;
+
+{
+if (pos('#for:dec', TemporaryBuf[10]) > 0) then begin
+
+      for p:=0 to 30 do writeln(TemporaryBuf[p]);
+      writeln('-------');
+
 end;
+}
+
+
+  opt_TEMP_BOOLEAN_OR;
+  opt_TEMP_ORD;
+  opt_TEMP_CMP;
+  opt_TEMP_CMP_0;
+  opt_TEMP;
+  opt_TEMP_IMUL_CX;
+  opt_TEMP_WHILE;
+  opt_TEMP_FORDEC;
+  opt_TEMP_FOR;
+  opt_TEMP_X;
+  opt_TEMP_EAX;
+  opt_TEMP_JMP;
+  opt_TEMP_ZTMP;
+  opt_TEMP_UNROLL;
+
+
+// -----------------------------------------------------------------------------
+
+    if (pos('@move ":bp2" ', TemporaryBuf[4]) > 1) and					// @move ":bp2"				; 4
+
+       lda(0) and									// lda A				; 0
+       sta_bp2(1) and									// sta :bp2				; 1
+       (TemporaryBuf[2] = TemporaryBuf[0] + '+1') and					// lda A+1				; 2
+       sta_bp2_1(3) then								// sta :bp2+1				; 3
+       begin
+	TemporaryBuf[4] := #9'@move ' + GetSTRING(0) + ' ' +  copy(TemporaryBuf[4], 15, 256);
+
+	TemporaryBuf[0] := '~';
+	TemporaryBuf[1] := '~';
+	TemporaryBuf[2] := '~';
+	TemporaryBuf[3] := '~';
+       end;
+
+
+    if (pos('mva:rpl (:bp2),y ', TemporaryBuf[5]) > 1) and				// mva:rpl (:bp2),y			; 5
+
+       lda_im(0) and									// lda #				; 0
+       sta_bp2(1) and									// sta :bp2				; 1
+       lda_im(2) and									// lda #				; 2
+       sta_bp2_1(3) and									// sta :bp2+1				; 3
+       ldy_im(4) then									// ldy #				; 4
+       begin
+	p := GetWORD(0, 2);
+
+	TemporaryBuf[0] := '~';
+	TemporaryBuf[1] := '~';
+	TemporaryBuf[2] := '~';
+	TemporaryBuf[3] := '~';
+
+	TemporaryBuf[5] := #9'mva:rpl ' + Hex(p, 4) + ',y ' +  copy(TemporaryBuf[5], 19, 256);
+       end;
+
+
+    if (pos('mva:rne (:bp2),y ', TemporaryBuf[5]) > 1) and				// mva:rne (:bp2),y			; 5
+
+       lda_im(0) and									// lda #				; 0
+       sta_bp2(1) and									// sta :bp2				; 1
+       lda_im(2) and									// lda #				; 2
+       sta_bp2_1(3) and									// sta :bp2+1				; 3
+       ldy_im(4) then									// ldy #				; 4
+       begin
+	p := GetWORD(0, 2);
+
+	TemporaryBuf[0] := '~';
+	TemporaryBuf[1] := '~';
+	TemporaryBuf[2] := '~';
+	TemporaryBuf[3] := '~';
+
+	TemporaryBuf[5] := #9'mva:rne ' + Hex(p, 4) + ',y ' +  copy(TemporaryBuf[5], 19, 256);
+       end;
+
+// -----------------------------------------------------------------------------
+
+    if (TemporaryBuf[0] = #9'jsr #$00') and						// jsr #$00				; 0
+       (TemporaryBuf[1] = #9'lda @BYTE.MOD.RESULT') then				// lda @BYTE.MOD.RESULT			; 1
+       begin
+	TemporaryBuf[0] := '~';
+	TemporaryBuf[1] := '~';
+       end;
+
+    if (TemporaryBuf[0] = #9'jsr #$00') and						// jsr #$00				; 0
+       (TemporaryBuf[1] = #9'ldy @BYTE.MOD.RESULT') then				// ldy @BYTE.MOD.RESULT			; 1
+       begin
+	TemporaryBuf[0] := #9'tay';
+	TemporaryBuf[1] := '~';
+       end;
+
+// -----------------------------------------------------------------------------
+
+    if (TemporaryBuf[0] = #9'lda :STACKORIGIN,x') and					// lda :STACKORIGIN,x			; 0
+       sta(1) and									// sta F				; 1
+       (TemporaryBuf[2] = #9'lda :STACKORIGIN+STACKWIDTH,x') and			// lda :STACKORIGIN+STACKWIDTH,x	; 2
+       sta(3) and									// sta F+1				; 3
+       dex(4) and									// dex					; 2
+       (TemporaryBuf[5] = ':move') then							//:move					; 3
+       begin
+
+	tmp:=TemporaryBuf[6];
+	p:=StrToInt(TemporaryBuf[7]);
+
+	if p = 256 then begin
+	 TemporaryBuf[1] := #9'sta :bp2';
+	 TemporaryBuf[3] := #9'sta :bp2+1';
+
+     	 TemporaryBuf[4] := #9'ldy #$00';
+     	 TemporaryBuf[5] := #9'mva:rne (:bp2),y adr.' + tmp + ',y+';
+    	end else
+    	if p <= 128 then begin
+	 TemporaryBuf[1] := #9'sta :bp2';
+	 TemporaryBuf[3] := #9'sta :bp2+1';
+
+	 TemporaryBuf[4] := #9'ldy #' + Hex(p-1, 2);
+     	 TemporaryBuf[5] := #9'mva:rpl (:bp2),y adr.' + tmp + ',y-';
+    	end else begin
+     	 TemporaryBuf[4] := #9'@move ' + tmp + ' #adr.' + tmp + ' #' + Hex(p,2);
+     	 TemporaryBuf[5] := '~';
+	end;
+
+     	TemporaryBuf[6] := '~';//' #9'mwa #adr.'+tmp+' '+tmp;
+     	TemporaryBuf[7] := #9'dex';
+       end;
+
+// -----------------------------------------------------------------------------
+
+   opt_TEMP_MOVE;
+   opt_TEMP_FILL;
+
+   opt_TEMP_IFTMP;
+   opt_TEMP_TAIL_IF;
+   opt_TEMP_TAIL_CASE;
+
+
+ // #asm
+
+   if TemporaryBuf[0].IndexOf('#asm:') = 0 then begin
+
+    writeln(OutFile, AsmBlock[StrToInt( copy(TemporaryBuf[0], 6, 256) )]);
+
+    TemporaryBuf[0] := '~';
+
+   end;
+
+
+// #lib:label
+
+   if TemporaryBuf[0].IndexOf('#lib:') = 0 then
+    TemporaryBuf[0] := #9'm@lib ' + copy(TemporaryBuf[0], 6, 256);
+
+
+// @PARAM?
+
+   if TemporaryBuf[0] = #9'sta @PARAM?' then TemporaryBuf[0] := '~';
+
+   if TemporaryBuf[0] = #9'sty @PARAM?' then TemporaryBuf[0] := #9'tya';
+
+
+// @FORTMP?
+
+   if (pos('@FORTMP_', TemporaryBuf[0]) > 1) then
+
+    if lda(0) then begin
+
+     if (pos('::#$00', TemporaryBuf[0]) = 0) then TemporaryBuf[0] := #9'lda ' + fortmp(GetSTRING(0)) + '::#$00';
+
+    end else
+    if cmp(0) then begin
+
+     if (pos('::#$00', TemporaryBuf[0]) = 0) then TemporaryBuf[0] := #9'cmp ' + fortmp(GetSTRING(0)) + '::#$00';
+
+    end else
+    if sub(0) then begin
+
+     if (pos('::#$00', TemporaryBuf[0]) = 0) then TemporaryBuf[0] := #9'sub ' + fortmp(GetSTRING(0)) + '::#$00';
+
+    end else
+    if sbc(0) then begin
+
+     if (pos('::#$00', TemporaryBuf[0]) = 0) then TemporaryBuf[0] := #9'sbc ' + fortmp(GetSTRING(0)) + '::#$00';
+
+    end else
+    if sta(0) then
+      TemporaryBuf[0] := #9'sta ' + fortmp(GetSTRING(0))
+    else
+    if sty(0) then
+      TemporaryBuf[0] := #9'sty ' + fortmp(GetSTRING(0))
+    else
+    if mva(0) and (pos('mva @FORTMP_', TemporaryBuf[0]) = 0) then begin
+     tmp:=copy(TemporaryBuf[0], pos('@FORTMP_', TemporaryBuf[0]), 256);
+
+     TemporaryBuf[0] := copy(TemporaryBuf[0], 1, pos(' @FORTMP_', TemporaryBuf[0]) ) + fortmp(tmp);
+    end else
+     writeln('Unassigned: ' + TemporaryBuf[0] );
+
+   //  tmp:=copy(TemporaryBuf[0], pos('@FORTMP_', TemporaryBuf[0]), 256);
+  //   TemporaryBuf[0] := copy(TemporaryBuf[0], 1, pos(' @FORTMP_', TemporaryBuf[0]) ) + ':' + fortmp(tmp);
+
+end;  //OptimizeTemporaryBuf
+
 
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 
 
 procedure WriteOut(const a: String);
+var
+  i: Integer;
 begin
-
-  // Debugger.debugger.WriteOut(a);
 
   if (pos(#9'jsr ', a) = 1) or (a = '#asm') then ResetOpty;
 
-  if OptimizeTemporary1 <> nil then OptimizeTemporary1.WriteOut(a);
+
+  if iOut < High(TemporaryBuf) then
+  begin
+
+    if (iOut >= 0) and (TemporaryBuf[iOut] <> '') then
+    begin
+
+      if TemporaryBuf[iOut] = '; --- ForToDoCondition' then
+        if (a = '') or (pos('; optimize ', a) > 0) then exit;
+
+      if (pos(#9'#for', TemporaryBuf[iOut]) > 0) then
+        if (a = '') or (pos('; optimize ', a) > 0) then exit;
+    end;
+
+    Inc(iOut);
+    TemporaryBuf[iOut] := a;
+
+  end
+  else
+  begin
+
+    OptimizeTemporaryBuf;
+
+    if TemporaryBuf[iOut] <> '' then
+    begin
+
+      if TemporaryBuf[iOut] = '; --- ForToDoCondition' then
+        if (a = '') or (pos('; optimize ', a) > 0) then exit;
+
+      if (pos(#9'#for', TemporaryBuf[iOut]) > 0) then
+        if (a = '') or (pos('; optimize ', a) > 0) then exit;
+    end;
+
+    if TemporaryBuf[0] <> '~' then
+    begin
+      if (TemporaryBuf[0] <> '') or (outTmp <> TemporaryBuf[0]) then writeln(OutFile, TemporaryBuf[0]);
+
+      outTmp := TemporaryBuf[0];
+    end;
+
+    for i := 1 to iOut do TemporaryBuf[i - 1] := TemporaryBuf[i];
+
+    TemporaryBuf[iOut] := a;
+
+  end;
 
 end;  //WriteOut
 
@@ -158,14 +504,12 @@ end;  //WriteOut
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 
-procedure Finalize;
+procedure FlushTempBuf;
+var
+  i: Integer;
 begin
 
-  if OptimizeTemporary1 <> nil then
-  begin
-    OptimizeTemporary1.Finalize;
-    OptimizeTemporary1 := nil;
-  end;
+  for i := 0 to High(TemporaryBuf) do WriteOut('');    // flush TemporaryBuf
 
 end;
 
@@ -191,52 +535,48 @@ begin
 end;
 
 
-procedure OptimizeASM(const CodeSize: Integer; const IsInterrupt: Boolean);
+procedure OptimizeASM;
 (* -------------------------------------------------------------------------- *)
-(* optymalizacja powiodla sie jesli na wyjsciu X=0                            *)
-(* peephole optimization                                                      *)
+(* optymalizacja powiodla sie jesli na wyjsciu X=0
+(* peephole optimization
 (* -------------------------------------------------------------------------- *)
 type
-    TListing_tmp = array [0..127] of String;
-    TString0_3_Array = array [0..3] of String;
-  TStack = array [0..15] of TString0_3_Array;
-var
-    inxUse, found: Boolean;
-    i, l, k, m, x: Integer;
+    TListing = array [0..1023] of string;
+    TListing_tmp = array [0..127] of string;
 
-    elf: Cardinal;
+    TStack = array [0..15, 0..3] of string;
+
+var inxUse, found: Boolean;
+    i, l, k, m, x: integer;
+
+    elf: cardinal;
 
     listing: TListing;
+    listing_tmp: TListing_tmp;
 
     s: TStack;
 
-    a, t, arg0: String;
+    a, t, arg0: string;
 
 // -----------------------------------------------------------------------------
 
-  function ListingToString(const listing: TListing): String;
-  var i: TListingIndex;
-  begin
-    Result:='';
-    for i:=0 to l-1 do Result:=Result+listing[i]+'/';
-  end;
 
-  function GetBYTE(const i: TListingIndex): Integer;
+  function GetBYTE(const i: Integer): Integer;
   begin
     Result := GetVAL(copy(listing[i], 6, 4));
   end;
 
-  function GetWORD(const i, j: TListingIndex): Integer;
+  function GetWORD(const i, j: Integer): Integer;
   begin
     Result := GetVAL(copy(listing[i], 6, 4)) + GetVAL(copy(listing[j], 6, 4)) shl 8;
   end;
 
-  function GetTRIPLE(const i, j, k: TListingIndex): Integer;
+  function GetTRIPLE(const i, j, k: Integer): integer;
   begin
     Result := GetVAL(copy(listing[i], 6, 4)) + GetVAL(copy(listing[j], 6, 4)) shl 8 + GetVAL(copy(listing[k], 6, 4)) shl 16;
   end;
 
-  function GetDWORD(const i, j, k, l: TListingIndex): Integer;
+  function GetDWORD(const i, j, k, l: Integer): integer;
   begin
     Result := GetVAL(copy(listing[i], 6, 4)) + GetVAL(copy(listing[j], 6, 4)) shl 8 + GetVAL(copy(listing[k], 6, 4)) shl 16 + GetVAL(copy(listing[l], 6, 4)) shl 24;
   end;
@@ -247,7 +587,7 @@ var
 
   // !!! kolejny rozkaz po UNUSED_A na pozycji 'i+1' musi koniecznie byc conajmniej 'LDA ' !!!
 
-  function UNUSED_A(const i: TListingIndex): Boolean;
+  function UNUSED_A(const i: Integer): Boolean;
   begin
     Result := sty_stack(i) or lda_stack(i) or sta_stack(i) or
       {!!! (pos(#9'lda :eax', listing[i]) = 1) or (pos(#9'sta :eax', listing[i]) = 1) or} lda_im(i) or
@@ -255,20 +595,20 @@ var
   end;
 
 
-  function onBreak(const i: TListingIndex): Boolean;
+  function onBreak(const i: Integer): Boolean;
   begin
     Result := lab_a(i) or jsr(i) or eif(i);
     // !!! eif !!! koniecznie
   end;
 
 
-  function argMatch(const i, j: TListingIndex): Boolean;
+  function argMatch(const i, j: Integer): Boolean;
   begin
     Result := copy(listing[i], 6, 256) = copy(listing[j], 6, 256);
   end;
 
 
-  procedure WriteInstruction(const i: TListingIndex);
+  procedure WriteInstruction(const i: Integer);
   begin
 
     if isInterrupt and (bp(i) or stack(i)) then
@@ -277,12 +617,11 @@ var
 
       TextColor(LIGHTRED);
 
-      WriteLn(GetSourceFileName + ' (' + IntToStr(GetSourceFileLine) +
-        ') Error: Illegal instruction in INTERRUPT block ''' + copy(listing[i], 2, 256) + '''');
+      WriteLn(UnitName[common.optimize.unitIndex].Path + ' (' + IntToStr(common.optimize.line) + ') Error: Illegal instruction in INTERRUPT block ''' + copy(listing[i], 2, 256) + '''');
 
       NormVideo;
 
-      // RaiseHaltException(EHaltException.COMPILING_ABORTED);
+    // RaiseHaltException(THaltException.COMPILING_ABORTED);
     end;
 
     WriteOut(listing[i]);
@@ -290,7 +629,7 @@ var
   end;  //WriteInstruction
 
 
-  function SKIP(const i: TListingIndex): Boolean;
+  function SKIP(const i: integer): Boolean;
   begin
 
     if (i < 0) or (listing[i] = '') then
@@ -302,8 +641,7 @@ var
   end;
 
 
-
-  function LabelIsUsed(const i: TListingIndex): Boolean;                  // issue #91 fixed
+  function LabelIsUsed(const i: Integer): Boolean;		// issue #91 fixed
 
 (*
 
@@ -320,7 +658,7 @@ var
 
 *)
 
-    procedure LabelTest(const mne: String);
+     procedure LabelTest(const mne: string);
      begin
 
       case optyY[1] of
@@ -353,7 +691,7 @@ var
   end;  //LabelIsUsed
 
 
-  function IFDEF_MUL8(const i: TListingIndex): Boolean;
+  function IFDEF_MUL8(const i: Integer): Boolean;
   begin
     Result :=
       //(listing[i+4] = #9'eif') and
@@ -362,7 +700,7 @@ var
       (listing[i + 1] = #9'fmulu_8') and (listing[i] = #9'.ifdef fmulinit');
   end;
 
-  function IFDEF_MUL16(const i: TListingIndex): Boolean;
+  function IFDEF_MUL16(const i: Integer): Boolean;
   begin
     Result :=
       //(listing[i+4] = #9'eif') and
@@ -372,7 +710,7 @@ var
   end;
 
 
-  function LDA_STA_BP(const i: TListingIndex): Boolean;
+  function LDA_STA_BP(const i: Integer): Boolean;
   begin
 
     Result := (lda_bp_y(i) and sta_a(i + 1)) or (lda_a(i) and sta_bp_y(i + 1));
@@ -380,7 +718,7 @@ var
   end;
 
 
-  procedure LDA_STA_ADR(const i: TListingIndex; q: Integer; op: Char);
+  procedure LDA_STA_ADR(const i, q: Integer; op: Char);
 
    procedure update(i: integer);
    begin
@@ -448,7 +786,7 @@ var
 
 // -----------------------------------------------------------------------------
 
-  procedure Expand(const i, e: TListingIndex);
+  procedure Expand(const i, e: Integer);
   var
     k: Integer;
   begin
@@ -466,30 +804,25 @@ var
 
 // -----------------------------------------------------------------------------
 
-  procedure Rebuild(const context: String);
-   var
-    k, i: TListingIndex;
-    // oldListing, newListing: String;
+   procedure Rebuild;
+   var k, i: integer;
    begin
-
-    // oldListing := ListingToString(listing);
 
     k:=0;
     for i := 0 to l - 1 do
-     if (listing[i] <> '') and (listing[i][1] <> ';') then
-      begin
+     if (listing[i] <> '') and (listing[i][1] <> ';') then begin
 
        listing[k] := listing[i];
 
-       if k > 0 then
-       begin
+       if k > 0 then begin
+
 
         if dex(k) and 									// inx			; k-1
-	       inx(k-1) then								// dex			; k
+	   inx(k-1) then								// dex			; k
 	  begin
 	   listing[k-1] := '';
 	   listing[k]   := '';
-       Dec(k);
+	   dec(k);
 	   continue;
 	  end;
 
@@ -499,7 +832,7 @@ var
 	  begin
 	   listing[k-1] := '';
 	   listing[k]   := '';
-       Dec(k);
+	   dec(k);
 	   continue;
 	  end;
 
@@ -511,7 +844,7 @@ var
 	  begin
 	   listing[k-1] := '';
 	   listing[k]   := '';
-	   Dec(k);
+	   dec(k);
 	   continue;
 	  end;
 
@@ -523,7 +856,7 @@ var
 	  begin
 	   listing[k-1] := '';
 	   listing[k]   := '';
-	   Dec(k);
+	   dec(k);
 	   continue;
 	  end;
 
@@ -536,7 +869,7 @@ var
 	  begin
 	   listing[k-1] := '';
 	   listing[k]   := '';
-	   Dec(k);
+	   dec(k);
 	   continue;
 	  end;
 
@@ -571,14 +904,14 @@ var
 
 
 	if sta_im_0(k) and 								// lda|rol @|asl @	; k-1
-	   (lda_a(k-1) or rol_a(k-1) or asl_a(k-1)) then 				// sta #$00		; k
-    begin
+	   (lda_a(k-1) or rol_a(k-1) or asl_a(k-1)) then begin				// sta #$00		; k
+
 
 	  if lda_a(i+1) then						/// lda			; i+1
 	  begin
 	   listing[k-1] := '';
 	   listing[k]   := '';
-	   Dec(k);
+	   dec(k);
 	   continue;
 	  end;
 
@@ -588,7 +921,7 @@ var
 	  begin
 	   listing[k-1] := '';
 	   listing[k]   := '';
-	   Dec(k);
+	   dec(k);
 	   continue;
 	  end;
 
@@ -604,7 +937,7 @@ var
 	   listing[i+1] := '';
 	   listing[i+2] := '';
 	   listing[i+3] := '';
-	   Dec(k);
+	   dec(k);
 	   continue;
 	  end;
 
@@ -618,7 +951,7 @@ var
 
 	   listing[i+1] := '';
 	   listing[i+2] := '';
-	   Dec(k);
+	   dec(k);
 	   continue;
 	  end;
 
@@ -630,7 +963,7 @@ var
 	   listing[k]   := '';
 
 	   listing[i+1] := '';
-	   Dec(k);
+	   dec(k);
 	   continue;
 	  end;
 
@@ -638,7 +971,7 @@ var
 
 	end;	// if k > 0
 
-      Inc(k);
+      inc(k);
      end;
 
     listing[k]   := '';
@@ -646,8 +979,6 @@ var
     listing[k+2] := '';
     listing[k+3] := '';
 
-    // newListing := ListingToString(listing);
-    // DebugCall(Format('Rebuild(%s)', [context]), Format('Changing l from %d to %d: oldListing=%s / newListing=%s', [l, k, oldListing, newListing]));
     l := k;
 
    end;  //Rebuild
@@ -672,7 +1003,7 @@ var
   end;
 
 
-  function GetString(const j: TListingIndex): String; overload;
+  function GetString(const j: Integer): String; overload;
   var
     i: Integer;
     a: String;
@@ -684,7 +1015,7 @@ var
     a := listing[j];
 
     if a <> '' then
-      while (i <= length(a)) and not (a[i] in [' ', #9]) do
+      while not (a[i] in [' ', #9]) and (i <= length(a)) do
       begin
         Result := Result + a[i];
         Inc(i);
@@ -693,7 +1024,7 @@ var
   end;
 
 
-  function GetStringLast(const j: TListingIndex): String; overload;
+  function GetStringLast(const j: Integer): String; overload;
   var
     i: Integer;
     a: String;
@@ -715,7 +1046,7 @@ var
   end;  //GetStringLast
 
 
-  function GetARG(const n: Byte; const x: Shortint; const reset: Boolean = True): String;
+  function GetARG(n: Byte; x: Shortint; reset: Boolean = True): String;
   var
     i: Integer;
     a: String;
@@ -747,7 +1078,7 @@ var
 
       while a[i] in [' ', #9] do Inc(i);
 
-      while (i <= length(a)) and not (a[i] in [' ', #9]) do
+      while not (a[i] in [' ', #9]) and (i <= length(a)) do
       begin
         Result := Result + a[i];
         Inc(i);
@@ -762,17 +1093,8 @@ var
 // -----------------------------------------------------------------------------
 
   function RemoveUnusedSTACK: Boolean;
-  const
-    last_i = 7;
-  const
-    last_i_plus_one = last_i + 1;
-  const
-    min_j = 0;
-  const
-    last_j = 3;
-
   type
-      tStack = array [0..last_i_plus_one, min_j..last_j] of Boolean;
+      tStack = array [0..7+1, 0..3] of Boolean;
 
   var j: byte;
       i: integer;
@@ -781,12 +1103,10 @@ var
 
 
    procedure Clear;
-   var
-      i: Byte;
+   var i: byte;
    begin
 
-    for i := 0 to 15 do
-    begin
+    for i := 0 to 15 do begin
      s[i][0] := '';
      s[i][1] := '';
      s[i][2] := '';
@@ -799,24 +1119,23 @@ var
    end;
 
 
-    function unrelated(const i: TListingIndex): Boolean;  // unrelated stack references
-    var
-       j, k: Byte;
+    function unrelated(i: Integer): Boolean;	// unrelated stack references
+    var j, k: Byte;
     begin
 
       Result := False;
 
      for j := 0 to 7 do
       for k := 0 to 3 do
-       if pos(GetARG(k, j, False), listing[i]) > 0 then exit( (cnt_s[j, k] and (cnt_l[j, k] = False)) or		// sa zapisy, brak odczytow
+       if pos(GetARG(k, j, false), listing[i]) > 0 then exit( (cnt_s[j, k] and (cnt_l[j, k] = false)) or		// sa zapisy, brak odczytow
 	                                                      ((cnt_s[j, k] = false) and cnt_l[j, k]) );		// brak zapisow, sa odczyty
 
 
     // wyjatek dla :STACKORIGIN+16 (cnt_s[8,k] ; cnt_l[8,k]) ktory mapuje :EAX
 
       for k := 0 to 3 do
-       if pos(GetARG(k, 8, False), listing[i]) > 0 then 								// sa zapisy, brak odczytu
-         exit( (cnt_s[8, 0] or cnt_s[8 ,1] or cnt_s[8, 2] or cnt_s[8, 3] = True ) and (cnt_l[8, 0] or cnt_l[8, 1] or cnt_l[8, 2] or cnt_l[8, 3] = False) );
+       if pos(GetARG(k, 8, false), listing[i]) > 0 then 								// sa zapisy, brak odczytu
+         exit( (cnt_s[8, 0] or cnt_s[8 ,1] or cnt_s[8, 2] or cnt_s[8, 3] = true ) and (cnt_l[8, 0] or cnt_l[8, 1] or cnt_l[8, 2] or cnt_l[8, 3] = false) );
 
 {
 ;----  4x zapis :EAX, 1x odczyt :EAX
@@ -856,7 +1175,7 @@ var
 
     // szukamy pojedynczych odwolan do :STACKORIGIN+N
 
-    Rebuild('RemoveUnusedSTACK');
+    Rebuild;
 
     Clear;
 
@@ -868,24 +1187,21 @@ var
     for i := 0 to l - 1 do 	       // zliczamy odwolania do :STACKORIGIN+N
      if stack(i) then
 
-       if sta_stack(i) or sty_stack(i) then
-       begin
+       if sta_stack(i) or sty_stack(i) then begin
 
         for j := 0 to 7+1 do
-         if pos(GetARG(0, j, false), listing[i]) > 0 then begin cnt_s[j, 0] := True; Break end else
-          if pos(GetARG(1, j, false), listing[i]) > 0 then begin cnt_s[j, 1] := True; Break end else
-           if pos(GetARG(2, j, false), listing[i]) > 0 then begin cnt_s[j, 2] := True; Break end else
-            if pos(GetARG(3, j, false), listing[i]) > 0 then begin cnt_s[j, 3] := True; Break end;
+         if pos(GetARG(0, j, false), listing[i]) > 0 then begin cnt_s[j, 0] := true; Break end else
+          if pos(GetARG(1, j, false), listing[i]) > 0 then begin cnt_s[j, 1] := true; Break end else
+           if pos(GetARG(2, j, false), listing[i]) > 0 then begin cnt_s[j, 2] := true; Break end else
+            if pos(GetARG(3, j, false), listing[i]) > 0 then begin cnt_s[j, 3] := true; Break end;
 
-       end
-       else
-       begin
+       end else begin
 
         for j := 0 to 7+1 do
-         if pos(GetARG(0, j, false), listing[i]) > 0 then begin cnt_l[j, 0] := True; Break end else
-          if pos(GetARG(1, j, false), listing[i]) > 0 then begin cnt_l[j, 1] := True; Break end else
-           if pos(GetARG(2, j, false), listing[i]) > 0 then begin cnt_l[j, 2] := True; Break end else
-            if pos(GetARG(3, j, false), listing[i]) > 0 then begin cnt_l[j, 3] := True; Break end;
+         if pos(GetARG(0, j, false), listing[i]) > 0 then begin cnt_l[j, 0] := true; Break end else
+          if pos(GetARG(1, j, false), listing[i]) > 0 then begin cnt_l[j, 1] := true; Break end else
+           if pos(GetARG(2, j, false), listing[i]) > 0 then begin cnt_l[j, 2] := true; Break end else
+            if pos(GetARG(3, j, false), listing[i]) > 0 then begin cnt_l[j, 3] := true; Break end;
 
        end;
 
@@ -908,39 +1224,39 @@ var
 
 // -----------------------------------------------------------------------------
 
-  {$i include/opt6502/opt_SHR_BYTE.inc}
-  {$i include/opt6502/opt_SHR_WORD.inc}
-  {$i include/opt6502/opt_SHR_CARD.inc}
-  {$i include/opt6502/opt_SHL_BYTE.inc}
-  {$i include/opt6502/opt_SHL_WORD.inc}
-  {$i include/opt6502/opt_SHL_CARD.inc}
-  {$i include/opt6502/opt_BYTE_DIV.inc}
+{$i include/opt6502/opt_SHR_BYTE.inc}
+{$i include/opt6502/opt_SHR_WORD.inc}
+{$i include/opt6502/opt_SHR_CARD.inc}
+{$i include/opt6502/opt_SHL_BYTE.inc}
+{$i include/opt6502/opt_SHL_WORD.inc}
+{$i include/opt6502/opt_SHL_CARD.inc}
+{$i include/opt6502/opt_BYTE_DIV.inc}
 
-  {$i include/opt6502/opt_STA_0.inc}
-  {$i include/opt6502/opt_STACK.inc}
-  {$i include/opt6502/opt_STACK_INX.inc}
-  {$i include/opt6502/opt_STACK_ADD.inc}
-  {$i include/opt6502/opt_STACK_CMP.inc}
-  {$i include/opt6502/opt_STACK_ADR.inc}
-  {$i include/opt6502/opt_STACK_AL_CL.inc}
-  {$i include/opt6502/opt_STACK_AX_CX.inc}
-  {$i include/opt6502/opt_STACK_EAX_ECX.inc}
-  {$i include/opt6502/opt_STACK_PRINT.inc}
-  {$i include/opt6502/opt_CMP_BRANCH.inc}
-  {$i include/opt6502/opt_CMP_BP2.inc}
-  {$i include/opt6502/opt_CMP_LOCAL.inc}
-  {$i include/opt6502/opt_CMP_LT_GTEQ.inc}
-  {$i include/opt6502/opt_CMP_LTEQ.inc}
-  {$i include/opt6502/opt_CMP_GT.inc}
-  {$i include/opt6502/opt_CMP_NE_EQ.inc}
-  {$i include/opt6502/opt_CMP.inc}
-  {$i include/opt6502/opt_CMP_0.inc}
+{$i include/opt6502/opt_STA_0.inc}
+{$i include/opt6502/opt_STACK.inc}
+{$i include/opt6502/opt_STACK_INX.inc}
+{$i include/opt6502/opt_STACK_ADD.inc}
+{$i include/opt6502/opt_STACK_CMP.inc}
+{$i include/opt6502/opt_STACK_ADR.inc}
+{$i include/opt6502/opt_STACK_AL_CL.inc}
+{$i include/opt6502/opt_STACK_AX_CX.inc}
+{$i include/opt6502/opt_STACK_EAX_ECX.inc}
+{$i include/opt6502/opt_STACK_PRINT.inc}
+{$i include/opt6502/opt_CMP_BRANCH.inc}
+{$i include/opt6502/opt_CMP_BP2.inc}
+{$i include/opt6502/opt_CMP_LOCAL.inc}
+{$i include/opt6502/opt_CMP_LT_GTEQ.inc}
+{$i include/opt6502/opt_CMP_LTEQ.inc}
+{$i include/opt6502/opt_CMP_GT.inc}
+{$i include/opt6502/opt_CMP_NE_EQ.inc}
+{$i include/opt6502/opt_CMP.inc}
+{$i include/opt6502/opt_CMP_0.inc}
 
 // -----------------------------------------------------------------------------
 
   function PeepholeOptimization_STACK: Boolean;
   var
-    i: TListingIndex;
+    i: Integer;
     tmp: String;
   begin
 
@@ -962,7 +1278,7 @@ var
     end;
 
 
-    Rebuild('PeepholeOptimization_STACK');
+    Rebuild;
 
     for i := 0 to l - 1 do
     begin
@@ -976,12 +1292,12 @@ if (pos('mva RESOLVECOLLISIONS.RESULT', listing[i]) > 0) then begin
 end;
 }
 
-      if opt_CMP_LT_GTEQ(i) = False then exit(False);
-      if opt_CMP_LTEQ(i) = False then exit(False);
-      if opt_CMP_GT(i) = False then exit(False);
-      if opt_CMP_NE_EQ(i) = False then exit(False);
+      if opt_LT_GTEQ(i) = False then exit(False);
+      if opt_LTEQ(i) = False then exit(False);
+      if opt_GT(i) = False then exit(False);
+      if opt_NE_EQ(i) = False then exit(False);
       if opt_CMP(i) = False then exit(False);
-      if opt_CMP_BRANCH(i) = False then exit(False);
+      if opt_BRANCH(i) = False then exit(False);
       if opt_STACK(i) = False then exit(False);
       if opt_STACK_INX(i) = False then exit(False);
       if opt_STACK_ADD(i) = False then exit(False);
@@ -999,7 +1315,7 @@ end;
 
   function OptimizeEAX: Boolean;
   var
-    i: TListingIndex;
+    i: Integer;
     tmp: String;
   begin
 
@@ -1025,14 +1341,13 @@ end;
 
   procedure OptimizeEAX_OFF;
   var
-    i: TListingIndex;
+    i: Integer;
     tmp: String;
   begin
 
     for i := 0 to l - 1 do
 
-      if pos(' :STACKORIGIN+', listing[i]) = 5 then
-      begin
+      if pos(' :STACKORIGIN+', listing[i]) = 5 then begin
         tmp := copy(listing[i], 6, 256);
 
         if tmp = ':STACKORIGIN+16' then listing[i] := copy(listing[i], 1, 5) + ':eax' else
@@ -1049,25 +1364,24 @@ end;
     k: Integer;
 
 
-    {$i include/opt6502/opt_STA_ADD.inc}
-    {$i include/opt6502/opt_STA_LDY.inc}
-    {$i include/opt6502/opt_STA_BP.inc}
-    {$i include/opt6502/opt_STA_LSR.inc}
-    {$i include/opt6502/opt_STA_IMUL.inc}
-    {$i include/opt6502/opt_STA_IMUL_CX.inc}
-    {$i include/opt6502/opt_STA_ZTMP.inc}
+{$i include/opt6502/opt_STA_ADD.inc}
+{$i include/opt6502/opt_STA_LDY.inc}
+{$i include/opt6502/opt_STA_BP.inc}
+{$i include/opt6502/opt_STA_LSR.inc}
+{$i include/opt6502/opt_STA_IMUL.inc}
+{$i include/opt6502/opt_STA_IMUL_CX.inc}
+{$i include/opt6502/opt_STA_ZTMP.inc}
 
 
     function PeepholeOptimization_END: Boolean;
-    var
-        i, p, k: Integer;
+    var i, p, k: Integer;
         tmp, old: String;
         yes, ok: Boolean;
     begin
 
       Result := True;
 
-      Rebuild('PeepholeOptimization_END');
+      Rebuild;
 
       tmp := '';
       old := '';
@@ -1075,7 +1389,7 @@ end;
       for i := 0 to l - 1 do
       begin
 
-        {$i include/opt6502/opt_END_STA.inc}
+{$i include/opt6502/opt_END_STA.inc}
 
       end;
 
@@ -1084,13 +1398,12 @@ end;
 // -----------------------------------------------------------------------------
 
     function PeepholeOptimization_STA: Boolean;
-    var
-      i: Integer;
+    var i: Integer;
     begin
 
       Result := True;
 
-      Rebuild('PeepholeOptimization_STA');
+      Rebuild;
 
       for i := 0 to l - 1 do
       begin
@@ -1142,14 +1455,12 @@ end;
 // -----------------------------------------------------------------------------
 
     function PeepholeOptimization: Boolean;
-    var
-      i: Integer;
+    var i: Integer;
     begin
 
       Result := True;
 
-      Rebuild('PeepholeOptimization');
-      // DebugCall('OptimizeASM:PeepholeOptimization', ListingToString);
+      Rebuild;
 
       for i := 0 to l - 1 do
       begin
@@ -1206,19 +1517,18 @@ end;
   end;
 
 
-  // ----------------------------------------------------------------------------
-  // ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 
-  function OptimizeRelation(const CodeSize: Integer): Boolean;
+  function OptimizeRelation: Boolean;
   var
     i, p: Integer;
     tmp: String;
 
 
-    function test_AND(i: Integer): Boolean;
-    var
-      p: Integer;
+    function test_AND(i: integer): Boolean;
+    var p: integer;
     begin
 
       Result := True;
@@ -1234,9 +1544,8 @@ end;
     end;
 
 
-    function test_ORA(i: Integer): Boolean;
-    var
-      p: Integer;
+    function test_ORA(i: integer): Boolean;
+    var p: integer;
     begin
 
       Result := True;
@@ -1251,11 +1560,12 @@ end;
 
     end;
 
+
   begin
 
     Result := True;
 
-    // we remove empty '@', '@-' are not present
+    // usuwamy puste '@', '@-' nie wystepuja
     for i := 0 to l - 1 do
     begin
       if (pos('@+', listing[i]) > 0) then Break;
@@ -1263,7 +1573,7 @@ end;
     end;
 
 
-    Rebuild('OptimizeRelation');
+    Rebuild;
 
     for i := 0 to l - 1 do
     begin
@@ -1277,21 +1587,22 @@ if (pos('cmp #$29', listing[i]) > 0) then begin
 end;
 }
 
+
 // -----------------------------------------------------------------------------
 
-     if opt_CMP_0(i) = False then exit(False);
+     if opt_CMP_0(i) = false then exit(false);
 
-     if opt_CMP_LOCAL(i) = False then exit(False);
+     if opt_LOCAL(i) = false then exit(false);
 
-     if opt_CMP_LT_GTEQ(i) = False then exit(False);
-     if opt_CMP_LTEQ(i) = False then exit(False);
-     if opt_CMP_GT(i) = False then exit(False);
-     if opt_CMP_NE_EQ(i) = False then exit(False);
+     if opt_LT_GTEQ(i) = false then exit(false);
+     if opt_LTEQ(i) = false then exit(false);
+     if opt_GT(i) = false then exit(false);
+     if opt_NE_EQ(i) = false then exit(false);
 
-     if opt_CMP(i) = False then exit(False);
-     if opt_CMP_BP2(i) = False then exit(False);
+     if opt_CMP(i) = false then exit(false);
+     if opt_CMP_BP2(i) = false then exit(false);
 
-     if opt_CMP_BRANCH(i) = False then exit(False);
+     if opt_BRANCH(i) = false then exit(false);
 
 // -----------------------------------------------------------------------------
 
@@ -1366,16 +1677,15 @@ end;
   end;  //index
 
 
-  {$i include/opt6502/opt_IMUL_CL.inc}
+{$i include/opt6502/opt_IMUL_CL.inc}
 
-  {$i include/opt6502/opt_inline_POKE.inc}
-  {$i include/opt6502/opt_inline_PEEK.inc}
+{$i include/opt6502/opt_inline_POKE.inc}
+{$i include/opt6502/opt_inline_PEEK.inc}
 
-  {$i include/opt6502/opt_FOR.inc}
-  {$i include/opt6502/opt_REG_A.inc}
-  {$i include/opt6502/opt_REG_BP2.inc}
-  //{$i include/opt6502/opt_REG_TMP.inc}
-  {$i include/opt6502/opt_REG_Y.inc}
+{$i include/opt6502/opt_FOR.inc}
+{$i include/opt6502/opt_REG_A.inc}
+{$i include/opt6502/opt_REG_BP2.inc}
+{$i include/opt6502/opt_REG_Y.inc}
 
 
 begin        // OptimizeASM
@@ -1389,6 +1699,7 @@ begin        // OptimizeASM
   inxUse := False;
 
   listing := Default(TListing);
+  listing_tmp := Default(TListing_tmp);
 
   s := Default(TStack);
 
@@ -1397,17 +1708,12 @@ begin        // OptimizeASM
   begin
     a := OptimizeBuf[i];
 
-    if DebugCallCountBreakPointHit then
-    begin
-         DebugCall('OptimizeASM', Format('i=%d a=''%s''', [i,a]));
-    end;
-
     if (a <> '') and (pos(';', a) = 0) then
     begin
 
       t := a;
 
-      if (a = #9'inx') then begin Inc(x); inxUse:=True; t:=''; continue end;
+      if (a = #9'inx') then begin inc(x); inxUse:=true; t:=''; continue end;
       if (a = #9'dex') then begin dec(x); t:=''; continue end;
 
       if (pos('@print', a) > 0) then begin x:=51; arg0:='@print'; resetOpty; Break end;		// zakoncz optymalizacje niepowodzeniem
@@ -1438,7 +1744,7 @@ begin        // OptimizeASM
        listing[l+4] := #9'sty '+GetARG(1, x-1);
        listing[l+5] := #9'sta '+GetARG(0, x-1);
 
-       Inc(l, 6);
+       inc(l, 6);
       end else
       if elf = $078D58FC then begin		// @expandSHORT2SMALL
        t:='';
@@ -1450,7 +1756,7 @@ begin        // OptimizeASM
        listing[l+4] := #9'sty '+GetARG(1, x);
        listing[l+5] := #9'sta '+GetARG(0, x);
 
-       Inc(l, 6);
+       inc(l, 6);
       end else
       if elf = $0A4BEA14 then begin		// @expandToCARD.SHORT
 	t:='';
@@ -1466,7 +1772,7 @@ begin        // OptimizeASM
 	listing[l+6] := #9'sty '+GetARG(2, x);
 	listing[l+7] := #9'sty '+GetARG(3, x);
 
-	Inc(l, 8);
+	inc(l, 8);
 	end;
 
       end else
@@ -1484,7 +1790,7 @@ begin        // OptimizeASM
 	listing[l+6] := #9'sty '+GetARG(2, x-1);
 	listing[l+7] := #9'sty '+GetARG(3, x-1);
 
-	Inc(l, 8);
+	inc(l, 8);
 	end;
 
       end else
@@ -1503,7 +1809,7 @@ begin        // OptimizeASM
 	listing[l+7] := #9'sty '+GetARG(2, x);
 	listing[l+8] := #9'sty '+GetARG(3, x);
 
-	Inc(l, 9);
+	inc(l, 9);
 	end;
 
       end else
@@ -1522,7 +1828,7 @@ begin        // OptimizeASM
 	listing[l+7] := #9'sty '+GetARG(2, x-1);
 	listing[l+8] := #9'sty '+GetARG(3, x-1);
 
-	Inc(l, 9);
+	inc(l, 9);
 	end;
 
       end else
@@ -1542,7 +1848,7 @@ begin        // OptimizeASM
 	s[x][0] := '';					// -> :STACKORIGIN
 	listing[l+7] := #9'sta ' + GetARG(0, x);
 
-	Inc(l,8);
+	inc(l,8);
 
       end else
       if elf = $07B01501 then begin		// @expandToREAL1
@@ -1561,7 +1867,7 @@ begin        // OptimizeASM
 	s[x-1][0] := '';				// -> :STACKORIGIN-1
 	listing[l+7] := #9'sta ' + GetARG(0, x-1);
 
-	Inc(l,8);
+	inc(l,8);
 
       end else
       if elf = $06ED7EC5 then begin		// @hiBYTE
@@ -1571,7 +1877,7 @@ begin        // OptimizeASM
        listing[l+1] := #9':4 lsr @';
        listing[l+2] := #9'sta '+GetARG(0, x);
 
-       Inc(l, 3);
+       inc(l, 3);
       end else
 
       if elf = $06EEC424 then begin		// @hiWORD
@@ -1581,7 +1887,7 @@ begin        // OptimizeASM
        s[x][0] := '';
        listing[l+1] := #9'sta '+GetARG(0, x);
 
-       Inc(l, 2);
+       inc(l, 2);
       end else
       if elf = $06ED7624 then begin		// @hiCARD
        t:='';
@@ -1595,7 +1901,7 @@ begin        // OptimizeASM
        listing[l+2] := #9'lda '+GetARG(2, x);
        listing[l+3] := #9'sta '+GetARG(0, x);
 
-       Inc(l, 4);
+       inc(l, 4);
       end else
 
       if elf = $0D523E88 then begin		// @movZTMP_aBX
@@ -1615,11 +1921,11 @@ begin        // OptimizeASM
 	listing[l+6] := #9'lda :ztmp11';
 	listing[l+7] := #9'sta ' + GetARG(3, x-1);
 
-	Inc(l, 8);
+	inc(l, 8);
 
       end else
 
-      If elf = $053B7FA8 then begin		// @movaBX_EAX
+      if elf = $053B7FA8 then begin		// @movaBX_EAX
 	t:='';
 
 	s[x-1, 0] := '';
@@ -1636,7 +1942,7 @@ begin        // OptimizeASM
 	listing[l+6] := #9'lda :eax+3';
 	listing[l+7] := #9'sta ' + GetARG(3, x-1);
 
-	Inc(l, 8);
+	inc(l, 8);
 
       end else
 
@@ -1666,13 +1972,13 @@ begin        // OptimizeASM
 
 	 listing[l+2] := #9'jsr #$00';
 
-	 Inc(l, 3);
+	 inc(l, 3);
 
 	end else begin
 
 	 listing[l] := #9'jsr @BYTE.MOD';
 
-	 Inc(l, 1);
+	 inc(l, 1);
 
 	end;
 
@@ -1699,13 +2005,13 @@ begin        // OptimizeASM
 	 listing[l]   := #9'lda ' + GetARG(0, x-1);
 	 listing[l+1] := #9'sta :eax';
 
-	 Inc(l, 2);
+	 inc(l, 2);
 
 	end else begin
 
 	 listing[l]   := #9'jsr @BYTE.DIV';
 
-	 Inc(l, 1);
+	 inc(l, 1);
 
 	end;
 
@@ -1729,7 +2035,7 @@ begin        // OptimizeASM
 
 	if elf = $0D334D44 then begin		// mulSHORTINT
 	 listing[l+2] := #9'sta :ztmp8';
-	 Inc(l);
+	 inc(l);
 	end;
 
 	listing[l+2]  := #9'lda '+GetARG(0, x-1);
@@ -1737,7 +2043,7 @@ begin        // OptimizeASM
 
 	if elf = $0D334D44 then begin		// mulSHORTINT
 	 listing[l+4] := #9'sta :ztmp10';
-	 Inc(l);
+	 inc(l);
 	end;
 
 	listing[l+4] := #9'.ifdef fmulinit';
@@ -1745,7 +2051,6 @@ begin        // OptimizeASM
 	listing[l+6] := #9'els';
 	listing[l+7] := #9'imulCL';
 	listing[l+8] := #9'eif';
-
 
 	if lda_im(l) and					// #const
 	   (listing[l+1] = #9'sta :ecx') and
@@ -1760,10 +2065,10 @@ begin        // OptimizeASM
       	  listing[l+2]:= #9'lda #' + Hex(byte(k shr 8), 2);
       	  listing[l+3]:= #9'sta :eax+1';
 
-	  Inc(l, 4);
+	  inc(l, 4);
 
 	end else
-	 if imulCL_opt then Inc(l, 9);
+	 if imulCL_opt then inc(l, 9);
 
 
 	if elf = $0D334D44 then begin		// mulSHORTINT
@@ -1793,7 +2098,7 @@ begin        // OptimizeASM
 	 listing[l+18] := #9'lda #$00';
 	 listing[l+19] := #9'sta '+GetARG(3, x-1);
 
-	 Inc(l, 20);
+	 inc(l, 20);
 	end;
 
       end else
@@ -1814,7 +2119,7 @@ begin        // OptimizeASM
 
 	if elf = $0135CDB4 then begin		// mulSMALLINT
 	 listing[l+2] := #9'sta :ztmp8';
-	 Inc(l);
+	 inc(l);
 	end;
 
 	listing[l+2]  := #9'lda '+GetARG(1, x);
@@ -1822,7 +2127,7 @@ begin        // OptimizeASM
 
 	if elf = $0135CDB4 then begin		// mulSMALLINT
 	 listing[l+4] := #9'sta :ztmp9';
-	 Inc(l);
+	 inc(l);
 	end;
 
 	listing[l+4]  := #9'lda '+GetARG(0, x-1);
@@ -1830,7 +2135,7 @@ begin        // OptimizeASM
 
 	if elf = $0135CDB4 then begin		// mulSMALLINT
 	 listing[l+6] := #9'sta :ztmp10';
-	 Inc(l);
+	 inc(l);
 	end;
 
 	listing[l+6]  := #9'lda '+GetARG(1, x-1);
@@ -1838,7 +2143,7 @@ begin        // OptimizeASM
 
 	if elf = $0135CDB4 then begin		// mulSMALLINT
 	 listing[l+8] := #9'sta :ztmp11';
-	 Inc(l);
+	 inc(l);
 	end;
 
 
@@ -1878,7 +2183,7 @@ begin        // OptimizeASM
 
 	end;
 
-	Inc(l, 13);
+	inc(l, 13);
 
 	if elf = $0135CDB4 then begin		// mulSMALLINT
 
@@ -1913,7 +2218,7 @@ begin        // OptimizeASM
 	listing[l+24] := #9'lda :eax+3';
 	listing[l+25] := #9'sta '+GetARG(3, x-1);
 
-	Inc(l, 26);
+	inc(l, 26);
 	end;
 
 
@@ -1993,7 +2298,7 @@ begin        // OptimizeASM
 
 	listing[l+16] := #9'jsr imulECX';
 
-	Inc(l, 17);
+	inc(l, 17);
 
 	if elf = $0E3FD7A2 then begin		// mulINTEGER
 	listing[l]   := #9'lda :eax';
@@ -2025,7 +2330,7 @@ begin        // OptimizeASM
 	 listing[l+7] := '';
 	end;
 
-	Inc(l, 8);
+	inc(l, 8);
 	end;
 
       end else
@@ -2069,7 +2374,7 @@ begin        // OptimizeASM
        listing[l+10] := '';
        listing[l+11] := '';
 
-       Inc(l, 3);
+       inc(l, 3);
       end;
 
       if (elf = $0B66E428) then begin		// subAX_CX
@@ -2103,7 +2408,7 @@ begin        // OptimizeASM
        listing[l+10] := '';
        listing[l+11] := '';
 
-       Inc(l, 6);
+       inc(l, 6);
       end;
 
       if (elf = $096B92E8) then begin		// subEAX_ECX
@@ -2124,7 +2429,7 @@ begin        // OptimizeASM
        listing[l+10] := #9'sbc '+GetARG(3, x);
        listing[l+11] := #9'sta '+GetARG(3, x-1);
 
-       Inc(l, 12);
+       inc(l, 12);
       end;
 
       if elf = $0A86250C then begin		// addAL_CL
@@ -2165,7 +2470,7 @@ begin        // OptimizeASM
        listing[l+10] := '';
        listing[l+11] := '';
 
-       Inc(l, 3);
+       inc(l, 3);
       end;
 
       if elf = $0A86E5F8 then begin		// addAX_CX
@@ -2199,7 +2504,7 @@ begin        // OptimizeASM
        listing[l+10] := '';
        listing[l+11] := '';
 
-       Inc(l, 6);
+       inc(l, 6);
       end;
 
       if (elf = $096C4308) then begin		// addEAX_ECX
@@ -2220,7 +2525,7 @@ begin        // OptimizeASM
        listing[l+10]:= #9'adc '+GetARG(3, x);
        listing[l+11]:= #9'sta '+GetARG(3, x-1);
 
-       Inc(l, 12);
+       inc(l, 12);
 
       end;
 
@@ -2407,7 +2712,7 @@ begin        // OptimizeASM
      listing[l]   := #9'lda ' + GetARG(0, x);
      listing[l+1] := #9'sta ' + GetARG(0, x);
 
-     Inc(l, 2);
+     inc(l, 2);
     end;
    end;
 
@@ -2419,7 +2724,7 @@ begin        // OptimizeASM
      listing[l]   := #9'lda ' + GetARG(1, x);
      listing[l+1] := #9'sta ' + GetARG(1, x);
 
-     Inc(l, 2);
+     inc(l, 2);
     end;
    end;
 
@@ -2431,7 +2736,7 @@ begin        // OptimizeASM
      listing[l]   := #9'lda ' + GetARG(2, x);
      listing[l+1] := #9'sta ' + GetARG(2, x);
 
-     Inc(l, 2);
+     inc(l, 2);
     end;
    end;
 
@@ -2443,7 +2748,7 @@ begin        // OptimizeASM
      listing[l]   := #9'lda ' + GetARG(3, x);
      listing[l+1] := #9'sta ' + GetARG(3, x);
 
-     Inc(l, 2);
+     inc(l, 2);
     end;
    end;
 
@@ -2459,37 +2764,33 @@ begin        // OptimizeASM
   end; // if (pos('(:bp),', t) = 0)
 
 
-   if (pos(':STACKORIGIN,', t) = 6) then
-   begin
+   if (pos(':STACKORIGIN,', t) = 6) then begin
     //k:=pos(':STACK', t);  writeln(k);
-    Delete(t, 6, 14);
+    delete(t, 6, 14);
 
     arg0 := GetARG(0, x);
     insert(arg0, t, 6);
    end;
 
-   if (pos(':STACKORIGIN+STACKWIDTH,', t) = 6) then
-   begin
+   if (pos(':STACKORIGIN+STACKWIDTH,', t) = 6) then begin
     //k:=pos(':STACK', t);
-    Delete(t, 6, 25);
+    delete(t, 6, 25);
 
     arg0 := GetARG(1, x);
     insert(arg0, t, 6);
    end;
 
-   if (pos(':STACKORIGIN+STACKWIDTH*2,', t) = 6) then
-   begin
+   if (pos(':STACKORIGIN+STACKWIDTH*2,', t) = 6) then begin
     //k:=pos(':STACK', t);
-    Delete(t, 6, 27);
+    delete(t, 6, 27);
 
     arg0 := GetARG(2, x);
     insert(arg0, t, 6);
    end;
 
-   if (pos(':STACKORIGIN+STACKWIDTH*3,', t) = 6) then
-   begin
+   if (pos(':STACKORIGIN+STACKWIDTH*3,', t) = 6) then begin
     //k:=pos(':STACK', t);
-    Delete(t, 6, 27);
+    delete(t, 6, 27);
 
     arg0 := GetARG(3, x);
     insert(arg0, t, 6);
@@ -2507,13 +2808,13 @@ begin        // OptimizeASM
    if (pos(':STACKORIGIN+1+STACKWIDTH*3,', t) = 6) then	t:=copy(a, 1, 5) + GetARG(3, x+1);
 
 
-   if t <> '' then
-   begin
+   if t <> '' then begin
 
     listing[l] := t;
-    Inc(l);
+    inc(l);
 
    end;
+
 
   end;
 
@@ -2523,18 +2824,16 @@ begin        // OptimizeASM
 
   (* -------------------------------------------------------------------------- *)
 
-  // DebugCall('OptimizeASM.l', IntToStr(l));
-
   if ((x = 0) and inxUse) then
-  begin   // succesful
+  begin   // succesfull
 
-    if GetSourceFileLine <> Common.optimize.old then
+    if common.optimize.line <> common.optimize.old then
     begin
       WriteOut('');
-      WriteOut('; optimize OK (' + GetSourceFileName + '), line = ' + IntToStr(GetSourceFileLine));
+      WriteOut('; optimize OK (' + UnitName[common.optimize.unitIndex].Name + '), line = ' + IntToStr(common.optimize.line));
       WriteOut('');
 
-      common.optimize.old := GetSourceFileLine;
+      common.optimize.old := common.optimize.line;
     end;
 
 
@@ -2544,15 +2843,14 @@ begin        // OptimizeASM
 
     OptimizeAssignment;
 
-    repeat until OptimizeRelation(CodeSize);
+    repeat until OptimizeRelation;
 
     OptimizeAssignment;
 
-  until OptimizeRelation(CodeSize);
+  until OptimizeRelation;
 
 
-    if OptimizeEAX then
-    begin
+  if OptimizeEAX then begin
     OptimizeAssignment;
 
     OptimizeEAX_OFF;
@@ -2572,13 +2870,8 @@ begin        // OptimizeASM
   (* -------------------------------------------------------------------------- *)
 
     for i := 0 to l - 1 do
-  begin
-    if listing[i] <> '' then
-    begin
-         // DebugCall('OptimizeASM.WriteInstruction',Format('listing[%d/%d]=%s', [i, l-1, listing[i]]));
-         WriteInstruction(i);
-    end;
-  end;
+      if listing[i] <> '' then WriteInstruction(i);
+
   (* -------------------------------------------------------------------------- *)
 
   end
@@ -2586,12 +2879,11 @@ begin        // OptimizeASM
   begin
 
     l := High(OptimizeBuf);
-    // DebugCall('OptimizeASM.l', IntToStr(l));
 
     if l > High(listing) then
     begin
       WriteLn('Out of resources, LISTING');
-      Halt;
+      halt;
     end;
 
     for i := 0 to l - 1 do
@@ -2600,8 +2892,7 @@ begin        // OptimizeASM
 
 {$IFDEF OPTIMIZECODE}
 
-  repeat
-  until PeepholeOptimization_STACK;		// optymalizacja lda :STACK...,x \ sta :STACK...,x
+  repeat until PeepholeOptimization_STACK;		// optymalizacja lda :STACK...,x \ sta :STACK...,x
 
 {$ENDIF}
 
@@ -2611,10 +2902,10 @@ begin        // OptimizeASM
     if optyA <> '' then
       for i := 0 to l - 1 do
         if (listing[i] = #9'inc ' + optyA) or (listing[i] = #9'dec ' + optyA) or //((optyY <> '') and (optyA = optyY)) or
-          lda_a(i) or mva(i) or mwa(i) or tya(i) or lab_a(i) or jsr(i) or (pos(#9'jmp ', listing[i]) > 0) or
-          (pos(#9'.if', listing[i]) > 0) then
+	  _if(i) or
+          lda_a(i) or mva(i) or mwa(i) or tya(i) or lab_a(i) or jsr(i) or (pos(#9'jmp ', listing[i]) > 0) then
         begin
-          SetOptyA ('');
+          optyA := '';
           Break;
         end;
 
@@ -2624,8 +2915,8 @@ begin        // OptimizeASM
     if optyY <> '' then
       for i := 0 to l - 1 do
         if LabelIsUsed(i) or //((optyA <> '') and (optyA = optyY)) or
-          ldy(i) or mvy(i) or mwy(i) or iny(i) or dey(i) or tay(i) or lab_a(i) or jsr(i) or
-          (pos(#9'jmp ', listing[i]) > 0) or (pos(#9'.if', listing[i]) > 0) then
+	  _if(i) or
+          ldy(i) or mvy(i) or mwy(i) or iny(i) or dey(i) or tay(i) or lab_a(i) or jsr(i) or (pos(#9'jmp ', listing[i]) > 0) then
         begin
           optyY := '';
           Break;
@@ -2654,28 +2945,24 @@ begin        // OptimizeASM
       end;
 
 
-    if GetSourceFileLine <> common.optimize.old then
+    if common.optimize.line <> common.optimize.old then
     begin
       WriteOut('');
 
       if x = 51 then
-        WriteOut('; optimize FAIL (' + '''' + arg0 + '''' + ', ' + GetSourceFileName + '), line = ' + IntToStr(GetSourceFileLine))
+        WriteOut('; optimize FAIL (' + '''' + arg0 + '''' + ', ' + UnitName[common.optimize.unitIndex].Name + '), line = ' + IntToStr(common.optimize.line))
       else
-        WriteOut('; optimize FAIL (' + IntToStr(x) + ', ' + GetSourceFileName + '), line = ' + IntToStr(GetSourceFileLine));
+        WriteOut('; optimize FAIL (' + IntToStr(x) + ', ' + UnitName[common.optimize.unitIndex].Name + '), line = ' + IntToStr(common.optimize.line));
 
       WriteOut('');
 
-      common.optimize.old := GetSourceFileLine;
+      common.optimize.old := common.optimize.line;
     end;
 
 
     (* -------------------------------------------------------------------------- *)
 
-    for i := 0 to l - 1 do
-     begin
-          // DebugCall('OptimizeASM.WriteInstruction',Format('listing[%d/%d]=%s', [i, l-1, listing[i]]));
-          WriteInstruction(i);
-     end;
+    for i := 0 to l - 1 do WriteInstruction(i);
 
     (* -------------------------------------------------------------------------- *)
 
@@ -2689,18 +2976,14 @@ begin        // OptimizeASM
  writeln(OptFile, StringOfChar('-', 32));
 
   for i := 0 to High(OptimizeBuf) - 1 do
-  begin
     Writeln(OptFile, OptimizeBuf[i]);
-  end;
 
  writeln(OptFile, StringOfChar('-', 32));
- writeln(OptFile, 'OPTIMIZE ',((x = 0) and inxUse),', x=',x,', ('+GetSourceFileName+') line = ',GetSourceFileLine);
+ writeln(OptFile, 'OPTIMIZE ',((x = 0) and inxUse),', x=',x,', ('+UnitName[common.optimize.unitIndex].Name+') line = ',common.optimize.line);
  writeln(OptFile, StringOfChar('-', 32));
 
   for i := 0 to l - 1 do
-  begin
     Writeln(OptFile, listing[i]);
-  end;
 
  writeln(OptFile);
  writeln(OptFile, StringOfChar('-', 64));
@@ -2715,15 +2998,9 @@ end;
 
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
-function IsASM65BufferEmpty: Boolean;
-begin
-  Result:= High(OptimizeBuf) = 0;
-end;
 
 
 procedure asm65(const a: string = ''; const comment : string ='');
-const TAB_WIDTH = 8;
-const COMMENT_COLUMN = 7*TAB_WIDTH;
 var len, i: integer;
     optimize_code: Boolean;
     str: string;
@@ -2739,45 +3016,34 @@ begin
 
  if Pass = CODEGENERATIONPASS then begin
 
-  LogAsm65(a,comment);
   if optimize_code and common.optimize.use then begin
 
-   // Add to the optimize buffer.
    i:=High(OptimizeBuf);
    OptimizeBuf[i] := a;
+
    SetLength(OptimizeBuf, i+2);
 
   end else begin
 
-    if not IsASM65BufferEmpty
-    then
-	   begin
-	    // DebugCall('OptimizeASM.Begin',OptimizeBufToString );
-	    OptimizeASM(CodeSize, IsInterrupt) ;
-	    // DebugCall('OptimizeASM.End',OptimizeBufToString );
-	   end
-     else
-      begin
+   if High(OptimizeBuf) > 0 then
+
+     OptimizeASM
+
+   else begin
 
     str:=a;
 
-    // Align comment to existing spaces and tabs
-    if comment <> '' then
-    begin
+    if comment<>'' then begin
 
      len:=0;
 
      for i := 1 to length(a) do
       if a[i] = #9 then
-       Inc(len, TAB_WIDTH-(len mod TAB_WIDTH))
+       inc(len, 8-(len mod 8))
       else
-       if not(a[i] in [CR, LF]) then Inc(len);
+       if not(a[i] in [CR, LF]) then inc(len);
 
-     while len < COMMENT_COLUMN do
-     begin
-       str:=str+#9;
-       Inc(len, TAB_WIDTH);
-     end;
+     while len < 56 do begin str:=str+#9; inc(len, 8) end;
 
      str:=str + comment;
 

@@ -4,15 +4,11 @@ interface
 
 {$i define.inc}
 
-{$inline on}
-
 // ----------------------------------------------------------------------------
-
-uses CompilerTypes;
 
 const
 
-  title = '1.7.5';
+  title = '1.7.6';
 
   TAB = ^I;   // Char for a TAB
   CR = ^M;    // Char for a CR
@@ -248,6 +244,7 @@ const
 
   MAXNAMELENGTH = 32;
   MAXTOKENNAMES = 200;
+  MAXSTRLENGTH = 255;
   MAXFIELDS = 256;
   MAXTYPES = 1024;
   //  MAXTOKENS    = 32768;
@@ -371,6 +368,7 @@ type
 
     );
 
+  TString = String [MAXSTRLENGTH];
   TName = String [MAXNAMELENGTH];
 
   TDefinesParam = array [1..MAXPARAMS] of TString;
@@ -526,7 +524,7 @@ var
   PROGRAM_NAME: String = 'Program';
   LIBRARY_NAME: String;
 
-  AsmBlock: TAsmBlockArray;
+  AsmBlock: array [0..4095] of String;
 
   Data, DataSegment, StaticStringData: array [0..$FFFF] of Word;
 
@@ -551,7 +549,7 @@ var
   BlockStackTop, CodeSize, CodePosStackTop, BreakPosStackTop, _VarDataSize, Pass, ShrShlCnt,
   NumStaticStrCharsTmp, AsmBlockIndex, IfCnt, CaseCnt, IfdefLevel, run_func: Integer;
 
-  TemporaryBufIndex: Integer = -1;
+  iOut: Integer = -1;
 
   start_time: QWord;
 
@@ -572,7 +570,7 @@ var
   resArray: array of TResource;
 
   MainPath, FilePath, optyA, optyY, optyBP2,
-  optyFOR0, optyFOR1, optyFOR2, optyFOR3, LastTempBuf0, outputFile: TString;
+  optyFOR0, optyFOR1, optyFOR2, optyFOR3, outTmp, outputFile: TString;
 
   msgWarning, msgNote, msgUser, UnitPath, OptimizeBuf, LinkObj, WithName: TArrayString;
 

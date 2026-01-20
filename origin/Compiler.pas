@@ -14,7 +14,7 @@ procedure CompileProgram;
 
 implementation
 
-uses Crt, SysUtils, Common, CompilerTypes, Messages, Scanner, Parser, Optimize, MathEvaluate;
+uses Crt, SysUtils, Common, Messages, Scanner, Parser, Optimize, MathEvaluate;
 
 // ---------------------------------------------------------------------------
 
@@ -563,7 +563,10 @@ writeln('_B: ', Ident[IdentIndex].Name);
         if Kind = VARIABLE then
         begin          // @label
 
-          svar := GetLocalName(IdentIndex);
+	  if Ident[IdentIndex].IdType = ARRAYTOK then	     
+            svar := GetLocalName(IdentIndex, 'adr.')
+	  else		     
+            svar := GetLocalName(IdentIndex);
 
           asm65(#9'mva <' + svar + ' :STACKORIGIN,x');
           asm65(#9'mva >' + svar + ' :STACKORIGIN+STACKWIDTH,x');
@@ -6623,7 +6626,7 @@ end;
                 Error(i + 1, CantAdrConstantExp);
 
 
-            //  writeln(Ident[IdentIndex].Name,' = ',Ident[IdentIndex].DataType,',',Ident[IdentIndex].AllocElementType,',',Ident[IdentIndex].NumAllocElements,',',Ident[IdentIndex].PassMethod );
+//	writeln(Ident[IdentIndex].Name,' = ',Ident[IdentIndex].DataType,',',Ident[IdentIndex].AllocElementType,',',Ident[IdentIndex].NumAllocElements,',',Ident[IdentIndex].PassMethod );
 
 
 	    if (Tok[i + 2].Kind = DEREFERENCETOK) and (Tok[i + 3].Kind = OBRACKETTOK) and (Ident[IdentIndex].DataType in [POINTERTOK, DEREFERENCEARRAYTOK]) then inc(i);
@@ -6655,7 +6658,6 @@ end;
                 // atari    // a := @tab[x,y]
 
                 i := CompileArrayIndex(i, IdentIndex, AllocElementType);
-
 
                 if Ident[IdentIndex].DataType = ENUMTYPE then
                   NumAllocElements := 0
@@ -6733,7 +6735,7 @@ end;
                   (VarPass and (Ident[IdentIndex].DataType in Pointers)) then
                 begin
 
-                  //  writeln(Ident[IdentIndex].Name,',',Ident[IdentIndex].DataType,',',Ident[IdentIndex].AllocElementType,',',Ident[IdentIndex].NumAllocElements,',',Ident[IdentIndex].PassMethod,',',Tok[i + 2].Kind);
+//	writeln(Ident[IdentIndex].Name,',',Ident[IdentIndex].DataType,',',Ident[IdentIndex].AllocElementType,',',Ident[IdentIndex].NumAllocElements,',',Ident[IdentIndex].PassMethod,',',Tok[i + 2].Kind);
 
                   DEREFERENCE := (Tok[i + 2].Kind = DEREFERENCETOK);
 
@@ -8076,6 +8078,7 @@ end;
           StartOptimization(i)
         else
           StopOptimization;
+
       run_func := old_func;
 
     end;
@@ -9248,7 +9251,7 @@ end;
 
 
     if DataSize[SelectorType]<>1 then
-     Error(i, 'Expected BYTE, SHORTINT, CHAR, or BOOLEAN as CASE selector');
+     Error(i, 'Expected BYTE, SHORTINT, CHAR or BOOLEAN as CASE selector');
 
     if not (SelectorType in OrdinalTypes) then
       Error(i, 'Ordinal variable expected as ''CASE'' selector');
@@ -9790,7 +9793,7 @@ end;
                     begin
 
 // progres
-//writeln(Ident[IdentIndex].name,',',Ident[IdentIndex].DataType,',',Ident[IdentIndex].AllocElementType,',',Ident[IdentIndex].NumAllocElements,',', Tok[i + 2].Kind);
+//	writeln(Ident[IdentIndex].name,',',Ident[IdentIndex].DataType,',',Ident[IdentIndex].AllocElementType,',',Ident[IdentIndex].NumAllocElements,',', Tok[i + 2].Kind);
 
 
                       if (Ident[IdentIndex].DataType = STRINGPOINTERTOK) and (Ident[IdentIndex].NumAllocElements = 0) then
@@ -9925,10 +9928,10 @@ end;
 			       (ValType in [RECORDTOK, OBJECTTOK]) then			// array[ ].field
                             begin
 
+// perl2
 //	writeln(valType,' / ',Ident[IdentIndex].name,',',Ident[IdentIndex].DataType,',',Ident[IdentIndex].AllocElementType,',',Ident[IdentIndex].NumAllocElements,',',Ident[IdentIndex].NumAllocElements_,',',Tok[i + 3].Kind );
 
                               //CheckTok(i + 1, CBRACKETTOK);
-
 
                               CheckTok(i + 3, IDENTTOK);
                               IdentTemp := RecordSize(IdentIndex, Tok[i + 3].Name^);
@@ -10002,7 +10005,7 @@ end;
                                 // zamiast 'record_ptr'
                                 // -----------------------------------------------------------------------------
 
-                                //  writeln(Ident[IdentIndex].name,',',Ident[IdentIndex].DataType,',',Ident[IdentIndex].NumAllocElements,',',Ident[IdentIndex].NumAllocElements_);
+//	writeln(Ident[IdentIndex].name,',',Ident[IdentIndex].DataType,',',Ident[IdentIndex].NumAllocElements,',',Ident[IdentIndex].NumAllocElements_);
 
                                 IdentTemp := 0;
 
@@ -10099,8 +10102,8 @@ end;
                           ValType := Ident[IdentIndex].DataType;
 
 
-                        // LUCI
-                        //  writeln(Ident[IdentIndex].Name,',',Ident[IdentIndex].DataType,',',Ident[IdentIndex].AllocElementType,',',Ident[IdentIndex].NumAllocElements,',',Ident[IdentIndex].NumAllocElements_,',',Ident[IdentIndex].idType,'/',Ident[IdentIndex].Kind,' = ',Ident[IdentIndex].PassMethod ,' | ',ValType,',',Tok[j].Kind,',',Tok[j+1].kind];
+// LUCI
+//	writeln(Ident[IdentIndex].Name,',',Ident[IdentIndex].DataType,',',Ident[IdentIndex].AllocElementType,',',Ident[IdentIndex].NumAllocElements,',',Ident[IdentIndex].NumAllocElements_,',',Ident[IdentIndex].idType,'/',Ident[IdentIndex].Kind,' = ',Ident[IdentIndex].PassMethod ,' | ',ValType,',',Tok[j].Kind,',',Tok[j+1].kind];
 
 
                         if (ValType = ENUMTYPE) and (Ident[IdentIndex].DataType = ENUMTYPE) then ValType := Ident[IdentIndex].AllocElementType;
@@ -11765,6 +11768,8 @@ end;
 
                       i := CompileArrayIndex(i, IdentIndex, VarType);
 
+		      if Ident[IdentIndex].AllocElementType in [RECORDTOK, OBJECTTOK] then VarType:=POINTERTOK;
+
                       CheckTok(i + 1, CBRACKETTOK);
 
                     end
@@ -11847,7 +11852,7 @@ end;
 // label.field[index] -> label + field[index]
 
                       if pos('.', Ident[IdentIndex].Name) > 0 then
-                      begin							// record_ptr.field[index] :=
+                      begin      						// record_ptr.field[index] :=
 
                         IdentTemp := GetIdent(copy(Ident[IdentIndex].Name, 1, pos('.', Ident[IdentIndex].Name) - 1));
 
@@ -11864,7 +11869,7 @@ end;
                           if IdentTemp < 0 then
                             Error(i + 3, 'identifier idents no member ''' + svar + '''');
 
-                          par2 := Hex(IdentTemp and $ffff, 2);     		 // offset to record field -> 'svar'
+                          par2 := Hex(IdentTemp and $ffff, 2);      // offset to record field -> 'svar'
 
                         end;
 
@@ -11884,11 +11889,11 @@ end;
                           Error(i + 3, 'identifier idents no member ''' + Tok[i + 3].Name^ + '''');
 
 
-//	writeln('>',Ident[IdentIndex].Name+ '||' + Tok[i + 3].Name^,',',IdentTemp shr 16,',',VarType,'||',Tok[i+4].Kind,',',Ident[GetIdent(Ident[IdentIndex].Name+ '.' + Tok[i + 3].Name^)].AllocElementTYpe]]
+                        //         writeln('>',Ident[IdentIndex].Name+ '||' + Tok[i + 3].Name^,',',IdentTemp shr 16,',',VarType,'||',Tok[i+4].Kind,',',Ident[GetIdent(Ident[IdentIndex].Name+ '.' + Tok[i + 3].Name^)].AllocElementTYpe]]
 
 
                         if Tok[i + 4].Kind = OBRACKETTOK then
-                        begin							// array_to_record_pointers[x].field[index] :=
+                        begin        						// array_to_record_pointers[x].field[index] :=
 
                           if not (Ident[IdentIndex].DataType in Pointers) then
                             Error(i + 2, IncompatibleTypeOf, IdentIndex);
@@ -11926,7 +11931,7 @@ end;
                       Inc(i);
 
                     end
-                    else				// Without dereferencing or indexing
+                    else                // Without dereferencing or indexing
                     begin
 
                       if (Ident[IdentIndex].PassMethod = VARPASSING) then
@@ -11946,7 +11951,7 @@ end;
                         VarType := Ident[IdentIndex].DataType;
                       end;
 
-//	writeln('= ',Ident[IdentIndex].Name,',',Ident[IdentIndex].DataType,',',Ident[IdentIndex].AllocElementType,',',Ident[IdentIndex].NumAllocElements,' | ', VarType,',',IndirectionLevel);
+                      //  writeln('= ',Ident[IdentIndex].Name,',',Ident[IdentIndex].DataType,',',Ident[IdentIndex].AllocElementType,',',Ident[IdentIndex].NumAllocElements,' | ', VarType,',',IndirectionLevel);
 
                     end;
 
@@ -12121,7 +12126,7 @@ end;
                             else
                             begin
 
-                              //      writeln(Ident[IdentIndex].Name,',',Ident[IdentIndex].DataType,':',Ident[IdentIndex].AllocElementType,':',Ident[IdentIndex].NumAllocElements,' | ',Ident[IdentTemp].Name,',',Ident[IdentTemp].DataType,':',Ident[IdentTemp].AllocElementType,':',Ident[IdentTemp].NumAllocElements);
+//	writeln(Ident[IdentIndex].Name,',',Ident[IdentIndex].DataType,':',Ident[IdentIndex].AllocElementType,':',Ident[IdentIndex].NumAllocElements,' | ',Ident[IdentTemp].Name,',',Ident[IdentTemp].DataType,':',Ident[IdentTemp].AllocElementType,':',Ident[IdentTemp].NumAllocElements);
 
                               if (Ident[IdentIndex].DataType = POINTERTOK) and
                                 (Ident[IdentIndex].AllocElementType <> UNTYPETOK) and
@@ -12159,7 +12164,7 @@ end;
                         else
                         begin
 
-                          //     writeln('1> ',Ident[IdentIndex].Name,',',Ident[IdentIndex].DataType,',',Ident[IdentIndex].AllocElementType,',',Ident[IdentIndex].NumAllocElements,'/',Ident[IdentIndex].NumAllocElements_,', P:', Ident[IdentIndex].PassMethod,' | ',VarType,',',ExpressionType,',',IndirectionLevel);
+//	writeln('1> ',Ident[IdentIndex].Name,',',Ident[IdentIndex].DataType,',',Ident[IdentIndex].AllocElementType,',',Ident[IdentIndex].NumAllocElements,'/',Ident[IdentIndex].NumAllocElements_,', P:', Ident[IdentIndex].PassMethod,' | ',VarType,',',ExpressionType,',',IndirectionLevel);
 
                           if ((Ident[IdentIndex].DataType = POINTERTOK) and (Ident[IdentIndex].AllocElementType in [RECORDTOK, OBJECTTOK])) or ((VarType = STRINGPOINTERTOK) and (ExpressionType = PCHARTOK)) then
 
@@ -12240,9 +12245,8 @@ end;
                   Ident[IdentIndex].isInit := True;
 
 
-                  //  writeln(vartype,',',ExpressionType,',',Ident[IdentIndex].Name);
-
-                  //       writeln('0> ',Ident[IdentIndex].Name,',',VarType,',',Ident[IdentIndex].DataType,',',Ident[IdentIndex].AllocElementType,',',Ident[IdentIndex].NumAllocElements,' | ', ExpressionType,',',IndirectionLevel);
+//	writeln(vartype,',',ExpressionType,',',Ident[IdentIndex].Name);
+//	writeln('0> ',Ident[IdentIndex].Name,',',VarType,',',Ident[IdentIndex].DataType,',',Ident[IdentIndex].AllocElementType,',',Ident[IdentIndex].NumAllocElements,' | ', ExpressionType,',',IndirectionLevel);
 
 
                   if (Ident[IdentIndex].PassMethod <> VARPASSING) and (IndirectionLevel <> ASPOINTERTODEREFERENCE) and
@@ -12388,18 +12392,11 @@ end;
 
 
 
-
-
-
-
-
                       a65(__subBX);
 {
                       StopOptimization;
                       ResetOpty;
 }
-
-
 
 
 
@@ -13037,7 +13034,7 @@ end;
 
         if SelectorType <> ENUMTYPE then
           if DataSize[SelectorType] <> 1 then
-            Error(i, 'Expected BYTE, SHORTINT, CHAR, or BOOLEAN as ''CASE'' selector');
+            Error(i, 'Expected BYTE, SHORTINT, CHAR or BOOLEAN as ''CASE'' selector');
 
         if not (SelectorType in OrdinalTypes + [ENUMTYPE]) then
           Error(i, 'Ordinal variable expected as ''CASE'' selector');
@@ -14775,7 +14772,9 @@ WHILETOK:
 
         //          if (Ident[IdentIndex].DataType in Pointers) and (Ident[IdentIndex].NumAllocElements = 0) and (Ident[IdentIndex].AllocElementType <> 0) then begin
 
+
 	  if (Tok[i + 1].Kind = DEREFERENCETOK) and (Tok[i + 2].Kind = OBRACKETTOK) and (Ident[IdentIndex].DataType in [POINTERTOK, DEREFERENCEARRAYTOK]) then inc(i);
+
 
           if Tok[i + 1].Kind = OBRACKETTOK then
           begin        // typed pointer: PByte[], Pword[] ...
@@ -16550,7 +16549,7 @@ DCOL	= DATAORIGIN+$017E
     NumAllocElements, NestedNumAllocElements, NestedFunctionNumAllocElements: Cardinal;
     ConstVal: Int64;
     ImplementationUse, open_array, iocheck_old, isInterrupt_old, yes, Assignment,
-    {pack,} IsNestedFunction, isAbsolute, isExternal, isForward, isVolatile, isStriped, isAsm,
+    IsNestedFunction, isAbsolute, isExternal, isForward, isVolatile, isStriped, isAsm,
     isReg, isInt, isInl, isOvr: Boolean;
     VarType, VarRegister, NestedFunctionResultType, ConstValType, AllocElementType, ActualParamType,
     NestedFunctionAllocElementType, NestedDataType, NestedAllocElementType, IdType: Byte;
@@ -18010,7 +18009,10 @@ DCOL	= DATAORIGIN+$017E
 
               IdType := DEREFERENCEARRAYTOK;
 
-              NumAllocElements := 1;
+	      if AllocElementType in [RECORDTOK, OBJECTTOK] then
+                NumAllocElements := NumAllocElements and $FFFF
+	      else
+                NumAllocElements := 1;
 
             end;
 
@@ -19107,7 +19109,7 @@ end;
     asm65;
     asm65(#9'end');
 
-    Finalize;      // flush TemporaryBuf
+    flushTempBuf;      // flush TemporaryBuf
 
   end;  //CompileProgram
 

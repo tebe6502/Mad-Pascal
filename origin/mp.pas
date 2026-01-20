@@ -41,7 +41,6 @@ Contributors:
   - unit GRAPHICS: TextOut
   - unit EFAST
   - unit ZX2
-  
 
 + David Schmenk :
   - IEEE-754 (32bit) Single[Float]
@@ -52,7 +51,6 @@ Contributors:
 
 + Guillermo Fuenzalida :
   - unit MISC: DetectANTIC
-
 
 + Janusz Chabowski :
   - unit SHANTI
@@ -95,6 +93,10 @@ Contributors:
   - unit GRAPH: detect X:Y graphics resolution (OS mode)
   - unit CRC
   - unit DEFLATE: unDEF
+
++ Peter Dell :
+  - pas2js
+  - optimizations
 
 + Rafal Czemko :
   - system X16 (-t x16)
@@ -202,12 +204,10 @@ uses
 {$ENDIF}
 
   Common,
-  CommonIO,
   Messages,
   Compiler,
   Scanner,
   Parser,
-  OptimizeTemporary,
   Optimize,
   Diagnostic;
 
@@ -456,12 +456,6 @@ uses
 //                                 Main program
 // ----------------------------------------------------------------------------
 
-var
-optimization: record
-  Writer: IWriter;
-  OptimizeTemporary: IOptimizeTemporary;
-  end;
-
 begin
 
 {$IFDEF WINDOWS}
@@ -611,20 +605,12 @@ begin
   INTERFACETOK_USE := False;
   PublicSection := True;
 
-  TemporaryBufIndex := -1;
-  LastTempBuf0 := '';
+  iOut := -1;
+  outTmp := '';
 
   SetLength(OptimizeBuf, 1);
 
   Pass := CODEGENERATIONPASS;
-
-//  optimization.Optimizer := Optimizer.CreateDefaultOptimizer(optimizerLogFileWriter);
-//  optimization.Optimizer.Initialize(target, AsmBlock, AsmBlockIndex, TFileWriter.Create(OutFile));
-  optimization.OptimizeTemporary := TOptimizeTemporary.Create;
-  optimization.Writer :=TTextFileWriter.Create(OutFile);
-  optimization.OptimizeTemporary.Initialize(AsmBlock,   optimization.Writer);
-  Optimize.Initialize(Target, optimization.OptimizeTemporary);
-
   CompileProgram;
 
   Flush(OutFile);
