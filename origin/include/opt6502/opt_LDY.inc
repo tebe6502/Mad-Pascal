@@ -2,7 +2,6 @@
 function opt_LDY(i: integer): Boolean;
 var p: integer;
     tmp: string;
-    listing_tmp: TListing_tmp;
 begin
 
     Result := true;

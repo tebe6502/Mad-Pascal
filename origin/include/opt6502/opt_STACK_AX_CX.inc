@@ -2,7 +2,6 @@
 function opt_STACK_AX_CX(i: integer): Boolean;
 var p, q: integer;
     tmp: string;
-    listing_tmp: TListing_tmp;
 begin
 
     Result := true;

@@ -45,17 +45,17 @@ end;
 
 function _FOR(const i: Integer): Boolean;
 begin
-  Result := (listing[i] = #9'#for');
+  Result := (listing[i] = #9'#for')
 end;
 
 function _IF(const i: Integer): Boolean;
 begin
-  Result := pos1(#9'.if', i);
+  Result := pos1(#9'.if', i)
 end;
 
 function EIF(const i: Integer): Boolean;
 begin
-  Result := (listing[i] = #9'eif');
+  Result := (listing[i] = #9'eif')
 end;
 
 function STA_PARAM(const i: Integer): Boolean;

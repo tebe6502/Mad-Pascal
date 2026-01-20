@@ -3,7 +3,6 @@ function opt_BP(i: integer): Boolean;
 var p: integer;
     tmp: string;
     yes: Boolean;
-    listing_tmp: TListing_tmp;
 begin
 
     Result := true;
