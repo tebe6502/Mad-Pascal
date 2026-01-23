@@ -10822,7 +10822,7 @@ end;
       CheckOperator(i, Tok[j + 1].Kind, ValType, RightValType);
 
       if not (Tok[j + 1].Kind in [SHLTOK, SHRTOK]) then        // dla SHR, SHL nie wyrownuj typow parametrow
-        ExpandExpression(ValType, RightValType, 0);
+	ExpandExpression(ValType, RightValType, 0);
 
       if Tok[j + 1].Kind = MULTOK then
         if (ValType in IntegerTypes) and (VarType in IntegerTypes) then
@@ -10831,21 +10831,23 @@ end;
       GenerateBinaryOperation(Tok[j + 1].Kind, ValType);
 
       case Tok[j + 1].Kind of              // !!! tutaj a nie przed ExpandExpression
-        MULTOK: begin
+        MULTOK: 
+	begin
           ResizeType(ValType);
           ExpandExpression(VarType, 0, 0);
         end;
 
         SHRTOK: if (ValType in SignedOrdinalTypes) and (DataSize[ValType] > 1) then
-          begin
-            ResizeType(ValType);
-            ResizeType(ValType);
-          end;  // int:=smallint(-90100) shr 4;
+        begin
+          ResizeType(ValType);
+          ResizeType(ValType);
+        end;		// int:=smallint(-90100) shr 4;
 
-        SHLTOK: begin
+        SHLTOK:
+	begin
+          ResizeType(ValType);    
           ResizeType(ValType);
-          ResizeType(ValType);
-        end;             // !!! Silly Intro lub "x(byte) shl 14" tego wymaga
+        end;		// !!! Silly Intro lub "x(byte) shl 14" tego wymaga
       end;
 
       j := k;
