@@ -268,6 +268,9 @@ begin
 
        end else begin
 
+	s[x-1][2] := #9'mva #$00';
+	s[x-1][3] := #9'mva #$00';
+
 	listing[l]   := #9'lda ' + GetARG(0, x-1);
 	listing[l+1] := #9'sta ' + GetARG(0, x-1);
 	listing[l+2] := #9'lda #$00';
