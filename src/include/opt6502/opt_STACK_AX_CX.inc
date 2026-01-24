@@ -2,7 +2,6 @@
 function opt_STACK_AX_CX(i: integer): Boolean;
 var p, q: integer;
     tmp: string;
-    listing_tmp: TListing_tmp;
 begin
 
     Result := true;
@@ -403,7 +402,7 @@ begin
 
     if jsr(i) and										// jsr					; 0
        inx(i+1) and										// inx					; 1
-       mva(i+2) and										// mva ... :STACKORIGIN,x		; 2
+       mva(i+2) and stack_0x(i+2) and								// mva ... :STACKORIGIN,x		; 2
        mva_im_0(i+3) and stack_1x(i+3) and							// mva #$00 :STACKORIGIN+STACKWIDTH,x	; 3
        mva_im_0(i+4) and stack_prev_1x(i+4) and							// mva #$00 :STACKORIGIN-1+STACKWIDTH,x	; 4
        add_sub_AX_CX(i+5) and									// jsr addAX_CX|subAX_CX		; 5
@@ -412,7 +411,6 @@ begin
        sta_a(i+8) and										// sta					; 8
        lda_stack_1x(i+9) and									// lda :STACKORIGIN+STACKWIDTH,x	; 9
        sta_a(i+10) then										// sta					; 10
-     if stack_0x(i+2) then
      begin
 
        if listing[i+5] = #9'jsr addAX_CX' then begin
@@ -438,6 +436,44 @@ begin
        listing[i+8]  := #9'dex';
        listing[i+9]  := '';
        listing[i+10] := '';
+
+       exit(false);
+     end;
+
+
+    if jsr(i) and										// jsr					; 0
+       inx(i+1) and										// inx					; 1
+       mva(i+2) and stack_0x(i+2) and								// mva ... :STACKORIGIN,x		; 2
+       mva(i+3) and stack_1x(i+3) and								// mva ... :STACKORIGIN+STACKWIDTH,x	; 3
+       add_sub_AX_CX(i+4) and									// jsr addAX_CX|subAX_CX		; 4
+       dex(i+5) and										// dex					; 5
+       lda_stack_0x(i+6) and									// lda :STACKORIGIN,x			; 6
+       add_sub(i+7) and										// sub|add				; 7
+       sta_a(i+8) and										// sta					; 8
+       lda_stack_1x(i+9) and									// lda :STACKORIGIN+STACKWIDTH,x	; 9
+       adc_sbc(i+10) and									// abc|adc				; 10
+       sta_a(i+11) then										// sta					; 11
+     begin
+
+       Expand(i+5, 1);
+
+       listing[i+1] := #9'lda :STACKORIGIN,x';
+
+       if listing[i+4] = #9'jsr addAX_CX' then begin
+	listing[i+2] := #9'add ' + GetString(i+2);
+	listing[i+5] := #9'adc ' + GetString(i+3);
+
+	listing[i+3] := #9'sta :STACKORIGIN,x';
+	listing[i+4] := #9'lda :STACKORIGIN+STACKWIDTH,x';
+	listing[i+6] := #9'sta :STACKORIGIN+STACKWIDTH,x';
+       end else begin
+	listing[i+2] := #9'sub ' + GetString(i+2);
+	listing[i+5] := #9'sbc ' + GetString(i+3);
+
+	listing[i+3] := #9'sta :STACKORIGIN,x';
+	listing[i+4] := #9'lda :STACKORIGIN+STACKWIDTH,x';
+	listing[i+6] := #9'sta :STACKORIGIN+STACKWIDTH,x';
+       end;
 
        exit(false);
      end;
