@@ -14,7 +14,7 @@ procedure CompileProgram;
 
 implementation
 
-uses Crt, SysUtils, Common, Messages, Scanner, Parser, Optimize, MathEvaluate;
+uses Crt, SysUtils, Common, Messages, Scanner, Parser, Optimize, OptimizeTemporary, MathEvaluate;
 
 // ---------------------------------------------------------------------------
 
@@ -563,9 +563,9 @@ writeln('_B: ', Ident[IdentIndex].Name);
         if Kind = VARIABLE then
         begin          // @label
 
-	  if Ident[IdentIndex].IdType = ARRAYTOK then	     
+	  if Ident[IdentIndex].IdType = ARRAYTOK then
             svar := GetLocalName(IdentIndex, 'adr.')
-	  else		     
+	  else
             svar := GetLocalName(IdentIndex);
 
           asm65(#9'mva <' + svar + ' :STACKORIGIN,x');
@@ -10831,7 +10831,7 @@ end;
       GenerateBinaryOperation(Tok[j + 1].Kind, ValType);
 
       case Tok[j + 1].Kind of              // !!! tutaj a nie przed ExpandExpression
-        MULTOK: 
+        MULTOK:
 	begin
           ResizeType(ValType);
           ExpandExpression(VarType, 0, 0);
@@ -10845,7 +10845,7 @@ end;
 
         SHLTOK:
 	begin
-          ResizeType(ValType);    
+          ResizeType(ValType);
           ResizeType(ValType);
         end;		// !!! Silly Intro lub "x(byte) shl 14" tego wymaga
       end;

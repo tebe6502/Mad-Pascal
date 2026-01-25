@@ -610,6 +610,9 @@ type
 type
   TIdentifierIndex = Integer;
 
+
+procedure ResetOpty;
+
 function Hex(Value: cardinal; nibbles: shortint): string;
 function HexByte(Value: byte): string;
 function HexWord(Value: word): string;
@@ -670,6 +673,19 @@ function StrToInt(const a: String): Int64;
 implementation
 
 uses SysUtils, Messages;
+
+// ----------------------------------------------------------------------------
+
+
+procedure ResetOpty;
+begin
+
+  optyA := '';
+  optyY := '';
+  optyBP2 := '';
+
+end;
+
 
 // ----------------------------------------------------------------------------
 
