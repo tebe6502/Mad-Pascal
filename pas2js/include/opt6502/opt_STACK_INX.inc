@@ -570,4 +570,67 @@ begin
      end;
 
 
+    if dex(i+7) and										// dex					; 7
+
+       //inx(i) and										// inx					; 0
+       lda_val(i+1) and										// lda					; 1	~:STACKORIGIN
+       add_sub_val(i+2) and									// add|sub				; 2	~:STACKORIGIN
+       sta_stack_0x(i+3) and									// sta :STACKORIGIN,x			; 3
+       lda_val(i+4) and										// lda 					; 4	~:STACKORIGIN
+       adc_sbc_val(i+5) and									// adc|sbc				; 5	~:STACKORIGIN
+       sta_stack_1x(i+6) then									// sta :STACKORIGIN-1+STACKWIDTH,x	; 6	~:STACKORIGIN
+//       dex(i+7) then										// dex					; 7
+     begin
+       listing[i+7] := #9'sta :STACKORIGIN+1+STACKWIDTH,x';
+       listing[i+6] := listing[i+5];
+       listing[i+5] := listing[i+4];
+       listing[i+4] := #9'sta :STACKORIGIN+1,x';
+       listing[i+3] := listing[i+2];
+       listing[i+2] := listing[i+1];
+
+       listing[i+1] := #9'dex';
+
+       exit(false);
+     end;
+
+
+    if dex(i+5) and										// dex					; 5
+
+       //inx(i) and										// inx					; 0
+       lda_stack_0x(i+1) and									// lda :STACKORIGIN,x			; 1
+       sta_val(i+2) and										// sta					; 2	~:STACKORIGIN
+       lda_stack_1x(i+3) and									// lda :STACKORIGIN+STACKWIDTH,x	; 3
+       sta_val(i+4) then									// sta					; 4	~:STACKORIGIN
+//       dex(i+5) then										// dex					; 5
+     begin
+       listing[i+5] := listing[i+4];
+       listing[i+4] := #9'lda :STACKORIGIN+1+STACKWIDTH,x';
+       listing[i+3] := listing[i+2];
+       listing[i+2] := #9'lda :STACKORIGIN+1,x';
+
+       listing[i+1] := #9'dex';
+
+       exit(false);
+     end;
+
+
+    if dex(i+4) and										// dex					; 4
+
+       lda_val(i) and										// lda					; 0	~:STACKORIGIN
+       sta_val(i+1) and										// sta					; 1	~:STACKORIGIN
+       lda_val(i+2) and										// lda					; 2	~:STACKORIGIN
+       sta_val(i+3) then									// sta					; 3	~:STACKORIGIN
+//       dex(i+4) then										// dex					; 4
+     begin
+       listing[i+4] := listing[i+3];
+       listing[i+3] := listing[i+2];
+       listing[i+2] := listing[i+1];
+       listing[i+1] := listing[i];
+
+       listing[i] := #9'dex';
+
+       exit(false);
+     end;
+
+
 end;		// function

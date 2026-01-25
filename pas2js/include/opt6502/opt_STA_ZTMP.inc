@@ -1,7 +1,6 @@
 
 function opt_STA_ZTMP(i: integer): Boolean;
 var p: integer;
-    listing_tmp: TListing_tmp;
 begin
 
     Result := true;

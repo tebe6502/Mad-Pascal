@@ -200,6 +200,7 @@ var
   elf: Cardinal;
 
   listing: TListing;
+  listing_tmp: TListing_tmp;
 
   s: TStack;
 

@@ -2,7 +2,6 @@
 function opt_LDY(i: integer): Boolean;
 var p: integer;
     tmp: string;
-    listing_tmp: TListing_tmp;
 begin
 
     Result := true;
@@ -14,6 +13,33 @@ begin
     if iny(i) and										// iny					; 0
        lda_im_0(i+1) and									// lda #$00				; 1
        asl_stack(i+2) then									// asl :STACKORIGIN			; 2
+     begin
+	listing[i] := '';
+
+      	exit(false);
+     end;
+
+
+    if ldy_1(i+2) and										// ldy #1				; 2
+
+       (iny(i) or dey(i)) and									// iny|dey				; 0
+       (add_sub(i+1) or and_ora_eor(i+1)) and (iy(i+1) = false) then				// add|sub|and|ora|eor			; 1
+     begin
+	listing[i] := '';
+
+      	exit(false);
+     end;
+
+
+    if mwy_bp2(i+7) and										// mwy ... :bp2				; 7
+
+       (iny(i) or dey(i)) and									// iny|dey				; 0
+       lda_a(i+1) and (iy(i+1) = false) and							// lda					; 1
+       (add_sub(i+2) or and_ora_eor(i+2)) and (iy(i+2) = false) and				// add|sub|and|ora|eor			; 2
+       cmp(i+3) and (iy(i+3) = false) and							// cmp					; 3
+       SKIP(i+4) and										// bcc|bcs|...				; 4
+       jmp(i+5) and										// jmp l_				; 5
+       lab_a(i+6) then										//@					; 6
      begin
 	listing[i] := '';
 
@@ -93,7 +119,7 @@ begin
     end;
 
 
-    if iny(i) and										// iny					; 0
+    if (iny(i) or dey(i)) and									// iny|dey				; 0
        lda_a(i+1) and (iy(i+1) = false) and							// lda					; 1
        sta_a(i+2) and (iy(i+2) = false) and							// sta					; 2
        (ldy(i+3) or mwy(i+3) or mvy(i+3) or tay(i+3)) then					// ldy|mwy|mvy|tay			; 3
@@ -104,7 +130,7 @@ begin
     end;
 
 
-    if iny(i) and										// iny					; 0
+    if (iny(i) or dey(i)) and									// iny|dey				; 0
        lda_a(i+1) and (iy(i+1) = false) and							// lda					; 1
        (add_sub(i+2) or and_ora_eor(i+2)) and (iy(i+2) = false) and				// add|sub|and|ora|eor			; 2
        tay(i+3) then										// tay					; 3
@@ -115,7 +141,7 @@ begin
     end;
 
 
-    if iny(i) and										// iny					; 0
+    if (iny(i) or dey(i)) and									// iny|dey				; 0
        sta_a(i+1) and (iy(i+1) = false) and							// sta					; 1
        (ldy(i+2) or mwy(i+2) or mvy(i+2)) then							// ldy|mwy|mvy				; 2
     begin

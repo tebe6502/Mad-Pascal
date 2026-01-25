@@ -3,8 +3,6 @@ function opt_STACK(i: integer): Boolean;
 var p: integer;
     tmp: string;
     yes: Boolean;
-    listing_tmp: TListing_tmp;
-
 begin
 
     Result := true;
@@ -1901,10 +1899,10 @@ begin
        mva(i+1) and										// mva   :STACKORIGIN+STACKWIDTH,x	; 1
        mva(i+2) and										// mva   :STACKORIGIN+STACKWIDTH*2,x	; 2
        mva(i+3) and										// mva   :STACKORIGIN+STACKWIDTH*3,x	; 3
-       lda_val(i+4) and				 						// lda ~:STACKORIGIN			; 4
+       lda_val(i+4) and				 						// lda					; 4	~:STACKORIGIN
        add_sub(i+5) and 									// add|sub :STACKORIGIN-1,x		; 5
        sta_bp2(i+6) and										// sta :bp2				; 6
-       lda_val(i+7) and										// lda ~:STACKORIGIN			; 7
+       lda_val(i+7) and										// lda					; 7	~:STACKORIGIN
        adc_sbc(i+8) and 									// adc|sbc :STACKORIGIN-1+STACKWIDTH,x	; 8
        sta_bp2_1(i+9) and									// sta :bp2+1				; 9
        ldy_im_0(i+10) and									// ldy #$00				; 10
@@ -1947,10 +1945,10 @@ begin
 
        mva(i) and										// mva   :STACKORIGIN,x			; 0
        mva(i+1) and										// mva   :STACKORIGIN+STACKWIDTH,x	; 1
-       lda_val(i+2) and										// lda ~:STACKORIGIN			; 2
+       lda_val(i+2) and										// lda					; 2	~:STACKORIGIN
        add_sub(i+3) and 									// add|sub :STACKORIGIN-1,x		; 3
        sta_bp2(i+4) and										// sta :bp2				; 4
-       lda_val(i+5) and										// lda ~:STACKORIGIN			; 5
+       lda_val(i+5) and										// lda					; 5	~:STACKORIGIN
        adc_sbc(i+6) and 									// adc|sbc :STACKORIGIN-1+STACKWIDTH,x	; 6
        sta_bp2_1(i+7) and									// sta :bp2+1				; 7
        ldy_im_0(i+8) and									// ldy #$00				; 8
@@ -1981,7 +1979,7 @@ begin
        mva(i+3) and 										// mva  :STACKORIGIN+STACKWIDTH*3,x	; 3
        inx(i+4) and										// inx					; 4
        lda_val(i+5) and										// lda					; 5
-       add_sub_val(i+6) and									// add|sub ~:STACKORIGIN		; 6
+       add_sub_val(i+6) and									// add|sub				; 6	~:STACKORIGIN
        sta_val(i+7) and										// sta					; 7
        lda(i+8) and										// lda					; 8
        adc_sbc(i+9) and 									// adc|sbc				; 9
