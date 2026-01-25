@@ -1,5 +1,5 @@
 
-function opt_CMP_LOCAL(i: integer): Boolean;
+function opt_LOCAL(i: integer): Boolean;
 begin
 
     Result := true;

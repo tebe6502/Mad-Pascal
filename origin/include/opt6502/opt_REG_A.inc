@@ -7,7 +7,7 @@ begin
 //				      REG A.
 // -------------------------------------------------------------------------- //
 
-   Rebuild('opt_REG_A');
+   Rebuild;
 
    for i := 0 to l - 1 do
     if mva_im(i) or

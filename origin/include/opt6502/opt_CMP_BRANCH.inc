@@ -1,5 +1,5 @@
 
-function opt_CMP_BRANCH(i: integer): Boolean;
+function opt_BRANCH(i: integer): Boolean;
 var p: integer;
 begin
 

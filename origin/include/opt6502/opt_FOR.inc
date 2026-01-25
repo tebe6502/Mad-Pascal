@@ -48,7 +48,7 @@ begin
 
      if found then begin
 
-      Rebuild('opt_FOR');
+      Rebuild;
 
       if l > 0 then begin
 
