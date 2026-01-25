@@ -1,83 +1,77 @@
 unit Scanner;
 
-{$I Defines.inc}
-
 interface
 
-uses CommonTypes, CompilerTypes, Tokens;
+{$i define.inc}
 
-  // ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
-type
-  IScanner = interface
+procedure TokenizeProgram(UsesOn: Boolean = True);
 
-    procedure TokenizeProgram(programUnit: TSourceFile; UsesOn: Boolean);
+procedure TokenizeMacro(a: String; Line, Spaces: Integer);
 
-    // This is only public for for testing. Idea: Put token array into a ITokenList, so it can be tested independently of the whole scanner
-    procedure AddToken(Kind: TTokenKind; SourceFile: TSourceFile; Line, Column: Integer; Value: TInteger);
+function get_digit(var i: Integer; var a: String): String;
 
-  end;
+function get_constant(var i: Integer; var a: String): String;
 
-type
-  TScanner = class(TInterfacedObject, IScanner)
+function get_label(var i: Integer; var a: String; up: Boolean = True): String;
 
-    procedure TokenizeProgram(programUnit: TSourceFile; UsesOn: Boolean);
-    // TODO: Remove, check why this is called with fixed UnitIndex=1
-    procedure AddToken_(Kind: TTokenKind; UnitIndex: TSourceFileIndex; Line, Column: Integer; Value: TInteger);
-    procedure AddToken(Kind: TTokenKind; SourceFile: TSourceFile; Line, Column: Integer; Value: TInteger);
+function get_string(var i: Integer; var a: String; up: Boolean = True): String;
 
-  private
-    procedure TokenizeMacro(a: String; Line, Spaces: Integer);
-  end;
+procedure omin_spacje(var i: Integer; var a: String);
+
+// ----------------------------------------------------------------------------
 
 implementation
 
-uses Classes, SysUtils, Common, DataTypes, Messages, FileIO, Memory, Optimize, StringUtilities, Targets, Utilities;
+uses SysUtils, Common, Messages, Optimize, SplitString;
 
-const
-  SCANNER_CACHED = True;
+// ----------------------------------------------------------------------------
 
-  // ----------------------------------------------------------------------------
-  // Class TScanner Implementation
-  // ----------------------------------------------------------------------------
 
 procedure ErrorOrdinalExpExpected(i: TTokenIndex);
 begin
-  Error(i, TMessage.Create(TErrorCode.OrdinalExpExpected, 'Ordinal expression expected.'));
+  Error(i, TErrorCode.OrdinalExpExpected);
 end;
 
-procedure TokenizeProgramInitialization(ProgramUnit: TSourceFile);
+
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+
+
+procedure TokenizeProgramInitialization;
 var
   i: Integer;
 begin
 
-  NumIdent_ := 0;
-  TokenList.Clear;
+  NumTok := 0;
+  NumIdent := 0;
+  fillchar(Ident, sizeof(Ident), 0);
+  fillchar(DataSegment, sizeof(DataSegment), 0);
 
-
-  FastMul := -1;
-  DataSegmentUse := False;
-  LoopUnroll := False;
   PublicSection := True;
-  ActiveSourceFile := ProgramUnit;
+  UnitNameIndex := 1;
 
   SetLength(WithName, 1);
   SetLength(linkObj, 1);
   SetLength(resArray, 1);
 
-  Messages.Initialize;
+  SetLength(msgUser, 1);
+  SetLength(msgWarning, 1);
+  SetLength(msgNote, 1);
 
-  BlockManager.Initialize;
-
+  NumBlocks := 0;
+  BlockStackTop := 0;
   CodeSize := 0;
   CodePosStackTop := 0;
   CaseCnt := 0;
   IfCnt := 0;
+  ShrShlCnt := 0;
   NumTypes := 0;
   run_func := 0;
   NumProc := 0;
 
-  ClearWordMemory(StaticStringData);
+  fillchar(StaticStringData, sizeof(StaticStringData), 0);
   NumStaticStrChars := 0;
 
   IfdefLevel := 0;
@@ -85,103 +79,303 @@ begin
 
   NumDefines := AddDefines;
 
+  ResetOpty;
+
+  // Do NOT put this into ResetOpty!
+  optyFOR0 := '';
+  optyFOR1 := '';
+  optyFOR2 := '';
+  optyFOR3 := '';
+
   for i := 0 to High(AsmBlock) do AsmBlock[i] := '';
+
+end;  //TokenizeProgramInitialization
+
+
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+
+
+procedure omin_spacje(var i: Integer; var a: String);
+(*----------------------------------------------------------------------------*)
+(*  omijamy tzw. "biale spacje" czyli spacje, tabulatory          *)
+(*----------------------------------------------------------------------------*)
+begin
+
+  if a <> '' then
+    while (i <= length(a)) and (a[i] in AllowWhiteSpaces) do Inc(i);
 
 end;
 
+
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 
-procedure AddResource(fnam: String);
-var
-  i, j: Integer;
-  t: ITextFile;
-  res: TResource;
-  s, tmp: String;
+
+function get_digit(var i: Integer; var a: String): String;
+  (*----------------------------------------------------------------------------*)
+  (*  pobierz ciag zaczynajaca sie znakami '0'..'9','%','$'          *)
+  (*----------------------------------------------------------------------------*)
 begin
+  Result := '';
 
-  t := TFileSystem.CreateTextFile;
-  t.Assign(fnam);
-  t.Reset;
+  if a <> '' then
+  begin
 
-  try
+    omin_spacje(i, a);
 
-    while not t.EOF do
+    if UpCase(a[i]) in AllowDigitFirstChars then
     begin
-      s := '';
-      t.ReadLn(s);
 
-      i := 1;
-      SkipWhitespaces(s, i);
+      Result := UpCase(a[i]);
+      Inc(i);
 
-      if (length(s) > i - 1) and (not (s[i] in ['#', ';'])) then
+      while UpCase(a[i]) in AllowDigitChars do
       begin
-
-        res.resName := GetLabelUpperCase(s, i);
-        res.resType := GetLabelUpperCase(s, i);
-        res.resFile := GetFilePath(s, i);
-
-        // Debug
-        // WriteLn('DEBUG: ', res.resName, ',', res.resType, ',', res.resFile);
-
-        if (res.resType = 'RCDATA') or (res.resType = 'RCASM') or (res.resType = 'DOSFILE') or
-          (res.resType = 'RELOC') or (res.resType = 'RMT') or (res.resType = 'MPT') or
-          (res.resType = 'CMC') or (res.resType = 'RMTPLAY') or (res.resType = 'RMTPLAY2') or
-          (res.resType = 'RMTPLAYV') or (res.resType = 'MPTPLAY') or (res.resType = 'CMCPLAY') or
-          (res.resType = 'EXTMEM') or (res.resType = 'XBMP') or (res.resType = 'SAPR') or
-          (res.resType = 'SAPRPLAY') or (res.resType = 'PP') or (res.resType = 'LIBRARY') or
-          (res.resType = 'MD1PLAY') or (res.resType = 'MD1') then
-
-        else
-          Error(NumTok, TMessage.Create(TErrorCode.UndefinedResourceType,
-            'Undefined resource type: Type = ''' + res.resType + ''', Name = ''' + res.resName + ''''));
-
-
-        if (res.resFile <> '') and (unitPathList.FindFile(res.resFile) = '') then
-        begin
-          // TODO Have message for special case empty unit path
-          Error(NumTok, TMessage.Create(TErrorCode.ResourceFileNotFound,
-            'Cannot find resource file ''{0}'' for resource {1} of type {2} unit path ''{3}''.',
-            res.resFile, res.resName, res.resType, unitPathList.ToString));
-        end;
-
-        for j := 1 to MAXPARAMS do
-        begin
-
-          if i <= Length(s) then
-          begin
-            if s[i] in ['''', '"'] then
-              tmp := GetStringUpperCase(s, i)
-            else
-              tmp := GetNumber(s, i);
-          end
-          else
-          begin
-            tmp := '';
-          end;
-
-          if tmp = '' then tmp := '0';
-
-          res.resPar[j] := tmp;
-        end;
-
-        for j := High(resArray) - 1 downto Low(resArray) do
-          if resArray[j].resName = res.resName then
-            Error(NumTok, TMessage.Create(TErrorCode.DuplicateResource, 'Duplicate resource: Type = ' +
-              res.resType + ', Name = ''' + res.resName + ''''));
-
-        j := High(resArray);
-        resArray[j] := res;
-
-        SetLength(resArray, j + 2);
-
+        Result := Result + UpCase(a[i]);
+        Inc(i);
       end;
 
     end;
 
-  finally
-    t.Close;
   end;
+
+end;  //get_digit
+
+
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+
+
+function get_constant(var i: Integer; var a: String): String;
+  (*----------------------------------------------------------------------------*)
+  (*  pobierz etykiete zaczynajaca sie znakami 'A'..'Z','_'          *)
+  (*----------------------------------------------------------------------------*)
+begin
+
+  Result := '';
+
+  if a <> '' then
+  begin
+
+    omin_spacje(i, a);
+
+    if UpCase(a[i]) in AllowLabelFirstChars + ['.'] then
+      while UpCase(a[i]) in AllowLabelChars do
+      begin
+
+        Result := Result + UpCase(a[i]);
+
+        Inc(i);
+      end;
+
+  end;
+
+end;  //get_constant
+
+
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+
+
+function get_label(var i: Integer; var a: String; up: Boolean = True): String;
+  (*----------------------------------------------------------------------------*)
+  (*  pobierz etykiete zaczynajaca sie znakami 'A'..'Z','_'          *)
+  (*----------------------------------------------------------------------------*)
+begin
+
+  Result := '';
+
+  if a <> '' then
+  begin
+
+    omin_spacje(i, a);
+
+    if UpCase(a[i]) in AllowLabelFirstChars + ['.'] then
+      while UpCase(a[i]) in AllowLabelChars + AllowDirectorySeparators do
+      begin
+
+        if up then
+          Result := Result + UpCase(a[i])
+        else
+          Result := Result + a[i];
+
+        Inc(i);
+      end;
+
+  end;
+
+end;  //get_label
+
+
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+
+
+function get_string(var i: Integer; var a: String; up: Boolean = True): String;
+  (*----------------------------------------------------------------------------*)
+  (*  pobiera ciag znakow, ograniczony znakami '' lub ""            *)
+  (*  podwojny '' oznacza literalne '                *)
+  (*  podwojny "" oznacza literalne "                *)
+  (*----------------------------------------------------------------------------*)
+var
+  len: Integer;
+  znak, gchr: Char;
+begin
+  Result := '';
+
+  omin_spacje(i, a);
+
+  if a[i] = '%' then
+  begin
+
+    while UpCase(a[i]) in ['A'..'Z', '%'] do
+    begin
+      Result := Result + Upcase(a[i]);
+      Inc(i);
+    end;
+
+  end
+  else
+    if not (a[i] in AllowQuotes) then
+    begin
+
+      Result := get_label(i, a, up);
+
+    end
+    else
+    begin
+
+      gchr := a[i];
+      len := length(a);
+
+      while i <= len do
+      begin
+        Inc(i);   // omijamy pierwszy znak ' lub "
+
+        znak := a[i];
+
+        if znak = gchr then
+        begin
+          Inc(i);
+          Break;
+        end;
+
+        Result := Result + znak;
+      end;
+
+    end;
+
+end;  //get_string
+
+
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+
+
+function GetStandardToken(const a: TString): Integer;
+var
+  i: Integer;
+  S: TString;
+begin
+  Result := 0;
+
+  S:=a;
+
+  if (S = 'LONGWORD') or (S = 'DWORD') or (S = 'UINT32') then S := 'CARDINAL'
+  else
+    if (S = 'UINT16') then S := 'WORD'
+    else
+      if (S = 'LONGINT') then S := 'INTEGER';
+
+  for i := 1 to MAXTOKENNAMES do
+    if S = Spelling[i] then
+    begin
+      Result := i;
+      Break;
+    end;
+end;
+
+
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+
+
+procedure AddResource(fnam: String);
+var
+  i, j: Integer;
+  t: textfile;
+  res: TResource;
+  s, tmp: String;
+begin
+
+  AssignFile(t, fnam);
+  FileMode := 0;
+  Reset(t);
+
+  while not EOF(t) do
+  begin
+
+    readln(t, s);
+
+    i := 1;
+    omin_spacje(i, s);
+
+    if (length(s) > i - 1) and (not (s[i] in ['#', ';'])) then
+    begin
+
+      res.resName := get_label(i, s);
+      res.resType := get_label(i, s);
+      res.resFile := get_string(i, s, False);      // don't change the case
+
+      if (AnsiUpperCase(res.resType) = 'RCDATA') or (AnsiUpperCase(res.resType) = 'RCASM') or
+        (AnsiUpperCase(res.resType) = 'DOSFILE') or (AnsiUpperCase(res.resType) = 'RELOC') or
+        (AnsiUpperCase(res.resType) = 'RMT') or (AnsiUpperCase(res.resType) = 'MPT') or
+        (AnsiUpperCase(res.resType) = 'MD1') or (AnsiUpperCase(res.resType) = 'CMC') or
+        (AnsiUpperCase(res.resType) = 'RMTPLAY') or (AnsiUpperCase(res.resType) = 'RMTPLAY2') or
+        (AnsiUpperCase(res.resType) = 'RMTPLAYV') or (AnsiUpperCase(res.resType) = 'MPTPLAY') or
+        (AnsiUpperCase(res.resType) = 'MD1PLAY') or (AnsiUpperCase(res.resType) = 'CMCPLAY') or
+        (AnsiUpperCase(res.resType) = 'EXTMEM') or (AnsiUpperCase(res.resType) = 'XBMP') or
+        (AnsiUpperCase(res.resType) = 'SAPR') or (AnsiUpperCase(res.resType) = 'SAPRPLAY') or
+        (AnsiUpperCase(res.resType) = 'PP') or (AnsiUpperCase(res.resType) = 'LIBRARY') then
+
+      else
+        Error(NumTok, 'Undefined resource type: Type = ''' + res.resType + ''', Name = ''' + res.resName + '''');
+
+
+      if (res.resFile <> '') and not (FindFile(res.resFile)) then
+        Error(NumTok, 'Resource file not found: Type = ' + res.resType + ', Name = ''' + res.resName + '''');
+
+
+      for j := 1 to MAXPARAMS do
+      begin
+
+        if s[i] in ['''', '"'] then
+          tmp := get_string(i, s)
+        else
+          tmp := get_digit(i, s);
+
+        if tmp = '' then tmp := '0';
+
+        res.resPar[j] := tmp;
+      end;
+
+      //     writeln(res.resName,',',res.resType,',',res.resFile);
+
+      for j := High(resArray) - 1 downto 0 do
+        if resArray[j].resName = res.resName then
+          Error(NumTok, 'Duplicate resource: Type = ' + res.resType + ', Name = ''' + res.resName + '''');
+
+      j := High(resArray);
+      resArray[j] := res;
+
+      SetLength(resArray, j + 2);
+
+    end;
+
+  end;
+
+  CloseFile(t);
 
 end;  //AddResource
 
@@ -189,17 +383,42 @@ end;  //AddResource
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 
-procedure TScanner.AddToken(Kind: TTokenKind; SourceFile: TSourceFile; Line, Column: Integer; Value: TInteger);
+
+procedure AddToken(Kind: Byte; UnitIndex, Line, Column: Integer; Value: Int64);
 begin
-  tokenList.AddToken(kind, SourceFile, line, Column, Value);
-end;
 
-procedure TScanner.AddToken_(Kind: TTokenKind; UnitIndex: TSourceFileIndex; Line, Column: Integer; Value: TInteger);
-begin
-  AddToken(kind, SourceFileList.GetSourceFile(UnitIndex), line, Column, Value);
-end;
+  Inc(NumTok);
 
+  if NumTok > High(Tok) then
+    SetLength(Tok, NumTok + 1);
 
+  // if NumTok > MAXTOKENS then
+  //    Error(NumTok, 'Out of resources, TOK');
+
+  Tok[NumTok].UnitIndex := UnitIndex;
+  Tok[NumTok].Kind := Kind;
+  Tok[NumTok].Value := Value;
+
+  if NumTok = 1 then
+    Column := 1
+  else
+  begin
+
+    if Tok[NumTok - 1].Line <> Line then
+    //   Column := 1
+    else
+      Column := Column + Tok[NumTok - 1].Column;
+
+  end;
+
+  // if Tok[NumTok- 1].Line <> Line then writeln;
+
+  Tok[NumTok].Line := Line;
+  Tok[NumTok].Column := Column;
+
+  //if line=46 then  writeln(Kind,',',Column);
+
+end;  //AddToken
 
 
 // ----------------------------------------------------------------------------
@@ -218,38 +437,34 @@ end;
 // ----------------------------------------------------------------------------
 
 
-procedure TScanner.TokenizeProgram(programUnit: TSourceFile; UsesOn: Boolean);
+procedure TokenizeProgram(UsesOn: Boolean = True);
 var
   Text: String;
   Num, Frac: TString;
-  OldNumTok: Integer;
-  ActiveSourceFile: TSourceFile; // Currently tokenized source file
-  Line, Err, cnt, Line2, Spaces, TextPos, im, OldNumDefines: Integer;
-  //  IncludeIndex: Integer;
+  OldNumTok, UnitIndex, IncludeIndex, Line, Err, cnt, Line2, Spaces, TextPos, im, OldNumDefines: Integer;
   Tmp: Int64;
   AsmFound, UsesFound, UnitFound, ExternalFound, yes: Boolean;
   ch, ch2, ch_: Char;
-  CurToken: TTokenKind;
-  StrParams: TStringArray;
+  CurToken: Byte;
+  StrParams: TArrayString;
 
 
-  procedure TokenizeUnit(a: TSourceFile; testSourceFile: Boolean = False); forward;
+  procedure TokenizeUnit(a: Integer; testUnit: Boolean = False); forward;
 
 
-  procedure Tokenize(filePath: TFilePath; testSourceFile: Boolean = False);
+  procedure Tokenize(fnam: String; testUnit: Boolean = False);
   var
-    InFile: IBinaryFile;
+    InFile: file of Char;
     _line: Integer;
-    _uidx: TSourceFile;
+    _uidx: Integer;
 
 
     procedure ReadUses;
     var
       i, j, k: Integer;
       _line: Integer;
-      _uidx: TSourceFile;
-      unitName: String;
-      filePath: TFilePath;
+      _uidx: Integer;
+      s, nam: String;
     begin
 
       UsesFound := False;
@@ -257,21 +472,21 @@ var
       i := NumTok - 1;
 
 
-      while TokenAt(i).Kind <> TTokenKind.USESTOK do
+      while Tok[i].Kind <> USESTOK do
       begin
 
-        if TokenAt(i).Kind = TTokenKind.STRINGLITERALTOK then
+        if Tok[i].Kind = STRINGLITERALTOK then
         begin
 
-          CheckTok(i - 1, TTokenKind.INTOK);
-          CheckTok(i - 2, TTokenKind.IDENTTOK);
+          CheckTok(i - 1, INTOK);
+          CheckTok(i - 2, IDENTTOK);
 
-          filePath := '';
+          nam := '';
 
-          for k := 1 to TokenAt(i).StrLength do
-            filePath := filePath + chr(StaticStringData[TokenAt(i).StrAddress - CODEORIGIN + k]);
+          for k := 1 to Tok[i].StrLength do
+            nam := nam + chr(StaticStringData[Tok[i].StrAddress - CODEORIGIN + k]);
 
-          filePath := FindFile(filePath, 'unit');
+          nam := FindFile(nam, 'unit');
 
           Dec(i, 2);
 
@@ -279,46 +494,38 @@ var
         else
         begin
 
-          CheckTok(i, TTokenKind.IDENTTOK);
+          CheckTok(i, IDENTTOK);
 
-          filePath := FindFile(TokenAt(i).Name + '.pas', 'unit');
+          nam := FindFile(Tok[i].Name^ + '.pas', 'unit');
 
         end;
 
 
-        unitName := AnsiUpperCase(TokenAt(i).Name);
+        s := AnsiUpperCase(Tok[i].Name^);
 
 
-        // We clear earlier usages of the same unit.
-        // This means this entry in the unit list will not be tokenized.
-        for j := 2 to SourceFileList.Size do
-        begin
-          if SourceFileList.GetSourceFile(j).Name = unitName then SourceFileList.GetSourceFile(j).Name := '';
-        end;
+        for j := 2 to NumUnits do    // kasujemy wczesniejsze odwolania
+          if UnitName[j].Name = s then UnitName[j].Name := '';
 
         _line := Line;
-        _uidx := ActiveSourceFile;
+        _uidx := UnitIndex;
 
-        // TODO
+        Inc(NumUnits);
+        UnitIndex := NumUnits;
 
+        if UnitIndex > High(UnitName) then
+          Error(NumTok, 'Out of resources, UnitIndex: ' + IntToStr(UnitIndex));
 
-        // TODO Move check to TSourceFileList and use exceptions
-        (*
-        if ActiveSourceFile > High(SourceFileList.UnitArray) then
-        begin
-          Error(NumTok, TMessage.Create(TErrorCode.OutOfResources, 'Out of resources, ActiveSourceFile: ' +
-            IntToStr(ActiveSourceFile)));
-        end; *)
-
-        ActiveSourceFile := SourceFileList.AddUnit(TSourceFileType.UNIT_FILE, unitName, filePath);
         Line := 1;
+        UnitName[UnitIndex].Name := s;
+        UnitName[UnitIndex].Path := nam;
 
-        TokenizeUnit(ActiveSourceFile, True);
+        TokenizeUnit(UnitIndex, True);
 
         Line := _line;
-        ActiveSourceFile := _uidx;
+        UnitIndex := _uidx;
 
-        if TokenAt(i - 1).Kind = TTokenKind.COMMATOK then
+        if Tok[i - 1].Kind = COMMATOK then
           Dec(i, 2)
         else
           Dec(i);
@@ -351,8 +558,7 @@ var
       Result := '';
 
       repeat
-        c := ' ';
-        InFile.Read(c);
+        Read(InFile, c);
 
         if c = LF then Inc(Line);
         case i of
@@ -429,19 +635,17 @@ var
     end;
 
 
-    procedure ReadDirective(const d: String; DefineLine: Integer);
+    procedure ReadDirective(d: String; DefineLine: Integer);
     var
       i, v, x: Integer;
-      cmd, s: String;
-      defineName: TDefineName;
-      filePath: TFilePath;
+      cmd, s, nam: String;
       found: Boolean;
-      Param: TDefineParams;
+      Param: TDefinesParam;
 
 
-      procedure bin2csv(const fn: String);
+      procedure bin2csv(fn: String);
       var
-        bin: IBinaryFile;
+        bin: file;
         tmp: Byte;
         NumRead: Integer;
         yes: Boolean;
@@ -451,26 +655,27 @@ var
 
         tmp := 0;
         NumRead := 0;
-        bin := TFileSystem.CreateBinaryFile(SCANNER_CACHED);
-        bin.Assign(fn);
-        bin.Reset(1);
+
+        AssignFile(bin, fn);
+        FileMode := 0;
+        Reset(bin, 1);
 
         repeat
-          bin.BlockRead(tmp, 1, NumRead);
+          BlockRead(bin, tmp, 1, NumRead);
 
           if NumRead = 1 then
           begin
 
-            if yes then AddToken(GetStandardToken(','), ActiveSourceFile, Line, 1, 0);
+            if yes then AddToken(GetStandardToken(','), UnitIndex, Line, 1, 0);
 
-            AddToken(TTokenKind.INTNUMBERTOK, ActiveSourceFile, Line, 1, tmp);
+            AddToken(INTNUMBERTOK, UnitIndex, Line, 1, tmp);
 
             yes := True;
           end;
 
         until (NumRead = 0);
 
-        bin.Close();
+        CloseFile(bin);
 
       end;
 
@@ -487,40 +692,41 @@ var
       end;
 
 
-      procedure newMsgUser(const Kind: TTokenKind);
+      procedure newMsgUser(Kind: Byte);
       var
         k: Integer;
       begin
 
-        k := msgLists.msgUser.Count;
+        k := High(msgUser);
 
-        AddToken(Kind, ActiveSourceFile, Line, 1, k);
-        AddToken(TTokenKind.SEMICOLONTOK, ActiveSourceFile, Line, 1, 0);
+        AddToken(Kind, UnitIndex, Line, 1, k);
+        AddToken(SEMICOLONTOK, UnitIndex, Line, 1, 0);
 
-        SkipWhitespaces(d, i);
+        omin_spacje(i, d);
 
-        msgLists.msgUser.Add(copy(d, i, length(d) - i));
+        msgUser[k] := copy(d, i, length(d) - i);
+        SetLength(msgUser, k + 2);
 
       end;
 
     begin
 
-      Param := Default(TDefineParams);
+      Param := Default(TDefinesParam);
 
       if UpCase(d[1]) in AllowLabelFirstChars then
       begin
 
         i := 1;
-        cmd := GetLabelUpperCase(d, i);
+        cmd := get_label(i, d);
 
         if cmd = 'INCLUDE' then cmd := 'I';
         if cmd = 'RESOURCE' then cmd := 'R';
 
-        if cmd = 'WARNING' then newMsgUser(TTokenKind.WARNINGTOK)
+        if cmd = 'WARNING' then newMsgUser(WARNINGTOK)
         else
-          if cmd = 'ERROR' then newMsgUser(TTokenKind.ERRORTOK)
+          if cmd = 'ERROR' then newMsgUser(ERRORTOK)
           else
-            if cmd = 'INFO' then newMsgUser(TTokenKind.INFOTOK)
+            if cmd = 'INFO' then newMsgUser(INFOTOK)
             else
 
               if cmd = 'MACRO+' then macros := True
@@ -530,45 +736,43 @@ var
                   if cmd = 'MACRO' then
                   begin
 
-                    s := GetStringUpperCase(d, i);
+                    s := get_string(i, d);
 
                     if s = 'ON' then macros := True
                     else
                       if s = 'OFF' then macros := False
                       else
-                        Error(NumTok, TMessage.Create(TErrorCode.WrongSwitchToggle,
-                          'Wrong switch toggle, use ON/OFF or +/-'));
+                        Error(NumTok, 'Wrong switch toggle, use ON/OFF or +/-');
 
                   end
                   else
 
                     if cmd = 'I' then
-                    begin
-                      // {$i filename}
+                    begin          // {$i filename}
                       // {$i+-} iocheck
                       if d[i] = '+' then
                       begin
-                        AddToken(TTokenKind.IOCHECKON, ActiveSourceFile, Line, 1, 0);
-                        AddToken(TTokenKind.SEMICOLONTOK, ActiveSourceFile, Line, 1, 0);
+                        AddToken(IOCHECKON, UnitIndex, Line, 1, 0);
+                        AddToken(SEMICOLONTOK, UnitIndex, Line, 1, 0);
                       end
                       else
                         if d[i] = '-' then
                         begin
-                          AddToken(TTokenKind.IOCHECKOFF, ActiveSourceFile, Line, 1, 0);
-                          AddToken(TTokenKind.SEMICOLONTOK, ActiveSourceFile, Line, 1, 0);
+                          AddToken(IOCHECKOFF, UnitIndex, Line, 1, 0);
+                          AddToken(SEMICOLONTOK, UnitIndex, Line, 1, 0);
                         end
                         else
                         begin
-                          //   AddToken(SEMICOLONTOK, ActiveSourceFile, Line, 1, 0);
+                          //   AddToken(SEMICOLONTOK, UnitIndex, Line, 1, 0);
 
-                          s := GetString(d, False, i);        // don't change the case, it could be a file path
+                          s := get_string(i, d, False);        // don't change the case
 
                           if AnsiUpperCase(s) = '%TIME%' then
                           begin
 
                             s := TimeToStr(Now);
 
-                            AddToken(TTokenKind.STRINGLITERALTOK, ActiveSourceFile, Line, length(s) + Spaces, 0);
+                            AddToken(STRINGLITERALTOK, UnitIndex, Line, length(s) + Spaces, 0);
                             Spaces := 0;
                             DefineStaticString(NumTok, s);
 
@@ -579,7 +783,7 @@ var
 
                               s := DateToStr(Now);
 
-                              AddToken(TTokenKind.STRINGLITERALTOK, ActiveSourceFile, Line, length(s) + Spaces, 0);
+                              AddToken(STRINGLITERALTOK, UnitIndex, Line, length(s) + Spaces, 0);
                               Spaces := 0;
                               DefineStaticString(NumTok, s);
 
@@ -587,26 +791,24 @@ var
                             else
                             begin
 
-                              filePath := FindFile(s, 'include');
+                              nam := FindFile(s, 'include');
 
                               _line := Line;
-                              _uidx := ActiveSourceFile;
+                              _uidx := UnitIndex;
 
                               Line := 1;
+                              UnitName[IncludeIndex].Name := ExtractFileName(nam);
+                              UnitName[IncludeIndex].Path := nam;
+                              UnitIndex := IncludeIndex;
+                              Inc(IncludeIndex);
 
-                              // TODO Error handling with exception
-                              ActiveSourceFile :=
-                                SourceFileList.AddUnit(TSourceFileType.INCLUDE_FILE,
-                                ExtractFileName(filePath), filePath);
-                              (* if IncludeIndex > High(SourceFileList.UnitArray) then
-                                Error(NumTok, TMessage.Create(TErrorCode.OutOfResources,
-                                  'Out of resources, IncludeIndex: ' + IntToStr(IncludeIndex)));
-                               *)
+                              if IncludeIndex > High(UnitName) then
+                                Error(NumTok, 'Out of resources, IncludeIndex: ' + IntToStr(IncludeIndex));
 
-                              Tokenize(filePath);
+                              Tokenize(nam);
 
                               Line := _line;
-                              ActiveSourceFile := _uidx;
+                              UnitIndex := _uidx;
 
                             end;
 
@@ -618,17 +820,14 @@ var
                       if (cmd = 'EVAL') then
                       begin
 
-                        if d.LastIndexOf('}') < 0 then
-                          Error(NumTok, TMessage.Create(TErrorCode.SyntaxError,
-                            'Syntax error. Character ''}'' expected'));
+                        if d.LastIndexOf('}') < 0 then Error(NumTok, 'Syntax error');
 
                         s := copy(d, i, d.LastIndexOf('}') - i + 1);
                         s := TrimRight(s);
 
-                        if s[length(s)] <> '"' then
-                          Error(NumTok, TMessage.Create(TErrorCode.SyntaxError, 'Syntax error. Missing ''"'''));
+                        if s[length(s)] <> '"' then Error(NumTok, 'Missing ''"''');
 
-                        AddToken(TTokenKind.EVALTOK, ActiveSourceFile, Line, 1, 0);
+                        AddToken(EVALTOK, UnitIndex, Line, 1, 0);
 
                         DefineFilename(NumTok, s);
 
@@ -638,7 +837,7 @@ var
                         if (cmd = 'BIN2CSV') then
                         begin
 
-                          s := GetFilePath(d, i);
+                          s := get_string(i, d, False);
 
                           s := FindFile(s, 'BIN2CSV');
 
@@ -650,17 +849,15 @@ var
                           if (cmd = 'OPTIMIZATION') then
                           begin
 
-                            s := GetStringUpperCase(d, i);
+                            s := get_string(i, d);
 
-                            if s = 'LOOPUNROLL' then AddToken(TTokenKind.LOOPUNROLLTOK, ActiveSourceFile, Line, 1, 0)
+                            if AnsiUpperCase(s) = 'LOOPUNROLL' then AddToken(LOOPUNROLLTOK, UnitIndex, Line, 1, 0)
                             else
-                              if s = 'NOLOOPUNROLL' then
-                                AddToken(TTokenKind.NOLOOPUNROLLTOK, ActiveSourceFile, Line, 1, 0)
+                              if AnsiUpperCase(s) = 'NOLOOPUNROLL' then AddToken(NOLOOPUNROLLTOK, UnitIndex, Line, 1, 0)
                               else
-                                Error(NumTok, TMessage.Create(TErrorCode.IllegalOptimizationSpecified,
-                                  'Illegal optimization specified "' + s + '"'));
+                                Error(NumTok, 'Illegal optimization specified "' + AnsiUpperCase(s) + '"');
 
-                            AddToken(TTokenKind.SEMICOLONTOK, ActiveSourceFile, Line, 1, 0);
+                            AddToken(SEMICOLONTOK, UnitIndex, Line, 1, 0);
 
                           end
                           else
@@ -668,53 +865,50 @@ var
                             if (cmd = 'CODEALIGN') then
                             begin
 
-                              s := GetStringUpperCase(d, i);
+                              s := get_string(i, d);
 
-                              if s = 'PROC' then AddToken(TTokenKind.PROCALIGNTOK, ActiveSourceFile, Line, 1, 0)
+                              if AnsiUpperCase(s) = 'PROC' then AddToken(PROCALIGNTOK, UnitIndex, Line, 1, 0)
                               else
-                                if s = 'LOOP' then AddToken(TTokenKind.LOOPALIGNTOK, ActiveSourceFile, Line, 1, 0)
+                                if AnsiUpperCase(s) = 'LOOP' then AddToken(LOOPALIGNTOK, UnitIndex, Line, 1, 0)
                                 else
-                                  if s = 'LINK' then AddToken(TTokenKind.LINKALIGNTOK, ActiveSourceFile, Line, 1, 0)
+                                  if AnsiUpperCase(s) = 'LINK' then AddToken(LINKALIGNTOK, UnitIndex, Line, 1, 0)
                                   else
-                                    Error(NumTok, TMessage.Create(TErrorCode.IllegalAlignmentDirective,
-                                      'Illegal alignment directive ''' + s + '''.'));
+                                    Error(NumTok, 'Illegal alignment directive');
 
-                              SkipWhitespaces(d, i);
+                              omin_spacje(i, d);
 
-                              if d[i] <> '=' then
-                                Error(NumTok, TMessage.Create(TErrorCode.SyntaxError, 'Character ''='' expected.'));
+                              if d[i] <> '=' then Error(NumTok, 'Illegal alignment directive');
                               Inc(i);
-                              SkipWhitespaces(d, i);
+                              omin_spacje(i, d);
 
-                              s := GetNumber(d, i);
+                              s := get_digit(i, d);
 
                               val(s, v, Err);
 
                               if Err > 0 then
                                 ErrorOrdinalExpExpected(NumTok);
 
-                              CheckCommonConstType(NumTok, TDataType.WORDTOK, GetValueType(v));
+                              GetCommonConstType(NumTok, WORDTOK, GetValueType(v));
 
-                              TokenAt(NumTok).Value := v;
+                              Tok[NumTok].Value := v;
 
-                              AddToken(TTokenKind.SEMICOLONTOK, ActiveSourceFile, Line, 1, 0);
+                              AddToken(SEMICOLONTOK, UnitIndex, Line, 1, 0);
 
                             end
                             else
 
                               if (cmd = 'UNITPATH') then
                               begin      // {$unitpath path1;path2;...}
-                                AddToken(TTokenKind.SEMICOLONTOK, ActiveSourceFile, Line, 1, 0);
+                                AddToken(SEMICOLONTOK, UnitIndex, Line, 1, 0);
 
                                 repeat
 
-                                  s := GetFilePath(d, i);
+                                  s := get_string(i, d, False);        // don't change the case
 
                                   if s = '' then
-                                    Error(NumTok, TMessage.Create(TErrorCode.FilePathNotSpecified,
-                                      'An empty path cannot be used'));
+                                    Error(NumTok, 'An empty path cannot be used');
 
-                                  unitPathList.AddFolder(s);
+                                  AddPath(s);
 
                                   if d[i] = ';' then
                                     Inc(i)
@@ -723,23 +917,22 @@ var
 
                                 until d[i] = ';';
 
-                                tokenList.RemoveToken;
+                                Dec(NumTok);
                               end
                               else
 
                                 if (cmd = 'LIBRARYPATH') then
                                 begin      // {$librarypath path1;path2;...}
-                                  AddToken(TTokenKind.SEMICOLONTOK, ActiveSourceFile, Line, 1, 0);
+                                  AddToken(SEMICOLONTOK, UnitIndex, Line, 1, 0);
 
                                   repeat
 
-                                    s := GetFilePath(d, i);
+                                    s := get_string(i, d, False);        // don't change the case
 
                                     if s = '' then
-                                      Error(NumTok, TMessage.Create(TErrorCode.FilePathNotSpecified,
-                                        'An empty path cannot be used'));
+                                      Error(NumTok, 'An empty path cannot be used');
 
-                                    unitPathList.AddFolder(s);
+                                    AddPath(s);
 
                                     if d[i] = ';' then
                                       Inc(i)
@@ -748,32 +941,32 @@ var
 
                                   until d[i] = ';';
 
-                                  TokenList.RemoveToken;
+                                  Dec(NumTok);
                                 end
                                 else
 
                                   if (cmd = 'R') and not (d[i] in ['+', '-']) then
                                   begin  // {$R filename}
-                                    AddToken(TTokenKind.SEMICOLONTOK, ActiveSourceFile, Line, 1, 0);
+                                    AddToken(SEMICOLONTOK, UnitIndex, Line, 1, 0);
 
-                                    s := GetFilePath(d, i);
+                                    s := get_string(i, d, False);        // don't change the case
                                     AddResource(FindFile(s, 'resource'));
 
-                                    tokenList.RemoveToken;
+                                    Dec(NumTok);
                                   end
                                   else
 (*
        if cmd = 'C' then begin          // {$c 6502|65816}
-  AddToken(SEMICOLONTOK, ActiveSourceFile, Line, 1, 0);
+  AddToken(SEMICOLONTOK, UnitIndex, Line, 1, 0);
 
-  s := GetNumber(i, d);
+  s := get_digit(i, d);
 
   val(s,CPUMode, Err);
 
   if Err > 0 then
    Error(NumTok, OrdinalExpExpected);
 
-  CheckCommonConstType(NumTok, CARDINALTOK, GetValueType(CPUMode));
+  GetCommonConstType(NumTok, CARDINALTOK, GetValueType(CPUMode));
 
   dec(NumTok);
        end else
@@ -781,14 +974,15 @@ var
 
                                     if (cmd = 'L') or (cmd = 'LINK') then
                                     begin    // {$L filename} | {$LINK filename}
-                                      AddToken(TTokenKind.LINKTOK, ActiveSourceFile, Line, 1, 0);
+                                      AddToken(LINKTOK, UnitIndex, Line, 1, 0);
 
-                                      s := GetFilePath(d, i);
+                                      s := get_string(i, d, False);        // don't change the case
+
                                       s := FindFile(s, 'link object');
 
                                       DefineFilename(NumTok, s);
 
-                                      AddToken(TTokenKind.SEMICOLONTOK, ActiveSourceFile, Line, 1, 0);
+                                      AddToken(SEMICOLONTOK, UnitIndex, Line, 1, 0);
 
                                       //dec(NumTok);
                                     end
@@ -796,9 +990,9 @@ var
 
                                       if (cmd = 'F') or (cmd = 'FASTMUL') then
                                       begin    // {$F [page address]}
-                                        AddToken(TTokenKind.SEMICOLONTOK, ActiveSourceFile, Line, 1, 0);
+                                        AddToken(SEMICOLONTOK, UnitIndex, Line, 1, 0);
 
-                                        s := GetNumber(d, i);
+                                        s := get_digit(i, d);
 
                                         val(s, FastMul, Err);
 
@@ -808,16 +1002,16 @@ var
                                         AddDefine('FASTMUL');
                                         AddDefines := NumDefines;
 
-                                        CheckCommonConstType(NumTok, TDataType.BYTETOK, GetValueType(FastMul));
+                                        GetCommonConstType(NumTok, BYTETOK, GetValueType(FastMul));
 
-                                        tokenList.RemoveToken;
+                                        Dec(NumTok);
                                       end
                                       else
 
                                         if (cmd = 'IFDEF') or (cmd = 'IFNDEF') then
                                         begin
 
-                                          found := 0 <> SearchDefine(GetLabelUpperCase(d, i));
+                                          found := 0 <> SearchDefine(get_label(i, d));
 
                                           if cmd = 'IFNDEF' then found := not found;
 
@@ -833,8 +1027,7 @@ var
                                           if cmd = 'ELSE' then
                                           begin
                                             if (IfdefLevel = 0) or SkipCodeUntilElseEndif then
-                                              Error(NumTok, TMessage.Create(TErrorCode.ElseWithoutIf,
-                                                'Found $ELSE without $IFXXX'));
+                                              Error(NumTok, 'Found $ELSE without $IFXXX');
                                             if IfdefLevel > 0 then
                                               Dec(IfdefLevel);
                                           end
@@ -842,15 +1035,14 @@ var
                                             if cmd = 'ENDIF' then
                                             begin
                                               if IfdefLevel = 0 then
-                                                Error(NumTok, TMessage.Create(TErrorCode.EndifWithoutIf,
-                                                  'Found $ENDIF without $IFXXX'))
+                                                Error(NumTok, 'Found $ENDIF without $IFXXX')
                                               else
                                                 Dec(IfdefLevel);
                                             end
                                             else
                                               if cmd = 'DEFINE' then
                                               begin
-                                                defineName := GetLabelUpperCase(d, i);
+                                                nam := get_label(i, d);
 
                                                 Err := 0;
 
@@ -871,29 +1063,23 @@ var
                                                   Inc(i);
                                                   skip_spaces;
 
-                                                  TokenAt(NumTok).SourceLocation.Line := line;
+                                                  Tok[NumTok].Line := line;
 
                                                   if not (UpCase(d[i]) in AllowLabelFirstChars) then
-                                                    Error(NumTok,
-                                                      TMessage.Create(TErrorCode.SyntaxError,
-                                                      'Syntax error, ''identifier'' expected'));
+                                                    Error(NumTok, 'Syntax error, ''identifier'' expected');
 
                                                   repeat
 
                                                     Inc(Err);
 
                                                     if Err > MAXPARAMS then
-                                                      Error(NumTok,
-                                                        TMessage.Create(TErrorCode.TooManyFormalParameters,
-                                                        'Too many formal parameters in ' + defineName));
+                                                      Error(NumTok, 'Too many formal parameters in ' + nam);
 
-                                                    Param[Err] := GetLabelUpperCase(d, i);
+                                                    Param[Err] := get_label(i, d);
 
                                                     for x := 1 to Err - 1 do
                                                       if Param[x] = Param[Err] then
-                                                        Error(NumTok,
-                                                          TMessage.Create(TErrorCode.DuplicateIdentifier,
-                                                          'Duplicate identifier ''' + Param[Err] + ''''));
+                                                        Error(NumTok, 'Duplicate identifier ''' + Param[Err] + '''');
 
                                                     skip_spaces;
 
@@ -903,9 +1089,7 @@ var
                                                       skip_spaces;
 
                                                       if not (UpCase(d[i]) in AllowLabelFirstChars) then
-                                                        Error(NumTok,
-                                                          TMessage.Create(TErrorCode.IdentifierExpected,
-                                                          'Syntax error, ''identifier'' expected'));
+                                                        Error(NumTok, 'Syntax error, ''identifier'' expected');
                                                     end;
 
                                                   until d[i] = ')';
@@ -922,7 +1106,7 @@ var
 
                                                   skip_spaces;
 
-                                                  AddDefine(defineName);    // define macro
+                                                  AddDefine(nam);    // define macro
 
                                                   s := copy(d, i, length(d));
                                                   SetLength(s, length(s) - 1);
@@ -934,19 +1118,17 @@ var
 
                                                 end
                                                 else
-                                                  AddDefine(defineName);
+                                                  AddDefine(nam);
 
                                               end
                                               else
                                                 if cmd = 'UNDEF' then
                                                 begin
-                                                  defineName := GetLabelUpperCase(d, i);
-                                                  RemoveDefine(defineName);
+                                                  nam := get_label(i, d);
+                                                  RemoveDefine(nam);
                                                 end
                                                 else
-                                                  Error(NumTok,
-                                                    TMessage.Create(TErrorCode.IllegalCompilerDirective,
-                                                    'Illegal compiler directive $' + cmd + d[i]));
+                                                  Error(NumTok, 'Illegal compiler directive $' + cmd + d[i]);
 
       end;
 
@@ -957,7 +1139,7 @@ var
     begin
 
       while (ch <> LF) do
-        InFile.Read(ch);
+        Read(InFile, ch);
 
     end;
 
@@ -970,28 +1152,27 @@ var
       _line: Integer;
     begin
 
-      InFile.Read(c);
+      Read(InFile, c);
 
       if c = '(' then
       begin
-        c2 := ' ';
-        InFile.Read(c2);
+        Read(InFile, c2);
 
         if c2 = '*' then
         begin        // Skip comments (*   *)
 
           repeat
             c2 := c;
-            InFile.Read(c);
+            Read(InFile, c);
 
             if c = LF then Inc(Line);
           until (c2 = '*') and (c = ')');
 
-          InFile.Read(c);
+          Read(InFile, c);
 
         end
         else
-          InFile.SeekBack;
+          Seek(InFile, FilePos(InFile) - 1);
 
       end;
 
@@ -1004,15 +1185,15 @@ var
 
         _line := Line;
 
-        InFile.Read(c2);
+        Read(InFile, c2);
 
         if c2 = '$' then
           dir := True
         else
-          InFile.SeekBack;
+          Seek(InFile, FilePos(InFile) - 1);
 
         repeat            // Skip comments
-          InFile.Read(c);
+          Read(InFile, c);
 
           if dir then directive := directive + c;
 
@@ -1024,18 +1205,18 @@ var
 
         if dir then ReadDirective(directive, _line);
 
-        InFile.Read(c);
+        Read(InFile, c);
 
       end
       else
         if c = '/' then
         begin
-          InFile.Read(c2);
+          Read(InFile, c2);
 
           if c2 = '/' then
             ReadSingleLineComment
           else
-            InFile.SeekBack;
+            Seek(InFile, FilePos(InFile) - 1);
 
         end;
 
@@ -1080,25 +1261,13 @@ var
 
       if c in [' ', TAB] then Inc(Spaces);
 
-      if not (c in ['''', ' ', '#', '~', '$', TAB, LF, CR, '{', (*'}',*) 'A'..'Z', '_',
-        '0'..'9', '=', '.', ',', ';', '(', ')', '*', '/', '+', '-', ':', '>', '<', '^', '@', '[', ']']) then
+      if not (c in ['''', ' ', '#', '~', '$', TAB, LF, CR, '{', (*'}',*) 'A'..'Z', '_', '0'..'9',
+        '=', '.', ',', ';', '(', ')', '*', '/', '+', '-', ':', '>', '<', '^', '@', '[', ']']) then
       begin
-        // InFile.Close();
-        Error(NumTok, TMessage.Create(TErrorCode.UnexpectedCharacter, 'Unexpected unknown character: ' + c));
+        CloseFile(InFile);
+        Error(NumTok, 'Unknown character: ' + c);
       end;
     end;
-
-
-    procedure SkipWhiteSpace;        // 'string' + #xx + 'string'
-    begin
-      SafeReadChar(ch);
-
-      while ch in AllowWhiteSpaces do SafeReadChar(ch);
-
-      if not (ch in ['''', '#']) then Error(NumTok, TMessage.Create(TErrorCode.SyntaxError,
-          'Syntax error, ''string'' expected but ''' + ch + ''' found'));
-    end;
-
 
     function ReadFractionalPart(var ch: Char): String; overload;
     begin
@@ -1130,6 +1299,16 @@ var
         end;
       end;
     end;
+
+    procedure SkipWhiteSpace;        // 'string' + #xx + 'string'
+    begin
+      SafeReadChar(ch);
+
+      while ch in AllowWhiteSpaces do SafeReadChar(ch);
+
+      if not (ch in ['''', '#']) then Error(NumTok, 'Syntax error, ''string'' expected but ''' + ch + ''' found');
+    end;
+
 
     procedure TextInvers(p: Integer);
     var
@@ -1177,7 +1356,7 @@ var
 
     begin
 
-      if target.id = TTargetID.A8 then
+      if target.id = ___a8 then
       begin
 
         for i := p to length(Text) do
@@ -1248,12 +1427,11 @@ var
 
   begin
 
-    inFile := TFileSystem.CreateBinaryFile(SCANNER_CACHED);
-    inFile.Assign(filePath);
-    inFile.Reset(1);
+    AssignFile(InFile, fnam);    // UnitIndex = 1 main program
+    FileMode := 0;
+    Reset(InFile);
 
     Text := '';
-    ch := ' ';
 
     try
       while True do
@@ -1265,8 +1443,7 @@ var
 
           if ch in [' ', TAB] then Inc(Spaces);
 
-        until not (ch in [' ', TAB, LF, CR, '{'(*, '}'*)]);
-        // Skip space, tab, line feed, carriage return, comment braces
+        until not (ch in [' ', TAB, LF, CR, '{'(*, '}'*)]);    // Skip space, tab, line feed, carriage return, comment braces
 
 
         ch := UpCase(ch);
@@ -1277,27 +1454,26 @@ var
 
         if Length(Num) > 0 then      // Number found
         begin
-          AddToken(TTokenKind.INTNUMBERTOK, ActiveSourceFile, Line, length(Num) + Spaces, StrToInt(Num));
+          AddToken(INTNUMBERTOK, UnitIndex, Line, length(Num) + Spaces, StrToInt(Num));
           Spaces := 0;
 
           if ch = '.' then      // Fractional part expected
           begin
             SafeReadChar(ch);
             if ch = '.' then
-              InFile.SeekBack   // Range ('..') token
+              Seek(InFile, FilePos(InFile) - 1)  // Range ('..') token
             else
             begin        // Fractional part found
               Frac := ReadFractionalPart(ch);
 
-              TokenAt(NumTok).Kind := TTokenKind.FRACNUMBERTOK;
+              Tok[NumTok].Kind := FRACNUMBERTOK;
 
               if length(Num) > 17 then
-                TokenAt(NumTok).FracValue := 0
+                Tok[NumTok].FracValue := 0
               else
-                TokenAt(NumTok).FracValue := StrToFloat(Num + Frac);
+                Tok[NumTok].FracValue := StrToFloat(Num + Frac);
 
-              TokenAt(NumTok).SourceLocation.Column :=
-                TokenAt(NumTok - 1).SourceLocation.Column + length(Num) + length(Frac) + Spaces;
+              Tok[NumTok].Column := Tok[NumTok - 1].Column + length(Num) + length(Frac) + Spaces;
               Spaces := 0;
             end;
           end;
@@ -1329,13 +1505,12 @@ var
           if Text[length(Text)] = '.' then
           begin
             SetLength(Text, length(Text) - 1);
-            InFile.Seek2(InFile.FilePos() - 2);
+            Seek(InFile, FilePos(InFile) - 2);
             Dec(err);
           end;
 
           if err > 255 then
-            Error(NumTok, TMessage.Create(TErrorCode.ConstantStringTooLong,
-              'Constant strings can''t be longer than 255 chars'));
+            Error(NumTok, 'Constant strings can''t be longer than 255 chars');
 
           if Length(Text) > 0 then
           begin
@@ -1347,7 +1522,7 @@ var
             if (im > 0) and (Defines[im].Macro <> '') then
             begin
 
-              tmp := InFile.FilePos();
+              tmp := FilePos(InFile);
               ch2 := ch;
               Num := '';      // read parameters, max 255 chars
 
@@ -1360,11 +1535,11 @@ var
               SetLength(StrParams, 1);
               StrParams[0] := '';
 
-              TokenAt(NumTok).SourceLocation.Line := Line;
+              Tok[NumTok].Line := Line;
 
               if Num = '' then
               begin
-                InFile.Seek2(tmp);
+                Seek(InFile, tmp);
                 ch := ch2;
               end
               else
@@ -1372,13 +1547,12 @@ var
                 StrParams := SplitStr(copy(Num, 2, length(Num) - 2), ',');
 
                 if High(StrParams) > MAXPARAMS then
-                  Error(NumTok, TMessage.Create(TErrorCode.TooManyFormalParameters,
-                    'Too many formal parameters in ' + Text));
+                  Error(NumTok, 'Too many formal parameters in ' + Text);
 
               end;
 
               if (StrParams[0] <> '') and (Defines[im].Param[1] = '') then
-                Error(NumTok, TMessage.Create(TErrorCode.WrongNumberOfParameters, 'Wrong number of parameters'));
+                Error(NumTok, 'Wrong number of parameters');
 
 
               OldNumDefines := NumDefines;
@@ -1389,7 +1563,7 @@ var
               begin
 
                 if StrParams[Err - 1] = '' then
-                  Error(NumTok, TMessage.Create(TErrorCode.ParameterMissing, 'Parameter missing'));
+                  Error(NumTok, 'Missing parameter');
 
                 AddDefine(Defines[im].Param[Err]);
                 Defines[NumDefines].Macro := StrParams[Err - 1];
@@ -1403,36 +1577,36 @@ var
 
               NumDefines := OldNumDefines;
 
-              CurToken := TTokenKind.MACRORELEASE;
+              CurToken := MACRORELEASE;
             end
             else
             begin
 
-              if CurToken = TTokenKind.TEXTTOK then CurToken := TTokenKind.TEXTFILETOK;
-              if CurToken = TTokenKind.FLOATTOK then CurToken := TTokenKind.SINGLETOK;
-              if CurToken = TTokenKind.FLOAT16TOK then CurToken := TTokenKind.HALFSINGLETOK;
-              if CurToken = TTokenKind.SHORTSTRINGTOK then CurToken := TTokenKind.STRINGTOK;
+              if CurToken = TEXTTOK then CurToken := TEXTFILETOK;
+              if CurToken = FLOATTOK then CurToken := SINGLETOK;
+              if CurToken = FLOAT16TOK then CurToken := HALFSINGLETOK;
+              if CurToken = SHORTSTRINGTOK then CurToken := STRINGTOK;
 
-              if CurToken = TTokenKind.EXTERNALTOK then ExternalFound := True;
+              if CurToken = EXTERNALTOK then ExternalFound := True;
 
-              AddToken(TTokenKind.UNTYPETOK, ActiveSourceFile, Line, length(Text) + Spaces, 0);
+              AddToken(0, UnitIndex, Line, length(Text) + Spaces, 0);
               Spaces := 0;
 
             end;
 
 
-            if CurToken = TTokenKind.ASMTOK then
+            if CurToken = ASMTOK then
             begin
 
-              TokenAt(NumTok).Kind := CurToken;
-              TokenAt(NumTok).Value := 0;
+              Tok[NumTok].Kind := CurToken;
+              Tok[NumTok].Value := 0;
 
-              tmp := InFile.FilePos();
+              tmp := FilePos(InFile);
 
               _line := line;
 
               repeat          // pomijaj puste znaki i sprawdz jaki znak zastaniesz
-                InFile.Read(ch);
+                Read(InFile, ch);
                 if ch = LF then Inc(line);
               until not (ch in AllowWhiteSpaces);
 
@@ -1442,11 +1616,11 @@ var
 
                 line := _line;        // zaczynamy od nowa czytać po 'ASM'
 
-                TokenAt(NumTok).Value := 1;
+                Tok[NumTok].Value := 1;
 
-                InFile.Seek2(tmp - 1);
+                Seek(InFile, tmp - 1);
 
-                InFile.Read(ch);
+                Read(InFile, ch);
 
                 AsmBlock[AsmBlockIndex] := '';
                 Text := '';
@@ -1456,7 +1630,7 @@ var
 
       if ch = LF then inc(line);
 
-      if ch = CR then InFile.Read(ch);    // CR LF
+      if ch = CR then Read(InFile, ch);    // CR LF
 
       AsmBlock[AsmBlockIndex] := '';
       Text:='';
@@ -1469,7 +1643,7 @@ var
 
                 while True do
                 begin
-                  InFile.Read(ch);
+                  Read(InFile, ch);
 
                   SaveAsmBlock(ch);
 
@@ -1495,7 +1669,7 @@ var
               else
               begin
 
-                InFile.SeekBack;
+                Seek(InFile, FilePos(InFile) - 1);
 
                 AsmFound := True;
 
@@ -1504,8 +1678,7 @@ var
 
                   if ch in [' ', TAB] then Inc(Spaces);
 
-                until not (ch in [' ', TAB, LF, CR, '{', '}']);
-                // Skip space, tab, line feed, carriage return, comment braces
+                until not (ch in [' ', TAB, LF, CR, '{', '}']);    // Skip space, tab, line feed, carriage return, comment braces
 
                 AsmFound := False;
 
@@ -1515,33 +1688,34 @@ var
 
               if AsmBlockIndex > High(AsmBlock) then
               begin
-                Error(NumTok, TMessage.Create(TErrorCode.OutOfResources, 'Out of resources, ASMBLOCK'));
-                RaiseHaltException(EHaltException.COMPILING_ABORTED);
+                Error(NumTok, 'Out of resources, ASMBLOCK');
+
+                halt(2);
               end;
 
             end
             else
             begin
 
-              if CurToken <> TTokenKind.MACRORELEASE then
+              if CurToken <> MACRORELEASE then
 
-                if CurToken <> TTokenKind.UNTYPETOK then
+                if CurToken <> 0 then
                 begin    // Keyword found
-                  TokenAt(NumTok).Kind := CurToken;
+                  Tok[NumTok].Kind := CurToken;
 
-                  if CurToken = TTokenKind.USESTOK then UsesFound := True;
+                  if CurToken = USESTOK then UsesFound := True;
 
-                  if CurToken = TTokenKind.UNITTOK then UnitFound := True;
+                  if CurToken = UNITTOK then UnitFound := True;
 
-                  if tesTSourceFile and (UnitFound = False) then
-                    Error(NumTok, TMessage.Create(TErrorCode.UnitExpected, '"UNIT" expected but "' +
-                      GetTokenSpelling(CurToken) + '" found'));
+                  if testUnit and (UnitFound = False) then
+                    Error(NumTok, 'Syntax error, "UNIT" expected but "' + Spelling[CurToken] + '" found');
 
                 end
                 else
                 begin        // Identifier found
-                  TokenAt(NumTok).Kind := TTokenKind.IDENTTOK;
-                  TokenAt(NumTok).Name := Text;
+                  Tok[NumTok].Kind := IDENTTOK;
+                  New(Tok[NumTok].Name);
+                  Tok[NumTok].Name^ := Text;
                 end;
 
             end;
@@ -1573,17 +1747,17 @@ var
                 Inc(Spaces);
 
                 repeat
-                  InFile.Read(ch);
+                  Read(InFile, ch);
 
                   if ch = LF then  //Inc(Line);
-                    Error(NumTok, TMessage.Create(TErrorCode.StringExceedsLine, 'String exceeds line'));
+                    Error(NumTok, 'String exceeds line');
 
                   if not (ch in ['''', CR, LF]) then
                     Text := Text + ch
                   else
                   begin
 
-                    InFile.Read(ch2);
+                    Read(InFile, ch2);
 
                     if ch2 = '''' then
                     begin
@@ -1591,7 +1765,7 @@ var
                       ch := #0;
                     end
                     else
-                      InFile.SeekBack;
+                      Seek(InFile, FilePos(InFile) - 1);
 
                   end;
 
@@ -1604,13 +1778,13 @@ var
                 if ch in [' ', TAB] then
                 begin
                   ch2 := ch;
-                  Err := InFile.FilePos();
-                  while ch2 in [' ', TAB] do InFile.Read(ch2);
+                  Err := FilePos(InFile);
+                  while ch2 in [' ', TAB] do Read(InFile, ch2);
 
                   if ch2 in ['*', '~', '+'] then
                     ch := ch2
                   else
-                    InFile.Seek2(Err);
+                    Seek(InFile, Err);
                 end;
 
 
@@ -1640,13 +1814,13 @@ var
                 if ch in [' ', TAB] then
                 begin
                   ch2 := ch;
-                  Err := InFile.FilePos();
-                  while ch2 in [' ', TAB] do InFile.Read(ch2);
+                  Err := FilePos(InFile);
+                  while ch2 in [' ', TAB] do Read(InFile, ch2);
 
                   if ch2 in ['''', '+'] then
                     ch := ch2
                   else
-                    InFile.Seek2(Err);
+                    Seek(InFile, Err);
                 end;
 
 
@@ -1668,19 +1842,18 @@ var
                 if Length(Num) > 0 then
                   Text := Text + chr(StrToInt(Num))
                 else
-                  Error(NumTok, TMessage.Create(TErrorCode.ConstantExpressionExpected,
-                    'Constant expression expected'));
+                  Error(NumTok, ConstExpExpected);
 
                 if ch in [' ', TAB] then
                 begin
                   ch2 := ch;
-                  Err := InFile.FilePos();
-                  while ch2 in [' ', TAB] do InFile.Read(ch2);
+                  Err := FilePos(InFile);
+                  while ch2 in [' ', TAB] do Read(InFile, ch2);
 
                   if ch2 in ['''', '+'] then
                     ch := ch2
                   else
-                    InFile.Seek2(Err);
+                    Seek(InFile, Err);
                 end;
 
                 if ch = '+' then
@@ -1708,12 +1881,12 @@ var
           // if Length(Text) > 0 then
           if Length(Text) = 1 then
           begin
-            AddToken(TTokenKind.CHARLITERALTOK, ActiveSourceFile, Line, 1 + Spaces, Ord(Text[1]));
+            AddToken(CHARLITERALTOK, UnitIndex, Line, 1 + Spaces, Ord(Text[1]));
             Spaces := 0;
           end
           else
           begin
-            AddToken(TTokenKind.STRINGLITERALTOK, ActiveSourceFile, Line, length(Text) + Spaces, 0);
+            AddToken(STRINGLITERALTOK, UnitIndex, Line, length(Text) + Spaces, 0);
             Spaces := 0;
 
             if ExternalFound then
@@ -1730,7 +1903,7 @@ var
 
         if ch in ['=', ',', ';', '(', ')', '*', '/', '+', '-', '^', '@', '[', ']'] then
         begin
-          AddToken(GetStandardToken(ch), ActiveSourceFile, Line, 1 + Spaces, 0);
+          AddToken(GetStandardToken(ch), UnitIndex, Line, 1 + Spaces, 0);
           Spaces := 0;
 
           ExternalFound := False;
@@ -1741,7 +1914,7 @@ var
 
 
         //      if ch in ['?','!','&','\','|','_','#'] then
-        //  AddToken(UNKNOWNIDENTTOK, ActiveSourceFile, Line, 1, ord(ch));
+        //  AddToken(UNKNOWNIDENTTOK, UnitIndex, Line, 1, ord(ch));
 
 
         if ch in [':', '>', '<', '.'] then          // Double-character token expected
@@ -1755,42 +1928,41 @@ var
 
           if (ch2 = '=') or ((ch = '<') and (ch2 = '>')) or ((ch = '.') and (ch2 = '.')) then
           begin        // Double-character token found
-            AddToken(GetStandardToken(ch + ch2), ActiveSourceFile, Line, 2 + Spaces, 0);
+            AddToken(GetStandardToken(ch + ch2), UnitIndex, Line, 2 + Spaces, 0);
             Spaces := 0;
           end
           else
             if (ch = '.') and (ch2 in ['0'..'9']) then
-            begin  // Fractional part found
+            begin
 
-              AddToken(TTokenKind.INTNUMBERTOK, ActiveSourceFile, Line, 0, 0);
+              AddToken(INTNUMBERTOK, UnitIndex, Line, 0, 0);
 
-              Frac := ReadFractionalPart(ch2);
+              Frac := ReadFractionalPart(ch2);  // Fractional part found
 
-              TokenAt(NumTok).Kind := TTokenKind.FRACNUMBERTOK;
-              TokenAt(NumTok).FracValue := StrToFloat('0' + Frac);
-              TokenAt(NumTok).SourceLocation.Column :=
-                TokenAt(NumTok - 1).SourceLocation.Column + length(Frac) + Spaces;
+              Tok[NumTok].Kind := FRACNUMBERTOK;
+              Tok[NumTok].FracValue := StrToFloat('0' + Frac);
+              Tok[NumTok].Column := Tok[NumTok - 1].Column + length(Frac) + Spaces;
               Spaces := 0;
 
               Frac := '';
 
-              InFile.SeekBack;
+              Seek(InFile, FilePos(InFile) - 1);
 
             end
             else
             begin
-              InFile.SeekBack;
+              Seek(InFile, FilePos(InFile) - 1);
               Line := Line2;
 
               if ch in [':', '>', '<', '.'] then
               begin        // Single-character token found
-                AddToken(GetStandardToken(ch), ActiveSourceFile, Line, 1 + Spaces, 0);
+                AddToken(GetStandardToken(ch), UnitIndex, Line, 1 + Spaces, 0);
                 Spaces := 0;
               end
               else
               begin
-                Error(NumTok, TMessage.Create(TErrorCode.UnexpectedCharacter,
-                  'Unexpected character ''{0}'' found. Expected one of ''{1}.''', ch, ':><.'));
+                CloseFile(InFile);
+                Error(NumTok, 'Unknown character: ' + ch);
               end;
             end;
         end;
@@ -1798,99 +1970,233 @@ var
 
         if NumTok = OldNumTok then   // No token found
         begin
-          Error(NumTok, TMessage.Create(TErrorCode.UnexpectedCharacter,
-            'Illegal character ''{0}'' (${1}) found.', ch, IntToHex(Ord(ch), 2)));
+          CloseFile(InFile);
+          Error(NumTok, 'Illegal character ''' + ch + ''' (' + Hex(Ord(ch), 2) + ')');
         end;
 
       end;// while
 
     except
-      on e: EHaltException do
-      begin
-        RaiseHaltException(e.GetExitCode());
-      end;
-      on e: EInOutError do
-      begin // EOF reached
-       // if e.ErrorCode > 0 then  // TODO: Distinguish EOF from other EInOutError by their ErroCode
-       // begin
-          if Text <> '' then
-          begin
-            if Text = 'END.' then
-            begin
-              AddToken(TTokenKind.ENDTOK, ActiveSourceFile, Line, 3, 0);
-              AddToken(TTokenKind.DOTTOK, ActiveSourceFile, Line, 1, 0);
-            end
-            else
-            begin
-              AddToken(GetStandardToken(Text), ActiveSourceFile, Line, length(Text) + Spaces, 0);
-              Spaces := 0;
-            end;
-          end;
+
+      if Text <> '' then
+        if Text = 'END.' then
+        begin
+          AddToken(ENDTOK, UnitIndex, Line, 3, 0);
+          AddToken(DOTTOK, UnitIndex, Line, 1, 0);
+        end
+        else
+        begin
+          AddToken(GetStandardToken(Text), UnitIndex, Line, length(Text) + Spaces, 0);
+          Spaces := 0;
         end;
-        //else
-       // begin
-       //   WriteLn('ERROR: EInOutError ' + e.message);
-       //   RaiseHaltException(-1);
-      //  end;
-      //end;
+
+      CloseFile(InFile);
     end;// try
-    InFile.Close;
+
   end;
 
 
-  procedure TokenizeUnit(a: TSourceFile; tesTSourceFile: Boolean = False);
+  procedure TokenizeUnit(a: Integer; testUnit: Boolean = False);
   // Read input file and get tokens
-  var
-    endLine: Integer;
   begin
 
-    ActiveSourceFile := a;
+    UnitIndex := a;
 
     Line := 1;
     Spaces := 0;
 
-    // TODO: Rather check unit type=UNIT_FILE?
-    if ActiveSourceFile.UnitIndex > 1 then AddToken(TTokenKind.UNITBEGINTOK, ActiveSourceFile, Line, 0, 0);
+    if UnitIndex > 1 then AddToken(UNITBEGINTOK, UnitIndex, Line, 0, 0);
 
-    //  writeln('>',ActiveSourceFile,',',ActiveSourceFile.Name);
+    //  writeln('>',UnitIndex,',',UnitName[UnitIndex].Name);
 
     UnitFound := False;
 
-    Tokenize(ActiveSourceFile.Path, testSourceFile);
+    Tokenize(UnitName[UnitIndex].Path, testUnit);
 
-    if ActiveSourceFile.UnitIndex > 1 then
+    if UnitIndex > 1 then
     begin
 
-      CheckTok(NumTok, TTokenKind.DOTTOK);
-      CheckTok(NumTok - 1, TTokenKind.ENDTOK);
-      EndLine := TokenAt(NumTok - 1).SourceLocation.Line;
-      tokenList.RemoveToken;
-      tokenList.RemoveToken;
+      CheckTok(NumTok, DOTTOK);
+      CheckTok(NumTok - 1, ENDTOK);
 
-      AddToken(TTokenKind.UNITENDTOK, ActiveSourceFile, EndLine - 1, 0, 0);
+      Dec(NumTok, 2);
+
+      AddToken(UNITENDTOK, UnitIndex, Tok[NumTok + 1].Line - 1, 0, 0);
     end
     else
-      AddToken(TTokenKind.EOFTOK, ActiveSourceFile, Line, 0, 0);
+      AddToken(EOFTOK, UnitIndex, Line, 0, 0);
 
   end;
 
 begin
+  // Token spelling definition
+
+  Spelling[CONSTTOK]               := 'CONST';
+  Spelling[TYPETOK]                := 'TYPE';
+  Spelling[VARTOK]                 := 'VAR';
+  Spelling[PROCEDURETOK]           := 'PROCEDURE';
+  Spelling[FUNCTIONTOK]            := 'FUNCTION';
+  Spelling[OBJECTTOK]              := 'OBJECT';
+  Spelling[PROGRAMTOK]             := 'PROGRAM';
+  Spelling[LIBRARYTOK]             := 'LIBRARY';
+  Spelling[EXPORTSTOK]             := 'EXPORTS';
+  Spelling[EXTERNALTOK]            := 'EXTERNAL';
+  Spelling[UNITTOK]                := 'UNIT';
+  Spelling[INTERFACETOK]           := 'INTERFACE';
+  Spelling[IMPLEMENTATIONTOK]      := 'IMPLEMENTATION';
+  Spelling[INITIALIZATIONTOK]      := 'INITIALIZATION';
+  Spelling[CONSTRUCTORTOK]         := 'CONSTRUCTOR';
+  Spelling[DESTRUCTORTOK]          := 'DESTRUCTOR';
+  Spelling[OVERLOADTOK]            := 'OVERLOAD';
+  Spelling[ASSEMBLERTOK]           := 'ASSEMBLER';
+  Spelling[FORWARDTOK]             := 'FORWARD';
+  Spelling[REGISTERTOK]            := 'REGISTER';
+  Spelling[INTERRUPTTOK]           := 'INTERRUPT';
+  Spelling[PASCALTOK]              := 'PASCAL';
+  Spelling[STDCALLTOK]             := 'STDCALL';
+  Spelling[INLINETOK]              := 'INLINE';
+  Spelling[KEEPTOK]                := 'KEEP';
+
+  Spelling[ASSIGNFILETOK]          := 'ASSIGN';
+  Spelling[RESETTOK]               := 'RESET';
+  Spelling[REWRITETOK]             := 'REWRITE';
+  Spelling[APPENDTOK]              := 'APPEND';
+  Spelling[BLOCKREADTOK]           := 'BLOCKREAD';
+  Spelling[BLOCKWRITETOK]          := 'BLOCKWRITE';
+  Spelling[CLOSEFILETOK]           := 'CLOSE';
+
+  Spelling[GETRESOURCEHANDLETOK]   := 'GETRESOURCEHANDLE';
+  Spelling[SIZEOFRESOURCETOK]      := 'SIZEOFRESOURCE';
+
+  Spelling[FILETOK]                := 'FILE';
+  Spelling[TEXTFILETOK]            := 'TEXTFILE';
+  Spelling[SETTOK]                 := 'SET';
+  Spelling[PACKEDTOK]              := 'PACKED';
+  Spelling[VOLATILETOK]            := 'VOLATILE';
+  Spelling[STRIPEDTOK]             := 'STRIPED';
+  Spelling[WITHTOK]                := 'WITH';
+  Spelling[LABELTOK]               := 'LABEL';
+  Spelling[GOTOTOK]                := 'GOTO';
+  Spelling[INTOK]                  := 'IN';
+  Spelling[RECORDTOK]              := 'RECORD';
+  Spelling[CASETOK]                := 'CASE';
+  Spelling[BEGINTOK]               := 'BEGIN';
+  Spelling[ENDTOK]                 := 'END';
+  Spelling[IFTOK]                  := 'IF';
+  Spelling[THENTOK]                := 'THEN';
+  Spelling[ELSETOK]                := 'ELSE';
+  Spelling[WHILETOK]               := 'WHILE';
+  Spelling[DOTOK]                  := 'DO';
+  Spelling[REPEATTOK]              := 'REPEAT';
+  Spelling[UNTILTOK]               := 'UNTIL';
+  Spelling[FORTOK]                 := 'FOR';
+  Spelling[TOTOK]                  := 'TO';
+  Spelling[DOWNTOTOK]              := 'DOWNTO';
+  Spelling[ASSIGNTOK]              := ':=';
+  Spelling[WRITETOK]               := 'WRITE';
+  Spelling[WRITELNTOK]             := 'WRITELN';
+  Spelling[SIZEOFTOK]              := 'SIZEOF';
+  Spelling[LENGTHTOK]              := 'LENGTH';
+  Spelling[HIGHTOK]                := 'HIGH';
+  Spelling[LOWTOK]                 := 'LOW';
+  Spelling[INTTOK]                 := 'INT';
+  Spelling[FRACTOK]                := 'FRAC';
+  Spelling[TRUNCTOK]               := 'TRUNC';
+  Spelling[ROUNDTOK]               := 'ROUND';
+  Spelling[ODDTOK]                 := 'ODD';
+
+  Spelling[READLNTOK]              := 'READLN';
+  Spelling[HALTTOK]                := 'HALT';
+  Spelling[BREAKTOK]               := 'BREAK';
+  Spelling[CONTINUETOK]            := 'CONTINUE';
+  Spelling[EXITTOK]                := 'EXIT';
+
+  Spelling[SUCCTOK]                := 'SUCC';
+  Spelling[PREDTOK]                := 'PRED';
+
+  Spelling[INCTOK]                 := 'INC';
+  Spelling[DECTOK]                 := 'DEC';
+  Spelling[ORDTOK]                 := 'ORD';
+  Spelling[CHRTOK]                 := 'CHR';
+  Spelling[ASMTOK]                 := 'ASM';
+  Spelling[ABSOLUTETOK]            := 'ABSOLUTE';
+  Spelling[USESTOK]                := 'USES';
+  Spelling[LOTOK]                  := 'LO';
+  Spelling[HITOK]                  := 'HI';
+  Spelling[GETINTVECTOK]           := 'GETINTVEC';
+  Spelling[SETINTVECTOK]           := 'SETINTVEC';
+  Spelling[ARRAYTOK]               := 'ARRAY';
+  Spelling[OFTOK]                  := 'OF';
+  Spelling[STRINGTOK]              := 'STRING';
+
+  Spelling[RANGETOK]               := '..';
+
+  Spelling[EQTOK]                  := '=';
+  Spelling[NETOK]                  := '<>';
+  Spelling[LTTOK]                  := '<';
+  Spelling[LETOK]                  := '<=';
+  Spelling[GTTOK]                  := '>';
+  Spelling[GETOK]                  := '>=';
+
+  Spelling[DOTTOK]                 := '.';
+  Spelling[COMMATOK]               := ',';
+  Spelling[SEMICOLONTOK]           := ';';
+  Spelling[OPARTOK]                := '(';
+  Spelling[CPARTOK]                := ')';
+  Spelling[DEREFERENCETOK]         := '^';
+  Spelling[ADDRESSTOK]             := '@';
+  Spelling[OBRACKETTOK]            := '[';
+  Spelling[CBRACKETTOK]            := ']';
+  Spelling[COLONTOK]               := ':';
+
+  Spelling[PLUSTOK]                := '+';
+  Spelling[MINUSTOK]               := '-';
+  Spelling[MULTOK]                 := '*';
+  Spelling[DIVTOK]                 := '/';
+  Spelling[IDIVTOK]                := 'DIV';
+  Spelling[MODTOK]                 := 'MOD';
+  Spelling[SHLTOK]                 := 'SHL';
+  Spelling[SHRTOK]                 := 'SHR';
+  Spelling[ORTOK]                  := 'OR';
+  Spelling[XORTOK]                 := 'XOR';
+  Spelling[ANDTOK]                 := 'AND';
+  Spelling[NOTTOK]                 := 'NOT';
+
+  Spelling[INTEGERTOK]             := 'INTEGER';
+  Spelling[CARDINALTOK]            := 'CARDINAL';
+  Spelling[SMALLINTTOK]            := 'SMALLINT';
+  Spelling[SHORTINTTOK]            := 'SHORTINT';
+  Spelling[WORDTOK]                := 'WORD';
+  Spelling[BYTETOK]                := 'BYTE';
+  Spelling[CHARTOK]                := 'CHAR';
+  Spelling[BOOLEANTOK]             := 'BOOLEAN';
+  Spelling[POINTERTOK]             := 'POINTER';
+  Spelling[SHORTREALTOK]           := 'SHORTREAL';
+  Spelling[REALTOK]                := 'REAL';
+  Spelling[SINGLETOK]              := 'SINGLE';
+  Spelling[HALFSINGLETOK]          := 'FLOAT16';
+  Spelling[PCHARTOK]               := 'PCHAR';
+
+  Spelling[SHORTSTRINGTOK]         := 'SHORTSTRING';
+  Spelling[FLOATTOK]               := 'FLOAT';
+  Spelling[TEXTTOK]                := 'TEXT';
+
   AsmFound := False;
   UsesFound := False;
   UnitFound := False;
   ExternalFound := False;
 
-  TokenizeProgramInitialization(programUnit);
+  IncludeIndex := MAXUNITS;
+
+  TokenizeProgramInitialization;
 
   if UsesOn then
-    TokenizeUnit(programUnit)     // main program file
+    TokenizeUnit(1)     // main_file
   else
-    for cnt := SourceFileList.Size downto 1 do
-      if SourceFileList.GetSourceFile(cnt).IsRelevant then
-        TokenizeUnit(SourceFileList.GetSourceFile(cnt));
+    for cnt := NumUnits downto 1 do
+      if UnitName[cnt].Name <> '' then TokenizeUnit(cnt);
 
-end;  // TokenizeProgram
-
+end;  //TokenizeProgram
 
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
@@ -1934,15 +2240,18 @@ begin
   end;
 end;
 
-procedure TScanner.TokenizeMacro(a: String; Line, Spaces: Integer);
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+
+
+procedure TokenizeMacro(a: String; Line, Spaces: Integer);
 var
-  i: Integer;
   Text: String;
   Num, Frac: TString;
-  Err, Line2, TextPos, im: Integer;
+  i, Err, Line2, TextPos, im: Integer;
   yes: Boolean;
   ch, ch2: Char;
-  CurToken: TTokenKind;
+  CurToken: Byte;
 
 
   procedure SkipWhiteSpace;        // 'string' + #xx + 'string'
@@ -1956,8 +2265,7 @@ var
       Inc(i);
     end;
 
-    if not (ch in ['''', '#']) then Error(NumTok, TMessage.Create(TErrorCode.UnexpectedCharacter,
-        'Syntax error, ''string'' expected but ''' + ch + ''' found'));
+    if not (ch in ['''', '#']) then Error(NumTok, 'Syntax error, ''string'' expected but ''' + ch + ''' found');
   end;
 
 
@@ -2007,7 +2315,7 @@ var
 
   begin
 
-    if target.id = TTargetID.A8 then
+    if target.id = ___a8 then
     begin
 
       for i := p to length(Text) do
@@ -2089,7 +2397,7 @@ begin
   while i <= length(a) do
   begin
 
-    while (i <= length(a)) and (a[i] in AllowWhiteSpaces) do
+    while a[i] in AllowWhiteSpaces do
     begin
 
       if a[i] = LF then
@@ -2098,200 +2406,209 @@ begin
         Spaces := 0;
       end
       else
-      begin
         Inc(Spaces);
-      end;
 
       Inc(i);
     end;
 
-    if i <= length(a) then
+    ch := UpCase(a[i]);
+    Inc(i);
+
+
+    Num := '';
+    if ch in ['0'..'9', '$', '%'] then ReadNumber;
+
+    if Length(Num) > 0 then      // Number found
     begin
+      AddToken(INTNUMBERTOK, 1, Line, length(Num) + Spaces, StrToInt(Num));
+      Spaces := 0;
 
-      ch := UpCase(a[i]);
-      Inc(i);
+      if ch = '.' then      // Fractional part expected
+      begin
 
+        ch := a[i];
+        Inc(i);
+
+        if ch = '.' then
+          Dec(i)        // Range ('..') token
+        else
+        begin        // Fractional part found
+          Frac := ReadFractionalPart(a, i, ch);
+
+          Tok[NumTok].Kind := FRACNUMBERTOK;
+          Tok[NumTok].FracValue := StrToFloat(Num + Frac);
+          Tok[NumTok].Column := Tok[NumTok - 1].Column + length(Num) + length(Frac) + Spaces;
+          Spaces := 0;
+        end;
+      end;
 
       Num := '';
-      if ch in ['0'..'9', '$', '%'] then ReadNumber;
+      Frac := '';
+    end;
 
-      if Length(Num) > 0 then      // Number found
+
+    if ch in ['A'..'Z', '_'] then    // Keyword or identifier expected
+    begin
+
+      Text := '';
+
+      err := 0;
+
+      TextPos := i - 1;
+
+      while ch in ['A'..'Z', '_', '0'..'9', '.'] do
       begin
-        AddToken_(TTokenKind.INTNUMBERTOK, 1, Line, length(Num) + Spaces, StrToInt(Num));
-        Spaces := 0;
+        Text := Text + ch;
+        Inc(err);
 
-        if ch = '.' then      // Fractional part expected
-        begin
-
-          ch := a[i];
-          Inc(i);
-
-          if ch = '.' then
-            Dec(i)        // Range ('..') token
-          else
-          begin        // Fractional part found
-            Frac := ReadFractionalPart(a, i, ch);
-
-            TokenAt(NumTok).Kind := TTokenKind.FRACNUMBERTOK;
-            TokenAt(NumTok).FracValue := StrToFloat(Num + Frac);
-            TokenAt(NumTok).SourceLocation.Column :=
-              TokenAt(NumTok - 1).SourceLocation.Column + length(Num) + length(Frac) + Spaces;
-            Spaces := 0;
-          end;
-        end;
-
-        Num := '';
-        Frac := '';
+        ch := UpCase(a[i]);
+        Inc(i);
       end;
 
 
-      if ch in ['A'..'Z', '_'] then    // Keyword or identifier expected
+      if err > 255 then
+        Error(NumTok, 'Constant strings can''t be longer than 255 chars');
+
+      if Length(Text) > 0 then
       begin
 
-        Text := '';
+        CurToken := GetStandardToken(Text);
 
-        err := 0;
+        im := SearchDefine(Text);
 
-        TextPos := i - 1;
-
-        while ch in ['A'..'Z', '_', '0'..'9', '.'] do
+        if (im > 0) and (Defines[im].Macro <> '') then
         begin
-          Text := Text + ch;
-          Inc(err);
 
-          ch := UpCase(a[i]);
-          Inc(i);
+          ch := #0;
+
+          i := TextPos;
+
+          if Defines[im].Macro = copy(a, i, length(Text)) then
+            Error(NumTok, 'Recursion in macros is not allowed');
+
+          Delete(a, i, length(Text));
+          insert(Defines[im].Macro, a, i);
+
+          CurToken := MACRORELEASE;
+
+        end
+        else
+        begin
+
+          if CurToken = TEXTTOK then CurToken := TEXTFILETOK;
+          if CurToken = FLOATTOK then CurToken := SINGLETOK;
+          if CurToken = FLOAT16TOK then CurToken := HALFSINGLETOK;
+          if CurToken = SHORTSTRINGTOK then CurToken := STRINGTOK;
+
+          AddToken(0, 1, Line, length(Text) + Spaces, 0);
+          Spaces := 0;
+
         end;
 
+        if CurToken <> MACRORELEASE then
 
-        if err > 255 then
-          Error(NumTok, TMessage.Create(TErrorCode.ConstantStringTooLong,
-            'Constant strings can''t be longer than 255 chars'));
+          if CurToken <> 0 then
+          begin    // Keyword found
 
-        if Length(Text) > 0 then
-        begin
-
-          CurToken := GetStandardToken(Text);
-
-          im := SearchDefine(Text);
-
-          if (im > 0) and (Defines[im].Macro <> '') then
-          begin
-
-            ch := #0;
-
-            i := TextPos;
-
-            if Defines[im].Macro = copy(a, i, length(Text)) then
-              Error(NumTok, TMessage.Create(TErrorCode.RecursionInMacro, 'Recursion in macros is not allowed'));
-
-            Delete(a, i, length(Text));
-            insert(Defines[im].Macro, a, i);
-
-            CurToken := TTokenKind.MACRORELEASE;
+            Tok[NumTok].Kind := CurToken;
 
           end
           else
-          begin
-
-            if CurToken = TTokenKind.TEXTTOK then CurToken := TTokenKind.TEXTFILETOK;
-            if CurToken = TTokenKind.FLOATTOK then CurToken := TTokenKind.SINGLETOK;
-            if CurToken = TTokenKind.FLOAT16TOK then CurToken := TTokenKind.HALFSINGLETOK;
-            if CurToken = TTokenKind.SHORTSTRINGTOK then CurToken := TTokenKind.STRINGTOK;
-
-            AddToken_(TTokenKind.UNTYPETOK, 1, Line, length(Text) + Spaces, 0);
-            Spaces := 0;
-
+          begin        // Identifier found
+            Tok[NumTok].Kind := IDENTTOK;
+            New(Tok[NumTok].Name);
+            Tok[NumTok].Name^ := Text;
           end;
 
-          if CurToken <> TTokenKind.MACRORELEASE then
-
-            if CurToken <> TTokenKind.UNTYPETOK then
-            begin    // Keyword found
-
-              TokenAt(NumTok).Kind := CurToken;
-
-            end
-            else
-            begin        // Identifier found
-              TokenAt(NumTok).Kind := TTokenKind.IDENTTOK;
-              TokenAt(NumTok).Name := Text;
-            end;
-
-        end;
-
-        Text := '';
       end;
 
+      Text := '';
+    end;
 
-      if ch in ['''', '#'] then
-      begin
 
-        Text := '';
-        yes := True;
+    if ch in ['''', '#'] then
+    begin
 
-        repeat
+      Text := '';
+      yes := True;
 
-          case ch of
+      repeat
 
-            '''': begin
+        case ch of
 
-              if yes then
-              begin
-                TextPos := Length(Text) + 1;
-                yes := False;
-              end;
+          '''': begin
 
-              Inc(Spaces);
+            if yes then
+            begin
+              TextPos := Length(Text) + 1;
+              yes := False;
+            end;
 
-              repeat
-                ch := a[i];
-                Inc(i);
+            Inc(Spaces);
 
-                if ch = LF then  //Inc(Line);
-                  Error(NumTok, TMessage.Create(TErrorCode.StringExceedsLine, 'String exceeds line'));
-
-                if not (ch in ['''', CR, LF]) then
-                  Text := Text + ch
-                else
-                begin
-
-                  ch2 := a[i];
-                  Inc(i);
-
-                  if ch2 = '''' then
-                  begin
-                    Text := Text + '''';
-                    ch := #0;
-                  end
-                  else
-                    Dec(i);
-
-                end;
-
-              until ch = '''';
-
-              Inc(Spaces);
-
+            repeat
               ch := a[i];
               Inc(i);
 
-              if ch in [' ', TAB] then
-              begin
-                ch2 := ch;
-                Err := i;
-                while ch2 in [' ', TAB] do
-                begin
-                  ch2 := a[i];
-                  Inc(i);
-                end;
+              if ch = LF then  //Inc(Line);
+                Error(NumTok, 'String exceeds line');
 
-                if ch2 in ['*', '~', '+'] then
-                  ch := ch2
+              if not (ch in ['''', CR, LF]) then
+                Text := Text + ch
+              else
+              begin
+
+                ch2 := a[i];
+                Inc(i);
+
+                if ch2 = '''' then
+                begin
+                  Text := Text + '''';
+                  ch := #0;
+                end
                 else
-                  i := Err;
+                  Dec(i);
+
               end;
 
+            until ch = '''';
+
+            Inc(Spaces);
+
+            ch := a[i];
+            Inc(i);
+
+            if ch in [' ', TAB] then
+            begin
+              ch2 := ch;
+              Err := i;
+              while ch2 in [' ', TAB] do
+              begin
+                ch2 := a[i];
+                Inc(i);
+              end;
+
+              if ch2 in ['*', '~', '+'] then
+                ch := ch2
+              else
+                i := Err;
+            end;
+
+
+            if ch = '*' then
+            begin
+              Inc(Spaces);
+              TextInvers(TextPos);
+              ch := a[i];
+              Inc(i);
+            end;
+
+            if ch = '~' then
+            begin
+              Inc(Spaces);
+              TextInternal(TextPos);
+              ch := a[i];
+              Inc(i);
 
               if ch = '*' then
               begin
@@ -2301,169 +2618,155 @@ begin
                 Inc(i);
               end;
 
-              if ch = '~' then
+            end;
+
+            if ch in [' ', TAB] then
+            begin
+              ch2 := ch;
+              Err := i;
+              while ch2 in [' ', TAB] do
               begin
-                Inc(Spaces);
-                TextInternal(TextPos);
-                ch := a[i];
+                ch2 := a[i];
                 Inc(i);
-
-                if ch = '*' then
-                begin
-                  Inc(Spaces);
-                  TextInvers(TextPos);
-                  ch := a[i];
-                  Inc(i);
-                end;
-
               end;
 
-              if ch in [' ', TAB] then
-              begin
-                ch2 := ch;
-                Err := i;
-                while ch2 in [' ', TAB] do
-                begin
-                  ch2 := a[i];
-                  Inc(i);
-                end;
-
-                if ch2 in ['''', '+'] then
-                  ch := ch2
-                else
-                  i := Err;
-              end;
-
-
-              if ch = '+' then
-              begin
-                yes := True;
-                Inc(Spaces);
-                SkipWhiteSpace;
-              end;
-
-            end;
-
-            '#': begin
-              ch := a[i];
-              Inc(i);
-
-              Num := '';
-              ReadNumber;
-
-              if Length(Num) > 0 then
-                Text := Text + chr(StrToInt(Num))
+              if ch2 in ['''', '+'] then
+                ch := ch2
               else
-                Error(NumTok, TMessage.Create(TErrorCode.ConstantExpressionExpected, 'Constant expression expected'));
-
-              if ch in [' ', TAB] then
-              begin
-                ch2 := ch;
-                Err := i;
-                while ch2 in [' ', TAB] do
-                begin
-                  ch2 := a[i];
-                  Inc(i);
-                end;
-
-                if ch2 in ['''', '+'] then
-                  ch := ch2
-                else
-                  i := Err;
-              end;
-
-              if ch = '+' then
-              begin
-                Inc(Spaces);
-                SkipWhiteSpace;
-              end;
-
+                i := Err;
             end;
+
+
+            if ch = '+' then
+            begin
+              yes := True;
+              Inc(Spaces);
+              SkipWhiteSpace;
+            end;
+
           end;
 
-        until not (ch in ['#', '''']);
-
-        case ch of
-          '*': begin
-            TextInvers(TextPos);
+          '#': begin
             ch := a[i];
             Inc(i);
-          end;      // Invers
-          '~': begin
-            TextInternal(TextPos);
-            ch := a[i];
-            Inc(i);
-          end;    // Antic
+
+            Num := '';
+            ReadNumber;
+
+            if Length(Num) > 0 then
+              Text := Text + chr(StrToInt(Num))
+            else
+              Error(NumTok, ConstExpExpected);
+
+            if ch in [' ', TAB] then
+            begin
+              ch2 := ch;
+              Err := i;
+              while ch2 in [' ', TAB] do
+              begin
+                ch2 := a[i];
+                Inc(i);
+              end;
+
+              if ch2 in ['''', '+'] then
+                ch := ch2
+              else
+                i := Err;
+            end;
+
+            if ch = '+' then
+            begin
+              Inc(Spaces);
+              SkipWhiteSpace;
+            end;
+
+          end;
         end;
 
-        // if Length(Text) > 0 then
-        if Length(Text) = 1 then
-        begin
-          AddToken_(TTokenKind.CHARLITERALTOK, 1, Line, 1 + Spaces, Ord(Text[1]));
-          Spaces := 0;
-        end
-        else
-        begin
-          AddToken_(TTokenKind.STRINGLITERALTOK, 1, Line, length(Text) + Spaces, 0);
-          Spaces := 0;
-          DefineStaticString(NumTok, Text);
-        end;
+      until not (ch in ['#', '''']);
 
-        Text := '';
-
+      case ch of
+        '*': begin
+          TextInvers(TextPos);
+          ch := a[i];
+          Inc(i);
+        end;      // Invers
+        '~': begin
+          TextInternal(TextPos);
+          ch := a[i];
+          Inc(i);
+        end;    // Antic
       end;
 
-
-      if ch in ['=', ',', ';', '(', ')', '*', '/', '+', '-', '^', '@', '[', ']'] then
+      // if Length(Text) > 0 then
+      if Length(Text) = 1 then
       begin
-        AddToken_(GetStandardToken(ch), 1, Line, 1 + Spaces, 0);
+        AddToken(CHARLITERALTOK, 1, Line, 1 + Spaces, Ord(Text[1]));
         Spaces := 0;
+      end
+      else
+      begin
+        AddToken(STRINGLITERALTOK, 1, Line, length(Text) + Spaces, 0);
+        Spaces := 0;
+        DefineStaticString(NumTok, Text);
       end;
 
+      Text := '';
 
-      if ch in [':', '>', '<', '.'] then          // Double-character token expected
-      begin
+    end;
 
-        Line2 := Line;
 
-        ch2 := a[i];
-        Inc(i);
+    if ch in ['=', ',', ';', '(', ')', '*', '/', '+', '-', '^', '@', '[', ']'] then
+    begin
+      AddToken(GetStandardToken(ch), 1, Line, 1 + Spaces, 0);
+      Spaces := 0;
+    end;
 
-        if (ch2 = '=') or ((ch = '<') and (ch2 = '>')) or ((ch = '.') and (ch2 = '.')) then
-        begin        // Double-character token found
-          AddToken_(GetStandardToken(ch + ch2), 1, Line, 2 + Spaces, 0);
+
+    if ch in [':', '>', '<', '.'] then          // Double-character token expected
+    begin
+
+      Line2 := Line;
+
+      ch2 := a[i];
+      Inc(i);
+
+      if (ch2 = '=') or ((ch = '<') and (ch2 = '>')) or ((ch = '.') and (ch2 = '.')) then
+      begin        // Double-character token found
+        AddToken(GetStandardToken(ch + ch2), 1, Line, 2 + Spaces, 0);
+        Spaces := 0;
+      end
+      else
+        if (ch = '.') and (ch2 in ['0'..'9']) then
+        begin
+
+          AddToken(INTNUMBERTOK, 1, Line, 0, 0);
+
+          Frac := ReadFractionalPart(a, i, ch2);  // Fractional part found
+
+          Tok[NumTok].Kind := FRACNUMBERTOK;
+          Tok[NumTok].FracValue := StrToFloat('0' + Frac);
+          Tok[NumTok].Column := Tok[NumTok - 1].Column + length(Frac) + Spaces;
           Spaces := 0;
+
+          Frac := '';
+
+          Dec(i);
+
         end
         else
-          if (ch = '.') and (ch2 in ['0'..'9']) then
-          begin
+        begin
+          Dec(i);
+          Line := Line2;
 
-            AddToken_(TTokenKind.INTNUMBERTOK, 1, Line, 0, 0);
-            Frac := ReadFractionalPart(a, i, ch2);
-
-            TokenAt(NumTok).Kind := TTokenKind.FRACNUMBERTOK;
-            TokenAt(NumTok).FracValue := StrToFloat('0' + Frac);
-            TokenAt(NumTok).SourceLocation.Column := TokenAt(NumTok - 1).SourceLocation.Column + length(Frac) + Spaces;
+          if ch in [':', '>', '<', '.'] then
+          begin        // Single-character token found
+            AddToken(GetStandardToken(ch), 1, Line, 1 + Spaces, 0);
             Spaces := 0;
-
-            Frac := '';
-
-            Dec(i);
-
-          end
-          else
-          begin
-            Dec(i);
-            Line := Line2;
-
-            if ch in [':', '>', '<', '.'] then
-            begin        // Single-character token found
-              AddToken_(GetStandardToken(ch), 1, Line, 1 + Spaces, 0);
-              Spaces := 0;
-            end;
-
           end;
-      end;
+
+        end;
+
     end;
 
   end;

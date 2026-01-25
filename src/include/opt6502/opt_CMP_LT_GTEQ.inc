@@ -1,5 +1,5 @@
 
-function opt_CMP_LT_GTEQ(i: integer): Boolean;
+function opt_LT_GTEQ(i: integer): Boolean;
 var p, k: integer;
 begin
 

@@ -13,7 +13,6 @@
 
 function opt_STA_IMUL_CX(i: integer): Boolean;
 var tmp: string;
-    listing_tmp: TListing_tmp;
 begin
 
     Result := true;

@@ -1,5 +1,5 @@
 
-function opt_CMP_LTEQ(i: integer): Boolean;
+function opt_LTEQ(i: integer): Boolean;
 var p: integer;
     c: cardinal;
     tmp: string;

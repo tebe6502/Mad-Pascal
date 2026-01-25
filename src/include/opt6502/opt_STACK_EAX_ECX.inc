@@ -1,6 +1,5 @@
 
 function opt_STACK_EAX_ECX(i: integer): Boolean;
-var listing_tmp: TListing_tmp;
 begin
 
     Result := true;

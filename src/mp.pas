@@ -87,15 +87,16 @@ Contributors:
 + Michael Jaskula :
   - {$DEFINE BASICOFF} (base\atari\basicoff.asm)
 
-+ Peter Dell :
-  - improved sources to make compilation compatible with pas2js (https://github.com/fpc/pas2js)
-
 + Piotr Fusik (https://github.com/pfusik) :
   - base\common\shortreal.asm (div24by15)
   - base\runtime\icmp.asm
   - unit GRAPH: detect X:Y graphics resolution (OS mode)
   - unit CRC
   - unit DEFLATE: unDEF
+
++ Peter Dell :
+  - pas2js
+  - optimizations
 
 + Rafal Czemko :
   - system X16 (-t x16)
@@ -166,538 +167,476 @@ Contributors:
 # :BP  tylko przy adresowaniu 1-go bajtu, :BP = $00 !!!, zmienia sie tylko :BP+1
 # :BP2 przy adresowaniu wiecej niz 1-go bajtu (WORD, CARDINAL itd.)
 
-# indeks dla jednowymiarowej tablicy [0..x] = a * GetDataSize(AllocElementType)
-# indeks dla dwuwymiarowej tablicy [0..x, 0..y] = a * ((y+1) * GetDataSize(AllocElementType)) + b * GetDataSize(AllocElementType)
+# indeks dla jednowymiarowej tablicy [0..x] = a * DataSize[AllocElementType]
+# indeks dla dwuwymiarowej tablicy [0..x, 0..y] = a * ((y+1) * DataSize[AllocElementType]) + b * DataSize[AllocElementType]
 
 # dla typu OBJECT przekazywany jest poczatkowy adres alokacji danych pamieci (HI = regY, LO = regA), potem sa obliczane kolejne adresy w naglowku procedury/funkcji
 # zaleca się uzywania typow prostych, wskazniki do tablic w OBJECT marnuja duzo zasobow CPU
 
-# podczas wartosciowania wyrazen typy sa roszerzane, w przypadku operacji '-' promowane do SIGNEDORDINALTYPES (BYTE -> TTokenKind.SMALLINTTOK ; WORD -> TTokenKind.INTEGERTOK)
+# podczas wartosciowania wyrazen typy sa roszerzane, w przypadku operacji '-' promowane do SIGNEDORDINALTYPES (BYTE -> SMALLINTTOK ; WORD -> INTEGERTOK)
 
-# (TokenAt( ].Kind = ASMTOK + TokenAt( ].Value = 0) wersja z { }
-# (TokenAt( ].Kind = ASMTOK + TokenAt( ].Value = 1) wersja bez { }
+# (Tok[ ].Kind = ASMTOK + Tok[ ].Value = 0) wersja z { }
+# (Tok[ ].Kind = ASMTOK + Tok[ ].Value = 1) wersja bez { }
 
-# --------------------------------------------------------------------------------------------------------------
-#                          |      DataType                |  AllocElementType   |  NumAllocElements  |  NumAllocElements_ |
-# --------------------------------------------------------------------------------------------------------------
-# VAR RECORD               | RECORDTOK          | 0                  | RecType            | 0                  |
-# VAR ^RECORD              | POINTERTOK         | RECORDTOK          | RecType            | 0                  |
-# ARRAY [0..X]             | POINTERTOK         | Type               | X Array Size       | 0                  |
-# ARRAY [0..X, 0..Y]       | POINTERTOK         | Type               | X Array Size       | Y Array Size       |
-# ARRAY [0..X] OF ^RECORD  | POINTERTOK         | RECORDTOK          | RecType            | X Array Size       |
-# ARRAY [0..X] OF ^OBJECT  | POINTERTOK         | OBJECTTOK          | RecType            | X Array Size       |
-# --------------------------------------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------------------------------------------
+#                          |      DataType      |  AllocElementType   |  NumAllocElements  |  NumAllocElements_ |
+# ---------------------------------------------------------------------------------------------------------------
+# ARRAY [0..X]             | POINTERTOK         | Type                | X Array Size       | 0                  |
+# ARRAY [0..X, 0..Y]       | POINTERTOK         | Type                | X Array Size       | Y Array Size       |
+# VAR RECORD               | POINTERTOK         | RECORDTOK|OBJECTTOK | 0                  | 0                  |
+# VAR ^RECORD              | POINTERTOK         | RECORDTOK           | RecType            | 0                  |
+# ARRAY [0..X] OF ^RECORD  | POINTERTOK         | RECORDTOK           | RecType            | X Array Size       |
+# ARRAY [0..X] OF ^OBJECT  | POINTERTOK         | OBJECTTOK           | RecType            | X Array Size       |
+# ---------------------------------------------------------------------------------------------------------------
 
 *)
 
 program MADPASCAL;
 
-{$I Defines.inc}
+{$i define.inc}
 
 uses
+  Crt,
   SysUtils,
-  {$IFDEF WINDOWS}
+
+{$IFDEF WINDOWS}
   Windows,
-  {$ENDIF}{$IFDEF SIMULATED_CONSOLE}
-  browserconsole,
-  {$ENDIF}
+{$ENDIF}
+
   Common,
-  Compiler,
-  CompilerTypes,
-  Console,
-  Diagnostic,
-  FileIO,
   Messages,
-  Targets,
-  Tokens,
-  Utilities,
-  Profiler;
+  Compiler,
+  Scanner,
+  Parser,
+  Optimize,
+  Diagnostic;
 
 
-  // ----------------------------------------------------------------------------
-  // ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
-  {$i include/syntax.inc}
+{$i include/syntax.inc}
+
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 
-  // ----------------------------------------------------------------------------
-  //                                 Main Program
-  // ----------------------------------------------------------------------------
-
-  function Main: TExitCode;
+  procedure ParseParam;
   var
-    // Command line parameters
-    inputFilePath: TFilePath;
-    unitPathList: TPathList;
-    targetID: TTargetID;
-    cpu: TCPU;
+    i, err: Integer;
+    s: String;
+    t, c: String[32];
+  begin
 
-    OutputFilePath: TFilePath;
+    t := 'A8';    // target
+    c := '';      // cpu
 
-    StartTime: QWord;
-    seconds: ValReal;
-
-    // Processing variables.
-    programUnit: TSourceFile;
-
-    procedure InitializeUnitPathList;
-    var
-      folderPath: TFolderPath;
-      libFolderLevel: Integer;
-      libFolderPath: TFolderPath;
+    i := 1;
+    while i <= ParamCount do
     begin
-      // By default the executable is in the folder 'bin/<os>'.
-      // For compatibility with previous version we also check that folder and its
-      // first and wecond parent folders for the existence of the "lib/system.pas".
-      unitPathList := TPathList.Create(True);
-      folderPath := ExtractFileDir(ParamStr(0));
-      for libFolderLevel := 1 to 3 do
-      begin
-        libFolderPath := IncludeTrailingPathDelimiter(folderPath) + 'lib';
 
-        if TFileSystem.FileExists_(IncludeTrailingPathDelimiter(libFolderPath) + SYSTEM_UNIT_FILE_NAME) then
+      if ParamStr(i)[1] = '-' then
+      begin
+
+        if AnsiUpperCase(ParamStr(i)) = '-O' then
         begin
-          unitPathList.AddFolder(libFolderPath);
-          break; // Found, exit For loop
+
+          outputFile := ParamStr(i + 1);
+          Inc(i);
+          if outputFile = '' then Syntax(3);
+
         end
         else
-        begin
-          folderPath := ExtractFileDir(folderPath);
-        end;
-      end;
-    end;
-
-    procedure ParseParam;
-    var
-      i: Integer;
-      parameter, parameterUpperCase, parameterValue: String;
-    begin
-
-      inputFilePath := '';
-      targetID := TTargetID.A8;
-      cpu := TCPU.NONE;
-
-      CODEORIGIN_BASE := -1;
-      DATA_BASE := -1;
-      ZPAGE_BASE := -1;
-      STACK_BASE := -1;
-      outputFilePath := '';
-      DiagMode := False;
-      PauseMode := False;
-
-      i := 1;
-      while i <= TEnvironment.GetParameterCount() do
-      begin
-        parameter := TEnvironment.GetParameterString(i);
-        parameterUpperCase := AnsiUpperCase(parameter);
-        parameterValue := '';
-        // Options start with a minus.
-        if parameter[1] = '-' then
-        begin
-
-          if parameterUpperCase = '-O' then
+          if pos('-O:', AnsiUpperCase(ParamStr(i))) = 1 then
           begin
 
-            Inc(i);
-            outputFilePath := parameter;
-            if outputFilePath = '' then ParameterError(i, 'Output file path is empty');
+            outputFile := copy(ParamStr(i), 4, 255);
+
+            if outputFile = '' then Syntax(3);
 
           end
           else
-            if pos('-O:', parameterUpperCase) = 1 then
-            begin
-
-              outputFilePath := copy(parameter, 4, 255);
-              if outputFilePath = '' then ParameterError(i, 'Output file path is empty');
-
-            end
+            if AnsiUpperCase(ParamStr(i)) = '-DIAG' then
+              DiagMode := True
             else
 
-
-              if (parameterUpperCase = '-IPATH') or (parameterUpperCase = '-I') then
+              if (AnsiUpperCase(ParamStr(i)) = '-IPATH') or (AnsiUpperCase(ParamStr(i)) = '-I') then
               begin
+
+                AddPath(ParamStr(i + 1));
                 Inc(i);
-                parameterValue := TEnvironment.GetParameterString(i);
-                unitPathList.AddFolder(parameterValue);
 
               end
               else
-                if pos('-IPATH:', parameterUpperCase) = 1 then
+                if pos('-IPATH:', AnsiUpperCase(ParamStr(i))) = 1 then
                 begin
-                  parameterValue := copy(parameter, 8, 255);
-                  unitPathList.AddFolder(parameterValue);
+
+                  s := copy(ParamStr(i), 8, 255);
+                  AddPath(s);
 
                 end
                 else
-                  if (parameterUpperCase = '-CPU') then
+                  if (AnsiUpperCase(ParamStr(i)) = '-CPU') then
                   begin
 
+                    c := AnsiUpperCase(ParamStr(i + 1));
                     Inc(i);
-                    parameterValue := TEnvironment.GetParameterStringUpperCase(i);
-                    cpu := ParseCPUParameter(i, parameterValue);
 
                   end
                   else
-                    if pos('-CPU:', parameterUpperCase) = 1 then
+                    if pos('-CPU:', AnsiUpperCase(ParamStr(i))) = 1 then
                     begin
 
-                      parameterValue := copy(parameter, 6, 255);
-                      cpu := ParseCPUParameter(i, parameterValue);
+                      c := copy(ParamStr(i), 6, 255);
 
                     end
                     else
-                    // TODO: Remove DEF?
-                      if (parameterUpperCase = '-DEFINE') or (parameterUpperCase = '-DEF') then
+                      if (AnsiUpperCase(ParamStr(i)) = '-DEFINE') or (AnsiUpperCase(ParamStr(i)) = '-DEF') then
                       begin
 
+                        AddDefine(AnsiUpperCase(ParamStr(i + 1)));
                         Inc(i);
-                        parameterValue := TEnvironment.GetParameterStringUpperCase(i);
-                        AddDefine(parameterValue);
                         AddDefines := NumDefines;
 
                       end
                       else
-                        if pos('-DEFINE:', parameterUpperCase) = 1 then
+                        if pos('-DEFINE:', AnsiUpperCase(ParamStr(i))) = 1 then
                         begin
-                          parameterValue := copy(parameterUpperCase, 9, 255);
-                          AddDefine(parameterValue);
+
+                          s := copy(ParamStr(i), 9, 255);
+                          AddDefine(AnsiUpperCase(s));
                           AddDefines := NumDefines;
+
                         end
                         else
-                          if (parameterUpperCase = '-CODE') or (parameterUpperCase = '-C') then
+                          if (AnsiUpperCase(ParamStr(i)) = '-CODE') or (AnsiUpperCase(ParamStr(i)) = '-C') then
                           begin
 
+                            val('$' + ParamStr(i + 1), CODEORIGIN_BASE, err);
                             Inc(i);
-                            parameterValue := TEnvironment.GetParameterString(i);
-                            CODEORIGIN_BASE := ParseHexParameter(i, parameterValue);
+                            if err <> 0 then Syntax(3);
 
                           end
                           else
-                            if pos('-CODE:', parameterUpperCase) = 1 then
+                            if pos('-CODE:', AnsiUpperCase(ParamStr(i))) = 1 then
                             begin
-                              parameterValue := copy(parameter, 7, 255);
-                              CODEORIGIN_BASE := ParseHexParameter(i, parameterValue);
+
+                              val('$' + copy(ParamStr(i), 7, 255), CODEORIGIN_BASE, err);
+                              if err <> 0 then Syntax(3);
 
                             end
                             else
-                              if (parameterUpperCase = '-DATA') or (parameterUpperCase = '-D') then
+                              if (AnsiUpperCase(ParamStr(i)) = '-DATA') or (AnsiUpperCase(ParamStr(i)) = '-D') then
                               begin
 
+                                val('$' + ParamStr(i + 1), DATA_BASE, err);
                                 Inc(i);
-                                parameterValue := TEnvironment.GetParameterString(i);
-                                DATA_BASE := ParseHexParameter(i, parameterValue);
+                                if err <> 0 then Syntax(3);
 
                               end
                               else
-                                if pos('-DATA:', parameterUpperCase) = 1 then
+                                if pos('-DATA:', AnsiUpperCase(ParamStr(i))) = 1 then
                                 begin
-                                  parameterValue := copy(parameter, 7, 255);
-                                  DATA_BASE := ParseHexParameter(i, parameterValue);
+
+                                  val('$' + copy(ParamStr(i), 7, 255), DATA_BASE, err);
+                                  if err <> 0 then Syntax(3);
 
                                 end
                                 else
-                                  if (parameterUpperCase = '-STACK') or (parameterUpperCase = '-S') then
+                                  if (AnsiUpperCase(ParamStr(i)) = '-STACK') or (AnsiUpperCase(ParamStr(i)) = '-S') then
                                   begin
 
+                                    val('$' + ParamStr(i + 1), STACK_BASE, err);
                                     Inc(i);
-                                    parameterValue := TEnvironment.GetParameterString(i);
-                                    STACK_BASE := ParseHexParameter(i, parameterValue);
+                                    if err <> 0 then Syntax(3);
 
                                   end
                                   else
-                                    if pos('-STACK:', parameterUpperCase) = 1 then
+                                    if pos('-STACK:', AnsiUpperCase(ParamStr(i))) = 1 then
                                     begin
-                                      parameterValue := copy(parameter, 8, 255);
-                                      STACK_BASE := ParseHexParameter(i, parameterValue);
+
+                                      val('$' + copy(ParamStr(i), 8, 255), STACK_BASE, err);
+                                      if err <> 0 then Syntax(3);
 
                                     end
                                     else
-                                      if (parameterUpperCase = '-ZPAGE') or (parameterUpperCase = '-Z') then
+                                      if (AnsiUpperCase(ParamStr(i)) = '-ZPAGE') or (AnsiUpperCase(ParamStr(i)) = '-Z') then
                                       begin
 
+                                        val('$' + ParamStr(i + 1), ZPAGE_BASE, err);
                                         Inc(i);
-                                        parameterValue := TEnvironment.GetParameterString(i);
-                                        ZPAGE_BASE := ParseHexParameter(i, parameterValue);
+                                        if err <> 0 then Syntax(3);
 
                                       end
                                       else
-                                        if pos('-ZPAGE:', parameterUpperCase) = 1 then
+                                        if pos('-ZPAGE:', AnsiUpperCase(ParamStr(i))) = 1 then
                                         begin
-                                          parameterValue := copy(parameter, 8, 255);
-                                          ZPAGE_BASE := ParseHexParameter(i, parameterValue);
+
+                                          val('$' + copy(ParamStr(i), 8, 255), ZPAGE_BASE, err);
+                                          if err <> 0 then Syntax(3);
 
                                         end
                                         else
-                                          if (parameterUpperCase = '-TARGET') or (parameterUpperCase = '-T') then
+                                          if (AnsiUpperCase(ParamStr(i)) = '-TARGET') or (AnsiUpperCase(ParamStr(i)) = '-T') then
                                           begin
 
+                                            t := AnsiUpperCase(ParamStr(i + 1));
                                             Inc(i);
-                                            parameterValue := TEnvironment.GetParameterStringUpperCase(i);
-                                            targetID := ParseTargetParameter(i, parameterValue);
+
                                           end
                                           else
-                                          begin
-                                            if pos('-TARGET:', parameterUpperCase) = 1 then
+                                            if pos('-TARGET:', AnsiUpperCase(ParamStr(i))) = 1 then
                                             begin
-                                              parameterValue := AnsiUpperCase(copy(parameter, 9, 255));
-                                              targetID := ParseTargetParameter(i, parameterValue);
+
+                                              t := AnsiUpperCase(copy(ParamStr(i), 9, 255));
+
                                             end
-                                            else if parameterUpperCase = '-DIAG' then
-                                              begin
-                                                DiagMode := True;
-                                              end
-                                              else if parameterUpperCase = '-PAUSE' then
-                                                begin
-                                                  PauseMode := True;
-                                                end
-                                                else
-                                                begin
-                                                  ParameterError(i, 'Unknown option ''' + parameter + '''.');
-                                                end;
-                                          end;
+                                            else
+                                              Syntax(3);
 
-        end
-        // No minus, so this must be the file name.
-        else
+      end
+      else
 
+      begin
+        UnitName[1].Name := ParamStr(i);  //ChangeFileExt(ParamStr(i), '.pas');
+        UnitName[1].Path := UnitName[1].Name;
+
+        if not FileExists(UnitName[1].Name) then
         begin
-          inputFilePath := TFileSystem.NormalizePath(TEnvironment.GetParameterString(i));
-
-          if not TFileSystem.FileExists_(inputFilePath) then
-          begin
-            ParameterError(i, 'Error: Cannot open input file ''' + TFileSystem.GetAbsolutePath(inputFilePath) +
- ''' for reading.');
-          end;
+          writeln('Error: Can''t open file ''' + UnitName[1].Name + '''');
+          FreeTokens;
+          Halt(3);
         end;
 
-        Inc(i);
       end;
 
+      Inc(i);
+    end;
 
-      // All parameters parsed.
-      Init(targetId, target);
+
+{$i targets/parse_param.inc}
+
+{$i targets/init.inc}
 
 
-      if CODEORIGIN_BASE < 0 then
-        CODEORIGIN_BASE := target.codeorigin
+    if CODEORIGIN_BASE < 0 then
+      CODEORIGIN_BASE := target.codeorigin
+    else
+      target.codeorigin := CODEORIGIN_BASE;
+
+
+    if ZPAGE_BASE < 0 then
+      ZPAGE_BASE := target.zpage
+    else
+      target.zpage := ZPAGE_BASE;
+
+
+    if c <> '' then
+      if AnsiUpperCase(c) = '6502' then target.cpu := CPU_6502
       else
-        target.codeorigin := CODEORIGIN_BASE;
+        if AnsiUpperCase(c) = '65C02' then target.cpu := CPU_65C02
+        else
+          if AnsiUpperCase(c) = '65816' then target.cpu := CPU_65816
+          else
+            Syntax(3);
 
 
-      if ZPAGE_BASE < 0 then
-        ZPAGE_BASE := target.zpage
-      else
-        target.zpage := ZPAGE_BASE;
-
-
-      if cpu <> TCPU.NONE then target.cpu := cpu;
-
-      case target.cpu of
-        TCPU.CPU_6502: AddDefine('CPU_6502');
-        TCPU.CPU_65C02: AddDefine('CPU_65C02');
-        TCPU.CPU_65816: AddDefine('CPU_65816');
-      end;
-
-      AddDefines := NumDefines;
-
-    end;  //ParseParam
-
-    // Main
-  begin
-
-    Result := 0;
-    {$IFDEF WINDOWS}
-   if Windows.GetFileType(Windows.GetStdHandle(STD_OUTPUT_HANDLE)) = Windows.FILE_TYPE_PIPE then
-   begin
-    System.Assign(Output, ''); FileMode:=1; System.Rewrite(Output);
-   end;
-    {$ENDIF}
-
-    // WriteLn('Sub-Pascal 32-bit real mode compiler v. 2.0 by Vasiliy Tereshkov, 2009');
-
-    WriteLn(Compiler.CompilerTitle);
-
-
-    InitializeUnitPathList;
-
-    SourceFileList := TSourceFileList.Create();
-
-    try
-
-      if (TEnvironment.GetParameterCount = 0) then Syntax(EHaltException.COMPILING_NOT_STARTED);
-
-      ParseParam();
-      // The main program is the first unit.
-
-      if (inputFilePath = '') then Syntax(EHaltException.COMPILING_NOT_STARTED);
-    except
-      on e: EHaltException do
-      begin
-        Result := e.GetExitCode();
-        Exit;
-      end;
+    case target.cpu of
+       CPU_6502: AddDefine('CPU_6502');
+      cpu_65c02: AddDefine('CPU_65C02');
+      cpu_65816: AddDefine('CPU_65816');
     end;
 
-    programUnit := SourceFileList.AddUnit(TSourceFileType.PROGRAM_FILE, ExtractFilename(inputFilePath), inputFilePath);
+    AddDefines := NumDefines;
 
-    {$IFDEF USEOPTFILE}
- // TODO Make command line option
-
-    OptFile := TFileSystem.CreateTextFile();
-    OptFile.Assign(ChangeFileExt(programUnit.Name, '.opt'));
-    try
-      OptFile.Rewrite();
-
-    except
-      on e: EInOutError do
-      begin
-      Console.TextColor(Console.LightRed);
-        WriteLn(Format('ERROR: Cannot open optimization file "%s" for writing. %s.', [OptFile.GetAbsoluteFilePath(), e.Message]));
-        Console.NormVideo;
-        Result := EHaltException.COMPILING_NOT_STARTED;
-        Exit();
-      end;
-    end;
+  end;  //ParseParam
 
 
-    {$ENDIF}
+// ----------------------------------------------------------------------------
+//                                 Main program
+// ----------------------------------------------------------------------------
 
-    OutFile := TFileSystem.CreateTextFile;
-
-    if ExtractFileName(outputFilePath) = '' then
-    begin
-      outputFilePath := ChangeFileExt(programUnit.Name, '.a65');
-    end;
-
-    OutFile.Assign(outputFilePath);
-    try
-      OutFile.Rewrite;
-
-    except
-      on e: EInOutError do
-      begin
-        Console.TextColor(Console.LightRed);
-        WriteLn(Format('ERROR: Cannot open output file "%s" for writing. %s.',
-          [OutFile.GetAbsoluteFilePath(), e.Message]));
-        Console.NormVideo;
-        Result := EHaltException.COMPILING_NOT_STARTED;
-        Exit();
-      end;
-    end;
-
-    {$IFDEF USETRACEFILE}
-    traceFile := TFileSystem.CreateTextFile;
-    traceFile.Assign(ChangeFileExt(outputFilePath, '.log'));
-    try
-      traceFile.Rewrite();
-    except
-      on e: EInOutError do
-      begin
-        Console.TextColor(Console.LightRed);
-        WriteLn(Format('ERROR: Cannot open trace file file "%s" for writing. %s.',
-          [traceFile.GetAbsoluteFilePath(), e.Message]));
-        Console.NormVideo;
-        Result := EHaltException.COMPILING_NOT_STARTED;
-        Exit();
-      end;
-    end;
-    {$ENDIF}
-
-    StartTime := GetTickCount64;
-
-    try
-      Compiler.Main(programUnit, unitPathList);
-      OutFile.Flush;
-      OutFile.Close;
-    except
-      on e: EHaltException do
-      begin
-        Result := e.GetExitCode();
-        OutFile.Close;
-        OutFile.Erase;
-      end;
-    end;
-
-    {$IFDEF USETRACEFILE}
-    TraceFile.Close;
-    {$ENDIF}
-
-    {$IFDEF USEOPTFILE}
-    OptFile.Close;
-    {$ENDIF}
-
-
-    // Diagnostics
-    if DiagMode then Diagnostics(programUnit);
-
-
-    WritelnMsg;
-
-    TextColor(WHITE);
-    seconds := (GetTickCount64 - StartTime + 500) / 1000;
-    {$IFNDEF PAS2JS}
-    Writeln(TokenAt(NumTok).SourceLocation.Line, ' lines compiled, ', seconds: 2: 2, ' sec, ',
-      NumTok, ' tokens, ', NumIdent, ' idents, ', BlockManager.BlockList.Count, ' blocks, ', NumTypes, ' types');
-    {$ELSE}
-   Writeln(IntToStr(TokenAt(NumTok).SourceLocation.Line) + ' lines compiled, ' + FloatToStr(seconds) + ' sec, '
- 	   + IntToStr(NumTok) + ' tokens        , ' + IntToStr(NumIdent) + ' idents, '
-	   + IntToStr(NumBlocks) + ' blocks, ' +  IntToStr(NumTypes) + ' types');
-    {$ENDIF}
-
-    Compiler.Free;
-
-    TextColor(LIGHTGRAY);
-
-    if msgLists.msgWarning.Count > 0 then Writeln(IntToStr(msgLists.msgWarning.Count) + ' warning(s) issued');
-    if msgLists.msgNote.Count > 0 then Writeln(IntToStr(msgLists.msgNote.Count) + ' note(s) issued');
-
-    NormVideo;
-  end;
-
-  function CallMain: TExitCode;
-  var
-    exitCode: TExitCode;
-    {$IFDEF SIMULATED_FILE_IO}
-    fileMap: TFileMap;
-    fileMapEntry: TFileMapEntry;
-    content: String;
-    {$ENDIF}
-  begin
-
-    exitCode := Main();
-    if (exitCode <> 0) then
-    begin
-      WriteLn('Program ended with exit code ' + IntToStr(exitCode));
-    end;
-
-    {$IFDEF SIMULATED_FILE_IO}
-  fileMap:=TFileSystem.GetFileMap();
-  fileMapEntry:=fileMap.GetEntry('Output.a65');
-  if fileMapEntry<>nil then
-  begin
-    content:=fileMapEntry.content;
-    WriteLn(content);
-  end;
-    {$ENDIF}
-
-    Result := exitCode;
-  end;
-
-var
-  exitCode: TExitCode;
 begin
-  exitCode := CallMain;
-  {$IFDEF DEBUG}
-  //exitCode := CallMain; // TODO until 2nd call works
-  {$ENDIF}
 
-  if PauseMode then
+{$IFDEF WINDOWS}
+ if GetFileType(GetStdHandle(STD_OUTPUT_HANDLE)) = 3 then begin
+  Assign(Output, ''); FileMode:=1; Rewrite(Output);
+ end;
+{$ENDIF}
+
+  //WriteLn('Sub-Pascal 32-bit real mode compiler v. 2.0 by Vasiliy Tereshkov, 2009');
+
+  WriteLn(CompilerTitle);
+
+  SetLength(Tok, 1);
+  SetLength(IFTmpPosStack, 1);
+
+  Tok[NumTok].Line := 0;
+  UnitName[1].Name := '';
+
+  MainPath := ExtractFilePath(ParamStr(0));
+
+  SetLength(UnitPath, 2);
+
+  MainPath := IncludeTrailingPathDelimiter(MainPath);
+  UnitPath[0] := IncludeTrailingPathDelimiter(MainPath + 'lib');
+
+  if (ParamCount = 0) then Syntax(3);
+
+  NumUnits := 1;           // !!! 1 !!!
+
+
+  ParseParam;
+
+
+  Defines[1].Name := AnsiUpperCase(target.Name);
+
+  if (UnitName[1].Name = '') then Syntax(3);
+
+  if pos(MainPath, ExtractFilePath(UnitName[1].Name)) > 0 then
+    FilePath := ExtractFilePath(UnitName[1].Name)
+  else
+    FilePath := MainPath + ExtractFilePath(UnitName[1].Name);
+
+  DefaultFormatSettings.DecimalSeparator := '.';
+
+ {$IFDEF USEOPTFILE}
+ AssignFile(OptFile, ChangeFileExt(UnitName[1].Name, '.opt') ); FileMode:=1; rewrite(OptFile);
+ {$ENDIF}
+
+
+  if ExtractFileName(outputFile) = '' then
   begin
-    WriteLn('Press any key to continue.');
-    Console.WaitForKeyPressed;
+    outputFile := ChangeFileExt(UnitName[1].Name, '.a65');
   end;
 
-  {$IFNDEF PAS2JS}
-  Halt(exitCode);
-  {$ENDIF}
+  AssignFile(OutFile, outputFile);
+
+  FileMode := 1;
+  Rewrite(OutFile);
+
+  TextColor(WHITE);
+
+  Writeln('Compiling ', UnitName[1].Name);
+
+  start_time := GetTickCount64;
+
+  // ----------------------------------------------------------------------------
+  // Set defines for first pass;
+  TokenizeProgram;
+
+  if NumTok = 0 then Error(1, '');
+
+  Inc(NumUnits);
+  UnitName[NumUnits].Name := 'SYSTEM';    // default UNIT 'system.pas'
+  UnitName[NumUnits].Path := FindFile('system.pas', 'unit');
+
+
+  TokenizeProgram(False);
+
+  // ----------------------------------------------------------------------------
+
+  NumStaticStrCharsTmp := NumStaticStrChars;
+
+  // Predefined constants
+  DefineIdent(1, 'BLOCKREAD', FUNCTIONTOK, INTEGERTOK, 0, 0, $00000000);
+  DefineIdent(1, 'BLOCKWRITE', FUNCTIONTOK, INTEGERTOK, 0, 0, $00000000);
+
+  DefineIdent(1, 'GETRESOURCEHANDLE', FUNCTIONTOK, INTEGERTOK, 0, 0, $00000000);
+
+  DefineIdent(1, 'NIL', CONSTANT, POINTERTOK, 0, 0, CODEORIGIN);
+
+  DefineIdent(1, 'EOL', CONSTANT, CHARTOK, 0, 0, target.eol);
+
+  DefineIdent(1, '__BUFFER', CONSTANT, WORDTOK, 0, 0, target.buf);
+
+  DefineIdent(1, 'TRUE', CONSTANT, BOOLEANTOK, 0, 0, $00000001);
+  DefineIdent(1, 'FALSE', CONSTANT, BOOLEANTOK, 0, 0, $00000000);
+
+  DefineIdent(1, 'MAXINT', CONSTANT, INTEGERTOK, 0, 0, MAXINT);
+  DefineIdent(1, 'MAXSMALLINT', CONSTANT, INTEGERTOK, 0, 0, MAXSMALLINT);
+
+  DefineIdent(1, 'PI', CONSTANT, REALTOK, 0, 0, $40490FDB00000324);
+  DefineIdent(1, 'NAN', CONSTANT, SINGLETOK, 0, 0, $FFC00000FFC00000);
+  DefineIdent(1, 'INFINITY', CONSTANT, SINGLETOK, 0, 0, $7F8000007F800000);
+  DefineIdent(1, 'NEGINFINITY', CONSTANT, SINGLETOK, 0, 0, $FF800000FF800000);
+
+  // First pass: compile the program and build call graph
+  NumPredefIdent := NumIdent;
+  Pass := CALLDETERMPASS;
+  CompileProgram;
+
+
+  // Visit call graph nodes and mark all procedures that are called as not dead
+  OptimizeProgram(GetIdent('MAIN'));
+
+
+  // Second pass: compile the program and generate output (IsNotDead fields are preserved since the first pass)
+  NumIdent := NumPredefIdent;
+
+  fillchar(DataSegment, sizeof(DataSegment), 0);
+
+  for CodeSize := 1 to High(UnitName) do UnitName[CodeSize].Units := 0;
+
+  NumBlocks := 0;
+  BlockStackTop := 0;
+  CodeSize := 0;
+  CodePosStackTop := 0;
+  _VarDataSize := 0;
+  CaseCnt := 0;
+  IfCnt := 0;
+  ShrShlCnt := 0;
+  NumTypes := 0;
+  run_func := 0;
+  NumProc := 0;
+
+  NumStaticStrChars := NumStaticStrCharsTmp;
+
+  ResetOpty;
+  optyFOR0 := '';
+  optyFOR1 := '';
+  optyFOR2 := '';
+  optyFOR3 := '';
+
+  LIBRARY_USE := LIBRARYTOK_USE;
+
+  LIBRARYTOK_USE := False;
+  PROGRAMTOK_USE := False;
+  INTERFACETOK_USE := False;
+  PublicSection := True;
+
+  iOut := -1;
+  outTmp := '';
+
+  SetLength(OptimizeBuf, 1);
+
+  Pass := CODEGENERATIONPASS;
+  CompileProgram;
+
+  Flush(OutFile);
+  CloseFile(OutFile);
+
+{$IFDEF USEOPTFILE}
+ CloseFile(OptFile);
+{$ENDIF}
+
+  // Diagnostics
+  if DiagMode then Diagnostics;
+
+
+  WritelnMsg;
+
+  TextColor(WHITE);
+
+  Writeln(Tok[NumTok].Line, ' lines compiled, ', ((GetTickCount64 - start_time + 500) / 1000): 2: 2, ' sec, ', NumTok, ' tokens, ', NumIdent, ' idents, ', NumBlocks, ' blocks, ', NumTypes, ' types');
+
+  FreeTokens;
+
+  TextColor(LIGHTGRAY);
+
+  if High(msgWarning) > 0 then Writeln(High(msgWarning), ' warning(s) issued');
+  if High(msgNote) > 0 then Writeln(High(msgNote), ' note(s) issued');
+
+  NormVideo;
+
 end.

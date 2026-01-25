@@ -2,74 +2,117 @@ unit OptimizeTemporary;
 
 interface
 
-uses CommonIO, CompilerTypes;
+{$i define.inc}
 
-// Public Interface
-// Note that due to the usage of the global unit variables, only on instance mustbe used a at a time currently.
-type
-  IOptimizeTemporary = interface
-    procedure Initialize(const aAsmBlockArray: TAsmBlockArray; const aWriter: IWriter);
-    procedure WriteOut(const a: String);
-    procedure Finalize;
-  end;
+// ----------------------------------------------------------------------------
 
-type
-  TOptimizeTemporary = class(TInterfacedObject, IOptimizeTemporary)
+procedure OptimizeTemporaryBuf;
 
-    public
+procedure WriteOut(const a: String);
+procedure FlushTempBuf;
 
-    procedure Initialize(const aAsmBlockArray: TAsmBlockArray; const aWriter: IWriter);
-    procedure WriteOut(const a: String);
-    procedure Finalize;
-  end;
+// ----------------------------------------------------------------------------
 
 implementation
 
-uses SysUtils, Assembler;
+uses Crt, SysUtils, Common;
 
-type
-  TTemporaryBufIndex = Integer;
+// ----------------------------------------------------------------------------
 
-var
-  AsmBlockArray: TAsmBlockArray;
-var
-  Writer: IWriter;
 var
   TemporaryBuf: array [0..511] of String;
-  TemporaryBufIndex: TTemporaryBufIndex;
-  LastTempBuf0: TString;
 
-procedure TOptimizeTemporary.Initialize(const aAsmBlockArray: TAsmBlockArray; const aWriter: IWriter);
+// ----------------------------------------------------------------------------
+
+
+procedure WriteOut(const a: String);
 var
-  i: TTemporaryBufIndex;
+  i: Integer;
 begin
-  AsmBlockArray:=aAsmBlockArray;
-  Writer:=aWriter;
+
+  if (pos(#9'jsr ', a) = 1) or (a = '#asm') then ResetOpty;
 
 
-  for i := Low(TemporaryBuf) to High(TemporaryBuf) do TemporaryBuf[i] := '';
-  TemporaryBufIndex := -1;
-  LastTempBuf0 := '';
+  if iOut < High(TemporaryBuf) then
+  begin
+
+    if (iOut >= 0) and (TemporaryBuf[iOut] <> '') then
+    begin
+
+      if TemporaryBuf[iOut] = '; --- ForToDoCondition' then
+        if (a = '') or (pos('; optimize ', a) > 0) then exit;
+
+      if (pos(#9'#for', TemporaryBuf[iOut]) > 0) then
+        if (a = '') or (pos('; optimize ', a) > 0) then exit;
+    end;
+
+    Inc(iOut);
+    TemporaryBuf[iOut] := a;
+
+  end
+  else
+  begin
+
+    OptimizeTemporaryBuf;
+
+    if TemporaryBuf[iOut] <> '' then
+    begin
+
+      if TemporaryBuf[iOut] = '; --- ForToDoCondition' then
+        if (a = '') or (pos('; optimize ', a) > 0) then exit;
+
+      if (pos(#9'#for', TemporaryBuf[iOut]) > 0) then
+        if (a = '') or (pos('; optimize ', a) > 0) then exit;
+    end;
+
+    if TemporaryBuf[0] <> '~' then
+    begin
+      if (TemporaryBuf[0] <> '') or (outTmp <> TemporaryBuf[0]) then writeln(OutFile, TemporaryBuf[0]);
+
+      outTmp := TemporaryBuf[0];
+    end;
+
+    for i := 1 to iOut do TemporaryBuf[i - 1] := TemporaryBuf[i];
+
+    TemporaryBuf[iOut] := a;
+
+  end;
+
+end;  //WriteOut
+
+
+// ----------------------------------------------------------------------------
+
+
+procedure FlushTempBuf;
+var
+  i: Integer;
+begin
+
+  for i := 0 to High(TemporaryBuf) do WriteOut('');    // flush TemporaryBuf
 
 end;
 
+
+// ----------------------------------------------------------------------------
+
+
 procedure OptimizeTemporaryBuf;
-var
-  p, k, q: Integer;
-  tmp: String;
-  yes: Boolean;
+var p, k , q: integer;
+    tmp: string;
+    yes: Boolean;
 
 
-  {$i include\cmd_temporary.inc}
+{$i include\cmd_temporary.inc}
 
 
-  function argMatch(const i, j: TTemporaryBufIndex): Boolean;
+  function argMatch(i, j: Integer): Boolean;
   begin
     Result := copy(TemporaryBuf[i], 6, 256) = copy(TemporaryBuf[j], 6, 256);
   end;
 
 
-  function fail(i: Integer): Boolean;
+  function fail(i: integer): Boolean;
   begin
 
         if (pos('#asm:', TemporaryBuf[i]) = 1) or
@@ -106,7 +149,7 @@ var
   end;
 
 
-  function IFDEF_MUL8(const i: TTemporaryBufIndex): Boolean;
+  function IFDEF_MUL8(i: integer): Boolean;
   begin
       Result :=	//(TemporaryBuf[i+4] = #9'eif') and
       		//(TemporaryBuf[i+3] = #9'imulCL') and
@@ -116,7 +159,7 @@ var
   end;
 
 
-  function IFDEF_MUL16(const i: TTemporaryBufIndex): Boolean;
+  function IFDEF_MUL16(i: integer): Boolean;
   begin
       Result :=	//(TemporaryBuf[i+4] = #9'eif') and
       		//(TemporaryBuf[i+3] = #9'imulCX') and
@@ -143,19 +186,18 @@ var
   end;
 
 
-  function GetBYTE(const i: TTemporaryBufIndex): Integer;
+  function GetBYTE(const i: Integer): Integer;
   begin
     Result := GetVAL(copy(TemporaryBuf[i], 6, 4));
   end;
 
-  // TODO: The functions below do not handle errors situations (-1) correctly
-  function GetWORD(const i, j: TTemporaryBufIndex): Integer;
+  function GetWORD(const i, j: Integer): Integer;
   begin
     Result := GetVAL(copy(TemporaryBuf[i], 6, 4)) + GetVAL(copy(TemporaryBuf[j], 6, 4)) * 256;
   end;
 
 
-  function GetSTRING(const j: TTemporaryBufIndex): String;
+  function GetSTRING(const j: Integer): String;
   var
     i: Integer;
     a: String;
@@ -167,7 +209,7 @@ var
     a := TemporaryBuf[j];
 
     if a <> '' then
-      while (i <= length(a)) and not (a[i] in [' ', #9]) do
+      while not (a[i] in [' ', #9]) and (i <= length(a)) do
       begin
         Result := Result + a[i];
         Inc(i);
@@ -177,38 +219,40 @@ var
 
 // -----------------------------------------------------------------------------
 
-  {$i include/opt6502/opt_TEMP_MOVE.inc}
-  {$i include/opt6502/opt_TEMP_FILL.inc}
-  {$i include/opt6502/opt_TEMP_TAIL_IF.inc}
-  {$i include/opt6502/opt_TEMP_TAIL_CASE.inc}
-  {$i include/opt6502/opt_TEMP.inc}
-  {$i include/opt6502/opt_TEMP_CMP.inc}
-  {$i include/opt6502/opt_TEMP_CMP_0.inc}
-  {$i include/opt6502/opt_TEMP_WHILE.inc}
-  {$i include/opt6502/opt_TEMP_FOR.inc}
-  {$i include/opt6502/opt_TEMP_FORDEC.inc}
-  {$i include/opt6502/opt_TEMP_IMUL_CX.inc}
-  {$i include/opt6502/opt_TEMP_IFTMP.inc}
-  {$i include/opt6502/opt_TEMP_ORD.inc}
-  {$i include/opt6502/opt_TEMP_X.inc}
-  {$i include/opt6502/opt_TEMP_EAX.inc}
-  {$i include/opt6502/opt_TEMP_JMP.inc}
-  {$i include/opt6502/opt_TEMP_ZTMP.inc}
-  {$i include/opt6502/opt_TEMP_UNROLL.inc}
-  {$i include/opt6502/opt_TEMP_BOOLEAN_OR.inc}
+{$i include/opt6502/opt_TEMP_MOVE.inc}
+{$i include/opt6502/opt_TEMP_FILL.inc}
+{$i include/opt6502/opt_TEMP_TAIL_IF.inc}
+{$i include/opt6502/opt_TEMP_TAIL_CASE.inc}
+{$i include/opt6502/opt_TEMP.inc}
+{$i include/opt6502/opt_TEMP_CMP.inc}
+{$i include/opt6502/opt_TEMP_CMP_0.inc}
+{$i include/opt6502/opt_TEMP_WHILE.inc}
+{$i include/opt6502/opt_TEMP_FOR.inc}
+{$i include/opt6502/opt_TEMP_FORDEC.inc}
+{$i include/opt6502/opt_TEMP_IMUL_CX.inc}
+{$i include/opt6502/opt_TEMP_IFTMP.inc}
+{$i include/opt6502/opt_TEMP_ORD.inc}
+{$i include/opt6502/opt_TEMP_X.inc}
+{$i include/opt6502/opt_TEMP_EAX.inc}
+{$i include/opt6502/opt_TEMP_JMP.inc}
+{$i include/opt6502/opt_TEMP_ZTMP.inc}
+{$i include/opt6502/opt_TEMP_UNROLL.inc}
+{$i include/opt6502/opt_TEMP_BOOLEAN_OR.inc}
 
 // -----------------------------------------------------------------------------
 
 begin
 
+
 {
-if (pos('#for:dec', TemporaryBuf[10]) > 0) then begin
+if (pos('lda adr.WALL,y', TemporaryBuf[10]) > 0) then begin
 
       for p:=0 to 30 do writeln(TemporaryBuf[p]);
       writeln('-------');
 
 end;
 }
+
 
   opt_TEMP_BOOLEAN_OR;
   opt_TEMP_ORD;
@@ -224,6 +268,7 @@ end;
   opt_TEMP_JMP;
   opt_TEMP_ZTMP;
   opt_TEMP_UNROLL;
+
 
 // -----------------------------------------------------------------------------
 
@@ -258,7 +303,7 @@ end;
 	TemporaryBuf[2] := '~';
 	TemporaryBuf[3] := '~';
 
-	TemporaryBuf[5] := #9'mva:rpl ' + HexWord(word(p)) + ',y ' +  copy(TemporaryBuf[5], 19, 256);
+	TemporaryBuf[5] := #9'mva:rpl ' + Hex(p, 4) + ',y ' +  copy(TemporaryBuf[5], 19, 256);
        end;
 
 
@@ -277,7 +322,7 @@ end;
 	TemporaryBuf[2] := '~';
 	TemporaryBuf[3] := '~';
 
-	TemporaryBuf[5] := #9'mva:rne ' + HexWord(word(p)) + ',y ' +  copy(TemporaryBuf[5], 19, 256);
+	TemporaryBuf[5] := #9'mva:rne ' + Hex(p, 4) + ',y ' +  copy(TemporaryBuf[5], 19, 256);
        end;
 
 // -----------------------------------------------------------------------------
@@ -320,10 +365,10 @@ end;
 	 TemporaryBuf[1] := #9'sta :bp2';
 	 TemporaryBuf[3] := #9'sta :bp2+1';
 
-	 TemporaryBuf[4] := #9'ldy #' + HexByte(Byte(p-1));
+	 TemporaryBuf[4] := #9'ldy #' + Hex(p-1, 2);
      	 TemporaryBuf[5] := #9'mva:rpl (:bp2),y adr.' + tmp + ',y-';
     	end else begin
-     	 TemporaryBuf[4] := #9'@move ' + tmp + ' #adr.' + tmp + ' #' + HexValue(p,2);
+     	 TemporaryBuf[4] := #9'@move ' + tmp + ' #adr.' + tmp + ' #' + Hex(p,2);
      	 TemporaryBuf[5] := '~';
 	end;
 
@@ -333,151 +378,79 @@ end;
 
 // -----------------------------------------------------------------------------
 
-  opt_TEMP_MOVE;
-  opt_TEMP_FILL;
+   opt_TEMP_MOVE;
+   opt_TEMP_FILL;
 
-  opt_TEMP_IFTMP;
-  opt_TEMP_TAIL_IF;
-  opt_TEMP_TAIL_CASE;
+   opt_TEMP_IFTMP;
+   opt_TEMP_TAIL_IF;
+   opt_TEMP_TAIL_CASE;
 
-  // #asm
 
-  if TemporaryBuf[0].IndexOf('#asm:') = 0 then
-  begin
+ // #asm
 
-    Writer.WriteLn(AsmBlockArray[StrToInt(copy(TemporaryBuf[0], 6, 256))]);
+   if TemporaryBuf[0].IndexOf('#asm:') = 0 then begin
+
+    writeln(OutFile, AsmBlock[StrToInt( copy(TemporaryBuf[0], 6, 256) )]);
 
     TemporaryBuf[0] := '~';
 
-  end;
+   end;
 
 
-  // #lib:label
+// #lib:label
 
-  if TemporaryBuf[0].IndexOf('#lib:') = 0 then
+   if TemporaryBuf[0].IndexOf('#lib:') = 0 then
     TemporaryBuf[0] := #9'm@lib ' + copy(TemporaryBuf[0], 6, 256);
 
 
-  // @PARAM?
+// @PARAM?
 
-  if TemporaryBuf[0] = #9'sta @PARAM?' then TemporaryBuf[0] := '~';
+   if TemporaryBuf[0] = #9'sta @PARAM?' then TemporaryBuf[0] := '~';
 
-  if TemporaryBuf[0] = #9'sty @PARAM?' then TemporaryBuf[0] := #9'tya';
+   if TemporaryBuf[0] = #9'sty @PARAM?' then TemporaryBuf[0] := #9'tya';
 
 
-  // @FORTMP?
+// @FORTMP?
 
-  if (pos('@FORTMP_', TemporaryBuf[0]) > 1) then
+   if (pos('@FORTMP_', TemporaryBuf[0]) > 1) then
 
     if lda(0) then begin
 
-      if (pos('::#$00', TemporaryBuf[0]) = 0) then TemporaryBuf[0] := #9'lda ' + fortmp(GetSTRING(0)) + '::#$00';
+     if (pos('::#$00', TemporaryBuf[0]) = 0) then TemporaryBuf[0] := #9'lda ' + fortmp(GetSTRING(0)) + '::#$00';
 
     end else
     if cmp(0) then begin
 
-        if (pos('::#$00', TemporaryBuf[0]) = 0) then TemporaryBuf[0] := #9'cmp ' + fortmp(GetSTRING(0)) + '::#$00';
+     if (pos('::#$00', TemporaryBuf[0]) = 0) then TemporaryBuf[0] := #9'cmp ' + fortmp(GetSTRING(0)) + '::#$00';
 
     end else
     if sub(0) then begin
 
-          if (pos('::#$00', TemporaryBuf[0]) = 0) then TemporaryBuf[0] := #9'sub ' + fortmp(GetSTRING(0)) + '::#$00';
+     if (pos('::#$00', TemporaryBuf[0]) = 0) then TemporaryBuf[0] := #9'sub ' + fortmp(GetSTRING(0)) + '::#$00';
 
     end else
     if sbc(0) then begin
 
-            if (pos('::#$00', TemporaryBuf[0]) = 0) then TemporaryBuf[0] := #9'sbc ' + fortmp(GetSTRING(0)) + '::#$00';
+     if (pos('::#$00', TemporaryBuf[0]) = 0) then TemporaryBuf[0] := #9'sbc ' + fortmp(GetSTRING(0)) + '::#$00';
 
     end else
-            if sta(0) then
-              TemporaryBuf[0] := #9'sta ' + fortmp(GetSTRING(0))
-            else
-              if sty(0) then
-                TemporaryBuf[0] := #9'sty ' + fortmp(GetSTRING(0))
-              else
+    if sta(0) then
+      TemporaryBuf[0] := #9'sta ' + fortmp(GetSTRING(0))
+    else
+    if sty(0) then
+      TemporaryBuf[0] := #9'sty ' + fortmp(GetSTRING(0))
+    else
     if mva(0) and (pos('mva @FORTMP_', TemporaryBuf[0]) = 0) then begin
-                  tmp := copy(TemporaryBuf[0], pos('@FORTMP_', TemporaryBuf[0]), 256);
+     tmp:=copy(TemporaryBuf[0], pos('@FORTMP_', TemporaryBuf[0]), 256);
 
-                  TemporaryBuf[0] := copy(TemporaryBuf[0], 1, pos(' @FORTMP_', TemporaryBuf[0])) + fortmp(tmp);
+     TemporaryBuf[0] := copy(TemporaryBuf[0], 1, pos(' @FORTMP_', TemporaryBuf[0]) ) + fortmp(tmp);
     end else
-                  writeln('Unassigned: ' + TemporaryBuf[0]);
+     writeln('Unassigned: ' + TemporaryBuf[0] );
 
-  //  tmp:=copy(TemporaryBuf[0], pos('@FORTMP_', TemporaryBuf[0]), 256);
+   //  tmp:=copy(TemporaryBuf[0], pos('@FORTMP_', TemporaryBuf[0]), 256);
   //   TemporaryBuf[0] := copy(TemporaryBuf[0], 1, pos(' @FORTMP_', TemporaryBuf[0]) ) + ':' + fortmp(tmp);
 
 end;  //OptimizeTemporaryBuf
 
 
-// ----------------------------------------------------------------------------
-// ----------------------------------------------------------------------------
-
-
-procedure TOptimizeTemporary.WriteOut(const a: String);
-var
-  i: Integer;
-begin
-
-  // Debugger.debugger.WriteOut(a);
-
-  // if (pos(#9'jsr ', a) = 1) or (a = '#asm') then ResetOpty; // TODO: Move to OptimizeASM
-
-  if TemporaryBufIndex < High(TemporaryBuf) then
-  begin
-
-    if (TemporaryBufIndex >= 0) and (TemporaryBuf[TemporaryBufIndex] <> '') then
-    begin
-
-      if TemporaryBuf[TemporaryBufIndex] = '; --- ForToDoCondition' then
-        if (a = '') or (pos('; optimize ', a) > 0) then exit;
-
-      if (pos(#9'#for', TemporaryBuf[TemporaryBufIndex]) > 0) then
-        if (a = '') or (pos('; optimize ', a) > 0) then exit;
-    end;
-
-    Inc(TemporaryBufIndex);
-    TemporaryBuf[TemporaryBufIndex] := a;
-
-  end
-  else
-  begin
-
-    // DebugCall('OptimizeTemporaryBuf.Before',  a+'/'+TemporaryBufToString);
-    OptimizeTemporaryBuf;
-    // DebugCall('OptimizeTemporaryBuf.After ', a+'/'+TemporaryBufToString);
-
-    if TemporaryBuf[TemporaryBufIndex] <> '' then
-    begin
-
-      if TemporaryBuf[TemporaryBufIndex] = '; --- ForToDoCondition' then
-        if (a = '') or (pos('; optimize ', a) > 0) then exit;
-
-      if (pos(#9'#for', TemporaryBuf[TemporaryBufIndex]) > 0) then
-        if (a = '') or (pos('; optimize ', a) > 0) then exit;
-    end;
-
-    if TemporaryBuf[0] <> '~' then
-    begin
-      if (TemporaryBuf[0] <> '') or (LastTempBuf0 <> TemporaryBuf[0]) then Writer.WriteLn(TemporaryBuf[0]);
-
-      LastTempBuf0 := TemporaryBuf[0];
-    end;
-
-    for i := 1 to TemporaryBufIndex do TemporaryBuf[i - 1] := TemporaryBuf[i];
-
-    TemporaryBuf[TemporaryBufIndex] := a;
-
-  end;
-
-end;  //WriteOut
-
-procedure TOptimizeTemporary.Finalize;
-var
-  i: Integer;
-begin
-
-  for i := 0 to High(TemporaryBuf) do WriteOut('');    // flush TemporaryBuf
-
-end;
-
 end.
-
