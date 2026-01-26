@@ -16,9 +16,9 @@ begin
        adc_sbc(i+4) and 									// adc|sbc				; 4
        sta_stack(i+5) and									// sta :STACKORIGIN+STACKWIDTH		; 5
        lda_stack(i+6) and									// lda :STACKORIGIN			; 6
-       sta_val(i+7) and										// sta ~:STACKORIGIN			; 7
+       sta_val(i+7) and										// sta					; 7	~:STACKORIGIN
        lda_stack(i+8) and									// lda :STACKORIGIN+STACKWIDTH		; 8
-       sta_val(i+9) then									// sta ~:STACKORIGIN			; 9
+       sta_val(i+9) then									// sta					; 9	~:STACKORIGIN
      if argMatch(i+2, i+6) and
         argMatch(i+5, i+8) then
      begin
@@ -54,7 +54,7 @@ begin
      end;
 
 
-    if lda_val(i) and (iy(i) = false) and							// lda ~:STACKORIGIN			; 0
+    if lda_val(i) and (iy(i) = false) and							// lda					; 0	~:STACKORIGIN
        (add_im_1(i+1) or sub_im_1(i+1)) and							// add|sub #$01				; 1
        sta_stack(i+2) and									// sta :STACKORIGIN,x			; 2
        (inx(i+3) or dex(i+3)) and								// inx|dex				; 3
@@ -75,10 +75,10 @@ begin
 
 
     if inx(i) and										// inx					; 0
-       lda_val(i+1) and										// lda ~:STACKORIGIN			; 1
-       add_sub_val(i+2) and									// add|sub ~:STACKORIGIN		; 2
+       lda_val(i+1) and										// lda					; 1	~:STACKORIGIN
+       add_sub_val(i+2) and									// add|sub				; 2	~:STACKORIGIN
        ldy_stack_prev_0x(i+3) and								// ldy :STACKORIGIN-1,x			; 3
-       sta_val(i+4) and										// sta ~:STACKORIGIN			; 4
+       sta_val(i+4) and										// sta					; 4	~:STACKORIGIN
        dex(i+5) then										// dex					; 5
      begin
        listing[i+3] := #9'ldy :STACKORIGIN,x';
@@ -92,9 +92,9 @@ begin
 
 
     if inx(i) and										// inx					; 0
-       lda_val(i+1) and										// lda ~:STACKORIGIN			; 1
-       add_sub_val(i+2) and									// add|sub ~:STACKORIGIN		; 2
-       sta_val(i+3) and										// sta ~:STACKORIGIN			; 3
+       lda_val(i+1) and										// lda					; 1	~:STACKORIGIN
+       add_sub_val(i+2) and									// add|sub				; 2	~:STACKORIGIN
+       sta_val(i+3) and										// sta					; 3	~:STACKORIGIN
        dex(i+4) then										// dex					; 4
      begin
        listing[i]   := '';
@@ -274,7 +274,7 @@ begin
     if ldy_stack(i+6) and									// ldy :STACKORIGIN,x			; 6
 
        lda_a(i) and										// lda					; 0
-       add_sub_val(i+1) and									// add|sub ~:STACKORIGIN		; 1
+       add_sub_val(i+1) and									// add|sub				; 1	~:STACKORIGIN
        sta_stack(i+2) and									// sta :STACKORIGIN,x			; 2
        lda_a(i+3) and										// lda					; 3
        adc_sbc(i+4) and										// adc|sbc				; 4

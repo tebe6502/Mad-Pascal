@@ -594,6 +594,8 @@ begin
      end;
 
 
+
+{
     if dex(i+5) and										// dex					; 5
 
        //inx(i) and										// inx					; 0
@@ -631,6 +633,6 @@ begin
 
        exit(false);
      end;
-
+}
 
 end;		// function

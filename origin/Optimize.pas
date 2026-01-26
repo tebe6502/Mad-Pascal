@@ -825,6 +825,7 @@ var inxUse, found: Boolean;
 
     Rebuild;
 
+
     for i := 0 to l - 1 do
     begin
 
@@ -839,12 +840,13 @@ end;
 }
 
 
-      if opt_LT_GTEQ(i) = False then exit(False);
-      if opt_LTEQ(i) = False then exit(False);
-      if opt_GT(i) = False then exit(False);
-      if opt_NE_EQ(i) = False then exit(False);
+      if opt_CMP_LT_GTEQ(i) = False then exit(False);
+      if opt_CMP_LTEQ(i) = False then exit(False);
+      if opt_CMP_GT(i) = False then exit(False);
+      if opt_CMP_NE_EQ(i) = False then exit(False);
       if opt_CMP(i) = False then exit(False);
-      if opt_BRANCH(i) = False then exit(False);
+      if opt_CMP_BRANCH(i) = False then exit(False);
+
       if opt_STACK(i) = False then exit(False);
       if opt_STACK_INX(i) = False then exit(False);
       if opt_STACK_ADD(i) = False then exit(False);
@@ -1140,17 +1142,17 @@ end;
 
      if opt_CMP_0(i) = false then exit(false);
 
-     if opt_LOCAL(i) = false then exit(false);
+     if opt_CMP_LOCAL(i) = false then exit(false);
 
-     if opt_LT_GTEQ(i) = false then exit(false);
-     if opt_LTEQ(i) = false then exit(false);
-     if opt_GT(i) = false then exit(false);
-     if opt_NE_EQ(i) = false then exit(false);
+     if opt_CMP_LT_GTEQ(i) = false then exit(false);
+     if opt_CMP_LTEQ(i) = false then exit(false);
+     if opt_CMP_GT(i) = false then exit(false);
+     if opt_CMP_NE_EQ(i) = false then exit(false);
 
      if opt_CMP(i) = false then exit(false);
      if opt_CMP_BP2(i) = false then exit(false);
 
-     if opt_BRANCH(i) = false then exit(false);
+     if opt_CMP_BRANCH(i) = false then exit(false);
 
 // -----------------------------------------------------------------------------
 
