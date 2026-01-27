@@ -530,6 +530,58 @@ begin
     end;
 
 
+   if lda_im(0) and (TemporaryBuf[0] = TemporaryBuf[7]) and				// lda #XX		; 0
+      sta(1) and									// sta			; 1
+      lda_im(2) and (TemporaryBuf[2] = TemporaryBuf[9]) and				// lda #YY 		; 2
+      sta(3) and									// sta			; 3
+      (TemporaryBuf[4] = '') and							//			; 4
+      opti(5) and									//; optimize		; 5
+      (TemporaryBuf[6] = '') and							//			; 6
+//      lda_im(7) and									// lda #XX		; 7
+      sta(8) and									// sta			; 8
+//      lda_im(9) and									// lda #YY 		; 9
+      sta(10) then									// sta			; 10
+    begin
+     TemporaryBuf[2] := TemporaryBuf[8];
+
+     TemporaryBuf[4] := TemporaryBuf[3];
+     TemporaryBuf[3] := TemporaryBuf[9];
+
+     TemporaryBuf[5] := TemporaryBuf[10];
+     TemporaryBuf[6] := '~';
+     TemporaryBuf[7] := '~';
+     TemporaryBuf[8] := '~';
+     TemporaryBuf[9] := '~';
+     TemporaryBuf[10] := '~';
+    end;
+
+
+   if lda_im(0) and (TemporaryBuf[0] <> TemporaryBuf[7]) and				// lda #AA		; 0
+      sta(1) and									// sta			; 1
+      lda_im(2) and (TemporaryBuf[2] = TemporaryBuf[9]) and				// lda #YY 		; 2
+      sta(3) and									// sta			; 3
+      (TemporaryBuf[4] = '') and							//			; 4
+      opti(5) and									//; optimize		; 5
+      (TemporaryBuf[6] = '') and							//			; 6
+      lda_im(7) and (TemporaryBuf[7] <> TemporaryBuf[2]) and				// lda #BB		; 7
+      sta(8) and									// sta			; 8
+//      lda_im(9) and									// lda #YY 		; 9
+      sta(10) then									// sta			; 10
+    begin
+     TemporaryBuf[4] := TemporaryBuf[5];
+     TemporaryBuf[5] := TemporaryBuf[6];
+     TemporaryBuf[6] := TemporaryBuf[7];
+     TemporaryBuf[7] := TemporaryBuf[8];
+     TemporaryBuf[8] := TemporaryBuf[9];
+     TemporaryBuf[9] := TemporaryBuf[10];
+
+     TemporaryBuf[10]:= TemporaryBuf[3];
+
+     TemporaryBuf[2] := '~';
+     TemporaryBuf[3] := '~';
+    end;
+
+
    if mva_im(0) and									// mva #$xx		; 0
       mva_im(1) and									// mva #$xx		; 1
       mva_im(2) then									// mva #$xx		; 2
@@ -643,6 +695,18 @@ begin
     if argMatch(0, 4) then
     begin
      TemporaryBuf[4] := '~';
+    end;
+
+
+   if sta(0) and									// sta PRIME		; 0
+      dex(1) and									// dex			; 1
+      (TemporaryBuf[2] = '') and							//			; 2
+      opti(3) and									//; optimize 		; 3
+      (TemporaryBuf[4] = '') and							//			; 4
+      lda(5) then									// lda PRIME		; 5
+    if argMatch(0, 5) then
+    begin
+     TemporaryBuf[5] := '~';
     end;
 
 
