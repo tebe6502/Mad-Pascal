@@ -270,6 +270,21 @@ begin
       end;
 
 
+    if lda_a(i) and (listing[i] = listing[i+4]) and						// lda A				; 0
+       and_ora_eor(i+1) and (listing[i+1] = listing[i+5]) and					// and|ora|eor				; 1
+       cmp(i+2) and										// cmp					; 2
+       SKIP(i+3) and										// SKIP					; 3
+       lda_a(i+4) and										// lda A				; 4
+       and_ora_eor(i+5) and									// and|ora|eor				; 5
+       cmp(i+6) then										// cmp					; 6
+      begin
+       listing[i+4]   := '';
+       listing[i+5] := '';
+
+       exit(false);
+      end;
+
+
     if bne(i) and										// bne @+				; 0
        lda_im_0(i+1) and									// lda #$00				; 1
        lab_a(i+2) and 										//@					; 2
