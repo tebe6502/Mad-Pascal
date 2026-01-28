@@ -82,8 +82,8 @@ end;
 
 procedure OptimizeASM;
 (* -------------------------------------------------------------------------- *)
-(* optymalizacja powiodla sie jesli na wyjsciu X=0                            *)
-(* peephole optimization                                                      *)
+(* optymalizacja powiodla sie jesli na wyjsciu X=0
+(* peephole optimization
 (* -------------------------------------------------------------------------- *)
 type
     TListing = array [0..1023] of string;
@@ -1128,8 +1128,9 @@ end;
     for i := 0 to l - 1 do
     begin
 
+
 {
-if (pos('cmp #$29', listing[i]) > 0) then begin
+if (pos('lda YN', listing[i]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');

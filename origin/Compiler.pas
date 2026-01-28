@@ -16456,18 +16456,18 @@ DCOL	= DATAORIGIN+$017E
     tmpVarDataSize_, ParamIndex: Integer;
   begin
 
-    //  writeln(iDtype,',',VarOfSameType[VarOfSameTypeIndex].Name,' / ',NumAllocElements,' , ',VarType,',',Types[NumAllocElements].Block,' | ', AllocElementType);
+//	writeln(iDtype,',',VarOfSameType[VarOfSameTypeIndex].Name,' / ',NumAllocElements,' , ',VarType,',',Types[NumAllocElements].Block,' | ', AllocElementType);
 
     if ((VarType in Pointers) and (AllocElementType = RECORDTOK)) then
     begin
 
-      //   writeln('> ',VarOfSameType[VarOfSameTypeIndex].Name,',',NestedDataType, ',',NestedAllocElementType,',', NestedNumAllocElements,',',NestedNumAllocElements and $ffff,'/',NestedNumAllocElements shr 16);
+//	writeln('> ',VarOfSameType[VarOfSameTypeIndex].Name,',',NestedDataType, ',',NestedAllocElementType,',', NestedNumAllocElements,',',NestedNumAllocElements and $ffff,'/',NestedNumAllocElements shr 16);
 
       tmpVarDataSize_ := _VarDataSize;
 
 
       if (NumAllocElements shr 16) > 0 then
-      begin                      // array [0..x] of record
+      begin								// array [0..x] of record
 
         Ident[NumIdent].NumAllocElements := NumAllocElements and $FFFF;
         Ident[NumIdent].NumAllocElements_ := NumAllocElements shr 16;
@@ -16481,18 +16481,16 @@ DCOL	= DATAORIGIN+$017E
       end
       else
         if Ident[NumIdent].isAbsolute = False then Inc(tmpVarDataSize, DataSize[POINTERTOK]);
-      // wskaznik dla ^record
 
+      // wskaznik dla ^record
 
       idx := Ident[NumIdent].Value - DATAORIGIN;
 
-      //writeln(NumAllocElements);
-      //!@!@
-      for ParamIndex := 1 to Types[NumAllocElements].NumFields do                  // label: ^record
+      for ParamIndex := 1 to Types[NumAllocElements].NumFields do	// label: ^record
         if (Types[NumAllocElements].Block = 1) or (Types[NumAllocElements].Block = BlockStack[BlockStackTop]) then
         begin
 
-          //      writeln('a ',',',VarOfSameType[VarOfSameTypeIndex].Name + '.' + Types[NumAllocElements].Field[ParamIndex].Name,',',Types[NumAllocElements].Field[ParamIndex].DataType,',',Types[NumAllocElements].Field[ParamIndex].AllocElementType,',',Types[NumAllocElements].Field[ParamIndex].NumAllocElements);
+//	writeln('a ',',',VarOfSameType[VarOfSameTypeIndex].Name + '.' + Types[NumAllocElements].Field[ParamIndex].Name,',',Types[NumAllocElements].Field[ParamIndex].DataType,',',Types[NumAllocElements].Field[ParamIndex].AllocElementType,',',Types[NumAllocElements].Field[ParamIndex].NumAllocElements);
 
           DefineIdent(i, VarOfSameType[VarOfSameTypeIndex].Name + '.' + Types[NumAllocElements].Field[ParamIndex].Name,
             VARIABLE,
@@ -16511,12 +16509,20 @@ DCOL	= DATAORIGIN+$017E
     end
     else
 
-      if (VarType in [RECORDTOK, OBJECTTOK]) then                      // label: record
+      if (VarType in [RECORDTOK, OBJECTTOK]) then			// label: record
+      begin
+
+        if (Types[NumAllocElements].Page > 0) and (ConstVal and $FF00 <> Types[NumAllocElements].Page shl 8) then begin
+
+	  writeln(Types[NumAllocElements].Page ,',',ConstVal);
+
+        end;
+
         for ParamIndex := 1 to Types[NumAllocElements].NumFields do
           if (Types[NumAllocElements].Block = 1) or (Types[NumAllocElements].Block = BlockStack[BlockStackTop]) then
           begin
 
-            //      writeln('b ',',',VarOfSameType[VarOfSameTypeIndex].Name + '.' + Types[NumAllocElements].Field[ParamIndex].Name,',',Types[NumAllocElements].Field[ParamIndex].DataType,',',Types[NumAllocElements].Field[ParamIndex].AllocElementType,',',Types[NumAllocElements].Field[ParamIndex].NumAllocElements,' | ',Ident[NumIdent].Value];
+//	writeln('b ',',',VarOfSameType[VarOfSameTypeIndex].Name + '.' + Types[NumAllocElements].Field[ParamIndex].Name,',',Types[NumAllocElements].Field[ParamIndex].DataType,',',Types[NumAllocElements].Field[ParamIndex].AllocElementType,',',Types[NumAllocElements].Field[ParamIndex].NumAllocElements,' | ',Ident[NumIdent].Value);
 
             tmpVarDataSize_ := _VarDataSize;
 
@@ -16534,6 +16540,9 @@ DCOL	= DATAORIGIN+$017E
             //    DataSize[Types[NumAllocElements].Field[ParamIndex].DataType]);
 
           end;
+
+      end;
+
 
   end;  //CompileRecordDeclaration
 

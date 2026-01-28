@@ -148,7 +148,7 @@ const
   SUCCTOK = 110;
   PREDTOK = 111;
   PACKEDTOK = 112;
-  ZPAGE = 113;
+  PAGETOK = 113;
   GOTOTOK = 114;
   INTOK = 115;
   VOLATILETOK = 116;
@@ -409,6 +409,7 @@ type
     Block: Integer;
     NumFields: Integer;
     Size: Integer;
+    Page: Integer;
     Field: array [0..MAXFIELDS] of TField;
   end;
 

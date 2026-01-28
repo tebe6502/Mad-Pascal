@@ -3029,6 +3029,20 @@ begin
 
                   if Tok[i].Kind = PACKEDTOK then Inc(i);
 
+		  ConstVal := -1;
+
+		  if Tok[i + 1].Kind = PAGETOK then begin
+
+		    CheckTok(i + 2, INTNUMBERTOK);
+
+		    if (Tok[i + 2].Value < 0) or (Tok[i + 2].Value > 255) then
+		     Error(i + 2, 'Page at $00..$FF');
+
+		    ConstVal := Tok[i + 2].Value;
+
+		    inc(i, 2);
+		  end;
+
                   Inc(NumTypes);
                   RecType := NumTypes;
 
@@ -3040,6 +3054,8 @@ begin
                   Types[RecType].Size := 0;
                   Types[RecType].NumFields := 0;
                   Types[RecType].Field[0].Name := Name;
+
+		  Types[RecType].Page := ConstVal;
 
                   repeat
                     NumFieldsInList := 0;
