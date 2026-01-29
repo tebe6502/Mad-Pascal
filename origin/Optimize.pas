@@ -33,9 +33,9 @@ var ProcAsBlock: TBoolean;					// issue #125 fixed
 
     Ident[IdentIndex].IsNotDead := TRUE;
 
-    ProcAsBlockIndex := Ident[IdentIndex].ProcAsBlock;
+    ProcAsBlockIndex := Ident[IdentIndex].ProcAsBlock;		// always > 0
 
-    if (ProcAsBlockIndex > 0) and (ProcAsBlock[ProcAsBlockIndex] = FALSE) and (CallGraph[ProcAsBlockIndex].NumChildren > 0) then begin
+    if {(ProcAsBlockIndex > 0) and} (ProcAsBlock[ProcAsBlockIndex] = FALSE) and (CallGraph[ProcAsBlockIndex].NumChildren > 0) then begin
 
 	ProcAsBlock[ProcAsBlockIndex] := TRUE;
 

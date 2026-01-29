@@ -24,7 +24,7 @@ procedure omin_spacje(var i: Integer; var a: String);
 
 implementation
 
-uses SysUtils, Common, Messages, Optimize, SplitString;
+uses SysUtils, Common, Messages, SplitString;
 
 // ----------------------------------------------------------------------------
 

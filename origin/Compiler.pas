@@ -2548,10 +2548,12 @@ writeln('_B: ', Ident[IdentIndex].Name);
   var
     NumAllocElements: Cardinal;
     IdentTemp: Integer;
+    Page: smallint;
     svar, svara: String;
 
 
     procedure LoadRegisterY;
+    var IdentTemp: integer;
     begin
 
       if (ParamY <> '') then
@@ -2562,8 +2564,17 @@ writeln('_B: ', Ident[IdentIndex].Name);
 
           if (Ident[IdentIndex].DataType = POINTERTOK) and not (Ident[IdentIndex].AllocElementType in [UNTYPETOK, PROCVARTOK]) then
             asm65(#9'ldy #$00')
-          else
-            asm65(#9'ldy #' + svar + '-DATAORIGIN');
+          else begin
+
+//		IdentTemp := GetIdent(ExtractName(IdentIndex, svar));
+//		writeln(Ident[IdentIndex].PassMethod,',', Ident[IdentTemp].name,',', Ident[IdentTemp].DataType,',', Ident[IdentTemp].AllocElementType,',', Ident[IdentTemp].NumAllocElements);
+		
+	    if Page >= 0 then 
+	      ParamY := svar + '-DATAORIGIN'
+	    else
+              asm65(#9'ldy #' + svar + '-DATAORIGIN');
+		
+	  end;
 
         end
         else
@@ -2572,6 +2583,8 @@ writeln('_B: ', Ident[IdentIndex].Name);
     end;
 
   begin
+  
+    Page := -1;
 
     if IdentIndex > 0 then
     begin
@@ -3555,8 +3568,19 @@ writeln('_B: ', Ident[IdentIndex].Name);
 
           if (Ident[IdentIndex].DataType = POINTERTOK) and not (Ident[IdentIndex].AllocElementType in [UNTYPETOK, PROCVARTOK, RECORDTOK, OBJECTTOK]) then begin
             asm65(#9'mwy ' + svar + ' :bp2');
-          end else
-            asm65(#9'mwy ' + ExtractName(IdentIndex, svar) + ' :bp2');
+          end else begin
+	  
+	    IdentTemp := GetIdent(ExtractName(IdentIndex, svar));
+	  
+	    if (Ident[IdentIndex].PassMethod = VARPASSING) and (Ident[IdentTemp].AllocElementType in [RECORDTOK, OBJECTTOK]) then 
+	      Page := Types[Ident[IdentTemp].NumAllocElements].Page;	      
+	    
+	    if Page >= 0 then 
+	     asm65(#9'ldy ' + ExtractName(IdentIndex, svar))
+	    else	  
+             asm65(#9'mwy ' + ExtractName(IdentIndex, svar) + ' :bp2');
+   
+	  end;
 
         end
         else
@@ -3565,18 +3589,43 @@ writeln('_B: ', Ident[IdentIndex].Name);
 
         LoadRegisterY;
 
+
         case Size of
           1: begin
-            asm65(#9'lda :STACKORIGIN,x');
-            asm65(#9'sta (:bp2),y');
+
+	    if Page >= 0 then begin
+
+             asm65(#9'lda :STACKORIGIN,x');
+             asm65(#9'sta ' + ParamY + ',y');
+
+	    end else begin	  
+
+             asm65(#9'lda :STACKORIGIN,x');
+             asm65(#9'sta (:bp2),y');
+
+	    end;
+
           end;
 
           2: begin
-            asm65(#9'lda :STACKORIGIN,x');
-            asm65(#9'sta (:bp2),y');
-            asm65(#9'iny');
-            asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
-            asm65(#9'sta (:bp2),y');
+	  
+	    if Page >= 0 then begin
+
+             asm65(#9'lda :STACKORIGIN,x');
+             asm65(#9'sta ' + ParamY + ',y');
+             asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
+             asm65(#9'sta ' + ParamY + '+1,y');  
+
+	    end else begin	  
+
+             asm65(#9'lda :STACKORIGIN,x');
+             asm65(#9'sta (:bp2),y');
+             asm65(#9'iny');
+             asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
+             asm65(#9'sta (:bp2),y');
+
+	    end;
+	    
           end;
 
           4: begin
@@ -16403,8 +16452,8 @@ DCOL	= DATAORIGIN+$017E
 
   procedure CheckForwardResolutions(typ: Boolean = True);
   var
-    TypeIndex, IdentIndex, TempIndex: Integer;
-//    Name: String;
+    TypeIndex, IdentIndex: Integer;
+
   begin
 
     // Search for unresolved forward references
@@ -16413,24 +16462,19 @@ DCOL	= DATAORIGIN+$017E
       begin
 
         IdentIndex := GetIdent(Tok[Ident[TypeIndex].NumAllocElements].Name^);
-//        Name := Ident[IdentIndex].Name;
 
         if Ident[IdentIndex].Kind = TYPETOK then begin
-//          for IdentIndex := 1 to NumIdent do
-//            if (Ident[IdentIndex].Name = Name) and (Ident[IdentIndex].Block = Ident[TempIndex].Block  {BlockStack[BlockStackTop]} ) then
-//            begin
 
               Ident[TypeIndex].NumAllocElements  := Ident[IdentIndex].NumAllocElements;
               Ident[TypeIndex].NumAllocElements_ := Ident[IdentIndex].NumAllocElements_;
               Ident[TypeIndex].AllocElementType  := Ident[IdentIndex].DataType;
 
 	      if (Ident[TypeIndex].DataType = POINTERTOK) and (Ident[TypeIndex].AllocElementType = POINTERTOK) then begin
-	       Ident[TypeIndex].DataType := DEREFERENCEARRAYTOK;
-	       Ident[TypeIndex].AllocElementType := Ident[IdentIndex].AllocElementType;
+	        Ident[TypeIndex].DataType := DEREFERENCEARRAYTOK;
+	        Ident[TypeIndex].AllocElementType := Ident[IdentIndex].AllocElementType;
 	      end;
 
-//              Break;
-            end;
+        end;
 
       end;
 
@@ -16512,9 +16556,10 @@ DCOL	= DATAORIGIN+$017E
       if (VarType in [RECORDTOK, OBJECTTOK]) then			// label: record
       begin
 
-        if (Types[NumAllocElements].Page > 0) and (ConstVal and $FF00 <> Types[NumAllocElements].Page shl 8) then begin
-
-	  writeln(Types[NumAllocElements].Page ,',',ConstVal);
+        if (Types[NumAllocElements].Page >= 0) then begin
+	
+	  if (isAbsolute = false) or (ConstVal and $FF00 <> Types[NumAllocElements].Page shl 8) then 
+	    writeln(Types[NumAllocElements].Page ,',',ConstVal,',',isAbsolute);
 
         end;
 
