@@ -6685,7 +6685,6 @@ end;
       begin
         IdentIndex := GetIdent(Tok[i + 1].Name^);
 
-
         if IdentIndex > 0 then
         begin
 
@@ -16792,7 +16791,7 @@ DCOL	= DATAORIGIN+$017E
     for ParamIndex := 1 to NumParams do
     begin
 
-      //  writeln(Param[ParamIndex].Name,':',Param[ParamIndex].DataType,'|',Param[ParamIndex].NumAllocElements and $FFFF,'/',Param[ParamIndex].NumAllocElements shr 16);
+//	writeln(Param[ParamIndex].Name,':',Param[ParamIndex].DataType,'|',Param[ParamIndex].NumAllocElements and $FFFF,'/',Param[ParamIndex].NumAllocElements shr 16);
 
       if Param[ParamIndex].PassMethod = VARPASSING then
       begin
@@ -16801,7 +16800,10 @@ DCOL	= DATAORIGIN+$017E
         begin
           tmpVarDataSize := _VarDataSize;
 
-          DefineIdent(i, Param[ParamIndex].Name, VARIABLE, Param[ParamIndex].DataType, Param[ParamIndex].NumAllocElements, Param[ParamIndex].AllocElementType, 0);
+	  if Param[ParamIndex].DataType in [RECORDTOK, OBJECTTOK] then
+            DefineIdent(i, Param[ParamIndex].Name, VARIABLE, POINTERTOK, Param[ParamIndex].NumAllocElements, Param[ParamIndex].DataType, 0)
+	  else
+            DefineIdent(i, Param[ParamIndex].Name, VARIABLE, Param[ParamIndex].DataType, Param[ParamIndex].NumAllocElements, Param[ParamIndex].AllocElementType, 0);
 
           Ident[GetIdent(Param[ParamIndex].Name)].isAbsolute := True;
           Ident[GetIdent(Param[ParamIndex].Name)].Value := (Byte(ParamIndex) shl 24) or $80000000;
