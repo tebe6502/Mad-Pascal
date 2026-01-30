@@ -3029,7 +3029,7 @@ begin
 
                   if Tok[i].Kind = PACKEDTOK then Inc(i);
 
-		  ConstVal := -1;
+		  ConstVal := 0;
 
 		  if Tok[i + 1].Kind = PAGETOK then begin
 
@@ -3038,7 +3038,7 @@ begin
 		    if (Tok[i + 2].Value < 0) or (Tok[i + 2].Value > 255) then
 		     Error(i + 2, 'Page at $00..$FF');
 
-		    ConstVal := Tok[i + 2].Value;
+		    ConstVal := Tok[i + 2].Value + 1;
 
 		    inc(i, 2);
 		  end;

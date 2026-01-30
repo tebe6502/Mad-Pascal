@@ -784,32 +784,6 @@ writeln('_B: ', Ident[IdentIndex].Name);
 // ----------------------------------------------------------------------------
 
 
-  procedure ExpandWord; //(regA: integer = -1);
-  begin
-
-    Gen;
-
-  end;
-
-
-// ----------------------------------------------------------------------------
-// ----------------------------------------------------------------------------
-
-
-  procedure ExpandByte;
-  begin
-
-    Gen;
-
-    ExpandWord;  // (0);
-
-  end;
-
-
-// ----------------------------------------------------------------------------
-// ----------------------------------------------------------------------------
-
-
 {$IFDEF USEOPTFILE}
   function InfoAboutSize(Size: Byte): String;
   begin
@@ -999,8 +973,13 @@ writeln('_B: ', Ident[IdentIndex].Name);
   var
     Kind: Byte;
     NumAllocElements: Cardinal;
-    svar, svara, lab: String;
+    IdentTemp: integer;
+    Page: smallint;
+    svar, svara, lab, ParamY: String;
   begin
+
+    Page := -1;
+    ParamY := '';
 
     if IdentIndex > 0 then
     begin
@@ -1029,6 +1008,7 @@ writeln('_B: ', Ident[IdentIndex].Name);
       svara := GetLocalName(IdentIndex, 'adr.')
     else
       svara := 'adr.' + svar;
+
 
 //    asm65separator;
 
@@ -1070,7 +1050,6 @@ writeln('_B: ', Ident[IdentIndex].Name);
           1: begin
             asm65(#9'mva ' + svar + ' :STACKORIGIN,x');
 
-            ExpandByte;
           end;
 
           2: begin
@@ -1103,7 +1082,6 @@ writeln('_B: ', Ident[IdentIndex].Name);
               asm65(#9'mva ' + svar + '+1 :STACKORIGIN+STACKWIDTH,x');
             end;
 
-            ExpandWord;
           end;
 
           4: begin
@@ -1172,10 +1150,21 @@ writeln('_B: ', Ident[IdentIndex].Name);
         if TestName(IdentIndex, svar) then
         begin
 
-          if (Ident[IdentIndex].DataType = POINTERTOK) and (Ident[IdentIndex].AllocElementType <> UNTYPETOK) and (Ident[IdentIndex].PassMethod <> VARPASSING) then
+          if (Ident[IdentIndex].DataType = POINTERTOK) and not (Ident[IdentIndex].AllocElementType in [UNTYPETOK, PROCVARTOK]) and (Ident[IdentIndex].PassMethod <> VARPASSING) then
             asm65(#9'mwy ' + svar + ' :bp2')
-          else
-            asm65(#9'mwy ' + ExtractName(IdentIndex, svar) + ' :bp2');
+          else begin
+
+	    IdentTemp := GetIdent(ExtractName(IdentIndex, svar));
+
+	    if (Ident[IdentIndex].PassMethod = VARPASSING) and (Ident[IdentTemp].AllocElementType in [RECORDTOK, OBJECTTOK]) then
+	      Page := Types[Ident[IdentTemp].NumAllocElements].Page;
+
+	    if Page > 0 then
+	     asm65(#9'ldy ' + ExtractName(IdentIndex, svar))
+	    else
+             asm65(#9'mwy ' + ExtractName(IdentIndex, svar) + ' :bp2');
+
+	  end;
 
         end
         else
@@ -1185,41 +1174,67 @@ writeln('_B: ', Ident[IdentIndex].Name);
         if TestName(IdentIndex, svar) then
         begin
 
-          if (Ident[IdentIndex].DataType = POINTERTOK) and (Ident[IdentIndex].AllocElementType <> UNTYPETOK) and (Ident[IdentIndex].PassMethod <> VARPASSING) then
+          if (Ident[IdentIndex].DataType = POINTERTOK) and not (Ident[IdentIndex].AllocElementType in [UNTYPETOK, PROCVARTOK]) and (Ident[IdentIndex].PassMethod <> VARPASSING) then
             asm65(#9'ldy #' + Hex(par, 2))
-          else
-            asm65(#9'ldy #' + svar + '-DATAORIGIN');
+          else begin
+
+	    if Page > 0 then
+	      ParamY := HexByte(Page-1) + '00+' + svar + '-DATAORIGIN'
+	    else
+              asm65(#9'ldy #' + svar + '-DATAORIGIN');
+
+	  end;
 
         end
         else
           asm65(#9'ldy #' + Hex(par, 2));
 
+
         case Size of
           1: begin
 
-            asm65(#9'mva (:bp2),y :STACKORIGIN,x');
+	    if Page > 0 then begin
 
-            ExpandByte;
+	     asm65(#9'mva ' + ParamY + ',y :STACKORIGIN,x');
+
+	    end else
+             asm65(#9'mva (:bp2),y :STACKORIGIN,x');
+
           end;
 
           2: begin
 
-            asm65(#9'mva (:bp2),y :STACKORIGIN,x');
-            asm65(#9'iny');
-            asm65(#9'mva (:bp2),y :STACKORIGIN+STACKWIDTH,x');
+	    if Page > 0 then begin
 
-            ExpandWord;
+	     asm65(#9'mva ' + ParamY + ',y :STACKORIGIN,x');
+	     asm65(#9'mva ' + ParamY + '+1,y :STACKORIGIN+STACKWIDTH,x');
+
+	    end else begin
+             asm65(#9'mva (:bp2),y :STACKORIGIN,x');
+             asm65(#9'iny');
+             asm65(#9'mva (:bp2),y :STACKORIGIN+STACKWIDTH,x');
+	    end;
+
           end;
 
           4: begin
 
-            asm65(#9'mva (:bp2),y :STACKORIGIN,x');
-            asm65(#9'iny');
-            asm65(#9'mva (:bp2),y :STACKORIGIN+STACKWIDTH,x');
-            asm65(#9'iny');
-            asm65(#9'mva (:bp2),y :STACKORIGIN+STACKWIDTH*2,x');
-            asm65(#9'iny');
-            asm65(#9'mva (:bp2),y :STACKORIGIN+STACKWIDTH*3,x');
+	    if Page > 0 then begin
+
+	     asm65(#9'mva ' + ParamY + ',y :STACKORIGIN,x');
+	     asm65(#9'mva ' + ParamY + '+1,y :STACKORIGIN+STACKWIDTH,x');
+	     asm65(#9'mva ' + ParamY + '+2,y :STACKORIGIN+STACKWIDTH*2,x');
+	     asm65(#9'mva ' + ParamY + '+3,y :STACKORIGIN+STACKWIDTH*3,x');
+
+	    end else begin
+             asm65(#9'mva (:bp2),y :STACKORIGIN,x');
+             asm65(#9'iny');
+             asm65(#9'mva (:bp2),y :STACKORIGIN+STACKWIDTH,x');
+             asm65(#9'iny');
+             asm65(#9'mva (:bp2),y :STACKORIGIN+STACKWIDTH*2,x');
+             asm65(#9'iny');
+             asm65(#9'mva (:bp2),y :STACKORIGIN+STACKWIDTH*3,x');
+	    end;
 
           end;
         end;
@@ -1329,7 +1344,6 @@ writeln('_B: ', Ident[IdentIndex].Name);
 
             end;
 
-            ExpandByte;
           end;
 
           2: begin                    // PUSH WORD
@@ -1434,7 +1448,6 @@ writeln('_B: ', Ident[IdentIndex].Name);
 
             end;
 
-            ExpandWord;
           end;
 
           4: begin                      // PUSH CARDINAL
@@ -1623,7 +1636,6 @@ writeln('_B: ', Ident[IdentIndex].Name);
             asm65(#9'lda (:bp2),y');
             asm65(#9'sta :STACKORIGIN,x');
 
-            ExpandByte;
           end;
 
           2: begin
@@ -1634,7 +1646,6 @@ writeln('_B: ', Ident[IdentIndex].Name);
             asm65(#9'lda (:bp2),y');
             asm65(#9'sta :STACKORIGIN+STACKWIDTH,x');
 
-            ExpandWord;
           end;
 
           4: begin
@@ -1739,7 +1750,6 @@ writeln('_B: ', Ident[IdentIndex].Name);
             asm65(#9'lda (:bp2),y');
             asm65(#9'sta :STACKORIGIN,x');
 
-            ExpandByte;
           end;
 
           2: begin
@@ -1750,7 +1760,6 @@ writeln('_B: ', Ident[IdentIndex].Name);
             asm65(#9'lda (:bp2),y');
             asm65(#9'sta :STACKORIGIN+STACKWIDTH,x');
 
-            ExpandWord;
           end;
 
           4: begin
@@ -2568,12 +2577,12 @@ writeln('_B: ', Ident[IdentIndex].Name);
 
 //		IdentTemp := GetIdent(ExtractName(IdentIndex, svar));
 //		writeln(Ident[IdentIndex].PassMethod,',', Ident[IdentTemp].name,',', Ident[IdentTemp].DataType,',', Ident[IdentTemp].AllocElementType,',', Ident[IdentTemp].NumAllocElements);
-		
-	    if Page >= 0 then 
-	      ParamY := svar + '-DATAORIGIN'
+
+	    if Page > 0 then
+	      ParamY := HexByte(Page-1) + '00+' + svar + '-DATAORIGIN'
 	    else
               asm65(#9'ldy #' + svar + '-DATAORIGIN');
-		
+
 	  end;
 
         end
@@ -2583,7 +2592,7 @@ writeln('_B: ', Ident[IdentIndex].Name);
     end;
 
   begin
-  
+
     Page := -1;
 
     if IdentIndex > 0 then
@@ -3569,17 +3578,17 @@ writeln('_B: ', Ident[IdentIndex].Name);
           if (Ident[IdentIndex].DataType = POINTERTOK) and not (Ident[IdentIndex].AllocElementType in [UNTYPETOK, PROCVARTOK, RECORDTOK, OBJECTTOK]) then begin
             asm65(#9'mwy ' + svar + ' :bp2');
           end else begin
-	  
+
 	    IdentTemp := GetIdent(ExtractName(IdentIndex, svar));
-	  
-	    if (Ident[IdentIndex].PassMethod = VARPASSING) and (Ident[IdentTemp].AllocElementType in [RECORDTOK, OBJECTTOK]) then 
-	      Page := Types[Ident[IdentTemp].NumAllocElements].Page;	      
-	    
-	    if Page >= 0 then 
+
+	    if (Ident[IdentIndex].PassMethod = VARPASSING) and (Ident[IdentTemp].AllocElementType in [RECORDTOK, OBJECTTOK]) then
+	      Page := Types[Ident[IdentTemp].NumAllocElements].Page;
+
+	    if Page > 0 then
 	     asm65(#9'ldy ' + ExtractName(IdentIndex, svar))
-	    else	  
+	    else
              asm65(#9'mwy ' + ExtractName(IdentIndex, svar) + ' :bp2');
-   
+
 	  end;
 
         end
@@ -3593,12 +3602,12 @@ writeln('_B: ', Ident[IdentIndex].Name);
         case Size of
           1: begin
 
-	    if Page >= 0 then begin
+	    if Page > 0 then begin
 
              asm65(#9'lda :STACKORIGIN,x');
              asm65(#9'sta ' + ParamY + ',y');
 
-	    end else begin	  
+	    end else begin
 
              asm65(#9'lda :STACKORIGIN,x');
              asm65(#9'sta (:bp2),y');
@@ -3608,15 +3617,15 @@ writeln('_B: ', Ident[IdentIndex].Name);
           end;
 
           2: begin
-	  
-	    if Page >= 0 then begin
+
+	    if Page > 0 then begin
 
              asm65(#9'lda :STACKORIGIN,x');
              asm65(#9'sta ' + ParamY + ',y');
              asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
-             asm65(#9'sta ' + ParamY + '+1,y');  
+             asm65(#9'sta ' + ParamY + '+1,y');
 
-	    end else begin	  
+	    end else begin
 
              asm65(#9'lda :STACKORIGIN,x');
              asm65(#9'sta (:bp2),y');
@@ -3625,21 +3634,38 @@ writeln('_B: ', Ident[IdentIndex].Name);
              asm65(#9'sta (:bp2),y');
 
 	    end;
-	    
+
           end;
 
           4: begin
-            asm65(#9'lda :STACKORIGIN,x');
-            asm65(#9'sta (:bp2),y');
-            asm65(#9'iny');
-            asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
-            asm65(#9'sta (:bp2),y');
-            asm65(#9'iny');
-            asm65(#9'lda :STACKORIGIN+STACKWIDTH*2,x');
-            asm65(#9'sta (:bp2),y');
-            asm65(#9'iny');
-            asm65(#9'lda :STACKORIGIN+STACKWIDTH*3,x');
-            asm65(#9'sta (:bp2),y');
+
+	    if Page > 0 then begin
+
+             asm65(#9'lda :STACKORIGIN,x');
+             asm65(#9'sta ' + ParamY + ',y');
+             asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
+             asm65(#9'sta ' + ParamY + '+1,y');
+             asm65(#9'lda :STACKORIGIN+STACKWIDTH*2,x');
+             asm65(#9'sta ' + ParamY + '+2,y');
+             asm65(#9'lda :STACKORIGIN+STACKWIDTH*3,x');
+             asm65(#9'sta ' + ParamY + '+3,y');
+
+	    end else begin
+
+             asm65(#9'lda :STACKORIGIN,x');
+             asm65(#9'sta (:bp2),y');
+             asm65(#9'iny');
+             asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
+             asm65(#9'sta (:bp2),y');
+             asm65(#9'iny');
+             asm65(#9'lda :STACKORIGIN+STACKWIDTH*2,x');
+             asm65(#9'sta (:bp2),y');
+             asm65(#9'iny');
+             asm65(#9'lda :STACKORIGIN+STACKWIDTH*3,x');
+             asm65(#9'sta (:bp2),y');
+
+	    end;
+
           end;
 
         end;
@@ -3921,7 +3947,6 @@ end;
     case CounterSize of
 
       1: begin
-        ExpandByte;
 
         if ValType = SHORTINTTOK then
         begin    // @cmpFor_SHORTINT
@@ -3943,7 +3968,6 @@ end;
       end;
 
       2: begin
-        ExpandWord;
 
         if ValType = SMALLINTTOK then
         begin    // @cmpFor_SMALLINT
@@ -16556,10 +16580,15 @@ DCOL	= DATAORIGIN+$017E
       if (VarType in [RECORDTOK, OBJECTTOK]) then			// label: record
       begin
 
-        if (Types[NumAllocElements].Page >= 0) then begin
-	
-	  if (isAbsolute = false) or (ConstVal and $FF00 <> Types[NumAllocElements].Page shl 8) then 
-	    writeln(Types[NumAllocElements].Page ,',',ConstVal,',',isAbsolute);
+        if (Types[NumAllocElements].Page > 0) then begin
+
+	  if isAbsolute = false then
+	    Error(i, 'Type ' + Types[NumAllocElements].Field[0].Name + ' requires absolute address on PAGE ' + HexByte(Types[NumAllocElements].Page-1));
+
+	  if (ConstVal and $FF00 <> (Types[NumAllocElements].Page-1) shl 8) then
+	    Error(i, Types[NumAllocElements].Field[0].Name + ' requires PAGE ' + HexByte(Types[NumAllocElements].Page-1) + ', got ' + HexByte(ConstVal shr 8));
+
+//	    writeln(Types[NumAllocElements].Page ,',',ConstVal,',',isAbsolute);
 
         end;
 
