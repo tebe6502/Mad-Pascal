@@ -2031,12 +2031,17 @@ writeln('_B: ', Ident[IdentIndex].Name);
 
   procedure GenerateIncDec(IndirectionLevel: TIndirectionLevel; ExpressionType: Byte; Down: Boolean; IdentIndex: Integer);
   var
-    b, c, svar, svara: String;
+    b, c, svar, svara, ParamY: String;
+    IdentTemp: integer;
+    Page: smallint;
     NumAllocElements: Cardinal;
   begin
 
     //svar := GetLocalName(IdentIndex);
     //NumAllocElements := Elements(IdentIndex);
+
+    Page := 0;
+    ParamY := '';
 
     if IdentIndex > 0 then
     begin
@@ -2142,18 +2147,62 @@ writeln('_B: ', Ident[IdentIndex].Name);
         asm65;
 {$ENDIF}
 
-        LoadBP2(IdentIndex, svar);
 
-        asm65(#9'ldy #$00');
+        if TestName(IdentIndex, svar) then
+        begin
+
+	    IdentTemp := GetIdent(ExtractName(IdentIndex, svar));
+
+	    if (Ident[IdentIndex].PassMethod = VARPASSING) and (Ident[IdentTemp].AllocElementType in [RECORDTOK, OBJECTTOK]) then begin
+	      Page := Types[Ident[IdentTemp].NumAllocElements].Page;
+	      ParamY := HexByte(Page-1) + '00+' + svar + '-DATAORIGIN';
+	    end;
+
+        end;
+
+
+	if Page > 0 then
+
+	  asm65(#9'ldy ' + ExtractName(IdentIndex, svar))
+
+	else begin
+
+          LoadBP2(IdentIndex, svar);
+
+          asm65(#9'ldy #$00');
+
+	end;
+
 
         case DataSize[ExpressionType] of
-          1: begin
+
+          1:
+	  if Page > 0 then begin
+
+            asm65(#9'lda ' + ParamY + ',y');
+            asm65(#9 + b + ' :STACKORIGIN,x');
+            asm65(#9'sta ' + ParamY + ',y');
+
+	  end else begin
+
             asm65(#9'lda (:bp2),y');
             asm65(#9 + b + ' :STACKORIGIN,x');
             asm65(#9'sta (:bp2),y');
+
           end;
 
-          2: begin
+          2:
+	  if Page > 0 then begin
+
+            asm65(#9'lda ' + ParamY + ',y');
+            asm65(#9 + b + ' :STACKORIGIN,x');
+            asm65(#9'sta ' + ParamY + ',y');
+            asm65(#9'lda ' + ParamY + '+1,y');
+            asm65(#9 + c + ' :STACKORIGIN+STACKWIDTH,x');
+            asm65(#9'sta ' + ParamY + '+1,y');
+
+	  end else begin
+
             asm65(#9'lda (:bp2),y');
             asm65(#9 + b + ' :STACKORIGIN,x');
             asm65(#9'sta (:bp2),y');
@@ -2161,9 +2210,27 @@ writeln('_B: ', Ident[IdentIndex].Name);
             asm65(#9'lda (:bp2),y');
             asm65(#9 + c + ' :STACKORIGIN+STACKWIDTH,x');
             asm65(#9'sta (:bp2),y');
+
           end;
 
-          4: begin
+          4:
+	  if Page > 0 then begin
+
+            asm65(#9'lda ' + ParamY + ',y');
+            asm65(#9 + b + ' :STACKORIGIN,x');
+            asm65(#9'sta ' + ParamY + ',y');
+            asm65(#9'lda ' + ParamY + '+1,y');
+            asm65(#9 + c + ' :STACKORIGIN+STACKWIDTH,x');
+            asm65(#9'sta ' + ParamY + '+1,y');
+            asm65(#9'lda ' + ParamY + '+2,y');
+            asm65(#9 + c + ' :STACKORIGIN+STACKWIDTH,x');
+            asm65(#9'sta ' + ParamY + '+2,y');
+            asm65(#9'lda ' + ParamY + '+3,y');
+            asm65(#9 + c + ' :STACKORIGIN+STACKWIDTH,x');
+            asm65(#9'sta ' + ParamY + '+3,y');
+
+	  end else begin
+
             asm65(#9'lda (:bp2),y');
             asm65(#9 + b + ' :STACKORIGIN,x');
             asm65(#9'sta (:bp2),y');
@@ -2179,6 +2246,7 @@ writeln('_B: ', Ident[IdentIndex].Name);
             asm65(#9'lda (:bp2),y');
             asm65(#9 + c + ' :STACKORIGIN+STACKWIDTH*3,x');
             asm65(#9'sta (:bp2),y');
+
           end;
 
         end;
