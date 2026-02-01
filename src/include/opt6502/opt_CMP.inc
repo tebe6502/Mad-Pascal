@@ -1069,13 +1069,13 @@ begin
 
     if cmp(i+15) and										// cmp 					; 15
 
-       lda_a(i) and (iy(i) = false) and								// lda ~,y				; 0
+       lda_val(i) and										// lda					; 0	~:STACKORIGIN
        sta_stack(i+1) and									// sta :STACKORIGIN			; 1
-       lda_a(i+2) and (iy(i+2) = false) and							// lda ~,y				; 2
+       lda_val(i+2) and										// lda					; 2	~:STACKORIGIN
        sta_stack(i+3) and									// sta :STACKORIGIN+STACKWIDTH		; 3
-       lda_a(i+4) and (iy(i+4) = false) and							// lda ~,y				; 4
+       lda_val(i+4) and										// lda					; 4	~:STACKORIGIN
        sta_stack(i+5) and									// sta :STACKORIGIN+STACKWIDTH*2	; 5
-       lda_a(i+6) and (iy(i+6) = false) and							// lda ~,y				; 6
+       lda_val(i+6) and 									// lda					; 6	~:STACKORIGIN
        sta_stack(i+7) and									// sta :STACKORIGIN+STACKWIDTH*3	; 7
        lda_stack(i+8) and									// lda :STACKORIGIN+STACKWIDTH*3 	; 8
        cmp(i+9) and										// cmp 					; 9
@@ -1866,5 +1866,6 @@ begin
 
 	exit(false);
       end;
+
 
 end;		// function

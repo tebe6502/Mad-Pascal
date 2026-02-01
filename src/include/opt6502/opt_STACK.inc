@@ -2053,7 +2053,7 @@ begin
     if dex(i+19) and										// dex					; 19
 
        lda_val(i) and (iy(i) = false) and							// lda					; 0	~:STACKORIGIN
-       add_sub_val(i+1) and	(iy(i+1) = false) and						// add|sub				; 1	~:STACKORIGIN
+       add_sub_val(i+1) and (iy(i+1) = false) and						// add|sub				; 1	~:STACKORIGIN
        sta_stack_0x(i+2) and									// sta :STACKORIGIN,x			; 2
        lda_val(i+3) and (iy(i+3) = false) and							// lda					; 3	~:STACKORIGIN
        adc_sbc_val(i+4) and (iy(i+4) = false) and						// adc|sbc				; 4	~:STACKORIGIN
@@ -2105,6 +2105,60 @@ begin
 	listing[i+17] := '';
 	listing[i+18] := '';
 	listing[i+19] := '';
+
+       exit(false);
+     end;
+
+
+    if dex(i+17) and										// dex					; 17
+
+       lda_val(i) and (iy(i) = false) and							// lda					; 0	~:STACKORIGIN
+       add_sub_val(i+1) and (iy(i+1) = false) and						// add|sub				; 1	~:STACKORIGIN
+       sta_stack_0x(i+2) and									// sta :STACKORIGIN,x			; 2
+       lda_val(i+3) and (iy(i+3) = false) and							// lda					; 3	~:STACKORIGIN
+       adc_sbc_val(i+4) and (iy(i+4) = false) and						// adc|sbc				; 4	~:STACKORIGIN
+       sta_stack_1x(i+5) and									// sta :STACKORIGIN+STACKWIDTH,x	; 5
+       lda_a(i+6) and										// lda					; 6
+       adc_sbc(i+7) and 									// adc|sbc				; 7
+       sta_stack_2x(i+8) and									// sta :STACKORIGIN+STACKWIDTH*2,x	; 8
+       lda_a(i+9) and										// lda					; 9
+       adc_sbc(i+10) and 									// adc|sbc				; 10
+       sta_stack_3x(i+11) and									// sta :STACKORIGIN+STACKWIDTH*3,x	; 11
+       ldy(i+12) and										// ldy					; 12
+       lda_stack_0x(i+13) and									// lda :STACKORIGIN,x			; 13
+       sta_a(i+14) and										// sta					; 14
+       lda_stack_1x(i+15) and									// lda :STACKORIGIN+STACKWIDTH,x	; 15
+       sta_a(i+16) then										// sta					; 16
+//       dex(i+17) then										// dex					; 17
+     begin
+        listing_tmp[0] := listing[i+12];
+        listing_tmp[1] := listing[i];
+        listing_tmp[2] := listing[i+1];
+        listing_tmp[3] := listing[i+14];
+        listing_tmp[4] := listing[i+3];
+        listing_tmp[5] := listing[i+4];
+        listing_tmp[6] := listing[i+16];
+
+	listing[i]   := #9'dex';
+
+	listing[i+1] := listing_tmp[0];
+	listing[i+2] := listing_tmp[1];
+	listing[i+3] := listing_tmp[2];
+	listing[i+4] := listing_tmp[3];
+	listing[i+5] := listing_tmp[4];
+	listing[i+6] := listing_tmp[5];
+	listing[i+7] := listing_tmp[6];
+
+	listing[i+8] := '';
+	listing[i+9] := '';
+	listing[i+10] := '';
+	listing[i+11] := '';
+	listing[i+12] := '';
+	listing[i+13] := '';
+	listing[i+14] := '';
+	listing[i+15] := '';
+	listing[i+16] := '';
+	listing[i+17] := '';
 
        exit(false);
      end;
