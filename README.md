@@ -122,7 +122,7 @@ Simple binary data manipulation tool written in JavaScript (export to Action!, A
 
 CutAs, FiDL, SprED, Sprite XL
 
-### [A8 Mad-Pascal Window Library](https://github.com/Ripjetski6502/A8MadPascalLibrary)
+### [A8 Mad-Pascal Window Library](https://unfinishedbitness.info/pascal-library/)
 
 This text-mode windowing library has window controls and modern gadgets (widgets). The gadgets allow you to build input forms that use buttons, radio buttons, input strings (with scrolled lengths and type restrictions), check boxes, progress bars, etc. This allows you to build applications with "modern" interfaces.
 
