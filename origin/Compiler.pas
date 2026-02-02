@@ -2643,9 +2643,6 @@ writeln('_B: ', Ident[IdentIndex].Name);
             asm65(#9'ldy #$00')
           else begin
 
-//		IdentTemp := GetIdent(ExtractName(IdentIndex, svar));
-//		writeln(Ident[IdentIndex].PassMethod,',', Ident[IdentTemp].name,',', Ident[IdentTemp].DataType,',', Ident[IdentTemp].AllocElementType,',', Ident[IdentTemp].NumAllocElements);
-
 	    if Page > 0 then
 	      ParamY := HexByte(Page-1) + '00+' + svar + '-DATAORIGIN'
 	    else
