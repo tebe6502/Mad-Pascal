@@ -16,7 +16,6 @@ begin
 // ~adc adr.label
 //
 
-
     if lda_l_adr(i) and									// lda <adr.				; 0
        add_im(i+1) and									// add #				; 1
        sta_a(i+2) and									// sta					; 2

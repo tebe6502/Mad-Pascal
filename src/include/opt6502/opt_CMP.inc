@@ -1871,6 +1871,40 @@ begin
       end;
 
 
+    if tay(i+18) and										// tay					; 18
+
+       lda_a(i) and (listing[i] = listing[i+12]) and						// lda I				; 0
+       asl_a(i+1) and 										// asl @				; 1
+       asl_a(i+2) and										// asl @				; 2
+       asl_a(i+3) and										// asl @				; 3
+       asl_a(i+4) and										// asl @				; 4
+       (add_sub(i+5) or and_ora_eor(i+5)) and (listing[i+5] = listing[i+17]) and		// add|sub|and|ora|eor			; 5
+       tay(i+6) and										// tay					; 6
+       lda_val(i+7) and										// lda					; 7
+       cmp(i+8) and										// cmp					; 8
+//       SKIP(i+9) and										// SKIP @+				; 9
+       jmp(i+10) and										// jmp					; 10
+       lab_a(i+11) and       									//@					; 11
+//       lda_a(i+12) and									// lda I				; 12
+       asl_a(i+13) and 										// asl @				; 13
+       asl_a(i+14) and										// asl @				; 14
+       asl_a(i+15) and										// asl @				; 15
+       asl_a(i+16) and										// asl @				; 16
+//       add_sub(i+17) and									// add|sub|and|ora|eor			; 17
+       tay(i+18) then										// tay					; 18
+      begin
+	listing[i+12] := '';
+	listing[i+13] := '';
+	listing[i+14] := '';
+	listing[i+15] := '';
+	listing[i+16] := '';
+	listing[i+17] := '';
+	listing[i+18] := '';
+
+	exit(false);
+      end;
+
+
     if bne(i+24) and										// bne					; 24
 
        lda_a(i) and (listing[i] = listing[i+12]) and						// lda					; 0

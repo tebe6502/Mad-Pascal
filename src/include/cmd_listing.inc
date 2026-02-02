@@ -1,4 +1,3 @@
-//PROFILE-NO
 // Optimized version of "StartsWith"
 // Assumption is that "str" is always at least 4 chars, e.g. '#9abc'
 function pos1(const str: String; const i: Integer): Boolean;
@@ -21,7 +20,6 @@ begin
   then exit(False);
   Result := True;
 end;
-//PROFILE-YES
 
 // -----------------------------------------------------------------------------
 
@@ -278,6 +276,27 @@ function STA_STACK_NEXT_3X(const i: Integer): Boolean;
 begin
   Result := (listing[i] = #9'sta :STACKORIGIN+1+STACKWIDTH*3,x');
 end;
+
+function ROR_STACK_1X(const i: Integer): Boolean;
+begin
+  Result := (listing[i] = #9'ror :STACKORIGIN+STACKWIDTH,x');
+end;
+
+function ROR_STACK_2X(const i: Integer): Boolean;
+begin
+  Result := (listing[i] = #9'ror :STACKORIGIN+STACKWIDTH*2,x');
+end;
+
+function LSR_STACK_1X(const i: Integer): Boolean;
+begin
+  Result := (listing[i] = #9'lsr :STACKORIGIN+STACKWIDTH,x');
+end;
+
+function LSR_STACK_2X(const i: Integer): Boolean;
+begin
+  Result := (listing[i] = #9'lsr :STACKORIGIN+STACKWIDTH*2,x');
+end;
+
 
 // -----------------------------------------------------------------------------
 
