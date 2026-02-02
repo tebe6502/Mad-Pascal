@@ -2286,11 +2286,13 @@ begin
       end;
 
 
-    if lda_a(i) and (iy(i) = false) and							// lda					; 0
+    if ldy(i+4) and 									// ldy					; 4
+
+       lda_a(i) and (iy(i) = false) and							// lda					; 0
        sta_stack(i+1) and								// sta :STACKORIGIN			; 1
        lda_a(i+2) and (iy(i+2) = false) and						// lda					; 2
        sta_stack(i+3) and								// sta :STACKORIGIN+STACKWIDTH		; 3
-       ldy(i+4) and 									// ldy					; 4
+//       ldy(i+4) and 									// ldy					; 4
        lda_val(i+5) and									// lda					; 5	~:STACKORIGIN
        add_sub(i+6) and									// add|sub				; 6
        sta_a(i+7) and									// lda :STACKORIGIN+STACKWIDTH		; 7

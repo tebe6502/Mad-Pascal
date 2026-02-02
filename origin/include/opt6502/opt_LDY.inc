@@ -130,6 +130,17 @@ begin
     end;
 
 
+    if ldy(i) and (listing[i] = listing[i+3]) and						// ldy A				; 0
+       lda_a(i+1) and										// lda					; 1
+       sta_a(i+2) then										// sta					; 2
+//       ldy(i+3) then										// ldy A				; 3
+    begin
+     listing[i+3] := '';
+
+     exit(false);
+    end;
+
+
     if (iny(i) or dey(i)) and									// iny|dey				; 0
        lda_a(i+1) and (iy(i+1) = false) and							// lda					; 1
        (add_sub(i+2) or and_ora_eor(i+2)) and (iy(i+2) = false) and				// add|sub|and|ora|eor			; 2
