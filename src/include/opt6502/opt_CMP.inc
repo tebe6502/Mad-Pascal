@@ -69,6 +69,68 @@ begin
       end;
 
 
+    if cmp_stack(i+5) and									// cmp :STACKORIGIN+10			; 5
+
+       lda_val(i) and										// lda					; 0	~:STACKORIGIN
+       sta_stack(i+1) and									// sta :STACKORIGIN+9			; 1
+       lda_val(i+2) and										// lda					; 2	~:STACKORIGIN
+       sta_stack(i+3) and									// sta :STACKORIGIN+10			; 3
+       lda_stack(i+4) then									// lda :STACKORIGIN+9			; 4
+//       cmp_stack(i+5) then									// cmp :STACKORIGIN+10			; 5
+     if argMatch(i+1, i+4) and
+        argMatch(i+3, i+5) then
+      begin
+	listing[i+4] := #9'lda ' + copy(listing[i], 6, 256);
+	listing[i+5] := #9'cmp ' + copy(listing[i+2], 6, 256);
+
+	listing[i]   := '';
+	listing[i+1] := '';
+	listing[i+2] := '';
+	listing[i+3] := '';
+
+	exit(false);
+      end;
+
+
+    if cmp_stack(i+4) and									// cmp :STACKORIGIN			; 4
+
+       lda_val(i) and										// lda					; 0	~:STACKORIGIN
+       sta_stack(i+1) and									// sta :STACKORIGIN			; 1
+       lda_val(i+2) and										// lda					; 2	~:STACKORIGIN
+       (add_sub(i+3) or and_ora_eor(i+3)) then							// add|sub|and|ora|eor			; 3
+//       cmp_stack(i+4) then									// cmp :STACKORIGIN			; 4
+     if argMatch(i+1, i+4) then
+      begin
+	listing[i+4] := #9'cmp ' + copy(listing[i], 6, 256);
+
+	listing[i]   := '';
+	listing[i+1] := '';
+
+	exit(false);
+      end;
+
+
+    if cmp_stack(i+7) and									// cmp :STACKORIGIN+10			; 7
+
+       lda_val(i) and										// lda					; 0	~:STACKORIGIN
+       sta_stack(i+1) and									// sta :STACKORIGIN+9			; 1
+       lda_val(i+2) and										// lda					; 2	~:STACKORIGIN
+       (add_sub(i+3) or and_ora_eor(i+3)) and							// add|sub|and|ora|eor			; 3
+       (add_sub(i+4) or and_ora_eor(i+4)) and							// add|sub|and|ora|eor			; 4
+       sta_stack(i+5) and									// sta :STACKORIGIN+10			; 5
+       lda_stack(i+6) then									// lda :STACKORIGIN+9			; 6
+//       cmp_stack(i+7) then									// cmp :STACKORIGIN+10			; 7
+     if argMatch(i+1, i+6) then
+      begin
+	listing[i+6] := listing[i];
+
+	listing[i]   := '';
+	listing[i+1] := '';
+
+	exit(false);
+      end;
+
+
     if cmp_im_0(i+10) and									// cmp #$00				; 10
 
        lda_a(i) and										// lda					; 0

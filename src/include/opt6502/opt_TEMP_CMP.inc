@@ -107,10 +107,54 @@ begin
     end;
 
 
+    if lda(0) and									// lda			; 0
+       sta_stack(1) and									// sta :STACKORIGIN	; 1
+       ldy_1(2) and 									// ldy #1		; 2	BOOL := BYTE > ?
+       lda_stack(3) and									// lda :STACKORIGIN	; 3
+       cmp(4) and									// cmp			; 4
+       bcs_a(5) and									// bcs @+		; 5
+       dey(6) and									// dey			; 6
+       lab_a(7) and									//@			; 7
+       sty_stack(8) and									// sty :STACKORIGIN	; 8
+       ldy(9) then									// ldy			; 9
+     if argMatch(1, 3) then
+     begin
+
+	TemporaryBuf[1] := '~';
+	TemporaryBuf[2] := '~';
+	TemporaryBuf[3] := '~';
+
+	TemporaryBuf[5] := #9'lda #$00';
+	TemporaryBuf[6] := #9'rol @';
+	TemporaryBuf[7] := #9'sta ' + copy(TemporaryBuf[8], 6, 256); 
+	TemporaryBuf[8] := '~';
+
+     end;
+
+
+    if ldy_1(0) and 									// ldy #1		; 0	BOOL := BYTE > ?
+       lda(1)and									// lda			; 1
+       cmp(2) and									// cmp			; 2
+       bcs_a(3) and									// bcs @+		; 3
+       dey(4) and									// dey			; 4
+       lab_a(5) and									//@			; 5
+       tya(6) then									// tya			; 6
+     begin
+
+	TemporaryBuf[0] := '~';
+
+	TemporaryBuf[3] := #9'lda #$00';
+	TemporaryBuf[4] := #9'rol @';
+	TemporaryBuf[5] := '~';
+	TemporaryBuf[6] := '~';
+
+     end;
+
+
    if sta_stack(0) and									// sta :STACKORIGIN	; 0
       ldy_1(1) and									// ldy #1		; 1
       lda_stack(2) and									// lda :STACKORIGIN	; 2
-      (and_ora_eor(3) or cmp(3)) then							// and|ora|eor|cmp	; 3
+      (cmp(3) or and_ora_eor(3)) then							// cmp|and|ora|eor	; 3
     if argMatch(0, 2) then
     begin
 
@@ -119,24 +163,6 @@ begin
       TemporaryBuf[2] := '~';
 
     end;
-
-
-    if ldy_1(0) and 									// ldy #1		; 0	BOOL := BYTE > ?
-       lda(1)and									// lda			; 1
-       cmp(2) and									// cmp			; 2
-       bcs_a(3) and							// bcs @+		; 3
-       dey(4) and							// dey			; 4
-       lab_a(5) and							//@			; 5
-       tya(6) then							// tya			; 6
-     begin
-	TemporaryBuf[0]   := '';
-
-	TemporaryBuf[3] := #9'lda #$00';
-	TemporaryBuf[4] := #9'rol @';
-	TemporaryBuf[5] := '~';
-	TemporaryBuf[6] := '~';
-
-     end;
 
 
 end;	// procedure
