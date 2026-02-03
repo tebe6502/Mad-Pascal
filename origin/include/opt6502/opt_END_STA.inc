@@ -1219,17 +1219,6 @@
 	Result:=false; Break;
       end;
 
-{
-    if rol_stack(i) and									// rol :STACKORIGIN			; 0
-       asl_a(i+1) and									// asl @				; 1
-       add_sub_val(i+2) and								// add|sub				; 2	~:STACKORIGIN
-       sta_val(i+3) then								// sta					; 3	~:STACKORIGIN
-      begin
-	listing[i] := '';
-
-	Result:=false; Break;
-      end;
-}
 
     if rol_stack(i) and									// rol :STACKORIGIN+STACKWIDTH		; 0
        asl_a(i+1) and									// asl @				; 1
@@ -1440,22 +1429,6 @@
 
 
     if UNUSED_A(i) and									// UNUSED_A				; 0
-       lda_a(i+1) and									// lda :STACKORIGIN			; 1
-       (add_sub(i+2) or and_ora_eor(i+2)) and						// add|sub|and|ora|eor			; 2
-       tay(i+3) and									// tay					; 3
-       lda_a(i+4) and									// lda					; 4
-       sta_val(i+5) then								// sta					; 5	~:STACKORIGIN
-     if (argMatch(i, i+1) = false) and
-	(argMatch(i, i+2) = false) and
-        (argMatch(i, i+4) = false) then
-       begin
-	listing[i] := '';
-
-	Result:=false; Break;
-       end;
-
-
-    if UNUSED_A(i) and									// UNUSED_A				; 0
        asl_stack(i+1) and								// asl :STACKORIGIN			; 1
        lda_val(i+2) and									// lda					; 2	~:STACKORIGIN
        (add_sub_stack(i+3) or and_ora_eor_stack(i+3)) and				// add|sub|and|ora|eor :STACKORIGIN	; 3
@@ -1606,6 +1579,22 @@
 
 
     if UNUSED_A(i) and									// UNUSED_A				; 0
+       lda_a(i+1) and									// lda :STACKORIGIN			; 1
+       (add_sub(i+2) or and_ora_eor(i+2)) and						// add|sub|and|ora|eor			; 2
+       tay(i+3) and									// tay					; 3
+       lda_a(i+4) and									// lda					; 4
+       sta_val(i+5) then								// sta					; 5	~:STACKORIGIN
+     if (argMatch(i, i+1) = false) and
+	(argMatch(i, i+2) = false) and
+        (argMatch(i, i+4) = false) then
+       begin
+	listing[i] := '';
+
+	Result:=false; Break;
+       end;
+
+
+    if UNUSED_A(i) and									// UNUSED_A				; 0
        lda_a(i+1) and									// lda					; 1
        sta_val(i+2) and									// sta					; 2	~:STACKORIGIN
        lda_im(i+3) and									// lda #				; 3
@@ -1664,11 +1653,29 @@
        asl_a(i+2) and									// asl @				; 2
        asl_a(i+3) and									// asl @				; 3
        asl_a(i+4) and									// asl @				; 4
-       add_sub(i+5) and									// add|sub :STACKORIGIN			; 5
+       add_sub(i+5) and									// add|sub				; 5
        sta_val(i+6) then								// sta					; 6	~:STACKORIGIN
      if (argMatch(i, i+5) = false) then
       begin
 	listing[i] := '';
+
+	Result:=false; Break;
+      end;
+
+
+    if asl_stack(i) and									// asl :STACKORIGIN			; 0
+       rol_stack(i+1) and								// rol :STACKORIGIN+STACKWIDTH		; 1
+       asl_stack(i+2) and								// asl :STACKORIGIN			; 2
+       asl_stack(i+3) and								// asl :STACKORIGIN			; 3
+       lda_stack(i+4) and								// lda :STACKORIGIN			; 4
+       (add_sub_val(i+5) or and_ora_eor_val(i+5)) and					// add|sub|and|ora|eor			; 5	~:STACKORIGIN
+       sta_val(i+6) then								// sta					; 6	~:STACKORIGIN
+     if (argMatch(i, i+1) = false) and
+        argMatch(i, i+2) and
+        argMatch(i+2, i+3) and
+        argMatch(i+3, i+4) then
+      begin
+	listing[i+1] := '';
 
 	Result:=false; Break;
       end;
@@ -1809,6 +1816,26 @@
       end;
 
 
+    if asl_stack(i) and									// asl :STACKORIGIN			; 0
+       rol_stack(i+1) and								// rol :STACKORIGIN+STACKWIDTH		; 1
+       asl_stack(i+2) and								// asl :STACKORIGIN			; 2
+       asl_stack(i+3) and								// asl :STACKORIGIN			; 3
+       asl_stack(i+4) and								// asl :STACKORIGIN			; 4
+       lda_stack(i+5) and								// lda :STACKORIGIN			; 5
+       (add_sub_val(i+6) or and_ora_eor_val(i+6)) and					// add|sub|and|ora|eor			; 6	~:STACKORIGIN
+       sta_val(i+7) then								// sta					; 7	~:STACKORIGIN
+     if (argMatch(i, i+1) = false) and
+        argMatch(i, i+2) and
+        argMatch(i+2, i+3) and
+        argMatch(i+3, i+4) and
+        argMatch(i+4, i+5) then
+      begin
+	listing[i+1] := '';
+
+	Result:=false; Break;
+      end;
+
+
     if asl_a(i) and									// asl @				; 0
        rol_stack(i+1) and								// rol :STACKORIGIN+STACKWIDTH		; 1
        add_sub_val(i+2) and								// add|sub				; 2	~:STACKORIGIN
@@ -1884,8 +1911,10 @@
 // -----------------------------------------------------------------------------
 
 
-    if (l = i + 9) and
-       rol_stack(i) and									// rol :STACKORIGIN			; 0
+  if (l = i + 9) then begin
+
+
+    if rol_stack(i) and									// rol :STACKORIGIN			; 0
        asl_a(i+1) and									// asl @				; 1
        sta_val(i+2) and									// sta					; 2	~:STACKORIGIN
        lda_val(i+3) and									// lda					; 3	~:STACKORIGIN
@@ -1901,8 +1930,7 @@
       end;
 
 
-    if (l = i + 9) and
-       rol_stack(i) and									// rol :STACKORIGIN+STACKWIDTH		; 0		2023-01-26
+    if rol_stack(i) and									// rol :STACKORIGIN+STACKWIDTH		; 0		2023-01-26
        add_sub_val(i+1) and								// add|sub W				; 1
        sta_stack(i+2) and								// sta :STACKORIGIN			; 2
        lda_val(i+3) and									// lda					; 3	~:STACKORIGIN
@@ -1920,8 +1948,7 @@
       end;
 
 
-    if (l = i + 9) and
-       asl_a(i) and									// asl @				; 0
+    if asl_a(i) and									// asl @				; 0
        rol_stack(i+1) and								// rol :STACKORIGIN+STACKWIDTH		; 1
        asl_a(i+2) and									// asl @				; 2
        add_sub_val(i+3) and								// add|sub				; 3	~:STACKORIGIN
@@ -1935,6 +1962,34 @@
 
 	Result:=false; Break;
       end;
+
+
+    if asl_stack(i) and									// asl :STACKORIGIN			; 0
+       rol_stack(i+1) and								// rol :STACKORIGIN+STACKWIDTH		; 1
+       asl_stack(i+2) and								// asl :STACKORIGIN			; 2
+       asl_stack(i+3) and								// asl :STACKORIGIN			; 3
+       asl_stack(i+4) and								// asl :STACKORIGIN			; 4
+       asl_stack(i+5) and								// asl :STACKORIGIN			; 5
+       lda_stack(i+6) and								// lda :STACKORIGIN			; 6
+       (add_sub_val(i+7) or and_ora_eor_val(i+7)) and					// add|sub|and|ora|eor			; 7	~:STACKORIGIN
+       sta_val(i+8) then								// sta					; 8	~:STACKORIGIN
+     if (argMatch(i, i+1) = false) and
+        argMatch(i, i+2) and
+        argMatch(i+2, i+3) and
+        argMatch(i+3, i+4) and
+        argMatch(i+4, i+5) and
+        argMatch(i+5, i+6) then
+      begin
+	listing[i+1] := '';
+
+	Result:=false; Break;
+      end;
+
+
+  end;
+
+
+// -----------------------------------------------------------------------------
 
 
     if //(l = i + 9) and
@@ -1959,8 +2014,13 @@
        end;
 
 
-    if (l = i + 10) and
-       rol_stack(i) and									// rol :STACKORIGIN			; 0
+// -----------------------------------------------------------------------------
+
+
+  if (l = i + 10) then begin
+
+
+    if rol_stack(i) and									// rol :STACKORIGIN			; 0
        asl_a(i+1) and									// asl @				; 1
        asl_a(i+2) and									// asl @				; 2
        sta_val(i+3) and									// sta					; 3	~:STACKORIGIN
@@ -1977,8 +2037,7 @@
       end;
 
 
-    if (l = i + 10) and
-       rol_stack(i) and									// rol :STACKORIGIN+STACKWIDTH		; 0		2023-01-26
+    if rol_stack(i) and									// rol :STACKORIGIN+STACKWIDTH		; 0		2023-01-26
        asl_a(i+1) and									// asl @				; 1
        add_sub_val(i+2) and								// add|sub W				; 2	~:STACKORIGIN
        sta_stack(i+3) and								// sta :STACKORIGIN			; 3
@@ -1997,11 +2056,69 @@
       end;
 
 
-    if (l = i + 11) and
-       lda(i) and (lda_stack(i) = false) and						// lda					; 0		~lda adr.
+    if asl_stack(i) and									// asl :STACKORIGIN			; 0
+       rol_stack(i+1) and								// rol :STACKORIGIN+STACKWIDTH		; 1
+       asl_stack(i+2) and								// asl :STACKORIGIN			; 2
+       asl_stack(i+3) and								// asl :STACKORIGIN			; 3
+       asl_stack(i+4) and								// asl :STACKORIGIN			; 4
+       asl_stack(i+5) and								// asl :STACKORIGIN			; 5
+       asl_stack(i+6) and								// asl :STACKORIGIN			; 6
+       lda_stack(i+7) and								// lda :STACKORIGIN			; 7
+       (add_sub_val(i+8) or and_ora_eor_val(i+8)) and					// add|sub|and|ora|eor			; 8	~:STACKORIGIN
+       sta_val(i+9) then								// sta					; 9	~:STACKORIGIN
+     if (argMatch(i, i+1) = false) and
+        argMatch(i, i+2) and
+        argMatch(i+2, i+3) and
+        argMatch(i+3, i+4) and
+        argMatch(i+4, i+5) and
+        argMatch(i+5, i+6) and
+        argMatch(i+6, i+7) then
+      begin
+	listing[i+1] := '';
+
+	Result:=false; Break;
+      end;
+
+
+  end;
+
+
+// -----------------------------------------------------------------------------
+
+
+  if (l = i + 11) then begin
+
+
+    if asl_stack(i) and									// asl :STACKORIGIN			; 0
+       rol_stack(i+1) and								// rol :STACKORIGIN+STACKWIDTH		; 1
+       asl_stack(i+2) and								// asl :STACKORIGIN			; 2
+       asl_stack(i+3) and								// asl :STACKORIGIN			; 3
+       asl_stack(i+4) and								// asl :STACKORIGIN			; 4
+       asl_stack(i+5) and								// asl :STACKORIGIN			; 5
+       asl_stack(i+6) and								// asl :STACKORIGIN			; 6
+       asl_stack(i+7) and								// asl :STACKORIGIN			; 7
+       lda_stack(i+8) and								// lda :STACKORIGIN			; 8
+       (add_sub_val(i+9) or and_ora_eor_val(i+9)) and					// add|sub|and|ora|eor			; 9	~:STACKORIGIN
+       sta_val(i+10) then								// sta					; 10	~:STACKORIGIN
+     if (argMatch(i, i+1) = false) and
+        argMatch(i, i+2) and
+        argMatch(i+2, i+3) and
+        argMatch(i+3, i+4) and
+        argMatch(i+4, i+5) and
+        argMatch(i+5, i+6) and
+        argMatch(i+6, i+7) and
+        argMatch(i+7, i+8) then
+      begin
+	listing[i+1] := '';
+
+	Result:=false; Break;
+      end;
+
+
+    if lda(i) and (lda_stack(i) = false) and						// lda					; 0	~lda adr.
        add_sub_im(i+1) and								// add|sub #				; 1
        sta_stack(i+2) and								// sta :STACKORIGIN			; 2
-       lda(i+3) and (lda_stack(i+3) = false) and					// lda					; 3		~lda adr.
+       lda(i+3) and (lda_stack(i+3) = false) and					// lda					; 3	~lda adr.
        adc_sbc_im(i+4) and								// adc|sbc #				; 4
        and_ora_eor(i+5) and								// and|ora|eor				; 5
        sta_stack(i+6) and								// sta :STACKORIGIN+STACKWIDTH		; 6
@@ -2043,8 +2160,7 @@
 	end;
 
 
-    if (l = i + 11) and
-       ldy(i) and									// ldy					; 0
+    if ldy(i) and									// ldy					; 0
        beq(i+1) and									// beq l_				; 1
        lab_l(i+2) and									//l_					; 2
        asl_a(i+3) and									// asl @				; 3
@@ -2073,6 +2189,12 @@
 
 	Result:=false; Break;
        end;
+
+
+  end;
+
+
+// -----------------------------------------------------------------------------
 
 
     if (l = i + 12) and

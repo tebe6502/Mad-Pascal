@@ -307,6 +307,45 @@ begin
 	exit(false);
      end;
 
+{
+	ldy #1
+	lda :STACKORIGIN+STACKWIDTH+9
+	bpl @+
+	dey
+@
+	tya
+	sta B1
+}
+    if ldy_1(i) and 										// ldy #1		; 0	BOOL := SHORTINT < 0
+       lda_val(i+1) and										// lda			; 1	BOOL := SMALLINT < 0
+       cmp(i+2) and       
+       bpl_a(i+3) {and										// bpl @+		; 2	BOOL := INTEGER < 0
+       dey(i+3) and										// dey			; 3
+       lab_a(i+4) and										//@			; 4
+       tya(i+5) and										// tya			; 5
+       sta_a(i+6) and										// sta			; 6
+												//			; 7
+       (dex(i+8) = false)} then									//~dex			; 8
+     begin
+
+
+      for p:=0 to l-1 do writeln(listing[p]);
+      writeln('-------');
+
+{     
+	listing[i]   := '';
+
+	listing[i+2] := #9'cmp #$80';
+	listing[i+3] := #9'lda #$00';
+	listing[i+4] := #9'rol @';
+	listing[i+5] := '';
+
+	exit(false);}
+     end;
+
+
+
+
 
     if ENDL(i+15) and										// .ENDL		; 15
        bmi(i+16) and										// bmi			; 16

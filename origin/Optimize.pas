@@ -134,7 +134,7 @@ var inxUse, found: Boolean;
 
   function UNUSED_A(const i: Integer): Boolean;
   begin
-    Result := sty_stack(i) or lda_stack(i) or sta_stack(i) or
+    Result := lda_stack(i) or sta_stack(i) or sty_stack(i) or
       {!!! (pos(#9'lda :eax', listing[i]) = 1) or (pos(#9'sta :eax', listing[i]) = 1) or} lda_im(i) or
       rol_stack(i) or ror_stack(i) or adc_sbc(i);
   end;
@@ -957,6 +957,7 @@ end;
       for i := 0 to l - 1 do
       begin
 
+
 {
 if (pos('lda adr.ROW1+$20,y', listing[i]) > 0) then begin
 
@@ -965,6 +966,7 @@ if (pos('lda adr.ROW1+$20,y', listing[i]) > 0) then begin
 
 end;
 }
+
 
         if opt_STA_ADD(i) = false then exit(False);
         if opt_STA_LDY(i) = false then exit(False);
@@ -1016,7 +1018,7 @@ end;
 
 
 {
-if (pos('sta', listing[i]) > 0) then begin
+if (pos('add #$01', listing[i]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');
