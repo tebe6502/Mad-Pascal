@@ -30,9 +30,9 @@ begin
        exit(false);
       end;
 
-
+{
     if ldy_1(i) and										// ldy #1				; 0
-       												// lda|jsr				; 1
+       lda_val(i+1) and										// lda					; 1	~:STACKORIGIN
        bmi(i+2) and										// bmi @+				; 2
        dey(i+3) and 										// dey					; 3
        lab_a(i+4) and										//@					; 4
@@ -43,7 +43,7 @@ begin
 
        listing[i+2] := #9'asl @';
        listing[i+3] := #9'lda #$00';
-       listing[i+4] := #9'adc #$00';
+       listing[i+4] := #9'rol @';
        listing[i+5] := '';
 
        exit(false);
@@ -51,7 +51,7 @@ begin
 
 
     if ldy_1(i) and										// ldy #1				; 0
-       (lda_stack(i+1) = false) and								// lda|jsr				; 1
+       lda_val(i+1) and										// lda					; 1	~:STACKORIGIN
        bpl(i+2) and										// bpl @+				; 2
        dey(i+3) and 										// dey					; 3
        lab_a(i+4) and										//@					; 4
@@ -63,11 +63,11 @@ begin
        listing[i+2] := #9'eor #$80';
        listing[i+3] := #9'asl @';
        listing[i+4] := #9'lda #$00';
-       listing[i+5] := #9'adc #$00';
+       listing[i+5] := #9'rol @';
 
        exit(false);
       end;
-
+}
 
     if cmp_stack(i+5) and									// cmp :STACKORIGIN+10			; 5
 

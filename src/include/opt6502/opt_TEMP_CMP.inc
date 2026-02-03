@@ -107,27 +107,26 @@ begin
     end;
 
 
-    if lda(0) and									// lda			; 0
-       sta_stack(1) and									// sta :STACKORIGIN	; 1
-       ldy_1(2) and 									// ldy #1		; 2	BOOL := BYTE > ?
-       lda_stack(3) and									// lda :STACKORIGIN	; 3
-       cmp(4) and									// cmp			; 4
-       bcs_a(5) and									// bcs @+		; 5
-       dey(6) and									// dey			; 6
-       lab_a(7) and									//@			; 7
-       sty_stack(8) and									// sty :STACKORIGIN	; 8
-       ldy(9) then									// ldy			; 9
-     if argMatch(1, 3) then
+    if sta_stack(0) and									// sta :STACKORIGIN	; 0	BOOL := BYTE > ?
+       ldy_1(1) and 									// ldy #1		; 1
+       lda_stack(2) and									// lda :STACKORIGIN	; 2
+       cmp(3) and									// cmp			; 3
+       bcs_a(4) and									// bcs @+		; 4
+       dey(5) and									// dey			; 5
+       lab_a(6) and									//@			; 6
+       sty_stack(7) and									// sty :STACKORIGIN	; 7
+       ldy(8) then									// ldy			; 8
+     if argMatch(0, 2) then
      begin
 
+	TemporaryBuf[0] := '~';
 	TemporaryBuf[1] := '~';
 	TemporaryBuf[2] := '~';
-	TemporaryBuf[3] := '~';
 
-	TemporaryBuf[5] := #9'lda #$00';
-	TemporaryBuf[6] := #9'rol @';
-	TemporaryBuf[7] := #9'sta ' + copy(TemporaryBuf[8], 6, 256); 
-	TemporaryBuf[8] := '~';
+	TemporaryBuf[4] := #9'lda #$00';
+	TemporaryBuf[5] := #9'rol @';
+	TemporaryBuf[6] := #9'sta ' + copy(TemporaryBuf[7], 6, 256); 
+	TemporaryBuf[7] := '~';
 
      end;
 

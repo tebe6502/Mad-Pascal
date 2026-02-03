@@ -1692,7 +1692,7 @@ begin
        asl_a(i+3) and										// asl @				; 3
        add_sub_stack(i+4) and									// add|sub :STACKORIGIN			; 4
        add_sub_val(i+5) and									// add|sub				; 5
-       and_ora_eor_val(i+6) then									// and|ora|eor				; 6	~:STACKORIGIN
+       and_ora_eor_val(i+6) then								// and|ora|eor				; 6	~:STACKORIGIN
 //       (sta_a(i+7) or tay(i+7)) then								// sta|tay				; 7
      if argMatch(i+1, i+4) then
       begin
