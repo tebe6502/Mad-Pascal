@@ -3031,7 +3031,7 @@ begin
 
 		  ConstVal := 0;
 
-		  if Tok[i + 1].Kind = PAGETOK then begin
+		  if Tok[i + 1].Kind = OFTOK then begin
 
 		    CheckTok(i + 2, INTNUMBERTOK);
 

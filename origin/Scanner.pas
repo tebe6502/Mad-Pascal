@@ -2072,7 +2072,6 @@ begin
   Spelling[TEXTFILETOK]            := 'TEXTFILE';
   Spelling[SETTOK]                 := 'SET';
   Spelling[PACKEDTOK]              := 'PACKED';
-  Spelling[PAGETOK]                := 'PAGE';
   Spelling[VOLATILETOK]            := 'VOLATILE';
   Spelling[STRIPEDTOK]             := 'STRIPED';
   Spelling[WITHTOK]                := 'WITH';
