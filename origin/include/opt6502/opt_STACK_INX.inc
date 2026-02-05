@@ -263,6 +263,34 @@ begin
      end;
 
 
+    if ldy_1(i+9) and										// ldy #1				; 9
+
+       lda_val(i) and										// lda					; 0
+       sta_stack_prev_0x(i+1) and								// sta 					; 1	~:STACKORIGIN
+       lda_val(i+2) and										// lda					; 2
+       sta_stack_prev_1x(i+3) and								// sta 					; 3	~:STACKORIGIN
+       lda_val(i+4) and										// lda					; 4
+       sta_stack_prev_2x(i+5) and								// sta 					; 5	~:STACKORIGIN
+       lda_val(i+6) and										// lda					; 6
+       sta_stack_prev_3x(i+7) and								// sta 					; 7	~:STACKORIGIN
+       dex(i+8) then										// dex					; 8
+//       ldy_1(i+9) then									// ldy #1				; 9
+     begin
+       listing[i+8] := #9'sta :STACKORIGIN+STACKWIDTH*3,x';
+       listing[i+7] := listing[i+6];
+       listing[i+6] := #9'sta :STACKORIGIN+STACKWIDTH*2,x';
+       listing[i+5] := listing[i+4];
+       listing[i+4] := #9'sta :STACKORIGIN+STACKWIDTH,x';
+       listing[i+3] := listing[i+2];
+       listing[i+2] := #9'sta :STACKORIGIN,x';
+       listing[i+1] := listing[i];
+
+       listing[i] := #9'dex';
+
+       exit(false);
+     end;
+
+
     if dex(i+10) and										// dex					; 10
 
        inx(i) and										// inx					; 0

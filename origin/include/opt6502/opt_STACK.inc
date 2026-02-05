@@ -921,7 +921,7 @@ begin
 
 
       if lda_stack_0x(i+5) and									// lda :STACKORIGIN,x			; 5
-         sta_val(i+6) and									// sta ~:STACKORIGIN			; 6
+         sta_val(i+6) and									// sta					; 6	~:STACKORIGIN
          dex(i+7) then										// dex					; 7
       	begin
 	 listing[i+2] := '';
@@ -937,9 +937,9 @@ begin
 
 
       if lda_stack_0x(i+5) and									// lda :STACKORIGIN,x			; 5
-         sta_val(i+6) and									// sta ~:STACKORIGIN			; 6
+         sta_val(i+6) and									// sta					; 6	~:STACKORIGIN
        	 lda_stack_1x(i+7) and									// lda :STACKORIGIN+STACKWIDTH,x	; 7
-       	 sta_val(i+8) and									// sta ~:STACKORIGIN			; 8
+       	 sta_val(i+8) and									// sta					; 8	~:STACKORIGIN
        	 dex(i+9) then										// dex					; 9
      	begin
 	 listing[i+3] := '';
@@ -957,13 +957,13 @@ begin
 
 
       if lda_stack_0x(i+5) and									// lda :STACKORIGIN,x			; 5
-         sta_val(i+6) and									// sta ~:STACKORIGIN			; 6
+         sta_val(i+6) and									// sta					; 6	~:STACKORIGIN
          lda_stack_1x(i+7) and									// lda :STACKORIGIN+STACKWIDTH,x	; 7
-         sta_val(i+8) and									// sta ~:STACKORIGIN			; 8
+         sta_val(i+8) and									// sta					; 8	~:STACKORIGIN
          lda_stack_2x(i+9) and									// lda :STACKORIGIN+STACKWIDTH*2,x	; 9
-         sta_val(i+10) and									// sta ~:STACKORIGIN			; 10
+         sta_val(i+10) and									// sta					; 10	~:STACKORIGIN
          lda_stack_3x(i+11) and									// lda :STACKORIGIN+STACKWIDTH*3,x	; 11
-         sta_val(i+12) then									// sta ~:STACKORIGIN			; 12
+         sta_val(i+12) then									// sta					; 12	~:STACKORIGIN
      	begin
 	 listing[i+5] := #9'lda ' + GetString(i+1);
 

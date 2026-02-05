@@ -538,7 +538,7 @@ begin
       opti(5) and									//; optimize		; 5
       (TemporaryBuf[6] = '') and							//			; 6
 //      lda_im(7) and									// lda #XX		; 7
-      sta(8) and									// sta			; 8
+      sta(8) and (pos(' SYSTEM.', TemporaryBuf[8]) = 0) and				// sta			; 8
 //      lda_im(9) and									// lda #YY 		; 9
       sta(10) then									// sta			; 10
     begin
@@ -564,7 +564,7 @@ begin
       opti(5) and									//; optimize		; 5
       (TemporaryBuf[6] = '') and							//			; 6
       lda_im(7) and (TemporaryBuf[7] <> TemporaryBuf[2]) and				// lda #BB		; 7
-      sta(8) and									// sta			; 8
+      sta(8) and (pos(' SYSTEM.', TemporaryBuf[8]) = 0) and				// sta			; 8
 //      lda_im(9) and									// lda #YY 		; 9
       sta(10) then									// sta			; 10
     begin
