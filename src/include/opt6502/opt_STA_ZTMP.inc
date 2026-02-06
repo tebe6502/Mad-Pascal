@@ -335,7 +335,7 @@ begin
        sub_ztmp(i+3) and								// sub :ztmp..				; 3
        sta_eax_1(i+4) and								// sta :eax+1				; 4
        lab_a(i+5) and									//@					; 5
-       lda_stack(i+6) and		 						// lda :STACKORIGIN			; 6
+       lda_a(i+6) and			 						// lda					; 6
        (add_eax(i+7) or sub_eax(i+7)) and						// add|sub :eax 			; 7
        ldy(i+8) and									// ldy					; 8
        sta_a(i+9) then									// sta					; 9
@@ -422,9 +422,9 @@ begin
        sub(i+3) and									// sub 					; 3
 //       sta_eax_1(i+4) and								// sta :eax+1				; 4
        lab_a(i+5) and									//@					; 5
-       lda_stack(i+6) and 								// lda :STACKORIGIN			; 6
+       lda_a(i+6) and 									// lda					; 6
        (add_eax(i+7) or sub_eax(i+7)) and						// add|sub :eax				; 7
-       sta_stack(i+8) and 								// sta :STACKORIGIN			; 8
+       sta_a(i+8) and 									// sta					; 8
        (EAX(i+9) = false) and								//					; 9
        (adc_sbc(i+10) = false) then							//~adc|sbc				; 10
      if (argMatch(i+4, i+7) = false) then
