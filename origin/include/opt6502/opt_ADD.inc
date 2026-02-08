@@ -100,9 +100,9 @@ begin
      end;
 
 
-    if (pos(#9'add <adr.', listing[i]) > 0) and						// add <adr.				; 0
+    if add_l_adr(i) and									// add <adr.				; 0
        sta_stack(i+1) and								// sta :STACKORIGIN			; 1
-       (pos(#9'lda >adr.', listing[i+2]) > 0) and					// lda >adr.				; 2
+       lda_h_adr(i+2) and								// lda >adr.				; 2
        adc(i+3) and									// adc					; 3
        sta_stack(i+4) and								// sta :STACKORIGIN+STACKWIDTH		; 4
        lda_stack(i+5) and								// lda :STACKORIGIN			; 5

@@ -801,7 +801,7 @@ begin
     if (SKIP(i-1) = false) and
        cmp(i) and										// cmp			; 0
        beq(i+1) and										// beq @+		; 1
-       jmp(i+2) and										// jmp l_		; 2
+       jmp_l(i+2) and										// jmp l_		; 2
        lab_a(i+3) then										// @			; 3
      begin
        listing[i+1] := #9'jne ' + copy(listing[i+2], 6, 256);
@@ -815,7 +815,7 @@ begin
     if (SKIP(i-1) = false) and
        cmp(i) and										// cmp			; 0
        bcc_a(i+1) and										// bcc @+		; 1
-       jmp(i+2) and										// jmp l_		; 2
+       jmp_l(i+2) and										// jmp l_		; 2
        lab_a(i+3) then										// @			; 3
      begin
        listing[i+1] := #9'jcs ' + copy(listing[i+2], 6, 256);
@@ -829,7 +829,7 @@ begin
     if //(listing[i] = #9'.ENDL') and								//
        bmi_a(i+1) and										// bmi @+		; 1
        beq(i+2) and										// beq @+		; 2
-       jmp(i+3) and										// jmp l_		; 3
+       jmp_l(i+3) and										// jmp l_		; 3
        lab_a(i+4) then										//@			; 4
       begin
        listing[i+2] := #9'jne ' + copy(listing[i+3], 6, 256);
@@ -842,7 +842,7 @@ begin
     if //(listing[i] = #9'.ENDL') and								//
        seq(i+1) and										// seq			; 1
        bpl_a(i+2) and										// bpl @+		; 2
-       jmp(i+3) and										// jmp l_		; 3
+       jmp_l(i+3) and										// jmp l_		; 3
        lab_a(i+4) then										//@			; 4
       begin
        listing[i+1] := #9'jmi ' + copy(listing[i+3], 6, 256);
@@ -856,7 +856,7 @@ begin
 
     if (SKIP(i) = false) and									//
        bpl_a(i+1) and										// bpl @+		; 1
-       jmp(i+2) and										// jmp l_		; 2
+       jmp_l(i+2) and										// jmp l_		; 2
        lab_a(i+3) then										//@			; 3
       begin
        listing[i+1] := #9'jmi ' + copy(listing[i+2], 6, 256);
@@ -869,7 +869,7 @@ begin
 
     if (SKIP(i) = false) and									//
        bmi_a(i+1) and										// bmi @+		; 1
-       jmp(i+2) and										// jmp l_		; 2
+       jmp_l(i+2) and										// jmp l_		; 2
        lab_a(i+3) then										//@			; 3
       begin
        listing[i+1] := #9'jpl ' + copy(listing[i+2], 6, 256);
@@ -882,7 +882,7 @@ begin
 
     if bcc_a(i) and										// bcc @+		; 0
        beq(i+1) and										// beq @+		; 1
-       jmp(i+2) and										// jmp l_		; 2
+       jmp_l(i+2) and										// jmp l_		; 2
        lab_a(i+3) then										//@			; 3
       begin
        listing[i+1] := #9'jne ' + copy(listing[i+2], 6, 256);
@@ -894,7 +894,7 @@ begin
 
     if (SKIP(i-1) = false) and
        bne(i) and										// bne @+		; 0
-       jmp(i+1) and										// jmp l_		; 1
+       jmp_l(i+1) and										// jmp l_		; 1
        lab_a(i+2) then										//@			; 2
      begin
        listing[i]   := #9'jeq ' + copy(listing[i+1], 6, 256);
@@ -907,7 +907,7 @@ begin
 
     if seq(i) and										// seq			; 0
        bcs_a(i+1) and										// bcs @+		; 1
-       jmp(i+2) and										// jmp l_		; 2
+       jmp_l(i+2) and										// jmp l_		; 2
        lab_a(i+3) then										//@			; 3
      begin
        listing[i]   := #9'jcc ' + copy(listing[i+2], 6, 256);
@@ -921,7 +921,7 @@ begin
 
     if (SKIP(i-1) = false) and
        bcs_a(i) and										// bcs @+		; 0
-       jmp(i+1) and										// jmp l_		; 1
+       jmp_l(i+1) and										// jmp l_		; 1
        lab_a(i+2) then										//@			; 2
      begin
        listing[i]   := #9'jcc ' + copy(listing[i+1], 6, 256);
@@ -934,7 +934,7 @@ begin
 
     if (SKIP(i-1) = false) and
        bcc_a(i) and										// bcc @+		; 0
-       jmp(i+1) and										// jmp l_		; 1
+       jmp_l(i+1) and										// jmp l_		; 1
        lab_a(i+2) then										//@			; 2
      begin
        listing[i]   := #9'jcs ' + copy(listing[i+1], 6, 256);
@@ -947,7 +947,7 @@ begin
 
     if (SKIP(i-1) = false) and
        beq(i) and										// beq @+		; 0
-       jmp(i+1) and										// jmp l_		; 1
+       jmp_l(i+1) and										// jmp l_		; 1
        lab_a(i+2) then										//@			; 2
      begin
        listing[i]   := #9'jne ' + copy(listing[i+1], 6, 256);
@@ -960,7 +960,7 @@ begin
 
     if (SKIP(i-1) = false) and
        (listing[i] = #9'bne *+5') and								// bne *+5		; 0
-       jmp(i+1) then										// jmp l_		; 1
+       jmp_l(i+1) then										// jmp l_		; 1
      begin
        listing[i]   := '';
        listing[i+1] := #9'jeq ' + copy(listing[i+1], 6, 256);
@@ -971,7 +971,7 @@ begin
 
     if (SKIP(i-1) = false) and
        (listing[i] = #9'beq *+5') and								// beq *+5		; 0
-       jmp(i+1) then										// jmp l_		; 1
+       jmp_l(i+1) then										// jmp l_		; 1
      begin
        listing[i]   := '';
        listing[i+1] := #9'jne ' + copy(listing[i+1], 6, 256);
@@ -982,7 +982,7 @@ begin
 
     if (SKIP(i-1) = false) and
        (listing[i] = #9'bcs *+5') and								// bcs *+5		; 0
-       jmp(i+1) then										// jmp l_		; 1
+       jmp_l(i+1) then										// jmp l_		; 1
      begin
        listing[i]   := '';
        listing[i+1] := #9'jcc ' + copy(listing[i+1], 6, 256);
@@ -993,7 +993,7 @@ begin
 
     if (SKIP(i-1) = false) and									//
        seq(i) and										// seq			; 0
-       jmp(i+1) then										// jmp l_		; 1
+       jmp_l(i+1) then										// jmp l_		; 1
       begin
        listing[i] := #9'jne ' + copy(listing[i+1], 6, 256);
        listing[i+1] := '';
@@ -1093,7 +1093,7 @@ begin
 
 
     if jcc(i) and										// jcc l_00C5w		; 0
-       jmp(i+1) and										// jmp l_		; 1
+       jmp_l(i+1) and										// jmp l_		; 1
        (listing[i+2] = copy(listing[i], 6, 256)) then						//l_00C5w		; 2
      begin
        listing[i]   := #9'jcs ' + copy(listing[i+1], 6, 256);
@@ -1104,7 +1104,7 @@ begin
 
 
     if jcs(i) and										// jcs l_00C5w		; 0
-       jmp(i+1) and										// jmp l_		; 1
+       jmp_l(i+1) and										// jmp l_		; 1
        (listing[i+2] = copy(listing[i], 6, 256)) then						//l_00C5w		; 2
      begin
        listing[i]   := #9'jcc ' + copy(listing[i+1], 6, 256);
@@ -1115,7 +1115,7 @@ begin
 
 
     if jne(i) and										// jne l_00C5w		; 0
-       jmp(i+1) and										// jmp l_		; 1
+       jmp_l(i+1) and										// jmp l_		; 1
        (listing[i+2] = copy(listing[i], 6, 256)) then						//l_00C5w		; 2
      begin
        listing[i]   := #9'jeq ' + copy(listing[i+1], 6, 256);
@@ -1126,7 +1126,7 @@ begin
 
 
     if jeq(i) and										// jeq l_00C5w		; 0
-       jmp(i+1) and										// jmp l_		; 1
+       jmp_l(i+1) and										// jmp l_		; 1
        (listing[i+2] = copy(listing[i], 6, 256)) then						//l_00C5w		; 2
      begin
        listing[i]   := #9'jne ' + copy(listing[i+1], 6, 256);
@@ -1138,7 +1138,7 @@ begin
 
     if (listing[i] = #9'jmp *+6') and								// jmp *+6			; 0
        (pos('@'#9'jmp l_', listing[i+1]) > 0) and						//@ jmp l_			; 1
-       jmp(i+2) and										// jmp l_			; 2
+       jmp_l(i+2) and										// jmp l_			; 2
        lab_l(i+3) then										//l_				; 3
      if (pos(listing[i+3], listing[i+1]) > 0) then
       begin
@@ -1154,7 +1154,7 @@ begin
        beq_a(i+1) and										// beq @+			; 1
        (listing[i+2] = #9'jmp *+6') and								// jmp *+6			; 2
        (pos('@'#9'jmp l_', listing[i+3]) > 0) and						//@ jmp l_			; 3
-       (jmp(i+4) = false) then									//~jmp l_			; 4
+       (jmp_l(i+4) = false) then								//~jmp l_			; 4
       begin
 	listing[i]   := #9'jcc ' + copy(listing[i+3], 7, 256);
 	listing[i+1] := #9'jeq ' + copy(listing[i+3], 7, 256);
@@ -1170,7 +1170,7 @@ begin
        (beq_a(i) or bne_a(i)) and								// beq|bne @+			; 0
        (listing[i+1] = #9'jmp *+6') and								// jmp *+6			; 1
        (pos('@'#9'jmp l_', listing[i+2]) > 0) and						//@ jmp l_			; 2
-       (jmp(i+3) = false) then									//~jmp l_			; 3
+       (jmp_l(i+3) = false) then								//~jmp l_			; 3
       begin
 	if beq(i) then
 	 listing[i]   := #9'jeq ' + copy(listing[i+2], 7, 256)
@@ -1188,7 +1188,7 @@ begin
        (bcs_a(i) or bcc_a(i)) and								// bcs|bcc @+			; 0
        (listing[i+1] = #9'jmp *+6') and								// jmp *+6			; 1
        (pos('@'#9'jmp l_', listing[i+2]) > 0) and						//@ jmp l_			; 2
-       (jmp(i+3) = false) then									//~jmp l_			; 3
+       (jmp_l(i+3) = false) then								//~jmp l_			; 3
       begin
         if bcs_a(i) then
 	 listing[i]   := #9'jcs ' + copy(listing[i+2], 7, 256)
@@ -1206,7 +1206,7 @@ begin
        (bpl_a(i) or bmi_a(i)) and								// bpl|bmi @+			; 0
        (listing[i+1] = #9'jmp *+6') and								// jmp *+6			; 1
        (pos('@'#9'jmp l_', listing[i+2]) > 0) and						//@ jmp l_			; 2
-       (jmp(i+3) = false) then									//~jmp l_			; 3
+       (jmp_l(i+3) = false) then								//~jmp l_			; 3
       begin
         if bpl_a(i) then
 	 listing[i]   := #9'jpl ' + copy(listing[i+2], 7, 256)

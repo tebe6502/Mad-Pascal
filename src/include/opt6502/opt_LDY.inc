@@ -38,7 +38,7 @@ begin
        (add_sub(i+2) or and_ora_eor(i+2)) and (iy(i+2) = false) and				// add|sub|and|ora|eor			; 2
        cmp(i+3) and (iy(i+3) = false) and							// cmp					; 3
        SKIP(i+4) and										// bcc|bcs|...				; 4
-       jmp(i+5) and										// jmp l_				; 5
+       jmp_l(i+5) and										// jmp l_				; 5
        lab_a(i+6) then										//@					; 6
      begin
 	listing[i] := '';

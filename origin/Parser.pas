@@ -2470,9 +2470,10 @@ var
   NumFieldsInList, FieldInListIndex, RecType, k, j: Integer;
   NestedDataType, ExpressionType, NestedAllocElementType, NestedFunctionAllocElementType,
   NestedFunctionResultType: Byte;
-  FieldInListName: array [1..MAXFIELDS] of TField;
   ExitLoop, isForward, IsNestedFunction, isInt, isInl, isOvr: Boolean;
   Name: TString;
+
+  FieldInListName: array [1..MAXFIELDS] of TField;
 
 
   function BoundaryType: Byte;

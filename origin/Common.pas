@@ -23,8 +23,6 @@ const
   AllowDigitFirstChars: set of Char = ['0'..'9', '%', '$'];
   AllowDigitChars: set of Char = ['0'..'9', 'A'..'F'];
 
-  tHex: array [0..15] of char = ('0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F');
-
   // Token codes
 
   UNTYPETOK = 0;
@@ -614,10 +612,6 @@ type
 
 procedure ResetOpty;
 
-function Hex(Value: cardinal; nibbles: shortint): string;
-function HexByte(Value: byte): string;
-function HexWord(Value: word): string;
-
 procedure AddDefine(const X: String);
 
 procedure AddPath(s: String);
@@ -649,8 +643,6 @@ function GetCommonType(ErrTokenIndex: Integer; LeftType, RightType: Byte): Byte;
 function GetEnumName(IdentIndex: Integer): TString;
 
 function GetSpelling(i: Integer): TString;
-
-function GetVAL(const a: String): Integer;
 
 function GetValueType(Value: Int64): Byte;
 
@@ -688,56 +680,6 @@ begin
 end;
 
 
-// ----------------------------------------------------------------------------
-
-
-function Hex(Value: cardinal; nibbles: shortint): string;
-(*----------------------------------------------------------------------------*)
-(*  zamiana na zapis hexadecymalny                                            *)
-(*  'B' okresla maksymalna liczbe nibbli do zamiany                           *)
-(*  jesli sa jeszcze jakies wartosci to kontynuuje zamiane                    *)
-(*----------------------------------------------------------------------------*)
-var v: byte;
-begin
-
- Result := '';
-
- while (nibbles > 0) or (Value <> 0) do begin
-
-  v := byte(Value);
-  Result := tHex[v shr 4] + tHex[v and $0f] + Result;
-
-  Value := Value shr 8;
-
-  dec(nibbles, 2);
- end;
-
- Result := '$' + Result;
-
-end;
-
-
-// ----------------------------------------------------------------------------
-
-
-function HexByte(Value: byte): string;
-begin
-  Result := '$' + tHex[Value shr 4] + tHex[Value and $0f];
-end;
-
-
-function HexWord(Value: word): string;
-var v: byte;
-begin
-  v := Value;
-  Result := tHex[v shr 4] + tHex[v and $0f];
-
-  v := Value shr 8;
-  Result := '$' + tHex[v shr 4] + tHex[v and $0f] + Result;
-end;
-
-
-// ----------------------------------------------------------------------------
 
 
 function NormalizePath(var Name: String): String;
@@ -1260,28 +1202,6 @@ begin
 
 end;
 
-
-// ----------------------------------------------------------------------------
-// ----------------------------------------------------------------------------
-
-
-function GetVAL(const a: String): Integer;
-var
-  err: Integer;
-begin
-
-  Result := -1;
-
-  if a <> '' then
-    if a[1] = '#' then
-    begin
-      val(copy(a, 2, length(a)), Result, err);
-
-      if err > 0 then Result := -1;
-
-    end;
-
-end;
 
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------

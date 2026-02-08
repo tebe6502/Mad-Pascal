@@ -68,7 +68,7 @@ begin
           cmp(1) and (cmp_im(1) = false) and
 	  (listing[2] = #9'bcc *+7') and
 	  (listing[3] = #9'beq *+5') and
-	  jmp(4) then
+	  jmp_l(4) then
         begin
 	 listing[2] := #9'lda ' + copy(listing[1], 6, 256);
 	 listing[3] := #9'cmp ' + copy(listing[0], 6, 256);
@@ -84,7 +84,7 @@ begin
           cmp_im(1) and
 	  (listing[2] = #9'bcc *+7') and
 	  (listing[3] = #9'beq *+5') and
-	  jmp(4) then
+	  jmp_l(4) then
         begin
         k := GetBYTE(1) + 1;
 
@@ -139,7 +139,7 @@ begin
           (listing[3] = #9'eor #$80') and
           (listing[4] = #9'bmi *+7') and
           (listing[5] = #9'beq *+5') and
-	  jmp(6) then
+	  jmp_l(6) then
 	begin
         k := GetBYTE(1) + 1;
 
@@ -160,7 +160,7 @@ begin
 	  svc(2) and
           (listing[3] = #9'eor #$80') and
           (listing[4] = #9'bpl *+5') and
-	  jmp(5) then
+	  jmp_l(5) then
 	begin
 	 listing[4] := #9'jmi ' + copy(listing[5], 6, 256);
 	 listing[5] := '';
@@ -176,7 +176,7 @@ begin
           lab_a(5) and
 	  (listing[6] = #9'bcc *+7') and
 	  (listing[7] = #9'beq *+5') and
-	  jmp(8) then
+	  jmp_l(8) then
         begin
 
         k := GetBYTE(1) shl 8 + GetBYTE(4);
@@ -214,7 +214,7 @@ begin
           lab_a(5) and
 	  (listing[6] = #9'bcc *+7') and
 	  (listing[7] = #9'beq *+5') and
-	  jmp(8) then
+	  jmp_l(8) then
         begin
 	 listing[7] := '@';
 	 listing[8] := #9'jcc ' + copy(listing[8], 6, 256);
@@ -247,7 +247,7 @@ begin
           lab_a(11) and
 	  (listing[12] = #9'bcc *+7') and
 	  (listing[13] = #9'beq *+5') and
-	  jmp(14) then
+	  jmp_l(14) then
 	begin
 	 listing[13] := '@';
 	 listing[14] := #9'jcc ' + copy(listing[14], 6, 256);
@@ -318,7 +318,7 @@ begin
           lab_a(11) and
 	  (listing[12] = #9'bcc *+7') and
 	  (listing[13] = #9'beq *+5') and
-	  jmp(14) then
+	  jmp_l(14) then
 	begin
 	 listing[0] := '';
 	 listing[1] := '';
@@ -358,7 +358,7 @@ begin
           ENDL(16) and
           (listing[17] = #9'bmi *+7') and
           (listing[18] = #9'beq *+5') and
-	  jmp(19) then
+	  jmp_l(19) then
 	begin
          k := GetBYTE(2) shl 8 + GetBYTE(5) + 1;
 
@@ -407,7 +407,7 @@ begin
           (listing[15] = 'L5') and
           ENDL(16) and
           (listing[17] = #9'bpl *+5') and
-	  jmp(18) then
+	  jmp_l(18) then
 	begin
          k := GetBYTE(2) shl 8 + GetBYTE(5);
 

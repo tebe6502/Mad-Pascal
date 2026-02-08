@@ -517,6 +517,16 @@ begin
   Result := pos1(#9'lda >adr.', i);
 end;
 
+function ADD_L_ADR(const i: Integer): Boolean;
+begin
+  Result := pos1(#9'add <adr.', i);
+end;
+
+function ADD_H_ADR(const i: Integer): Boolean;
+begin
+  Result := pos1(#9'add >adr.', i);
+end;
+
 function LDA_L(const i: Integer): Boolean;
 begin
   Result := pos1(#9'lda <', i);
@@ -612,6 +622,11 @@ begin
 end;
 
 function JMP(const i: Integer): Boolean;
+begin
+  Result := pos1(#9'jmp ', i);
+end;
+
+function JMP_L(const i: Integer): Boolean;
 begin
   Result := pos1(#9'jmp l_', i);
 end;

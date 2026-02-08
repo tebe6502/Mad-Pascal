@@ -1971,7 +1971,7 @@ var
         if NumTok = OldNumTok then   // No token found
         begin
           CloseFile(InFile);
-          Error(NumTok, 'Illegal character ''' + ch + ''' (' + Hex(Ord(ch), 2) + ')');
+          Error(NumTok, 'Illegal character ''' + ch + ''' (' + IntToHex(Ord(ch), 2) + ')');
         end;
 
       end;// while

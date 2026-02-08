@@ -391,7 +391,7 @@ begin
        rol_stack(i+4) and								// rol :STACKORIGIN+STACKWIDTH		; 4
        asl_a(i+5) and									// asl @				; 5
        rol_stack(i+6) and								// rol :STACKORIGIN+STACKWIDTH		; 6
-       (pos(#9'add <adr.', listing[i+7]) > 0) and					// add <adr.				; 7
+       add_l_adr(i+7) and								// add <adr.				; 7
        sta_bp2(i+8) and									// sta :bp2				; 8
        lda_h_adr(i+9) and								// lda >adr.				; 9
        adc_stack(i+10) and								// adc :STACKORIGIN+STACKWIDTH		; 10

@@ -538,9 +538,10 @@ begin
       opti(5) and									//; optimize		; 5
       (TemporaryBuf[6] = '') and							//			; 6
 //      lda_im(7) and									// lda #XX		; 7
-      sta(8) and (pos(' SYSTEM.', TemporaryBuf[8]) = 0) and				// sta			; 8
+      sta(8) and									// sta			; 8
 //      lda_im(9) and									// lda #YY 		; 9
-      sta(10) then									// sta			; 10
+      sta(10) and									// sta			; 10
+      (TemporaryBuf[11] = '') then							//			; 11
     begin
      TemporaryBuf[2] := TemporaryBuf[8];
 
@@ -564,9 +565,10 @@ begin
       opti(5) and									//; optimize		; 5
       (TemporaryBuf[6] = '') and							//			; 6
       lda_im(7) and (TemporaryBuf[7] <> TemporaryBuf[2]) and				// lda #BB		; 7
-      sta(8) and (pos(' SYSTEM.', TemporaryBuf[8]) = 0) and				// sta			; 8
+      sta(8) and									// sta			; 8
 //      lda_im(9) and									// lda #YY 		; 9
-      sta(10) then									// sta			; 10
+      sta(10) and									// sta			; 10
+      (TemporaryBuf[11] = '') then							//			; 11
     begin
      TemporaryBuf[4] := TemporaryBuf[5];
      TemporaryBuf[5] := TemporaryBuf[6];
@@ -680,7 +682,8 @@ begin
       (TemporaryBuf[3] = '') and							//			; 3
       opti(4) and									//; optimize 		; 4
       (TemporaryBuf[5] = '') and							//			; 5
-      lda(6) then									// lda PRIME		; 6
+      lda(6) and									// lda PRIME		; 6
+      (SKIP(7) = false) then								//~SKIP			; 7
     if argMatch(0, 6) then
     begin
      TemporaryBuf[6] := '~';
@@ -703,7 +706,8 @@ begin
       (TemporaryBuf[2] = '') and							//			; 2
       opti(3) and									//; optimize 		; 3
       (TemporaryBuf[4] = '') and							//			; 4
-      lda(5) then									// lda PRIME		; 5
+      lda(5) and									// lda PRIME		; 5
+      (SKIP(6) = false) then								//~SKIP			; 6
     if argMatch(0, 5) then
     begin
      TemporaryBuf[5] := '~';

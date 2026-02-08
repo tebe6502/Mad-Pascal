@@ -1383,7 +1383,7 @@ begin
 //       cmp_stack(i+7) and									// cmp :STACKORIGIN+9			; 7
        seq(i+8) and										// seq					; 8
        (bpl_a(i+9) or bcs_a(i+9)) and								// bpl|bcs @+				; 9
-       jmp(i+10) then										// jmp l_				; 10
+       jmp_l(i+10) then										// jmp l_				; 10
      if argMatch(i+2, i+7) then
       begin
 	listing[i+3] := '';
@@ -1883,7 +1883,7 @@ begin
        lda_val(i+7) and										// lda					; 7
        cmp(i+8) and										// cmp					; 8
 //       SKIP(i+9) and										// SKIP @+				; 9
-       jmp(i+10) and										// jmp					; 10
+       jmp_l(i+10) and										// jmp					; 10
        lab_a(i+11) and       									//@					; 11
 //       lda_a(i+12) and									// lda I				; 12
        asl_a(i+13) and 										// asl @				; 13

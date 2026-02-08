@@ -14,7 +14,8 @@ procedure CompileProgram;
 
 implementation
 
-uses Crt, SysUtils, Common, Messages, Scanner, Parser, Optimize, OptimizeTemporary, MathEvaluate;
+uses Crt, SysUtils, Common, Assembler, Messages, Scanner, Parser, Optimize, OptimizeTemporary, MathEvaluate;
+
 
 // ---------------------------------------------------------------------------
 
@@ -15490,6 +15491,7 @@ WHILETOK:
     const
       reg: array [1..3] of String = (':EDX', ':ECX', ':EAX');
       // !!! kolejnosc edx, ecx, eax !!! korzysta z tego memmove, memset !!!
+
     var
       ftmp: TFloat;
       v: Int64;
@@ -15511,10 +15513,12 @@ WHILETOK:
       if dorig then
       begin
 
+        txt := 'DATAORIGIN+' + Hex(Ident[IdentIndex].Value - DATAORIGIN, 4);
+
         if brackets then
-          Result := #9'= [DATAORIGIN+' + Hex(Ident[IdentIndex].Value - DATAORIGIN, 4) + ']'
+          Result := #9'= [' + txt + ']'
         else
-          Result := #9'= DATAORIGIN+' + Hex(Ident[IdentIndex].Value - DATAORIGIN, 4);
+          Result := #9'= ' + txt;
 
       end
       else
@@ -15633,12 +15637,17 @@ WHILETOK:
     end;
 
     // ----------------------------------------------------------------------------
+
   begin
 
     if Pass = CODEGENERATIONPASS then
     begin
 
       StopOptimization;
+
+
+//      Working := CallGraph[ Ident[BlockIdentIndex].ProcAsBlock ].NumChildren = 0;
+
 
       emptyLine := True;
       size := 0;

@@ -450,7 +450,7 @@ begin
        ora(i+2) and										// ora 			; 2
        sne(i+3) and										// sne			; 3
        lab_a(i+4) and										//@			; 4
-       jmp(i+5) then										// jmp l_		; 5
+       jmp_l(i+5) then										// jmp l_		; 5
       begin
 	listing[i+1] := #9'jmi ' + copy(listing[i+5], 6, 256);
 

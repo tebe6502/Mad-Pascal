@@ -31,7 +31,7 @@ begin
 
 
     if (i = l - 2) and										// "samotna" instrukcja na koncu bloku
-       jmp(i+1) and										// jmp l_
+       jmp_l(i+1) and										// jmp l_
        (sta_stack(i) or sty_stack(i) or lda_a(i) or ldy(i) or and_ora_eor(i) or iny(i) or
         lsr_stack(i) or asl_stack(i) or ror_stack(i) or rol_stack(i) or
         lsr_a(i) or asl_a(i) or ror_a(i) or rol_a(i) or adc(i) or sbc(i)) then
@@ -496,7 +496,7 @@ begin
 
     if sta_im_0(i) and										// sta #$00			; 0
        (beq(i+1) or bne(i+1)) and								// beq|bne			; 1
-       jmp(i+2) then										// jmp				; 2
+       jmp_l(i+2) then										// jmp				; 2
      begin
 	listing[i]   := '';
 

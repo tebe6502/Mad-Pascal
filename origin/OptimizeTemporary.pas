@@ -15,12 +15,12 @@ procedure FlushTempBuf;
 
 implementation
 
-uses Crt, SysUtils, Common;
+uses Crt, SysUtils, Common, Assembler;
 
-// ----------------------------------------------------------------------------
 
 var
   TemporaryBuf: array [0..511] of String;
+
 
 // ----------------------------------------------------------------------------
 

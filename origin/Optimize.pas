@@ -14,7 +14,25 @@ procedure OptimizeProgram(MainProcedureIndex: Integer);
 
 implementation
 
-uses Crt, SysUtils, Common, OptimizeTemporary;
+uses Crt, SysUtils, Common, Assembler, OptimizeTemporary;
+
+
+type
+    TListing = array [0..1023] of string;
+    TListing_tmp = array [0..63] of string;
+
+    TStack = array [0..15, 0..3] of string;
+
+    RWStack = array [0..7+1, 0..3] of Boolean;
+
+var
+    listing: TListing;
+    listing_tmp: TListing_tmp;
+
+    s: TStack;
+
+    cnt_l,		// licznik odczytow stosu
+    cnt_s: RWStack;	// licznik zapisow stosu
 
 
 // ----------------------------------------------------------------------------
@@ -41,7 +59,7 @@ var ProcAsBlock: TBoolean;					// issue #125 fixed
 
   	for ChildIndex := 1 to CallGraph[ProcAsBlockIndex].NumChildren do
 	   for ChildIdentIndex := 1 to NumIdent do
-	      if (Ident[ChildIdentIndex].ProcAsBlock > 0) and (Ident[ChildIdentIndex].ProcAsBlock = CallGraph[ProcAsBlockIndex].ChildBlock[ChildIndex]) then
+	      if {(Ident[ChildIdentIndex].ProcAsBlock > 0) and} (Ident[ChildIdentIndex].ProcAsBlock = CallGraph[ProcAsBlockIndex].ChildBlock[ChildIndex]) then
 		MarkNotDead(ChildIdentIndex);
 
      end;
@@ -50,8 +68,7 @@ var ProcAsBlock: TBoolean;					// issue #125 fixed
 
 begin
 
- //fillbyte(ProcAsBlock, sizeof(ProcAsBlock), 0);
- ProcAsBlock:=Default(TBoolean);
+ ProcAsBlock := Default(TBoolean);
 
 // Perform dead code elimination
  MarkNotDead(MainProcedureIndex);
@@ -85,21 +102,22 @@ procedure OptimizeASM;
 (* optymalizacja powiodla sie jesli na wyjsciu X=0
 (* peephole optimization
 (* -------------------------------------------------------------------------- *)
-type
-    TListing = array [0..1023] of string;
-    TListing_tmp = array [0..127] of string;
+//type
+//    TListing = array [0..1023] of string;
+//    TListing_tmp = array [0..63] of string;
 
-    TStack = array [0..15, 0..3] of string;
+//    TStack = array [0..15, 0..3] of string;
+
 
 var inxUse, found: Boolean;
     i, l, k, m, x: integer;
 
     elf: cardinal;
 
-    listing: TListing;
-    listing_tmp: TListing_tmp;
+//    listing: TListing;
+//    listing_tmp: TListing_tmp;
 
-    s: TStack;
+//    s: TStack;
 
     a, t, arg0: string;
 
@@ -142,8 +160,7 @@ var inxUse, found: Boolean;
 
   function onBreak(const i: Integer): Boolean;
   begin
-    Result := lab_a(i) or jsr(i) or eif(i);
-    // !!! eif !!! koniecznie
+    Result := lab_a(i) or jsr(i) or eif(i);	// !!! eif !!! koniecznie
   end;
 
 
@@ -547,6 +564,7 @@ var inxUse, found: Boolean;
 
   end;
 
+// -----------------------------------------------------------------------------
 
   function GetString(const j: Integer): String; overload;
   var
@@ -568,8 +586,9 @@ var inxUse, found: Boolean;
 
   end;
 
+// -----------------------------------------------------------------------------
 
-  function GetStringLast(const j: Integer): String; overload;
+  function GetStringLast(const j: Integer): String;
   var
     i: Integer;
     a: String;
@@ -590,8 +609,9 @@ var inxUse, found: Boolean;
 
   end;  //GetStringLast
 
+// -----------------------------------------------------------------------------
 
-  function GetARG(n: Byte; x: Shortint; reset: Boolean = True): String;
+  function GetARG(n: Byte; x: Shortint; reset: Boolean = True): String; overload;
   var
     i: Integer;
     a: String;
@@ -637,29 +657,41 @@ var inxUse, found: Boolean;
 
 // -----------------------------------------------------------------------------
 
+  function GetARG(const i: integer): String; overload;
+  begin
+
+    Result := copy(listing[i], 6, 256)
+
+  end;
+
+// -----------------------------------------------------------------------------
+
+  function GetCMD(const i: integer): String;
+  begin
+
+    Result := copy(listing[i], 1, 5)
+
+  end;
+
+// -----------------------------------------------------------------------------
+
   function RemoveUnusedSTACK: Boolean;
-  type
-      tStack = array [0..7+1, 0..3] of Boolean;
+//  type
+//      tStack = array [0..7+1, 0..3] of Boolean;
 
   var j: byte;
       i: integer;
-      cnt_l,		// licznik odczytow stosu
-      cnt_s: tStack;	// licznik zapisow stosu
+//      cnt_l,		// licznik odczytow stosu
+//      cnt_s: tStack;	// licznik zapisow stosu
 
 
    procedure Clear;
-   var i: byte;
    begin
 
-    for i := 0 to 15 do begin
-     s[i][0] := '';
-     s[i][1] := '';
-     s[i][2] := '';
-     s[i][3] := '';
-    end;
+    s := Default(TStack);
 
-    cnt_l := Default(TStack);
-    cnt_s := Default(TStack);
+    cnt_l := Default(RWStack);
+    cnt_s := Default(RWStack);
 
    end;
 
@@ -872,16 +904,16 @@ end;
 
     for i := 0 to l - 1 do
 
-      if (pos(' :eax', listing[i]) = 5) and (pos(#9'.if', listing[i + 1]) = 0) then
+      if {(pos(' :eax', listing[i]) = 5)} EAX(i) and (_if(i+1) = false) then
       begin
         Result := True;
 
-        tmp := copy(listing[i], 6, 256);
+        tmp := GetARG(i);
 
-        if tmp = ':eax' then listing[i] := copy(listing[i], 1, 5) + ':STACKORIGIN+16' else
-         if tmp = ':eax+1' then listing[i] := copy(listing[i], 1, 5) + ':STACKORIGIN+STACKWIDTH+16' else
-          if tmp = ':eax+2' then listing[i] := copy(listing[i], 1, 5) + ':STACKORIGIN+STACKWIDTH*2+16' else
-           if tmp = ':eax+3' then listing[i] := copy(listing[i], 1, 5) + ':STACKORIGIN+STACKWIDTH*3+16';
+        if tmp = ':eax' then listing[i] := GetCMD(i) + ':STACKORIGIN+16' else
+         if tmp = ':eax+1' then listing[i] := GetCMD(i) + ':STACKORIGIN+STACKWIDTH+16' else
+          if tmp = ':eax+2' then listing[i] := GetCMD(i) + ':STACKORIGIN+STACKWIDTH*2+16' else
+           if tmp = ':eax+3' then listing[i] := GetCMD(i) + ':STACKORIGIN+STACKWIDTH*3+16';
 
       end;
 
@@ -897,12 +929,14 @@ end;
     for i := 0 to l - 1 do
 
       if pos(' :STACKORIGIN+', listing[i]) = 5 then begin
-        tmp := copy(listing[i], 6, 256);
 
-        if tmp = ':STACKORIGIN+16' then listing[i] := copy(listing[i], 1, 5) + ':eax' else
-         if tmp = ':STACKORIGIN+STACKWIDTH+16' then listing[i] := copy(listing[i], 1, 5) + ':eax+1' else
-          if tmp = ':STACKORIGIN+STACKWIDTH*2+16' then listing[i] := copy(listing[i], 1, 5) + ':eax+2' else
-           if tmp = ':STACKORIGIN+STACKWIDTH*3+16' then listing[i] := copy(listing[i], 1, 5) + ':eax+3';
+        tmp := GetARG(i);
+
+        if tmp = ':STACKORIGIN+16' then listing[i] := GetCMD(i) + ':eax' else
+         if tmp = ':STACKORIGIN+STACKWIDTH+16' then listing[i] := GetCMD(i)+ ':eax+1' else
+          if tmp = ':STACKORIGIN+STACKWIDTH*2+16' then listing[i] := GetCMD(i)+ ':eax+2' else
+           if tmp = ':STACKORIGIN+STACKWIDTH*3+16' then listing[i] := GetCMD(i) + ':eax+3';
+
       end;
 
   end;  //OptimizeEAX_OFF
@@ -1247,7 +1281,6 @@ begin        // OptimizeASM
   x := 0;
 
   arg0 := '';
-  //arg1 := '';
 
   inxUse := False;
 
@@ -2456,7 +2489,7 @@ begin        // OptimizeASM
       for i := 0 to l - 1 do
         if (listing[i] = #9'inc ' + optyA) or (listing[i] = #9'dec ' + optyA) or //((optyY <> '') and (optyA = optyY)) or
 	  _if(i) or
-          lda_a(i) or mva(i) or mwa(i) or tya(i) or lab_a(i) or jsr(i) or (pos(#9'jmp ', listing[i]) > 0) then
+          lda_a(i) or mva(i) or mwa(i) or tya(i) or lab_a(i) or jsr(i) or jmp(i) then
         begin
           optyA := '';
           Break;
@@ -2469,7 +2502,7 @@ begin        // OptimizeASM
       for i := 0 to l - 1 do
         if LabelIsUsed(i) or //((optyA <> '') and (optyA = optyY)) or
 	  _if(i) or
-          ldy(i) or mvy(i) or mwy(i) or iny(i) or dey(i) or tay(i) or lab_a(i) or jsr(i) or (pos(#9'jmp ', listing[i]) > 0) then
+          ldy(i) or mvy(i) or mwy(i) or iny(i) or dey(i) or tay(i) or lab_a(i) or jsr(i) or jmp(i) then
         begin
           optyY := '';
           Break;
@@ -2489,7 +2522,7 @@ begin        // OptimizeASM
             Break;
           end;
 
-        if sta_bp2(i) or sta_bp2_1(i) or jsr(i) or (pos(#9'jmp ', listing[i]) > 0) then
+        if sta_bp2(i) or sta_bp2_1(i) or jsr(i) or jmp(i) then
         begin
           optyBP2 := '';
           Break;
