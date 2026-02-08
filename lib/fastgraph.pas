@@ -814,7 +814,7 @@ ok1	lda x+1
 	lda x
 	cmp MAIN.SYSTEM.ScreenWidth
 sk2
-	bcs error
+	bcc ok2
 
 	mwa WIN_RIGHT x
 	clc

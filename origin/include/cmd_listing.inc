@@ -599,6 +599,16 @@ begin
   Result := pos1(#9'and #', i);
 end;
 
+function ORA_IM(const i: Integer): Boolean;
+begin
+  Result := pos1(#9'ora #', i);
+end;
+
+function EOR_IM(const i: Integer): Boolean;
+begin
+  Result := pos1(#9'eor #', i);
+end;
+
 function AND_ORA_EOR_IM(const i: Integer): Boolean;
 begin
   Result := pos1(#9'and #', i) or pos1(#9'ora #', i) or pos1(#9'eor #', i);

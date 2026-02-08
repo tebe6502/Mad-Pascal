@@ -386,8 +386,9 @@ begin
 
 
     if lda_im(i) and									// lda #				; 0
-       (pos('eor #', listing[i+1]) > 0) and						// eor #				; 1
+       eor_im(i+1) and									// eor #				; 1
        sta_a(i+2) then									// sta 					; 2
+     if argMatch(i, i+1) then
      begin
 
 	p := GetBYTE(i) xor GetBYTE(i+1);

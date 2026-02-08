@@ -196,6 +196,11 @@ end;
     Result := pos1(#9'sta :STACK', i)
   end;
 
+  function CMP_STACK(const i: Integer): Boolean;
+  begin
+    Result := pos1(#9'cmp :STACK', i);
+  end;
+
   function STY_STACK(const i: Integer): Boolean;
   begin
     Result := pos1(#9'sty :STACK', i)
@@ -360,6 +365,11 @@ end;
   function BPL_A(const i: Integer): Boolean;
   begin
     Result := TemporaryBuf[i] = #9'bpl @+'
+  end;
+
+  function BMI_A(const i: Integer): Boolean;
+  begin
+    Result := TemporaryBuf[i] = #9'bmi @+'
   end;
 
 // -----------------------------------------------------------------------------

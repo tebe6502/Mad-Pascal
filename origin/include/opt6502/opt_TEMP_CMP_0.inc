@@ -62,7 +62,7 @@ begin
 
 
    if ldy_1(0) and										// ldy #1		; 0
-      and_ora_eor(1) and									// and|orq|eor		; 1
+      and_ora_eor(1) and									// and|ora|eor		; 1
       cmp_im_0(2) and										// cmp #$00		; 2
       (beq_a(3) or bne_a(3)) and								// beq|bne		; 3
       dey(4) and										// dey			; 4

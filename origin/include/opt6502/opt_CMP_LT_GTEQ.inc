@@ -194,6 +194,8 @@ begin
       end;
 
 
+
+{
     if ldy_1(i) and										// ldy #1		; 0
        lda_val(i+1) and										// lda			; 1	~:STACKORIGIN
        cmp_val(i+2) and										// cmp			; 2	~:STACKORIGIN
@@ -201,7 +203,7 @@ begin
        dey(i+4) and 										// dey			; 4
        lab_a(i+5) and										//@			; 5
        tya(i+6) and										// tya			; 6
-       sta_a(i+7) and										// sta			; 7
+       (sta_a(i+7) or and_ora_eor(i+7)) and							// sta|and|ora|eor	; 7
 												//			; 8
        (dex(i+9) = false) then									//~dex			; 9
       begin
@@ -224,7 +226,7 @@ begin
        dey(i+5) and										// dey			; 5
        lab_a(i+6) and										//@			; 6
        tya(i+7) and										// tya			; 7
-       sta_a(i+8) and										// sta			; 8
+       (sta_a(i+8) or and_ora_eor(i+8)) and							// sta|and|ora|eor	; 8
 												//			; 9
        (dex(i+10) = false) then									//~dex			; 10
      if argMatch(i, i+2) then
@@ -240,6 +242,9 @@ begin
 
 	exit(false);
      end;
+}
+
+
 
 
 // -----------------------------------------------------------------------------
@@ -335,13 +340,17 @@ begin
 // 				     SMALLINT
 // -----------------------------------------------------------------------------
 
+
+{
+
+
     if ldy_1(i) and 										// ldy #1		; 0	BOOL := SHORTINT < 0
        lda_val(i+1) and										// lda			; 1	BOOL := SMALLINT < 0
        bmi_a(i+2) and										// bmi @+		; 2	BOOL := INTEGER < 0
        dey(i+3) and										// dey			; 3
        lab_a(i+4) and										//@			; 4
        tya(i+5) and										// tya			; 5
-       sta_a(i+6) and										// sta			; 6
+       (sta_a(i+6) or and_ora_eor(i+6)) and							// sta|and|ora|eor	; 6
 												//			; 7
        (dex(i+8) = false) then									//~dex			; 8
      begin
@@ -363,7 +372,7 @@ begin
        dey(i+4) and										// dey			; 4
        lab_a(i+5) and										//@			; 5
        tya(i+6) and										// tya			; 6
-       sta_a(i+7) and										// sta			; 7
+       (sta_a(i+7) or and_ora_eor(i+7)) and							// sta|and|ora|eor	; 7
 												//			; 8
        (dex(i+9) = false) then									//~dex			; 9
      if argMatch(i, i+2) then
@@ -386,7 +395,7 @@ begin
        dey(i+3) and										// dey			; 3
        lab_a(i+4) and										//@			; 4
        tya(i+5) and										// tya			; 5
-       sta_a(i+6) and										// sta			; 6
+       (sta_a(i+6) or and_ora_eor(i+6)) and							// sta|and|ora|eor	; 6
 												//			; 7
        (dex(i+8) = false) then									//~dex			; 8
      begin
@@ -408,7 +417,7 @@ begin
        dey(i+4) and										// dey			; 4
        lab_a(i+5) and										//@			; 5
        tya(i+6) and										// tya			; 6
-       sta_a(i+7) and										// sta			; 7
+       (sta_a(i+7) or and_ora_eor(i+7)) and							// sta|and|ora|eor	; 7
 												//			; 8
        (dex(i+9) = false) then									//~dex			; 9
      if argMatch(i, i+2) then
@@ -423,6 +432,13 @@ begin
 
 	exit(false);
      end;
+
+}
+
+
+
+
+
 
 
     if ENDL(i+15) and										// .ENDL		; 15

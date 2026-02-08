@@ -21,7 +21,7 @@ begin
        (tya(i+7) or sty(i+7)) then								// tya|sty		; 7
      if argMatch(i, i+3) then
       begin
-       listing[i+2] := #9'cmp ' + copy(listing[i+2], 6, 256);
+       listing[i+2] := #9'cmp ' + GetARG(i+2);
 
        listing[i] := '';
 
@@ -62,7 +62,7 @@ begin
       begin
        listing[i+2] := '';
        listing[i+3] := '';
-       listing[i+4] := #9'ora ' + copy(listing[i+4], 6, 256);
+       listing[i+4] := #9'ora ' + GetARG(i+4);
        listing[i+5] := '';
        listing[i+6] := '';
 
@@ -81,7 +81,7 @@ begin
       begin
 
        if beq(i+2) then
-        listing[i+6] := #9'jeq ' + copy(listing[i+6], 6, 256);
+        listing[i+6] := #9'jeq ' + GetARG(i+6);
 
        listing[i+2] := '';
        listing[i+3] := '';
@@ -125,6 +125,7 @@ begin
        exit(false);
       end;
 
+
 { !!! nie moze decydowac na podstawie tylko starszego bajtu
 
     if (SKIP(i-1) = false) and
@@ -158,6 +159,7 @@ begin
        exit(false);
       end;
 }
+
 
     if ldy(i) and										// ldy 			; 0	opt_095	| WORD <> 0 ; WORD = 0
        lda_bp2_y(i+1) and									// lda (:bp2),y		; 1
