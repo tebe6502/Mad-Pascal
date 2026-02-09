@@ -579,21 +579,21 @@ writeln('_B: ', Ident[IdentIndex].Name);
           // Size:=4;
 
           v := Byte(Value);
-          asm65(#9'mva #' + Hex(Byte(v), 2) + ' :STACKORIGIN,x');
+          asm65(#9'mva #' + HexByte(v) + ' :STACKORIGIN,x');
 
           if Size in [2, 4] then
           begin
             v := Byte(Value shr 8);
-            asm65(#9'mva #' + Hex(v, 2) + ' :STACKORIGIN+STACKWIDTH,x');
+            asm65(#9'mva #' + HexByte(v) + ' :STACKORIGIN+STACKWIDTH,x');
           end;
 
           if Size = 4 then
           begin
             v := Byte(Value shr 16);
-            asm65(#9'mva #' + Hex(v, 2) + ' :STACKORIGIN+STACKWIDTH*2,x');
+            asm65(#9'mva #' + HexByte(v) + ' :STACKORIGIN+STACKWIDTH*2,x');
 
             v := Byte(Value shr 24);
-            asm65(#9'mva #' + Hex(v, 2) + ' :STACKORIGIN+STACKWIDTH*3,x');
+            asm65(#9'mva #' + HexByte(v) + ' :STACKORIGIN+STACKWIDTH*3,x');
           end;
 
         end;
@@ -645,8 +645,6 @@ writeln('_B: ', Ident[IdentIndex].Name);
               asm65(#9'jsr @expandToCARD.SMALL')
             else
             begin
-              //       asm65(#9'jsr @expandToCARD.WORD');
-
               asm65(#9'mva #$00 :STACKORIGIN+STACKWIDTH*2,x');
               asm65(#9'mva #$00 :STACKORIGIN+STACKWIDTH*3,x');
             end;
@@ -655,8 +653,6 @@ writeln('_B: ', Ident[IdentIndex].Name);
               asm65(#9'jsr @expandToCARD.SHORT')
             else
             begin
-              //       asm65(#9'jsr @expandToCARD.BYTE');
-
               asm65(#9'mva #$00 :STACKORIGIN+STACKWIDTH,x');
               asm65(#9'mva #$00 :STACKORIGIN+STACKWIDTH*2,x');
               asm65(#9'mva #$00 :STACKORIGIN+STACKWIDTH*3,x');
@@ -698,8 +694,6 @@ writeln('_B: ', Ident[IdentIndex].Name);
               asm65(#9'jsr @expandToCARD1.SMALL')
             else
             begin
-              //       asm65(#9'jsr @expandToCARD1.WORD');
-
               asm65(#9'mva #$00 :STACKORIGIN-1+STACKWIDTH*2,x');
               asm65(#9'mva #$00 :STACKORIGIN-1+STACKWIDTH*3,x');
             end;
@@ -708,8 +702,6 @@ writeln('_B: ', Ident[IdentIndex].Name);
               asm65(#9'jsr @expandToCARD1.SHORT')
             else
             begin
-              //       asm65(#9'jsr @expandToCARD1.BYTE');
-
               asm65(#9'mva #$00 :STACKORIGIN-1+STACKWIDTH,x');
               asm65(#9'mva #$00 :STACKORIGIN-1+STACKWIDTH*2,x');
               asm65(#9'mva #$00 :STACKORIGIN-1+STACKWIDTH*3,x');
@@ -1111,7 +1103,7 @@ writeln('_B: ', Ident[IdentIndex].Name);
         if TestName(IdentIndex, svar) then
           asm65(#9'lda #' + svar + '-DATAORIGIN')
         else
-          asm65(#9'lda #' + Hex(par, 2));
+          asm65(#9'lda #' + HexByte(par));
 
         if TestName(IdentIndex, svar) then
         begin
@@ -1176,7 +1168,7 @@ writeln('_B: ', Ident[IdentIndex].Name);
         begin
 
           if (Ident[IdentIndex].DataType = POINTERTOK) and not (Ident[IdentIndex].AllocElementType in [UNTYPETOK, PROCVARTOK]) and (Ident[IdentIndex].PassMethod <> VARPASSING) then
-            asm65(#9'ldy #' + Hex(par, 2))
+            asm65(#9'ldy #' + HexByte(par))
           else begin
 
 	    if Page > 0 then
@@ -1188,7 +1180,7 @@ writeln('_B: ', Ident[IdentIndex].Name);
 
         end
         else
-          asm65(#9'ldy #' + Hex(par, 2));
+          asm65(#9'ldy #' + HexByte(par));
 
 
         case Size of
@@ -1265,10 +1257,10 @@ writeln('_B: ', Ident[IdentIndex].Name);
               if (Ident[IdentIndex].isAbsolute) and (Ident[IdentIndex].idType = ARRAYTOK) and (Ident[IdentIndex].Value >= 0) then
               begin
 
-                asm65(#9'lda #' + Hex(Byte(Ident[IdentIndex].Value), 2));
+                asm65(#9'lda #' + HexByte(Byte(Ident[IdentIndex].Value)));
                 asm65(#9'add :STACKORIGIN,x');
                 asm65(#9'tay');
-                asm65(#9'lda #' + Hex(Byte(Ident[IdentIndex].Value shr 8), 2));
+                asm65(#9'lda #' + HexByte(Byte(Ident[IdentIndex].Value shr 8)));
                 asm65(#9'adc :STACKORIGIN+STACKWIDTH,x');
                 asm65(#9'sta :bp+1');
                 asm65(#9'lda (:bp),y');
@@ -1292,8 +1284,7 @@ writeln('_B: ', Ident[IdentIndex].Name);
                   asm65(#9'adc :STACKORIGIN+STACKWIDTH,x');
                   asm65(#9'sta :bp2+1');
                   asm65(#9'ldy #$00');
-                  asm65(#9'lda (:bp2),y');
-                  asm65(#9'sta :STACKORIGIN,x');
+                  asm65(#9'mva (:bp2),y :STACKORIGIN,x');
 
                 end
                 else
@@ -1324,8 +1315,7 @@ writeln('_B: ', Ident[IdentIndex].Name);
                 LoadBP2(IdentIndex, svar);
 
                 asm65(#9'ldy :STACKORIGIN,x');
-                asm65(#9'lda (:bp2),y');
-                asm65(#9'sta :STACKORIGIN,x');
+                asm65(#9'mva (:bp2),y :STACKORIGIN,x');
 
               end
               else
@@ -1349,8 +1339,7 @@ writeln('_B: ', Ident[IdentIndex].Name);
 
           2: begin                    // PUSH WORD
 
-            if IndirectionLevel = ASPOINTERTOARRAYORIGIN then
-              GenerateIndexShift(WORDTOK);
+            if IndirectionLevel = ASPOINTERTOARRAYORIGIN then GenerateIndexShift(WORDTOK);
 
             asm65;
 
@@ -1379,10 +1368,10 @@ writeln('_B: ', Ident[IdentIndex].Name);
                 if (Ident[IdentIndex].isAbsolute) and (Ident[IdentIndex].idType = ARRAYTOK) and (Ident[IdentIndex].Value >= 0) then
                 begin
 
-                  asm65(#9'lda #' + Hex(Byte(Ident[IdentIndex].Value), 2));
+                  asm65(#9'lda #' + HexByte(Byte(Ident[IdentIndex].Value)));
                   asm65(#9'add :STACKORIGIN,x');
                   asm65(#9'sta :bp2');
-                  asm65(#9'lda #' + Hex(Byte(Ident[IdentIndex].Value shr 8), 2));
+                  asm65(#9'lda #' + HexByte(Byte(Ident[IdentIndex].Value shr 8)));
                   asm65(#9'adc :STACKORIGIN+STACKWIDTH,x');
                   asm65(#9'sta :bp2+1');
 
@@ -1400,11 +1389,9 @@ writeln('_B: ', Ident[IdentIndex].Name);
                 end;
 
                 asm65(#9'ldy #$00');
-                asm65(#9'lda (:bp2),y');
-                asm65(#9'sta :STACKORIGIN,x');
+                asm65(#9'mva (:bp2),y :STACKORIGIN,x');
                 asm65(#9'iny');
-                asm65(#9'lda (:bp2),y');
-                asm65(#9'sta :STACKORIGIN+STACKWIDTH,x');
+                asm65(#9'mva (:bp2),y :STACKORIGIN+STACKWIDTH,x');
 
               end;
 
@@ -1418,11 +1405,9 @@ writeln('_B: ', Ident[IdentIndex].Name);
                 LoadBP2(IdentIndex, svar);
 
                 asm65(#9'ldy :STACKORIGIN,x');
-                asm65(#9'lda (:bp2),y');
-                asm65(#9'sta :STACKORIGIN,x');
+                asm65(#9'mva (:bp2),y :STACKORIGIN,x');
                 asm65(#9'iny');
-                asm65(#9'lda (:bp2),y');
-                asm65(#9'sta :STACKORIGIN+STACKWIDTH,x');
+                asm65(#9'mva (:bp2),y :STACKORIGIN+STACKWIDTH,x');
 
               end
               else
@@ -1453,8 +1438,7 @@ writeln('_B: ', Ident[IdentIndex].Name);
 
           4: begin                      // PUSH CARDINAL
 
-            if IndirectionLevel = ASPOINTERTOARRAYORIGIN then
-              GenerateIndexShift(CARDINALTOK);
+            if IndirectionLevel = ASPOINTERTOARRAYORIGIN then GenerateIndexShift(CARDINALTOK);
 
             asm65;
 
@@ -1487,10 +1471,10 @@ writeln('_B: ', Ident[IdentIndex].Name);
                 if (Ident[IdentIndex].isAbsolute) and (Ident[IdentIndex].idType = ARRAYTOK) and (Ident[IdentIndex].Value >= 0) then
                 begin
 
-                  asm65(#9'lda #' + Hex(Byte(Ident[IdentIndex].Value), 2));
+                  asm65(#9'lda #' + HexByte(Byte(Ident[IdentIndex].Value)));
                   asm65(#9'add :STACKORIGIN,x');
                   asm65(#9'sta :bp2');
-                  asm65(#9'lda #' + Hex(Byte(Ident[IdentIndex].Value shr 8), 2));
+                  asm65(#9'lda #' + HexByte(Byte(Ident[IdentIndex].Value shr 8)));
                   asm65(#9'adc :STACKORIGIN+STACKWIDTH,x');
                   asm65(#9'sta :bp2+1');
 
@@ -1508,17 +1492,13 @@ writeln('_B: ', Ident[IdentIndex].Name);
                 end;
 
                 asm65(#9'ldy #$00');
-                asm65(#9'lda (:bp2),y');
-                asm65(#9'sta :STACKORIGIN,x');
+                asm65(#9'mva (:bp2),y :STACKORIGIN,x');
                 asm65(#9'iny');
-                asm65(#9'lda (:bp2),y');
-                asm65(#9'sta :STACKORIGIN+STACKWIDTH,x');
+                asm65(#9'mva (:bp2),y :STACKORIGIN+STACKWIDTH,x');
                 asm65(#9'iny');
-                asm65(#9'lda (:bp2),y');
-                asm65(#9'sta :STACKORIGIN+STACKWIDTH*2,x');
+                asm65(#9'mva (:bp2),y :STACKORIGIN+STACKWIDTH*2,x');
                 asm65(#9'iny');
-                asm65(#9'lda (:bp2),y');
-                asm65(#9'sta :STACKORIGIN+STACKWIDTH*3,x');
+                asm65(#9'mva (:bp2),y :STACKORIGIN+STACKWIDTH*3,x');
 
               end;
 
@@ -1532,17 +1512,13 @@ writeln('_B: ', Ident[IdentIndex].Name);
                 LoadBP2(IdentIndex, svar);
 
                 asm65(#9'ldy :STACKORIGIN,x');
-                asm65(#9'lda (:bp2),y');
-                asm65(#9'sta :STACKORIGIN,x');
+                asm65(#9'mva (:bp2),y :STACKORIGIN,x');
                 asm65(#9'iny');
-                asm65(#9'lda (:bp2),y');
-                asm65(#9'sta :STACKORIGIN+STACKWIDTH,x');
+                asm65(#9'mva (:bp2),y :STACKORIGIN+STACKWIDTH,x');
                 asm65(#9'iny');
-                asm65(#9'lda (:bp2),y');
-                asm65(#9'sta :STACKORIGIN+STACKWIDTH*2,x');
+                asm65(#9'mva (:bp2),y :STACKORIGIN+STACKWIDTH*2,x');
                 asm65(#9'iny');
-                asm65(#9'lda (:bp2),y');
-                asm65(#9'sta :STACKORIGIN+STACKWIDTH*3,x');
+                asm65(#9'mva (:bp2),y :STACKORIGIN+STACKWIDTH*3,x');
 
               end
               else
@@ -1629,39 +1605,32 @@ writeln('_B: ', Ident[IdentIndex].Name);
         if TestName(IdentIndex, svar) then
           asm65(#9'ldy #' + svar + '-DATAORIGIN')
         else
-          asm65(#9'ldy #' + Hex(par, 2));
+          asm65(#9'ldy #' + HexByte(par));
 
         case Size of
           1: begin
 
-            asm65(#9'lda (:bp2),y');
-            asm65(#9'sta :STACKORIGIN,x');
+            asm65(#9'mva (:bp2),y :STACKORIGIN,x');
 
           end;
 
           2: begin
 
-            asm65(#9'lda (:bp2),y');
-            asm65(#9'sta :STACKORIGIN,x');
+            asm65(#9'mva (:bp2),y :STACKORIGIN,x');
             asm65(#9'iny');
-            asm65(#9'lda (:bp2),y');
-            asm65(#9'sta :STACKORIGIN+STACKWIDTH,x');
+            asm65(#9'mva (:bp2),y :STACKORIGIN+STACKWIDTH,x');
 
           end;
 
           4: begin
 
-            asm65(#9'lda (:bp2),y');
-            asm65(#9'sta :STACKORIGIN,x');
+            asm65(#9'mva (:bp2),y :STACKORIGIN,x');
             asm65(#9'iny');
-            asm65(#9'lda (:bp2),y');
-            asm65(#9'sta :STACKORIGIN+STACKWIDTH,x');
+            asm65(#9'mva (:bp2),y :STACKORIGIN+STACKWIDTH,x');
             asm65(#9'iny');
-            asm65(#9'lda (:bp2),y');
-            asm65(#9'sta :STACKORIGIN+STACKWIDTH*2,x');
+            asm65(#9'mva (:bp2),y :STACKORIGIN+STACKWIDTH*2,x');
             asm65(#9'iny');
-            asm65(#9'lda (:bp2),y');
-            asm65(#9'sta :STACKORIGIN+STACKWIDTH*3,x');
+            asm65(#9'mva (:bp2),y :STACKORIGIN+STACKWIDTH*3,x');
 
           end;
         end;
@@ -1705,7 +1674,7 @@ writeln('_B: ', Ident[IdentIndex].Name);
           asm65(#9'add #' + svar + '-DATAORIGIN');
         end
         else
-          asm65(#9'add #' + Hex(par, 2));
+          asm65(#9'add #' + HexByte(par));
 
         asm65(#9'sta :STACKORIGIN,x');
 
@@ -1736,7 +1705,7 @@ writeln('_B: ', Ident[IdentIndex].Name);
         if TestName(IdentIndex, svar) then
           asm65(#9'add #' + svar + '-DATAORIGIN')
         else
-          asm65(#9'add #' + Hex(par, 2));
+          asm65(#9'add #' + HexByte(par));
 
         asm65(#9'sta :STACKORIGIN,x');
         asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
@@ -1748,34 +1717,27 @@ writeln('_B: ', Ident[IdentIndex].Name);
         case Size of
           1: begin
 
-            asm65(#9'lda (:bp2),y');
-            asm65(#9'sta :STACKORIGIN,x');
+            asm65(#9'mva (:bp2),y :STACKORIGIN,x');
 
           end;
 
           2: begin
 
-            asm65(#9'lda (:bp2),y');
-            asm65(#9'sta :STACKORIGIN,x');
+            asm65(#9'mva (:bp2),y :STACKORIGIN,x');
             asm65(#9'iny');
-            asm65(#9'lda (:bp2),y');
-            asm65(#9'sta :STACKORIGIN+STACKWIDTH,x');
+            asm65(#9'mva (:bp2),y :STACKORIGIN+STACKWIDTH,x');
 
           end;
 
           4: begin
 
-            asm65(#9'lda (:bp2),y');
-            asm65(#9'sta :STACKORIGIN,x');
+            asm65(#9'mva (:bp2),y :STACKORIGIN,x');
             asm65(#9'iny');
-            asm65(#9'lda (:bp2),y');
-            asm65(#9'sta :STACKORIGIN+STACKWIDTH,x');
+            asm65(#9'mva (:bp2),y :STACKORIGIN+STACKWIDTH,x');
             asm65(#9'iny');
-            asm65(#9'lda (:bp2),y');
-            asm65(#9'sta :STACKORIGIN+STACKWIDTH*2,x');
+            asm65(#9'mva (:bp2),y :STACKORIGIN+STACKWIDTH*2,x');
             asm65(#9'iny');
-            asm65(#9'lda (:bp2),y');
-            asm65(#9'sta :STACKORIGIN+STACKWIDTH*3,x');
+            asm65(#9'mva (:bp2),y :STACKORIGIN+STACKWIDTH*3,x');
 
           end;
         end;
@@ -1828,7 +1790,7 @@ writeln('_B: ', Ident[IdentIndex].Name);
         end;
 
         asm65(#9'lda :STACKORIGIN,x');
-        asm65(#9'add #' + Hex(par, 2));
+        asm65(#9'add #' + HexByte(par));
         asm65(#9'sta :STACKORIGIN,x');
         asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
         asm65(#9'adc #$00');
@@ -1838,30 +1800,23 @@ writeln('_B: ', Ident[IdentIndex].Name);
 
         case Size of
           1: begin
-            asm65(#9'lda (:bp2),y');
-            asm65(#9'sta :STACKORIGIN-1,x');
+            asm65(#9'mva (:bp2),y :STACKORIGIN-1,x');
           end;
 
           2: begin
-            asm65(#9'lda (:bp2),y');
-            asm65(#9'sta :STACKORIGIN-1,x');
+            asm65(#9'mva (:bp2),y :STACKORIGIN-1,x');
             asm65(#9'iny');
-            asm65(#9'lda (:bp2),y');
-            asm65(#9'sta :STACKORIGIN-1+STACKWIDTH,x');
+            asm65(#9'mva (:bp2),y :STACKORIGIN-1+STACKWIDTH,x');
           end;
 
           4: begin
-            asm65(#9'lda (:bp2),y');
-            asm65(#9'sta :STACKORIGIN-1,x');
+            asm65(#9'mva (:bp2),y :STACKORIGIN-1,x');
             asm65(#9'iny');
-            asm65(#9'lda (:bp2),y');
-            asm65(#9'sta :STACKORIGIN-1+STACKWIDTH,x');
+            asm65(#9'mva (:bp2),y :STACKORIGIN-1+STACKWIDTH,x');
             asm65(#9'iny');
-            asm65(#9'lda (:bp2),y');
-            asm65(#9'sta :STACKORIGIN-1+STACKWIDTH*2,x');
+            asm65(#9'mva (:bp2),y :STACKORIGIN-1+STACKWIDTH*2,x');
             asm65(#9'iny');
-            asm65(#9'lda (:bp2),y');
-            asm65(#9'sta :STACKORIGIN-1+STACKWIDTH*3,x');
+            asm65(#9'mva (:bp2),y :STACKORIGIN-1+STACKWIDTH*3,x');
           end;
 
         end;
@@ -2271,10 +2226,10 @@ writeln('_B: ', Ident[IdentIndex].Name);
               if (IdentIndex > 0) and (Ident[IdentIndex].isAbsolute) and (Ident[IdentIndex].idType = ARRAYTOK) and (Ident[IdentIndex].Value >= 0) then
               begin
 
-                asm65(#9'lda #' + Hex(Byte(Ident[IdentIndex].Value), 2));
+                asm65(#9'lda #' + HexByte(Byte(Ident[IdentIndex].Value)));
                 asm65(#9'add :STACKORIGIN-1,x');
                 asm65(#9'tay');
-                asm65(#9'lda #' + Hex(Byte(Ident[IdentIndex].Value shr 8), 2));
+                asm65(#9'lda #' + HexByte(Byte(Ident[IdentIndex].Value shr 8)));
                 asm65(#9'adc :STACKORIGIN-1+STACKWIDTH,x');
                 asm65(#9'sta :bp+1');
 
@@ -2392,10 +2347,10 @@ writeln('_B: ', Ident[IdentIndex].Name);
                   if (Ident[IdentIndex].isAbsolute) and (Ident[IdentIndex].idType = ARRAYTOK) and (Ident[IdentIndex].Value >= 0) then
                   begin
 
-                    asm65(#9'lda #' + Hex(Byte(Ident[IdentIndex].Value), 2));
+                    asm65(#9'lda #' + HexByte(Byte(Ident[IdentIndex].Value)));
                     asm65(#9'add :STACKORIGIN-1,x');
                     asm65(#9'sta :bp2');
-                    asm65(#9'lda #' + Hex(Byte(Ident[IdentIndex].Value shr 8), 2));
+                    asm65(#9'lda #' + HexByte(Byte(Ident[IdentIndex].Value shr 8)));
                     asm65(#9'adc :STACKORIGIN-1+STACKWIDTH,x');
                     asm65(#9'sta :bp2+1');
 
@@ -2522,10 +2477,10 @@ writeln('_B: ', Ident[IdentIndex].Name);
                   if (Ident[IdentIndex].isAbsolute) and (Ident[IdentIndex].idType = ARRAYTOK) and (Ident[IdentIndex].Value >= 0) then
                   begin
 
-                    asm65(#9'lda #' + Hex(Byte(Ident[IdentIndex].Value), 2));
+                    asm65(#9'lda #' + HexByte(Byte(Ident[IdentIndex].Value)));
                     asm65(#9'add :STACKORIGIN-1,x');
                     asm65(#9'sta :bp2');
-                    asm65(#9'lda #' + Hex(Byte(Ident[IdentIndex].Value shr 8), 2));
+                    asm65(#9'lda #' + HexByte(Byte(Ident[IdentIndex].Value shr 8)));
                     asm65(#9'adc :STACKORIGIN-1+STACKWIDTH,x');
                     asm65(#9'sta :bp2+1');
 
@@ -2887,10 +2842,10 @@ writeln('_B: ', Ident[IdentIndex].Name);
               if (Ident[IdentIndex].isAbsolute) and (Ident[IdentIndex].idType = ARRAYTOK) and (Ident[IdentIndex].Value >= 0) then
               begin
 
-                asm65(#9'lda #' + Hex(Byte(Ident[IdentIndex].Value), 2));
+                asm65(#9'lda #' + HexByte(Byte(Ident[IdentIndex].Value)));
                 asm65(#9'add :STACKORIGIN-1,x');
                 asm65(#9'tay');
-                asm65(#9'lda #' + Hex(Byte(Ident[IdentIndex].Value shr 8), 2));
+                asm65(#9'lda #' + HexByte(Byte(Ident[IdentIndex].Value shr 8)));
                 asm65(#9'adc :STACKORIGIN-1+STACKWIDTH,x');
                 asm65(#9'sta :bp+1');
                 asm65(#9'lda :STACKORIGIN,x');
@@ -2974,8 +2929,7 @@ writeln('_B: ', Ident[IdentIndex].Name);
 
           2: begin											// PULL WORD
 
-            if IndirectionLevel = ASPOINTERTOARRAYORIGIN then
-              GenerateIndexShift(WORDTOK, 1);
+            if IndirectionLevel = ASPOINTERTOARRAYORIGIN then GenerateIndexShift(WORDTOK, 1);
 
             if (NumAllocElements * 2 > 256) or (NumAllocElements in [0, 1]) then
             begin
@@ -3002,10 +2956,10 @@ writeln('_B: ', Ident[IdentIndex].Name);
                 if (Ident[IdentIndex].isAbsolute) and (Ident[IdentIndex].idType = ARRAYTOK) and (Ident[IdentIndex].Value >= 0) then
                 begin
 
-                  asm65(#9'lda #' + Hex(Byte(Ident[IdentIndex].Value), 2));
+                  asm65(#9'lda #' + HexByte(Byte(Ident[IdentIndex].Value)));
                   asm65(#9'add :STACKORIGIN-1,x');
                   asm65(#9'sta :bp2');
-                  asm65(#9'lda #' + Hex(Byte(Ident[IdentIndex].Value shr 8), 2));
+                  asm65(#9'lda #' + HexByte(Byte(Ident[IdentIndex].Value shr 8)));
                   asm65(#9'adc :STACKORIGIN-1+STACKWIDTH,x');
                   asm65(#9'sta :bp2+1');
 
@@ -3078,8 +3032,7 @@ writeln('_B: ', Ident[IdentIndex].Name);
 
           4: begin                    // PULL CARDINAL
 
-            if IndirectionLevel = ASPOINTERTOARRAYORIGIN then
-              GenerateIndexShift(CARDINALTOK, 1);
+            if IndirectionLevel = ASPOINTERTOARRAYORIGIN then GenerateIndexShift(CARDINALTOK, 1);
 
             if (NumAllocElements * 4 > 256) or (NumAllocElements in [0, 1]) then
             begin
@@ -3110,10 +3063,10 @@ writeln('_B: ', Ident[IdentIndex].Name);
                 if (Ident[IdentIndex].isAbsolute) and (Ident[IdentIndex].idType = ARRAYTOK) and (Ident[IdentIndex].Value >= 0) then
                 begin
 
-                  asm65(#9'lda #' + Hex(Byte(Ident[IdentIndex].Value), 2));
+                  asm65(#9'lda #' + HexByte(Byte(Ident[IdentIndex].Value)));
                   asm65(#9'add :STACKORIGIN-1,x');
                   asm65(#9'sta :bp2');
-                  asm65(#9'lda #' + Hex(Byte(Ident[IdentIndex].Value shr 8), 2));
+                  asm65(#9'lda #' + HexByte(Byte(Ident[IdentIndex].Value shr 8)));
                   asm65(#9'adc :STACKORIGIN-1+STACKWIDTH,x');
                   asm65(#9'sta :bp2+1');
 
@@ -4192,10 +4145,10 @@ end;
         begin
           asm65(#9'lda @CASETMP_' + IntToHex(CaseLocalCnt, 4));
 
-          if Value <> 0 then asm65(#9'cmp #' + Hex(Byte(Value), 2));
+          if Value <> 0 then asm65(#9'cmp #' + HexByte(Byte(Value)));
         end
         else
-          asm65(#9'cmp #' + Hex(Byte(Value), 2));
+          asm65(#9'cmp #' + HexByte(Byte(Value)));
 
       // 2: asm65(#9'cpw :STACKORIGIN,x #$'+IntToHex(Value, 4));
       // 4: asm65(#9'cpd :STACKORIGIN,x #$'+IntToHex(Value, 4));
@@ -4237,7 +4190,7 @@ end;
           end
           else
           begin
-            asm65(#9'cmp #' + Hex(Value2 + 1, 2));
+            asm65(#9'cmp #' + HexByte(Value2 + 1));
             asm65(#9'bcc @+');
           end;
 
@@ -4255,7 +4208,7 @@ end;
             end
             else
             begin
-              asm65(#9'cmp #' + Hex(Value1, 2));
+              asm65(#9'cmp #' + HexByte(Value1));
               asm65(#9'bcs @+');
             end;
 
@@ -4266,7 +4219,7 @@ end;
 
               if join = False then asm65(#9'lda @CASETMP_' + IntToHex(CaseLocalCnt, 4));
 
-              asm65(#9'cmp #' + Hex(Value1, 2));
+              asm65(#9'cmp #' + HexByte(Value1));
               asm65(#9'beq @+');
             end
             else
@@ -4275,8 +4228,8 @@ end;
               if join = False then asm65(#9'lda @CASETMP_' + IntToHex(CaseLocalCnt, 4));
 
               asm65(#9'clc', '; clear carry for add');
-              asm65(#9'adc #$FF-' + Hex(Value2, 2), '; make m = $FF');
-              asm65(#9'adc #' + Hex(Value2, 2) + '-' + Hex(Value1, 2) + '+1', '; carry set if in range n to m');
+              asm65(#9'adc #$FF-' + HexByte(Value2), '; make m = $FF');
+              asm65(#9'adc #' + HexByte(Value2) + '-' + HexByte(Value1) + '+1', '; carry set if in range n to m');
               asm65(#9'bcs @+');
             end;
 
@@ -4713,7 +4666,7 @@ end;
     Gen;
     Gen;              // mov ah, 4Ch
 
-    asm65(#9'lda #' + Hex(ExitCode, 2));
+    asm65(#9'lda #' + HexByte(ExitCode));
     asm65(#9'jmp @halt');
 
   end;
@@ -6839,7 +6792,7 @@ end;
                   if (Ident[IdentIndex].PassMethod = VARPASSING) or (NumAllocElements * DataSize[AllocElementType] > 256) or (NumAllocElements in [0, 1]) then
                   begin
 
-                    //  writeln(Ident[IdentIndex].DataType,',',Ident[IdentIndex].AllocElementType,',',Ident[IdentIndex].NumAllocElements,',',Ident[IdentIndex].PassMethod,',',Ident[IdentIndex].idType );
+//	writeln(Ident[IdentIndex].DataType,',',Ident[IdentIndex].AllocElementType,',',Ident[IdentIndex].NumAllocElements,',',Ident[IdentIndex].PassMethod,',',Ident[IdentIndex].idType );
 
                     asm65(#9'lda ' + svar);
                     asm65(#9'add :STACKORIGIN,x');
@@ -6851,15 +6804,34 @@ end;
                   end
                   else
                   begin
+// sux
+//	writeln(Ident[IdentIndex].DataType,',',Ident[IdentIndex].AllocElementType,',',Ident[IdentIndex].NumAllocElements,',',Ident[IdentIndex].PassMethod,',',Ident[IdentIndex].idType );
 
-                    //  writeln(Ident[IdentIndex].DataType,',',Ident[IdentIndex].AllocElementType,',',Ident[IdentIndex].NumAllocElements,',',Ident[IdentIndex].PassMethod,',',Ident[IdentIndex].idType );
+		    if (Ident[IdentIndex].DataType = POINTERTOK) and (Ident[IdentIndex].AllocElementType = POINTERTOK) {and (NumAllocElements * DataSize[AllocElementType] < 256) }then
+		    begin
 
-                    asm65(#9'lda <' + GetLocalName(IdentIndex, 'adr.'));
-                    asm65(#9'add :STACKORIGIN,x');
-                    asm65(#9'sta :STACKORIGIN,x');
-                    asm65(#9'lda >' + GetLocalName(IdentIndex, 'adr.'));
-                    asm65(#9'adc :STACKORIGIN+STACKWIDTH,x');
-                    asm65(#9'sta :STACKORIGIN+STACKWIDTH,x');
+                      asm65(#9'lda <' + GetLocalName(IdentIndex, 'adr.'));
+                      asm65(#9'add :STACKORIGIN,x');
+                      asm65(#9'sta :TMP');
+                      asm65(#9'lda >' + GetLocalName(IdentIndex, 'adr.'));
+                      asm65(#9'adc :STACKORIGIN+STACKWIDTH,x');
+                      asm65(#9'sta :TMP+1');
+
+                      asm65(#9'ldy #$00');
+                      asm65(#9'lda (:TMP),y');
+		      asm65(#9'sta :STACKORIGIN,x');
+                      asm65(#9'iny');
+                      asm65(#9'lda (:TMP),y');
+		      asm65(#9'sta :STACKORIGIN+STACKWIDTH,x');
+
+		    end else begin
+                      asm65(#9'lda <' + GetLocalName(IdentIndex, 'adr.'));
+                      asm65(#9'add :STACKORIGIN,x');
+                      asm65(#9'sta :STACKORIGIN,x');
+                      asm65(#9'lda >' + GetLocalName(IdentIndex, 'adr.'));
+                      asm65(#9'adc :STACKORIGIN+STACKWIDTH,x');
+                      asm65(#9'sta :STACKORIGIN+STACKWIDTH,x');
+		    end;
 
                   end;
 
@@ -7599,11 +7571,9 @@ end;
               asm65(#9'sta :bp2+1');
 
               asm65(#9'ldy #$00');
-              asm65(#9'lda (:bp2),y');
-              asm65(#9'sta :STACKORIGIN,x');
+              asm65(#9'mva (:bp2),y :STACKORIGIN,x');
               asm65(#9'iny');
-              asm65(#9'lda (:bp2),y');
-              asm65(#9'sta :STACKORIGIN+STACKWIDTH,x');
+              asm65(#9'mva (:bp2),y :STACKORIGIN+STACKWIDTH,x');
 
             end;
 
@@ -7931,9 +7901,9 @@ end;
                         asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
                         asm65(#9'sta :STACKORIGIN+STACKWIDTH,x');
 
-                        asm65(#9'lda <CODEORIGIN+' + Hex(Tok[i].StrAddress - CODEORIGIN, 4));
+                        asm65(#9'lda <CODEORIGIN+' + HexWord(Tok[i].StrAddress - CODEORIGIN));
                         asm65(#9'sta :STACKORIGIN,x');
-                        asm65(#9'lda >CODEORIGIN+' + Hex(Tok[i].StrAddress - CODEORIGIN, 4));
+                        asm65(#9'lda >CODEORIGIN+' + HexWord(Tok[i].StrAddress - CODEORIGIN));
                         asm65(#9'sta :STACKORIGIN+STACKWIDTH,x');
                       end;
 
@@ -7971,9 +7941,9 @@ end;
                         asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
                         asm65(#9'sta :STACKORIGIN+STACKWIDTH,x');
 
-                        asm65(#9'lda <CODEORIGIN+' + Hex(Tok[i].StrAddress - CODEORIGIN + 1, 4));
+                        asm65(#9'lda <CODEORIGIN+' + HexWord(Tok[i].StrAddress - CODEORIGIN + 1));
                         asm65(#9'sta :STACKORIGIN,x');
-                        asm65(#9'lda >CODEORIGIN+' + Hex(Tok[i].StrAddress - CODEORIGIN + 1, 4));
+                        asm65(#9'lda >CODEORIGIN+' + HexWord(Tok[i].StrAddress - CODEORIGIN + 1));
                         asm65(#9'sta :STACKORIGIN+STACKWIDTH,x');
                       end;
 
@@ -8017,13 +7987,12 @@ end;
               if j = 256 then
               begin
                 asm65(#9'ldy #$00');
-                ;
                 asm65(#9'mva:rne (:bp2),y ' + svar + '.adr.' + Ident[IdentIndex].Param[NumActualParams].Name + ',y+');
               end
               else
                 if j <= 128 then
                 begin
-                  asm65(#9'ldy #' + Hex(j - 1, 2));
+                  asm65(#9'ldy #' + HexByte(j - 1));
                   asm65(#9'mva:rpl (:bp2),y ' + svar + '.adr.' + Ident[IdentIndex].Param[NumActualParams].Name + ',y-');
                 end
                 else
@@ -8061,7 +8030,7 @@ end;
                 else
                   if j <= 128 then
                   begin
-                    asm65(#9'ldy #' + Hex(j - 1, 2));
+                    asm65(#9'ldy #' + HexByte(j - 1));
                     asm65(#9'mva:rpl (:bp2),y ' + svar + '.adr.' + Ident[IdentIndex].Param[NumActualParams].Name + ',y-');
                   end
                   else
@@ -9548,30 +9517,23 @@ end;
 
               case DataSize[Ident[IdentIndex].AllocElementType] of
                 1: begin
-                  asm65(#9'lda (:bp2),y');
-                  asm65(#9'sta :STACKORIGIN,x');
+                  asm65(#9'mva (:bp2),y :STACKORIGIN,x');
                 end;
 
                 2: begin
-                  asm65(#9'lda (:bp2),y');
-                  asm65(#9'sta :STACKORIGIN,x');
+                  asm65(#9'mva (:bp2),y :STACKORIGIN,x');
                   asm65(#9'iny');
-                  asm65(#9'lda (:bp2),y');
-                  asm65(#9'sta :STACKORIGIN+STACKWIDTH,x');
+                  asm65(#9'mva (:bp2),y :STACKORIGIN+STACKWIDTH,x');
                 end;
 
                 4: begin
-                  asm65(#9'lda (:bp2),y');
-                  asm65(#9'sta :STACKORIGIN,x');
+                  asm65(#9'mva (:bp2),y :STACKORIGIN,x');
                   asm65(#9'iny');
-                  asm65(#9'lda (:bp2),y');
-                  asm65(#9'sta :STACKORIGIN+STACKWIDTH,x');
+                  asm65(#9'mva (:bp2),y :STACKORIGIN+STACKWIDTH,x');
                   asm65(#9'iny');
-                  asm65(#9'lda (:bp2),y');
-                  asm65(#9'sta :STACKORIGIN+STACKWIDTH*2,x');
+                  asm65(#9'mva (:bp2),y :STACKORIGIN+STACKWIDTH*2,x');
                   asm65(#9'iny');
-                  asm65(#9'lda (:bp2),y');
-                  asm65(#9'sta :STACKORIGIN+STACKWIDTH*3,x');
+                  asm65(#9'mva (:bp2),y :STACKORIGIN+STACKWIDTH*3,x');
                 end;
 
               end;
@@ -9762,7 +9724,7 @@ end;
                       asm65(#9'sta :bp2');
                       asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
                       asm65(#9'sta :bp2+1');
-                      asm65(#9'ldy #' + Hex(IdentTemp and $ffff, 2));
+                      asm65(#9'ldy #' + HexByte(IdentTemp and $ffff));
 
                       Inc(j, 2);
                     end;
@@ -9792,30 +9754,23 @@ end;
                   case DataSize[ValType] of
 
                     1: begin
-                      asm65(#9'lda (:bp2),y');
-                      asm65(#9'sta :STACKORIGIN,x');
+                      asm65(#9'mva (:bp2),y :STACKORIGIN,x');
                     end;
 
                     2: begin
-                      asm65(#9'lda (:bp2),y');
-                      asm65(#9'sta :STACKORIGIN,x');
+                      asm65(#9'mva (:bp2),y :STACKORIGIN,x');
                       asm65(#9'iny');
-                      asm65(#9'lda (:bp2),y');
-                      asm65(#9'sta :STACKORIGIN+STACKWIDTH,x');
+                      asm65(#9'mva (:bp2),y :STACKORIGIN+STACKWIDTH,x');
                     end;
 
                     4: begin
-                      asm65(#9'lda (:bp2),y');
-                      asm65(#9'sta :STACKORIGIN,x');
+                      asm65(#9'mva (:bp2),y :STACKORIGIN,x');
                       asm65(#9'iny');
-                      asm65(#9'lda (:bp2),y');
-                      asm65(#9'sta :STACKORIGIN+STACKWIDTH,x');
+                      asm65(#9'mva (:bp2),y :STACKORIGIN+STACKWIDTH,x');
                       asm65(#9'iny');
-                      asm65(#9'lda (:bp2),y');
-                      asm65(#9'sta :STACKORIGIN+STACKWIDTH*2,x');
+                      asm65(#9'mva (:bp2),y :STACKORIGIN+STACKWIDTH*2,x');
                       asm65(#9'iny');
-                      asm65(#9'lda (:bp2),y');
-                      asm65(#9'sta :STACKORIGIN+STACKWIDTH*3,x');
+                      asm65(#9'mva (:bp2),y :STACKORIGIN+STACKWIDTH*3,x');
                     end;
 
                   end;
@@ -10460,13 +10415,11 @@ end;
             asm65(#9'sta :bp2');
             asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
             asm65(#9'sta :bp2+1');
-            asm65(#9'ldy #$00');
 
-            asm65(#9'lda (:bp2),y');
-            asm65(#9'sta :STACKORIGIN,x');
+            asm65(#9'ldy #$00');
+            asm65(#9'mva (:bp2),y :STACKORIGIN,x');
             asm65(#9'iny');
-            asm65(#9'lda (:bp2),y');
-            asm65(#9'sta :STACKORIGIN+STACKWIDTH,x');
+            asm65(#9'mva (:bp2),y :STACKORIGIN+STACKWIDTH,x');
 
             Inc(j);
 
@@ -10529,19 +10482,15 @@ end;
             asm65(#9'sta :bp2');
             asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
             asm65(#9'sta :bp2+1');
-            asm65(#9'ldy #$00');
 
-            asm65(#9'lda (:bp2),y');
-            asm65(#9'sta :STACKORIGIN,x');
+            asm65(#9'ldy #$00');
+            asm65(#9'mva (:bp2),y :STACKORIGIN,x');
             asm65(#9'iny');
-            asm65(#9'lda (:bp2),y');
-            asm65(#9'sta :STACKORIGIN+STACKWIDTH,x');
+            asm65(#9'mva (:bp2),y :STACKORIGIN+STACKWIDTH,x');
             asm65(#9'iny');
-            asm65(#9'lda (:bp2),y');
-            asm65(#9'sta :STACKORIGIN+STACKWIDTH*2,x');
+            asm65(#9'mva (:bp2),y :STACKORIGIN+STACKWIDTH*2,x');
             asm65(#9'iny');
-            asm65(#9'lda (:bp2),y');
-            asm65(#9'sta :STACKORIGIN+STACKWIDTH*3,x');
+            asm65(#9'mva (:bp2),y :STACKORIGIN+STACKWIDTH*3,x');
 
             Inc(j);
 
@@ -10603,11 +10552,9 @@ end;
             asm65(#9'sta :bp2+1');
             asm65(#9'ldy #$00');
 
-            asm65(#9'lda (:bp2),y');
-            asm65(#9'sta :STACKORIGIN,x');
+            asm65(#9'mva (:bp2),y :STACKORIGIN,x');
             asm65(#9'iny');
-            asm65(#9'lda (:bp2),y');
-            asm65(#9'sta :STACKORIGIN+STACKWIDTH,x');
+            asm65(#9'mva (:bp2),y :STACKORIGIN+STACKWIDTH,x');
 
             Inc(j);
 
@@ -10697,19 +10644,15 @@ end;
               asm65(#9'sta :bp2');
               asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
               asm65(#9'sta :bp2+1');
-              asm65(#9'ldy #$00');
 
-              asm65(#9'lda (:bp2),y');
-              asm65(#9'sta :STACKORIGIN,x');
+              asm65(#9'ldy #$00');
+              asm65(#9'mva (:bp2),y :STACKORIGIN,x');
               asm65(#9'iny');
-              asm65(#9'lda (:bp2),y');
-              asm65(#9'sta :STACKORIGIN+STACKWIDTH,x');
+              asm65(#9'mva (:bp2),y :STACKORIGIN+STACKWIDTH,x');
               asm65(#9'iny');
-              asm65(#9'lda (:bp2),y');
-              asm65(#9'sta :STACKORIGIN+STACKWIDTH*2,x');
+              asm65(#9'mva (:bp2),y :STACKORIGIN+STACKWIDTH*2,x');
               asm65(#9'iny');
-              asm65(#9'lda (:bp2),y');
-              asm65(#9'sta :STACKORIGIN+STACKWIDTH*3,x');
+              asm65(#9'mva (:bp2),y :STACKORIGIN+STACKWIDTH*3,x');
 
               Inc(j);
 
@@ -10807,30 +10750,23 @@ end;
             case DataSize[Tok[i].Kind] of
 
               1: begin
-                asm65(#9'lda (:bp2),y');
-                asm65(#9'sta :STACKORIGIN,x');
+                asm65(#9'mva (:bp2),y :STACKORIGIN,x');
               end;
 
               2: begin
-                asm65(#9'lda (:bp2),y');
-                asm65(#9'sta :STACKORIGIN,x');
+                asm65(#9'mva (:bp2),y :STACKORIGIN,x');
                 asm65(#9'iny');
-                asm65(#9'lda (:bp2),y');
-                asm65(#9'sta :STACKORIGIN+STACKWIDTH,x');
+                asm65(#9'mva (:bp2),y :STACKORIGIN+STACKWIDTH,x');
               end;
 
               4: begin
-                asm65(#9'lda (:bp2),y');
-                asm65(#9'sta :STACKORIGIN,x');
+                asm65(#9'mva (:bp2),y :STACKORIGIN,x');
                 asm65(#9'iny');
-                asm65(#9'lda (:bp2),y');
-                asm65(#9'sta :STACKORIGIN+STACKWIDTH,x');
+                asm65(#9'mva (:bp2),y :STACKORIGIN+STACKWIDTH,x');
                 asm65(#9'iny');
-                asm65(#9'lda (:bp2),y');
-                asm65(#9'sta :STACKORIGIN+STACKWIDTH*2,x');
+                asm65(#9'mva (:bp2),y :STACKORIGIN+STACKWIDTH*2,x');
                 asm65(#9'iny');
-                asm65(#9'lda (:bp2),y');
-                asm65(#9'sta :STACKORIGIN+STACKWIDTH*3,x');
+                asm65(#9'mva (:bp2),y :STACKORIGIN+STACKWIDTH*3,x');
               end;
 
             end;
@@ -12566,7 +12502,7 @@ end;
                         if RecordSize(IdentIndex) <= 128 then
                         begin
 
-                          asm65(#9'ldy #' + Hex(RecordSize(IdentIndex) - 1, 2));
+                          asm65(#9'ldy #' + HexByte(RecordSize(IdentIndex) - 1));
                           asm65(#9'mva:rpl (:bp2),y ' + GetLocalName(IdentIndex, 'adr.') + ',y-');
 
                         end
@@ -12587,7 +12523,7 @@ end;
                             if RecordSize(IdentIndex) <= 128 then
                             begin
 
-                              asm65(#9'ldy #' + Hex(RecordSize(IdentIndex) - 1, 2));
+                              asm65(#9'ldy #' + HexByte(RecordSize(IdentIndex) - 1));
                               asm65(#9'mva:rpl ' + Name + ',y (:bp2),y-');
 
 			    end
@@ -12651,7 +12587,7 @@ end;
                                 if RecordSize(IdentIndex) <= 128 then
                                 begin
 
-                                  asm65(#9'ldy #' + Hex(RecordSize(IdentIndex) - 1, 2));
+                                  asm65(#9'ldy #' + HexByte(RecordSize(IdentIndex) - 1));
                                   asm65(#9'mva:rpl (:bp2),y ' + GetLocalName(IdentIndex, 'adr.') + ',y-');
 
                                 end
@@ -12672,7 +12608,7 @@ end;
                                   if RecordSize(IdentIndex) <= 128 then
                                   begin
 
-                                    asm65(#9'ldy #' + Hex(RecordSize(IdentIndex) - 1, 2));
+                                    asm65(#9'ldy #' + HexByte(RecordSize(IdentIndex) - 1));
                                     asm65(#9'mva:rpl (:TMP),y ' + GetLocalName(IdentIndex, 'adr.') + ',y-');
 
 				  end else
@@ -12685,7 +12621,7 @@ end;
 
                                   asm65(#9'mwy ' + GetLocalName(IdentTemp) + ' :bp2');
 
-                                  asm65(#9'ldy #' + Hex(RecordSize(IdentIndex) - 1, 2));
+                                  asm65(#9'ldy #' + HexByte(RecordSize(IdentIndex) - 1));
                                   asm65(#9'mva:rpl (:bp2),y ' + GetLocalName(IdentIndex, 'adr.') + ',y-');
 
                                 end
@@ -12707,7 +12643,7 @@ end;
                                 if RecordSize(IdentIndex) <= 128 then
                                 begin
 
-                                  asm65(#9'ldy #' + Hex(RecordSize(IdentIndex) - 1, 2));
+                                  asm65(#9'ldy #' + HexByte(RecordSize(IdentIndex) - 1));
                                   asm65(#9'mva:rpl ' + Name + ',y (:bp2),y-');
 
                                 end
@@ -12730,7 +12666,7 @@ end;
                                   else
                                     asm65(#9'mwy ' + GetLocalName(IdentIndex) + ' :bp2');
 
-                                  asm65(#9'ldy #' + Hex(RecordSize(IdentIndex) - 1, 2));
+                                  asm65(#9'ldy #' + HexByte(RecordSize(IdentIndex) - 1));
                                   asm65(#9'mva:rpl ' + Name + ',y (:bp2),y-');
 
                                 end
@@ -13474,7 +13410,7 @@ WHILETOK:
         begin
           asm65;
           asm65(#9'jmp @+');
-          asm65(#9'.align ' + Hex(codealign.loop, 4));
+          asm65(#9'.align ' + HexWord(codealign.loop));
           asm65('@');
           asm65;
         end;
@@ -13567,7 +13503,7 @@ WHILETOK:
         begin
           asm65;
           asm65(#9'jmp @+');
-          asm65(#9'.align ' + Hex(codealign.loop, 4));
+          asm65(#9'.align ' + HexWord(codealign.loop));
           asm65('@');
           asm65;
         end;
@@ -13636,7 +13572,7 @@ WHILETOK:
                 begin
                   asm65;
                   asm65(#9'jmp @+');
-                  asm65(#9'.align ' + Hex(codealign.loop, 4));
+                  asm65(#9'.align ' + HexWord(codealign.loop));
                   asm65('@');
                   asm65;
                 end;
@@ -13844,25 +13780,25 @@ WHILETOK:
 
                           case DataSize[ActualParamType] of
                             1: begin
-                              asm65(#9'ldy #' + Hex(Byte(ConstVal), 2));
+                              asm65(#9'ldy #' + HexByte(Byte(ConstVal)));
                               asm65(#9'sty ' + GetLocalName(IdentIndex));
                             end;
 
                             2: begin
-                              asm65(#9'ldy #' + Hex(Byte(ConstVal), 2));
+                              asm65(#9'ldy #' + HexByte(Byte(ConstVal)));
                               asm65(#9'sty ' + GetLocalName(IdentIndex));
-                              asm65(#9'ldy #' + Hex(Byte(ConstVal shr 8), 2));
+                              asm65(#9'ldy #' + HexByte(Byte(ConstVal shr 8)));
                               asm65(#9'sty ' + GetLocalName(IdentIndex) + '+1');
                             end;
 
                             4: begin
-                              asm65(#9'ldy #' + Hex(Byte(ConstVal), 2));
+                              asm65(#9'ldy #' + HexByte(Byte(ConstVal)));
                               asm65(#9'sty ' + GetLocalName(IdentIndex));
-                              asm65(#9'ldy #' + Hex(Byte(ConstVal shr 8), 2));
+                              asm65(#9'ldy #' + HexByte(Byte(ConstVal shr 8)));
                               asm65(#9'sty ' + GetLocalName(IdentIndex) + '+1');
-                              asm65(#9'ldy #' + Hex(Byte(ConstVal shr 16), 2));
+                              asm65(#9'ldy #' + HexByte(Byte(ConstVal shr 16)));
                               asm65(#9'sty ' + GetLocalName(IdentIndex) + '+2');
-                              asm65(#9'ldy #' + Hex(Byte(ConstVal shr 24), 2));
+                              asm65(#9'ldy #' + HexByte(Byte(ConstVal shr 24)));
                               asm65(#9'sty ' + GetLocalName(IdentIndex) + '+3');
                             end;
 
@@ -13880,25 +13816,25 @@ WHILETOK:
 
                         case DataSize[ActualParamType] of
                           1: begin
-                            asm65(#9'ldy #' + Hex(Byte(ConstVal), 2));
+                            asm65(#9'ldy #' + HexByte(Byte(ConstVal)));
                             asm65(#9'sty ' + GetLocalName(IdentIndex));
                           end;
 
                           2: begin
-                            asm65(#9'ldy #' + Hex(Byte(ConstVal), 2));
+                            asm65(#9'ldy #' + HexByte(Byte(ConstVal)));
                             asm65(#9'sty ' + GetLocalName(IdentIndex));
-                            asm65(#9'ldy #' + Hex(Byte(ConstVal shr 8), 2));
+                            asm65(#9'ldy #' + HexByte(Byte(ConstVal shr 8)));
                             asm65(#9'sty ' + GetLocalName(IdentIndex) + '+1');
                           end;
 
                           4: begin
-                            asm65(#9'ldy #' + Hex(Byte(ConstVal), 2));
+                            asm65(#9'ldy #' + HexByte(Byte(ConstVal)));
                             asm65(#9'sty ' + GetLocalName(IdentIndex));
-                            asm65(#9'ldy #' + Hex(Byte(ConstVal shr 8), 2));
+                            asm65(#9'ldy #' + HexByte(Byte(ConstVal shr 8)));
                             asm65(#9'sty ' + GetLocalName(IdentIndex) + '+1');
-                            asm65(#9'ldy #' + Hex(Byte(ConstVal shr 16), 2));
+                            asm65(#9'ldy #' + HexByte(Byte(ConstVal shr 16)));
                             asm65(#9'sty ' + GetLocalName(IdentIndex) + '+2');
-                            asm65(#9'ldy #' + Hex(Byte(ConstVal shr 24), 2));
+                            asm65(#9'ldy #' + HexByte(Byte(ConstVal shr 24)));
                             asm65(#9'sty ' + GetLocalName(IdentIndex) + '+3');
                           end;
 
@@ -14515,13 +14451,13 @@ WHILETOK:
               STRINGLITERALTOK:		// 'text'
               begin
                 asm65(#9'ldy #$00');
-                asm65(#9'mva:rne CODEORIGIN+' + Hex(Tok[i + 1].StrAddress - CODEORIGIN + 1, 4) + ',y @buf,y+');
+                asm65(#9'mva:rne CODEORIGIN+' + HexWord(Tok[i + 1].StrAddress - CODEORIGIN + 1) + ',y @buf,y+');
 
                 if yes then
                 begin			// WRITELN
 
                   asm65(#9'lda #eol');
-                  asm65(#9'ldy CODEORIGIN+' + Hex(Tok[i + 1].StrAddress - CODEORIGIN, 4));
+                  asm65(#9'ldy CODEORIGIN+' + HexWord(Tok[i + 1].StrAddress - CODEORIGIN));
                   asm65(#9'sta @buf,y');
 
                   asm65(#9'mwy ' + GetLocalName(IdentIndex) + ' :bp2');
@@ -14539,7 +14475,7 @@ WHILETOK:
                 else
                 begin			// WRITE
 
-                  asm65(#9'lda CODEORIGIN+' + Hex(Tok[i + 1].StrAddress - CODEORIGIN, 4));
+                  asm65(#9'lda CODEORIGIN+' + HexWord(Tok[i + 1].StrAddress - CODEORIGIN));
 
                   asm65(#9'mwy ' + GetLocalName(IdentIndex) + ' :bp2');
 
@@ -14618,7 +14554,7 @@ WHILETOK:
                   Inc(i);
 
                   repeat
-                    asm65(#9'@print #' + Hex(Tok[i].Value, 2));
+                    asm65(#9'@print #' + HexByte(Tok[i].Value));
                     Inc(i);
                   until Tok[i].Kind <> CHARLITERALTOK;
 
@@ -14646,9 +14582,9 @@ WHILETOK:
                     asm65(#9'sta :bp2');
                     asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
                     asm65(#9'sta :bp2+1');
+
                     asm65(#9'ldy #$00');
-                    asm65(#9'lda (:bp2),y');
-                    asm65(#9'sta :STACKORIGIN,x');
+                    asm65(#9'mva (:bp2),y :STACKORIGIN,x');
 
                   end;
 
@@ -15281,8 +15217,10 @@ WHILETOK:
 
         case ConstVal of
           Ord(iDLI): begin
-            asm65(#9'mva :STACKORIGIN,x VDSLST');
-            asm65(#9'mva :STACKORIGIN+STACKWIDTH,x VDSLST+1');
+            asm65(#9'lda :STACKORIGIN,x');
+	    asm65(#9'sta VDSLST');
+            asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
+	    asm65(#9'sta VDSLST+1');
             a65(__subBX);
           end;
 
@@ -15312,8 +15250,10 @@ WHILETOK:
 
           Ord(iTIM1): begin
             asm65(#9'sei');
-            asm65(#9'mva :STACKORIGIN,x VTIMR1');
-            asm65(#9'mva :STACKORIGIN+STACKWIDTH,x VTIMR1+1');
+            asm65(#9'lda :STACKORIGIN,x');
+	    asm65(#9'sta VTIMR1');
+            asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
+	    asm65(#9'sta VTIMR1+1');
             a65(__subBX);
 
             if Tok[i + 1].Kind = COMMATOK then
@@ -15328,7 +15268,8 @@ WHILETOK:
               asm65(#9'sta AUDC1');
               asm65(#9'sty SKCTL');
 
-              asm65(#9'mva :STACKORIGIN,x AUDCTL');
+              asm65(#9'lda :STACKORIGIN,x');
+	      asm65(#9'sta AUDCTL');
               a65(__subBX);
 
               CheckTok(i + 1, COMMATOK);
@@ -15336,7 +15277,8 @@ WHILETOK:
               i := CompileExpression(i + 2, ActualParamType);
               GetCommonType(i, BYTETOK, ActualParamType);
 
-              asm65(#9'mva :STACKORIGIN,x AUDF1');
+              asm65(#9'lda :STACKORIGIN,x');
+	      asm65(#9'sta AUDF1');
               a65(__subBX);
 
               asm65(#9'lda irqens');
@@ -15361,8 +15303,10 @@ WHILETOK:
 
           Ord(iTIM2): begin
             asm65(#9'sei');
-            asm65(#9'mva :STACKORIGIN,x VTIMR2');
-            asm65(#9'mva :STACKORIGIN+STACKWIDTH,x VTIMR2+1');
+            asm65(#9'lda :STACKORIGIN,x');
+	    asm65(#9'sta VTIMR2');
+            asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
+	    asm65(#9'sta VTIMR2+1');
             a65(__subBX);
 
             if Tok[i + 1].Kind = COMMATOK then
@@ -15377,7 +15321,8 @@ WHILETOK:
               asm65(#9'sta AUDC2');
               asm65(#9'sty SKCTL');
 
-              asm65(#9'mva :STACKORIGIN,x AUDCTL');
+              asm65(#9'lda :STACKORIGIN,x');
+	      asm65(#9'sta AUDCTL');
               a65(__subBX);
 
               CheckTok(i + 1, COMMATOK);
@@ -15385,7 +15330,8 @@ WHILETOK:
               i := CompileExpression(i + 2, ActualParamType);
               GetCommonType(i, BYTETOK, ActualParamType);
 
-              asm65(#9'mva :STACKORIGIN,x AUDF2');
+              asm65(#9'lda :STACKORIGIN,x');
+	      asm65(#9'sta AUDF2');
               a65(__subBX);
 
               asm65(#9'lda irqens');
@@ -15410,8 +15356,10 @@ WHILETOK:
 
           Ord(iTIM4): begin
             asm65(#9'sei');
-            asm65(#9'mva :STACKORIGIN,x VTIMR4');
-            asm65(#9'mva :STACKORIGIN+STACKWIDTH,x VTIMR4+1');
+            asm65(#9'lda :STACKORIGIN,x');
+	    asm65(#9'sta VTIMR4');
+            asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
+	    asm65(#9'sta VTIMR4+1');
             a65(__subBX);
 
             if Tok[i + 1].Kind = COMMATOK then
@@ -15426,7 +15374,8 @@ WHILETOK:
               asm65(#9'sta AUDC4');
               asm65(#9'sty SKCTL');
 
-              asm65(#9'mva :STACKORIGIN,x AUDCTL');
+              asm65(#9'lda :STACKORIGIN,x');
+	      asm65(#9'sta AUDCTL');
               a65(__subBX);
 
               CheckTok(i + 1, COMMATOK);
@@ -15434,7 +15383,8 @@ WHILETOK:
               i := CompileExpression(i + 2, ActualParamType);
               GetCommonType(i, BYTETOK, ActualParamType);
 
-              asm65(#9'mva :STACKORIGIN,x AUDF4');
+              asm65(#9'lda :STACKORIGIN,x');
+	      asm65(#9'sta AUDF4');
               a65(__subBX);
 
               asm65(#9'lda irqens');
@@ -15513,7 +15463,7 @@ WHILETOK:
       if dorig then
       begin
 
-        txt := 'DATAORIGIN+' + Hex(Ident[IdentIndex].Value - DATAORIGIN, 4);
+        txt := 'DATAORIGIN+' + HexWord(Ident[IdentIndex].Value - DATAORIGIN);
 
         if brackets then
           Result := #9'= [' + txt + ']'
@@ -15615,7 +15565,7 @@ WHILETOK:
           if IdentTemp > 0 then
           begin
             asm65('');
-            asm65(#9'lmb #' + Hex(Ident[IdentTemp].Value + 1, 2));
+            asm65(#9'lmb #' + HexByte(Ident[IdentTemp].Value + 1));
             asm65('');
 
             Result := True;
@@ -16316,7 +16266,7 @@ DCOL	= DATAORIGIN+$017E
 
     if codealign.proc > 0 then
     begin
-      asm65(#9'.align ' + Hex(codealign.proc, 4));
+      asm65(#9'.align ' + HexWord(codealign.proc));
       asm65;
     end;
 
@@ -17221,7 +17171,7 @@ DCOL	= DATAORIGIN+$017E
 
         if codealign.link > 0 then
         begin
-          asm65(#9'.align ' + Hex(codealign.link, 4));
+          asm65(#9'.align ' + HexWord(codealign.link));
           asm65;
         end;
 
@@ -19037,7 +18987,7 @@ end;
 
 
     if DATA_BASE > 0 then
-      asm65(#9'org ' + Hex(DATA_BASE, 4))
+      asm65(#9'org ' + HexWord(DATA_BASE))
     else
     begin
 
@@ -19085,16 +19035,16 @@ end;
           if (j mod 8 = 0) then tmp := tmp + ' ';
 
           if DataSegment[j] and $c000 = $8000 then
-            tmp := tmp + ' <[DATAORIGIN+' + Hex(Byte(DataSegment[j]) or Byte(DataSegment[j + 1]) shl 8, 4) + ']'
+            tmp := tmp + ' <[DATAORIGIN+' + HexWord(Byte(DataSegment[j]) or Byte(DataSegment[j + 1]) shl 8) + ']'
           else
           if DataSegment[j] and $c000 = $4000 then
-            tmp := tmp + ' >[DATAORIGIN+' + Hex(Byte(DataSegment[j - 1]) or Byte(DataSegment[j]) shl 8, 4) + ']'
+            tmp := tmp + ' >[DATAORIGIN+' + HexWord(Byte(DataSegment[j - 1]) or Byte(DataSegment[j]) shl 8) + ']'
           else
           if DataSegment[j] and $3000 = $2000 then
-            tmp := tmp + ' <[CODEORIGIN+' + Hex(Byte(DataSegment[j]) or Byte(DataSegment[j + 1]) shl 8, 4) + ']'
+            tmp := tmp + ' <[CODEORIGIN+' + HexWord(Byte(DataSegment[j]) or Byte(DataSegment[j + 1]) shl 8) + ']'
           else
           if DataSegment[j] and $3000 = $1000 then
-            tmp := tmp + ' >[CODEORIGIN+' + Hex(Byte(DataSegment[j - 1]) or Byte(DataSegment[j]) shl 8, 4) + ']'
+            tmp := tmp + ' >[CODEORIGIN+' + HexWord(Byte(DataSegment[j - 1]) or Byte(DataSegment[j]) shl 8) + ']'
           else
             tmp := tmp + ' ' + Hex(DataSegment[j], 2);
 
@@ -19150,7 +19100,7 @@ end;
       asm65(#9'.print ''FMUL_INIT: '',fmulinit,''..'',*-1');
 
       asm65;
-      asm65(#9'org ' + Hex(FastMul, 2) + '00');
+      asm65(#9'org ' + HexByte(FastMul) + '00');
 
       asm65;
       asm65(#9'.print ''FMUL_DATA: '',*,''..'',*+$07FF');
@@ -19190,16 +19140,16 @@ end;
         if (i > 0) and (i mod 8 = 0) then tmp := tmp + ' ';
 
       if StaticStringData[i] and $c000 = $8000 then
-        tmp := tmp + ' <[DATAORIGIN+' + Hex(Byte(StaticStringData[i]) or Byte(StaticStringData[i + 1]) shl 8, 4) + ']'
+        tmp := tmp + ' <[DATAORIGIN+' + HexWord(Byte(StaticStringData[i]) or Byte(StaticStringData[i + 1]) shl 8) + ']'
       else
       if StaticStringData[i] and $c000 = $4000 then
-        tmp := tmp + ' >[DATAORIGIN+' + Hex(Byte(StaticStringData[i - 1]) or Byte(StaticStringData[i]) shl 8, 4) + ']'
+        tmp := tmp + ' >[DATAORIGIN+' + HexWord(Byte(StaticStringData[i - 1]) or Byte(StaticStringData[i]) shl 8) + ']'
       else
       if StaticStringData[i] and $3000 = $2000 then
-        tmp := tmp + ' <[CODEORIGIN+' + Hex(Byte(StaticStringData[i]) or Byte(StaticStringData[i + 1]) shl 8, 4) + ']'
+        tmp := tmp + ' <[CODEORIGIN+' + HexWord(Byte(StaticStringData[i]) or Byte(StaticStringData[i + 1]) shl 8) + ']'
       else
       if StaticStringData[i] and $3000 = $1000 then
-        tmp := tmp + ' >[CODEORIGIN+' + Hex(Byte(StaticStringData[i - 1]) or Byte(StaticStringData[i]) shl 8, 4) + ']'
+        tmp := tmp + ' >[CODEORIGIN+' + HexWord(Byte(StaticStringData[i - 1]) or Byte(StaticStringData[i]) shl 8) + ']'
       else
         tmp := tmp + ' ' + Hex(StaticStringData[i], 2);
 

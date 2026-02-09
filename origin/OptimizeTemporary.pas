@@ -197,6 +197,12 @@ var p, k , q: integer;
   end;
 
 
+  function GetARG(const i: integer): String;
+  begin
+   Result := copy(TemporaryBuf[i], 6, 256);
+  end;
+
+
   function GetSTRING(const j: Integer): String;
   var
     i: Integer;
@@ -303,7 +309,7 @@ end;
 	TemporaryBuf[2] := '~';
 	TemporaryBuf[3] := '~';
 
-	TemporaryBuf[5] := #9'mva:rpl ' + Hex(p, 4) + ',y ' +  copy(TemporaryBuf[5], 19, 256);
+	TemporaryBuf[5] := #9'mva:rpl ' + HexWord(p) + ',y ' +  copy(TemporaryBuf[5], 19, 256);
        end;
 
 
@@ -322,7 +328,7 @@ end;
 	TemporaryBuf[2] := '~';
 	TemporaryBuf[3] := '~';
 
-	TemporaryBuf[5] := #9'mva:rne ' + Hex(p, 4) + ',y ' +  copy(TemporaryBuf[5], 19, 256);
+	TemporaryBuf[5] := #9'mva:rne ' + HexWord(p) + ',y ' +  copy(TemporaryBuf[5], 19, 256);
        end;
 
 // -----------------------------------------------------------------------------
@@ -365,7 +371,7 @@ end;
 	 TemporaryBuf[1] := #9'sta :bp2';
 	 TemporaryBuf[3] := #9'sta :bp2+1';
 
-	 TemporaryBuf[4] := #9'ldy #' + Hex(p-1, 2);
+	 TemporaryBuf[4] := #9'ldy #' + HexByte(p-1);
      	 TemporaryBuf[5] := #9'mva:rpl (:bp2),y adr.' + tmp + ',y-';
     	end else begin
      	 TemporaryBuf[4] := #9'@move ' + tmp + ' #adr.' + tmp + ' #' + Hex(p,2);

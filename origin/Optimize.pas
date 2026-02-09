@@ -639,6 +639,8 @@ var inxUse, found: Boolean;
     else
     begin
 
+      //Result := copy(a, 6, 256);
+
       i := 6;
 
       while a[i] in [' ', #9] do Inc(i);
@@ -683,17 +685,6 @@ var inxUse, found: Boolean;
       i: integer;
 //      cnt_l,		// licznik odczytow stosu
 //      cnt_s: tStack;	// licznik zapisow stosu
-
-
-   procedure Clear;
-   begin
-
-    s := Default(TStack);
-
-    cnt_l := Default(RWStack);
-    cnt_s := Default(RWStack);
-
-   end;
 
 
     function unrelated(i: Integer): Boolean;	// unrelated stack references
@@ -754,7 +745,10 @@ var inxUse, found: Boolean;
 
     Rebuild;
 
-    Clear;
+    s := Default(TStack);
+
+    cnt_l := Default(RWStack);
+    cnt_s := Default(RWStack);
 
     // !!!!!!!!!!!!!!!!!!!!
     // czytamy listing szukajac zapisow :STACKORIGIN (STA, STY), kazde inne odwolanie do :STACKORIGIN traktujemy jako odczyt
@@ -933,8 +927,8 @@ end;
         tmp := GetARG(i);
 
         if tmp = ':STACKORIGIN+16' then listing[i] := GetCMD(i) + ':eax' else
-         if tmp = ':STACKORIGIN+STACKWIDTH+16' then listing[i] := GetCMD(i)+ ':eax+1' else
-          if tmp = ':STACKORIGIN+STACKWIDTH*2+16' then listing[i] := GetCMD(i)+ ':eax+2' else
+         if tmp = ':STACKORIGIN+STACKWIDTH+16' then listing[i] := GetCMD(i) + ':eax+1' else
+          if tmp = ':STACKORIGIN+STACKWIDTH*2+16' then listing[i] := GetCMD(i) + ':eax+2' else
            if tmp = ':STACKORIGIN+STACKWIDTH*3+16' then listing[i] := GetCMD(i) + ':eax+3';
 
       end;
@@ -1166,7 +1160,7 @@ end;
 
 
 {
-if (pos('lda YN', listing[i]) > 0) then begin
+if (pos('lda MOUSECLICK.RESULT', listing[i]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');
@@ -1646,9 +1640,9 @@ begin        // OptimizeASM
 
 	  k := GetBYTE(l) * GetBYTE(l+2);
 
-      	  listing[l]  := #9'lda #' + Hex(k and $ff, 2);
+      	  listing[l]  := #9'lda #' + HexByte(k and $ff);
       	  listing[l+1]:= #9'sta :eax';
-      	  listing[l+2]:= #9'lda #' + Hex(byte(k shr 8), 2);
+      	  listing[l+2]:= #9'lda #' + HexByte(byte(k shr 8));
       	  listing[l+3]:= #9'sta :eax+1';
 
 	  inc(l, 4);
@@ -1745,13 +1739,13 @@ begin        // OptimizeASM
 
 	 k := GetWORD(l, l+2) * GetWORD(l+4, l+6);
 
-         listing[l]   := #9'lda #' + Hex(k and $ff, 2);
+         listing[l]   := #9'lda #' + HexByte(k and $ff);
 	 listing[l+1] := #9'sta :eax';
-         listing[l+2] := #9'lda #' + Hex(byte(k shr 8), 2);
+         listing[l+2] := #9'lda #' + HexByte(byte(k shr 8));
 	 listing[l+3] := #9'sta :eax+1';
-         listing[l+4] := #9'lda #' + Hex(byte(k shr 16), 2);
+         listing[l+4] := #9'lda #' + HexByte(byte(k shr 16));
 	 listing[l+5] := #9'sta :eax+2';
-         listing[l+6] := #9'lda #' + Hex(byte(k shr 24), 2);
+         listing[l+6] := #9'lda #' + HexByte(byte(k shr 24));
 	 listing[l+7] := #9'sta :eax+3';
          listing[l+8] := '';
          listing[l+9] := '';
@@ -2286,127 +2280,151 @@ begin        // OptimizeASM
      end;
 
 
+
   if t <> '' then begin
 
-  if (pos('(:bp),', t) = 0) then begin
 
-   if (pos(':STACKORIGIN,', t) > 7) then begin	// kiedy odczytujemy tablice
-    s[x][0]:=copy(a, 1, pos(' :STACK', a));
-    t:='';
+// #9'MVA :STACKORIGIN ARG'  !!! unacceptable !!!
 
-    if pos(',y', s[x][0]) > 0 then begin
-     listing[l]   := #9'lda ' + GetARG(0, x);
-     listing[l+1] := #9'sta ' + GetARG(0, x);
 
-     inc(l, 2);
+// STAGE #1
+
+// #9'MVA ARG :STACKORIGIN...'
+
+// #9'MVA Q :STACK
+// ^  ^^^^^^^
+// 1  2345678
+
+   if (pos(':STACKORIGIN-1', t) > 7) then begin
+
+     arg0 := copy(t, 1, pos(' :STACK', t)-1);
+
+     if (pos(':STACKORIGIN-1,', t) > 7)              then s[x-1][0] := arg0 else
+     if (pos(':STACKORIGIN-1+STACKWIDTH,', t) > 7)   then s[x-1][1] := arg0 else
+     if (pos(':STACKORIGIN-1+STACKWIDTH*2,', t) > 7) then s[x-1][2] := arg0 else
+     if (pos(':STACKORIGIN-1+STACKWIDTH*3,', t) > 7) then s[x-1][3] := arg0;
+
+     t := '';
+
+   end else
+   if (pos(':STACKORIGIN+1', t) > 7) then begin
+
+     arg0 := copy(t, 1, pos(' :STACK', t)-1);
+
+     if (pos(':STACKORIGIN+1,', t) > 7)              then s[x+1][0] := arg0 else
+     if (pos(':STACKORIGIN+1+STACKWIDTH,', t) > 7)   then s[x+1][1] := arg0 else
+     if (pos(':STACKORIGIN+1+STACKWIDTH*2,', t) > 7) then s[x+1][2] := arg0  else
+     if (pos(':STACKORIGIN+1+STACKWIDTH*3,', t) > 7) then s[x+1][3] := arg0;
+
+     t := '';
+
+   end else
+   if (pos(':STACKORIGIN', t) > 7) then begin
+
+        arg0 := copy(t, 1, pos(' :STACK', t)-1);
+
+        if (pos(':STACKORIGIN,', t) > 7) then begin	// kiedy odczytujemy tablice
+         s[x][0] := arg0;
+
+         if pos(',y', s[x][0]) > 0 then begin
+          listing[l]   := #9'lda ' + GetARG(0, x);
+          listing[l+1] := #9'sta ' + GetARG(0, x);
+
+          inc(l, 2);
+         end;
+        end else
+
+        if (pos(':STACKORIGIN+STACKWIDTH,', t) > 7) then begin
+         s[x][1] := arg0;
+
+         if pos(',y', s[x][1]) > 0 then begin
+          listing[l]   := #9'lda ' + GetARG(1, x);
+          listing[l+1] := #9'sta ' + GetARG(1, x);
+
+          inc(l, 2);
+         end;
+        end else
+
+        if (pos(':STACKORIGIN+STACKWIDTH*2,', t) > 7) then begin
+         s[x][2] := arg0;
+
+         if pos(',y', s[x][2]) > 0 then begin
+          listing[l]   := #9'lda ' + GetARG(2, x);
+          listing[l+1] := #9'sta ' + GetARG(2, x);
+
+          inc(l, 2);
+         end;
+        end else
+
+        if (pos(':STACKORIGIN+STACKWIDTH*3,', t) > 7) then begin
+         s[x][3] := arg0;
+
+         if pos(',y', s[x][3]) > 0 then begin
+          listing[l]   := #9'lda ' + GetARG(3, x);
+          listing[l+1] := #9'sta ' + GetARG(3, x);
+
+          inc(l, 2);
+         end;
+        end;
+
+	t := '';
+
+   end;
+
+
+// STAGE #2
+
+// #9'MNE :STACKORIGIN...'
+// ^  ^^^^^
+// 1  23456
+
+    if (pos(':STACKORIGIN-1', t) > 0) then begin
+
+      arg0 := copy(t, 1, 5);
+
+      if (pos(':STACKORIGIN-1,', t) = 6)              then t := arg0 + GetARG(0, x-1) else
+      if (pos(':STACKORIGIN-1+STACKWIDTH,', t) = 6)   then t := arg0 + GetARG(1, x-1) else
+      if (pos(':STACKORIGIN-1+STACKWIDTH*2,', t) = 6) then t := arg0 + GetARG(2, x-1) else
+      if (pos(':STACKORIGIN-1+STACKWIDTH*3,', t) = 6) then t := arg0 + GetARG(3, x-1);
+
+    end else
+    if (pos(':STACKORIGIN+1', t) > 0) then begin
+
+      arg0 := copy(t, 1, 5);
+
+      if (pos(':STACKORIGIN+1,', t) = 6)              then t := arg0 + GetARG(0, x+1) else
+      if (pos(':STACKORIGIN+1+STACKWIDTH,', t) = 6)   then t := arg0 + GetARG(1, x+1) else
+      if (pos(':STACKORIGIN+1+STACKWIDTH*2,', t) = 6) then t := arg0 + GetARG(2, x+1) else
+      if (pos(':STACKORIGIN+1+STACKWIDTH*3,', t) = 6) then t := arg0 + GetARG(3, x+1);
+
+    end else
+    if (pos(':STACKORIGIN', t) > 0) then begin
+
+      arg0 := copy(t, 1, 5);
+
+      if (pos(':STACKORIGIN,', t) = 6)              then t := arg0 + GetARG(0, x) else
+      if (pos(':STACKORIGIN+STACKWIDTH,', t) = 6)   then t := arg0 + GetARG(1, x) else
+      if (pos(':STACKORIGIN+STACKWIDTH*2,', t) = 6) then t := arg0 + GetARG(2, x) else
+      if (pos(':STACKORIGIN+STACKWIDTH*3,', t) = 6) then t := arg0 + GetARG(3, x);
+
     end;
-   end;
 
-   if (pos(':STACKORIGIN+STACKWIDTH,', t) > 7) then begin
-    s[x][1]:=copy(a, 1, pos(' :STACK', a));
-    t:='';
 
-    if pos(',y', s[x][1]) > 0 then begin
-     listing[l]   := #9'lda ' + GetARG(1, x);
-     listing[l+1] := #9'sta ' + GetARG(1, x);
+    if t <> '' then begin
 
-     inc(l, 2);
+     listing[l] := t;
+     inc(l);
+
     end;
-   end;
 
-   if (pos(':STACKORIGIN+STACKWIDTH*2,', t) > 7) then begin
-    s[x][2]:=copy(a, 1, pos(' :STACK', a));
-    t:='';
-
-    if pos(',y', s[x][2]) > 0 then begin
-     listing[l]   := #9'lda ' + GetARG(2, x);
-     listing[l+1] := #9'sta ' + GetARG(2, x);
-
-     inc(l, 2);
-    end;
-   end;
-
-   if (pos(':STACKORIGIN+STACKWIDTH*3,', t) > 7) then begin
-    s[x][3]:=copy(a, 1, pos(' :STACK', a));
-    t:='';
-
-    if pos(',y', s[x][3]) > 0 then begin
-     listing[l]   := #9'lda ' + GetARG(3, x);
-     listing[l+1] := #9'sta ' + GetARG(3, x);
-
-     inc(l, 2);
-    end;
-   end;
-
-
-   if (pos(':STACKORIGIN-1+STACKWIDTH,', t) > 7)   then begin s[x-1][1]:=copy(a, 1, pos(' :STACK', a)); t:='' end;
-   if (pos(':STACKORIGIN-1+STACKWIDTH*2,', t) > 7) then begin s[x-1][2]:=copy(a, 1, pos(' :STACK', a)); t:='' end;
-   if (pos(':STACKORIGIN-1+STACKWIDTH*3,', t) > 7) then begin s[x-1][3]:=copy(a, 1, pos(' :STACK', a)); t:='' end;
-
-   if (pos(':STACKORIGIN+1+STACKWIDTH,', t) > 7)   then begin s[x+1][1]:=copy(a, 1, pos(' :STACK', a)); t:='' end;
-   if (pos(':STACKORIGIN+1+STACKWIDTH*2,', t) > 7) then begin s[x+1][2]:=copy(a, 1, pos(' :STACK', a)); t:='' end;
-   if (pos(':STACKORIGIN+1+STACKWIDTH*3,', t) > 7) then begin s[x+1][3]:=copy(a, 1, pos(' :STACK', a)); t:='' end;
-
-  end; // if (pos('(:bp),', t) = 0)
-
-
-   if (pos(':STACKORIGIN,', t) = 6) then begin
-    //k:=pos(':STACK', t);  writeln(k);
-    delete(t, 6, 14);
-
-    arg0 := GetARG(0, x);
-    insert(arg0, t, 6);
-   end;
-
-   if (pos(':STACKORIGIN+STACKWIDTH,', t) = 6) then begin
-    //k:=pos(':STACK', t);
-    delete(t, 6, 25);
-
-    arg0 := GetARG(1, x);
-    insert(arg0, t, 6);
-   end;
-
-   if (pos(':STACKORIGIN+STACKWIDTH*2,', t) = 6) then begin
-    //k:=pos(':STACK', t);
-    delete(t, 6, 27);
-
-    arg0 := GetARG(2, x);
-    insert(arg0, t, 6);
-   end;
-
-   if (pos(':STACKORIGIN+STACKWIDTH*3,', t) = 6) then begin
-    //k:=pos(':STACK', t);
-    delete(t, 6, 27);
-
-    arg0 := GetARG(3, x);
-    insert(arg0, t, 6);
-   end;
-
-
-   if (pos(':STACKORIGIN-1,', t) = 6) then		t:=copy(a, 1, 5) + GetARG(0, x-1);
-   if (pos(':STACKORIGIN-1+STACKWIDTH,', t) = 6) then	t:=copy(a, 1, 5) + GetARG(1, x-1);
-   if (pos(':STACKORIGIN-1+STACKWIDTH*2,', t) = 6) then	t:=copy(a, 1, 5) + GetARG(2, x-1);
-   if (pos(':STACKORIGIN-1+STACKWIDTH*3,', t) = 6) then	t:=copy(a, 1, 5) + GetARG(3, x-1);
-
-   if (pos(':STACKORIGIN+1,', t) = 6) then		t:=copy(a, 1, 5) + GetARG(0, x+1);
-   if (pos(':STACKORIGIN+1+STACKWIDTH,', t) = 6) then	t:=copy(a, 1, 5) + GetARG(1, x+1);
-   if (pos(':STACKORIGIN+1+STACKWIDTH*2,', t) = 6) then	t:=copy(a, 1, 5) + GetARG(2, x+1);
-   if (pos(':STACKORIGIN+1+STACKWIDTH*3,', t) = 6) then	t:=copy(a, 1, 5) + GetARG(3, x+1);
-
-
-   if t <> '' then begin
-
-    listing[l] := t;
-    inc(l);
-
-   end;
-
-
-  end;
 
   end; // if t <> ''
 
+  end;
+
  end;
+
+
 
   (* -------------------------------------------------------------------------- *)
 

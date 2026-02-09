@@ -142,8 +142,9 @@
 		   ASPOINTER:
 		     begin
 
-		      asm65(#9'mva :STACKORIGIN,x ' + GetLocalName(IdentIndex, 'adr.') + '+1');
-		      asm65(#9'mva #$01 '+GetLocalName(IdentIndex, 'adr.'));
+		      asm65(#9'lda :STACKORIGIN,x');
+		      asm65(#9'sta ' + GetLocalName(IdentIndex, 'adr.') + '+1');
+		      asm65(#9'mva #$01 '+ GetLocalName(IdentIndex, 'adr.'));
 
 		      a65(__subBX);
 		     end;
@@ -155,7 +156,8 @@
 		       asm65(#9'ldy #$00');
 		       asm65(#9'mva #$01 (:bp2),y');
 		       asm65(#9'iny');
-		       asm65(#9'mva :STACKORIGIN,x (:bp2),y');
+		       asm65(#9'lda :STACKORIGIN,x');
+		       asm65(#9'sta (:bp2),y');
 
 		       a65(__subBX);
 		     end;

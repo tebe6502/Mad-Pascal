@@ -146,6 +146,11 @@ Contributors:
 
 # uzywaj asm65('') zamiast #13#10, POS bedzie wlasciwie zwracalo indeks
 
+------------------------------------------------------------------------------------------------------------------
+# zapis na stos zawsze przez MVA, zamiast 'lda ARG \ sta :STACKORIGIN,x' nalezy uzywac 'mva ARG :STACKORIGIN,x'
+# !!! '#9'mva :STACKORIGIN,x ARG' !!! zabronione !!!
+------------------------------------------------------------------------------------------------------------------
+
 # parametry dla imulCL, imulCX w konkretnej kolejnosci 1: ECX, 2: EAX
 
 # wystepuja tylko skoki w przod @+ (@- nie wystepuja)
