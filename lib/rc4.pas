@@ -2,7 +2,7 @@ unit rc4;
 (*
  @type: unit
  @author: Viacheslav Komenda
- @name: RC4 decompression unit
+ @name: RC4 cipher unit
  @version: 1.0
 
  @description:
