@@ -5,6 +5,7 @@
 
 procedure opt_TEMP_WHILE;
 var p: integer;
+    tmp: string;
 begin
 
 

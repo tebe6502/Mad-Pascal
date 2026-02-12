@@ -60,6 +60,104 @@ procedure opt_TEMP_MOVE;
 
 begin
 
+
+// -----------------------------------------------------------------------------
+
+
+    if (pos('@move ":bp2" ', TemporaryBuf[4]) > 1) and					// @move ":bp2"				; 4
+
+       lda(0) and									// lda A				; 0
+       sta_bp2(1) and									// sta :bp2				; 1
+       (TemporaryBuf[2] = TemporaryBuf[0] + '+1') and					// lda A+1				; 2
+       sta_bp2_1(3) then								// sta :bp2+1				; 3
+       begin
+	TemporaryBuf[4] := #9'@move ' + GetSTRING(0) + ' ' +  copy(TemporaryBuf[4], 15, 256);
+
+	TemporaryBuf[0] := '~';
+	TemporaryBuf[1] := '~';
+	TemporaryBuf[2] := '~';
+	TemporaryBuf[3] := '~';
+       end;
+
+
+    if (pos('mva:rpl (:bp2),y ', TemporaryBuf[5]) > 1) and				// mva:rpl (:bp2),y			; 5
+
+       lda_im(0) and									// lda #				; 0
+       sta_bp2(1) and									// sta :bp2				; 1
+       lda_im(2) and									// lda #				; 2
+       sta_bp2_1(3) and									// sta :bp2+1				; 3
+       ldy_im(4) then									// ldy #				; 4
+       begin
+	p := GetWORD(0, 2);
+
+	TemporaryBuf[0] := '~';
+	TemporaryBuf[1] := '~';
+	TemporaryBuf[2] := '~';
+	TemporaryBuf[3] := '~';
+
+	TemporaryBuf[5] := #9'mva:rpl ' + HexWord(p) + ',y ' +  copy(TemporaryBuf[5], 19, 256);
+       end;
+
+
+    if (pos('mva:rne (:bp2),y ', TemporaryBuf[5]) > 1) and				// mva:rne (:bp2),y			; 5
+
+       lda_im(0) and									// lda #				; 0
+       sta_bp2(1) and									// sta :bp2				; 1
+       lda_im(2) and									// lda #				; 2
+       sta_bp2_1(3) and									// sta :bp2+1				; 3
+       ldy_im(4) then									// ldy #				; 4
+       begin
+	p := GetWORD(0, 2);
+
+	TemporaryBuf[0] := '~';
+	TemporaryBuf[1] := '~';
+	TemporaryBuf[2] := '~';
+	TemporaryBuf[3] := '~';
+
+	TemporaryBuf[5] := #9'mva:rne ' + HexWord(p) + ',y ' +  copy(TemporaryBuf[5], 19, 256);
+       end;
+
+
+// -----------------------------------------------------------------------------
+
+
+    if (TemporaryBuf[0] = #9'lda :STACKORIGIN,x') and					// lda :STACKORIGIN,x			; 0
+       sta(1) and									// sta F				; 1
+       (TemporaryBuf[2] = #9'lda :STACKORIGIN+STACKWIDTH,x') and			// lda :STACKORIGIN+STACKWIDTH,x	; 2
+       sta(3) and									// sta F+1				; 3
+       dex(4) and									// dex					; 2
+       (TemporaryBuf[5] = ':move') then							//:move					; 3
+       begin
+
+	tmp := TemporaryBuf[6];
+	p := StrToInt(TemporaryBuf[7]);
+
+	if p = 256 then begin
+	 TemporaryBuf[1] := #9'sta :bp2';
+	 TemporaryBuf[3] := #9'sta :bp2+1';
+
+     	 TemporaryBuf[4] := #9'ldy #$00';
+     	 TemporaryBuf[5] := #9'mva:rne (:bp2),y adr.' + tmp + ',y+';
+    	end else
+    	if p <= 128 then begin
+	 TemporaryBuf[1] := #9'sta :bp2';
+	 TemporaryBuf[3] := #9'sta :bp2+1';
+
+	 TemporaryBuf[4] := #9'ldy #' + HexByte(p-1);
+     	 TemporaryBuf[5] := #9'mva:rpl (:bp2),y adr.' + tmp + ',y-';
+    	end else begin
+     	 TemporaryBuf[4] := #9'@move ' + tmp + ' #adr.' + tmp + ' #' + Hex(p,2);
+     	 TemporaryBuf[5] := '~';
+	end;
+
+     	TemporaryBuf[6] := '~';//' #9'mwa #adr.'+tmp+' '+tmp;
+     	TemporaryBuf[7] := #9'dex';
+       end;
+
+
+// -----------------------------------------------------------------------------
+
+
 if JSR_SYSTEM_MOVE(11) or (LOCAL_SYSTEM_MOVE(11) and mINLINE(12) and ENDL(13)) then
    begin
 
