@@ -400,5 +400,32 @@ begin
 end;
 
 
+procedure OutTextXY(x,y: smallint; s: string);
+var i, j, k, v: byte;
+    w: word;
+begin
+
+ for i:=1 to length(s) do begin
+  v:= ord(ata2int(s[i]));
+
+  w:= v shl 3 + mem[756]*256;
+
+  for j:=0 to 7 do begin
+  v:=mem[w + j];
+
+   for k:=0 to 7 do begin
+    if v and $80 <> 0 then PutPixel(x+k, y+j);
+    v:=v shl 1;
+   end;
+
+  end;
+
+  inc(x, 8);
+
+ end;
+
+end;
+
+
 {$i vbxe.inc}
 

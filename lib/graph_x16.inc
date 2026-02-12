@@ -316,6 +316,7 @@ asm
 
 end;
 
+
 procedure ClearDevice; assembler;
 (*
 @description:  Clear the current window with the current background color.
@@ -325,3 +326,9 @@ asm
 	jsr GRAPH_clear
 end;
 
+
+procedure OutTextXY(x,y: smallint; s: string);
+begin
+
+
+end;

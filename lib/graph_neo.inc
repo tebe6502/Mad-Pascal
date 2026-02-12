@@ -151,3 +151,9 @@ asm
 
 end;
 
+
+procedure OutTextXY(x,y: smallint; s: string);
+begin
+
+
+end;
