@@ -2284,10 +2284,9 @@ begin        // OptimizeASM
   if t <> '' then begin
 
 
-// #9'MVA :STACKORIGIN ARG'  !!! unacceptable !!!
-
-
 // STAGE #1
+
+// #9'MVA :STACKORIGIN ARG'  !!! unacceptable !!!
 
 // #9'MVA ARG :STACKORIGIN...'
 
@@ -2373,6 +2372,8 @@ begin        // OptimizeASM
 
 
 // STAGE #2
+
+// #9'MVA :STACKORIGIN ARG'  !!! unacceptable !!!
 
 // #9'MNE :STACKORIGIN...'
 // ^  ^^^^^

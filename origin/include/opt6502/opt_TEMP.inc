@@ -5,7 +5,7 @@
 
 procedure opt_TEMP;
 var p: integer;
-    tmp, old: string;
+    tmp: string;
 begin
 
 
@@ -531,153 +531,6 @@ begin
     end;
 
 
-
-
-
-    if lda_im(6) and (TemporaryBuf[6] = TemporaryBuf[0]) and
-
-//       lda_im(0) and									// lda #		; 0
-       sta(1) and									// sta			; 1
-       lda_im(2) and (TemporaryBuf[2] <> TemporaryBuf[0]) and				// lda #		; 2
-       sta(3) and									// sta			; 3
-       lda_im(4) and (TemporaryBuf[4] <> TemporaryBuf[0]) and				// lda #		; 4
-       sta(5) then									// sta			; 5
-//       lda_im(6) then									// lda #		; 6
-      begin
-	tmp := TemporaryBuf[1];
-
-	TemporaryBuf[0] := TemporaryBuf[2];
-	TemporaryBuf[1] := TemporaryBuf[3];
-	TemporaryBuf[2] := TemporaryBuf[4];
-	TemporaryBuf[3] := TemporaryBuf[5];
-
-	TemporaryBuf[4] := TemporaryBuf[6];
-	TemporaryBuf[5] := tmp;
-
-	TemporaryBuf[6] := '~';
-      end;
-
-
-
-
-
-
-
-    if lda_im(5) and (TemporaryBuf[5] = TemporaryBuf[0]) and
-
-//       lda_im(0) and									// lda #		; 0
-       sta(1) and									// sta			; 1
-       sta(2) and									// sta			; 2
-       lda_im(3) and (TemporaryBuf[3] <> TemporaryBuf[0]) and				// lda #		; 3
-       sta(4) then									// sta			; 4
-//       lda_im(5) then									// lda #		; 5
-      begin
-	tmp := TemporaryBuf[1];
-	old := TemporaryBuf[2];	
-
-	TemporaryBuf[0] := TemporaryBuf[3];
-	TemporaryBuf[1] := TemporaryBuf[4];
-
-	TemporaryBuf[2] := TemporaryBuf[5];
-	TemporaryBuf[3] := tmp;
-	TemporaryBuf[4] := old;
-
-	TemporaryBuf[5] := '~';
-      end;
-
-
-
-
-    if lda_im(5) and (TemporaryBuf[5] = TemporaryBuf[0]) and
-
-//       lda_im(0) and									// lda #		; 0
-       sta(1) and									// sta			; 1
-       lda_im(2) and (TemporaryBuf[2] <> TemporaryBuf[0]) and				// lda #		; 2
-       sta(3) and									// sta			; 3
-       sta(4) then									// sta			; 4
-//       lda_im(5) then									// lda #		; 5
-      begin
-	tmp := TemporaryBuf[1];
-
-	TemporaryBuf[0] := TemporaryBuf[2];
-	TemporaryBuf[1] := TemporaryBuf[3];
-	TemporaryBuf[2] := TemporaryBuf[4];
-
-	TemporaryBuf[3] := TemporaryBuf[5];
-	TemporaryBuf[4] := tmp;
-
-	TemporaryBuf[5] := '~';
-      end;
-
-
-
-    if lda_im(4) and (TemporaryBuf[4] = TemporaryBuf[0]) and
-
-//       lda_im(0) and									// lda #		; 0
-       sta(1) and									// sta			; 1
-       lda_im(2) and (TemporaryBuf[2] <> TemporaryBuf[0]) and				// lda #		; 2
-       sta(3) then									// sta			; 3
-//       lda_im(4) then									// lda #		; 4
-      begin
-	tmp := TemporaryBuf[1];
-
-	TemporaryBuf[0] := TemporaryBuf[2];
-	TemporaryBuf[1] := TemporaryBuf[3];
-	TemporaryBuf[2] := TemporaryBuf[4];
-
-	TemporaryBuf[3] := tmp;
-
-	TemporaryBuf[4] := '~';
-
-
-    if (TemporaryBuf[2] = TemporaryBuf[8]) and
-    
-//       lda_im(4) and									// ~			; 4
-       sta(5) and									// sta			; 5
-       lda_im(6) and (TemporaryBuf[6] <> TemporaryBuf[2]) and				// lda #		; 6
-       sta(7) then									// sta			; 7
-//       lda_im(8) then									// lda #		; 8
-      begin		
-	tmp := TemporaryBuf[5];
-
-	TemporaryBuf[4] := TemporaryBuf[6];
-	TemporaryBuf[5] := TemporaryBuf[7];
-	TemporaryBuf[6] := TemporaryBuf[2];
-
-	TemporaryBuf[7] := tmp;
-
-	TemporaryBuf[8] := '~';
-      end;
-
-
-
-    if (TemporaryBuf[2] = TemporaryBuf[12]) and
-
-//       lda_im(8) and									// ~			; 8
-       sta(9) and									// sta			; 9
-       lda_im(10) and (TemporaryBuf[10] <> TemporaryBuf[2]) and				// lda #		; 10
-       sta(11) then									// sta			; 11
-//       lda_im(12) then								// lda #		; 12
-      begin		
-	tmp := TemporaryBuf[9];
-
-	TemporaryBuf[8] := TemporaryBuf[10];
-	TemporaryBuf[9] := TemporaryBuf[11];
-	TemporaryBuf[10]:= TemporaryBuf[2];
-
-	TemporaryBuf[11]:= tmp;
-
-	TemporaryBuf[12] := '~';
-      end;
-
-
-
-      end;
-
-
-
-
-
    if lda_im(0) and (TemporaryBuf[0] = TemporaryBuf[7]) and				// lda #XX		; 0
       sta(1) and									// sta			; 1
       lda_im(2) and (TemporaryBuf[2] = TemporaryBuf[9]) and				// lda #YY 		; 2
@@ -701,7 +554,7 @@ begin
      TemporaryBuf[7] := '~';
      TemporaryBuf[8] := '~';
      TemporaryBuf[9] := '~';
-     TemporaryBuf[10] := '~';
+     TemporaryBuf[10]:= '~';
     end;
 
 

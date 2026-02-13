@@ -228,6 +228,7 @@ var p, k , q: integer;
 {$i include/opt6502/opt_TEMP_TAIL_IF.inc}
 {$i include/opt6502/opt_TEMP_TAIL_CASE.inc}
 {$i include/opt6502/opt_TEMP.inc}
+{$i include/opt6502/opt_TEMP_LDA.inc}
 {$i include/opt6502/opt_TEMP_CMP.inc}
 {$i include/opt6502/opt_TEMP_CMP_0.inc}
 {$i include/opt6502/opt_TEMP_WHILE.inc}
@@ -295,6 +296,8 @@ end;
 
    opt_TEMP_MOVE;
    opt_TEMP_FILL;
+
+   opt_TEMP_LDA;
 
    opt_TEMP_IFTMP;
    opt_TEMP_TAIL_IF;
