@@ -920,6 +920,129 @@ begin
 // -----------------------------------------------------------------------------
 
 
+    if lda_val(i) and (listing[i] = listing[i+8]) and						// lda A				; 0	~:STACKORIGIN
+       sta_val(i+1) and										// sta					; 1	~:STACKORIGIN
+       lda_val(i+2) and (listing[i+2] = listing[i+10]) and					// lda A+1				; 2	~:STACKORIGIN
+       sta_val(i+3) and										// sta					; 3	~:STACKORIGIN
+       lda_val(i+4) and (listing[i+4] = listing[i+12]) and					// lda A+2				; 4	~:STACKORIGIN
+       sta_val(i+5) and										// sta					; 5	~:STACKORIGIN
+       lda_val(i+6) and (listing[i+6] = listing[i+14]) and					// lda A+3				; 6	~:STACKORIGIN
+       sta_val(i+7) and										// sta					; 7	~:STACKORIGIN
+//       lda_val(i+8) and									// lda A				; 8	~:STACKORIGIN
+       sta_val(i+9) and										// sta					; 9	~:STACKORIGIN
+//       lda_val(i+10) and									// lda A+1				; 10	~:STACKORIGIN
+       sta_val(i+11) and									// sta					; 11	~:STACKORIGIN
+//       lda_val(i+12) and									// lda A+2				; 12	~:STACKORIGIN
+       sta_val(i+13) and									// sta					; 13	~:STACKORIGIN
+//       lda_val(i+14) and									// lda A+3				; 14	~:STACKORIGIN
+       sta_val(i+15) then									// sta					; 15	~:STACKORIGIN
+     begin
+	listing_tmp[0] := listing[i];
+	listing_tmp[1] := listing[i+1];
+	listing_tmp[2] := listing[i+9];
+	listing_tmp[3] := listing[i+2];
+	listing_tmp[4] := listing[i+3];
+	listing_tmp[5] := listing[i+11];
+	listing_tmp[6] := listing[i+4];
+	listing_tmp[7] := listing[i+5];
+	listing_tmp[8] := listing[i+13];
+	listing_tmp[9] := listing[i+6];
+	listing_tmp[10] := listing[i+7];
+	listing_tmp[11] := listing[i+15];
+
+	listing[i]   := listing_tmp[0];
+	listing[i+1] := listing_tmp[1];
+	listing[i+2] := listing_tmp[2];
+	listing[i+3] := listing_tmp[3];
+	listing[i+4] := listing_tmp[4];
+	listing[i+5] := listing_tmp[5];
+	listing[i+6] := listing_tmp[6];
+	listing[i+7] := listing_tmp[7];
+	listing[i+8] := listing_tmp[8];
+	listing[i+9] := listing_tmp[9];
+	listing[i+10]:= listing_tmp[10];
+	listing[i+11]:= listing_tmp[11];
+	listing[i+12]:= '';
+	listing[i+13]:= '';
+	listing[i+14]:= '';
+	listing[i+15]:= '';
+
+      	exit(false);
+     end;
+
+
+    if lda_val(i) and (listing[i] = listing[i+12]) and						// lda A				; 0	~:STACKORIGIN
+       add_sub_val(i+1) and (listing[i+1] = listing[i+13]) and					// add|sub				; 1
+       sta_val(i+2) and										// sta					; 2	~:STACKORIGIN
+       lda_val(i+3) and (listing[i+3] = listing[i+15]) and					// lda A+1				; 3	~:STACKORIGIN
+       adc_sbc_val(i+4) and (listing[i+4] = listing[i+16]) and					// adc|sbc				; 4
+       sta_val(i+5) and										// sta					; 5	~:STACKORIGIN
+       lda_val(i+6) and (listing[i+6] = listing[i+18]) and					// lda A+2				; 6	~:STACKORIGIN
+       adc_sbc_val(i+7) and (listing[i+7] = listing[i+19]) and					// adc|sbc				; 7
+       sta_val(i+8) and										// sta					; 8	~:STACKORIGIN
+       lda_val(i+9) and (listing[i+9] = listing[i+21]) and					// lda A+3				; 9	~:STACKORIGIN
+       adc_sbc_val(i+10) and (listing[i+10] = listing[i+22]) and				// adc|sbc				; 10
+       sta_val(i+11) and									// sta					; 11	~:STACKORIGIN
+
+//       lda_val(i+12) and									// lda A				; 12	~:STACKORIGIN
+//       add_sub_val(i+13) and 									// add|sub				; 13
+       sta_val(i+14) and									// sta					; 14	~:STACKORIGIN
+//       lda_val(i+15) and									// lda A+1				; 15	~:STACKORIGIN
+//       adc_sbc_val(i+16) and									// adc|sbc				; 16
+       sta_val(i+17) and									// sta					; 17	~:STACKORIGIN
+//       lda_val(i+18) and									// lda A+2				; 18	~:STACKORIGIN
+//       adc_sbc_val(i+19) and									// adc|sbc				; 19
+       sta_val(i+20) and									// sta					; 20	~:STACKORIGIN
+//       lda_val(i+21) and									// lda A+3				; 21	~:STACKORIGIN
+//       adc_sbc_val(i+22) and									// adc|sbc				; 22
+       sta_val(i+23) then									// sta					; 23	~:STACKORIGIN
+     begin
+	listing_tmp[0] := listing[i];
+	listing_tmp[1] := listing[i+1];
+	listing_tmp[2] := listing[i+2];
+	listing_tmp[3] := listing[i+14];
+	listing_tmp[4] := listing[i+3];
+	listing_tmp[5] := listing[i+4];
+	listing_tmp[6] := listing[i+5];
+	listing_tmp[7] := listing[i+17];
+	listing_tmp[8] := listing[i+6];
+	listing_tmp[9] := listing[i+7];
+	listing_tmp[10]:= listing[i+8];
+	listing_tmp[11]:= listing[i+20];
+	listing_tmp[12]:= listing[i+9];
+	listing_tmp[13]:= listing[i+10];
+	listing_tmp[14]:= listing[i+11];
+	listing_tmp[15]:= listing[i+23];
+
+	listing[i]   := listing_tmp[0];
+	listing[i+1] := listing_tmp[1];
+	listing[i+2] := listing_tmp[2];
+	listing[i+3] := listing_tmp[3];
+	listing[i+4] := listing_tmp[4];
+	listing[i+5] := listing_tmp[5];
+	listing[i+6] := listing_tmp[6];
+	listing[i+7] := listing_tmp[7];
+	listing[i+8] := listing_tmp[8];
+	listing[i+9] := listing_tmp[9];
+	listing[i+10]:= listing_tmp[10];
+	listing[i+11]:= listing_tmp[11];
+	listing[i+12]:= listing_tmp[12];
+	listing[i+13]:= listing_tmp[13];
+	listing[i+14]:= listing_tmp[14];
+	listing[i+15]:= listing_tmp[15];
+	listing[i+16]:= '';
+	listing[i+17]:= '';
+	listing[i+18]:= '';
+	listing[i+19]:= '';
+	listing[i+20]:= '';
+	listing[i+21]:= '';
+	listing[i+22]:= '';
+	listing[i+23]:= '';
+
+      	exit(false);
+     end;
+
+
   if sta_stack(i+15) and									// sta :STACKORIGIN+STACKWIDTH*3	; 15
 
      lda_a(i) and										// lda					; 0
