@@ -971,6 +971,35 @@ begin
      end;
 
 
+    if lda_val(i) and (listing[i] = listing[i+4]) and						// lda A				; 0	~:STACKORIGIN
+       sta_val(i+1) and										// sta					; 1	~:STACKORIGIN
+       lda_val(i+2) and (listing[i+2] = listing[i+6]) and					// lda A+1				; 2	~:STACKORIGIN
+       sta_val(i+3) and										// sta					; 3	~:STACKORIGIN
+//       lda_val(i+4) and									// lda A				; 4	~:STACKORIGIN
+       sta_val(i+5) and										// sta					; 5	~:STACKORIGIN
+//       lda_val(i+6) and									// lda A+1				; 6	~:STACKORIGIN
+       sta_val(i+7) then									// sta					; 7	~:STACKORIGIN
+     begin
+	listing_tmp[0] := listing[i];
+	listing_tmp[1] := listing[i+1];
+	listing_tmp[2] := listing[i+5];
+	listing_tmp[3] := listing[i+2];
+	listing_tmp[4] := listing[i+3];
+	listing_tmp[5] := listing[i+7];
+
+	listing[i]   := listing_tmp[0];
+	listing[i+1] := listing_tmp[1];
+	listing[i+2] := listing_tmp[2];
+	listing[i+3] := listing_tmp[3];
+	listing[i+4] := listing_tmp[4];
+	listing[i+5] := listing_tmp[5];
+	listing[i+6] := '';
+	listing[i+7] := '';
+
+      	exit(false);
+     end;
+
+
     if lda_val(i) and (listing[i] = listing[i+12]) and						// lda A				; 0	~:STACKORIGIN
        add_sub_val(i+1) and (listing[i+1] = listing[i+13]) and					// add|sub				; 1
        sta_val(i+2) and										// sta					; 2	~:STACKORIGIN
