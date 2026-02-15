@@ -190,6 +190,8 @@ const
 
 var
 	vram: TVBXEMemoryStream;
+	
+	VideoRAM: cardinal = VBXE_OVRADR;
 
 	scrollback_fill: Boolean absolute $63;				// (LOGCOL = $63) TRUE -> row #0 was copied to the scrollback_buffer
 
@@ -228,11 +230,6 @@ var
 
 	procedure ClearDevice;
 	procedure CloseGraph; assembler;
-//	procedure TextOut(a: char; c: byte); overload;
-//	procedure TextOut(a: char); overload;
-//	procedure TextOut(s: PString; c: byte); overload;
-//	procedure TextOut(s: PString); overload;
-//	procedure Position(x,y: byte); assembler;
 
 	procedure SetColorMapEntry; overload; assembler;
 	procedure SetColorMapEntry(a,b,c, i: byte); overload; assembler;
@@ -252,6 +249,8 @@ var
 	procedure SetTopBorder(a: byte); register; assembler;
 	procedure SetXDLHeight(a: byte); register; assembler;
 	procedure SetMapStep(a: word); register; assembler;
+
+	procedure TextOut(x: word; y: byte; s: PString);
 
 	procedure PutPixel(x: word; y: byte);
 	procedure SetColor(a: byte);
@@ -297,7 +296,7 @@ var a: cardinal;
     v: byte;
 begin
 
-    vram.position := VBXE_OVRADR + y*320;
+    vram.position := VideoRAM + y*320;
 
     if GraphMode = VGAHi then begin
 
@@ -451,138 +450,112 @@ begin
 end;
 
 
-procedure Position(x, y: byte); assembler;
-(*
-@description:
-Set cursor position on screen.
+procedure TextOut(x: word; y: byte; s: PString);
+var i, j, k, v, o: byte;
+    w: word;
+    vdst: cardinal;
+    
+    buf: array [0..63] of byte absolute __buffer;
+    tmp: array [0..63] of byte absolute VBXE_WINDOW+$400;
 
-Positions the cursor at (X,Y), X in horizontal, Y in vertical direction.
-
-@param: x - horizontal positions
-@param: y - vertical positions
-*)
-asm
-	jsr @vbxe_Cursor.off
-
-	ldy x
-	beq @+
-
-	dey
-
-@	sty colcrs
-	mvy #$00 colcrs+1
-
-	ldy y
-	beq @+
-
-	dey
-
-@	sty rowcrs
-
-	jmp @vbxe_SetCursor
-end;
-
-
-procedure TextOut(a: char; c: byte); overload;
 (*
 @description:
 
 *)
-begin
-
- fildat := c;
-
- asm
-	fxs FX_MEMS #$80+MAIN.SYSTEM.VBXE_OVRADR/$1000
-
-	lda a
-	jsr @putchar_80
-
- 	fxs FX_MEMS #$00		; disable VBXE BANK
- end;
-
-end;
 
 
-procedure TextOut(a: char); overload;
-(*
-@description:
-
-*)
-begin
-
- asm
-	fxs FX_MEMS #$80+MAIN.SYSTEM.VBXE_OVRADR/$1000
-
-	lda a
-	jsr @putchar_80
-
- 	fxs FX_MEMS #$00		; disable VBXE BANK
- end;
-
-end;
-
-
-procedure TextOut(s: PString; c: byte); overload;
-(*
-@description:
-
-*)
-var i: byte;
-    a: char;
-begin
-
- fildat := c;
-
- for i:=1 to s[0] do begin
-
-  a := s[i];
-
+  procedure blitTMP; assembler;
   asm
-	fxs FX_MEMS #$80+MAIN.SYSTEM.VBXE_OVRADR/$1000
+		ert *>=MAIN.SYSTEM.VBXE_WINDOW && *<MAIN.SYSTEM.VBXE_WINDOW+$1000, 'VBXE_WINDOW Memory conflict'
+  
+		lda vdst
+		sta dst
+		lda vdst+1
+		sta dst+1
+		lda vdst+2
+		sta dst+2
 
-	lda a
-	jsr @putchar_80
+		mwa MAIN.SYSTEM.ScreenWidth width
 
-	fxs FX_MEMS #$00		; disable VBXE BANK
+		fxs FX_MEMS #$80+MAIN.SYSTEM.VBXE_XDLADR/$1000
+
+		ldy #63
+		mva:rpl adr.buf,y adr.tmp,y-
+
+		ldy #20
+		mva:rpl bltCop,y MAIN.SYSTEM.VBXE_WINDOW+MAIN.SYSTEM.VBXE_BCBTMP,y-
+
+		fxs FX_BL_ADR0 #MAIN.SYSTEM.VBXE_BCBTMP	; program blittera od adresu MAIN.SYSTEM.VBXE_BCBTMP
+		fxs FX_BL_ADR1 #$00			; zaraz za programem VBXE Display List
+		fxsa FX_BL_ADR2
+
+		fxs FX_BLITTER_START #$01		; !!! start gdy 1 !!!
+
+;wait		fxla FX_BLITTER_BUSY
+;		bne wait
+
+		fxs FX_MEMS #$00
+
+		jmp @exit
+
+
+bltCop
+		.long $000400				; source address
+		.word 8					; source step y
+		.byte 1					; source step x
+dst		.long MAIN.SYSTEM.VBXE_MAPADR		; destination address
+width		.word 320				; destination step y
+		.byte 1					; destination step x
+		.word 8-1				; width
+		.byte 8-1				; height
+blt_mask	dta 0xff				; and mask (and mask equal to 0, memory will be filled with xor mask)
+		dta 0x00				; xor mask
+		dta 0x00				; collision and mask
+		dta 0x00				; zoom
+		dta 0x00				; pattern feature
+		dta 0x01				; control
+  
   end;
 
-end;
-
-end;
 
 
-procedure TextOut(s: PString); overload;
-(*
-@description:
-
-*)
-var i: byte;
-    a: char;
 begin
 
-asm
-	lda colpf2s	; TextBackground
-	ora colpf1s	; TextColor
-	sta fildat
-end;
+ vdst := VideoRAM + y*word(ScreenWidth) + x; 
 
  for i:=1 to s[0] do begin
+ 
+  v:= ord(ata2int(s[i]));
 
-  a := s[i];
+  w:= v shl 3 + mem[756]*256;
 
-  asm
-	fxs FX_MEMS #$80+MAIN.SYSTEM.VBXE_OVRADR/$1000
+  for j:=7 downto 0 do begin
+   
+   v:=mem[w + j];
 
-	lda a
-	jsr @putchar_80
+   for k:=0 to 7 do begin
 
-	fxs FX_MEMS #$00		; disable VBXE BANK
+    if v and $80 <> 0 then 
+     o := fildat
+    else
+     o := 0;
+     
+    buf[k+j*8] := o;
+    
+    v:=v shl 1;
+   end;
+
   end;
+ 
+  blitTMP;
+
+  inc(vdst, 8);
 
  end;
-
+ 
+ 
 end;
+
 
 
 procedure OverlayOff; assembler;

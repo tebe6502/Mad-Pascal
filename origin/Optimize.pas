@@ -279,70 +279,70 @@ var inxUse, found: Boolean;
 
   end;
 
+// -----------------------------------------------------------------------------
+
+  procedure LDA_STA_ADR_0(const i, q: Integer; op: Char);
+
+   procedure update(const i: integer);
+   begin
+      //Delete(listing[i], pos(',y', listing[i]), 2);
+      SetLength(listing[i], length(listing[i])-2);
+      if q <> 0 then listing[i] := listing[i] + op + Hex(q, 2);
+   end;
+
+  begin
+
+    if lda_adr_y(i + 6) then update(i+6);
+    if sta_adr_y(i + 7) then update(i+7);
+
+    if (lda_adr(i + 8) = False) and (sta_adr(i + 9) = False) then exit;
+
+    if lda_adr_y(i + 8) then update(i+8);
+    if sta_adr_y(i + 9) then update(i+9);
+
+    if (lda_adr(i + 10) = False) and (sta_adr(i + 11) = False) then exit;
+
+    if lda_adr_y(i + 10) then update(i+10);
+    if sta_adr_y(i + 11) then update(i+11);
+
+    if (lda_adr(i + 12) = False) and (sta_adr(i + 13) = False) then exit;
+
+    if lda_adr_y(i + 12) then update(i+12);
+    if sta_adr_y(i + 13) then update(i+13);
+
+  end;  //LDA_STA_ADR_0
+
 
   procedure LDA_STA_ADR(const i, q: Integer; op: Char);
 
-   procedure update(i: integer);
+   procedure update(const i: integer);
    begin
-      Delete(listing[i], pos(',y', listing[i]), 2);
+      //Delete(listing[i], pos(',y', listing[i]), 2);
+      SetLength(listing[i], length(listing[i])-2);
       listing[i] := listing[i] + op + Hex(q, 2) + ',y';
    end;
 
   begin
 
-    if lda_adr(i + 6) and iy(i + 6) then update(i+6);
-//    begin
-//      Delete(listing[i + 6], pos(',y', listing[i + 6]), 2);
-//      listing[i + 6] := listing[i + 6] + op + '$' + IntToHex(q, 2) + ',y';
-//    end;
+    if q = 0 then exit;
 
-    if sta_adr(i + 7) and iy(i + 7) then update(i+7);
-//    begin
-//      Delete(listing[i + 7], pos(',y', listing[i + 7]), 2);
-//      listing[i + 7] := listing[i + 7] + op + '$' + IntToHex(q, 2) + ',y';
-//    end;
+    if lda_adr_y(i + 6) then update(i+6);
+    if sta_adr_y(i + 7) then update(i+7);
 
     if (lda_adr(i + 8) = False) and (sta_adr(i + 9) = False) then exit;
 
-    if lda_adr(i + 8) and iy(i + 8) then update(i+8);
-//    begin
-//      Delete(listing[i + 8], pos(',y', listing[i + 8]), 2);
-//      listing[i + 8] := listing[i + 8] + op + '$' + IntToHex(q, 2) + ',y';
-//    end;
-
-    if sta_adr(i + 9) and iy(i + 9) then update(i+9);
-//    begin
-//      Delete(listing[i + 9], pos(',y', listing[i + 9]), 2);
-//      listing[i + 9] := listing[i + 9] + op + '$' + IntToHex(q, 2) + ',y';
-//    end;
+    if lda_adr_y(i + 8) then update(i+8);
+    if sta_adr_y(i + 9) then update(i+9);
 
     if (lda_adr(i + 10) = False) and (sta_adr(i + 11) = False) then exit;
 
-    if lda_adr(i + 10) and iy(i + 10) then update(i+10);
-//    begin
-//      Delete(listing[i + 10], pos(',y', listing[i + 10]), 2);
-//      listing[i + 10] := listing[i + 10] + op + '$' + IntToHex(q, 2) + ',y';
-//    end;
-
-    if sta_adr(i + 11) and iy(i + 11) then update(i+11);
-//    begin
-//      Delete(listing[i + 11], pos(',y', listing[i + 11]), 2);
-//      listing[i + 11] := listing[i + 11] + op + '$' + IntToHex(q, 2) + ',y';
-//    end;
+    if lda_adr_y(i + 10) then update(i+10);
+    if sta_adr_y(i + 11) then update(i+11);
 
     if (lda_adr(i + 12) = False) and (sta_adr(i + 13) = False) then exit;
 
-    if lda_adr(i + 12) and iy(i + 12) then update(i+12);
-//    begin
-//      Delete(listing[i + 12], pos(',y', listing[i + 12]), 2);
-//      listing[i + 12] := listing[i + 12] + op + '$' + IntToHex(q, 2) + ',y';
-//    end;
-
-    if sta_adr(i + 13) and iy(i + 13) then update(i+13);
-//    begin
-//      Delete(listing[i + 13], pos(',y', listing[i + 13]), 2);
-//      listing[i + 13] := listing[i + 13] + op + '$' + IntToHex(q, 2) + ',y';
-//    end;
+    if lda_adr_y(i + 12) then update(i+12);
+    if sta_adr_y(i + 13) then update(i+13);
 
   end;  //LDA_STA_ADR
 
@@ -987,7 +987,7 @@ end;
 
 
 {
-if (pos('lda adr.ROW1+$20,y', listing[i]) > 0) then begin
+if (pos('lda adr.WALL', listing[i]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');
@@ -1034,7 +1034,7 @@ end;
 // -----------------------------------------------------------------------------
 
     function PeepholeOptimization: Boolean;
-    var i: Integer;
+    var p,i: Integer;
     begin
 
       Result := True;
@@ -1046,7 +1046,7 @@ end;
 
 
 {
-if (pos('add #$01', listing[i]) > 0) then begin
+if (pos('lda adr.WALL', listing[i]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');
@@ -1160,7 +1160,7 @@ end;
 
 
 {
-if (pos('lda MOUSECLICK.RESULT', listing[i]) > 0) then begin
+if (pos('lda adr.', listing[i]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');

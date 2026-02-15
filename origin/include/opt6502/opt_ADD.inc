@@ -45,9 +45,13 @@ begin
        add_im_0(i+3) and								// add #$00				; 3
        (sta_a(i+4) or tay(i+4)) then							// sta|tay				; 4
      begin
-	listing[i+3] := '';
 
-	exit(false);
+	if add(i+2) then begin
+	  listing[i+3] := '';
+
+	  exit(false);
+	end;
+
      end;
 
 
@@ -56,9 +60,13 @@ begin
        add_im_0(i+2) and								// add #$00				; 2
        (sta_a(i+3) or tay(i+3)) then							// sta|tay				; 3
      begin
-	listing[i+2] := '';
 
-	exit(false);
+	if add(i+1) then begin
+	  listing[i+2] := '';
+
+	  exit(false);
+	end;
+
      end;
 
 
@@ -223,7 +231,7 @@ begin
 
     if lda_val(i) and (iy(i) = false) and						// lda					; 0
        (add_im_1(i+1) or sub_im_1(i+1)) and						// add #$01|sub #$01			; 1
-       sta_val(i+2) and (iy(i+2) = false) and						// sta					; 2
+       sta_val(i+2) and (iy(i+2) = false) and						// sta					; 2	~:STACKORIGIN
        ldy(i+3) then									// ldy					; 3
      begin
 	listing[i]   := #9'ldy ' + copy(listing[i], 6, 256);
@@ -302,7 +310,9 @@ begin
     if lda(i) and									// lda I				; 0
        add_sub(i+1) and									// add|sub				; 1
        add_im_1(i+2) and								// add #$01				; 2
-       tay(i+3) then									// tay					; 3
+       tay(i+3) and									// tay					; 3
+											//					; 4
+       (adc(i+5) = false) then								//~adc					; 5
      begin
 	listing[i+2] := #9'tay';
 	listing[i+3] := #9'iny';
@@ -2215,7 +2225,9 @@ begin
        lda(i+1) and (lda_im(i+1) = false) and						// lda					; 1		~lda adr.
        add_im_1(i+2) and								// add #$01				; 2
        add_stack(i+3) and								// add :STACKORIGIN			; 3
-       tay(i+4) then									// tay					; 4
+       tay(i+4) and									// tay					; 4
+											//					; 5
+       (adc(i+6) = false) then								//~adc					; 6
       if argMatch(i, i+3) then
        begin
 	listing[i] := '';
@@ -2515,7 +2527,9 @@ begin
        lda(i+2) and (lda_im(i+2) = false) and						// lda 					; 2		~lda adr.
        add_sub_im(i+3) and								// add|sub #				; 3
        add_stack(i+4) and								// add :STACKORIGIN			; 4
-       tay(i+5) then									// tay					; 5
+       tay(i+5) and									// tay					; 5
+											//					; 6
+       (adc(i+7) = false) then								//~adc					; 7
      if argMatch(i+1, i+4) then
       begin
 	listing[i+2] := #9'add ' + copy(listing[i+2], 6, 256);
@@ -3327,10 +3341,10 @@ begin
 // -----------------------------------------------------------------------------
 
     if lda_im_0(i) and 									// lda #$00				; 0
-       add(i+1) and (add_im(i+1) = false) and						// add					; 1	~add #$00	!!!
+       add(i+1) and (add_im(i+1) = false) and						// add					; 1	~add #		!!!
        tay(i+2) and 									// tay					; 2
        lda_a(i+3) and									// lda					; 3
-       adc(i+4) and (adc_im(i+4) = false) and						// adc 					; 4	~adc #$00	!!!
+       adc(i+4) and (adc_im(i+4) = false) and						// adc 					; 4	~adc #		!!!
        sta_a(i+5) and (sta_bp_1(i+5) = false) then					// sta					; 5	~sta :bp+1	!!!
      begin
       listing[i]   := '';

@@ -594,7 +594,7 @@ begin
      end;
 
 
-    if (l=3) and
+    if (l = 3) and
        lda_im(i) and									// lda #				; 0
        sub_im(i+1) and									// sub #				; 1
        sta_a(i+2) then									// sta 					; 2

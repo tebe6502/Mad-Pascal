@@ -387,10 +387,8 @@ begin
 
     if lda_im(i) and									// lda #				; 0
        eor_im(i+1) and									// eor #				; 1
-       sta_a(i+2) then									// sta 					; 2
-     if argMatch(i, i+1) then
+       sta_a(i+2) then									// sta					; 2
      begin
-
 	p := GetBYTE(i) xor GetBYTE(i+1);
 
 	listing[i]   := #9'lda #' + HexByte(p);
