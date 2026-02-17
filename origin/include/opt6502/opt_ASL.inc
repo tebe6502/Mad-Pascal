@@ -68,7 +68,7 @@ begin
 
 
     if rol_a(i) and										// rol @				; 0
-       mwy_bp2(i+1) and										// mwy					; 1
+       (mwy_bp2(i+1) or ldy(i+1)) and								// mwy|ldy				; 1
        lda_a(i+2) and										// lda					; 2
        (and_ora_eor(i+3) or add_sub(i+3)) and							// and|ora|eor|add|sub			; 3
        (sta_a(i+4) or ldy(i+4) or tay(i+4)) then						// sta|ldy|tay				; 4
@@ -982,7 +982,7 @@ begin
        rol_stack(i+2) and									// rol :STACKORIGIN+STACKWIDTH*2	; 2
        rol_stack(i+3) and									// rol :STACKORIGIN+STACKWIDTH*3	; 3
        lda_a(i+4) and										// lda					; 4
-       ADD_SUB_STACK(i+5) and									// add|sub :STACKORIGIN			; 5
+       (ADD_SUB_STACK(i+5) or AND_ORA_EOR_STACK(i+5)) and					// add|sub|and|ora|eor :STACKORIGIN	; 5
        sta_a(i+6) and										// sta					; 6
        (lda_a(i+7) = false) then								//~lda					; 7
      if argMatch(i, i+5) then begin
@@ -1010,7 +1010,7 @@ begin
        rol_stack(i+2) and									// rol :STACKORIGIN+STACKWIDTH*2	; 2
        rol_stack(i+3) and									// rol :STACKORIGIN+STACKWIDTH*3	; 3
        lda_stack(i+4) and									// lda :STACKORIGIN			; 4
-       add_sub(i+5) and										// add|sub				; 5
+       (add_sub(i+5) or and_ora_eor(i+5)) and							// add|sub|and|ora|eor			; 5
        sta_a(i+6) and										// sta					; 6
        (lda_a(i+7) = false) then								//~lda					; 7
      if argMatch(i, i+4) then begin

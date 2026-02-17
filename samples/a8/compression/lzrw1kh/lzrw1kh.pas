@@ -39,7 +39,7 @@ CONST
     FLAG_Compress  = $40;
 
 TYPE
-    BufferIndex    = 0..BufferMax + 15; 
+    BufferIndex    = 0..BufferMax + 15;
     BufferSize     = 0..BufferMaxSize;
        { extra bytes needed here if compression fails      *dh *}
     BufferArray    = ARRAY [BufferIndex] OF BYTE;
@@ -73,7 +73,7 @@ VAR
   HashValue      : WORD;
   TmpHash        : Int16;
 BEGIN
-  HashValue := (40543*((((Source^[X] SHL 4) XOR Source^[X+1]) SHL 4) XOR
+  HashValue := (40543*(((byte(Source^[X] SHL 4) XOR Source^[X+1]) SHL 4) XOR
                                      Source^[X+2]) SHR 4) AND $0FFF;
   Result := FALSE;
   TmpHash := Hash^[HashValue];
@@ -97,7 +97,7 @@ VAR
   X,Y,Z,Pos                : BufferIndex;
 BEGIN
   FillChar(Hash^,SizeOf(Hashtable), $FF);
-  
+
   Dest^[0] := FLAG_Compress;
   X := 0;
   Y := 3;

@@ -52,7 +52,7 @@ begin
 
        	if lsr_stack(i+6) and							/// lsr :STACKORIGIN+STACKWIDTH		; 6
            ror_stack(i+7) and							/// ror :STACKORIGIN			; 7
-           lsr_stack(i+8) and							// lsr :STACKORIGIN+STACKWIDTH		; 8
+           lsr_stack(i+8) and							/// lsr :STACKORIGIN+STACKWIDTH		; 8
            ror_stack(i+9) and							/// ror :STACKORIGIN			; 9
 	   lda_stack(i+10) then							/// lda :STACKORIGIN			; 10
          if argMatch(i+9, i+10) then

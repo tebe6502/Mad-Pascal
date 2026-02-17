@@ -206,9 +206,9 @@ begin
 
 
     if (lda_im(i) = false) and (lda_im(i+2) = false) and
-       lda(i) and										// lda TEMP				; 0	~lda adr. !!!
+       lda(i) and										// lda A				; 0	~lda adr. !!!
        sta_a(i+1) and										// sta					; 1
-       lda(i+2) then										// lda TEMP				; 2	~lda adr. !!!
+       lda(i+2) then										// lda A				; 2	~lda adr. !!!
      if argMatch(i, i+2) and
 	(argMatch(i, i+1) = false) then
       begin
@@ -711,7 +711,7 @@ begin
        (lda_a(i+2) or mva(i+2) or mwa(i+2)) then						// lda|mva|mwa				; 2
      begin
 
-      if (i>0) and adc_sbc(i) and lda_a(i-1) then listing[i-1] := '';
+      if (i > 0) and adc_sbc(i) and lda_a(i-1) then listing[i-1] := '';
 
       listing[i] := '';
       exit(false);

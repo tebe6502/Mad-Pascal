@@ -733,11 +733,11 @@
        sty_stack(i+1) and								// sty :STACKORIGIN+STACKWIDTH*2	; 1
        sty_stack(i+2) and								// sty :STACKORIGIN+STACKWIDTH*3	; 2
        lda_stack(i+3) and								// lda :STACKORIGIN+STACKWIDTH		; 3
-       sta_val(i+4) and									// sta ~:STACKORIGIN			; 4
+       sta_val(i+4) and									// sta					; 4	~:STACKORIGIN
        lda_stack(i+5) and								// lda :STACKORIGIN+STACKWIDTH*2	; 5
-       sta_val(i+6) and									// sta ~:STACKORIGIN			; 6
+       sta_val(i+6) and									// sta					; 6	~:STACKORIGIN
        lda_stack(i+7) and								// lda :STACKORIGIN+STACKWIDTH*3	; 7
-       sta_val(i+8) then								// sta ~:STACKORIGIN			; 8
+       sta_val(i+8) then								// sta					; 8	~:STACKORIGIN
      if argMatch(i, i+3) and
         argMatch(i+1, i+5) and
         argMatch(i+2, i+7) then
@@ -2238,7 +2238,7 @@
        dey(i+7) and									// dey					; 7
        bne(i+8) and									// bne l_				; 8
        lab_l(i+9) and									//l_					; 9
-       sta_val(i+10) and								// sta ~:STACKORIGIN			; 10
+       sta_val(i+10) and								// sta					; 10	~:STACKORIGIN
        lda_stack(i+11) and								// lda :STACKORIGIN+STACKWIDTH		; 11
        sta_a(i+12) then									// sta 					; 12
      if argMatch(i+4, i+11) then
