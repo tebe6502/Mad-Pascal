@@ -678,6 +678,35 @@
       end;
 
 
+// -----------------------------------------------------------------------------
+
+
+    if (ror_stack(i) or rol_stack(i)) and						// ror|rol :STACKORIGIN			; 0
+       lda_stack(i+1) and								// lda :STACKORIGIN+STACKWIDTH		; 1
+       and_ora_eor(i+2) and								// and|ora|eor				; 2
+       sta_val(i+3) and									// sta A+1				; 3	~:STACKORIGIN
+       lda_stack(i+4) and								// lda :STACKORIGIN			; 4
+       sta_val(i+5) and					 				// sta A				; 5	~:STACKORIGIN
+       (sta_a(i+6) = false) and (tay(i+6) = false) then					//~sta|tay				; 6
+     if argMatch(i, i+4) and
+        (argMatch(i, i+1) = false) then
+     begin
+	listing_tmp[0] := listing[i+4];
+	listing_tmp[1] := listing[i+5];
+	listing_tmp[2] := listing[i+1];
+	listing_tmp[3] := listing[i+2];
+	listing_tmp[4] := listing[i+3];
+
+	listing[i+1] := listing_tmp[0];
+	listing[i+2] := listing_tmp[1];
+	listing[i+3] := listing_tmp[2];
+	listing[i+4] := listing_tmp[3];
+	listing[i+5] := listing_tmp[4];
+
+//     	Result:=false; Break;
+     end;
+
+
     if sty_stack(i) and									// sty :STACKORIGIN+STACKWIDTH*2	; 0
        sty_stack(i+1) and								// sty :STACKORIGIN+STACKWIDTH*3	; 1
        lda_stack(i+2) and								// lda :STACKORIGIN+STACKWIDTH*2	; 2
@@ -859,6 +888,7 @@
        Result:=false; Break;
      end;
 }
+
 
 // -----------------------------------------------------------------------------
 
@@ -1047,9 +1077,9 @@
        ror_stack(i+2) and								// ror :STACKORIGIN+STACKWIDTH		; 2
        ror_stack(i+3) and								// ror :STACKORIGIN			; 3
        lda_stack(i+4) and								// lda :STACKORIGIN			; 4
-       sta(i+5) and									// sta					; 5
+       sta_a(i+5) and									// sta					; 5
        lda_stack(i+6) and								// lda :STACKORIGIN+STACKWIDTH		; 6
-       sta(i+7) then									// sta					; 7
+       sta_a(i+7) then									// sta					; 7
      if argMatch(i+2, i+6) and
         argMatch(i+3, i+4) then
      begin

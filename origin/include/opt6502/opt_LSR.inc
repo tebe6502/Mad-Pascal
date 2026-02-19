@@ -415,6 +415,73 @@ begin
      end;
 
 
+    if (l = i + 10) and
+       lsr_stack(i) and									// lsr :STACKORIGIN+STACKWIDTH*3	; 0
+       ror_stack(i+1) and								// ror :STACKORIGIN+STACKWIDTH*2	; 1
+       ror_stack(i+2) and								// ror :STACKORIGIN+STACKWIDTH		; 2
+       ror_stack(i+3) and								// ror :STACKORIGIN			; 3
+       lda_stack(i+4) and								// lda :STACKORIGIN			; 4
+       and_ora_eor(i+5) and								// and|ora|eor				; 5
+       sta_a(i+6) and									// sta					; 6
+       lda_stack(i+7) and								// lda :STACKORIGIN+STACKWIDTH		; 7
+       and_ora_eor(i+8) and								// and|ora|eor				; 8
+       sta_a(i+9) then									// sta					; 9
+     if argMatch(i+3, i+4) and
+        argMatch(i+2, i+7) then
+     begin
+	
+	p:=i;
+	while (p > 3) and 
+	      (listing[i] = listing[p-4]) and 
+	      (listing[i+1] = listing[p-3]) and 
+	      (listing[i+2] = listing[p-2]) and 
+	      (listing[i+3] = listing[p-1]) do
+	begin
+	  
+	  listing[p-4] := #9'lsr #$00';
+
+ 	  dec(p, 4);
+	end;
+
+	listing[i] := #9'lsr #$00';
+
+	exit(false);
+     end;
+
+
+    if (l = i + 9) and
+       lsr_stack(i) and									// lsr :STACKORIGIN+STACKWIDTH*3	; 0
+       ror_stack(i+1) and								// ror :STACKORIGIN+STACKWIDTH*2	; 1
+       ror_stack(i+2) and								// ror :STACKORIGIN+STACKWIDTH		; 2
+       ror_stack(i+3) and								// ror :STACKORIGIN			; 3
+       lda_stack(i+4) and								// lda :STACKORIGIN			; 4
+       sta_a(i+5) and									// sta					; 5
+       lda_stack(i+6) and								// lda :STACKORIGIN+STACKWIDTH		; 6
+       and_ora_eor(i+7) and								// and|ora|eor				; 7
+       sta_a(i+8) then									// sta					; 8
+     if argMatch(i+3, i+4) and
+        argMatch(i+2, i+6) then
+     begin
+	
+	p:=i;
+	while (p > 3) and 
+	      (listing[i] = listing[p-4]) and 
+	      (listing[i+1] = listing[p-3]) and 
+	      (listing[i+2] = listing[p-2]) and 
+	      (listing[i+3] = listing[p-1]) do
+	begin
+	  
+	  listing[p-4] := #9'lsr #$00';
+
+ 	  dec(p, 4);
+	end;
+
+	listing[i] := #9'lsr #$00';
+
+	exit(false);
+     end;
+
+
     if ror_stack(i+8) and									// ror :STACKORIGIN+STACKWIDTH		; 8
 
        lda_a(i) and										// lda					; 0
