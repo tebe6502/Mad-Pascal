@@ -1034,7 +1034,7 @@ end;
 // -----------------------------------------------------------------------------
 
     function PeepholeOptimization: Boolean;
-    var p,i: Integer;
+    var i: Integer;
     begin
 
       Result := True;
@@ -1149,7 +1149,7 @@ end;
     for i := 0 to l - 1 do
     begin
       if (pos('@+', listing[i]) > 0) then Break;
-      if listing[i] = '@' then listing[i] := '';
+      if lab_a(i) then listing[i] := '';
     end;
 
 

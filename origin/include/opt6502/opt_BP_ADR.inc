@@ -20,7 +20,8 @@ begin
        add_sub(i+7) and									// add|sub				; 7
        sta_bp_y(i+8) then								// sta (:bp),y				; 8
     begin
-     tmp:=#9'sta ' + copy(listing[i+1], 6, 256);
+
+     tmp := #9'sta ' + copy(listing[i+1], 6, 256);
 
      for p:=i-1 downto 0 do
       if listing[p] = tmp then begin

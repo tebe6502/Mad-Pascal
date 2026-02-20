@@ -18,7 +18,7 @@ begin
        sta_stack(i+5) then 		 						// sta :STACKORIGIN+STACKWIDTH		; 5
     begin
 
-     tmp:=#9'sta ' + copy(listing[i], 6, 256);
+     tmp := #9'sta ' + copy(listing[i], 6, 256);
 
 // -----------------------------------------------------------------------------
 // -----------------------------------------------------------------------------	// array of CARDINAL

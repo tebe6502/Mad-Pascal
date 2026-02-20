@@ -9,6 +9,19 @@ begin
 // ===		     		      CMP_0.
 // -----------------------------------------------------------------------------
 
+
+    if lab_a(i+2) and										//@				; 2
+    
+       lab_a(i) and										//@				; 0
+       (jcc(i+1) or jcs(i+1) or jeq(i+1) or jne(i+1) or jpl(i+1) or jmi(i+1)) then		// jcc|jcs|jeq|jne|jpl|jmi	; 1
+//       lab_a(i+2) then 									//@				; 2
+     begin
+      listing[i+2] := '';
+     
+      exit(false);
+     end;
+
+
     if cmp(i) and										// cmp				; 0
        lab_a(i+1) and 										//@				; 1
        (jeq(i+2) or jne(i+2)) and 								// jeq|jne			; 2
