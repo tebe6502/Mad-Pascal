@@ -1136,7 +1136,7 @@ writeln('_B: ', Ident[IdentIndex].Name);
 
         a65(__addBX);
 
-        if (Ident[IdentIndex].isAbsolute) and (Ident[IdentIndex].PassMethod <> VARPASSING) and (NumAllocElements = 0) then asm65('+' + svar);  // +lda
+        if (Ident[IdentIndex].isAbsolute) and ((Ident[IdentIndex].Value in [0..255]) or (Ident[IdentIndex].Value shr 24 <> 0)) and (Ident[IdentIndex].PassMethod <> VARPASSING) and (NumAllocElements = 0) then asm65('+' + svar);  // +lda
 
         //  writeln(Ident[IdentIndex].PassMethod,',', Ident[IdentIndex].name,',',Ident[IdentIndex].DataType,',',Ident[IdentIndex].AllocElementType,',',Ident[IdentIndex].NumAllocElements,' | ', svar,',',ExtractName(IdentIndex, svar),',',par);
 
@@ -1232,7 +1232,7 @@ writeln('_B: ', Ident[IdentIndex].Name);
           end;
         end;
 
-        if (Ident[IdentIndex].isAbsolute) and (Ident[IdentIndex].PassMethod <> VARPASSING) and (NumAllocElements = 0) then asm65('+');  // +lda
+        if (Ident[IdentIndex].isAbsolute) and ((Ident[IdentIndex].Value in [0..255]) or (Ident[IdentIndex].Value shr 24 <> 0)) and (Ident[IdentIndex].PassMethod <> VARPASSING) and (NumAllocElements = 0) then asm65('+');  // +lda
 
       end;
 
@@ -1252,7 +1252,7 @@ writeln('_B: ', Ident[IdentIndex].Name);
             if (NumAllocElements > 256) or (NumAllocElements in [0, 1]) then
             begin
 
-              if (Ident[IdentIndex].isAbsolute) and (Ident[IdentIndex].PassMethod <> VARPASSING) and (NumAllocElements = 0) then asm65('+' + svar);  // +lda
+              if (Ident[IdentIndex].isAbsolute) and ((Ident[IdentIndex].Value in [0..255]) or (Ident[IdentIndex].Value shr 24 <> 0)) and (Ident[IdentIndex].PassMethod <> VARPASSING) and (NumAllocElements = 0) then asm65('+' + svar);  // +lda
 
               if (Ident[IdentIndex].isAbsolute) and (Ident[IdentIndex].idType = ARRAYTOK) and (Ident[IdentIndex].Value >= 0) then
               begin
@@ -1303,7 +1303,7 @@ writeln('_B: ', Ident[IdentIndex].Name);
 
               end;
 
-              if (Ident[IdentIndex].isAbsolute) and (Ident[IdentIndex].PassMethod <> VARPASSING) and (NumAllocElements = 0) then asm65('+');  // +lda
+              if (Ident[IdentIndex].isAbsolute) and ((Ident[IdentIndex].Value in [0..255]) or (Ident[IdentIndex].Value shr 24 <> 0)) and (Ident[IdentIndex].PassMethod <> VARPASSING) and (NumAllocElements = 0) then asm65('+');  // +lda
 
             end
             else
@@ -2837,7 +2837,7 @@ writeln('_B: ', Ident[IdentIndex].Name);
             if (NumAllocElements > 256) or (NumAllocElements in [0, 1]) then
             begin
 
-              if (Ident[IdentIndex].isAbsolute) and (Ident[IdentIndex].PassMethod <> VARPASSING) and (NumAllocElements = 0) then asm65('-' + svar); // -sta
+              if (Ident[IdentIndex].isAbsolute) and ((Ident[IdentIndex].Value in [0..255]) or (Ident[IdentIndex].Value shr 24 <> 0)) and (Ident[IdentIndex].PassMethod <> VARPASSING) and (NumAllocElements = 0) then asm65('-' + svar); // -sta
 
               if (Ident[IdentIndex].isAbsolute) and (Ident[IdentIndex].idType = ARRAYTOK) and (Ident[IdentIndex].Value >= 0) then
               begin
@@ -2890,7 +2890,7 @@ writeln('_B: ', Ident[IdentIndex].Name);
               end;
 
 
-              if (Ident[IdentIndex].isAbsolute) and (Ident[IdentIndex].PassMethod <> VARPASSING) and (NumAllocElements = 0) then asm65('-');	// -sta
+              if (Ident[IdentIndex].isAbsolute) and ((Ident[IdentIndex].Value in [0..255]) or (Ident[IdentIndex].Value shr 24 <> 0)) and (Ident[IdentIndex].PassMethod <> VARPASSING) and (NumAllocElements = 0) then asm65('-');	// -sta
 
             end
             else
@@ -3587,7 +3587,7 @@ writeln('_B: ', Ident[IdentIndex].Name);
         asm65('; as Pointer to Pointer');
 {$ENDIF}
 
-        if (Ident[IdentIndex].isAbsolute) and (Ident[IdentIndex].PassMethod <> VARPASSING) and (NumAllocElements = 0) then asm65('-' + svar);  // -sta
+        if (Ident[IdentIndex].isAbsolute) and ((Ident[IdentIndex].Value in [0..255]) or (Ident[IdentIndex].Value shr 24 <> 0)) and (Ident[IdentIndex].PassMethod <> VARPASSING) and (NumAllocElements = 0) then asm65('-' + svar);  // -sta
 
         //  writeln(Ident[IdentIndex].Name,',',Ident[IdentIndex].DataType,',',Ident[IdentIndex].AllocElementType,' / ',svar ,' / ', UnitName[Ident[IdentIndex].UnitIndex].Name,',',svar.LastIndexOf('.'));
 
@@ -3689,7 +3689,7 @@ writeln('_B: ', Ident[IdentIndex].Name);
 
         end;
 
-        if (Ident[IdentIndex].isAbsolute) and (Ident[IdentIndex].PassMethod <> VARPASSING) and (NumAllocElements = 0) then asm65('-');  // -sta
+        if (Ident[IdentIndex].isAbsolute) and ((Ident[IdentIndex].Value in [0..255]) or (Ident[IdentIndex].Value shr 24 <> 0)) and (Ident[IdentIndex].PassMethod <> VARPASSING) and (NumAllocElements = 0) then asm65('-');  // -sta
 
         a65(__subBX);
 

@@ -128,7 +128,7 @@ BEGIN
     END
     ELSE begin { not size >= 16 }
       IF (GetMatch(Source,X,SourceSize,Hash,Size,Pos)) THEN BEGIN
-        Key := ((X-Pos) SHL 4) + (Size-3);
+        Key := (Size-3) + ((X-Pos) SHL 4);
         Dest^[Y] := HI(Key);
         Dest^[Y+1] := LO(Key);
         INC(Y,2);

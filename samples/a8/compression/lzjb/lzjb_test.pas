@@ -1,7 +1,7 @@
 {
 
-107
-43
+99
+42
 
 }
 
@@ -33,7 +33,7 @@ begin
  writeln(ln,'b (',GetTickCount-tick,' ticks)');
 
 
- write('Decompress ');
+ write('Decompress ', ln, 'b -> ');
 
  tick:=GetTickCount;
  ln := lzjb_decompress_mem(@dst, ln, Pointer(dpeek(88)) );
@@ -45,4 +45,4 @@ begin
 
 end.
 
-// 12327
+// 12269
