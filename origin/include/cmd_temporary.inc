@@ -206,10 +206,12 @@ end;
     Result := pos1(#9'sty :STACK', i)
   end;
 
+{
   function MVA_STACK(const i: Integer): Boolean;
   begin
     Result := pos1(#9'mva :STACK', i)
   end;
+}
 
   function ASL_STACK(const i: Integer): Boolean;
   begin

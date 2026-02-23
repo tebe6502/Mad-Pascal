@@ -962,6 +962,29 @@ writeln('_B: ', Ident[IdentIndex].Name);
 // ----------------------------------------------------------------------------
 
 
+  function AbsoluteBasePointer(const IdentIndex: integer): Boolean;
+  begin
+
+   Result := (Ident[IdentIndex].isAbsolute) and 
+	     (Ident[IdentIndex].PassMethod <> VARPASSING) and 
+             ((Ident[IdentIndex].Value in [0..255]) or 
+	     
+	     ((abs(Ident[IdentIndex].Value) and $FF = 0) and (Byte((abs(Ident[IdentIndex].Value) shr 24) and $7F) in [1..127])))
+  end;
+
+
+  function AbsoluteArrayOrigin(const IdentIndex: integer): Boolean;
+  begin
+
+   Result := (Ident[IdentIndex].isAbsolute) and (Ident[IdentIndex].idType = ARRAYTOK) and (Ident[IdentIndex].Value >= 0)
+
+  end;
+
+
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+
+
   procedure Push(Value: Int64; IndirectionLevel: TIndirectionLevel; Size: Byte; IdentIndex: Integer = 0; par: Byte = 0);
   var
     Kind: Byte;
@@ -1136,9 +1159,9 @@ writeln('_B: ', Ident[IdentIndex].Name);
 
         a65(__addBX);
 
-        if (Ident[IdentIndex].isAbsolute) and ((Ident[IdentIndex].Value in [0..255]) or (Ident[IdentIndex].Value shr 24 <> 0)) and (Ident[IdentIndex].PassMethod <> VARPASSING) and (NumAllocElements = 0) then asm65('+' + svar);  // +lda
+        if (NumAllocElements = 0) and AbsoluteBasePointer(IdentIndex) then asm65('+' + svar);  // +lda
 
-        //  writeln(Ident[IdentIndex].PassMethod,',', Ident[IdentIndex].name,',',Ident[IdentIndex].DataType,',',Ident[IdentIndex].AllocElementType,',',Ident[IdentIndex].NumAllocElements,' | ', svar,',',ExtractName(IdentIndex, svar),',',par);
+//	writeln(Ident[IdentIndex].PassMethod,',', Ident[IdentIndex].name,',',Ident[IdentIndex].DataType,',',Ident[IdentIndex].AllocElementType,',',Ident[IdentIndex].NumAllocElements,' | ', svar,',',ExtractName(IdentIndex, svar),',',par);
 
         if TestName(IdentIndex, svar) then
         begin
@@ -1232,7 +1255,7 @@ writeln('_B: ', Ident[IdentIndex].Name);
           end;
         end;
 
-        if (Ident[IdentIndex].isAbsolute) and ((Ident[IdentIndex].Value in [0..255]) or (Ident[IdentIndex].Value shr 24 <> 0)) and (Ident[IdentIndex].PassMethod <> VARPASSING) and (NumAllocElements = 0) then asm65('+');  // +lda
+        if (NumAllocElements = 0) and AbsoluteBasePointer(IdentIndex) then asm65('+');  // +lda
 
       end;
 
@@ -1252,9 +1275,9 @@ writeln('_B: ', Ident[IdentIndex].Name);
             if (NumAllocElements > 256) or (NumAllocElements in [0, 1]) then
             begin
 
-              if (Ident[IdentIndex].isAbsolute) and ((Ident[IdentIndex].Value in [0..255]) or (Ident[IdentIndex].Value shr 24 <> 0)) and (Ident[IdentIndex].PassMethod <> VARPASSING) and (NumAllocElements = 0) then asm65('+' + svar);  // +lda
+              if (NumAllocElements = 0) and AbsoluteBasePointer(IdentIndex) then asm65('+' + svar);  // +lda
 
-              if (Ident[IdentIndex].isAbsolute) and (Ident[IdentIndex].idType = ARRAYTOK) and (Ident[IdentIndex].Value >= 0) then
+              if AbsoluteArrayOrigin(IdentIndex) then
               begin
 
                 asm65(#9'lda #' + HexByte(Byte(Ident[IdentIndex].Value)));
@@ -1303,7 +1326,7 @@ writeln('_B: ', Ident[IdentIndex].Name);
 
               end;
 
-              if (Ident[IdentIndex].isAbsolute) and ((Ident[IdentIndex].Value in [0..255]) or (Ident[IdentIndex].Value shr 24 <> 0)) and (Ident[IdentIndex].PassMethod <> VARPASSING) and (NumAllocElements = 0) then asm65('+');  // +lda
+              if (NumAllocElements = 0) and AbsoluteBasePointer(IdentIndex) then asm65('+');  // +lda
 
             end
             else
@@ -1365,7 +1388,7 @@ writeln('_B: ', Ident[IdentIndex].Name);
               else
               begin
 
-                if (Ident[IdentIndex].isAbsolute) and (Ident[IdentIndex].idType = ARRAYTOK) and (Ident[IdentIndex].Value >= 0) then
+                if AbsoluteArrayOrigin(IdentIndex) then
                 begin
 
                   asm65(#9'lda #' + HexByte(Byte(Ident[IdentIndex].Value)));
@@ -1468,7 +1491,7 @@ writeln('_B: ', Ident[IdentIndex].Name);
               else
               begin
 
-                if (Ident[IdentIndex].isAbsolute) and (Ident[IdentIndex].idType = ARRAYTOK) and (Ident[IdentIndex].Value >= 0) then
+                if AbsoluteArrayOrigin(IdentIndex) then
                 begin
 
                   asm65(#9'lda #' + HexByte(Byte(Ident[IdentIndex].Value)));
@@ -2223,7 +2246,7 @@ writeln('_B: ', Ident[IdentIndex].Name);
             if (NumAllocElements > 256) or (NumAllocElements in [0, 1]) then
             begin
 
-              if (IdentIndex > 0) and (Ident[IdentIndex].isAbsolute) and (Ident[IdentIndex].idType = ARRAYTOK) and (Ident[IdentIndex].Value >= 0) then
+              if AbsoluteArrayOrigin(IdentIndex) then
               begin
 
                 asm65(#9'lda #' + HexByte(Byte(Ident[IdentIndex].Value)));
@@ -2344,7 +2367,7 @@ writeln('_B: ', Ident[IdentIndex].Name);
                 else
                 begin
 
-                  if (Ident[IdentIndex].isAbsolute) and (Ident[IdentIndex].idType = ARRAYTOK) and (Ident[IdentIndex].Value >= 0) then
+                  if AbsoluteArrayOrigin(IdentIndex) then
                   begin
 
                     asm65(#9'lda #' + HexByte(Byte(Ident[IdentIndex].Value)));
@@ -2474,7 +2497,7 @@ writeln('_B: ', Ident[IdentIndex].Name);
                 else
                 begin
 
-                  if (Ident[IdentIndex].isAbsolute) and (Ident[IdentIndex].idType = ARRAYTOK) and (Ident[IdentIndex].Value >= 0) then
+                  if AbsoluteArrayOrigin(IdentIndex) then
                   begin
 
                     asm65(#9'lda #' + HexByte(Byte(Ident[IdentIndex].Value)));
@@ -2837,9 +2860,9 @@ writeln('_B: ', Ident[IdentIndex].Name);
             if (NumAllocElements > 256) or (NumAllocElements in [0, 1]) then
             begin
 
-              if (Ident[IdentIndex].isAbsolute) and ((Ident[IdentIndex].Value in [0..255]) or (Ident[IdentIndex].Value shr 24 <> 0)) and (Ident[IdentIndex].PassMethod <> VARPASSING) and (NumAllocElements = 0) then asm65('-' + svar); // -sta
+              if (NumAllocElements = 0) and AbsoluteBasePointer(IdentIndex) then asm65('-' + svar); // -sta
 
-              if (Ident[IdentIndex].isAbsolute) and (Ident[IdentIndex].idType = ARRAYTOK) and (Ident[IdentIndex].Value >= 0) then
+              if AbsoluteArrayOrigin(IdentIndex) then
               begin
 
                 asm65(#9'lda #' + HexByte(Byte(Ident[IdentIndex].Value)));
@@ -2890,7 +2913,7 @@ writeln('_B: ', Ident[IdentIndex].Name);
               end;
 
 
-              if (Ident[IdentIndex].isAbsolute) and ((Ident[IdentIndex].Value in [0..255]) or (Ident[IdentIndex].Value shr 24 <> 0)) and (Ident[IdentIndex].PassMethod <> VARPASSING) and (NumAllocElements = 0) then asm65('-');	// -sta
+              if (NumAllocElements = 0) and AbsoluteBasePointer(IdentIndex) then asm65('-');	// -sta
 
             end
             else
@@ -2953,7 +2976,7 @@ writeln('_B: ', Ident[IdentIndex].Name);
               else
               begin
 
-                if (Ident[IdentIndex].isAbsolute) and (Ident[IdentIndex].idType = ARRAYTOK) and (Ident[IdentIndex].Value >= 0) then
+                if AbsoluteArrayOrigin(IdentIndex) then
                 begin
 
                   asm65(#9'lda #' + HexByte(Byte(Ident[IdentIndex].Value)));
@@ -3060,7 +3083,7 @@ writeln('_B: ', Ident[IdentIndex].Name);
               else
               begin
 
-                if (Ident[IdentIndex].isAbsolute) and (Ident[IdentIndex].idType = ARRAYTOK) and (Ident[IdentIndex].Value >= 0) then
+                if AbsoluteArrayOrigin(IdentIndex) then
                 begin
 
                   asm65(#9'lda #' + HexByte(Byte(Ident[IdentIndex].Value)));
@@ -3587,7 +3610,7 @@ writeln('_B: ', Ident[IdentIndex].Name);
         asm65('; as Pointer to Pointer');
 {$ENDIF}
 
-        if (Ident[IdentIndex].isAbsolute) and ((Ident[IdentIndex].Value in [0..255]) or (Ident[IdentIndex].Value shr 24 <> 0)) and (Ident[IdentIndex].PassMethod <> VARPASSING) and (NumAllocElements = 0) then asm65('-' + svar);  // -sta
+        if (NumAllocElements = 0) and AbsoluteBasePointer(IdentIndex) then asm65('-' + svar);  // -sta
 
         //  writeln(Ident[IdentIndex].Name,',',Ident[IdentIndex].DataType,',',Ident[IdentIndex].AllocElementType,' / ',svar ,' / ', UnitName[Ident[IdentIndex].UnitIndex].Name,',',svar.LastIndexOf('.'));
 
@@ -3689,7 +3712,7 @@ writeln('_B: ', Ident[IdentIndex].Name);
 
         end;
 
-        if (Ident[IdentIndex].isAbsolute) and ((Ident[IdentIndex].Value in [0..255]) or (Ident[IdentIndex].Value shr 24 <> 0)) and (Ident[IdentIndex].PassMethod <> VARPASSING) and (NumAllocElements = 0) then asm65('-');  // -sta
+        if (NumAllocElements = 0) and AbsoluteBasePointer(IdentIndex) then asm65('-');  // -sta
 
         a65(__subBX);
 
@@ -6940,7 +6963,7 @@ end;
                        if (Ident[IdentIndex].DataType in [RECORDTOK, OBJECTTOK] + FileTypes) or
 		          (VarPass and (Ident[IdentIndex].DataType = POINTERTOK) and (Ident[IdentIndex].AllocElementType in AllTypes - [PROCVARTOK, RECORDTOK, OBJECTTOK]) and (Ident[IdentIndex].NumAllocElements = 0)) or
 		          ((Ident[IdentIndex].DataType in Pointers) and (Ident[IdentIndex].AllocElementType in [RECORDTOK, OBJECTTOK]) and (VarPass or (Ident[IdentIndex].PassMethod = VARPASSING))) or
-		          (Ident[IdentIndex].isAbsolute and (abs(Ident[IdentIndex].Value) and $ff = 0) and (byte(abs(Ident[IdentIndex].Value shr 24) and $7f) in [1..127])) or
+		          (Ident[IdentIndex].isAbsolute and (abs(Ident[IdentIndex].Value) and $FF = 0) and (byte(abs(Ident[IdentIndex].Value shr 24) and $7F) in [1..127])) or
 		          ((Ident[IdentIndex].DataType in Pointers) and (Ident[IdentIndex].AllocElementType in [RECORDTOK, OBJECTTOK]) and (Ident[IdentIndex].NumAllocElements_ = 0)) or
 		          ((Ident[IdentIndex].DataType in Pointers) and (Ident[IdentIndex].idType = DATAORIGINOFFSET)) or
 		          ((Ident[IdentIndex].DataType in Pointers) and (not (Ident[IdentIndex].AllocElementType in [UNTYPETOK, RECORDTOK, OBJECTTOK, PROCVARTOK])) and (Ident[IdentIndex].NumAllocElements > 0)) or
@@ -15473,12 +15496,12 @@ WHILETOK:
       end
       else
         if Ident[IdentIndex].isAbsolute and (Ident[IdentIndex].Kind = VARIABLE) and
-          (abs(Ident[IdentIndex].Value) and $ff = 0) and (Byte((abs(Ident[IdentIndex].Value) shr 24) and $7f) in [1..127]) then
+          (abs(Ident[IdentIndex].Value) and $FF = 0) and (Byte((abs(Ident[IdentIndex].Value) shr 24) and $7F) in [1..127]) then
         begin
 
-          case Byte(abs(Ident[IdentIndex].Value shr 24) and $7f) of
-            1..3: Result := #9'= ' + reg[abs(Ident[IdentIndex].Value shr 24) and $7f];
-            4..19: Result := #9'= :STACKORIGIN-' + IntToStr(Byte(abs(Ident[IdentIndex].Value shr 24) and $7f) - 3);
+          case Byte(abs(Ident[IdentIndex].Value shr 24) and $7F) of
+            1..3: Result := #9'= ' + reg[abs(Ident[IdentIndex].Value shr 24) and $7F];
+            4..19: Result := #9'= :STACKORIGIN-' + IntToStr(Byte(abs(Ident[IdentIndex].Value shr 24) and $7F) - 3);
             else
               Result := #9'= ''out of resource'''
           end;

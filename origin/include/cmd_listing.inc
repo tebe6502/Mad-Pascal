@@ -1164,10 +1164,12 @@ begin
   Result := pos1(#9'cmp :STACK', i);
 end;
 
+{
 function MVA_STACK(const i: Integer): Boolean;
 begin
   Result := pos1(#9'mva :STACK', i);
 end;
+}
 
 function ROR_STACK(const i: Integer): Boolean;
 begin

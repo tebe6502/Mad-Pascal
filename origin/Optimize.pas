@@ -1160,7 +1160,7 @@ end;
 
 
 {
-if (pos('lda adr.', listing[i]) > 0) then begin
+if (pos('lda C+3', listing[i]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');

@@ -48,7 +48,7 @@ begin
 
        inx(i) and										// inx					; 0
        lda_val(i+1) and										// lda					; 1	~:STACKORIGIN
-       and_ora_eor_val(i+2) and									// and|ora|eor ~:STACKORIGIN		; 2
+       and_ora_eor_val(i+2) and									// and|ora|eor				; 2	~:STACKORIGIN
        sta_val(i+3) then									// sta					; 3	~:STACKORIGIN
      begin
        listing[i]   := '';

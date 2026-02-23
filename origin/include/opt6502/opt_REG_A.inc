@@ -38,16 +38,16 @@ begin
     end else
      if (mva(i) and (iy(i)=false)) then begin
 
-      if mva_stack(i) then
-       arg0 := ''
-      else begin
+      //if mva_stack(i) then
+      // arg0 := ''
+      //else begin
        arg0 := listing[i];
        k := length(listing[i]);
 
        while arg0[k] <> ' ' do dec(k);
 
        arg0 := copy(arg0, k+1, 256);
-      end;
+      //end;
 
       optyA := arg0;
 

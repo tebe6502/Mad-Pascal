@@ -6,38 +6,6 @@
 procedure opt_TEMP_X;
 begin
 
-    if (pos('mva :STACKORIGIN,x', TemporaryBuf[0]) > 0) and					// mva :STACKORIGIN			; 0
-       (pos('mva :STACKORIGIN+STACKWIDTH,x', TemporaryBuf[1]) > 0) and				// mva :STACKORIGIN+STACKWIDTH		; 1
-       (pos('mva :STACKORIGIN+STACKWIDTH*2,x', TemporaryBuf[2]) > 0) and			// mva :STACKORIGIN+STACKWIDTH*2	; 2
-       (pos('mva :STACKORIGIN+STACKWIDTH*3,x', TemporaryBuf[3]) > 0) and			// mva :STACKORIGIN+STACKWIDTH*3	; 3
-       dex(4) and										// dex					; 4
-       (TemporaryBuf[5] = '') and								// 					; 5
-       opti(6) and										//; optimize				; 6
-       (TemporaryBuf[7] = '') and								// 					; 7
-       inx(8) and										// inx					; 8
-       mva(9) and (mva_stack(9) = false) and							// mva ... :STACKORIGIN			; 9
-       mva(10) and (mva_stack(10) = false) and							// mva ... :STACKORIGIN+STACKWIDTH	; 10
-       mva(11) and (mva_stack(11) = false) and							// mva ... :STACKORIGIN+STACKWIDTH*2	; 11
-       mva(12) and (mva_stack(12) = false) then							// mva ... :STACKORIGIN+STACKWIDTH*3	; 12
-     if (pos(':STACKORIGIN,x', TemporaryBuf[9]) > 0) and
-        (pos(':STACKORIGIN+STACKWIDTH,x', TemporaryBuf[10]) > 0) and
-        (pos(':STACKORIGIN+STACKWIDTH*2,x', TemporaryBuf[11]) > 0) and
-        (pos(':STACKORIGIN+STACKWIDTH*3,x', TemporaryBuf[12]) > 0) and
-	(TemporaryBuf[0] = #9'mva :STACKORIGIN,x ' + GetString(9)) and
-	(TemporaryBuf[1] = #9'mva :STACKORIGIN+STACKWIDTH,x ' + GetString(10)) and
-	(TemporaryBuf[2] = #9'mva :STACKORIGIN+STACKWIDTH*2,x ' + GetString(11)) and
-	(TemporaryBuf[3] = #9'mva :STACKORIGIN+STACKWIDTH*3,x ' + GetString(12)) then
-       begin
-	TemporaryBuf[4] := '~';
-
-	TemporaryBuf[8] := '~';
-	TemporaryBuf[9] := '~';
-	TemporaryBuf[10] := '~';
-	TemporaryBuf[11] := '~';
-	TemporaryBuf[12] := '~';
-       end;
-
-
     if lda(0) and										// lda B				; 0
        sta(1) and										// sta					; 1
        lda(2) and										// lda B+1				; 2
@@ -79,28 +47,6 @@ begin
 	TemporaryBuf[13] := '~';
 	TemporaryBuf[14] := '~';
 	TemporaryBuf[15] := '~';
-       end;
-
-
-    if (pos('mva :STACKORIGIN,x', TemporaryBuf[0]) > 0) and					// mva :STACKORIGIN			; 0
-       (pos('mva :STACKORIGIN+STACKWIDTH,x', TemporaryBuf[1]) > 0) and				// mva :STACKORIGIN+STACKWIDTH		; 1
-       dex(2) and										// dex					; 2
-       (TemporaryBuf[3] = '') and								// 					; 3
-       opti(4) and										//; optimize				; 4
-       (TemporaryBuf[5] = '') and								// 					; 5
-       inx(6) and										// inx					; 6
-       mva(7) and (mva_stack(7) = false) and							// mva ... :STACKORIGIN			; 7
-       mva(8) and (mva_stack(8) = false) then							// mva ... :STACKORIGIN+STACKWIDTH	; 8
-     if (pos(':STACKORIGIN,x', TemporaryBuf[7]) > 0) and
-        (pos(':STACKORIGIN+STACKWIDTH,x', TemporaryBuf[8]) > 0) and
-	(TemporaryBuf[0] = #9'mva :STACKORIGIN,x ' + GetString(7)) and
-	(TemporaryBuf[1] = #9'mva :STACKORIGIN+STACKWIDTH,x ' + GetString(8)) then
-       begin
-	TemporaryBuf[2] := '~';
-
-	TemporaryBuf[6] := '~';
-	TemporaryBuf[7] := '~';
-	TemporaryBuf[8] := '~';
        end;
 
 

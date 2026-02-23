@@ -231,15 +231,4 @@ begin
       end;
 
 
-    if (sty_stack(i) or sta_stack(i)) and							// sty|sta :STACKORIGIN		; 0
-       mva_stack(i+1) and									// mva :STACKORIGIN STOP	; 1
-       (copy(listing[i], 6, 256) = GetString(i+1)) then
-     begin
-	listing[i+1] := copy(listing[i], 1, 5) + copy(listing[i+1], length(GetString(i+1)) + 7, 256);
-	listing[i]   := '';
-
-	exit(false);
-     end;
-
-
 end;		// function

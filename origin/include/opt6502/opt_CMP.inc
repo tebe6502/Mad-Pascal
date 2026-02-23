@@ -1370,31 +1370,6 @@ begin
       end;
 
 
-{
-    if cmp_stack(i+7) and									// cmp :STACKORIGIN+9			; 7
-
-       lda(i) and										// lda					; 0
-       add_sub(i+1) and										// add|sub				; 1
-       sta_stack(i+2) and									// sta :STACKORIGIN+9			; 2
-       lda(i+3) and										// lda 					; 3
-       adc_sbc(i+4) and										// adc|sbc				; 4
-       sta_stack(i+5) and									// sta :STACKORIGIN+STACVKWIDTH+9	; 5
-       lda(i+6) and										// lda 					; 6
-//       cmp_stack(i+7) and									// cmp :STACKORIGIN+9			; 7
-       seq(i+8) and										// seq					; 8
-       (bpl_a(i+9) or bcs_a(i+9)) and								// bpl|bcs @+				; 9
-       jmp_l(i+10) then										// jmp l_				; 10
-     if argMatch(i+2, i+7) then
-      begin
-	listing[i+3] := '';
-	listing[i+4] := '';
-	listing[i+5] := '';
-
-	exit(false);
-      end;
-}
-
-
     if bne(i+13) and										// bne @+				; 13
 
        lda_a(i) and										// lda					; 0
@@ -1433,6 +1408,85 @@ begin
 	listing[i+5] := '';
 	listing[i+6] := '';
 	listing[i+7] := '';
+
+	exit(false);
+      end;
+
+
+    if bne(i+20) and										// bne @+				; 20
+
+       lda_val(i) and (iy(i) = false) and							// lda					; 0
+       sta_stack(i+1) and									// sta :STACKORIGIN			; 1
+       lda_a(i+2) and										// lda					; 2
+       and_ora_eor(i+3) and									// and|ora|eor				; 3
+       sta_stack(i+4) and									// sta :STACKORIGIN+STACKWIDTH		; 4
+       lda_a(i+5) and										// lda					; 5
+       and_ora_eor(i+6) and									// and|ora|eor				; 6
+       sta_stack(i+7) and									// sta :STACKORIGIN+STACKWIDTH*2	; 7
+       lda_a(i+8) and										// lda					; 8
+       and_ora_eor(i+9) and									// and|ora|eor				; 9
+       sta_stack(i+10) and									// sta :STACKORIGIN+STACKWIDTH*3	; 10
+       ldy_1(i+11) and										// ldy #1				; 11       
+       lda_stack(i+12) and									// lda :STACKORIGIN+STACKWIDTH*3	; 12
+       cmp(i+13) and										// cmp					; 13
+       bne(i+14) and										// bne @+				; 14
+       lda_stack(i+15) and									// lda :STACKORIGIN+STACKWIDTH*2	; 15
+       cmp(i+16) and										// cmp					; 16
+       bne(i+17) and										// bne @+				; 17
+       lda_stack(i+18) and									// lda :STACKORIGIN+STACKWIDTH		; 18
+       cmp(i+19) and										// cmp					; 19
+//       bne(i+20) and										// bne @+				; 20
+       lda_stack(i+21) then									// lda :STACKORIGIN			; 21
+     if argMatch(i+1, i+21) and
+        argMatch(i+4, i+18) and
+        argMatch(i+7, i+15) and
+        argMatch(i+10, i+12) then
+      begin
+	listing[i+21] := listing[i];
+
+	listing[i]   := '';
+	listing[i+1] := '';
+
+	exit(false);
+      end;
+
+
+    if bne(i+19) and										// bne @+				; 19
+
+       lda_val(i) and (iy(i) = false) and							// lda					; 0
+       sta_stack(i+1) and									// sta :STACKORIGIN			; 1
+       lda_val(i+2) and (iy(i+2) = false) and							// lda					; 2
+       sta_stack(i+3) and									// sta :STACKORIGIN+STACKWIDTH		; 3
+       lda_a(i+4) and										// lda					; 4
+       and_ora_eor(i+5) and									// and|ora|eor				; 5
+       sta_stack(i+6) and									// sta :STACKORIGIN+STACKWIDTH*2	; 6
+       lda_a(i+7) and										// lda					; 7
+       and_ora_eor(i+8) and									// and|ora|eor				; 8
+       sta_stack(i+9) and									// sta :STACKORIGIN+STACKWIDTH*3	; 9
+       ldy_1(i+10) and										// ldy #1				; 10       
+       lda_stack(i+11) and									// lda :STACKORIGIN+STACKWIDTH*3	; 11
+       cmp(i+12) and										// cmp					; 12
+       bne(i+13) and										// bne @+				; 13
+       lda_stack(i+14) and									// lda :STACKORIGIN+STACKWIDTH*2	; 14
+       cmp(i+15) and										// cmp					; 15
+       bne(i+16) and										// bne @+				; 16
+       lda_stack(i+17) and									// lda :STACKORIGIN+STACKWIDTH		; 17
+       cmp(i+18) and										// cmp					; 18
+//       bne(i+19) and										// bne @+				; 19
+       lda_stack(i+20) then									// lda :STACKORIGIN			; 20
+     if argMatch(i+1, i+20) and
+        argMatch(i+3, i+17) and
+        argMatch(i+6, i+14) and
+        argMatch(i+9, i+11) then
+      begin
+	listing[i+20] := listing[i];
+
+	listing[i+17] := listing[i+2];
+
+	listing[i]   := '';
+	listing[i+1] := '';
+	listing[i+2] := '';
+	listing[i+3] := '';
 
 	exit(false);
       end;

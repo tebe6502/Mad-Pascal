@@ -824,21 +824,6 @@
      end;
 
 
-    if sta_stack(i) and									// sta :STACKORIGIN+9			; 0
-       ldy(i+1) and									// ldy					; 1
-       mva_stack(i+2) then								// mva :STACKORIGIN+9 ...		; 2
-     if pos(copy(listing[i], 6, 256), listing[i+2]) > 0 then
-       begin
-	tmp:=copy(listing[i], 6, 256);
-
-	listing[i+2] := #9'sta' + copy(listing[i+2], 6 + length(tmp), 256);
-
-	listing[i] := '';
-
-	Result:=false; Break;
-       end;
-
-
     if sta_stack(i) and									// sta :STACKORIGIN+10			; 0
        ldy(i+1) and									// ldy					; 1
        lda_stack(i+2) and								// lda :STACKORIGIN+10			; 2

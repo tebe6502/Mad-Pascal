@@ -164,8 +164,8 @@ begin
 
 
     if //inx(i) and										// inx					; 0
-       mva(i+1) and 										// mva aa :STACKORIGIN			; 1
-       mva(i+2) and										// mva bb|#$00 :STACKORIGIN+STACKWIDTH	; 2
+       mva(i+1) and 										// mva ... :STACKORIGIN			; 1
+       mva(i+2) and										// mva ... :STACKORIGIN+STACKWIDTH	; 2
        lda_val(i+3) and (lda_im(i+3) = false) and						// lda TB				; 3	~#
        add_stack(i+4) and									// add :STACKORIGIN			; 4
        tay(i+5) and										// tay					; 5
@@ -201,8 +201,8 @@ begin
 
 
     if //inx(i) and										// inx					; 0
-       mva(i+1) and										// mva aa :STACKORIGIN,x		; 1
-       mva(i+2) and										// mva bb :STACKORIGIN+STACKWIDTH,x	; 2
+       mva(i+1) and										// mva ... :STACKORIGIN,x		; 1
+       mva(i+2) and										// mva ... :STACKORIGIN+STACKWIDTH,x	; 2
        lda(i+3) and										// lda					; 3
        add_stack(i+4) and									// add :STACKORIGIN,x			; 4
        sta(i+5) and										// sta					; 5
