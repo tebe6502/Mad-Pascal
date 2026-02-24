@@ -1153,16 +1153,36 @@ begin
       end;
 
 
-    if mwy_bp2(i) and										// mwy LEVEL :bp2			; 0
-       ldy_val(i+1) and										// ldy					; 1	~:STACKORIGIN
-       mva_bp2_y(i+2) and stack_0x(i+2) and							// mva (:bp2),y :STACKORIGIN,x		; 2
-       dex(i+3) then										// dex                  		; 3
+    if dex(i+4) and										// dex                  		; 4
+
+       inx(i) and										// inx					; 0
+       mwy_bp2(i+1) and										// mwy LEVEL :bp2			; 1
+       ldy_val(i+2) and										// ldy					; 2	~:STACKORIGIN
+       mva_bp2_y(i+3) and stack_0x(i+3) then							// mva (:bp2),y :STACKORIGIN,x		; 3
+//       dex(i+4) then										// dex                  		; 4
      begin
-       listing[i+3] := #9'mva (:bp2),y :STACKORIGIN+1,x';
+       listing[i]   := '';
+
+       listing[i+3] := #9'lda (:bp2),y';
+       listing[i+4] := #9'sta :STACKORIGIN+1,x';
+
+       exit(false);
+     end;
+
+
+    if dex(i+4) and										// dex                  		; 4
+    
+       mwy_bp2(i) and										// mwy LEVEL :bp2			; 0
+       ldy_val(i+1) and										// ldy					; 1	~:STACKORIGIN
+       lda_bp2_y(i+2) and									// lda (:bp2),y				; 2
+       sta_stack_next_0x(i+3) then								// sta :STACKORIGIN+1,x			; 3
+//       dex(i+4) then										// dex                  		; 4
+     begin
+       listing[i+4] := #9'sta :STACKORIGIN+2,x';
+       listing[i+3] := listing[i+2];
        listing[i+2] := listing[i+1];
        listing[i+1] := listing[i];
-
-       listing[i] := #9'dex';
+       listing[i]   := #9'dex';
 
        exit(false);
      end;
@@ -1467,18 +1487,6 @@ begin
      end;
 
 
-
-{
-	sty :STACKORIGIN-1,x
-	dex
-	lda :STACKORIGIN-1,x
-	dex
-
-	and :STACKORIGIN+1,x
-	dex
-}
-
-
 // ----------------------------------------------------------------------------------------------------------------------------------------
 // andAL_CL
 
@@ -1608,80 +1616,6 @@ begin
        exit(false);
      end;
 
-{
-    if lda_val(i) and										// lda					; 0	~:STACKORIGIN
-       dex(i+1) then										// dex					; 1
-     begin
-       listing[i+1]:= listing[i];
-       listing[i]  := #9'dex';
-
-       exit(false);
-     end;
-
-
-    if sta_stack_prev_0x(i) and									// sta :STACKORIGIN-1,x			; 0
-       dex(i+1) then										// dex					; 1
-     begin
-       listing[i]  := #9'dex';
-       listing[i+1]:= #9'sta :STACKORIGIN,x';
-
-       exit(false);
-     end;
-
-
-    if sta_stack_0x(i) and									// sta :STACKORIGIN,x			; 0
-       dex(i+1) then										// dex					; 1
-     begin
-       listing[i]  := #9'dex';
-       listing[i+1]:= #9'sta :STACKORIGIN+1,x';
-
-       exit(false);
-     end;
-
-
-    if lda_stack_prev_0x(i) and									// lda :STACKORIGIN-1,x			; 0
-       dex(i+1) then										// dex					; 1
-     begin
-       listing[i]  := #9'dex';
-       listing[i+1]:= #9'lda :STACKORIGIN,x';
-
-       exit(false);
-     end;
-
-
-    if lda_stack_0x(i) and									// lda :STACKORIGIN,x			; 0
-       dex(i+1) then										// dex					; 1
-     begin
-       listing[i]  := #9'dex';
-       listing[i+1]:= #9'lda :STACKORIGIN+1,x';
-
-       exit(false);
-     end;
-
-
-    if tya(i) and										// tya					; 0
-       sta_stack_0x(i+1) and									// sta :STACKORIGIN,x			; 1
-       dex(i+2) then										// dex					; 2
-     begin
-       listing[i+2] := #9'sta :STACKORIGIN+1,x';
-       listing[i+1] := #9'tya';
-       listing[i]   := #9'dex';
-
-       exit(false);
-     end;
-
-
-    if tya(i) and										// tya					; 0
-       and_ora_eor_val(i+1) and									// and|ora|eor				; 1
-       dex(i+2) then										// dex					; 2
-     begin
-       listing[i+2] := listing[i+1];
-       listing[i+1] := listing[i];
-       listing[i]   := #9'dex';
-
-       exit(false);
-     end;
-}
 
     if (inx(i) = false) and									//~inx					; 0
        ldy_val(i+1) and										// ldy					; 1	~:STACKORIGIN
@@ -2450,7 +2384,7 @@ begin
      if stack_0x(i) and
         stack_1x(i+1) then
       begin
-	listing[i]   := #9'mva ' + copy(listing[i+1], 6, pos(':STACK', listing[i+1])-6) + ':STACKORIGIN,x';
+	listing[i]   := #9'mva ' + GetSTRING(i+1) + ':STACKORIGIN,x';
 
 	listing[i+1] := '';
 	listing[i+2] := '';

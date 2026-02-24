@@ -1527,9 +1527,6 @@ begin
         argMatch(i+7, i+16) and
         argMatch(i+10, i+13) then
       begin
-       listing[i+5] := '';
-       listing[i+6] := '';
-       listing[i+7] := '';
        listing[i+8] := '';
        listing[i+9] := '';
        listing[i+10]:= '';
@@ -1537,9 +1534,6 @@ begin
        listing[i+12] := '';
        listing[i+13] := '';
        listing[i+14] := '';
-       listing[i+15] := '';
-       listing[i+16] := '';
-       listing[i+17] := '';
 
        exit(false);
       end;
@@ -1576,9 +1570,6 @@ begin
 	argMatch(i+8, i+16) and
 	argMatch(i+11, i+13) then
      begin
-      listing[i+6] := '';
-      listing[i+7] := '';
-      listing[i+8] := '';
       listing[i+9] := '';
       listing[i+10] := '';
       listing[i+11] := '';
@@ -1586,9 +1577,6 @@ begin
       listing[i+13] := '';
       listing[i+14] := '';
       listing[i+15] := '';
-      listing[i+16] := '';
-      listing[i+17] := '';
-      listing[i+18] := '';
 
       exit(false);
      end;

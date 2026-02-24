@@ -44,6 +44,19 @@ begin
      end;
 
 
+    if dex(i+2) and										// dex					; 2
+
+       inx(i) and										// inx					; 0
+       lda_val(i+1) then									// lda					; 1	~:STACKORIGIN
+     begin
+       listing[i]   := '';
+
+       listing[i+2] := '';
+
+       exit(false);
+     end;
+
+
     if dex(i+4) and										// dex					; 4
 
        inx(i) and										// inx					; 0
@@ -414,6 +427,20 @@ begin
 	listing[i+1] := #9'lda ' + GetString(i+1);
 	listing[i+2] := '';
 	listing[i+3] := '';
+
+       exit(false);
+     end;
+
+
+    if dex(i+2) and										// dex					; 2
+
+       inx(i) and										// inx					; 0
+       lda_stack_prev_0x(i+1) then								// lda :STACKORIGIN-1,x			; 1
+  //     dex(i+2) and										// dex					; 2
+     begin
+	listing[i]   := #9'lda :STACKORIGIN,x';
+	listing[i+1] := '';
+	listing[i+2] := '';
 
        exit(false);
      end;
