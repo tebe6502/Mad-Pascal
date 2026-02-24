@@ -500,9 +500,9 @@ begin
         stack_1x(i+2) and
         stack_1x(i+7) then
      begin
-	listing[i+4] := copy(listing[i+4], 1, 5) + GetString(i+1);
+	listing[i+4] := GetCMD(i+4) + GetString(i+1);
 
-	listing[i+7] := copy(listing[i+7], 1, 5) + GetString(i+2);
+	listing[i+7] := GetCMD(i+7) + GetString(i+2);
 
 	listing[i+1] := '';
 	listing[i+2] := '';
@@ -741,13 +741,13 @@ begin
            argMatch(i+5, i+15) and
            argMatch(i+7, i+18) then
          begin
-	   listing[i+9]  := copy(listing[i+9], 1, 5) + copy(listing[i], 6, 256);
+	   listing[i+9]  := GetCMD(i+9) + copy(listing[i], 6, 256);
 
-	   listing[i+12] := copy(listing[i+12], 1, 5) + copy(listing[i+2], 6, 256);
+	   listing[i+12] := GetCMD(i+12) + copy(listing[i+2], 6, 256);
 
-   	   listing[i+15] := copy(listing[i+15], 1, 5) + copy(listing[i+4], 6, 256);
+   	   listing[i+15] := GetCMD(i+15) + copy(listing[i+4], 6, 256);
 
-	   listing[i+18] := copy(listing[i+18], 1, 5) + copy(listing[i+6], 6, 256);
+	   listing[i+18] := GetCMD(i+18) + copy(listing[i+6], 6, 256);
 
 	   listing[i]   := '';
 	   listing[i+1] := '';
@@ -889,13 +889,13 @@ begin
           stack_2x(i+12) and
           stack_3x(i+15) then
      	begin
-	 listing[i+6] := copy(listing[i+6], 1, 5) + GetString(i+1);
+	 listing[i+6] := GetCMD(i+6) + GetString(i+1);
 
-	 listing[i+9] := copy(listing[i+9], 1, 5) + GetString(i+2);
+	 listing[i+9] := GetCMD(i+9) + GetString(i+2);
 
-	 listing[i+12] := copy(listing[i+12], 1, 5) + GetString(i+3);
+	 listing[i+12] := GetCMD(i+12) + GetString(i+3);
 
-	 listing[i+15] := copy(listing[i+15], 1, 5) + GetString(i+4);
+	 listing[i+15] := GetCMD(i+15) + GetString(i+4);
 
 	 listing[i+1] := '';
 	 listing[i+2] := '';
@@ -1129,7 +1129,7 @@ begin
      if stack_0x(i+1) and
         stack_0x(i+3) then
      begin
-	listing[i+3] := copy(listing[i+3], 1, 5) + GetString(i+1);
+	listing[i+3] := GetCMD(i+3) + GetString(i+1);
 
 	listing[i+1] := '';
 
@@ -1171,7 +1171,7 @@ begin
 
 
     if dex(i+4) and										// dex                  		; 4
-    
+
        mwy_bp2(i) and										// mwy LEVEL :bp2			; 0
        ldy_val(i+1) and										// ldy					; 1	~:STACKORIGIN
        lda_bp2_y(i+2) and									// lda (:bp2),y				; 2
@@ -1498,7 +1498,7 @@ begin
      	stack_0x(i+2) then
      begin
 
-       listing[i+2] := copy(listing[i+2], 1, 5) + GetString(i);
+       listing[i+2] := GetCMD(i+2) + GetString(i);
 
        listing[i] := ''	 ;
 
@@ -1565,7 +1565,7 @@ begin
 
        listing[i+3] := #9'sta :STACKORIGIN,x';
 
-       listing[i+2] := copy(listing[i+1], 1, 5) + ':STACKORIGIN+1,x';
+       listing[i+2] := GetCMD(i+1) + ':STACKORIGIN+1,x';
 
        listing[i] := #9'dex';
        listing[i+1] := #9'lda :STACKORIGIN,x';
@@ -1588,7 +1588,7 @@ begin
 
        listing[i+3] := #9'sta :STACKORIGIN,x';
 
-       listing[i+2] := copy(listing[i+1], 1, 5) + ':STACKORIGIN,x';
+       listing[i+2] := GetCMD(i+1) + ':STACKORIGIN,x';
 
        listing[i] := #9'dex';
        listing[i+1] := #9'tya';
@@ -1608,7 +1608,7 @@ begin
 
        listing[i+3] := #9'sta :STACKORIGIN+1,x';
 
-       listing[i+2] := copy(listing[i+1], 1, 5) + ':STACKORIGIN+1,x';
+       listing[i+2] := GetCMD(i+1) + ':STACKORIGIN+1,x';
 
        listing[i] := #9'dex';
        listing[i+1] := #9'tya';
@@ -2462,9 +2462,9 @@ begin
        if bp2_y(p) then begin
 
         if mva_bp2_y(p) then
-         listing[p] := copy(listing[p], 1, 5) + '('+tmp+'),y' + copy(listing[p], 14, 256)
+         listing[p] := copy(listing[p], 1, 5) + '(' + tmp + '),y' + copy(listing[p], 14, 256)
 	else
-         listing[p] := copy(listing[p], 1, 5) + '('+tmp+'),y';
+         listing[p] := copy(listing[p], 1, 5) + '(' + tmp + '),y';
 
 	yes:=true;
        end else

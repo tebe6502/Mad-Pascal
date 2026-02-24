@@ -186,6 +186,11 @@ end;
 
 // -----------------------------------------------------------------------------
 
+  function STACK(const i: Integer): Boolean;
+  begin
+    Result := pos(' :STACK', TemporaryBuf[i]) > 0;
+  end;
+
   function LDA_STACK(const i: Integer): Boolean;
   begin
     Result := pos1(#9'lda :STACK', i);

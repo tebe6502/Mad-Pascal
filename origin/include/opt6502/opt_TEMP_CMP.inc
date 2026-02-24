@@ -88,10 +88,10 @@ begin
     end;
 
 
-    if lda(0) and (lda_stack(0) = false) and						// lda			; 0
-       sta(1) and									// sta :STACKORIGIN	; 1
-       lda(2) and									// lda :STACKORIGIN	; 2
-       cmp(3) and (cmp_stack(3) = false) then						// cmp			; 3
+    if (lda(0) or and_ora_eor(0) or adc_sbc(0)) and (stack(0) = false) and		// lda|and|ora|eor|adc|sbc	; 0
+       sta(1) and									// sta :STACKORIGIN		; 1
+       lda(2) and									// lda :STACKORIGIN		; 2
+       cmp(3) and (cmp_stack(3) = false) then						// cmp				; 3
      if argMatch(1, 2) then
       begin
 	TemporaryBuf[1] := '~';

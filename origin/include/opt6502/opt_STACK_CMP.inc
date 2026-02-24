@@ -376,7 +376,7 @@ begin
      if stack_next_0x(i) and
         stack_next_0x(i+8) then
      begin
-      listing[i+8] := copy(listing[i+8], 1, 5) + GetString(i);
+      listing[i+8] := GetCMD(i+8) + GetString(i);
 
       listing[i] := '';
 
