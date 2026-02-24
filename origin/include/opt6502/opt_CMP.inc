@@ -69,6 +69,7 @@ begin
       end;
 }
 
+
     if cmp_stack(i+5) and									// cmp :STACKORIGIN+10			; 5
 
        lda_val(i) and										// lda					; 0	~:STACKORIGIN
@@ -1426,7 +1427,7 @@ begin
        lda_a(i+8) and										// lda					; 8
        and_ora_eor(i+9) and									// and|ora|eor				; 9
        sta_stack(i+10) and									// sta :STACKORIGIN+STACKWIDTH*3	; 10
-       ldy_1(i+11) and										// ldy #1				; 11       
+       ldy_1(i+11) and										// ldy #1				; 11
        lda_stack(i+12) and									// lda :STACKORIGIN+STACKWIDTH*3	; 12
        cmp(i+13) and										// cmp					; 13
        bne(i+14) and										// bne @+				; 14
@@ -1463,7 +1464,7 @@ begin
        lda_a(i+7) and										// lda					; 7
        and_ora_eor(i+8) and									// and|ora|eor				; 8
        sta_stack(i+9) and									// sta :STACKORIGIN+STACKWIDTH*3	; 9
-       ldy_1(i+10) and										// ldy #1				; 10       
+       ldy_1(i+10) and										// ldy #1				; 10
        lda_stack(i+11) and									// lda :STACKORIGIN+STACKWIDTH*3	; 11
        cmp(i+12) and										// cmp					; 12
        bne(i+13) and										// bne @+				; 13

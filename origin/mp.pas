@@ -151,9 +151,6 @@ Contributors:
 # zapis na stos zawsze przez MVA, zamiast 'lda ARG \ sta :STACKORIGIN,x' nalezy uzywac 'mva ARG :STACKORIGIN,x'
 # !!! '#9'mva :STACKORIGIN,x ARG' !!! zabronione !!!
 ------------------------------------------------------------------------------------------------------------------
-# :STACKORIGIN-1
-# :STACKORIGIN
-# :STACKORIGIN+1	!!! -1 .. +1 !!!
 
 # parametry dla imulCL, imulCX w konkretnej kolejnosci 1: ECX, 2: EAX
 

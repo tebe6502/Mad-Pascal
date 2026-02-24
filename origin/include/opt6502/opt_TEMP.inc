@@ -281,17 +281,14 @@ begin
       end;
 
 
-    if (TemporaryBuf[0] <> #9'sta #$00') and sta(0) and					// sta A		; 0
-       lda(1) then									// lda A		; 1
-     if argMatch(0, 1) then
+    if and_ora_eor(0) and								// and|ora|eor		; 0
+       sta(1) and									// sta :STACKORIGIN	; 1
+       lda(2) and									// lda :STACKORIGIN	; 2
+       SKIP(3) then									// SKIP			; 3
+     if argMatch(1, 2) then
       begin
-
-        if sta_stack(0) then begin
-	  TemporaryBuf[0] := '~';
-	  TemporaryBuf[1] := '~';
-	end else
-	  TemporaryBuf[1] := '~';
-
+	TemporaryBuf[1] := '~';
+	TemporaryBuf[2] := '~';
       end;
 
 

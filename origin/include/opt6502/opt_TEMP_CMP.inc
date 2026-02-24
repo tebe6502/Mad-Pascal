@@ -88,6 +88,17 @@ begin
     end;
 
 
+    if lda(0) and (lda_stack(0) = false) and						// lda			; 0
+       sta(1) and									// sta :STACKORIGIN	; 1
+       lda(2) and									// lda :STACKORIGIN	; 2
+       cmp(3) and (cmp_stack(3) = false) then						// cmp			; 3
+     if argMatch(1, 2) then
+      begin
+	TemporaryBuf[1] := '~';
+	TemporaryBuf[2] := '~';
+      end;
+
+
    if lda(0) and									// lda W		; 0
       cmp(1) and									// cmp			; 1
       SKIP(2) and									// SKIP			; 2
