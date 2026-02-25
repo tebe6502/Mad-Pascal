@@ -15,19 +15,19 @@ begin
        sta_bp2(i+2) and									// sta :bp2				; 2
        lda_val(i+3) and									// lda TB+1				; 3	~:STACKORIGIN
        adc_stack(i+4) and								// adc :STACKORIGIN+STACKWIDTH		; 4
-       sta_bp2_1(i+5) and 		 						// sta :bp2+1				; 5
+       sta_bp2_1(i+5) and 								// sta :bp2+1				; 5
        ldy_im_0(i+6) then								// ldy #$00				; 6
     begin
 
 
-     tmp:=#9'sta ' + copy(listing[i+1], 6, 256);
+     tmp := #9'sta ' + copy(listing[i+1], 6, 256);
 
 
      if lda_im_0(i) and lda_im_0(i+3) then begin
-       listing[i]  := '' ;
+       listing[i]  := '';
        listing[i+1]:= #9'lda ' + copy(listing[i+1], 6, 256);
 
-       listing[i+3]:= '' ;
+       listing[i+3]:= '';
        listing[i+4]:= #9'lda ' + copy(listing[i+4], 6, 256);
      end;
 
@@ -189,9 +189,35 @@ begin
 // -----------------------------------------------------------------------------
 // -----------------------------------------------------------------------------	// BYTE
 // -----------------------------------------------------------------------------
+
 (*
      for p:=i-1 downto 0 do
       if listing[p] = tmp then begin
+
+
+    if (p > 1) and
+       lda_val(p-2) and									// lda					; p-2		#-BYTE
+       add_im(p-1) and									// add #				; p-1
+											// sta :STACKORIGIN			; p
+       lda_val(p+1) and									// lda 					; p+1
+       adc_im_0(p+2) and								// adc #$00				; p+2
+       sta_stack(p+3) then								// sta :STACKORIGIN+STACKWIDTH		; p+3
+      begin
+	listing[i+1] := #9'add ' + GetARG(p-2);
+
+	listing[i+4] := #9'adc ' + GetARG(p+1);
+
+	listing[i+6] := #9'ldy ' + GetARG(p-1);
+	
+	listing[p-2] := '';
+	listing[p-1] := '';
+	listing[p]   := '';
+	listing[p+1] := '';
+	listing[p+2] := '';
+	listing[p+3] := '';
+
+	Result:=false; Break;
+      end;
 
 
 {
@@ -219,7 +245,7 @@ begin
 
        Break;
       end else	// for p:=
-        if onBreak(p) or (listing[p] = #9'asl ' + copy(listing[i], 6, 256)) then Break;
+        if onBreak(p) {or (listing[p] = #9'asl ' + copy(listing[i], 6, 256))} then Break;
 *)
 
 
@@ -227,5 +253,6 @@ begin
 
      if Result = false then exit(false);
     end;
+
 
 end;		// function

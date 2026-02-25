@@ -371,74 +371,74 @@ var
     Result := (lda_bp_y(i) and sta_a(i + 1)) or (lda_a(i) and sta_bp_y(i + 1));
 
   end;
+ 
+  // -----------------------------------------------------------------------------
+
+  procedure LDA_STA_ADR_0(const i: TListingIndex; q: Integer; op: Char);
+
+   procedure update(const i: TListingIndex);
+   begin
+      //Delete(listing[i], pos(',y', listing[i]), 2);
+      SetLength(listing[i], length(listing[i])-2);
+      if q <> 0 then listing[i] := listing[i] + op + Hex(q, 2);
+   end;
+
+  begin
+
+    if lda_adr_y(i + 6) then update(i+6);
+    if sta_adr_y(i + 7) then update(i+7);
+
+    if (lda_adr(i + 8) = False) and (sta_adr(i + 9) = False) then exit;
+
+    if lda_adr_y(i + 8) then update(i+8);
+    if sta_adr_y(i + 9) then update(i+9);
+
+    if (lda_adr(i + 10) = False) and (sta_adr(i + 11) = False) then exit;
+
+    if lda_adr_y(i + 10) then update(i+10);
+    if sta_adr_y(i + 11) then update(i+11);
+
+    if (lda_adr(i + 12) = False) and (sta_adr(i + 13) = False) then exit;
+
+    if lda_adr_y(i + 12) then update(i+12);
+    if sta_adr_y(i + 13) then update(i+13);
+
+  end;  //LDA_STA_ADR_0
 
 
   procedure LDA_STA_ADR(const i: TListingIndex; q: Integer; op: Char);
 
-   procedure update(i: integer);
-    begin
-      Delete(listing[i], pos(',y', listing[i]), 2);
+   procedure update(const i: TListingIndex);
+   begin
+      //Delete(listing[i], pos(',y', listing[i]), 2);
+      SetLength(listing[i], length(listing[i])-2);
       listing[i] := listing[i] + op + Hex(q, 2) + ',y';
-    end;
+   end;
 
-    begin
+  begin
 
-    if lda_adr(i + 6) and iy(i + 6) then update(i+6);
-//    begin
-//      Delete(listing[i + 6], pos(',y', listing[i + 6]), 2);
-//      listing[i + 6] := listing[i + 6] + op + '$' + IntToHex(q, 2) + ',y';
-//    end;
+    if q = 0 then exit;
 
-    if sta_adr(i + 7) and iy(i + 7) then update(i+7);
-//    begin
-//      Delete(listing[i + 7], pos(',y', listing[i + 7]), 2);
-//      listing[i + 7] := listing[i + 7] + op + '$' + IntToHex(q, 2) + ',y';
-//    end;
+    if lda_adr_y(i + 6) then update(i+6);
+    if sta_adr_y(i + 7) then update(i+7);
 
     if (lda_adr(i + 8) = False) and (sta_adr(i + 9) = False) then exit;
 
-    if lda_adr(i + 8) and iy(i + 8) then update(i+8);
-//    begin
-//      Delete(listing[i + 8], pos(',y', listing[i + 8]), 2);
-//      listing[i + 8] := listing[i + 8] + op + '$' + IntToHex(q, 2) + ',y';
-//    end;
-
-    if sta_adr(i + 9) and iy(i + 9) then update(i+9);
-//    begin
-//      Delete(listing[i + 9], pos(',y', listing[i + 9]), 2);
-//      listing[i + 9] := listing[i + 9] + op + '$' + IntToHex(q, 2) + ',y';
-//    end;
+    if lda_adr_y(i + 8) then update(i+8);
+    if sta_adr_y(i + 9) then update(i+9);
 
     if (lda_adr(i + 10) = False) and (sta_adr(i + 11) = False) then exit;
 
-    if lda_adr(i + 10) and iy(i + 10) then update(i+10);
-//    begin
-//      Delete(listing[i + 10], pos(',y', listing[i + 10]), 2);
-//      listing[i + 10] := listing[i + 10] + op + '$' + IntToHex(q, 2) + ',y';
-//    end;
-
-    if sta_adr(i + 11) and iy(i + 11) then update(i+11);
-//    begin
-//      Delete(listing[i + 11], pos(',y', listing[i + 11]), 2);
-//      listing[i + 11] := listing[i + 11] + op + '$' + IntToHex(q, 2) + ',y';
-//    end;
+    if lda_adr_y(i + 10) then update(i+10);
+    if sta_adr_y(i + 11) then update(i+11);
 
     if (lda_adr(i + 12) = False) and (sta_adr(i + 13) = False) then exit;
 
-    if lda_adr(i + 12) and iy(i + 12) then update(i+12);
-//    begin
-//      Delete(listing[i + 12], pos(',y', listing[i + 12]), 2);
-//      listing[i + 12] := listing[i + 12] + op + '$' + IntToHex(q, 2) + ',y';
-//    end;
+    if lda_adr_y(i + 12) then update(i+12);
+    if sta_adr_y(i + 13) then update(i+13);
 
-    if sta_adr(i + 13) and iy(i + 13) then update(i+13);
-//    begin
-//      Delete(listing[i + 13], pos(',y', listing[i + 13]), 2);
-//      listing[i + 13] := listing[i + 13] + op + '$' + IntToHex(q, 2) + ',y';
-//    end;
-
-  end;  //LDA_STA_ADR
-
+  end;  //LDA_STA_ADR 
+  
   // -----------------------------------------------------------------------------
 
   procedure Expand(const i, e: TListingIndex);
@@ -708,8 +708,9 @@ var
 
   end;  //GetStringLast
 
+// -----------------------------------------------------------------------------
 
-  function GetARG(const n: Byte; const x: Shortint; const reset: Boolean = True): String;
+  function GetARG(const n: Byte; const x: Shortint; const reset: Boolean = True): String; overload;
   var
     i: Integer;
     a: String;
@@ -752,6 +753,24 @@ var
     end;
 
   end;	//GetARG
+
+// -----------------------------------------------------------------------------
+
+  function GetARG(const i: TListingIndex): String; overload;
+  begin
+
+    Result := copy(listing[i], 6, 256)
+
+  end;
+
+// -----------------------------------------------------------------------------
+
+  function GetCMD(const i: TListingIndex): String;
+  begin
+
+    Result := copy(listing[i], 1, 5)
+
+  end;  
 
 // -----------------------------------------------------------------------------
 
@@ -1354,7 +1373,6 @@ end;
   {$i include/opt6502/opt_FOR.inc}
   {$i include/opt6502/opt_REG_A.inc}
   {$i include/opt6502/opt_REG_BP2.inc}
-  //{$i include/opt6502/opt_REG_TMP.inc}
   {$i include/opt6502/opt_REG_Y.inc}
 
 begin        // OptimizeASM

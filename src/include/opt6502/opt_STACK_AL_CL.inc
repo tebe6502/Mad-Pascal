@@ -12,7 +12,7 @@ begin
 
     if add_sub_AL_CL(i+10) and									// jsr addAL_CL|subAL_CL		; 10
 
-     //inx(i) and										// inx					; 0
+//     inx(i) and										// inx					; 0
        mva(i+1) and										// mva   :STACKORIGIN,x			; 1
        mva(i+2) and 										// mva   :STACKORIGIN+STACKWIDTH,x	; 2
        mva(i+3) and 										// mva   :STACKORIGIN+STACKWIDTH*2,x	; 3
@@ -46,7 +46,7 @@ begin
 
     if add_sub_AL_CL(i+7) and									// jsr addAL_CL|subAL_CL		; 7
 
-     //inx(i) and										// inx					; 0
+//     inx(i) and										// inx					; 0
        mva(i+1) and										// mva   :STACKORIGIN,x			; 1
        mva(i+2) and 										// mva   :STACKORIGIN+STACKWIDTH,x	; 2
        mva(i+3) and 										// mva   :STACKORIGIN+STACKWIDTH*2,x	; 3
@@ -68,11 +68,13 @@ begin
      end;
 
 
-    if //inx(i) and										// inx					; 0
+    if add_sub_AL_CL(i+4) and									// jsr addAL_CL|subAL_CL		; 4
+    
+//     inx(i) and										// inx					; 0
        mva_im(i+1) and										// mva # :STACKORIGIN,x			; 1
        inx(i+2) and										// inx					; 2
-       mva_im(i+3) and										// mva # :STACKORIGIN,x			; 3
-       add_sub_AL_CL(i+4) then									// jsr addAL_CL|subAL_CL		; 4
+       mva_im(i+3) then										// mva # :STACKORIGIN,x			; 3
+//     add_sub_AL_CL(i+4) then									// jsr addAL_CL|subAL_CL		; 4
      if stack_0x(i+1) and
      	stack_0x(i+3) then
      begin
@@ -95,25 +97,13 @@ begin
      end;
 
 
-    if inx(i) and										// inx					; 0
+    if add_sub_AL_CL(i+4) and									// jsr addAL_CL|subAL_CL		; 4
+
+       inx(i) and										// inx					; 0
        mva(i+1) and										// mva   :STACKORIGIN,x			; 1
        mva(i+2) and 										// mva   :STACKORIGIN+STACKWIDTH,x	; 2
-       add_sub_AL_CL(i+3) then									// jsr addAL_CL|subAL_CL		; 3
-     if stack_0x(i+1) and
-	stack_1x(i+2) then
-     begin
-
-       listing[i+2] := '';
-
-       exit(false);
-     end;
-
-
-    if inx(i) and										// inx					; 0
-       mva(i+1) and										// mva   :STACKORIGIN,x			; 1
-       mva(i+2) and 										// mva   :STACKORIGIN+STACKWIDTH,x	; 2
-       mva(i+3) and 										// mva   :STACKORIGIN-1+STACKWIDTH,x	; 3
-       add_sub_AL_CL(i+4) then									// jsr addAL_CL|subAL_CL		; 4
+       mva(i+3) then 										// mva   :STACKORIGIN-1+STACKWIDTH,x	; 3
+//     add_sub_AL_CL(i+4) then									// jsr addAL_CL|subAL_CL		; 4
      if stack_0x(i+1) and
 	stack_1x(i+2) then
      begin
@@ -125,10 +115,28 @@ begin
      end;
 
 
-    if jsr(i) and										// jsr					; 0
+    if add_sub_AL_CL(i+3) and									// jsr addAL_CL|subAL_CL		; 3
+    
+       inx(i) and										// inx					; 0
+       mva(i+1) and										// mva   :STACKORIGIN,x			; 1
+       mva(i+2) then 										// mva   :STACKORIGIN+STACKWIDTH,x	; 2
+//     add_sub_AL_CL(i+3) then									// jsr addAL_CL|subAL_CL		; 3
+     if stack_0x(i+1) and
+	stack_1x(i+2) then
+     begin
+
+       listing[i+2] := '';
+
+       exit(false);
+     end;
+
+
+    if add_sub_AL_CL(i+3) and									// jsr addAL_CL|subAL_CL		; 3
+    
+       jsr(i) and										// jsr					; 0
        inx(i+1) and										// inx					; 1
        mva(i+2) and										// mva  :STACKORIGIN,x			; 2
-       add_sub_AL_CL(i+3) and									// jsr addAL_CL|subAL_CL		; 3
+//     add_sub_AL_CL(i+3) and									// jsr addAL_CL|subAL_CL		; 3
        dex(i+4) then										// dex					; 4
      if stack_0x(i+2) then
      begin
@@ -147,10 +155,12 @@ begin
      end;
 
 
-    if mva(i) and										// mva  :STACKORIGIN,x			; 0
+    if add_sub_AL_CL(i+3) and									// jsr addAL_CL|subAL_CL		; 3
+    
+       mva(i) and										// mva  :STACKORIGIN,x			; 0
        inx(i+1) and										// inx					; 1
-       mva(i+2) and 										// mva  :STACKORIGIN,x			; 2
-       add_sub_AL_CL(i+3) then									// jsr addAL_CL|subAL_CL		; 3
+       mva(i+2) then 										// mva  :STACKORIGIN,x			; 2
+//     add_sub_AL_CL(i+3) then									// jsr addAL_CL|subAL_CL		; 3
      if stack_0x(i) and
      	stack_0x(i+2) then
      begin
@@ -172,13 +182,15 @@ begin
      end;
 
 
-    if (lda(i) or lda_adr(i)) and								// lda					; 0
+    if add_sub_AL_CL(i+6) and									// jsr addAL_CL|subAL_CL		; 6
+    
+       lda_a(i) and										// lda					; 0
        sta_stack_0x(i+1) and									// sta :STACKORIGIN,x			; 1
-       (lda(i+2) or lda_adr(i+2)) and								// lda					; 2
+       lda_a(i+2) and										// lda					; 2
        sta_stack_1x(i+3) and									// sta :STACKORIGIN+STACKWIDTH,x	; 3
        inx(i+4) and										// inx					; 4
-       mva(i+5) and 										// mva  :STACKORIGIN,x			; 5
-       add_sub_AL_CL(i+6) then									// jsr addAL_CL|subAL_CL		; 6
+       mva(i+5) then 										// mva  :STACKORIGIN,x			; 5
+//     add_sub_AL_CL(i+6) then									// jsr addAL_CL|subAL_CL		; 6
      if stack_0x(i+5) then
      begin
 
@@ -197,11 +209,13 @@ begin
      end;
 
 
-    if mva(i) and										// mva  :STACKORIGIN,x			; 0
+    if add_sub_AL_CL(i+4) and									// jsr addAL_CL|subAL_CL		; 4
+    
+       mva(i) and										// mva  :STACKORIGIN,x			; 0
        mva(i+1) and										// mva  :STACKORIGIN+STACKWIDTH,x	; 1
        inx(i+2) and										// inx					; 2
-       mva(i+3) and 										// mva  :STACKORIGIN,x			; 3
-       add_sub_AL_CL(i+4) then									// jsr addAL_CL|subAL_CL		; 4
+       mva(i+3) then 										// mva  :STACKORIGIN,x			; 3
+//     add_sub_AL_CL(i+4) then									// jsr addAL_CL|subAL_CL		; 4
      if stack_0x(i) and
      	stack_1x(i+1) and
      	stack_0x(i+3) then
@@ -222,12 +236,14 @@ begin
      end;
 
 
-    if //inx(i) and 										// inx					; 0
+    if add_sub_AL_CL(i+5) and									// jsr addAL_CL|subAL_CL		; 5
+
+//     inx(i) and 										// inx					; 0
        mva(i+1) and (iy(i+1) = false) and							// mva  :STACKORIGIN,x			; 1
        inx(i+2) and 										// inx					; 2
-       (lda(i+3) or lda_adr(i+3)) and								// lda					; 3
-       sta_stack_0x(i+4) and									// sta :STACKORIGIN,x			; 4
-       add_sub_AL_CL(i+5) then									// jsr addAL_CL|subAL_CL		; 5
+       lda_a(i+3) and										// lda					; 3
+       sta_stack_0x(i+4) then									// sta :STACKORIGIN,x			; 4
+//     add_sub_AL_CL(i+5) then									// jsr addAL_CL|subAL_CL		; 5
      if stack_0x(i+1) then
      begin
 
@@ -246,13 +262,15 @@ begin
      end;
 
 
-    if inx(i) and (iy(i+1) = false) and								// inx					; 0
-       mva(i+1) and 										// mva  :STACKORIGIN,x			; 1
+    if add_sub_AL_CL(i+6) and									// jsr addAL_CL|subAL_CL		; 6
+    
+       inx(i) and										// inx					; 0
+       mva(i+1) and (iy(i+1) = false) and							// mva  :STACKORIGIN,x			; 1
        inx(i+2) and 										// inx					; 2
        mwy_bp2(i+3) and										// mwy ... :bp2				; 3
        ldy_im(i+4) and										// ldy #				; 4
-       mva_bp2_y(i+5) and			 						// mva (:bp2),y :STACKORIGIN,x		; 5
-       add_sub_AL_CL(i+6) then									// jsr addAL_CL|subAL_CL		; 6
+       mva_bp2_y(i+5) then			 						// mva (:bp2),y :STACKORIGIN,x		; 5
+//     add_sub_AL_CL(i+6) then									// jsr addAL_CL|subAL_CL		; 6
      if stack_0x(i+1) and
      	stack_0x(i+5) then
      begin
@@ -275,14 +293,16 @@ begin
      end;
 
 
-    if inx(i) and										// inx					; 0
+    if add_sub_AL_CL(i+7) and									// jsr addAL_CL|subAL_CL		; 7
+    
+       inx(i) and										// inx					; 0
        mwy_bp2(i+1) and										// mwa ... :bp2				; 1
        ldy_im(i+2) and										// ldy #				; 2
        LDA_BP2_Y(i+3) and 									// lda (:bp2),y 			; 3
        sta_stack_0x(i+4) and 									// sta :STACKORIGIN,x			; 4
-       inx(i+5) and (iy(i+6) = false) and							// inx					; 5
-       mva(i+6) and 										// mva .. :STACKORIGIN,x		; 6
-       add_sub_AL_CL(i+7) then									// jsr addAL_CL|subAL_CL		; 7
+       inx(i+5) and 										// inx					; 5
+       mva(i+6) and (iy(i+6) = false) then							// mva .. :STACKORIGIN,x		; 6
+//     add_sub_AL_CL(i+7) then									// jsr addAL_CL|subAL_CL		; 7
      if stack_0x(i+6) then
      begin
 
@@ -300,13 +320,15 @@ begin
      end;
 
 
-    if inx(i) and 										// inx					; 0
+    if add_sub_AL_CL(i+6) and									// jsr addAL_CL|subAL_CL		; 6
+    
+       inx(i) and 										// inx					; 0
        mwy_bp2(i+1) and										// mwa ... :bp2				; 1
        ldy_im(i+2) and										// ldy #				; 2
        mva_bp2_y(i+3) and			 						// mva (:bp2),y :STACKORIGIN,x		; 3
-       inx(i+4) and (iy(i+5) = false) and							// inx					; 4
-       mva(i+5) and 										// mva .. :STACKORIGIN,x		; 5
-       add_sub_AL_CL(i+6) then									// jsr addAL_CL|subAL_CL		; 6
+       inx(i+4) and 										// inx					; 4
+       mva(i+5) and (iy(i+5) = false) then							// mva .. :STACKORIGIN,x		; 5
+//     add_sub_AL_CL(i+6) then									// jsr addAL_CL|subAL_CL		; 6
      if stack_0x(i+3) and
      	stack_0x(i+5) then
      begin
@@ -325,14 +347,16 @@ begin
      end;
 
 
-    if inx(i) and 										// inx					; 0
+    if add_sub_AL_CL(i+7) and									// jsr addAL_CL|subAL_CL		; 7
+    
+       inx(i) and 										// inx					; 0
        mwy_bp2(i+1) and										// mwa ... :bp2				; 1
        ldy_im(i+2) and										// ldy #				; 2
        mva_bp2_y(i+3) and			 						// mva (:bp2),y :STACKORIGIN,x		; 3
        inx(i+4) and 										// inx					; 4
        ldy_im(i+5) and										// ldy #				; 5
-       mva_bp2_y(i+6) and				 					// mva (:bp2),y :STACKORIGIN,x		; 6
-       add_sub_AL_CL(i+7) then									// jsr addAL_CL|subAL_CL		; 7
+       mva_bp2_y(i+6) then				 					// mva (:bp2),y :STACKORIGIN,x		; 6
+//     add_sub_AL_CL(i+7) then									// jsr addAL_CL|subAL_CL		; 7
      if stack_0x(i+3) and
      	stack_0x(i+6) then
      begin
@@ -352,13 +376,15 @@ begin
      end;
 
 
-    if inx(i) and 										// inx					; 0
+    if add_sub_AL_CL(i+6) and									// jsr addAL_CL|subAL_CL		; 6
+    
+       inx(i) and 										// inx					; 0
        ldy_im(i+1) and										// ldy #				; 1
        mva_bp2_y(i+2) and			 						// mva (:bp2),y :STACKORIGIN,x		; 2
        inx(i+3) and 										// inx					; 3
        ldy_im(i+4) and										// ldy #				; 4
-       mva_bp2_y(i+5) and				 					// mva (:bp2),y :STACKORIGIN,x		; 5
-       add_sub_AL_CL(i+6) then									// jsr addAL_CL|subAL_CL		; 6
+       mva_bp2_y(i+5) then				 					// mva (:bp2),y :STACKORIGIN,x		; 5
+//     add_sub_AL_CL(i+6) then									// jsr addAL_CL|subAL_CL		; 6
      if stack_0x(i+2) and
      	stack_0x(i+5) then
      begin
@@ -380,28 +406,9 @@ begin
 
     if add_sub_AL_CL(i) and									// jsr addAL_CL|subAL_CL		; 0
        dex(i+1) and										// dex					; 1
-       (pos(#9'mva :STACKORIGIN,x', listing[i+2]) > 0) and					// mva :STACKORIGIN,x ...		; 2
-       dex(i+3) then										// dex					; 3
-     begin
-
-       if listing[i] = #9'jsr addAL_CL' then
-        listing[i] := #9'adb :STACKORIGIN-1,x :STACKORIGIN,x ' + copy(listing[i+2], pos(',x', listing[i+2])+3, length(listing[i+2]) )
-       else
-        listing[i] := #9'sbb :STACKORIGIN-1,x :STACKORIGIN,x ' + copy(listing[i+2], pos(',x', listing[i+2])+3, length(listing[i+2]) );
-
-       listing[i+2] := '';
-
-       if (i>0) and (pos(#9'jsr @expand', listing[i-1]) > 0) then listing[i-1] := '';
-
-       exit(false);
-     end;
-
-
-    if add_sub_AL_CL(i) and									// jsr addAL_CL|subAL_CL		; 0
-       dex(i+1) and										// dex					; 1
        lda_stack_0x(i+2) and									// lda :STACKORIGIN,x			; 2
        sta_val(i+3) and										// sta I				; 3
-       (lda(i+4) = false) then									//~lda					; 4
+       (lda_a(i+4) = false) then								//~lda					; 4
      begin
 
        if listing[i] = #9'jsr addAL_CL' then begin

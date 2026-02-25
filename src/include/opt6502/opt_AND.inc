@@ -78,18 +78,6 @@ begin
 	exit(false);
      end;
 
-{
-    if lda_stack(i) and										// lda :STACKORIGIN			; 0
-       and_im_0(i+1) and									// and #$00				; 1
-       sta_stack(i+2) then									// sta :STACKORIGIN			; 2
-     if argMatch(i, i+2) then
-     begin
-	listing[i]   := '';
-	listing[i+1] := #9'lda #$00';
-
-	exit(false);
-     end;
-}
 
     if and_im_0(i) and										// and #$00				; 0
        mwy(i+1) and										// mwy					; 1
