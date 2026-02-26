@@ -108,7 +108,7 @@ uses Crt, SysUtils, Common, Assembler, Messages, Scanner, Parser, Optimize, Opti
   function TestName(IdentIndex: Integer; a: String): Boolean;
   begin
 
-    if {(Ident[IdentIndex].UnitIndex > 1) and} (pos(UnitName[Ident[IdentIndex].UnitIndex].Name + '.', a) = 1) then
+    if (IdentIndex > 0) and (pos(UnitName[Ident[IdentIndex].UnitIndex].Name + '.', a) = 1) then
       a := copy(a, a.IndexOf('.') + 2, length(a));
 
     Result := pos('.', a) > 0;
@@ -283,7 +283,8 @@ writeln('_A: ', Ident[IdentIndex].Name);
 
 
               if (Ident[IdentIndex].Param[i].DataType = Param[i].DataType) and
-                (Ident[IdentIndex].Param[i].AllocElementType <> UNTYPETOK) and (Ident[IdentIndex].Param[i].AllocElementType = Param[i].AllocElementType) then
+                (Ident[IdentIndex].Param[i].AllocElementType <> UNTYPETOK) and 
+		(Ident[IdentIndex].Param[i].AllocElementType = Param[i].AllocElementType) then
 
               begin
 {
@@ -964,19 +965,32 @@ writeln('_B: ', Ident[IdentIndex].Name);
 
   function AbsoluteBasePointer(const IdentIndex: integer): Boolean;
   begin
+  
+   if IdentIndex > 0 then
 
-   Result := (Ident[IdentIndex].isAbsolute) and 
-	     (Ident[IdentIndex].PassMethod <> VARPASSING) and 
-             ((Ident[IdentIndex].Value in [0..255]) or 
+    Result := (Ident[IdentIndex].isAbsolute) and 
+	      (Ident[IdentIndex].PassMethod <> VARPASSING) and 
+              (((Ident[IdentIndex].Value >= 0) and (Ident[IdentIndex].Value < 256)) or 
+	      
+	      ((abs(Ident[IdentIndex].Value) and $FF = 0) and (Byte((abs(Ident[IdentIndex].Value) shr 24) and $7F) in [1..127])))
+
+   else
+   
+    Result := false;
 	     
-	     ((abs(Ident[IdentIndex].Value) and $FF = 0) and (Byte((abs(Ident[IdentIndex].Value) shr 24) and $7F) in [1..127])))
   end;
 
 
   function AbsoluteArrayOrigin(const IdentIndex: integer): Boolean;
   begin
 
-   Result := (Ident[IdentIndex].isAbsolute) and (Ident[IdentIndex].idType = ARRAYTOK) and (Ident[IdentIndex].Value >= 0)
+   if IdentIndex > 0 then
+
+    Result := (Ident[IdentIndex].isAbsolute) and (Ident[IdentIndex].idType = ARRAYTOK) and (Ident[IdentIndex].Value >= 0)
+   
+   else
+   
+    Result := false;
 
   end;
 
@@ -3617,9 +3631,9 @@ writeln('_B: ', Ident[IdentIndex].Name);
         if TestName(IdentIndex, svar) then
         begin
 
-          if (Ident[IdentIndex].DataType = POINTERTOK) and not (Ident[IdentIndex].AllocElementType in [UNTYPETOK, PROCVARTOK, RECORDTOK, OBJECTTOK]) then begin
-            asm65(#9'mwy ' + svar + ' :bp2');
-          end else begin
+          if (Ident[IdentIndex].DataType = POINTERTOK) and not (Ident[IdentIndex].AllocElementType in [UNTYPETOK, PROCVARTOK, RECORDTOK, OBJECTTOK]) then 
+            asm65(#9'mwy ' + svar + ' :bp2')
+          else begin
 
 	    IdentTemp := GetIdent(ExtractName(IdentIndex, svar));
 
@@ -6773,6 +6787,7 @@ end;
 
                 i := CompileArrayIndex(i, IdentIndex, AllocElementType);
 
+
                 if Ident[IdentIndex].DataType = ENUMTYPE then
                   NumAllocElements := 0
                 else
@@ -6848,12 +6863,14 @@ end;
 		      asm65(#9'sta :STACKORIGIN+STACKWIDTH,x');
 
 		    end else begin
+
                       asm65(#9'lda <' + GetLocalName(IdentIndex, 'adr.'));
                       asm65(#9'add :STACKORIGIN,x');
                       asm65(#9'sta :STACKORIGIN,x');
                       asm65(#9'lda >' + GetLocalName(IdentIndex, 'adr.'));
                       asm65(#9'adc :STACKORIGIN+STACKWIDTH,x');
                       asm65(#9'sta :STACKORIGIN+STACKWIDTH,x');
+
 		    end;
 
                   end;
@@ -7610,6 +7627,7 @@ end;
               IdentTemp := GetIdent(Tok[i].Name^)
             else
               IdentTemp := 0;
+
 
             if IdentTemp > 0 then
             begin

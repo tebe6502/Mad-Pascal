@@ -51,9 +51,9 @@ var ProcAsBlock: TBoolean;					// issue #125 fixed
 
     Ident[IdentIndex].IsNotDead := TRUE;
 
-    ProcAsBlockIndex := Ident[IdentIndex].ProcAsBlock;		// always > 0
-
-    if {(ProcAsBlockIndex > 0) and} (ProcAsBlock[ProcAsBlockIndex] = FALSE) and (CallGraph[ProcAsBlockIndex].NumChildren > 0) then begin
+    ProcAsBlockIndex := Ident[IdentIndex].ProcAsBlock;
+    
+    if (ProcAsBlockIndex > 0) and (ProcAsBlock[ProcAsBlockIndex] = FALSE) and (CallGraph[ProcAsBlockIndex].NumChildren > 0) then begin
 
 	ProcAsBlock[ProcAsBlockIndex] := TRUE;
 
@@ -556,7 +556,7 @@ var inxUse, found: Boolean;
     i := 6;
 
     if a <> '' then
-      while not (a[i] in [' ', #9]) and (i <= length(a)) do
+      while (i <= length(a)) and not (a[i] in [' ', #9]) do
       begin
         Result := Result + a[i];
         Inc(i);
@@ -578,7 +578,7 @@ var inxUse, found: Boolean;
     a := listing[j];
 
     if a <> '' then
-      while not (a[i] in [' ', #9]) and (i <= length(a)) do
+      while (i <= length(a)) and not (a[i] in [' ', #9])  do
       begin
         Result := Result + a[i];
         Inc(i);
@@ -645,7 +645,7 @@ var inxUse, found: Boolean;
 
       while a[i] in [' ', #9] do Inc(i);
 
-      while not (a[i] in [' ', #9]) and (i <= length(a)) do
+      while (i <= length(a)) and not (a[i] in [' ', #9]) do
       begin
         Result := Result + a[i];
         Inc(i);

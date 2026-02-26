@@ -125,7 +125,7 @@ begin
 
 
     if (l = i + 4) and
-       (and_ora_eor_val(i) or add_sub_val(i) or adc_sbc_val(i)) and				// and|ora|eor|add|sdc|sub|sbc		; 0	~:STACKORIGIN
+       (and_ora_eor_val(i) or add_sub_val(i) or adc_sbc_val(i)) and				// and|ora|eor|add|adc|sub|sbc		; 0	~:STACKORIGIN
        lda_stack(i+1) and									// lda :STACKORIGIN			; 1
        sta_val(i+2) and										// sta					; 2	~:STACKORIGIN
        dex(i+3) then										// dex					; 3

@@ -261,6 +261,7 @@ type
     TypeIndex: TTypeIndex;
     BlockIndex: TBlockIndex;
     Size: Integer;
+    Page: Integer;
     NumFields: Integer;
     Field: array [0..MAXFIELDS] of TField;
   end;

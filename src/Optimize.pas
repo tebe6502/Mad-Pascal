@@ -190,7 +190,7 @@ procedure OptimizeASM(const CodeSize: Integer; const IsInterrupt: Boolean);
 (* peephole optimization                                                      *)
 (* -------------------------------------------------------------------------- *)
 type
-  TListing_tmp = array [0..127] of String;
+  TListing_tmp = array [0..63] of String;
   TString0_3_Array = array [0..3] of String;
   TStack = array [0..15] of TString0_3_Array;
 var
@@ -372,7 +372,9 @@ var
 
   end;
  
+ 
   // -----------------------------------------------------------------------------
+
 
   procedure LDA_STA_ADR_0(const i: TListingIndex; q: Integer; op: Char);
 
@@ -439,7 +441,9 @@ var
 
   end;  //LDA_STA_ADR 
   
+  
   // -----------------------------------------------------------------------------
+
 
   procedure Expand(const i, e: TListingIndex);
   var
@@ -478,8 +482,8 @@ var
         if k > 0 then
         begin
 
-          if dex(k) and                             // inx      ; k-1
-             inx(k - 1) then                        // dex      ; k
+          if dex(k) and                              // inx      ; k-1
+             inx(k - 1) then                         // dex      ; k
           begin
             listing[k - 1] := '';
             listing[k] := '';
@@ -488,8 +492,8 @@ var
           end;
 
 
-          if inx(k) and                             // dex      ; k-1
-            dex(k - 1) then                        // inx      ; k
+          if inx(k) and                              // dex      ; k-1
+             dex(k - 1) then                         // inx      ; k
           begin
             listing[k - 1] := '';
             listing[k] := '';
@@ -498,9 +502,9 @@ var
           end;
 
 
-          if lda_stack(k) and                       // sta :STACKORIGIN  ; k-1
-            sta_stack(k - 1) and                   // lda :STACKORIGIN  ; k
-            (sta_a(i + 1) or add_sub(i + 1)) then  // sta|add|sub       ; i+1
+          if lda_stack(k) and                        // sta :STACKORIGIN  ; k-1
+             sta_stack(k - 1) and                    // lda :STACKORIGIN  ; k
+             (sta_a(i + 1) or add_sub(i + 1)) then   // sta|add|sub       ; i+1
             if argMatch(k, k - 1) then
             begin
               listing[k - 1] := '';
@@ -510,9 +514,9 @@ var
             end;
 
 
-          if sta_stack(k) and                       // lda :STACKORIGIN  ; k-1
-            lda_stack(k - 1) and                   // sta :STACKORIGIN  ; k
-            lda_a(i + 1) then                      // lda               ; i+1
+          if sta_stack(k) and                        // lda :STACKORIGIN  ; k-1
+             lda_stack(k - 1) and                    // sta :STACKORIGIN  ; k
+             lda_a(i + 1) then                       // lda               ; i+1
             if argMatch(k, k - 1) then
             begin
               listing[k - 1] := '';
@@ -522,10 +526,10 @@ var
             end;
 
 
-          if sta_stack(k) and                       // lda #             ; k-1
-            lda_im(k - 1) and                      // sta :STACKORIGIN  ; k
-            lda_val(i + 1) and                     // lda               ; i+1    ~:STACKORIGIN
-            sta_stack(i + 2) then                  // sta :STACKORIGIN  ; i+2
+          if sta_stack(k) and                        // lda #             ; k-1
+             lda_im(k - 1) and                       // sta :STACKORIGIN  ; k
+             lda_val(i + 1) and                      // lda               ; i+1    ~:STACKORIGIN
+             sta_stack(i + 2) then                   // sta :STACKORIGIN  ; i+2
             if listing[k] = listing[i + 2] then
             begin
               listing[k - 1] := '';
@@ -535,9 +539,9 @@ var
             end;
 
 
-          if lda_a(k) and                           // lda      ; k-1
-            lda_a(k - 1) and                       // lda      ; k
-            sta_a(i + 1) then                      // sta      ; i+1
+          if lda_a(k) and                            // lda      ; k-1
+             lda_a(k - 1) and                        // lda      ; k
+             sta_a(i + 1) then                       // sta      ; i+1
           begin
             listing[k - 1] := listing[k];
             listing[k] := '';
@@ -546,8 +550,8 @@ var
 
 
           if iny(k) and                             // lda      ; k-1
-            lda_a(k - 1) and                       // iny      ; k
-            lda_a(i + 1) then                      // lda      ; i+1
+            lda_a(k - 1) and                        // iny      ; k
+            lda_a(i + 1) then                       // lda      ; i+1
           begin
             listing[k - 1] := #9'iny';
             listing[k] := '';
@@ -556,7 +560,7 @@ var
 
 
           if sta_im_0(k) and                        // sta :STACKORIGIN  ; k-1
-            sta_stack(k - 1) then                  // sta #$00          ; k
+            sta_stack(k - 1) then                   // sta #$00          ; k
           begin
             listing[k] := '';
             continue;
@@ -564,7 +568,7 @@ var
 
 
 
-          if sta_im_0(k) and                                       // lda|rol @|asl @  ; k-1
+          if sta_im_0(k) and                                      // lda|rol @|asl @  ; k-1
             (lda_a(k - 1) or rol_a(k - 1) or asl_a(k - 1)) then   // sta #$00         ; k
           begin
 
@@ -578,7 +582,7 @@ var
 
 
             if (ldy(i + 1) or mwy(i + 1) or iny(i + 1)) and   /// ldy|mwy|iny   ; i+1
-              lda_a(i + 2) then                              /// lda           ; i+2
+               lda_a(i + 2) then                              /// lda           ; i+2
             begin
               listing[k - 1] := '';
               listing[k] := '';
@@ -618,7 +622,7 @@ var
 
 
             if sta_im_0(i + 1) and                  /// sta #$00    ; i+1
-              lda_a(i + 2) then                    /// lda         ; i+2
+               lda_a(i + 2) then                    /// lda         ; i+2
             begin
               listing[k - 1] := '';
               listing[k] := '';
@@ -657,7 +661,7 @@ var
     i := 6;
 
     if a <> '' then
-      while not (a[i] in [' ', #9]) and (i <= length(a)) do
+      while (i <= length(a)) and not (a[i] in [' ', #9]) do
       begin
         Result := Result + a[i];
         Inc(i);
@@ -1258,7 +1262,7 @@ end;
     for i := 0 to l - 1 do
     begin
       if (pos('@+', listing[i]) > 0) then Break;
-      if listing[i] = '@' then listing[i] := '';
+      if lab_a(i) then listing[i] := '';
     end;
 
 
@@ -1383,11 +1387,11 @@ begin        // OptimizeASM
   x := 0;
 
   arg0 := '';
-  //arg1 := '';
 
   inxUse := False;
 
   listing := Default(TListing);
+  listing_tmp := Default(TListing_tmp);
 
   s := Default(TStack);
 
@@ -1424,7 +1428,7 @@ begin        // OptimizeASM
       if length(arg0) > 20 then begin x := 51; resetOpty; Break; end;
 
 
-        elf := ElfHash(arg0);
+      elf := ElfHash(arg0);
 
 
      if elf = $08D58F81 then begin		// @expandSHORT2SMALL1
@@ -2396,129 +2400,148 @@ begin        // OptimizeASM
 
   if t <> '' then begin
 
-  if (pos('(:bp),', t) = 0) then begin
 
-   if (pos(':STACKORIGIN,', t) > 7) then begin	// kiedy odczytujemy tablice
-    s[x][0]:=copy(a, 1, pos(' :STACK', a));
-    t:='';
+// STAGE #1
 
-    if pos(',y', s[x][0]) > 0 then begin
-     listing[l]   := #9'lda ' + GetARG(0, x);
-     listing[l+1] := #9'sta ' + GetARG(0, x);
+// #9'MVA :STACKORIGIN ARG'  !!! unacceptable !!!
 
-     Inc(l, 2);
-    end;
+// #9'MVA ARG :STACKORIGIN...'
+
+// #9'MVA Q :STACK
+// ^  ^^^^^^^
+// 1  2345678
+
+   if (pos(':STACKORIGIN-1', t) > 7) then begin
+
+     arg0 := copy(t, 1, pos(' :STACK', t)-1);
+
+     if (pos(':STACKORIGIN-1,', t) > 7)              then s[x-1][0] := arg0 else
+     if (pos(':STACKORIGIN-1+STACKWIDTH,', t) > 7)   then s[x-1][1] := arg0 else
+     if (pos(':STACKORIGIN-1+STACKWIDTH*2,', t) > 7) then s[x-1][2] := arg0 else
+     if (pos(':STACKORIGIN-1+STACKWIDTH*3,', t) > 7) then s[x-1][3] := arg0;
+
+     t := '';
+
+   end else
+   if (pos(':STACKORIGIN+1', t) > 7) then begin
+
+     arg0 := copy(t, 1, pos(' :STACK', t)-1);
+
+     if (pos(':STACKORIGIN+1,', t) > 7)              then s[x+1][0] := arg0 else
+     if (pos(':STACKORIGIN+1+STACKWIDTH,', t) > 7)   then s[x+1][1] := arg0 else
+     if (pos(':STACKORIGIN+1+STACKWIDTH*2,', t) > 7) then s[x+1][2] := arg0  else
+     if (pos(':STACKORIGIN+1+STACKWIDTH*3,', t) > 7) then s[x+1][3] := arg0;
+
+     t := '';
+
+   end else
+   if (pos(':STACKORIGIN', t) > 7) then begin
+
+        arg0 := copy(t, 1, pos(' :STACK', t)-1);
+
+        if (pos(':STACKORIGIN,', t) > 7) then begin	// kiedy odczytujemy tablice
+         s[x][0] := arg0;
+
+         if pos(',y', s[x][0]) > 0 then begin
+          listing[l]   := #9'lda ' + GetARG(0, x);
+          listing[l+1] := #9'sta ' + GetARG(0, x);
+
+          inc(l, 2);
+         end;
+        end else
+
+        if (pos(':STACKORIGIN+STACKWIDTH,', t) > 7) then begin
+         s[x][1] := arg0;
+
+         if pos(',y', s[x][1]) > 0 then begin
+          listing[l]   := #9'lda ' + GetARG(1, x);
+          listing[l+1] := #9'sta ' + GetARG(1, x);
+
+          inc(l, 2);
+         end;
+        end else
+
+        if (pos(':STACKORIGIN+STACKWIDTH*2,', t) > 7) then begin
+         s[x][2] := arg0;
+
+         if pos(',y', s[x][2]) > 0 then begin
+          listing[l]   := #9'lda ' + GetARG(2, x);
+          listing[l+1] := #9'sta ' + GetARG(2, x);
+
+          inc(l, 2);
+         end;
+        end else
+
+        if (pos(':STACKORIGIN+STACKWIDTH*3,', t) > 7) then begin
+         s[x][3] := arg0;
+
+         if pos(',y', s[x][3]) > 0 then begin
+          listing[l]   := #9'lda ' + GetARG(3, x);
+          listing[l+1] := #9'sta ' + GetARG(3, x);
+
+          inc(l, 2);
+         end;
+        end;
+
+	t := '';
+
    end;
 
-   if (pos(':STACKORIGIN+STACKWIDTH,', t) > 7) then begin
-    s[x][1]:=copy(a, 1, pos(' :STACK', a));
-    t:='';
 
-    if pos(',y', s[x][1]) > 0 then begin
-     listing[l]   := #9'lda ' + GetARG(1, x);
-     listing[l+1] := #9'sta ' + GetARG(1, x);
+// STAGE #2
 
-     Inc(l, 2);
+// #9'MVA :STACKORIGIN ARG'  !!! unacceptable !!!
+
+// #9'MNE :STACKORIGIN...'
+// ^  ^^^^^
+// 1  23456
+
+    if (pos(':STACKORIGIN-1', t) > 0) then begin
+
+      arg0 := copy(t, 1, 5);
+
+      if (pos(':STACKORIGIN-1,', t) = 6)              then t := arg0 + GetARG(0, x-1) else
+      if (pos(':STACKORIGIN-1+STACKWIDTH,', t) = 6)   then t := arg0 + GetARG(1, x-1) else
+      if (pos(':STACKORIGIN-1+STACKWIDTH*2,', t) = 6) then t := arg0 + GetARG(2, x-1) else
+      if (pos(':STACKORIGIN-1+STACKWIDTH*3,', t) = 6) then t := arg0 + GetARG(3, x-1);
+
+    end else
+    if (pos(':STACKORIGIN+1', t) > 0) then begin
+
+      arg0 := copy(t, 1, 5);
+
+      if (pos(':STACKORIGIN+1,', t) = 6)              then t := arg0 + GetARG(0, x+1) else
+      if (pos(':STACKORIGIN+1+STACKWIDTH,', t) = 6)   then t := arg0 + GetARG(1, x+1) else
+      if (pos(':STACKORIGIN+1+STACKWIDTH*2,', t) = 6) then t := arg0 + GetARG(2, x+1) else
+      if (pos(':STACKORIGIN+1+STACKWIDTH*3,', t) = 6) then t := arg0 + GetARG(3, x+1);
+
+    end else
+    if (pos(':STACKORIGIN', t) > 0) then begin
+
+      arg0 := copy(t, 1, 5);
+
+      if (pos(':STACKORIGIN,', t) = 6)              then t := arg0 + GetARG(0, x) else
+      if (pos(':STACKORIGIN+STACKWIDTH,', t) = 6)   then t := arg0 + GetARG(1, x) else
+      if (pos(':STACKORIGIN+STACKWIDTH*2,', t) = 6) then t := arg0 + GetARG(2, x) else
+      if (pos(':STACKORIGIN+STACKWIDTH*3,', t) = 6) then t := arg0 + GetARG(3, x);
+
     end;
-   end;
 
-   if (pos(':STACKORIGIN+STACKWIDTH*2,', t) > 7) then begin
-    s[x][2]:=copy(a, 1, pos(' :STACK', a));
-    t:='';
 
-    if pos(',y', s[x][2]) > 0 then begin
-     listing[l]   := #9'lda ' + GetARG(2, x);
-     listing[l+1] := #9'sta ' + GetARG(2, x);
+    if t <> '' then begin
 
-     Inc(l, 2);
+     listing[l] := t;
+     inc(l);
+
     end;
-   end;
-
-   if (pos(':STACKORIGIN+STACKWIDTH*3,', t) > 7) then begin
-    s[x][3]:=copy(a, 1, pos(' :STACK', a));
-    t:='';
-
-    if pos(',y', s[x][3]) > 0 then begin
-     listing[l]   := #9'lda ' + GetARG(3, x);
-     listing[l+1] := #9'sta ' + GetARG(3, x);
-
-     Inc(l, 2);
-    end;
-   end;
 
 
-   if (pos(':STACKORIGIN-1+STACKWIDTH,', t) > 7)   then begin s[x-1][1]:=copy(a, 1, pos(' :STACK', a)); t:='' end;
-   if (pos(':STACKORIGIN-1+STACKWIDTH*2,', t) > 7) then begin s[x-1][2]:=copy(a, 1, pos(' :STACK', a)); t:='' end;
-   if (pos(':STACKORIGIN-1+STACKWIDTH*3,', t) > 7) then begin s[x-1][3]:=copy(a, 1, pos(' :STACK', a)); t:='' end;
-
-   if (pos(':STACKORIGIN+1+STACKWIDTH,', t) > 7)   then begin s[x+1][1]:=copy(a, 1, pos(' :STACK', a)); t:='' end;
-   if (pos(':STACKORIGIN+1+STACKWIDTH*2,', t) > 7) then begin s[x+1][2]:=copy(a, 1, pos(' :STACK', a)); t:='' end;
-   if (pos(':STACKORIGIN+1+STACKWIDTH*3,', t) > 7) then begin s[x+1][3]:=copy(a, 1, pos(' :STACK', a)); t:='' end;
-
-        end; // if (pos('(:bp),', t) = 0)
-
-
-        if (pos(':STACKORIGIN,', t) = 6) then
-        begin
-          //k:=pos(':STACK', t);  writeln(k);
-          Delete(t, 6, 14);
-
-          arg0 := GetARG(0, x);
-          insert(arg0, t, 6);
-        end;
-
-        if (pos(':STACKORIGIN+STACKWIDTH,', t) = 6) then
-        begin
-          //k:=pos(':STACK', t);
-          Delete(t, 6, 25);
-
-          arg0 := GetARG(1, x);
-          insert(arg0, t, 6);
-        end;
-
-        if (pos(':STACKORIGIN+STACKWIDTH*2,', t) = 6) then
-        begin
-          //k:=pos(':STACK', t);
-          Delete(t, 6, 27);
-
-          arg0 := GetARG(2, x);
-          insert(arg0, t, 6);
-        end;
-
-        if (pos(':STACKORIGIN+STACKWIDTH*3,', t) = 6) then
-        begin
-          //k:=pos(':STACK', t);
-          Delete(t, 6, 27);
-
-          arg0 := GetARG(3, x);
-          insert(arg0, t, 6);
-        end;
-
-
-        if (pos(':STACKORIGIN-1,', t) = 6) then  t := copy(a, 1, 5) + GetARG(0, x - 1);
-        if (pos(':STACKORIGIN-1+STACKWIDTH,', t) = 6) then  t := copy(a, 1, 5) + GetARG(1, x - 1);
-        if (pos(':STACKORIGIN-1+STACKWIDTH*2,', t) = 6) then  t := copy(a, 1, 5) + GetARG(2, x - 1);
-        if (pos(':STACKORIGIN-1+STACKWIDTH*3,', t) = 6) then  t := copy(a, 1, 5) + GetARG(3, x - 1);
-
-        if (pos(':STACKORIGIN+1,', t) = 6) then  t := copy(a, 1, 5) + GetARG(0, x + 1);
-        if (pos(':STACKORIGIN+1+STACKWIDTH,', t) = 6) then  t := copy(a, 1, 5) + GetARG(1, x + 1);
-        if (pos(':STACKORIGIN+1+STACKWIDTH*2,', t) = 6) then  t := copy(a, 1, 5) + GetARG(2, x + 1);
-        if (pos(':STACKORIGIN+1+STACKWIDTH*3,', t) = 6) then  t := copy(a, 1, 5) + GetARG(3, x + 1);
-
-
-        if t <> '' then
-        begin
-
-          listing[l] := t;
-          Inc(l);
-
-        end;
-
-      end;
-
-    end; // if t <> ''
+  end; // if t <> ''
 
   end;
+
+ end;
+
 
   (* -------------------------------------------------------------------------- *)
 
@@ -2611,10 +2634,10 @@ begin        // OptimizeASM
     if optyA <> '' then
       for i := 0 to l - 1 do
         if (listing[i] = #9'inc ' + optyA) or (listing[i] = #9'dec ' + optyA) or //((optyY <> '') and (optyA = optyY)) or
-          lda_a(i) or mva(i) or mwa(i) or tya(i) or lab_a(i) or jsr(i) or (pos(#9'jmp ', listing[i]) > 0) or
-          (pos(#9'.if', listing[i]) > 0) then
+	  _if(i) or
+          lda_a(i) or mva(i) or mwa(i) or tya(i) or lab_a(i) or jsr(i) or jmp(i) then
         begin
-          SetOptyA ('');
+          optyA := '';
           Break;
         end;
 
@@ -2624,8 +2647,8 @@ begin        // OptimizeASM
     if optyY <> '' then
       for i := 0 to l - 1 do
         if LabelIsUsed(i) or //((optyA <> '') and (optyA = optyY)) or
-          ldy(i) or mvy(i) or mwy(i) or iny(i) or dey(i) or tay(i) or lab_a(i) or jsr(i) or
-          (pos(#9'jmp ', listing[i]) > 0) or (pos(#9'.if', listing[i]) > 0) then
+	  _if(i) or
+          ldy(i) or mvy(i) or mwy(i) or iny(i) or dey(i) or tay(i) or lab_a(i) or jsr(i) or jmp(i) then
         begin
           optyY := '';
           Break;
@@ -2645,7 +2668,7 @@ begin        // OptimizeASM
             Break;
           end;
 
-        if sta_bp2(i) or sta_bp2_1(i) or jsr(i) or (pos(#9'jmp ', listing[i]) > 0) then
+        if sta_bp2(i) or sta_bp2_1(i) or jsr(i) or jmp(i) then
         begin
           optyBP2 := '';
           Break;

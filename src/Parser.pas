@@ -2903,6 +2903,20 @@ begin
 
                   if TokenAt(i).Kind = TTokenKind.PACKEDTOK then Inc(i);
 
+		  ConstVal := 0;
+
+		  if TokenAt(i + 1).Kind = TTokenKind.OFTOK then begin
+
+		    CheckTok(i + 2, TTokenKind.INTNUMBERTOK);
+
+		    if (TokenAt(i + 2).Value < 0) or (TokenAt(i + 2).Value > 255) then
+		     Error(i + 2, 'Page at $00..$FF');
+
+		    ConstVal := TokenAt(i + 2).Value + 1;
+
+		    inc(i, 2);
+		  end;
+
                   Inc(NumTypes);
                   RecType := NumTypes;
 
@@ -2914,6 +2928,8 @@ begin
                   GetTypeAtIndex(RecType).Size := 0;
                   GetTypeAtIndex(RecType).NumFields := 0;
                   GetTypeAtIndex(RecType).Field[0].Name := Name;
+
+		  GetTypeAtIndex(RecType).Page := ConstVal;
 
                   repeat
                     NumFieldsInList := 0;
