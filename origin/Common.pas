@@ -1,8 +1,10 @@
 unit Common;
 
+{$i define.inc}
+
 interface
 
-{$i define.inc}
+uses Classes;
 
 // ----------------------------------------------------------------------------
 
@@ -563,6 +565,7 @@ var
   FastMul: Integer = -1;
 
   OutFile: TextFile;
+  OutStream: TStringStream;
 
   //AsmLabels: array of integer;
 

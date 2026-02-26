@@ -994,7 +994,7 @@ writeln('_B: ', Ident[IdentIndex].Name);
     svar, svara, lab, ParamY: String;
   begin
 
-    Page := -1;
+    Page := 0;
     ParamY := '';
 
     if IdentIndex > 0 then
@@ -2637,7 +2637,7 @@ writeln('_B: ', Ident[IdentIndex].Name);
 
   begin
 
-    Page := -1;
+    Page := 0;
 
     if IdentIndex > 0 then
     begin
@@ -2860,7 +2860,7 @@ writeln('_B: ', Ident[IdentIndex].Name);
             if (NumAllocElements > 256) or (NumAllocElements in [0, 1]) then
             begin
 
-              if (NumAllocElements = 0) and AbsoluteBasePointer(IdentIndex) then asm65('-' + svar); // -sta
+              if (NumAllocElements = 0) and AbsoluteBasePointer(IdentIndex) then asm65('-' + svar);  // -sta
 
               if AbsoluteArrayOrigin(IdentIndex) then
               begin
@@ -2913,7 +2913,7 @@ writeln('_B: ', Ident[IdentIndex].Name);
               end;
 
 
-              if (NumAllocElements = 0) and AbsoluteBasePointer(IdentIndex) then asm65('-');	// -sta
+              if (NumAllocElements = 0) and AbsoluteBasePointer(IdentIndex) then asm65('-');  // -sta
 
             end
             else

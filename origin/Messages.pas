@@ -1,8 +1,8 @@
 unit Messages;
 
-interface
-
 {$i define.inc}
+
+interface
 
 uses Common;
 

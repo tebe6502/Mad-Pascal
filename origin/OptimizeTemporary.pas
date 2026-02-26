@@ -1,8 +1,8 @@
 unit OptimizeTemporary;
 
-interface
-
 {$i define.inc}
+
+interface
 
 // ----------------------------------------------------------------------------
 
@@ -66,7 +66,7 @@ begin
 
     if TemporaryBuf[0] <> '~' then
     begin
-      if (TemporaryBuf[0] <> '') or (outTmp <> TemporaryBuf[0]) then writeln(OutFile, TemporaryBuf[0]);
+      if (TemporaryBuf[0] <> '') or (outTmp <> TemporaryBuf[0]) then OutStream.WriteString(TemporaryBuf[0] + LF);    //writeln(OutFile, TemporaryBuf[0]);
 
       outTmp := TemporaryBuf[0];
     end;
@@ -308,7 +308,9 @@ end;
 
    if TemporaryBuf[0].IndexOf('#asm:') = 0 then begin
 
-    writeln(OutFile, AsmBlock[StrToInt( copy(TemporaryBuf[0], 6, 256) )]);
+//    writeln(OutFile, AsmBlock[StrToInt( copy(TemporaryBuf[0], 6, 256) )]);
+
+    OutStream.WriteString( AsmBlock[StrToInt( copy(TemporaryBuf[0], 6, 256) )] + LF );
 
     TemporaryBuf[0] := '~';
 

@@ -1,10 +1,10 @@
 unit Parser;
 
+{$i define.inc}
+
 interface
 
 uses Common;
-
-{$i define.inc}
 
 // -----------------------------------------------------------------------------
 
@@ -3122,7 +3122,7 @@ begin
 
                   DataType := RECORDTOK;
                   NumAllocElements := RecType;      // indeks do tablicy Types
-                  AllocElementType := 0;
+                  AllocElementType := UNTYPETOK;
 
                   if Types[RecType].Size > 256 then
                     Error(i, 'Record size (' + IntToStr(Types[RecType].Size) + ') beyond the 256 bytes limit');

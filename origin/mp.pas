@@ -202,6 +202,7 @@ program MADPASCAL;
 {$i define.inc}
 
 uses
+  Classes,
   Crt,
   SysUtils,
 
@@ -516,6 +517,8 @@ begin
     outputFile := ChangeFileExt(UnitName[1].Name, '.a65');
   end;
 
+  OutStream:=TStringStream.Create();
+
   AssignFile(OutFile, outputFile);
 
   FileMode := 1;
@@ -619,6 +622,8 @@ begin
   Pass := CODEGENERATIONPASS;
   CompileProgram;
 
+  writeln(OutFile, OutStream.DataString);
+
   Flush(OutFile);
   CloseFile(OutFile);
 
@@ -645,4 +650,5 @@ begin
 
   NormVideo;
 
+  OutStream.Free;
 end.
