@@ -243,8 +243,8 @@ var
 
   function UNUSED_A(const i: TListingIndex): Boolean;
   begin
-    Result := sty_stack(i) or lda_stack(i) or sta_stack(i) or
-      {!!! (pos(#9'lda :eax', listing[i]) = 1) or (pos(#9'sta :eax', listing[i]) = 1) or} lda_im(i) or
+    Result := lda_im(i) or lda_stack(i) or sta_stack(i) or  sty_stack(i) or
+      {!!! (pos(#9'lda :eax', listing[i]) = 1) or (pos(#9'sta :eax', listing[i]) = 1) or}
       rol_stack(i) or ror_stack(i) or adc_sbc(i);
   end;
 
@@ -371,8 +371,8 @@ var
     Result := (lda_bp_y(i) and sta_a(i + 1)) or (lda_a(i) and sta_bp_y(i + 1));
 
   end;
- 
- 
+
+
   // -----------------------------------------------------------------------------
 
 
@@ -439,9 +439,9 @@ var
     if lda_adr_y(i + 12) then update(i+12);
     if sta_adr_y(i + 13) then update(i+13);
 
-  end;  //LDA_STA_ADR 
-  
-  
+  end;  //LDA_STA_ADR
+
+
   // -----------------------------------------------------------------------------
 
 
@@ -774,7 +774,7 @@ var
 
     Result := copy(listing[i], 1, 5)
 
-  end;  
+  end;
 
 // -----------------------------------------------------------------------------
 
@@ -1171,7 +1171,7 @@ end;
         if opt_EOR(i) = False then exit(ExitTrick('opt_EOR', i, {$include %file%} ,{$include %line%} ,{$include %currentroutine%}));
         if opt_NOT(i) = False then exit(ExitTrick('opt_NOT', i, {$include %file%} ,{$include %line%} ,{$include %currentroutine%}));
         if opt_ADD(i) = False then exit(ExitTrick('opt_ADD', i, {$include %file%} ,{$include %line%} ,{$include %currentroutine%}));
-          if opt_SUB(i) = False then exit(ExitTrick('opt_SUB', i, {$include %file%} ,{$include %line%} ,{$include %currentroutine%}));
+        if opt_SUB(i) = False then exit(ExitTrick('opt_SUB', i, {$include %file%} ,{$include %line%} ,{$include %currentroutine%}));
         if opt_LSR(i) = False then exit(ExitTrick('opt_LSR', i, {$include %file%} ,{$include %line%} ,{$include %currentroutine%}));
         if opt_ASL(i) = False then exit(ExitTrick('opt_ASL', i, {$include %file%} ,{$include %line%} ,{$include %currentroutine%}));
         if opt_SPL(i) = False then exit(ExitTrick('opt_SPL', i, {$include %file%} ,{$include %line%} ,{$include %currentroutine%}));

@@ -188,7 +188,7 @@ var
   {$i include/opt6502/opt_TEMP_TAIL_IF.inc}
   {$i include/opt6502/opt_TEMP_TAIL_CASE.inc}
   {$i include/opt6502/opt_TEMP.inc}
-  {$i include/opt6502/opt_TEMP_LDA.inc}  
+  {$i include/opt6502/opt_TEMP_LDA.inc}
   {$i include/opt6502/opt_TEMP_CMP.inc}
   {$i include/opt6502/opt_TEMP_CMP_0.inc}
   {$i include/opt6502/opt_TEMP_WHILE.inc}

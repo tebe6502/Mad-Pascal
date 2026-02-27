@@ -1487,6 +1487,18 @@ begin
      end;
 
 
+    if sta_stack_1x(i) and									// sta :STACKORIGIN+STACKWIDTH,x	; 0
+       lda_stack_1x(i+1) and									// lda :STACKORIGIN+STACKWIDTH,x	; 1
+       asl_stack_0x(i+2) and									// asl :STACKORIGIN,x			; 2
+       rol_a(i+3) then										// rol @				; 3
+     begin
+       listing[i]   := '';
+       listing[i+1] := '';
+
+       exit(false);
+     end;
+
+
 // ----------------------------------------------------------------------------------------------------------------------------------------
 // andAL_CL
 
