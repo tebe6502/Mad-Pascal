@@ -558,10 +558,10 @@ begin
     if cmp_stack(i+8) and									// cmp :STACKORIGIN+10			; 8
 
        lda(i) and										// lda					; 0
-       and_im(i+1) and (listing[i+1] = listing[i+4]) and					// and #				; 1
+       and_im(i+1) and (listing[i+1] = listing[i+4]) and					// and #XY				; 1
        sta_stack(i+2) and									// sta :STACKORIGIN+9			; 2
        lda(i+3) and										// lda					; 3
-//       and_im(i+4) and									// and #				; 4
+//       and_im(i+4) and									// and #XY				; 4
        sta_stack(i+5) and									// sta :STACKORIGIN+10			; 5
        ldy_1(i+6) and										// ldy #1				; 6
        lda_stack(i+7) and									// lda :STACKORIGIN+9			; 7
@@ -590,11 +590,11 @@ begin
 
        ldy_im(i) and										// ldy #				; 0
        lda(i+1) and										// lda					; 1
-       and_im(i+2) and (listing[i+2] = listing[i+6]) and					// and #				; 2
+       and_im(i+2) and (listing[i+2] = listing[i+6]) and					// and #XY				; 2
        sta_stack(i+3) and									// sta :STACKORIGIN+9			; 3
        ldy_im(i+4) and										// ldy #				; 4
        lda(i+5) and										// lda					; 5
-//       and_im(i+6) and									// and #				; 6
+//       and_im(i+6) and									// and #XY				; 6
        sta_stack(i+7) and									// sta :STACKORIGIN+10			; 7
        ldy_1(i+8) and										// ldy #1				; 8
        lda_stack(i+9) and									// lda :STACKORIGIN+9			; 9
@@ -621,15 +621,15 @@ begin
 
     if cmp_stack(i+12) and									// cmp :STACKORIGIN+10			; 12
 
-       mwy_bp2(i) and (listing[i] = listing[i+5]) and						// mwy					; 0
+       mwy_bp2(i) and (listing[i] = listing[i+5]) and						// mwy A				; 0
        ldy_im(i+1) and										// ldy #				; 1
        lda_bp2_y(i+2) and									// lda (:bp2),y				; 2
-       and_im(i+3) and (listing[i+3] = listing[i+8]) and					// and #				; 3
+       and_im(i+3) and (listing[i+3] = listing[i+8]) and					// and #XY				; 3
        sta_stack(i+4) and									// sta :STACKORIGIN+9			; 4
-//       mwy_bp2(i+5) and									// mwy					; 5
+//       mwy_bp2(i+5) and									// mwy A				; 5
        ldy_im(i+6) and										// ldy #				; 6
        lda_bp2_y(i+7) and									// lda (:bp2),y				; 7
-       and_im(i+8) and										// and #				; 8
+       and_im(i+8) and										// and #XY				; 8
        sta_stack(i+9) and									// sta :STACKORIGIN+10			; 9
        ldy_1(i+10) and										// ldy #1				; 10
        lda_stack(i+11) and									// lda :STACKORIGIN+9			; 11

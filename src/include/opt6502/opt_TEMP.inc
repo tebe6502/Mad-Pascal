@@ -281,17 +281,6 @@ begin
       end;
 
 
-    if (and_ora_eor(0) or add_sub(0) or adc_sbc(0)) and					// and|ora|eor|add|sub|adc|sbc	; 0
-       sta(1) and									// sta :STACKORIGIN		; 1
-       lda(2) and									// lda :STACKORIGIN		; 2
-       (SKIP(3) {or asl_stack(3)}) then							// SKIP|asl :STACKORIGIN	; 3
-     if argMatch(1, 2) then
-      begin
-	TemporaryBuf[1] := '~';
-	TemporaryBuf[2] := '~';
-      end;
-
-
     if iny(2) and									// iny			; 2
        lda_im_0(3) and									// lda #$00		; 3
        asl_stack(4) then								// asl :STACKORIGIN	; 4

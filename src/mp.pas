@@ -145,6 +145,11 @@ Contributors:
 
 # uzywaj asm65('') zamiast #13#10, POS bedzie wlasciwie zwracalo indeks
 
+------------------------------------------------------------------------------------------------------------------
+# zapis na stos zawsze przez MVA, zamiast 'lda ARG \ sta :STACKORIGIN,x' nalezy uzywac 'mva ARG :STACKORIGIN,x'
+# !!! '#9'mva :STACKORIGIN,x ARG' !!! zabronione !!!
+------------------------------------------------------------------------------------------------------------------
+
 # parametry dla imulCL, imulCX w konkretnej kolejnosci 1: ECX, 2: EAX
 
 # wystepuja tylko skoki w przod @+ (@- nie wystepuja)
@@ -177,16 +182,16 @@ Contributors:
 # (TokenAt( ].Kind = ASMTOK + TokenAt( ].Value = 0) wersja z { }
 # (TokenAt( ].Kind = ASMTOK + TokenAt( ].Value = 1) wersja bez { }
 
-# --------------------------------------------------------------------------------------------------------------
-#                          |      DataType                |  AllocElementType   |  NumAllocElements  |  NumAllocElements_ |
-# --------------------------------------------------------------------------------------------------------------
-# VAR RECORD               | RECORDTOK          | 0                  | RecType            | 0                  |
-# VAR ^RECORD              | POINTERTOK         | RECORDTOK          | RecType            | 0                  |
-# ARRAY [0..X]             | POINTERTOK         | Type               | X Array Size       | 0                  |
-# ARRAY [0..X, 0..Y]       | POINTERTOK         | Type               | X Array Size       | Y Array Size       |
-# ARRAY [0..X] OF ^RECORD  | POINTERTOK         | RECORDTOK          | RecType            | X Array Size       |
-# ARRAY [0..X] OF ^OBJECT  | POINTERTOK         | OBJECTTOK          | RecType            | X Array Size       |
-# --------------------------------------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------------------------------------------
+#                          |      DataType      |  AllocElementType   |  NumAllocElements  |  NumAllocElements_ |
+# ---------------------------------------------------------------------------------------------------------------
+# ARRAY [0..X]             | POINTERTOK         | Type                | X Array Size       | 0                  |
+# ARRAY [0..X, 0..Y]       | POINTERTOK         | Type                | X Array Size       | Y Array Size       |
+# VAR RECORD               | POINTERTOK         | RECORDTOK|OBJECTTOK | 0                  | 0                  |
+# VAR ^RECORD              | POINTERTOK         | RECORDTOK           | RecType            | 0                  |
+# ARRAY [0..X] OF ^RECORD  | POINTERTOK         | RECORDTOK           | RecType            | X Array Size       |
+# ARRAY [0..X] OF ^OBJECT  | POINTERTOK         | OBJECTTOK           | RecType            | X Array Size       |
+# ---------------------------------------------------------------------------------------------------------------
 
 *)
 
