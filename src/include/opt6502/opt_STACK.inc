@@ -1129,11 +1129,11 @@ begin
      if stack_0x(i+1) and
         stack_0x(i+3) then
      begin
-	listing[i+3] := GetCMD(i+3) + GetString(i+1);
+      listing[i+3] := GetCMD(i+3) + GetString(i+1);
 
-	listing[i+1] := '';
+      listing[i+1] := '';
 
-       exit(false);
+      exit(false);
      end;
 
 
@@ -1610,7 +1610,7 @@ begin
 
        listing[i+2] := GetCMD(i+1) + ':STACKORIGIN+1,x';
 
-       listing[i] := #9'dex';
+       listing[i]   := #9'dex';
        listing[i+1] := #9'tya';
 
        exit(false);

@@ -12,16 +12,17 @@ begin
     if lab_a(i) and										//@					; 0
        sty_stack_next_0x(i+1) and								// sty :STACKORIGIN+1,x			; 1
        lda_stack_0x(i+2) and									// lda :STACKORIGIN,x			; 2
-       and_ora_eor_stack(i+3) and stack_next_0x(i+3) and					// and :STACKORIGIN+1,x			; 3
+       and_ora_eor_stack(i+3) and stack_next_0x(i+3) and					// and|ora|eor :STACKORIGIN+1,x		; 3
        sta_stack_0x(i+4) then									// sta :STACKORIGIN,x			; 4
      begin
        listing[i+1] := #9'tya';
-       listing[i+2] := #9'and :STACKORIGIN,x';
+       listing[i+2] := GetCMD(i+3) + ':STACKORIGIN,x';
        listing[i+3] := #9'sta :STACKORIGIN,x';
        listing[i+4] := '';
 
        exit(false);
      end;
+
 
     if lab_a(i) and										//@					; 0
        sty_stack_prev_0x(i+1) and								// sty :STACKORIGIN-1,x			; 1
