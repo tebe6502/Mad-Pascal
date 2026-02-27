@@ -284,7 +284,7 @@ begin
     if (and_ora_eor(0) or add_sub(0) or adc_sbc(0)) and					// and|ora|eor|add|sub|adc|sbc	; 0
        sta(1) and									// sta :STACKORIGIN		; 1
        lda(2) and									// lda :STACKORIGIN		; 2
-       (SKIP(3) or asl_stack(3)) then							// SKIP|asl :STACKORIGIN	; 3
+       (SKIP(3) {or asl_stack(3)}) then							// SKIP|asl :STACKORIGIN	; 3
      if argMatch(1, 2) then
       begin
 	TemporaryBuf[1] := '~';

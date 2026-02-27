@@ -2384,7 +2384,7 @@ begin
      if stack_0x(i) and
         stack_1x(i+1) then
       begin
-	listing[i]   := #9'mva ' + GetSTRING(i+1) + ':STACKORIGIN,x';
+	listing[i]   := #9'mva ' + GetSTRING(i+1) + ' :STACKORIGIN,x';
 
 	listing[i+1] := '';
 	listing[i+2] := '';

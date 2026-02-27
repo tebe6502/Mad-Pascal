@@ -818,8 +818,6 @@ begin
             asm65(#9'jsr @expandToCARD.SMALL')
           else
           begin
-            //       asm65(#9'jsr @expandToCARD.WORD');
-
             asm65(#9'mva #$00 :STACKORIGIN+STACKWIDTH*2,x');
             asm65(#9'mva #$00 :STACKORIGIN+STACKWIDTH*3,x');
           end;
@@ -828,8 +826,6 @@ begin
             asm65(#9'jsr @expandToCARD.SHORT')
           else
           begin
-            //       asm65(#9'jsr @expandToCARD.BYTE');
-
             asm65(#9'mva #$00 :STACKORIGIN+STACKWIDTH,x');
             asm65(#9'mva #$00 :STACKORIGIN+STACKWIDTH*2,x');
             asm65(#9'mva #$00 :STACKORIGIN+STACKWIDTH*3,x');
@@ -871,8 +867,6 @@ begin
             asm65(#9'jsr @expandToCARD1.SMALL')
           else
           begin
-            //       asm65(#9'jsr @expandToCARD1.WORD');
-
             asm65(#9'mva #$00 :STACKORIGIN-1+STACKWIDTH*2,x');
             asm65(#9'mva #$00 :STACKORIGIN-1+STACKWIDTH*3,x');
           end;
@@ -881,8 +875,6 @@ begin
             asm65(#9'jsr @expandToCARD1.SHORT')
           else
           begin
-            //       asm65(#9'jsr @expandToCARD1.BYTE');
-
             asm65(#9'mva #$00 :STACKORIGIN-1+STACKWIDTH,x');
             asm65(#9'mva #$00 :STACKORIGIN-1+STACKWIDTH*2,x');
             asm65(#9'mva #$00 :STACKORIGIN-1+STACKWIDTH*3,x');
