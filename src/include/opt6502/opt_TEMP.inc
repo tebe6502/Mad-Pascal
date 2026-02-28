@@ -511,9 +511,22 @@ begin
       opti(2) and									//; optimize 		; 2
       (TemporaryBuf[3] = '') and							//			; 3
       lda(4) and									// lda 			; 4
-      (TemporaryBuf[5] = #9'sta ' + copy(TemporaryBuf[0], 6, 256)) then			// sta N		; 5
+      sta(5) then									// sta N		; 5
+    if argMatch(0, 5) then
     begin
      TemporaryBuf[0] := '~';
+    end;
+
+
+   if lda(0) and									// lda N		; 0
+      sta(1) and									// sta			; 1
+      (TemporaryBuf[2] = '') and							//			; 2
+      opti(3) and									//; optimize 		; 3
+      (TemporaryBuf[4] = '') and							//			; 4
+      ldy(5) then									// ldy N		; 5
+    if argMatch(0, 5) then
+    begin
+     TemporaryBuf[5] := #9'tay';
     end;
 
 

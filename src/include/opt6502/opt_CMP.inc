@@ -619,6 +619,55 @@ begin
      end;
 
 
+
+{
+
+    if cmp_stack(i+5) and									// cmp :STACKORIGIN+10			; 7
+
+       lda_val(i) and (iy(i) = false) and							// lda					; 0	~:STACKORIGIN
+       and_ora_eor(i+1) and (iy(i+1) = false) and						// and|ora|eor				; 1
+       sta_stack(i+2) and									// sta :STACKORIGIN			; 2
+       lda_val(i+3) and (iy(i+3) = false) and							// lda					; 3	~:STACKORIGIN
+       and_ora_eor(i+4) and (iy(i+4) = false) and						// and|ora|eor				; 4
+       sta_stack(i+5) and									// sta :STACKORIGIN+STACKWIDTH		; 5
+       ldy_1(i+6) and										// ldy #1				; 6
+       lda_stack(i+7) and									// lda :STACKORIGIN+STACKWIDTH		; 7
+       cmp(i+8) and										// cmp					; 8
+       bne(i+9) and										// bne					; 9
+       lda_stack(i+10) and									// lda :STACKORIGIN			; 10
+       cmp(i+11) then										// cmp					; 11
+     if argMatch(i+2, i+10) and
+        argMatch(i+5, i+7) then
+      begin
+	listing_tmp[0] := #9'ldy #1';
+	listing_tmp[1] := listing[i+3];
+	listing_tmp[2] := listing[i+4];
+	listing_tmp[3] := listing[i+8];
+
+
+	exit(false);
+      end;
+
+
+	lda A
+	and B
+	sta :STACKORIGIN+9
+	lda A+1
+	and B+1
+	sta :STACKORIGIN+STACKWIDTH+9
+	ldy #1
+
+	lda :STACKORIGIN+STACKWIDTH+9
+	cmp #$00
+	bne @+
+	lda :STACKORIGIN+9
+	cmp #$00
+@
+
+}
+
+
+
     if cmp_stack(i+12) and									// cmp :STACKORIGIN+10			; 12
 
        mwy_bp2(i) and (listing[i] = listing[i+5]) and						// mwy A				; 0
