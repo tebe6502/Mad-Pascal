@@ -242,6 +242,7 @@ This text-mode windowing library has window controls and modern gadgets (widgets
 
 ## YouTube
 
+* [WUDSN IDE Tutorial](https://youtu.be/36MFqY55yR0?list=PLD57AEE018938BA5E)
 * [Arcadia](https://youtu.be/cJXRhfvKeH4)
 * [Flob](https://youtu.be/sH4mg0DtWTM)
 * [ProHiBan (Sokoban)](https://youtu.be/4VDKaIR_moY)
