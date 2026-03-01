@@ -935,7 +935,7 @@ var
 
   function PeepholeOptimization_STACK: Boolean;
   var
-    i: TListingIndex;
+    p,i: TListingIndex;
     tmp: String;
   begin
 
@@ -962,14 +962,16 @@ var
     for i := 0 to l - 1 do
     begin
 
+
 {
-if (pos('mva RESOLVECOLLISIONS.RESULT', listing[i]) > 0) then begin
+if (pos('subEAX_ECX', listing[i]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');
 
 end;
 }
+
 
       if opt_CMP_LT_GTEQ(i) = False then exit(False);
       if opt_CMP_LTEQ(i) = False then exit(False);
@@ -1149,14 +1151,16 @@ end;
       for i := 0 to l - 1 do
       begin
 
+
 {
-if (pos('DST+1', listing[i]) > 0) then begin
+if (pos('sub W', listing[i]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');
 
 end;
 }
+
 
         if opt_FORTMP(i) = False then exit(ExitTrick('opt_FORTMP', i, {$include %file%} ,{$include %line%} ,{$include %currentroutine%}));
 
@@ -1271,14 +1275,16 @@ end;
     for i := 0 to l - 1 do
     begin
 
+
 {
-if (pos('cmp #$29', listing[i]) > 0) then begin
+if (pos('lda X+1', listing[i]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');
 
 end;
 }
+
 
 // -----------------------------------------------------------------------------
 

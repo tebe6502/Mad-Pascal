@@ -126,41 +126,6 @@ begin
       end;
 
 
-{ !!! nie moze decydowac na podstawie tylko starszego bajtu
-
-    if (SKIP(i-1) = false) and
-       lda(i) and										// lda W+1		; 0	WORD =
-       cmp(i+1) and										// cmp 			; 1
-       bne(i+2) and										// bne @+		; 2
-       lda(i+3) and										// lda W		; 3
-       cmp(i+4) and										// cmp			; 4
-       lab_a(i+5) and										//@			; 5
-       beq(i+6) and										// beq @+		; 6
-       dey(i+7) and										// dey			; 7
-       lab_a(i+8) and										//@			; 8
-       tya(i+9) and										// tya			; 9
-       jne(i+10) then										// jne l_		; 10
-      begin
-       if cmp_im_0(i+1) then listing[i+1] := '';
-       if cmp_im_0(i+4) then listing[i+4] := '';
-
-       listing[i+2] := #9'jeq ' + copy(listing[i+10], 6, 256);
-
-       listing[i+10] := #9'jeq ' + copy(listing[i+10], 6, 256);
-
-       listing[i+6] := '';
-       listing[i+7] := '';
-       listing[i+8] := '';
-       listing[i+9] := '';
-
-       for p:=i-1 downto 0 do
-	 if ldy_1(p) then begin listing[p]:=''; Break end;
-
-       exit(false);
-      end;
-}
-
-
     if ldy(i) and										// ldy 			; 0	opt_095	| WORD <> 0 ; WORD = 0
        lda_bp2_y(i+1) and									// lda (:bp2),y		; 1
        sta_stack(i+2) and									// sta :STACKORIGIN	; 2

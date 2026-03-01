@@ -96,7 +96,7 @@ end;
 
 procedure TFileWriter.WriteLn(const Text: TText);
 begin
-  TextFile.WriteLn(Text);
+  TextFile.Write(Text + #10);
 end;
 
 

@@ -1468,13 +1468,15 @@ begin
      end;
 
 
-    if mva(i) and										// mva ... :STACKORIGIN,x		; 0
+    if rol_a(i+6) and										// rol @				; 6
+
+       mva(i) and										// mva ... :STACKORIGIN,x		; 0
        mva(i+1) and										// mva ... :STACKORIGIN+STACKWIDTH,x	; 1
        mva(i+2) and										// mva ... :STACKORIGIN+STACKWIDTH*2,x	; 2
        mva(i+3) and										// mva ... :STACKORIGIN+STACKWIDTH*3,x	; 3
        lda_stack_1x(i+4) and									// lda :STACKORIGIN+STACKWIDTH,x	; 4
-       asl_stack_0x(i+5) and									// asl :STACKORIGIN,x			; 5
-       rol_a(i+6) then										// rol @				; 6
+       asl_stack_0x(i+5) then									// asl :STACKORIGIN,x			; 5
+//       rol_a(i+6) then									// rol @				; 6
      if stack_0x(i) and
      	stack_1x(i+1) and
      	stack_2x(i+2) and
@@ -1487,10 +1489,12 @@ begin
      end;
 
 
-    if sta_stack_1x(i) and									// sta :STACKORIGIN+STACKWIDTH,x	; 0
+    if rol_a(i+3) and										// rol @				; 3
+
+       sta_stack_1x(i) and									// sta :STACKORIGIN+STACKWIDTH,x	; 0
        lda_stack_1x(i+1) and									// lda :STACKORIGIN+STACKWIDTH,x	; 1
-       asl_stack_0x(i+2) and									// asl :STACKORIGIN,x			; 2
-       rol_a(i+3) then										// rol @				; 3
+       asl_stack_0x(i+2) then									// asl :STACKORIGIN,x			; 2
+//       rol_a(i+3) then									// rol @				; 3
      begin
        listing[i]   := '';
        listing[i+1] := '';
@@ -1629,13 +1633,32 @@ begin
      end;
 
 
-    if (inx(i) = false) and									//~inx					; 0
+    if dex(i+4) and										// dex					; 4
+
+       (inx(i) = false) and									//~inx					; 0
        ldy_val(i+1) and										// ldy					; 1	~:STACKORIGIN
        lda_val(i+2) and										// lda					; 2	~:STACKORIGIN
-       sta_stack_0x(i+3) and									// sta :STACKORIGIN,x			; 3
-       dex(i+4) then										// dex					; 4
+       sta_stack_0x(i+3) then									// sta :STACKORIGIN,x			; 3
+//       dex(i+4) then										// dex					; 4
      begin
        listing[i+4] := #9'sta :STACKORIGIN+1,x';
+       listing[i+3] := listing[i+2];
+       listing[i+2] := listing[i+1];
+       listing[i+1] := #9'dex';
+
+       exit(false);
+     end;
+
+
+    if dex(i+4) and										// dex					; 4
+
+       (inx(i) = false) and									//~inx					; 0
+       ldy_val(i+1) and										// ldy					; 1	~:STACKORIGIN
+       lda_val(i+2) and										// lda					; 2	~:STACKORIGIN
+       sta_stack_next_0x(i+3) then								// sta :STACKORIGIN+1,x			; 3
+//       dex(i+4) then										// dex					; 4
+     begin
+       listing[i+4] := #9'sta :STACKORIGIN+2,x';
        listing[i+3] := listing[i+2];
        listing[i+2] := listing[i+1];
        listing[i+1] := #9'dex';

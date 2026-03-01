@@ -547,6 +547,29 @@ begin
     if dex(i+6) and										// dex					; 6
 
        ldy_1(i) and										// ldy #1				; 0
+       lda_stack_next_0x(i+1) and								// lda :STACKORIGIN+1,x			; 1
+       cmp_val(i+2) and										// cmp					; 2	~:STACKORIGIN
+       SKIP(i+3) and										// SKIP					; 3
+       dey(i+4) and										// dey					; 4
+       lab_a(i+5) then										//@					; 5
+//     dex(i+6) then										// dex					; 6
+     begin
+       listing[i+6] := listing[i+5];
+       listing[i+5] := listing[i+4];
+       listing[i+4] := listing[i+3];
+       listing[i+3] := listing[i+2];
+       listing[i+2] := #9'lda :STACKORIGIN+2,x';
+       listing[i+1] := listing[i];
+
+       listing[i] := #9'dex';
+
+       exit(false);
+     end;
+
+
+    if dex(i+6) and										// dex					; 6
+
+       ldy_1(i) and										// ldy #1				; 0
        and_ora_eor_val(i+1) and									// and|ora|eor				; 1	~:STACKORIGIN
        cmp_val(i+2) and										// cmp					; 2	~:STACKORIGIN
        SKIP(i+3) and										// SKIP					; 3

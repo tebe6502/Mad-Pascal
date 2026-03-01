@@ -1417,6 +1417,36 @@ begin
      end;
 
 
+    if adc_im_0(i+15) and									// adc #$00				; 15
+
+       ldy(i) and										// ldy 					; 0
+       beq(i+1) and										// beq					; 1
+       lab_l(i+2) and										//l_					; 2
+       asl_a(i+3) and										// asl @				; 3
+       rol_stack(i+4) and									// rol :STACKORIGIN+STACKWIDTH		; 4
+       rol_stack(i+5) and									// rol :STACKORIGIN+STACKWIDTH*2	; 5
+       rol_stack(i+6) and									// rol :STACKORIGIN+STACKWIDTH*3	; 6
+       dey(i+7) and										// dey					; 7
+       bne(i+8) and										// bne l_				; 8
+       lab_l(i+9) and										//l_					; 9
+       sta_stack(i+10) and									// sta :STACKORIGIN			; 10
+       lda_val(i+11) and									// lda					; 11
+       add_im_0(i+12) and									// add #$00				; 12
+       tay(i+13) and										// tay					; 13
+       lda_val(i+14) and									// lda					; 14
+//       adc_im_0(i+15) and									// adc #$00				; 15
+       sta_stack(i+16) and									// sta :STACKORIGIN+STACKWIDTH		; 16
+       lda_stack(i+17) then									// lda :STACKORIGIN			; 17
+     if argMatch(i+10, i+17) then
+     begin
+	listing[i+4] := '';
+	listing[i+5] := '';
+	listing[i+6] := '';
+
+	exit(false);
+     end;
+
+
     if dey(i+14) and										// dey					; 14
 
        lda(i) and										// lda B+3				; 0

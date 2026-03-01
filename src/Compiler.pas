@@ -175,8 +175,8 @@ end;
 function GetLocalName(IdentIndex: Integer; a: String = ''): String;
 begin
 
-  if ((IdentifierAt(IdentIndex).SourceFile.UnitIndex > 1) and 
-      (IdentifierAt(IdentIndex).SourceFile <> ActiveSourceFile) and 
+  if ((IdentifierAt(IdentIndex).SourceFile.UnitIndex > 1) and
+      (IdentifierAt(IdentIndex).SourceFile <> ActiveSourceFile) and
        IdentifierAt(IdentIndex).IsSection)
   then
     Result := IdentifierAt(IdentIndex).SourceFile.Name + '.' + a + IdentifierAt(IdentIndex).Name
@@ -214,7 +214,7 @@ end;
 function TestName(IdentIndex: Integer; a: String): Boolean;
 begin
 
-  if (IdentIndex > 0) and 
+  if (IdentIndex > 0) and
      //(IdentifierAt(IdentIndex).SourceFile.UnitIndex > 1) and
      (pos(IdentifierAt(IdentIndex).SourceFile.Name + '.', a) = 1) then
   begin
@@ -575,8 +575,8 @@ begin
       begin
 
         for k := 0 to High(l) - 1 do
-          if (Identifier.NumParams = l[k].NumParams) and 
-	     (Identifier.SourceFile.UnitIndex = l[k].SourceFileUnitIndex) and 
+          if (Identifier.NumParams = l[k].NumParams) and
+	     (Identifier.SourceFile.UnitIndex = l[k].SourceFileUnitIndex) and
 	     (Identifier.BlockIndex = l[k].BlockIndex) then
           begin
 
@@ -1120,8 +1120,8 @@ end;  //LoadBP2
   begin
 
     Result := (IdentIndex > 0) and
-              (IdentifierAt(IdentIndex).isAbsolute) and 
-              (IdentifierAt(IdentIndex).idType = TDataType.ARRAYTOK) and 
+              (IdentifierAt(IdentIndex).isAbsolute) and
+              (IdentifierAt(IdentIndex).idType = TDataType.ARRAYTOK) and
 	      (IdentifierAt(IdentIndex).Value >= 0)
   end;
 
@@ -1322,7 +1322,7 @@ begin
         else begin
 	    IdentTemp := GetIdentIndex(ExtractName(IdentIndex, svar));
 
-	    if (IdentifierAt(IdentIndex).PassMethod = TParameterPassingMethod.VARPASSING) and 
+	    if (IdentifierAt(IdentIndex).PassMethod = TParameterPassingMethod.VARPASSING) and
 	       (IdentifierAt(IdentTemp).AllocElementType in [TDataType.RECORDTOK, TDataType.OBJECTTOK]) then
 	      Page := GetTypeAtIndex(IdentifierAt(IdentTemp).NumAllocElements).Page;
 
@@ -1336,7 +1336,7 @@ begin
         end
         else
           asm65(#9'mwy ' + svar + ' :bp2');
-	  
+
 
       if TestName(IdentIndex, svar) then
       begin
@@ -1362,7 +1362,7 @@ begin
       case Size of
 
         1:
-	if Page > 0 then 
+	if Page > 0 then
 
 	  asm65(#9'mva ' + ParamY + ',y :STACKORIGIN,x')
 
@@ -1371,7 +1371,7 @@ begin
           asm65(#9'mva (:bp2),y' + GetStackVariable(0));
 
 
-        2: 
+        2:
 	if Page > 0 then begin
 
 	  asm65(#9'mva ' + ParamY + ',y :STACKORIGIN,x');
@@ -1382,10 +1382,10 @@ begin
           asm65(#9'mva (:bp2),y' + GetStackVariable(0));
           asm65(#9'iny');
           asm65(#9'mva (:bp2),y' + GetStackVariable(1));
-	  
+
         end;
 
-        4: 
+        4:
 	if Page > 0 then begin
 
 	  asm65(#9'mva ' + ParamY + ',y :STACKORIGIN,x');
@@ -2182,7 +2182,7 @@ begin
 
   //svar := GetLocalName(IdentIndex);
   //NumAllocElements := Elements(IdentIndex);
-  
+
   Page := 0;
   ParamY := '';
 
@@ -2297,8 +2297,8 @@ begin
 
 	    IdentTemp := GetIdentIndex(ExtractName(IdentIndex, svar));
 
-	    if (IdentifierAt(IdentIndex).PassMethod = TParameterPassingMethod.VARPASSING) and 
-	       (IdentifierAt(IdentTemp).AllocElementType in [TDataType.RECORDTOK, TDataType.OBJECTTOK]) then 
+	    if (IdentifierAt(IdentIndex).PassMethod = TParameterPassingMethod.VARPASSING) and
+	       (IdentifierAt(IdentTemp).AllocElementType in [TDataType.RECORDTOK, TDataType.OBJECTTOK]) then
 	    begin
 	      Page := GetTypeAtIndex(IdentifierAt(IdentTemp).NumAllocElements).Page;
 	      ParamY := HexByte(Page-1) + '00+' + svar + '-DATAORIGIN';
@@ -2784,7 +2784,7 @@ var
       if pos('.', IdentifierAt(IdentIndex).Name) > 0 then
       begin
 
-        if (IdentifierAt(IdentIndex).DataType = TDataType.POINTERTOK) and 
+        if (IdentifierAt(IdentIndex).DataType = TDataType.POINTERTOK) and
 	   not (IdentifierAt(IdentIndex).AllocElementType in [TDataType.UNTYPETOK, TDataType.PROCVARTOK]) then
           asm65(#9'ldy #$00')
         else begin
@@ -3793,7 +3793,7 @@ begin
       if TestName(IdentIndex, svar) then
       begin
 
-        if (IdentifierAt(IdentIndex).DataType = TDataType.POINTERTOK) and 
+        if (IdentifierAt(IdentIndex).DataType = TDataType.POINTERTOK) and
 	   not (IdentifierAt(IdentIndex).AllocElementType in [TDataType.UNTYPETOK, TDataType.PROCVARTOK,
           TDataType.RECORDTOK, TDataType.OBJECTTOK]) then
           asm65(#9'mwy ' + svar + ' :bp2')
@@ -3801,8 +3801,8 @@ begin
 
 	    IdentTemp := GetIdentIndex(ExtractName(IdentIndex, svar));
 
-	    if (IdentifierAt(IdentIndex).PassMethod = TParameterPassingMethod.VARPASSING) and 
-	       (IdentifierAt(IdentTemp).AllocElementType in [TDataType.RECORDTOK, TDataType.OBJECTTOK]) 
+	    if (IdentifierAt(IdentIndex).PassMethod = TParameterPassingMethod.VARPASSING) and
+	       (IdentifierAt(IdentTemp).AllocElementType in [TDataType.RECORDTOK, TDataType.OBJECTTOK])
 	    then
 	      Page := GetTypeAtIndex(IdentifierAt(IdentTemp).NumAllocElements).Page;
 
@@ -7024,7 +7024,7 @@ begin
 // sux
 //	writeln(Ident[IdentIndex].DataType,',',Ident[IdentIndex].AllocElementType,',',Ident[IdentIndex].NumAllocElements,',',Ident[IdentIndex].PassMethod,',',Ident[IdentIndex].idType );
 
-		    if (IdentifierAt(IdentIndex).DataType = TDataType.POINTERTOK) and 
+		    if (IdentifierAt(IdentIndex).DataType = TDataType.POINTERTOK) and
 		       (IdentifierAt(IdentIndex).AllocElementType = TDataType.POINTERTOK) {and (NumAllocElements * DataSize[AllocElementType] < 256) }then
 		    begin
 
@@ -7816,7 +7816,7 @@ begin
 
 
           if (IdentifierAt(IdentIndex).Param[NumActualParams].DataType <> TDataType.UNTYPETOK) and
-            (ActualParamType = TDataType.POINTERTOK) and 
+            (ActualParamType = TDataType.POINTERTOK) and
 	    (AllocElementType in [TDataType.POINTERTOK, TDataType.STRINGPOINTERTOK, TDataType.PCHARTOK]) then
           begin
 
@@ -8126,8 +8126,8 @@ begin
                     ErrorIdentifierIncompatibleTypesArray(i, IdentTemp, TDataType.POINTERTOK)
 
                   else
-                    if (IdentifierAt(IdentIndex).Param[NumActualParams].AllocElementType <> TDataType.PROCVARTOK) and 
-		       (IdentifierAt(IdentIndex).Param[NumActualParams].DataType <> IdentifierAt(IdentTemp).DataType) and 
+                    if (IdentifierAt(IdentIndex).Param[NumActualParams].AllocElementType <> TDataType.PROCVARTOK) and
+		       (IdentifierAt(IdentIndex).Param[NumActualParams].DataType <> IdentifierAt(IdentTemp).DataType) and
 		       (IdentifierAt(IdentIndex).Param[NumActualParams].NumAllocElements > 0) then
 
                       if (IdentifierAt(IdentIndex).Param[NumActualParams].DataType in [TDataType.POINTERTOK,
@@ -8254,7 +8254,7 @@ begin
 
 
         if (IdentifierAt(IdentIndex).isRecursion = False) and (IdentifierAt(IdentIndex).isStdCall = False) and
-          (ParamIndex > 1) and (IdentifierAt(IdentIndex).Param[NumActualParams].PassMethod <> TParameterPassingMethod.VARPASSING) and 
+          (ParamIndex > 1) and (IdentifierAt(IdentIndex).Param[NumActualParams].PassMethod <> TParameterPassingMethod.VARPASSING) and
 	  (IdentifierAt(IdentIndex).Param[NumActualParams].DataType in [TDataType.RECORDTOK, TDataType.OBJECTTOK] + Pointers) and
           (IdentifierAt(IdentIndex).Param[NumActualParams].NumAllocElements and $FFFF > 1) then
 
@@ -15335,15 +15335,14 @@ WHILETOK:
         (pos(' :STACK', AsmBlock[AsmBlockIndex]) > 0)) then
       begin
 
-        if (pos(' :bp', AsmBlock[AsmBlockIndex]) > 0) then
-          Error(i, 'Illegal instruction in INTERRUPT block '':BP''');
-        if (pos(' :STACK', AsmBlock[AsmBlockIndex]) > 0) then
-          Error(i, 'Illegal instruction in INTERRUPT block '':STACKORIGIN''');
+        if (pos(' :bp', AsmBlock[AsmBlockIndex]) > 0) then Error(i, 'Illegal instruction in INTERRUPT block '':BP''');
+
+        if (pos(' :STACK', AsmBlock[AsmBlockIndex]) > 0) then Error(i, 'Illegal instruction in INTERRUPT block '':STACKORIGIN''');
 
       end;
 
 
-      asm65('#asm:' + IntToStr(AsmBlockIndex));
+      asm65('#asm:' + IntToStr(AsmBlockIndex));		// wklejenie właściwego kodu ASM odbywa się w OptimizeTemporary
 
       Inc(AsmBlockIndex);
 

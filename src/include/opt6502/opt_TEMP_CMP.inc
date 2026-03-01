@@ -99,6 +99,15 @@ begin
       end;
 
 
+    if sta(0) and (sta_stack(0) = false) and						// sta A		; 0	~:STACKORIGIN
+       lda(1) and (lda_stack(1) = false) and						// lda A		; 1	~:STACKORIGIN
+       SKIP(2) then									// SKIP			; 2
+     if argMatch(0, 1) then
+      begin
+	TemporaryBuf[1] := '~';
+      end;
+
+
    if lda(0) and									// lda W		; 0
       cmp(1) and									// cmp			; 1
       SKIP(2) and									// SKIP			; 2
