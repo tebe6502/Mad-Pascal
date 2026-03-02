@@ -1004,16 +1004,16 @@ end;
 
     for i := 0 to l - 1 do
 
-      if (pos(' :eax', listing[i]) = 5) and (pos(#9'.if', listing[i + 1]) = 0) then
+      if {(pos(' :eax', listing[i]) = 5)} EAX(i) and (_if(i+1) = false) then
       begin
         Result := True;
 
-        tmp := copy(listing[i], 6, 256);
+        tmp := GetARG(i);
 
-        if tmp = ':eax' then listing[i] := copy(listing[i], 1, 5) + ':STACKORIGIN+16' else
-         if tmp = ':eax+1' then listing[i] := copy(listing[i], 1, 5) + ':STACKORIGIN+STACKWIDTH+16' else
-          if tmp = ':eax+2' then listing[i] := copy(listing[i], 1, 5) + ':STACKORIGIN+STACKWIDTH*2+16' else
-           if tmp = ':eax+3' then listing[i] := copy(listing[i], 1, 5) + ':STACKORIGIN+STACKWIDTH*3+16';
+        if tmp = ':eax' then listing[i] := GetCMD(i) + ':STACKORIGIN+16' else
+         if tmp = ':eax+1' then listing[i] := GetCMD(i) + ':STACKORIGIN+STACKWIDTH+16' else
+          if tmp = ':eax+2' then listing[i] := GetCMD(i) + ':STACKORIGIN+STACKWIDTH*2+16' else
+           if tmp = ':eax+3' then listing[i] := GetCMD(i) + ':STACKORIGIN+STACKWIDTH*3+16';
 
       end;
 
@@ -1030,12 +1030,12 @@ end;
 
       if pos(' :STACKORIGIN+', listing[i]) = 5 then
       begin
-        tmp := copy(listing[i], 6, 256);
+        tmp := GetARG(i);
 
-        if tmp = ':STACKORIGIN+16' then listing[i] := copy(listing[i], 1, 5) + ':eax' else
-         if tmp = ':STACKORIGIN+STACKWIDTH+16' then listing[i] := copy(listing[i], 1, 5) + ':eax+1' else
-          if tmp = ':STACKORIGIN+STACKWIDTH*2+16' then listing[i] := copy(listing[i], 1, 5) + ':eax+2' else
-           if tmp = ':STACKORIGIN+STACKWIDTH*3+16' then listing[i] := copy(listing[i], 1, 5) + ':eax+3';
+        if tmp = ':STACKORIGIN+16' then listing[i] := GetCMD(i) + ':eax' else
+         if tmp = ':STACKORIGIN+STACKWIDTH+16' then listing[i] := GetCMD(i) + ':eax+1' else
+          if tmp = ':STACKORIGIN+STACKWIDTH*2+16' then listing[i] := GetCMD(i) + ':eax+2' else
+           if tmp = ':STACKORIGIN+STACKWIDTH*3+16' then listing[i] := GetCMD(i) + ':eax+3';
       end;
 
   end;  //OptimizeEAX_OFF
@@ -1262,13 +1262,6 @@ end;
 
     Result := True;
 
-    // we remove empty '@', '@-' are not present
-    for i := 0 to l - 1 do
-    begin
-      if (pos('@+', listing[i]) > 0) then Break;
-      if lab_a(i) then listing[i] := '';
-    end;
-
 
     Rebuild('OptimizeRelation');
 
@@ -1277,7 +1270,7 @@ end;
 
 
 {
-if (pos('lda X+1', listing[i]) > 0) then begin
+if (pos('lda AMOUNT', listing[i]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');
@@ -1314,6 +1307,25 @@ end;
       // -----------------------------------------------------------------------------
 
     end;   // for
+
+
+    // we remove empty '@', '@-' are not present
+    p := 0;
+    for i := 0 to l - 1 do
+    begin
+      if (length(listing[i]) = 7) and (listing[i][7] = '+') and (listing[i][6] = '@') then p:=1;
+
+      if lab_a(i) then begin
+
+        if p = 1 then
+          p := 0
+        else
+          listing[i] := '';
+
+      end;
+
+    end;
+
 
   end;  //OptimizeRelation
 
