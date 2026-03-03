@@ -3054,8 +3054,8 @@ begin
             else
             begin
 
-              if IdentifierAt(IdentIndex).IsObjectVariable and (IdentifierAt(IdentIndex).PassMethod =
-                TParameterPassingMethod.VARPASSING) then
+              if IdentifierAt(IdentIndex).IsObjectVariable and 
+	         (IdentifierAt(IdentIndex).PassMethod = TParameterPassingMethod.VARPASSING) then
               begin
 
                 asm65(#9'mwy ' + svar + ' :TMP');
@@ -8913,7 +8913,7 @@ begin
             begin
 
               if IdentifierAt(IdentIndex).DataType = TDataType.CHARTOK then
-              begin          // length(CHAR) = 1
+              begin								// length(CHAR) = 1
 
                 Push(1, ASVALUE, 1);
 
@@ -8923,10 +8923,10 @@ begin
               else
 
                 if (IdentifierAt(IdentIndex).DataType = TDataType.POINTERTOK) and
-                  (IdentifierAt(IdentIndex).AllocElementType in [TDataType.RECORDTOK, TDataType.OBJECTTOK]) then
+                   (IdentifierAt(IdentIndex).AllocElementType in [TDataType.RECORDTOK, TDataType.OBJECTTOK]) then
                 begin
 
-                  i := CompileArrayIndex(i + 2, IdentIndex, ValType);            // array[ ].field
+                  i := CompileArrayIndex(i + 2, IdentIndex, ValType);		// array[ ].field
 
                   CheckTok(i + 2, TTokenKind.DOTTOK);
                   CheckTok(i + 3, TTokenKind.IDENTTOK);
@@ -8968,23 +8968,25 @@ begin
                 else
 
                   if //(IdentifierAt(IdentIndex).DataType = TDataType.STRINGPOINTERTOK) or
-                  ((IdentifierAt(IdentIndex).DataType in Pointers) and
+                   ((IdentifierAt(IdentIndex).DataType in Pointers) and
                     (IdentifierAt(IdentIndex).NumAllocElements > 0)) or
+
                     ((IdentifierAt(IdentIndex).DataType in Pointers) and
-                    (IdentifierAt(IdentIndex).NumAllocElements = 0) and (TokenAt(i + 3).Kind =
-                    TTokenKind.DEREFERENCETOK)) then
+                    (IdentifierAt(IdentIndex).NumAllocElements = 0) and 
+		    (TokenAt(i + 3).Kind = TTokenKind.DEREFERENCETOK)) then
                   begin
 
                     if TokenAt(i + 3).Kind = TTokenKind.DEREFERENCETOK then Inc(i);
 
                     if ((IdentifierAt(IdentIndex).DataType = TDataType.STRINGPOINTERTOK) or
-                      (IdentifierAt(IdentIndex).AllocElementType = TDataType.CHARTOK)) or
-                      ((IdentifierAt(IdentIndex).DataType = TDataType.POINTERTOK) and
-                      (IdentifierAt(IdentIndex).AllocElementType = TDataType.STRINGPOINTERTOK)) then
+                       (IdentifierAt(IdentIndex).AllocElementType = TDataType.CHARTOK)) or
+
+                       ((IdentifierAt(IdentIndex).DataType = TDataType.POINTERTOK) and
+                       (IdentifierAt(IdentIndex).AllocElementType = TDataType.STRINGPOINTERTOK)) then
                     begin
 
                       if IdentifierAt(IdentIndex).AllocElementType = TDataType.STRINGPOINTERTOK then
-                      begin    // length(array[x])
+                      begin							// length(array[x])
 
                         i := CompileArrayIndex(i + 2, IdentIndex, ValType);
 
@@ -8993,8 +8995,8 @@ begin
                         svar := GetLocalName(IdentIndex);
 
                         if (IdentifierAt(IdentIndex).NumAllocElements * 2 > 256) or
-                          (IdentifierAt(IdentIndex).NumAllocElements in [0, 1]) or
-                          (IdentifierAt(IdentIndex).PassMethod = TParameterPassingMethod.VARPASSING)
+                           (IdentifierAt(IdentIndex).NumAllocElements in [0, 1]) or
+                           (IdentifierAt(IdentIndex).PassMethod = TParameterPassingMethod.VARPASSING)
                         then
                         begin
 
@@ -11533,7 +11535,7 @@ begin
   else
     if (ValType in Pointers) and (TokenAt(i).Kind = TTokenKind.IDENTTOK) then
       if (IdentifierAt(GetIdentIndex(TokenAt(i).Name)).AllocElementType = TDataType.CHARTOK) and
-        (Elements(GetIdentIndex(TokenAt(i).Name)) > 0) then sLeft := True;
+         (Elements(GetIdentIndex(TokenAt(i).Name)) > 0) then sLeft := True;
 
 
   if TokenAt(i + 1).Kind = TTokenKind.INTOK then writeln('IN');        // not yet programmed
@@ -11588,7 +11590,7 @@ begin
     else
       if (RightValType in Pointers) and (TokenAt(i + 2).Kind = TTokenKind.IDENTTOK) then
         if (IdentifierAt(GetIdentIndex(TokenAt(i + 2).Name)).AllocElementType = TDataType.CHARTOK) and
-          (Elements(GetIdentIndex(TokenAt(i + 2).Name)) > 0) then sRight := True;
+           (Elements(GetIdentIndex(TokenAt(i + 2).Name)) > 0) then sRight := True;
 
     //  if (ValType in [SHORTREALTOK, TDataType.REALTOK]) and (RightValType in [TDataType.SHORTREALTOK, TDataType.TTokenKind.REALTOK]) then
     //    RightValType := ValType;
@@ -12100,8 +12102,7 @@ begin
 
               //      writeln(ExpressionType,',',VarTYpe,',',Elements(GetIdent(TokenAt(j + 2).Name^)));
 
-              if GetDataSize(VarType) <> Elements(IdentIndex) *
-                GetDataSize(IdentifierAt(IdentIndex).AllocElementType) then
+              if GetDataSize(VarType) <> Elements(IdentIndex) * GetDataSize(IdentifierAt(IdentIndex).AllocElementType) then
                 if VarType = TDataType.UNTYPETOK then
                   Error(j + 2, 'Illegal type conversion: "POINTER" to "Array[0..' +
                     IntToStr(Elements(IdentIndex) - 1) + '] Of ' + InfoAboutDataType(IdentifierAt(IdentIndex).AllocElementType) + '"')
@@ -12144,8 +12145,7 @@ begin
 
                 //  writeln('= ',IdentifierAt(IdentIndex).Name,',',IdentifierAt(IdentIndex).Kind,',',IdentifierAt(IdentIndex).DataType,',',IdentifierAt(IdentIndex).AllocElementType);
 
-                if not (IdentifierAt(IdentIndex).DataType in [TDataType.POINTERTOK,
-                  TDataType.RECORDTOK, TDataType.OBJECTTOK]) then
+                if not (IdentifierAt(IdentIndex).DataType in [TDataType.POINTERTOK, TDataType.RECORDTOK, TDataType.OBJECTTOK]) then
                   Error(i, TErrorCode.IllegalExpression);
 
                 if IdentifierAt(IdentIndex).DataType = TDataType.POINTERTOK then
@@ -12245,7 +12245,7 @@ begin
                   IndirectionLevel := ASPOINTERTOPOINTER;
 
                   if (IdentifierAt(IdentIndex).DataType = TDataType.STRINGPOINTERTOK) and
-                    (IdentifierAt(IdentIndex).NumAllocElements = 0) then
+                     (IdentifierAt(IdentIndex).NumAllocElements = 0) then
                   begin
                     VarType := TDataType.STRINGPOINTERTOK;
 
@@ -18872,10 +18872,13 @@ begin
             if isStriped and (IdentifierAt(NumIdent).PassMethod <> TParameterPassingMethod.VARPASSING) then
             begin
 
+{
               if NumAllocElements shr 16 > 0 then
                 yes := (NumAllocElements and $FFFF) * (NumAllocElements shr 16) <= 256
               else
                 yes := NumAllocElements <= 256;
+}
+              yes := Elements(NumIdent) <= 256;
 
               if yes then
                 IdentifierAt(NumIdent).isStriped := True

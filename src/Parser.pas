@@ -60,8 +60,9 @@ begin
     if IdentifierAt(IdentIndex).AllocElementType in [TDataType.RECORDTOK, TDataType.OBJECTTOK] then
       Result := IdentifierAt(IdentIndex).NumAllocElements_
     else
-      if (IdentifierAt(IdentIndex).NumAllocElements_ = 0) or (IdentifierAt(IdentIndex).AllocElementType in
-        [TDataType.PROCVARTOK]) then
+      if (IdentifierAt(IdentIndex).NumAllocElements_ = 0) or 
+         (IdentifierAt(IdentIndex).AllocElementType in [TDataType.PROCVARTOK])
+      then
         Result := IdentifierAt(IdentIndex).NumAllocElements
       else
         Result := IdentifierAt(IdentIndex).NumAllocElements * IdentifierAt(IdentIndex).NumAllocElements_;

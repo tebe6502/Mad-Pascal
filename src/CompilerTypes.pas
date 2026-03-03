@@ -1254,8 +1254,8 @@ var
           for ChildIdentIndex := 1 to NumIdent do
           begin
             ChildIdentifier := IdentfierList.GetIdentifierAtIndex(ChildIdentIndex);
-            if { (ChildIdentifier.ProcAsBlockIndex > 0) and  } (ChildIdentifier.ProcAsBlockIndex =
-              CallGraphNode.GetChild(ChildIndex)) then
+            if { (ChildIdentifier.ProcAsBlockIndex > 0) and  } 
+	       (ChildIdentifier.ProcAsBlockIndex = CallGraphNode.GetChild(ChildIndex)) then
             begin
               MarkNotDead(ChildIdentifier);
             end;
