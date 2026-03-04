@@ -1209,6 +1209,7 @@ end;
     repeat until PeepholeOptimization_END;
     DebugCall('OptimizeASM:OptimizeAssignment.PeepholeOptimization_END', ListingToString(listing));
     while RemoveUnusedSTACK do repeat until PeepholeOptimization;
+
   end;
 
 

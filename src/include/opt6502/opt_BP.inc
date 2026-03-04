@@ -3247,6 +3247,8 @@ begin
       end;
 
 
+{ !!!!!!!!  dla [striped] nie dziala
+
     if sta_bp2_1(i+3) and									// sta :bp2+1				; 3
 
        lda_adr(i) and (iy(i) = false) and							// lda adr.				; 0
@@ -3263,6 +3265,7 @@ begin
 
 	exit(false);
       end;
+}
 
 
     if lda_val(i) and (lda_im(i) = false) and (iy(i) = false) and				// lda TB				; 0
