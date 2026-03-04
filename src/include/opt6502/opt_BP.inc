@@ -712,7 +712,7 @@ begin
 
 
     if (lda_a(i) or AND_ORA_EOR(i)) and								// lda|and|ora|eor			; 0
-       mwy_bp2(i+1) and	(pos(#9'mwy #', listing[i+1]) = 0) and					// mwy P0 :bp2				; 1
+       mwy_bp2(i+1) and	(mwy_im(i+1) = false) and						// mwy P0 :bp2				; 1
        ldy_im_0(i+2) and 									// ldy #$00				; 2
        STA_BP2_Y(i+3) and  									// sta (:bp2),y				; 3
        (listing[i+4] = '') then									//~
@@ -736,7 +736,7 @@ begin
 
 
     if (asl(i) or lsr(i)) and									// asl|lsr				; 0
-       mwy_bp2(i+1) and (pos(#9'mwy #', listing[i+1]) = 0) and					// mwy P0 :bp2				; 1
+       mwy_bp2(i+1) and (mwy_im(i+1) = false) and						// mwy P0 :bp2				; 1
        ldy_im_0(i+2) and 									// ldy #$00				; 2
        STA_BP2_Y(i+3) and  									// sta (:bp2),y				; 3
        (listing[i+4] = '') then									//~

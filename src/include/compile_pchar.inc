@@ -114,9 +114,9 @@
             else
               k := TokenAt(i + 2).StrAddress - CODEORIGIN;
 
-            asm65(#9'lda <CODEORIGIN+$' + IntToHex(k, 4));
+            asm65(#9'lda <CODEORIGIN+' + HexWord(k));
             asm65(#9'sta @move.src');
-            asm65(#9'lda >CODEORIGIN+$' + IntToHex(k, 4));
+            asm65(#9'lda >CODEORIGIN+' + HexWord(k));
             asm65(#9'sta @move.src+1');
 
             asm65(#9'@moveSTRING_P ' + svar);

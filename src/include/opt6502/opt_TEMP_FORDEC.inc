@@ -27,7 +27,7 @@ begin
         if (TemporaryBuf[p] = #9'jmp ' + TemporaryBuf[2]) and			//; --- ForToDoEpilog	// p-5
 	   (TemporaryBuf[p-5] = '; --- ForToDoEpilog') and			// dec I		// p-4
 	   (pos('dec ', TemporaryBuf[p-4]) > 0) and				// lda I		// p-3
-	   (TemporaryBuf[p-1] = #9'seq') and					// cmp #$FF		// p-2
+	   seq(p-1) and								// cmp #$FF		// p-2
 	   (TemporaryBuf[p-2] = #9'cmp #$FF') then				// seq			// p-1
 	   begin								// jmp l_00FB		// p
  	    TemporaryBuf[4] := TemporaryBuf[p-4];
@@ -153,10 +153,8 @@ begin
        if pos(TemporaryBuf[2], TemporaryBuf[p]) > 0 then begin
 
         if yes and
-           lda(6) and									// lda		; 6
-           ((pos('and #', TemporaryBuf[7]) > 0) or					// and		; 7
-            (pos('ora #', TemporaryBuf[7]) > 0) or					// ora
-            (pos('eor #', TemporaryBuf[7]) > 0)) and					// eor
+           lda(6) and									// lda			; 6
+           and_ora_eor_im(7) and							// and|ora|eor #	; 7
 
 	   (TemporaryBuf[p] = #9'jmp ' + TemporaryBuf[2]) and			// jmp l_00FB		// p
 	   (TemporaryBuf[p-3] = '; --- ForToDoEpilog') and			// ; --- ForToDoEpilog	// p-3

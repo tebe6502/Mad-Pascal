@@ -158,7 +158,7 @@ begin
 
     if (listing[i+1] = #9'@printCHAR') and							// @printCHAR				; 1
 
-       (pos(#9'mva adr.', listing[i]) > 0) and iy(i) then					// mva adr. ,y  :STACKORIGIN		; 0
+       mva_adr(i) and iy(i) then								// mva adr. ,y  :STACKORIGIN		; 0
 //       (listing[i+1] = #9'@printCHAR') then							// @printCHAR				; 1
      if stack_0x(i) then
       begin

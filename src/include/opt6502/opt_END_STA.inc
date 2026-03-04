@@ -499,9 +499,9 @@
              rol_stack(p-4) and						/// rol :STACKORIGIN+STACKWIDTH		; p-4
              asl_a(p-3) and						/// asl @				; p-3
              rol_stack(p-2) and						/// rol :STACKORIGIN+STACKWIDTH+9	; p-2
-             (pos(#9'add <adr.', listing[p-1]) > 0) and	  		/// add <adr.				; p-1
+             add_l_adr(p-1) and				  		/// add <adr.				; p-1
 //	     sta_stack(p) and						/// sta :STACKORIGIN			; p
-	     (pos(#9'lda >adr.', listing[p+1]) > 0) and			/// lda >adr.				; p+1
+	     lda_h_adr(p+1) and						/// lda >adr.				; p+1
 	     adc_stack(p+2) and						/// adc :STACKORIGIN+STACKWIDTH		; p+2
 	     sta_stack(p+3) then					/// sta :STACKORIGIN+STACKWIDTH		; p+3
 	  if argMatch(i+2, p-7) then

@@ -492,6 +492,11 @@ end;
     Result := pos1(#9'and ', i) or pos1(#9'ora ', i) or pos1(#9'eor ', i);
   end;
 
+  function AND_ORA_EOR_IM(const i: Integer): Boolean;
+  begin
+    Result := pos1(#9'and #', i) or pos1(#9'ora #', i) or pos1(#9'eor #', i);
+  end;
+ 
   function STA_ADR(const i: Integer): Boolean;
   begin
     if (pos(',y', TemporaryBuf[i]) > 0) then

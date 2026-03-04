@@ -624,6 +624,11 @@ begin
   Result := pos1(#9'mvy #', i);
 end;
 
+function MWY_IM(const i: Integer): Boolean;
+begin
+  Result := pos1(#9'mwy #', i);
+end;
+
 // -----------------------------------------------------------------------------
 
 function JSR(const i: Integer): Boolean;

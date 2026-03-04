@@ -4493,7 +4493,7 @@ begin
             if join = False then asm65(#9'lda @CASETMP_' + IntToHex(CaseLocalCnt, 4));
 
             asm65(#9'clc', '; clear carry for add');
-            asm65(#9'adc #$FF-$' + IntToHex(Value2, 2), '; make m = $FF');
+            asm65(#9'adc #$FF-' + HexByte(Value2), '; make m = $FF');
             asm65(#9'adc #' + HexByte(Value2) + '-' + HexByte(Value1) + '+1', '; carry set if in range n to m');
             asm65(#9'bcs @+');
           end;
@@ -5074,7 +5074,7 @@ begin
     ASPOINTER:
     begin
 
-      asm65(#9'@printSTRING #CODEORIGIN+$' + IntToHex(Address - CODEORIGIN, 4));
+      asm65(#9'@printSTRING #CODEORIGIN+' + HexWord(Address - CODEORIGIN));
 
       //    a65(TCode65.subBX);   !!!   bez DEX-a
     end;
@@ -13985,7 +13985,7 @@ WHILETOK:
       begin
         asm65;
         asm65(#9'jmp @+');
-        asm65(#9'.align $' + IntToHex(codealign.loop, 4));
+        asm65(#9'.align ' + HexWord(codealign.loop));
         asm65('@');
         asm65;
       end;
@@ -14078,7 +14078,7 @@ WHILETOK:
       begin
         asm65;
         asm65(#9'jmp @+');
-        asm65(#9'.align $' + IntToHex(codealign.loop, 4));
+        asm65(#9'.align ' + HexWord(codealign.loop));
         asm65('@');
         asm65;
       end;
@@ -14148,7 +14148,7 @@ WHILETOK:
               begin
                 asm65;
                 asm65(#9'jmp @+');
-                asm65(#9'.align $' + IntToHex(codealign.loop, 4));
+                asm65(#9'.align ' + HexWord(codealign.loop));
                 asm65('@');
                 asm65;
               end;
@@ -15074,13 +15074,13 @@ WHILETOK:
             TTokenKind.STRINGLITERALTOK:            // 'text'
             begin
               asm65(#9'ldy #$00');
-              asm65(#9'mva:rne CODEORIGIN+$' + IntToHex(TokenAt(i + 1).StrAddress - CODEORIGIN + 1, 4) + ',y @buf,y+');
+              asm65(#9'mva:rne CODEORIGIN+' + HexWord(TokenAt(i + 1).StrAddress - CODEORIGIN + 1) + ',y @buf,y+');
 
               if yes then
               begin                 // WRITELN
 
                 asm65(#9'lda #eol');
-                asm65(#9'ldy CODEORIGIN+$' + IntToHex(TokenAt(i + 1).StrAddress - CODEORIGIN, 4));
+                asm65(#9'ldy CODEORIGIN+' + HexWord(TokenAt(i + 1).StrAddress - CODEORIGIN));
                 asm65(#9'sta @buf,y');
 
                 asm65(#9'mwy ' + GetLocalName(IdentIndex) + ' :bp2');
@@ -15098,7 +15098,7 @@ WHILETOK:
               else
               begin                // WRITE
 
-                asm65(#9'lda CODEORIGIN+$' + IntToHex(TokenAt(i + 1).StrAddress - CODEORIGIN, 4));
+                asm65(#9'lda CODEORIGIN+' + HexWord(TokenAt(i + 1).StrAddress - CODEORIGIN));
 
                 asm65(#9'mwy ' + GetLocalName(IdentIndex) + ' :bp2');
 
@@ -15177,7 +15177,7 @@ WHILETOK:
                 Inc(i);
 
                 repeat
-                  asm65(#9'@print #$' + IntToHex(TokenAt(i).Value, 2));
+                  asm65(#9'@print #' + HexByte(TokenAt(i).Value));
                   Inc(i);
                 until TokenAt(i).Kind <> TTokenKind.CHARLITERALTOK;
 
@@ -16107,9 +16107,9 @@ var
     begin
 
       if brackets then
-        Result := #9'= [DATAORIGIN+$' + IntToHex(IdentifierAt(IdentIndex).Value - DATAORIGIN, 4) + ']'
+        Result := #9'= [DATAORIGIN+' + HexWord(IdentifierAt(IdentIndex).Value - DATAORIGIN) + ']'
       else
-        Result := #9'= DATAORIGIN+$' + IntToHex(IdentifierAt(IdentIndex).Value - DATAORIGIN, 4);
+        Result := #9'= DATAORIGIN+' + HexWord(IdentifierAt(IdentIndex).Value - DATAORIGIN);
 
     end
     else
@@ -16948,7 +16948,7 @@ begin
 
   if codealign.proc > 0 then
   begin
-    asm65(#9'.align $' + IntToHex(codealign.proc, 4));
+    asm65(#9'.align ' + HexWord(codealign.proc));
     asm65;
   end;
 
@@ -17917,7 +17917,7 @@ begin
 
       if codealign.link > 0 then
       begin
-        asm65(#9'.align $' + IntToHex(codealign.link, 4));
+        asm65(#9'.align ' + HexWord(codealign.link));
         asm65;
       end;
 
@@ -19626,16 +19626,16 @@ var
 begin
   Value := Memory[index];
   if (Value and $c000) = $8000 then
-    tmp := tmp + ' <[DATAORIGIN+$' + IntToHex(Byte(Value) or Byte(memory[index + 1]) shl 8, 4) + ']'
+    tmp := tmp + ' <[DATAORIGIN+' + HexWord(Byte(Value) or Byte(memory[index + 1]) shl 8) + ']'
   else
     if Value and $c000 = $4000 then
-      tmp := tmp + ' >[DATAORIGIN+$' + IntToHex(Byte(memory[index - 1]) or Byte(Value) shl 8, 4) + ']'
+      tmp := tmp + ' >[DATAORIGIN+' + HexWord(Byte(memory[index - 1]) or Byte(Value) shl 8) + ']'
     else
       if Value and $3000 = $2000 then
-        tmp := tmp + ' <[CODEORIGIN+$' + IntToHex(Byte(Value) or Byte(memory[index + 1]) shl 8, 4) + ']'
+        tmp := tmp + ' <[CODEORIGIN+' + HexWord(Byte(Value) or Byte(memory[index + 1]) shl 8) + ']'
       else
         if Value and $3000 = $1000 then
-          tmp := tmp + ' >[CODEORIGIN+$' + IntToHex(Byte(memory[index - 1]) or Byte(Value) shl 8, 4) + ']'
+          tmp := tmp + ' >[CODEORIGIN+' + HexWord(Byte(memory[index - 1]) or Byte(Value) shl 8) + ']'
         else
           tmp := tmp + ' $' + IntToHex(Byte(Value), 2);
 end;
@@ -20030,7 +20030,7 @@ end;
 
 
   if DATA_BASE > 0 then
-    asm65(#9'org $' + IntToHex(DATA_BASE, 4))
+    asm65(#9'org ' + HexWord(DATA_BASE))
   else
   begin
 
@@ -20058,7 +20058,7 @@ end;
     asm65(#9'.print ''FMUL_INIT: '',fmulinit,''..'',*-1');
 
     asm65;
-    asm65(#9'org $' + IntToHex(FastMul, 2) + '00');
+    asm65(#9'org ' + HexByte(FastMul) + '00');
 
     asm65;
     asm65(#9'.print ''FMUL_DATA: '',*,''..'',*+$07FF');
