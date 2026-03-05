@@ -1772,6 +1772,14 @@ begin
         asm65(#9'lda' + GetStackVariable(1));
         asm65(#9'adc ' + ExtractName(IdentIndex, svar) + '+1');
         asm65(#9'sta :TMP+1');
+
+        asm65(#9'ldy #$00');
+        asm65(#9'lda (:TMP),y');
+        asm65(#9'sta :bp2');
+        asm65(#9'iny');
+        asm65(#9'lda (:TMP),y');
+        asm65(#9'sta :bp2+1');
+
       end
       else
       begin
@@ -1785,9 +1793,9 @@ begin
           asm65(#9'sta' + GetStackVariable(1));
 
           asm65(#9'lda ' + svara + ',y');
-          asm65(#9'sta :TMP');
+          asm65(#9'sta :bp2');
           asm65(#9'lda ' + svara + '+' + IntToStr(NumAllocElements) + ',y');
-          asm65(#9'sta :TMP+1');
+          asm65(#9'sta :bp2+1');
 
 	end
 	else
@@ -1799,17 +1807,16 @@ begin
           asm65(#9'adc ' + svar + '+1');
           asm65(#9'sta :TMP+1');
 
+          asm65(#9'ldy #$00');
+          asm65(#9'lda (:TMP),y');
+          asm65(#9'sta :bp2');
+          asm65(#9'iny');
+          asm65(#9'lda (:TMP),y');
+          asm65(#9'sta :bp2+1');
+
 	end;
 
       end;
-
-
-      asm65(#9'ldy #$00');
-      asm65(#9'lda (:TMP),y');
-      asm65(#9'sta :bp2');
-      asm65(#9'iny');
-      asm65(#9'lda (:TMP),y');
-      asm65(#9'sta :bp2+1');
 
 
       if TestName(IdentIndex, svar) then
@@ -2921,43 +2928,48 @@ begin
             else
 	    begin
 
-              asm65(#9'lda :STACKORIGIN-1,x');
-              asm65(#9'add #$00');
-              asm65(#9'tay');
-              asm65(#9'lda :STACKORIGIN-1+STACKWIDTH,x');
-              asm65(#9'adc #$00');
-              asm65(#9'sta :STACKORIGIN-1+STACKWIDTH,x');
+              asm65(#9'lda ' + GetLocalName(IdentTemp));
+              asm65(#9'add :STACKORIGIN-1,x');
+              asm65(#9'sta :TMP');
+              asm65(#9'lda ' + GetLocalName(IdentTemp) + '+1');
+              asm65(#9'adc :STACKORIGIN-1+STACKWIDTH,x');
+              asm65(#9'sta :TMP+1');
 
-              asm65(#9'lda ' + GetLocalName(IdentTemp, 'adr.') + ',y');
+              asm65(#9'ldy #$00');
+              asm65(#9'lda (:TMP),y');
               asm65(#9'sta :bp2');
-              asm65(#9'lda ' + GetLocalName(IdentTemp, 'adr.') + '+1,y');
+              asm65(#9'iny');
+              asm65(#9'lda (:TMP),y');
               asm65(#9'sta :bp2+1');
 
-	    end;
+	    end; // isStriped
 
           end
           else
           begin
 
-            asm65(#9'lda ' + svar);
-            asm65(#9'add :STACKORIGIN-1,x');
-            asm65(#9'sta :TMP');
-            asm65(#9'lda ' + svar + '+1');
-            asm65(#9'adc :STACKORIGIN-1+STACKWIDTH,x');
-            asm65(#9'sta :TMP+1');
+            asm65(#9'lda :STACKORIGIN-1,x');
+            asm65(#9'add #$00');
+            asm65(#9'tay');
+            asm65(#9'lda :STACKORIGIN-1+STACKWIDTH,x');
+            asm65(#9'adc #$00');
+            asm65(#9'sta :STACKORIGIN-1+STACKWIDTH,x');
 
-            asm65(#9'ldy #$00');
-            asm65(#9'lda (:TMP),y');
+            asm65(#9'lda ' + GetLocalName(IdentTemp, 'adr.') + ',y');
             asm65(#9'sta :bp2');
-            asm65(#9'iny');
-            asm65(#9'lda (:TMP),y');
+
+	    if IdentifierAt(IdentTemp).isStriped then 
+              asm65(#9'lda ' + GetLocalName(IdentTemp, 'adr.') + '+' + IntToStr(NumAllocElements) + ',y')
+            else
+              asm65(#9'lda ' + GetLocalName(IdentTemp, 'adr.') + '+1,y');
+
             asm65(#9'sta :bp2+1');
 
           end;
 
         end
         else
-        begin
+        begin  // TestName
 
           asm65(#9'lda ' + svar);
           asm65(#9'add :STACKORIGIN-1,x');
@@ -2974,19 +2986,6 @@ begin
           asm65(#9'sta :bp2+1');
 
         end;
-{
-      end
-      else
-      begin
-
-        asm65(#9'ldy :STACKORIGIN-1,x');
-        asm65(#9'lda ' + svara + ',y');
-        asm65(#9'sta :bp2');
-        asm65(#9'lda ' + svara + '+1,y');
-        asm65(#9'sta :bp2+1');
-
-      end;
-}
 
 
       LoadRegisterY;
