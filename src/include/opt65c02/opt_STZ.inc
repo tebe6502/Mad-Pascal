@@ -16,7 +16,7 @@ begin
        (lda_a(i+2) or jsr(i+2)) then								// lda|jsr			; 2
      begin
         listing[i]   := '';
-        listing[i+1] := #9'stz ' + copy(listing[i+1], 6, 256);
+        listing[i+1] := #9'stz ' + GetARG(i+1);
 
 	exit(false);
      end;
@@ -27,7 +27,7 @@ begin
        sta_val(i+1) and (iy(i+1) = false) then							// sta				; 1
      begin
         listing[i]   := '';
-        listing[i+1] := #9'stz ' + copy(listing[i+1], 6, 256);
+        listing[i+1] := #9'stz ' + GetARG(i+1);
 
 	exit(false);
      end;
