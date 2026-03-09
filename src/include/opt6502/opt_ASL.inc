@@ -501,13 +501,15 @@ begin
        end;
 
 
-    if asl_stack(i) and										// asl :STACKORIGIN			; 0
+    if tay(i+6) and										// tay					; 6
+
+       asl_stack(i) and										// asl :STACKORIGIN			; 0
        rol_stack(i+1) and									// rol :STACKORIGIN+STACKWIDTH		; 1
        rol_stack(i+2) and									// rol :STACKORIGIN+STACKWIDTH*2	; 2	redundant
        rol_stack(i+3) and									// rol :STACKORIGIN+STACKWIDTH*3	; 3	redundant
        lda(i+4) and										// lda					; 4
        asl_a(i+5) and										// asl @				; 5
-       tay(i+6) and										// tay					; 6
+//       tay(i+6) and										// tay					; 6
        lda_stack(i+7) and									// lda :STACKORIGIN			; 7
        add_sub(i+8) and										// add|sub				; 8
        sta_a(i+9) and										// sta					; 9
@@ -519,6 +521,45 @@ begin
      if argMatch(i, i+7) then begin
 
 	yes := stack(i+10);
+
+	k:=i;
+	while (listing[i]=listing[k-4]) and (listing[i+1]=listing[k-4+1]) and (listing[i+2]=listing[k-4+2]) and (listing[i+3]=listing[k-4+3]) do begin
+
+	 if not yes then listing[k-4+1] := '';
+
+	 listing[k-4+2] := '';
+	 listing[k-4+3] := '';
+
+	 dec(k, 4);
+	end;
+
+	 if not yes then listing[i+1] := '';
+
+	listing[i+2] := '';
+	listing[i+3] := '';
+
+	exit(false);
+       end;
+
+
+    if ldy(i+4) and										// ldy					; 4
+
+       asl_stack(i) and										// asl :STACKORIGIN			; 0
+       rol_stack(i+1) and									// rol :STACKORIGIN+STACKWIDTH		; 1
+       rol_stack(i+2) and									// rol :STACKORIGIN+STACKWIDTH*2	; 2	redundant
+       rol_stack(i+3) and									// rol :STACKORIGIN+STACKWIDTH*3	; 3	redundant
+//       ldy(i+4) and										// ldy					; 4
+       lda_stack(i+5) and									// lda :STACKORIGIN			; 5
+       add_sub(i+6) and										// add|sub				; 6
+       sta_a(i+7) and										// sta					; 7
+       lda(i+8) and										// lda :STACKORIGIN+STACKWIDTH		; 8
+       adc_sbc(i+9) and										// adc|sbc				; 9
+       sta_a(i+10) and										// sta					; 10
+      												//					; 11
+       (adc_sbc(i+12) = false) then								//~adc|sbc				; 12
+     if argMatch(i, i+5) then begin
+
+	yes := stack(i+8);
 
 	k:=i;
 	while (listing[i]=listing[k-4]) and (listing[i+1]=listing[k-4+1]) and (listing[i+2]=listing[k-4+2]) and (listing[i+3]=listing[k-4+3]) do begin
@@ -663,7 +704,7 @@ begin
 	end;
 
 
-	if sta_stack(k-1) and argMatch(k-1, i) then begin	// sta :STACKORIGIN		// k-1
+	if sta_stack(k-1) and argMatch(k-1, i) then begin						// sta :STACKORIGIN		// k-1
 													// asl :STACKORIGIN 		// k
 	  k:=i;												// rol :STACKORIGIN+STACKWIDTH	// k+1
 	  while (listing[i]=listing[k-2]) and (listing[i+1]=listing[k-2+1]) do begin
@@ -682,7 +723,7 @@ begin
 	  exit(false);
 	end else
 
-	if sta_stack(k-1) and argMatch(k-1, i+1) then begin	// sta :STACKORIGIN+STACKWIDHT	// k-1
+	if sta_stack(k-1) and argMatch(k-1, i+1) then begin						// sta :STACKORIGIN+STACKWIDHT	// k-1
 													// asl :STACKORIGIN 		// k
 	  k:=i;												// rol :STACKORIGIN+STACKWIDTH	// k+1
 	  while (listing[i]=listing[k-2]) and (listing[i+1]=listing[k-2+1]) do begin
@@ -948,16 +989,20 @@ begin
        end;
 
 
-    if asl_stack(i) and										// asl :STACKORIGIN			; 0
+    if STA_BP2_Y(i+10) and									// sta (:bp2),y				; 10
+
+       asl_stack(i) and										// asl :STACKORIGIN			; 0
        rol_stack(i+1) and									// rol :STACKORIGIN+STACKWIDTH		; 1
        rol_stack(i+2) and									// rol :STACKORIGIN+STACKWIDTH*2	; 2
        rol_stack(i+3) and									// rol :STACKORIGIN+STACKWIDTH*3	; 3
        mwy_bp2(i+4) and										// mwy XX bp2				; 4
        ldy(i+5) and										// ldy					; 5
-       lda_stack(i+6) and STA_BP2_Y(i+7) and							// lda :STACKORIGIN			; 6
-       iny(i+8) and										// sta (:bp2),y				; 7
-       lda_stack(i+9) and STA_BP2_Y(i+10) and							// iny					; 8
-       (iny(i+11) = false) then									// lda :STACKORIGIN+STACKWIDTH		; 9
+       lda_stack(i+6) and									// lda :STACKORIGIN			; 6
+       STA_BP2_Y(i+7) and									// sta (:bp2),y				; 7
+       iny(i+8) and										// iny					; 8	
+       lda_stack(i+9) and									// lda :STACKORIGIN+STACKWIDTH		; 9
+//       STA_BP2_Y(i+10) and									// sta (:bp2),y				; 10
+       (iny(i+11) = false) then									//~iny					; 11
      if argMatch(i, i+6) and
 	argMatch(i+1, i+9) then begin
 

@@ -290,9 +290,9 @@ var
     if (i < 0) or (listing[i] = '') then
       Result := False
     else
-      Result := seq(i) or sne(i) or spl(i) or smi(i) or scc(i) or scs(i) or
-	        jeq(i) or jne(i) or jpl(i) or jmi(i) or jcc(i) or jcs(i) or
-	        beq(i) or bne(i) or bpl(i) or bmi(i) or bcc(i) or bcs(i);
+      Result := jeq(i) or jne(i) or jpl(i) or jmi(i) or jcc(i) or jcs(i) or
+	        beq(i) or bne(i) or bpl(i) or bmi(i) or bcc(i) or bcs(i) or
+		seq(i) or sne(i) or spl(i) or smi(i) or scc(i) or scs(i);
   end;
 
 
@@ -935,7 +935,7 @@ var
 
   function PeepholeOptimization_STACK: Boolean;
   var
-    p,i: TListingIndex;
+    i: TListingIndex;
     tmp: String;
   begin
 
@@ -1310,7 +1310,7 @@ end;
     end;   // for
 
 
-    // we remove empty '@', '@-' are not present
+    // remove empty '@', '@-' are not present
     p := 0;
     for i := 0 to l - 1 do
     begin

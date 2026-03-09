@@ -132,6 +132,28 @@ begin
       end;
 
 
+    if cmp_stack(i+7) and									// cmp :STACKORIGIN+9			; 7
+
+       lda_val(i) and										// lda					; 0	~:STACKORIGIN
+       sta_stack(i+1) and									// sta :STACKORIGIN+9			; 1
+       lda_val(i+2) and										// lda					; 2	~:STACKORIGIN
+       (add_sub(i+3) or and_ora_eor(i+3)) and							// add|sub|and|ora|eor			; 3
+       (add_sub(i+4) or and_ora_eor(i+4)) and							// add|sub|and|ora|eor			; 4
+       sta_stack(i+5) and									// sta :STACKORIGIN+10			; 5
+       lda_stack(i+6) then									// lda :STACKORIGIN+10			; 6
+//       cmp_stack(i+7) then									// cmp :STACKORIGIN+9			; 7
+     if (argMatch(i+1, i+6) = false) and
+        argMatch(i+1, i+7) then
+      begin
+	listing[i+7] := #9'cmp ' + GetARG(i);
+
+	listing[i]   := '';
+	listing[i+1] := '';
+
+	exit(false);
+      end;
+
+
     if cmp_im_0(i+10) and									// cmp #$00				; 10
 
        lda_a(i) and										// lda					; 0
@@ -342,13 +364,29 @@ begin
        lda_a(i) and (listing[i] = listing[i+4]) and						// lda A				; 0
        and_ora_eor(i+1) and (listing[i+1] = listing[i+5]) and					// and|ora|eor				; 1
        cmp(i+2) and										// cmp					; 2
-       SKIP(i+3) and										// SKIP					; 3
-       lda_a(i+4) and										// lda A				; 4
-       and_ora_eor(i+5) then									// and|ora|eor				; 5
+       SKIP(i+3) then										// SKIP					; 3
+//       lda_a(i+4) and										// lda A				; 4
+//       and_ora_eor(i+5) and									// and|ora|eor				; 5
 //       cmp(i+6) then										// cmp					; 6
       begin
-       listing[i+4]   := '';
+       listing[i+4] := '';
        listing[i+5] := '';
+
+       exit(false);
+      end;
+
+
+    if cmp(i+5) and										// cmp					; 5
+
+       lda_a(i) and (listing[i] = listing[i+3]) and						// lda A				; 0
+       and_ora_eor(i+1) and (listing[i+1] = listing[i+4]) and					// and|ora|eor				; 1
+       SKIP(i+2) then										// SKIP					; 2
+//       lda_a(i+3) and										// lda A				; 3
+//       and_ora_eor(i+4) and									// and|ora|eor				; 4
+//       cmp(i+5) then										// cmp					; 5
+      begin
+       listing[i+3] := '';
+       listing[i+4] := '';
 
        exit(false);
       end;
