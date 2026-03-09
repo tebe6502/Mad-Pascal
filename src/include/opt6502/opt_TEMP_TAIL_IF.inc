@@ -32,7 +32,7 @@ begin
        ) then
     begin
 
-      lab:=copy(TemporaryBuf[ofs+23], 6, 256);			// l_xxxx
+      lab:=GetARG(ofs+23);					// l_xxxx
 
       yes:=false;
 

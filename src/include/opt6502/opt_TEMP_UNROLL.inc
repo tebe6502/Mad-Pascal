@@ -68,7 +68,7 @@ begin
      delete(TemporaryBuf[4], pos(',y', TemporaryBuf[4]), 2);
      TemporaryBuf[4] := TemporaryBuf[4] + '+' + Hex(p, 2) + ',y';
 
-     TemporaryBuf[0] := #9'ldy ' + copy(TemporaryBuf[0], 6, 256);
+     TemporaryBuf[0] := #9'ldy ' + GetARG(0);
      TemporaryBuf[1] := '~';
      TemporaryBuf[2] := '~';
    end;
@@ -160,7 +160,7 @@ begin
        (TemporaryBuf[11] = '===unroll===') then						//===unroll===-				; 11
      if argMatch(2, 4) then
 	begin
-	 TemporaryBuf[4] := #9'add ' + copy(TemporaryBuf[1], 6, 256);
+	 TemporaryBuf[4] := #9'add ' + GetARG(1);
 
 	 TemporaryBuf[7] := #9'adc #$00';
 

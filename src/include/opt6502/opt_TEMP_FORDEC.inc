@@ -18,7 +18,7 @@ begin
 
      yes:=true;
 
-     arg:=copy(TemporaryBuf[0], 6, 256);
+     arg:=GetARG(0);
 
 
      for p:=6 to High(TemporaryBuf) do
@@ -68,7 +68,7 @@ begin
            lab_l(p+1) then							//l_			// p+1
 	  begin
 	   TemporaryBuf[p-2] := #9'dey';
-	   TemporaryBuf[p-1] := #9'jpl ' + copy(TemporaryBuf[p], 6, 256);
+	   TemporaryBuf[p-1] := #9'jpl ' + GetARG(p);
 
   	   if lab_b(p+2) then begin
 	    TemporaryBuf[p] := '~';//TemporaryBuf[p+1];
@@ -89,7 +89,7 @@ begin
 
 	 Break;
        end else
-        if ( (p-3 >= 8) and (copy(TemporaryBuf[p-3], 6, 256) = arg) ) or fail(p) then yes:=false;
+        if ( (p-3 >= 8) and (GetARG(p-3) = arg) ) or fail(p) then yes:=false;
 {
 	   ldy(p) or
 	   jsr(p) or
@@ -98,7 +98,7 @@ begin
            tay(p) or
 	   mwy(p) or
 	   mvy(p) or
-           (pos(#9'.if', TemporaryBuf[p]) > 0) or
+	   _IF(p) or
            (pos(#9'.LOCAL ', TemporaryBuf[p]) > 0) or
            (pos(#9'@print', TemporaryBuf[p]) > 0) then yes:=false;
 }
@@ -110,12 +110,12 @@ begin
         if yes and
 	   (TemporaryBuf[p] = #9'jmp ' + TemporaryBuf[2]) and			// jmp l_00FB		// p
 	   (TemporaryBuf[p-3] = '; --- ForToDoEpilog') and			// ; --- ForToDoEpilog	// p-3
-	   (TemporaryBuf[p-2] = #9'dec ' + arg) and	// dec I		// p-2
+	   (TemporaryBuf[p-2] = #9'dec ' + arg) and				// dec I		// p-2
 	   (TemporaryBuf[p-1] = #9'bmi *+5') and				// bmi *+5		// p-1
            lab_l(p+1) then							//l_			// p+1
 	  begin
 	   TemporaryBuf[p-2] := #9'dey';
-	   TemporaryBuf[p-1] := #9'jpl ' + copy(TemporaryBuf[p], 6, 256);
+	   TemporaryBuf[p-1] := #9'jpl ' + GetARG(p);
 
   	   if lab_b(p+2) then begin
 	    TemporaryBuf[p] := '~';//TemporaryBuf[p+1];
@@ -134,7 +134,7 @@ begin
 
 	 Break;
        end else
-        if ( (p-3 >= 7) and (copy(TemporaryBuf[p-3], 6, 256) = arg) ) or fail(p) then yes:=false;
+        if ( (p-3 >= 7) and (GetARG(p-3) = arg) ) or fail(p) then yes:=false;
 {
 	   ldy(p) or
 	   jsr(p) or
@@ -143,7 +143,7 @@ begin
            tay(p) or
 	   mwy(p) or
 	   mvy(p) or
-           (pos(#9'.if', TemporaryBuf[p]) > 0) or
+	   _IF(p) or
            (pos(#9'.LOCAL ', TemporaryBuf[p]) > 0) or
            (pos(#9'@print', TemporaryBuf[p]) > 0) then yes:=false;
 }
@@ -158,12 +158,12 @@ begin
 
 	   (TemporaryBuf[p] = #9'jmp ' + TemporaryBuf[2]) and			// jmp l_00FB		// p
 	   (TemporaryBuf[p-3] = '; --- ForToDoEpilog') and			// ; --- ForToDoEpilog	// p-3
-	   (TemporaryBuf[p-2] = #9'dec ' + arg) and	// dec I		// p-2
+	   (TemporaryBuf[p-2] = #9'dec ' + arg) and				// dec I		// p-2
 	   (TemporaryBuf[p-1] = #9'bmi *+5') and				// bmi *+5		// p-1
            lab_l(p+1) then							//l_			// p+1
 	  begin
 	   TemporaryBuf[p-2] := #9'dey';
-	   TemporaryBuf[p-1] := #9'jpl ' + copy(TemporaryBuf[p], 6, 256);
+	   TemporaryBuf[p-1] := #9'jpl ' + GetARG(p);
 
   	   if lab_b(p+2) then begin
 	    TemporaryBuf[p] := '~';//TemporaryBuf[p+1];
@@ -174,7 +174,7 @@ begin
 	    TemporaryBuf[p+1] := #9'sty ' + arg;
 	   end;
 
-	   if copy(TemporaryBuf[6], 6, 256) = arg then TemporaryBuf[6] := #9'tya';
+	   if GetARG(6) = arg then TemporaryBuf[6] := #9'tya';
 
 	   TemporaryBuf[0] := #9'tay';
 
@@ -184,7 +184,7 @@ begin
 
 	 Break;
        end else
-        if ( (p-3 >= 9) and (copy(TemporaryBuf[p-3], 6, 256) = arg) ) or fail(p) then yes:=false;
+        if ( (p-3 >= 9) and (GetARG(p-3) = arg) ) or fail(p) then yes:=false;
 {
 	   ldy(p) or
 	   jsr(p) or
@@ -193,7 +193,7 @@ begin
            tay(p) or
 	   mwy(p) or
 	   mvy(p) or
-           (pos(#9'.if', TemporaryBuf[p]) > 0) or
+	   _IF(p) or
            (pos(#9'.LOCAL ', TemporaryBuf[p]) > 0) or
            (pos(#9'@print', TemporaryBuf[p]) > 0) then yes:=false;
 }

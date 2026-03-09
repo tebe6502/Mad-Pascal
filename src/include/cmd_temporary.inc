@@ -79,6 +79,11 @@ end;
   begin
     Result := pos1(#9'jmp @+', i)
   end;
+  
+  function _IF(const i: Integer): Boolean;
+  begin
+    Result := pos1(#9'.if', i)
+  end;
 
 // -----------------------------------------------------------------------------
 

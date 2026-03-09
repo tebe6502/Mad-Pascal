@@ -82,7 +82,7 @@ var
            tya(i) or
            mwy(i) or
 	   mwy(i) or
-           (pos(#9'.if', TemporaryBuf[i]) > 0) or
+	   _IF(i) or
            (pos(#9'.LOCAL ', TemporaryBuf[i]) > 0) or
            (pos(#9'@print', TemporaryBuf[i]) > 0) then Result:=true else Result:=false;
   end;

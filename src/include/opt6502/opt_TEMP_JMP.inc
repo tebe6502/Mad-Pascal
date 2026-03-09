@@ -14,7 +14,7 @@ begin
       opti(5) and									//; optimize 		; 5
       (TemporaryBuf[6] = '') and							//			; 6
       lda(7) then									// lda A		; 7
-    if (TemporaryBuf[3] = copy(TemporaryBuf[2], 6, 256)) and
+    if (TemporaryBuf[3] = GetARG(2)) and
        argMatch(0, 7) then
     begin
      TemporaryBuf[2] := '~';
@@ -71,7 +71,7 @@ begin
 
     if (SKIP(0) = false) and								//~SKIP			; 0
        jmp_l(1) and									// jmp l_xxxx		; 1
-       (TemporaryBuf[2] = copy(TemporaryBuf[1], 6, 256)) and				//l_xxxx		; 2
+       (TemporaryBuf[2] = GetARG(1)) and						//l_xxxx		; 2
        (IFTMP(3) = false) then								//~lda IFTMP_		; 3
      begin
       TemporaryBuf[1] := '~';
@@ -82,7 +82,7 @@ begin
     if (SKIP(0) = false) and								//~SKIP			; 0
        jmp_l(1) and									// jmp l_xxxx		; 1
        lab_l(2) and									//l_yyyy		; 2
-       (TemporaryBuf[3] = copy(TemporaryBuf[1], 6, 256)) and				//l_xxxx		; 3
+       (TemporaryBuf[3] = GetARG(1)) and						//l_xxxx		; 3
        (IFTMP(4) = false) then								//~lda IFTMP_		; 4
       begin
 	TemporaryBuf[1] := '~';
@@ -94,7 +94,7 @@ begin
     if (SKIP(0) = false) and								//~SKIP			; 0
        (pos('jmp a_', TemporaryBuf[1]) > 0) and						// jmp a_xxxx		; 1
        lab_l(2) and									//l_yyyy		; 2
-       (TemporaryBuf[3] = copy(TemporaryBuf[1], 6, 256)) then				//a_xxxx		; 3
+       (TemporaryBuf[3] = GetARG(1)) then						//a_xxxx		; 3
       begin
 	TemporaryBuf[1] := '~';
       end;
@@ -104,7 +104,7 @@ begin
        (pos('jmp a_', TemporaryBuf[1]) > 0) and						// jmp a_xxxx		; 1
        (TemporaryBuf[2] = '~') and							//~			; 2
        lab_l(3) and									//l_yyyy		; 3
-       (TemporaryBuf[4] = copy(TemporaryBuf[1], 6, 256)) then				//a_xxxx		; 4
+       (TemporaryBuf[4] = GetARG(1)) then						//a_xxxx		; 4
       begin
 	TemporaryBuf[1] := '~';
       end;

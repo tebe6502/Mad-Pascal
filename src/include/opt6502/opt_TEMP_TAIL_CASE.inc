@@ -20,7 +20,7 @@ begin
       if lab_s(i+1) then TemporaryBuf[i+1]:= '~';
 
       tmp:=TemporaryBuf[i];				// jmp a_xxxx
-      lab:=copy(tmp, 6, 256);				// a_xxxx
+      lab:=GetARG(i);					// a_xxxx
 
       yes:=false;
 

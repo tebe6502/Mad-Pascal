@@ -40,7 +40,7 @@ begin
   p:=7;
   yes:=false;
 
-  tmp := #9'ora ' + copy(TemporaryBuf[6], 6, 256);
+  tmp := #9'ora ' + GetARG(6);
 
   while (p < 512) and
         ldy_1(p) and									// ldy #1

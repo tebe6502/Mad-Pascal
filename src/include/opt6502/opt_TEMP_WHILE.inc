@@ -19,7 +19,7 @@ begin
      for p:=5 to High(TemporaryBuf)-1 do
       if (TemporaryBuf[p] = TemporaryBuf[0]) and					// sta K+1		; p
          lab_l(p+1) and									//l_00FA		; p+1
-	 (TemporaryBuf[p+1] = copy(TemporaryBuf[3], 6, 256)) then
+	 (TemporaryBuf[p+1] = GetARG(3)) then
        begin
 	TemporaryBuf[p]   := TemporaryBuf[p+1];
 	TemporaryBuf[p+1] := TemporaryBuf[0];
@@ -38,15 +38,15 @@ begin
       jmp_l(3) and									// jmp l_00FA		; 3
       lab_l(4) then									//l_00FB		; 4
     begin
-     tmp := copy(TemporaryBuf[0], 6, 256);
+     tmp := GetARG(0);
 
      for p:=5 to High(TemporaryBuf)-6 do
       if (SKIP(p-1) = false) and							//~SKIP			; p-1
          (inc_(p) or dec_(p)) and							// inc|dec K		; p
-         (TemporaryBuf[p+1] = copy(TemporaryBuf[3], 6, 256)) and			//l_00FA		; p+1
+         (TemporaryBuf[p+1] = GetARG(3)) and						//l_00FA		; p+1
 											//			; p+2
          opti(p+3) and									// optimize 		; p+3
-         (tmp = copy(TemporaryBuf[p], 6, 256)) and					//			; p+4
+         (tmp = GetARG(p)) and								//			; p+4
          (TemporaryBuf[p+5] = #9'lda ' + tmp) and					// lda K		; p+5
          (TemporaryBuf[p+6] = #9'jne ' + TemporaryBuf[4]) then				// jne l_00FB		; p+6
        begin
@@ -65,24 +65,24 @@ begin
       lab_l(5) then									//l_00FB		; 5
     begin
 
-     tmp:=copy(TemporaryBuf[4], 6, 256);
+     tmp:=GetARG(4);
 
      for p:=7 to High(TemporaryBuf)-6 do
       if TemporaryBuf[p] = tmp then begin
 
 	if (SKIP(p-2) = false) and						//~SKIP			; p-2
-	   (TemporaryBuf[p-1] = #9'dec ' + copy(TemporaryBuf[1], 6, 256)) and	// dec K		; p-1
+	   (TemporaryBuf[p-1] = #9'dec ' + GetARG(1)) and			// dec K		; p-1
 										//			; p
 	   (TemporaryBuf[p+1] = '') and						//			; p+1
            opti(p+2) and							//; optimize 		; p+2
 	   (TemporaryBuf[p+3] = '') and						//			; p+3
-	   (TemporaryBuf[p+4] = #9'lda ' + copy(TemporaryBuf[p-1], 6, 256)) and	// lda K		; p+4
+	   (TemporaryBuf[p+4] = #9'lda ' + GetARG(p-1)) and			// lda K		; p+4
 	   (TemporaryBuf[p+5] = #9'cmp #$FF') and				// cmp #$FF		; p+5
 	   jne(p+6) then 							// jne			; p+6
 	  begin
 	   TemporaryBuf[p+4] := '~';
 	   TemporaryBuf[p+5] := '~';
-	   TemporaryBuf[p+6] := #9'jpl ' + copy(TemporaryBuf[p+6], 6, 256);
+	   TemporaryBuf[p+6] := #9'jpl ' + GetARG(p+6);
 	  end;
 
 	Break;
@@ -102,7 +102,7 @@ begin
     begin
       yes:=true;
 
-      tmp:=copy(TemporaryBuf[3], 6, 256);
+      tmp:=GetARG(3);
 
       for p:=9 to High(TemporaryBuf) do
        if TemporaryBuf[p] = tmp then begin
@@ -138,10 +138,10 @@ begin
     begin
       yes:=true;
 
-      tmp:=copy(TemporaryBuf[3], 6, 256);
+      tmp:=GetARG(3);
 
       for p:=8 to High(TemporaryBuf)-5 do
-       if (TemporaryBuf[p-1] = #9'dec ' + copy(TemporaryBuf[p+4], 6, 256)) and
+       if (TemporaryBuf[p-1] = #9'dec ' + GetARG(p+4)) and
           (TemporaryBuf[p] = tmp) and						//l_00FA		; +0
           (TemporaryBuf[p+1] = '') and						//			; +1
           opti(p+2) and								//; optimize 		; +2

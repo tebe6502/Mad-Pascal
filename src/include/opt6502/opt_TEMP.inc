@@ -15,7 +15,7 @@ begin
       lda(13) and									// lda			; 13	C=1
       sub(14) then									// sub			; 14
     begin
-	TemporaryBuf[14] := #9'sbc ' + copy(TemporaryBuf[14], 6, 256);
+	TemporaryBuf[14] := #9'sbc ' + GetARG(14);
     end;
 
 
@@ -25,7 +25,7 @@ begin
       (TemporaryBuf[13] = '') and							//			; 13	C=1
       sub(14) then									// sub			; 14
     begin
-	TemporaryBuf[14] := #9'sbc ' + copy(TemporaryBuf[14], 6, 256);
+	TemporaryBuf[14] := #9'sbc ' + GetARG(14);
     end;
 
 
@@ -36,7 +36,7 @@ begin
       lda(14) and									// lda			; 14
       sub(15) then									// sub			; 15
     begin
-	TemporaryBuf[15] := #9'sbc ' + copy(TemporaryBuf[15], 6, 256);
+	TemporaryBuf[15] := #9'sbc ' + GetARG(15);
     end;
 
 
@@ -48,7 +48,7 @@ begin
       lda(15) and									// lda			; 15
       sub(16) then									// sub			; 16
     begin
-	TemporaryBuf[16] := #9'sbc ' + copy(TemporaryBuf[16], 6, 256);
+	TemporaryBuf[16] := #9'sbc ' + GetARG(16);
     end;
 
 
@@ -58,7 +58,7 @@ begin
       (TemporaryBuf[13] = '') and							//			; 13	C=0
       add(14) then									// add			; 14
     begin
-	TemporaryBuf[14] := #9'adc ' + copy(TemporaryBuf[14], 6, 256);
+	TemporaryBuf[14] := #9'adc ' + GetARG(14);
     end;
 
 
@@ -69,7 +69,7 @@ begin
       lda(14) and									// lda			; 14
       add(15) then									// add			; 15
     begin
-	TemporaryBuf[15] := #9'adc ' + copy(TemporaryBuf[15], 6, 256);
+	TemporaryBuf[15] := #9'adc ' + GetARG(15);
     end;
 
 
@@ -81,7 +81,7 @@ begin
       lda(15) and									// lda			; 15
       add(16) then									// add			; 16
     begin
-	TemporaryBuf[16] := #9'adc ' + copy(TemporaryBuf[16], 6, 256);
+	TemporaryBuf[16] := #9'adc ' + GetARG(16);
     end;
 
 
@@ -94,7 +94,7 @@ begin
       asl_a(14) and									// asl @		; 14
       (pos('add ', TemporaryBuf[15]) > 0) then						// add			; 15
     begin
-	TemporaryBuf[15] := #9'adc ' + copy(TemporaryBuf[15], 6, 256);
+	TemporaryBuf[15] := #9'adc ' + GetARG(15);
     end;
 
 
@@ -106,7 +106,7 @@ begin
       asl_a(15) and									// asl @		; 15
       (pos('add ', TemporaryBuf[16]) > 0) then						// add			; 16
     begin
-	TemporaryBuf[16] := #9'adc ' + copy(TemporaryBuf[16], 6, 256);
+	TemporaryBuf[16] := #9'adc ' + GetARG(16);
     end;
 }
 
@@ -123,7 +123,7 @@ begin
 	TemporaryBuf[12] := #9'clc';
 	TemporaryBuf[13] := '@';
 
-	TemporaryBuf[15] := #9'adc ' + copy(TemporaryBuf[15], 6, 256);
+	TemporaryBuf[15] := #9'adc ' + GetARG(15);
     end;
 
 
@@ -139,7 +139,7 @@ begin
 	TemporaryBuf[12] := #9'sec';
 	TemporaryBuf[13] := '@';
 
-	TemporaryBuf[15] := #9'sbc ' + copy(TemporaryBuf[15], 6, 256);
+	TemporaryBuf[15] := #9'sbc ' + GetARG(15);
     end;
 
 
@@ -189,7 +189,7 @@ begin
        sta(5) then									// sta			; 5
      if argMatch(1, 3) then
      begin
-	TemporaryBuf[4] := #9'lda ' + copy(TemporaryBuf[4], 6, 256) ;
+	TemporaryBuf[4] := #9'lda ' + GetARG(4) ;
 
 	TemporaryBuf[0] := '~';
 	TemporaryBuf[1] := '~';
@@ -224,18 +224,18 @@ begin
     begin
      TemporaryBuf[2] := #9'iny';
 
-     TemporaryBuf[6] := #9'sty ' + copy(TemporaryBuf[6], 6, 256);
-     TemporaryBuf[7] := #9'cpy ' + copy(TemporaryBuf[7], 6, 256);
+     TemporaryBuf[6] := #9'sty ' + GetARG(6);
+     TemporaryBuf[7] := #9'cpy ' + GetARG(7);
 
      if (SKIP(9) = false) and (pos(' l_', TemporaryBuf[8]) > 0) then begin
 
-      tmp := copy(TemporaryBuf[8], 6, 256);
+      tmp := GetARG(8);
       p:=9;
       while (TemporaryBuf[p] <> tmp) and (p < High(TemporaryBuf)) do inc(p);
 
       if (TemporaryBuf[p] = tmp) and
          mva(p-1) and											// mva ... I
-         (TemporaryBuf[p-1] = #9'mva ' + GetString(p-1) + ' ' + copy(TemporaryBuf[6], 6, 256)) and	//l_
+         (TemporaryBuf[p-1] = #9'mva ' + GetString(p-1) + ' ' + GetARG(6)) and	//l_
          (TemporaryBuf[p+1] = '') then
   	begin
 	 TemporaryBuf[p+1] := TemporaryBuf[6];
@@ -255,7 +255,7 @@ begin
        lda(3) and									// lda			; 3
        (TemporaryBuf[4] = #9'add #$01') then						// add #$01		; 4
       begin
-	TemporaryBuf[3] := #9'add ' + copy(TemporaryBuf[3], 6, 256);
+	TemporaryBuf[3] := #9'add ' + GetARG(3);
 	TemporaryBuf[4] := '~';
       end;
 
@@ -268,7 +268,7 @@ begin
        //(TemporaryBuf[5] = '; --- WhileDoEpilog') then					//; --- WhileDoEpilog	; 5
      if (pos(TemporaryBuf[0], TemporaryBuf[2]) > 0) then
       begin
-	TemporaryBuf[1] := #9'jne ' + copy(TemporaryBuf[3], 6, 256);
+	TemporaryBuf[1] := #9'jne ' + GetARG(3);
       end;
 
 
@@ -330,7 +330,7 @@ begin
        jmp_l(2) then									// jmp l_		; 2
       begin
        TemporaryBuf[0] := #9'scc';
-       TemporaryBuf[1] := #9'jne ' + copy(TemporaryBuf[2], 6, 256);
+       TemporaryBuf[1] := #9'jne ' + GetARG(2);
        TemporaryBuf[2] := '~';
       end;
 
@@ -339,7 +339,7 @@ begin
       (TemporaryBuf[1] = #9'beq *+5') and						// jmp l_xxxx		; 2
       jmp_l(2) then
     begin
-     TemporaryBuf[1] := #9'jne ' + copy(TemporaryBuf[2], 6, 256);
+     TemporaryBuf[1] := #9'jne ' + GetARG(2);
      TemporaryBuf[2] := '~';
     end;
 
@@ -348,7 +348,7 @@ begin
       (TemporaryBuf[1] = #9'bmi *+5') and						// jmp l_xxxx		; 2
       jmp_l(2) then
     begin
-     TemporaryBuf[1] := #9'jpl ' + copy(TemporaryBuf[2], 6, 256);
+     TemporaryBuf[1] := #9'jpl ' + GetARG(2);
      TemporaryBuf[2] := '~';
     end;
 
@@ -356,7 +356,7 @@ begin
    if seq(0) and									// seq			; 0
       jmp_l(1) then									// jmp l_		; 1
     begin
-     TemporaryBuf[0]   := #9'jne ' + copy(TemporaryBuf[1], 6, 256);
+     TemporaryBuf[0]   := #9'jne ' + GetARG(1);
      TemporaryBuf[1] := '~';
     end;
 
@@ -367,7 +367,7 @@ begin
        jmp_l(3) then									// jmp l_		; 3
       begin
        TemporaryBuf[1] := #9'smi';
-       TemporaryBuf[2] := #9'jne ' + copy(TemporaryBuf[3], 6, 256);
+       TemporaryBuf[2] := #9'jne ' + GetARG(3);
        TemporaryBuf[3] := '~';
       end;
 
@@ -379,7 +379,7 @@ begin
       jmp_l(4) and 									// jmp l_xxxx		; 4
       lab_a(5) then									//@			; 5
     begin
-     TemporaryBuf[3] := #9'jne ' + copy(TemporaryBuf[4], 6, 256);
+     TemporaryBuf[3] := #9'jne ' + GetARG(4);
      TemporaryBuf[4] := '~';
      TemporaryBuf[5] := '~';
     end;
@@ -401,7 +401,7 @@ begin
       jmp_l(3) and 									// jmp l_xxxx		; 3
       lab_a(4) then									//@			; 4
     begin
-     TemporaryBuf[2] := #9'jne ' + copy(TemporaryBuf[3], 6, 256);
+     TemporaryBuf[2] := #9'jne ' + GetARG(3);
      TemporaryBuf[3] := '~';
      TemporaryBuf[4] := '~';
     end;
@@ -421,7 +421,7 @@ begin
       jmp_l(2) and									// jmp l_xxxx		; 2
       lab_a(3) then									//@			; 3
     begin
-     TemporaryBuf[1] := #9'jne ' + copy(TemporaryBuf[2], 6, 256);
+     TemporaryBuf[1] := #9'jne ' + GetARG(2);
      TemporaryBuf[2] := '~';
     end;
 
@@ -435,7 +435,7 @@ begin
       jmp_l(6) and 									// jmp l_xxxx		; 6
       lab_a(7) then									//@			; 7
     begin
-     TemporaryBuf[5] := #9'jcc ' + copy(TemporaryBuf[6], 6, 256);
+     TemporaryBuf[5] := #9'jcc ' + GetARG(6);
      TemporaryBuf[6] := '~';
      TemporaryBuf[7] := '~';
     end;
@@ -449,7 +449,7 @@ begin
       jmp_l(5) and 									// jmp l_xxxx		; 5
       lab_a(6) then									//@			; 6
     begin
-     TemporaryBuf[4] := #9'jcc ' + copy(TemporaryBuf[5], 6, 256);
+     TemporaryBuf[4] := #9'jcc ' + GetARG(5);
      TemporaryBuf[5] := '~';
      TemporaryBuf[6] := '~';
     end;
@@ -460,7 +460,7 @@ begin
       jmp_l(2) and									// jmp l_xxxx		; 2
       lab_a(3) then									//@			; 3
     begin
-     TemporaryBuf[1] := #9'jcc ' + copy(TemporaryBuf[2], 6, 256);
+     TemporaryBuf[1] := #9'jcc ' + GetARG(2);
      TemporaryBuf[2] := '~';
     end;
 
@@ -470,7 +470,7 @@ begin
       jmp_l(2) and									// jmp l_xxxx		; 2
       lab_a(3) then									//@			; 3
     begin
-     TemporaryBuf[1] := #9'jcs ' + copy(TemporaryBuf[2], 6, 256);
+     TemporaryBuf[1] := #9'jcs ' + GetARG(2);
      TemporaryBuf[2] := '~';
     end;
 
@@ -486,7 +486,7 @@ begin
 //      lab_l(8) then									//l_00DB		; 8
     if argMatch(0, 6) and
        argMatch(0, 7) and
-       (copy(TemporaryBuf[1], 6, 256) = TemporaryBuf[8]) then
+       (GetARG(1) = TemporaryBuf[8]) then
     begin
      TemporaryBuf[5] := #9'eor #$FF';
      TemporaryBuf[6] := #9'add #$01';
@@ -636,7 +636,7 @@ begin
 
      tmp := copy(tmp, p+1, 256);
 
-     if copy(TemporaryBuf[5], 6, 256) = tmp then begin
+     if GetARG(5) = tmp then begin
       TemporaryBuf[5] := '~';
 
       tmp:=TemporaryBuf[0];
@@ -661,7 +661,7 @@ begin
 
      tmp := copy(tmp, p+1, 256);
 
-     if copy(TemporaryBuf[4], 6, 256) = tmp then TemporaryBuf[4] := '~'
+     if GetARG(4) = tmp then TemporaryBuf[4] := '~'
     end;
 
 
@@ -672,7 +672,7 @@ begin
     begin
      TemporaryBuf[0] := #9'scc';
      TemporaryBuf[1] := #9'iny';
-     TemporaryBuf[2] := #9'sty ' + copy(TemporaryBuf[2], 6, 256);
+     TemporaryBuf[2] := #9'sty ' + GetARG(2);
     end;
 
 
@@ -724,7 +724,7 @@ begin
 
      if sty(5) then begin
       TemporaryBuf[4] := '~';
-      TemporaryBuf[5] := #9'sta ' + copy(TemporaryBuf[5], 6, 256);
+      TemporaryBuf[5] := #9'sta ' + GetARG(5);
      end else
       TemporaryBuf[4] := #9'tay';
 
@@ -763,7 +763,7 @@ begin
       (TemporaryBuf[5] = '') and							//			; 5
       (pos('mwy ', TemporaryBuf[6]) > 0) and (pos(' :bp2', TemporaryBuf[6]) > 0) then	// mwy W :bp2		; 6
     if (pos(TemporaryBuf[0], TemporaryBuf[2]) > 0) and
-       (#9'mwy ' + copy(TemporaryBuf[0], 6, 256) + ' :bp2' = TemporaryBuf[6]) then
+       (#9'mwy ' + GetARG(0) + ' :bp2' = TemporaryBuf[6]) then
     begin
      TemporaryBuf[6] := '~';
      TemporaryBuf[5] := TemporaryBuf[4];
@@ -799,7 +799,7 @@ begin
 	argMatch(5, 10) then
       begin
        TemporaryBuf[10] := '~';
-       TemporaryBuf[9]  := #9'add ' + copy(TemporaryBuf[9], 6, 256);
+       TemporaryBuf[9]  := #9'add ' + GetARG(9);
       end;
 
     end;
@@ -819,7 +819,7 @@ begin
       sta(11) and									// sta			; 11
       (TemporaryBuf[12] = TemporaryBuf[4]) then						// lda K+1		; 12
     begin
-	TemporaryBuf[4] := #9'ldy ' + copy(TemporaryBuf[4], 6, 256);
+	TemporaryBuf[4] := #9'ldy ' + GetARG(4);
 
 	TemporaryBuf[12] := #9'tya';
     end;
@@ -855,7 +855,7 @@ begin
        begin
 	TemporaryBuf[1] := TemporaryBuf[7];
 
-	TemporaryBuf[4] := #9'rol ' + copy(TemporaryBuf[7], 6, 256);
+	TemporaryBuf[4] := #9'rol ' + GetARG(7);
 
 	TemporaryBuf[6] := '~';
 	TemporaryBuf[7] := '~';

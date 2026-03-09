@@ -13,7 +13,7 @@ begin
 												// eif			; 12
 
        mva(0) and										// mva .. X		; 0
-       (TemporaryBuf[1] = #9'mva #$00 ' + copy(TemporaryBuf[5], 6, 256)) and 			// mva #$00 X+1		; 1
+       (TemporaryBuf[1] = #9'mva #$00 ' + GetARG(5)) and 					// mva #$00 X+1		; 1
        lda(2) and										// lda X		; 2
        sta_ecx(3) and										// sta :ecx		; 3
        sta_eax(4) and										// sta :eax		; 4

@@ -26,7 +26,7 @@ begin
 	   lab_l(p) or
            jsr(p) or
 	   tya(p) or
-           (pos(#9'.if', TemporaryBuf[p]) > 0) or
+	   _IF(p) or
            (pos(#9'.LOCAL ', TemporaryBuf[p]) > 0) or
            (pos(#9'@print', TemporaryBuf[p]) > 0) then Break;
 
@@ -85,7 +85,7 @@ begin
       lab_a(11) and										//@			; 11
       (tya(12) or sty(12)) then									// tya|sty		; 12
       begin
-	TemporaryBuf[4] := #9'ora ' + copy(TemporaryBuf[6], 6, 256);
+	TemporaryBuf[4] := #9'ora ' + GetARG(6);
 	TemporaryBuf[5] := '~';
 	TemporaryBuf[6] := '~';
 	TemporaryBuf[7] := '~';
