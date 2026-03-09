@@ -29,13 +29,13 @@ begin
       begin
 	listing[i+1] := '';
 
-	listing[i+3] := #9'ora ' + copy(listing[i+3], 6, 256);
+	listing[i+3] := #9'ora ' + GetARG(i+3);
 	listing[i+4] := '';
 
-	listing[i+6] := #9'ora ' + copy(listing[i+6], 6, 256);
+	listing[i+6] := #9'ora ' + GetARG(i+6);
 	listing[i+7] := '';
 
-	listing[i+9] := #9'ora ' + copy(listing[i+9], 6, 256);
+	listing[i+9] := #9'ora ' + GetARG(i+9);
 	listing[i+10] := '';
 	listing[i+11] := '';
 	listing[i+12] := '';
@@ -65,15 +65,15 @@ begin
        if c = 0 then begin
         listing[i+1] := '';
         listing[i+2] := '';
-        listing[i+3] := #9'ora ' + copy(listing[i+3], 6, 256);
+        listing[i+3] := #9'ora ' + GetARG(i+3);
 
         listing[i+4] := '';
         listing[i+5] := '';
-        listing[i+6] := #9'ora ' + copy(listing[i+6], 6, 256);
+        listing[i+6] := #9'ora ' + GetARG(i+6);
 
         listing[i+7] := '';
         listing[i+8] := '';
-        listing[i+9] := #9'ora ' + copy(listing[i+9], 6, 256);
+        listing[i+9] := #9'ora ' + GetARG(i+9);
 
         listing[i+10] := '';
         listing[i+11] := '';
@@ -109,7 +109,7 @@ begin
 	listing[i+11] := '';
 	listing[i+12] := '';
 
-	listing[i+13] := #9'jmp ' + copy(listing[i+13], 6, 256);
+	listing[i+13] := #9'jmp ' + GetARG(i+13);
 
 	exit(false);
        end;
@@ -158,7 +158,7 @@ begin
       begin
 	listing[i+1] := '';
 
-        listing[i+3] := #9'ora ' + copy(listing[i+3], 6, 256);
+        listing[i+3] := #9'ora ' + GetARG(i+3);
 
        // listing[i+4] := '';
         listing[i+5] := '';
@@ -184,7 +184,7 @@ begin
 	if c = 0 then begin
 	 listing[i+1] := '';
          listing[i+2] := '';
-         listing[i+3] := #9'ora ' + copy(listing[i+3], 6, 256);
+         listing[i+3] := #9'ora ' + GetARG(i+3);
 
          listing[i+5] := '';
          listing[i+6] := '';
@@ -209,7 +209,7 @@ begin
 	 listing[i+5] := '';
 	 listing[i+6] := '';
 
-	 listing[i+7] := #9'jmp ' + copy(listing[i+7], 6, 256);
+	 listing[i+7] := #9'jmp ' + GetARG(i+7);
 
 	 exit(false);
 	end;
@@ -233,11 +233,11 @@ begin
 
 	if c = 0 then begin
 	 listing[i+1] := '';
-         listing[i+2] := #9'jne ' + copy(listing[i+7], 6, 256);
+         listing[i+2] := #9'jne ' + GetARG(i+7);
 
          listing[i+5] := '';
          listing[i+6] := '';
-         listing[i+7] := #9'jne ' + copy(listing[i+7], 6, 256);
+         listing[i+7] := #9'jne ' + GetARG(i+7);
 
 	 exit(false);
         end else
@@ -287,7 +287,7 @@ begin
 	listing[i+10]:= '';
 	listing[i+11]:= '';
 
-	listing[i+12] := #9'jmp ' + copy(listing[i+12], 6, 256);
+	listing[i+12] := #9'jmp ' + GetARG(i+12);
 
 	exit(false);
       end;
@@ -311,7 +311,7 @@ begin
 	if c = 0 then begin
 	 listing[i+1] := '';
          listing[i+2] := '';
-	 listing[i+3] := #9'ora ' + copy(listing[i+3], 6, 256);
+	 listing[i+3] := #9'ora ' + GetARG(i+3);
          listing[i+4] := '';
          listing[i+5] := '';
          listing[i+6] := '';
@@ -343,13 +343,15 @@ begin
        bcs(i+7) and										// bcs @+		; 7
        dey(i+8) then										// dey			; 8
       begin
-	tmp := listing[i];
-	listing[i]   := #9'lda ' + copy(listing[i+1], 6, 256);
-	listing[i+1] := #9'cmp ' + copy(tmp, 6, 256);
+	tmp := GetARG(i);
 
-	tmp := listing[i+3];
-	listing[i+3]   := #9'lda ' + copy(listing[i+4], 6, 256);
-	listing[i+4] := #9'cmp ' + copy(tmp, 6, 256);
+	listing[i]   := #9'lda ' + GetARG(i+1);
+	listing[i+1] := #9'cmp ' + tmp;
+
+	tmp := GetARG(i+3);
+
+	listing[i+3] := #9'lda ' + GetARG(i+4);
+	listing[i+4] := #9'cmp ' + tmp;
 
 	listing[i+6] := '';
 	listing[i+7] := #9'bcc @+';
@@ -389,7 +391,7 @@ begin
 	 listing[i+1] := '';
 	 listing[i+2] := '';
 
-	 listing[i+3] := #9'jmp ' + copy(listing[i+3], 6, 256);
+	 listing[i+3] := #9'jmp ' + GetARG(i+3);
 
 	 exit(false);
 	end;
@@ -434,10 +436,10 @@ begin
        seq(i+2) and										// seq			; 2
        bcs_a(i+3) then										// bcs @+		; 3
       begin
-	tmp := listing[i];
+	tmp := GetARG(i);
 
-	listing[i]   := #9'lda ' + copy(listing[i+1], 6, 256);
-	listing[i+1] := #9'cmp ' + copy(tmp, 6, 256);
+	listing[i]   := #9'lda ' + GetARG(i+1);
+	listing[i+1] := #9'cmp ' + tmp;
 	listing[i+2] := #9'bcc @+';
 	listing[i+3] := '';
 
@@ -452,9 +454,9 @@ begin
        lab_a(i+4) and										//@			; 4
        jmp_l(i+5) then										// jmp l_		; 5
       begin
-	listing[i+1] := #9'jmi ' + copy(listing[i+5], 6, 256);
+	listing[i+1] := #9'jmi ' + GetARG(i+5);
 
-	listing[i+3] := #9'jeq ' + copy(listing[i+5], 6, 256);
+	listing[i+3] := #9'jeq ' + GetARG(i+5);
 	listing[i+4] := '';
 	listing[i+5] := '';
 
@@ -472,9 +474,9 @@ begin
        tya(i+7) and										// tya			; 7
        jeq(i+8) then										// jeq			; 8
       begin
-	listing[i+1] := #9'jmi ' + copy(listing[i+8], 6, 256);
+	listing[i+1] := #9'jmi ' + GetARG(i+8);
 
-	listing[i+3] := #9'jeq ' + copy(listing[i+8], 6, 256);
+	listing[i+3] := #9'jeq ' + GetARG(i+8);
 	listing[i+4] := '';
 	listing[i+5] := '';
 	listing[i+6] := '';
@@ -560,10 +562,10 @@ begin
        (listing[i+6] = #9'ora #$01') and							// ora #$01		; 6
        (listing[i+7] = 'L5') then								//L5			; 7
       begin
-        tmp := listing[i+1];
+        tmp := GetARG(i+1);
 
-	listing[i+1] := #9'lda ' + copy(listing[i+2], 6, 256);
-	listing[i+2] := #9'sub ' + copy(tmp, 6, 256);
+	listing[i+1] := #9'lda ' + GetARG(i+2);
+	listing[i+2] := #9'sub ' + tmp;
 
 	listing[i+9]  := '';
 	listing[i+10] := #9'bmi @+';
@@ -608,7 +610,7 @@ begin
 	 listing[i+12] := '';
 	 listing[i+13] := listing[i+1];
 	 listing[i+14] := #9'bmi @+';
- 	 listing[i+15] := #9'ora ' + copy(listing[i+4], 6, 256);
+ 	 listing[i+15] := #9'ora ' + GetARG(i+4);
 	 listing[i+16] := #9'sne';
 	 listing[i+17] := '@';
 	end else
@@ -671,13 +673,15 @@ begin
        (listing[i+13] = #9'ora #$01') and							// ora #$01		; 13
        (listing[i+14] = 'L5') then								//L5			; 14
       begin
-	tmp := listing[i+1];
-	listing[i+1] := #9'lda ' + copy(listing[i+2], 6, 256);
-	listing[i+2] := #9'sub ' + copy(tmp, 6, 256);
+	tmp := GetARG(i+1);
 
-	tmp := listing[i+4];
-	listing[i+4] := #9'lda ' + copy(listing[i+5], 6, 256);
-	listing[i+5] := #9'cmp ' + copy(tmp, 6, 256);
+	listing[i+1] := #9'lda ' + GetARG(i+2);
+	listing[i+2] := #9'sub ' + tmp;
+
+	tmp := GetARG(i+4);
+
+	listing[i+4] := #9'lda ' + GetARG(i+5);
+	listing[i+5] := #9'cmp ' + tmp;
 
 	listing[i+16] := '';
 	listing[i+17] := #9'bmi @+';
@@ -727,17 +731,17 @@ begin
 	 if lda_im_0(i+1) then begin
  	  listing[i+16] := '';
 	  listing[i+17] := '';
-	  listing[i+18] := #9'lda ' + copy(listing[i+4], 6, 256);
-	  listing[i+19] := #9'ora ' + copy(listing[i+7], 6, 256);
-	  listing[i+20] := #9'ora ' + copy(listing[i+10], 6, 256);
+	  listing[i+18] := #9'lda ' + GetARG(i+4);
+	  listing[i+19] := #9'ora ' + GetARG(i+7);
+	  listing[i+20] := #9'ora ' + GetARG(i+10);
 	  listing[i+21] := #9'sne';
 	  listing[i+22] := '';
 	 end else begin
  	  listing[i+16] := listing[i+1];
 	  listing[i+17] := #9'bmi @+';
-	  listing[i+18] := #9'ora ' + copy(listing[i+4], 6, 256);
-	  listing[i+19] := #9'ora ' + copy(listing[i+7], 6, 256);
-	  listing[i+20] := #9'ora ' + copy(listing[i+10], 6, 256);
+	  listing[i+18] := #9'ora ' + GetARG(i+4);
+	  listing[i+19] := #9'ora ' + GetARG(i+7);
+	  listing[i+20] := #9'ora ' + GetARG(i+10);
 	  listing[i+21] := #9'sne';
 	  listing[i+22] := '@';
 	 end;
@@ -773,11 +777,11 @@ begin
 	  listing[i-1] := '';
 
 	  if jeq(i+28) then begin
-       	   listing[i+23] := #9'jmi ' + copy(listing[i+28], 6, 256);
-           listing[i+24] := #9'jeq ' + copy(listing[i+28], 6, 256);
+       	   listing[i+23] := #9'jmi ' + GetARG(i+28);
+           listing[i+24] := #9'jeq ' + GetARG(i+28);
 	  end else begin
        	   listing[i+23] := #9'smi';
-           listing[i+24] := #9'jne ' + copy(listing[i+28], 6, 256);
+           listing[i+24] := #9'jne ' + GetARG(i+28);
 	  end;
 
           listing[i+25] := '';
@@ -853,8 +857,8 @@ begin
        (listing[i+21] = 'L5') then								//L5			; 21
       begin
 
-	listing[i+23] := #9'jmi ' + copy(listing[i+28], 6, 256);
-	listing[i+24] := #9'jeq ' + copy(listing[i+28], 6, 256);
+	listing[i+23] := #9'jmi ' + GetARG(i+28);
+	listing[i+24] := #9'jeq ' + GetARG(i+28);
 
         for p:=i-1 downto 0 do
 	 if ldy_1(p) then begin listing[p]:=''; Break end;

@@ -151,12 +151,12 @@ begin
 
 	while (listing[p-3] = listing[i]) and (listing[p-2] = listing[i+1]) and (listing[p-1] = listing[i+2]) and (listing[p] = listing[i+3]) do begin
 	 listing[p-3] := '';
-	 listing[p-2] := #9'lsr ' + copy(listing[p-2], 6, 256);
+	 listing[p-2] := #9'lsr ' + GetARG(p-2);
 
 	 dec(p, 4);
 	end;
 
- 	listing[i+1] := #9'lsr ' + copy(listing[i+1], 6, 256);
+ 	listing[i+1] := #9'lsr ' + GetARG(i+1);
 
 	listing[i]   := '';
 
@@ -177,12 +177,12 @@ begin
 	while (listing[p-3] = listing[i]) and (listing[p-2] = listing[i+1]) and (listing[p-1] = listing[i+2]) and (listing[p] = listing[i+3]) do begin
 	 listing[p-3] := '';
 	 listing[p-2] := '';
- 	 listing[p-1] := #9'lsr ' + copy(listing[p-1], 6, 256);
+ 	 listing[p-1] := #9'lsr ' + GetARG(p-1);
 
 	 dec(p, 4);
 	end;
 
- 	listing[i+2] := #9'lsr ' + copy(listing[i+2], 6, 256);
+ 	listing[i+2] := #9'lsr ' + GetARG(i+2);
 
 	listing[i]   := '';
 	listing[i+1] := '';
@@ -207,12 +207,12 @@ begin
 
 	while (listing[p-3] = listing[i]) and (listing[p-2] = listing[i+1]) and (listing[p-1] = listing[i+2]) and (listing[p] = listing[i+3]) do begin
 	 listing[p-3] := '';
-	 listing[p-2] := #9'lsr ' + copy(listing[p-2], 6, 256);
+	 listing[p-2] := #9'lsr ' + GetARG(p-2);
 
 	 dec(p, 4);
 	end;
 
- 	listing[i+1] := #9'lsr ' + copy(listing[i+1], 6, 256);
+ 	listing[i+1] := #9'lsr ' + GetARG(i+1);
 
 	listing[i]   := '';
 
@@ -231,12 +231,12 @@ begin
 	while (listing[p-3] = listing[i]) and (listing[p-2] = listing[i+1]) and (listing[p-1] = listing[i+2]) and (listing[p] = listing[i+3]) do begin
 	 listing[p-3] := '';
 	 listing[p-2] := '';
- 	 listing[p-1] := #9'lsr ' + copy(listing[p-1], 6, 256);
+ 	 listing[p-1] := #9'lsr ' + GetARG(p-1);
 
 	 dec(p, 4);
 	end;
 
- 	listing[i+2] := #9'lsr ' + copy(listing[i+2], 6, 256);
+ 	listing[i+2] := #9'lsr ' + GetARG(i+2);
 
 	listing[i]   := '';
 	listing[i+1] := '';
@@ -258,12 +258,12 @@ begin
 
 	while (listing[p-3] = listing[i]) and (listing[p-2] = listing[i+1]) and (listing[p-1] = listing[i+2]) and (listing[p] = listing[i+3]) do begin
 	 listing[p-3] := '';
- 	 listing[p-2] := #9'lsr ' + copy(listing[p-2], 6, 256);
+ 	 listing[p-2] := #9'lsr ' + GetARG(p-2);
 
 	 dec(p, 4);
 	end;
 
- 	listing[i+1] := #9'lsr ' + copy(listing[i+1], 6, 256);
+ 	listing[i+1] := #9'lsr ' + GetARG(i+1);
 
 	listing[i] := '';
 
@@ -284,12 +284,12 @@ begin
 	while (listing[p-3] = listing[i]) and (listing[p-2] = listing[i+1]) and (listing[p-1] = listing[i+2]) and (listing[p] = listing[i+3]) do begin
 	 listing[p-3] := '';
 	 listing[p-2] := '';
- 	 listing[p-1] := #9'lsr ' + copy(listing[p-1], 6, 256);
+ 	 listing[p-1] := #9'lsr ' + GetARG(p-1);
 
 	 dec(p, 4);
 	end;
 
- 	listing[i+2] := #9'lsr ' + copy(listing[i+2], 6, 256);
+ 	listing[i+2] := #9'lsr ' + GetARG(i+2);
 
 	listing[i]   := '';
 	listing[i+1] := '';
@@ -311,12 +311,12 @@ begin
 
 	while (listing[p-3] = listing[i]) and (listing[p-2] = listing[i+1]) and (listing[p-1] = listing[i+2]) and (listing[p] = listing[i+3]) do begin
 	 listing[p-3] := '';
- 	 listing[p-2] := #9'lsr ' + copy(listing[p-2], 6, 256);
+ 	 listing[p-2] := #9'lsr ' + GetARG(p-2);
 
 	 dec(p, 4);
 	end;
 
- 	listing[i+1] := #9'lsr ' + copy(listing[i+1], 6, 256);
+ 	listing[i+1] := #9'lsr ' + GetARG(i+1);
 
 	listing[i]   := '';
 
@@ -337,12 +337,12 @@ begin
 	while (listing[p-3] = listing[i]) and (listing[p-2] = listing[i+1]) and (listing[p-1] = listing[i+2]) and (listing[p] = listing[i+3]) do begin
 	 listing[p-3] := '';
 	 listing[p-2] := '';
- 	 listing[p-1] := #9'lsr ' + copy(listing[p-1], 6, 256);
+ 	 listing[p-1] := #9'lsr ' + GetARG(p-1);
 
 	 dec(p, 4);
 	end;
 
- 	listing[i+2] := #9'lsr ' + copy(listing[i+2], 6, 256);
+ 	listing[i+2] := #9'lsr ' + GetARG(i+2);
 
 	listing[i]   := '';
 	listing[i+1] := '';

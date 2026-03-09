@@ -197,7 +197,7 @@ begin
 	listing[i+2] := '';
        end else begin
 	listing[i] := listing[i+1];
-	listing[i+1] := #9'cmp ' + copy(listing[i+2], 6, 256);
+	listing[i+1] := #9'cmp ' + GetARG(i+2);
 	listing[i+2] := '';
        end;
 
@@ -245,13 +245,13 @@ begin
 	listing[i+12] := '';
 	listing[i+13] := '';
 	listing[i+14] := listing[i+1];
-	listing[i+15] := #9'ora ' + copy(listing[i+4], 6, 256);
+	listing[i+15] := #9'ora ' + GetARG(i+4);
        end else begin
         listing[i+10] := listing[i+1];
-        listing[i+11] := #9'cmp ' + copy(listing[i+2], 6, 256);
+        listing[i+11] := #9'cmp ' + GetARG(i+2);
 	listing[i+12] := #9'bne @+';
-	listing[i+13] := #9'lda ' + copy(listing[i+4], 6, 256);
-	listing[i+14] := #9'cmp ' + copy(listing[i+5], 6, 256);
+	listing[i+13] := #9'lda ' + GetARG(i+4);
+	listing[i+14] := #9'cmp ' + GetARG(i+5);
 	listing[i+15] := '@';
        end;
 
@@ -306,9 +306,9 @@ begin
 
        if sub_im_0(i+2) and cmp_im_0(i+5) and cmp_im_0(i+8) and cmp_im_0(i+11) then begin
 	listing[i] := listing[i+1];
-	listing[i+1] := #9'ora ' + copy(listing[i+4], 6, 256);
-	listing[i+2] := #9'ora ' + copy(listing[i+7], 6, 256);
-	listing[i+3] := #9'ora ' + copy(listing[i+10], 6, 256);
+	listing[i+1] := #9'ora ' + GetARG(i+4);
+	listing[i+2] := #9'ora ' + GetARG(i+7);
+	listing[i+3] := #9'ora ' + GetARG(i+10);
 	listing[i+4] := '';
 	listing[i+5] := '';
 	listing[i+6] := '';
@@ -319,16 +319,16 @@ begin
 	listing[i+11] := '';
        end else begin
 	listing[i] := listing[i+1];
-	listing[i+1] := #9'cmp ' + copy(listing[i+2], 6, 256);
+	listing[i+1] := #9'cmp ' + GetARG(i+2);
 	listing[i+2] := #9'bne @+';
-	listing[i+3] := #9'lda ' + copy(listing[i+4], 6, 256);
-	listing[i+4] := #9'cmp ' + copy(listing[i+5], 6, 256);
+	listing[i+3] := #9'lda ' + GetARG(i+4);
+	listing[i+4] := #9'cmp ' + GetARG(i+5);
 	listing[i+5] := #9'bne @+';
-	listing[i+6] := #9'lda ' + copy(listing[i+7], 6, 256);
-	listing[i+7] := #9'cmp ' + copy(listing[i+8], 6, 256);
+	listing[i+6] := #9'lda ' + GetARG(i+7);
+	listing[i+7] := #9'cmp ' + GetARG(i+8);
 	listing[i+8] := #9'bne @+';
-	listing[i+9] := #9'lda ' + copy(listing[i+10], 6, 256);
-	listing[i+10] := #9'cmp ' + copy(listing[i+11], 6, 256);
+	listing[i+9] := #9'lda ' + GetARG(i+10);
+	listing[i+10] := #9'cmp ' + GetARG(i+11);
 	listing[i+11] := '@';
        end;
 

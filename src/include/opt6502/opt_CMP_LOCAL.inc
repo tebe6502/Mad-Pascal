@@ -91,13 +91,13 @@ begin
         argMatch(i+4, i+12) and
         argMatch(i+5, i+9) then
      begin
-      listing[i+9] := #9'sub ' + copy(listing[i], 6, 256);
+      listing[i+9] := #9'sub ' + GetARG(i);
 
-      listing[i+12] := #9'cmp ' + copy(listing[i], 6, 256);
+      listing[i+12] := #9'cmp ' + GetARG(i);
 
-      listing[i+15] := #9'cmp ' + copy(listing[i], 6, 256);
+      listing[i+15] := #9'cmp ' + GetARG(i);
 
-      listing[i+18] := #9'cmp ' + copy(listing[i+1], 6, 256);
+      listing[i+18] := #9'cmp ' + GetARG(i+1);
 
       listing[i] := '';
       listing[i+1] := '';
@@ -160,7 +160,7 @@ begin
        lda_stack(i+3) then 									// lda STACKORIGIN			; 3
      if argMatch(i+1, i+3) then
      begin
-	listing[i+3]   := #9'lda ' + copy(listing[i], 6, 256);
+	listing[i+3]   := #9'lda ' + GetARG(i);
 
 	listing[i]   := '';
 	listing[i+1] := '';
@@ -181,7 +181,7 @@ begin
        cmp_stack(i+7) then									// cmp :STACKORIGIN			; 7
      if argMatch(i+1, i+7) then
      begin
-       listing[i+7]  := #9'cmp ' + copy(listing[i], 6, 256);
+       listing[i+7]  := #9'cmp ' + GetARG(i);
 
        listing[i]   := '';
        listing[i+1] := '';
@@ -202,7 +202,7 @@ begin
        cmp(i+7) then										// cmp 					; 7
      if argMatch(i+1, i+6) then
      begin
-       listing[i+6]  := #9'lda ' + copy(listing[i], 6, 256);
+       listing[i+6]  := #9'lda ' + GetARG(i);
 
        listing[i]   := '';
        listing[i+1] := '';
@@ -221,7 +221,7 @@ begin
 //       (listing[i+5] = #9'bne L4') then							// bne L4				; 5
      if argMatch(i+1, i+4) then
      begin
-       listing[i+4]  := #9'sub ' + copy(listing[i], 6, 256);
+       listing[i+4]  := #9'sub ' + GetARG(i);
 
        listing[i]   := '';
        listing[i+1] := '';
@@ -245,7 +245,7 @@ begin
        cmp_stack(i+10) then									// cmp :STACKORIGIN			; 10
      if argMatch(i+1, i+10) then
      begin
-       listing[i+10]  := #9'cmp ' + copy(listing[i], 6, 256);
+       listing[i+10]  := #9'cmp ' + GetARG(i);
 
        listing[i]   := '';
        listing[i+1] := '';
@@ -268,7 +268,7 @@ begin
        lda_stack(i+9) then									// lda :STACKORIGIN			; 9
      if argMatch(i+1, i+9) then
      begin
-       listing[i+9]  := #9'lda ' + copy(listing[i], 6, 256);
+       listing[i+9]  := #9'lda ' + GetARG(i);
 
        listing[i]   := '';
        listing[i+1] := '';
@@ -295,7 +295,7 @@ begin
        cmp_stack(i+13) then									// cmp :STACKORIGIN			; 13
      if argMatch(i+1, i+13) then
      begin
-       listing[i+13]  := #9'cmp ' + copy(listing[i], 6, 256);
+       listing[i+13]  := #9'cmp ' + GetARG(i);
 
        listing[i]   := '';
        listing[i+1] := '';
@@ -321,7 +321,7 @@ begin
        lda_stack(i+12) then									// lda :STACKORIGIN			; 12
      if argMatch(i+1, i+12) then
      begin
-       listing[i+12]  := #9'lda ' + copy(listing[i], 6, 256);
+       listing[i+12]  := #9'lda ' + GetARG(i);
 
        listing[i]   := '';
        listing[i+1] := '';
@@ -345,8 +345,8 @@ begin
      if argMatch(i+2, i+6) and
 	argMatch(i+3, i+9) then
      begin
-       listing[i+6] := #9'sub ' + copy(listing[i], 6, 256);
-       listing[i+9] := #9'cmp ' + copy(listing[i+1], 6, 256);
+       listing[i+6] := #9'sub ' + GetARG(i);
+       listing[i+9] := #9'cmp ' + GetARG(i+1);
 
        listing[i]   := '';
        listing[i+1] := '';
@@ -381,10 +381,10 @@ begin
 	argMatch(i+3, i+10) and
 	argMatch(i+4, i+7) then
      begin
-       listing[i+7]  := #9'sub ' + copy(listing[i], 6, 256);
-       listing[i+10] := #9'cmp ' + copy(listing[i], 6, 256);
-       listing[i+13] := #9'cmp ' + copy(listing[i], 6, 256);
-       listing[i+16] := #9'cmp ' + copy(listing[i], 6, 256);
+       listing[i+7]  := #9'sub ' + GetARG(i);
+       listing[i+10] := #9'cmp ' + GetARG(i);
+       listing[i+13] := #9'cmp ' + GetARG(i);
+       listing[i+16] := #9'cmp ' + GetARG(i);
 
        listing[i]   := '';
        listing[i+1] := '';
@@ -418,9 +418,9 @@ begin
 	argMatch(i+2, i+12) and
 	argMatch(i+3, i+15) then
      begin
-       listing[i+9]  := #9'cmp ' + copy(listing[i], 6, 256);
-       listing[i+12] := #9'cmp ' + copy(listing[i], 6, 256);
-       listing[i+15] := #9'cmp ' + copy(listing[i], 6, 256);
+       listing[i+9]  := #9'cmp ' + GetARG(i);
+       listing[i+12] := #9'cmp ' + GetARG(i);
+       listing[i+15] := #9'cmp ' + GetARG(i);
 
        listing[i]   := '';
        listing[i+1] := '';
@@ -476,8 +476,8 @@ begin
      if argMatch(i+1, i+5) and
 	argMatch(i+2, i+8) then
      begin
-       listing[i+5] := #9'sub ' + copy(listing[i], 6, 256);
-       listing[i+8] := #9'cmp ' + copy(listing[i], 6, 256);
+       listing[i+5] := #9'sub ' + GetARG(i);
+       listing[i+8] := #9'cmp ' + GetARG(i);
 
        listing[i]   := '';
        listing[i+1] := '';
@@ -503,7 +503,7 @@ begin
        cmp(i+8) then										// cmp 					; 8
      if argMatch(i+1, i+7) then
      begin
-       listing[i+7]  := #9'lda ' + copy(listing[i], 6, 256);
+       listing[i+7]  := #9'lda ' + GetARG(i);
 
        listing[i]   := '';
        listing[i+1] := '';
@@ -525,7 +525,7 @@ begin
        cmp_stack(i+8) then									// cmp :STACKORIGIN			; 8
      if argMatch(i+1, i+8) then
      begin
-       listing[i+8]  := #9'cmp ' + copy(listing[i], 6, 256);
+       listing[i+8]  := #9'cmp ' + GetARG(i);
 
        listing[i]   := '';
        listing[i+1] := '';
@@ -545,7 +545,7 @@ begin
 
      if argMatch(i+1, i+5) then
      begin
-       listing[i+5]  := #9'sub ' + copy(listing[i], 6, 256);
+       listing[i+5]  := #9'sub ' + GetARG(i);
 
        listing[i]   := '';
        listing[i+1] := '';
@@ -573,7 +573,7 @@ begin
        cmp_stack(i+14) then									// cmp :STACKORIGIN+9			; 14
      if argMatch(i+1, i+14) then
      begin
-       listing[i+14] := #9'cmp ' + copy(listing[i], 6, 256);
+       listing[i+14] := #9'cmp ' + GetARG(i);
 
        listing[i]   := '';
        listing[i+1] := '';
@@ -598,7 +598,7 @@ begin
        cmp_stack(i+11) then									// cmp :STACKORIGIN+STACKWIDTH		; 11
      if argMatch(i+1, i+11) then
      begin
-       listing[i+11] := #9'cmp ' + copy(listing[i], 6, 256);
+       listing[i+11] := #9'cmp ' + GetARG(i);
 
        listing[i]   := '';
        listing[i+1] := '';
@@ -620,7 +620,7 @@ begin
        cmp_stack(i+8) then									// cmp :STACKORIGIN+STACKWIDTH*2	; 8
      if argMatch(i+1, i+8) then
      begin
-       listing[i+8]  := #9'cmp ' + copy(listing[i], 6, 256);
+       listing[i+8]  := #9'cmp ' + GetARG(i);
 
        listing[i]   := '';
        listing[i+1] := '';
@@ -644,8 +644,8 @@ begin
      if argMatch(i+1, i+9) and
 	argMatch(i+2, i+6) then
      begin
-       listing[i+6] := #9'sub ' + copy(listing[i], 6, 256);
-       listing[i+9] := #9'cmp ' + copy(listing[i], 6, 256);
+       listing[i+6] := #9'sub ' + GetARG(i);
+       listing[i+9] := #9'cmp ' + GetARG(i);
 
        listing[i]   := '';
        listing[i+1] := '';
@@ -670,8 +670,8 @@ begin
      if argMatch(i+1, i+6) and
 	argMatch(i+2, i+9) then
      begin
-       listing[i+6] := #9'sub ' + copy(listing[i], 6, 256);
-       listing[i+9] := #9'cmp ' + copy(listing[i], 6, 256);
+       listing[i+6] := #9'sub ' + GetARG(i);
+       listing[i+9] := #9'cmp ' + GetARG(i);
 
        listing[i]   := '';
        listing[i+1] := '';
@@ -736,9 +736,9 @@ begin
 	argMatch(i+2, i+13) and
 	argMatch(i+3, i+16) then
      begin
-       listing[i+10] := #9'cmp ' + copy(listing[i], 6, 256);
-       listing[i+13] := #9'cmp ' + copy(listing[i], 6, 256);
-       listing[i+16] := #9'cmp ' + copy(listing[i], 6, 256);
+       listing[i+10] := #9'cmp ' + GetARG(i);
+       listing[i+13] := #9'cmp ' + GetARG(i);
+       listing[i+16] := #9'cmp ' + GetARG(i);
 
        listing[i]   := '';
        listing[i+1] := '';
@@ -774,10 +774,10 @@ begin
 	argMatch(i+3, i+14) and
 	argMatch(i+4, i+17) then
      begin
-       listing[i+8]  := #9'sub ' + copy(listing[i], 6, 256);
-       listing[i+11] := #9'cmp ' + copy(listing[i], 6, 256);
-       listing[i+14] := #9'cmp ' + copy(listing[i], 6, 256);
-       listing[i+17] := #9'cmp ' + copy(listing[i], 6, 256);
+       listing[i+8]  := #9'sub ' + GetARG(i);
+       listing[i+11] := #9'cmp ' + GetARG(i);
+       listing[i+14] := #9'cmp ' + GetARG(i);
+       listing[i+17] := #9'cmp ' + GetARG(i);
 
        listing[i]   := '';
        listing[i+1] := '';
@@ -1083,7 +1083,7 @@ begin
        if GetBYTE(i+12) < 128 then begin
 
 	listing[i+8]  := listing[i+11];
-	listing[i+9]  := #9'sub ' + copy(listing[i+12], 6, 256);
+	listing[i+9]  := #9'sub ' + GetARG(i+12);
 	listing[i+10] := #9'beq L5';
 	listing[i+11] := #9'bvc L5';
 	listing[i+12] := #9'eor #$FF';
@@ -1138,7 +1138,7 @@ begin
        listing[i+5] := '';
        listing[i+6] := #9'.LOCAL';
 
-       listing[i+8] := #9'sub ' + copy(listing[i+8], 6, 256);
+       listing[i+8] := #9'sub ' + GetARG(i+8);
        listing[i+9] := #9'bne L4';
 
        listing[i+12] := #9'beq L5';

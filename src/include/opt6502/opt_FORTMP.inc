@@ -12,7 +12,7 @@ begin
     if (pos('sta @FORTMP_', listing[i+1]) > 0) and			// zamiana na MVA aby zadzialala optymalizacja OPTYFOR
        lda_im(i) then
     begin
-     listing[i+1] := #9'mva ' + copy(listing[i], 6, 4) + ' ' +  copy(listing[i+1], 6, 256);
+     listing[i+1] := #9'mva ' + copy(listing[i], 6, 4) + ' ' +  GetARG(i+1);
      listing[i] := '';
 
      exit(false);
@@ -22,7 +22,7 @@ begin
     if (pos('sta @FORTMP_', listing[i+1]) > 0) and			// zamiana na MVA aby zadzialala optymalizacja OPTYFOR
        lda_adr(i) and (iy(i) = false) then
     begin
-     listing[i+1] := #9'mva ' + copy(listing[i], 6, 256) + ' ' +  copy(listing[i+1], 6, 256);
+     listing[i+1] := #9'mva ' + GetARG(i) + ' ' +  GetARG(i+1);
      listing[i] := '';
 
      exit(false);

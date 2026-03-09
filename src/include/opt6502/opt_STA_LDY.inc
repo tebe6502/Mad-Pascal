@@ -16,7 +16,7 @@ begin
 	(lda_adr(i+1) or sta_adr(i+1) or beq(i+1) or sta_adr(i+2) or sta_adr(i+3)) then	// lda adr.|sta adr.|beq	; 1
       begin										//         |sta adr.		; 2
 											//	   |sta adr.		; 3
-	tmp:=#9'sta ' + copy(listing[i], 6, 256);
+	tmp:=#9'sta ' + GetARG(i);
 
 	for p:=i-1 downto 0 do
 	 if (listing[p] = tmp) and (lda_stack(p-1) = false) then begin
@@ -477,8 +477,7 @@ begin
 	  Break;
 
 	 end else
-	  if (pos(copy(listing[i], 6, 256), listing[p]) > 0) or
-	     lab_a(i) or (listing[i] = #9'eif') or
+	  if (pos(GetARG(i), listing[p]) > 0) or lab_a(i) or eif(i) or
 	     (jsr(i) and (pos(#9'jsr @', listing[i]) = 0)) then Break;
 
 	if Result = false then exit(false);
