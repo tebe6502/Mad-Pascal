@@ -12,7 +12,7 @@ begin
        lda(i+1) and									// lda			; 1	~lda adr.
        add_eax(i+2) then								// add :eax		; 2
       begin
-        listing[i+1] := #9'add ' + copy(listing[i+1], 6, 256);
+        listing[i+1] := #9'add ' + GetARG(i+1);
 	listing[i+2] := '';
 
 	exit(false);

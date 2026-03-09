@@ -11,7 +11,7 @@
 
       if test_AND(i) then begin
 
-       tmp := copy(listing[i+2], 6, 256);
+       tmp := GetARG(i+2);
 
        for p := i-1 downto 0 do begin
 
@@ -23,7 +23,7 @@
 	   (listing[p+1] = listing[i+2]) and					// ora :STACKORIGIN	; 1
 	   (listing[p+2] = #9'sta ' + tmp) then					// sta :STACKORIGIN	; 2
 	 begin
-	   listing[p+1] := #9'jne ' + copy(listing[i+3], 6, 256);
+	   listing[p+1] := #9'jne ' + GetARG(i+3);
 	   listing[p+2] := '';
 	 end;
 
@@ -38,8 +38,8 @@
 	   listing[p+2] := '';
 	   listing[p+3] := '';
 	  end else begin
-	   listing[p+1] := #9'lda ' + copy(listing[p+2], 6, 256);
-	   listing[p+2] := #9'jne ' + copy(listing[i+3], 6, 256);
+	   listing[p+1] := #9'lda ' + GetARG(p+2);
+	   listing[p+2] := #9'jne ' + GetARG(i+3);
 	   listing[p+3] := '';
 	  end;
 
@@ -49,7 +49,7 @@
 	   lab_a(p+1) then 							//@
 	begin
 	 listing[p]   := #9'jmp *+6';
-	 listing[p+1] := '@'#9'jmp ' + copy(listing[i+3], 6, 256);
+	 listing[p+1] := '@'#9'jmp ' + GetARG(i+3);
 	end;
 
        end;
@@ -60,7 +60,7 @@
 
        for p:=i downto 1 do
         if (pos(tmp, listing[p]) > 0) and (add_sub(p-1) = false) and (adc_sbc(p-1) = false) and (lda_a(p-1) = false) then begin
-	 if (listing[p] = #9'sta ' + tmp) then listing[p] := #9'jne ' + copy(listing[i+3], 6, 256);
+	 if (listing[p] = #9'sta ' + tmp) then listing[p] := #9'jne ' + GetARG(i+3);
 	 Break;
 	end;
 

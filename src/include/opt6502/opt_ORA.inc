@@ -36,10 +36,10 @@ begin
 	argMatch(i+5, i+15) and
 	argMatch(i+7, i+18) then
        begin
-	listing[i+9]  := #9'ora ' + copy(listing[i], 6, 256);
-	listing[i+12] := #9'ora ' + copy(listing[i+2], 6, 256);
-	listing[i+15] := #9'ora ' + copy(listing[i+4], 6, 256);
-	listing[i+18] := #9'ora ' + copy(listing[i+6], 6, 256);
+	listing[i+9]  := #9'ora ' + GetARG(i);
+	listing[i+12] := #9'ora ' + GetARG(i+2);
+	listing[i+15] := #9'ora ' + GetARG(i+4);
+	listing[i+18] := #9'ora ' + GetARG(i+6);
 
 	listing[i]   := '';
 	listing[i+1] := '';
@@ -174,7 +174,7 @@ begin
        ora(i+1) and									// ora 			; 1
        sta_a(i+2) then									// sta			; 2
      begin
-	listing[i]   := #9'lda ' + copy(listing[i+1], 6, 256) ;
+	listing[i]   := #9'lda ' + GetARG(i+1) ;
 	listing[i+1] := '';
 
 	exit(false);
@@ -198,7 +198,7 @@ begin
      if argMatch(i, i+2) then
        begin
 	listing[i] := '';
-	listing[i+1] := #9'ora ' + copy(listing[i+1], 6, 256);
+	listing[i+1] := #9'ora ' + GetARG(i+1);
 	listing[i+2] := '';
 
 	exit(false);
@@ -267,9 +267,9 @@ begin
      if argMatch(i+2, i+7) and
 	argMatch(i+5, i+10) then
        begin
-	listing[i+2] := #9'ora ' + copy(listing[i+6], 6, 256);
+	listing[i+2] := #9'ora ' + GetARG(i+6);
 
-	listing[i+5] := #9'ora ' + copy(listing[i+9], 6, 256);
+	listing[i+5] := #9'ora ' + GetARG(i+9);
 
 	listing[i+6] := listing[i+5];
 	listing[i+5] := listing[i+4];

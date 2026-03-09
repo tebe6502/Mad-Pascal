@@ -13,7 +13,7 @@ begin
        tay(i+1) and										// tay					; 1
        lda_a(i+2) then										// lda					; 2
      begin
-	listing[i]   := #9'ldy ' + copy(listing[i], 6, 256);
+	listing[i]   := #9'ldy ' + GetARG(i);
 	listing[i+1] := '';
 
 	exit(false);
@@ -34,7 +34,7 @@ begin
 	 listing[i+2] := '';
 
 	end else begin
-	 listing[i]   := #9'ldy ' + copy(listing[i], 6, 256);
+	 listing[i]   := #9'ldy ' + GetARG(i);
 	 listing[i+1] := #9'dey';
 	 listing[i+2] := '';
 	end;
@@ -75,7 +75,7 @@ begin
        lda(i+3) and										// lda					; 3
        add(i+4) then										// add					; 4
       begin
-	listing[i]   := #9'ldy ' + copy(listing[i], 6, 256);
+	listing[i]   := #9'ldy ' + GetARG(i);
 	listing[i+1] := #9'iny';
 	listing[i+2] := '';
 
@@ -108,7 +108,7 @@ begin
     if lda(i) and (iy(i) = false) and								// lda					; 0
        tay(i+1) then										// tay					; 1
       begin
-	listing[i]   := #9'ldy ' + copy(listing[i], 6, 256);
+	listing[i]   := #9'ldy ' + GetARG(i);
 	listing[i+1] := '';
 
 	exit(false);
@@ -157,7 +157,7 @@ begin
        (and_ora_eor_stack(i+6) or add_sub_stack(i+6)) then					// and|ora|eor|add|sub :STACKORIGIN	; 6
      if argMatch(i+1, i+6) then
      begin
-	listing[i+6] := copy(listing[i+6], 1, 5) + copy(listing[i], 6, 256);
+	listing[i+6] := GetCMD(i+6) + GetARG(i);
 
 	listing[i]   := '';
 	listing[i+1] := '';
@@ -177,7 +177,7 @@ begin
        adc_sbc_stack(i+6) then									// adc|sbc :STACKORIGIN+STACKWIDTH	; 6
      if argMatch(i+1, i+6) then
      begin
-	listing[i+6] := copy(listing[i+6], 1, 5) + copy(listing[i], 6, 256);
+	listing[i+6] := GetCMD(i+6) + GetARG(i);
 
 	listing[i]   := '';
 	listing[i+1] := '';
@@ -198,7 +198,7 @@ begin
      if (argMatch(i, i+3) = false) and
         argMatch(i+1, i+6) then
      begin
-	listing[i+6] := copy(listing[i+6], 1, 5) + copy(listing[i], 6, 256);
+	listing[i+6] := GetCMD(i+6) + GetARG(i);
 
 	listing[i]   := '';
 	listing[i+1] := '';
@@ -407,7 +407,7 @@ begin
        sta_a(i+10) then										// sta					; 10
      if argMatch(i+1, i+9) then
       begin
-        listing[i+9] := copy(listing[i+9], 1, 5) + copy(listing[i], 6, 256);
+        listing[i+9] := GetCMD(i+9) + GetARG(i);
 
 	exit(false);
       end;
@@ -482,7 +482,7 @@ begin
        asl_a(i+4) then										// asl @				; 4
 //       tay(i+5) then										// tay					; 5
       begin
-	listing[i+3] := #9'sty ' + copy(listing[i+2], 6, 256);
+	listing[i+3] := #9'sty ' + GetARG(i+2);
 
 	listing[i+2] := #9'tay';
 
@@ -524,7 +524,7 @@ begin
        asl_a(i+6) then										// asl @				; 6
 //       tay(i+7) then										// tay					; 7
       begin
-	listing[i+4] := #9'sty ' + copy(listing[i+3], 6, 256);
+	listing[i+4] := #9'sty ' + GetARG(i+3);
 
 	listing[i+3] := #9'tay';
 
@@ -549,7 +549,7 @@ begin
        asl_a(i+8) then										// asl @				; 8
 //       tay(i+9) then										// tay					; 9
       begin
-	listing[i+5] := #9'sty ' + copy(listing[i+4], 6, 256);
+	listing[i+5] := #9'sty ' + GetARG(i+4);
 
 	listing[i+4] := #9'tay';
 
@@ -641,7 +641,7 @@ begin
 //       add_sub(i+12) and									// add|sub B				; 12
 //       tay(i+13) then										// tay					; 13
       begin
-	listing[i+7] := #9'sty ' + copy(listing[i+6], 6, 256);
+	listing[i+7] := #9'sty ' + GetARG(i+6);
 
 	listing[i+6] := #9'tay';
 
@@ -1169,7 +1169,7 @@ begin
        begin
 	listing[i+1] := '';
 
-	listing[i+4] := copy(listing[i+4], 1, 5) + copy(listing[i], 6, 256);
+	listing[i+4] := GetCMD(i+4) + GetARG(i);
 
 	exit(false);
        end;

@@ -188,29 +188,29 @@ begin
 
 	if (listing[i+9] = #9'jsr addEAX_ECX') then begin
 	 listing_tmp[0] := #9'lda :STACKORIGIN,x';
-	 listing_tmp[1] := #9'add ' + copy(listing[i], 6, 256);
+	 listing_tmp[1] := #9'add ' + GetARG(i);
 	 listing_tmp[2] := listing[i+12];
 	 listing_tmp[3] := #9'lda :STACKORIGIN+STACKWIDTH,x';
-	 listing_tmp[4] := #9'adc ' + copy(listing[i+2], 6, 256);
+	 listing_tmp[4] := #9'adc ' + GetARG(i+2);
 	 listing_tmp[5] := listing[i+14];
 	 listing_tmp[6] := #9'lda :STACKORIGIN+STACKWIDTH*2,x';
-	 listing_tmp[7] := #9'adc ' + copy(listing[i+4], 6, 256);
+	 listing_tmp[7] := #9'adc ' + GetARG(i+4);
 	 listing_tmp[8] := listing[i+16];
 	 listing_tmp[9]  := #9'lda :STACKORIGIN+STACKWIDTH*3,x';
-	 listing_tmp[10] := #9'adc ' + copy(listing[i+6], 6, 256);
+	 listing_tmp[10] := #9'adc ' + GetARG(i+6);
 	 listing_tmp[11] := listing[i+18];
 	end else begin
 	 listing_tmp[0] := #9'lda :STACKORIGIN,x';
-	 listing_tmp[1] := #9'sub ' + copy(listing[i], 6, 256);
+	 listing_tmp[1] := #9'sub ' + GetARG(i);
 	 listing_tmp[2] := listing[i+12];
 	 listing_tmp[3] := #9'lda :STACKORIGIN+STACKWIDTH,x';
-	 listing_tmp[4] := #9'sbc ' + copy(listing[i+2], 6, 256);
+	 listing_tmp[4] := #9'sbc ' + GetARG(i+2);
 	 listing_tmp[5] := listing[i+14];
 	 listing_tmp[6] := #9'lda :STACKORIGIN+STACKWIDTH*2,x';
-	 listing_tmp[7] := #9'sbc ' + copy(listing[i+4], 6, 256);
+	 listing_tmp[7] := #9'sbc ' + GetARG(i+4);
 	 listing_tmp[8] := listing[i+16];
 	 listing_tmp[9]  := #9'lda :STACKORIGIN+STACKWIDTH*3,x';
-	 listing_tmp[10] := #9'sbc ' + copy(listing[i+6], 6, 256);
+	 listing_tmp[10] := #9'sbc ' + GetARG(i+6);
 	 listing_tmp[11] := listing[i+18];
 	end;
 

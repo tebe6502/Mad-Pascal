@@ -38,7 +38,7 @@ begin
 
 	if lda_im(i) then begin
 	 p:=GetWORD(i, i+3);
-	 listing[i]   := #9'lda ' + copy(listing[i+1], 6, 256);
+	 listing[i]   := #9'lda ' + GetARG(i+1);
 	 listing[i+1] := '';
 	end else begin
 	 p:=GetWORD(i+1, i+4);
@@ -97,7 +97,7 @@ begin
 
 	if lda_im(i) then begin
 	 p:=GetWORD(i, i+3);
-	 listing[i]   := #9'lda ' + copy(listing[i+1], 6, 256);
+	 listing[i]   := #9'lda ' + GetARG(i+1);
 	 listing[i+1] := '';
 	end else begin
 	 p:=GetWORD(i+1, i+4);
@@ -186,7 +186,7 @@ begin
 
 	if lda_im(i) then begin
 	 p:=GetWORD(i, i+3);
-	 listing[i]   := #9'lda ' + copy(listing[i+1], 6, 256);
+	 listing[i]   := #9'lda ' + GetARG(i+1);
 	 listing[i+1] := '';
 	end else begin
 	 p:=GetWORD(i+1, i+4);
@@ -267,7 +267,7 @@ begin
 
 	if lda_im(i) then begin
 	 p:=GetWORD(i, i+3);
-	 listing[i]   := #9'lda ' + copy(listing[i+1], 6, 256);
+	 listing[i]   := #9'lda ' + GetARG(i+1);
 	 listing[i+1] := '';
 	end else begin
 	 p:=GetWORD(i+1, i+4);
@@ -537,7 +537,7 @@ begin
        sta_stack(i+5) then									// sta :STACKORIGIN+STACKWIDTH,x	; 5
      if argMatch(i+3, i+5) then
      begin
-       listing[i]   := #9'ldy ' + copy(listing[i], 6, 256);
+       listing[i]   := #9'ldy ' + GetARG(i);
        listing[i+1] := '';
        listing[i+2] := '';
        listing[i+3] := '';

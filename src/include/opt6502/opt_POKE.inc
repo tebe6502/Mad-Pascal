@@ -26,9 +26,9 @@ begin
         if lda_l(i) then
 	 listing[i+4] := #9'mwy #' + copy(listing[i], 7, 256) + ' :bp2'
 	else
-	 listing[i+4] := #9'mwy ' + copy(listing[i], 6, 256) + ' :bp2';
+	 listing[i+4] := #9'mwy ' + GetARG(i) + ' :bp2';
 
-	listing[i+5] := #9'ldy ' + copy(listing[i+1], 6, 256);
+	listing[i+5] := #9'ldy ' + GetARG(i+1);
 	listing[i+6] := #9'lda (:bp2),y';
 
 	if sta_bp_y(i+7) then listing[i+7] := #9'sta (:bp2),y';
@@ -51,9 +51,9 @@ begin
         if lda_l(i) then
 	 listing[i+4] := #9'mwy #' + copy(listing[i], 7, 256) + ' :bp2'
 	else
-	 listing[i+4] := #9'mwy ' + copy(listing[i], 6, 256) + ' :bp2';
+	 listing[i+4] := #9'mwy ' + GetARG(i) + ' :bp2';
 
-	listing[i+5] := #9'ldy ' + copy(listing[i+1], 6, 256);
+	listing[i+5] := #9'ldy ' + GetARG(i+1);
 	listing[i+6] := #9'lda (:bp2),y';
 
 	listing[i]   := '';
@@ -74,9 +74,9 @@ begin
         if lda_l(i) then
 	 listing[i+4] := #9'mwy #' + copy(listing[i], 7, 256) + ' :bp2'
 	else
-	 listing[i+4] := #9'mwy ' + copy(listing[i], 6, 256) + ' :bp2';
+	 listing[i+4] := #9'mwy ' + GetARG(i) + ' :bp2';
 
-	listing[i+5] := #9'ldy ' + copy(listing[i+1], 6, 256);
+	listing[i+5] := #9'ldy ' + GetARG(i+1);
 	listing[i+6] := #9'lda (:bp2),y';
 
 	if lda_bp_y(i+8) then listing[i+8] := #9'lda (:bp2),y';
@@ -99,9 +99,9 @@ begin
         if lda_l(i) then
 	 listing[i+4] := #9'mwy #' + copy(listing[i], 7, 256) + ' :bp2'
 	else
-	 listing[i+4] := #9'mwy ' + copy(listing[i], 6, 256) + ' :bp2';
+	 listing[i+4] := #9'mwy ' + GetARG(i) + ' :bp2';
 
-	listing[i+5] := #9'ldy ' + copy(listing[i+1], 6, 256);
+	listing[i+5] := #9'ldy ' + GetARG(i+1);
 	listing[i+6] := #9'lda (:bp2),y';
 
 	if sta_bp_y(i+8) then listing[i+8] := #9'sta (:bp2),y';
@@ -122,11 +122,11 @@ begin
         if lda_l(i) then
 	 listing[i+4] := #9'mwy #' + copy(listing[i], 7, 256) + ' :bp2'
 	else
-	 listing[i+4] := #9'mwy ' + copy(listing[i], 6, 256) + ' :bp2';
+	 listing[i+4] := #9'mwy ' + GetARG(i) + ' :bp2';
 
-	listing[i+5] := #9'ldy ' + copy(listing[i+1], 6, 256);
+	listing[i+5] := #9'ldy ' + GetARG(i+1);
 
-	listing[i+7] := copy(listing[i+7], 1, 5) + '(:bp2),y';
+	listing[i+7] := GetCMD(i+7) + '(:bp2),y';
 
 	listing[i]   := '';
 	listing[i+1] := '';
@@ -144,9 +144,9 @@ begin
         if lda_l(i) then
 	 listing[i+4] := #9'mwy #' + copy(listing[i], 7, 256) + ' :bp2'
 	else
-	 listing[i+4] := #9'mwy ' + copy(listing[i], 6, 256) + ' :bp2';
+	 listing[i+4] := #9'mwy ' + GetARG(i) + ' :bp2';
 
-	listing[i+5] := #9'ldy ' + copy(listing[i+1], 6, 256);
+	listing[i+5] := #9'ldy ' + GetARG(i+1);
 	listing[i+6] := #9'lda (:bp2),y';
 
 	if sta_bp_y(i+8) then listing[i+8] := #9'sta (:bp2),y';
@@ -167,9 +167,9 @@ begin
 	if lda_l(i) then
 	 listing[i+4] := #9'mwy #' + copy(listing[i], 7, 256) + ' :bp2'
 	else
-	 listing[i+4] := #9'mwy ' + copy(listing[i], 6, 256) + ' :bp2';
+	 listing[i+4] := #9'mwy ' + GetARG(i) + ' :bp2';
 
-	listing[i+5] := #9'ldy ' + copy(listing[i+1], 6, 256);
+	listing[i+5] := #9'ldy ' + GetARG(i+1);
 	listing[i+6] := #9'lda (:bp2),y';
 
 	listing[i]   := '';
@@ -187,9 +187,9 @@ begin
 	if lda_l(i) then
 	 listing[i+4] := #9'mwy #' + copy(listing[i], 7, 256) + ' :bp2'
 	else
-	 listing[i+4] := #9'mwy ' + copy(listing[i], 6, 256) + ' :bp2';
+	 listing[i+4] := #9'mwy ' + GetARG(i) + ' :bp2';
 
-	listing[i+5] := #9'ldy ' + copy(listing[i+1], 6, 256);
+	listing[i+5] := #9'ldy ' + GetARG(i+1);
 	listing[i+6] := #9'lda (:bp2),y';
 
 	if cmp_bp_y(i+7) then listing[i+7] := #9'cmp (:bp2),y';
@@ -211,9 +211,9 @@ begin
         if lda_l(i) then
 	 listing[i+4] := #9'mwy #' + copy(listing[i], 7, 256) + ' :bp2'
 	else
-	 listing[i+4] := #9'mwy ' + copy(listing[i], 6, 256) + ' :bp2';
+	 listing[i+4] := #9'mwy ' + GetARG(i) + ' :bp2';
 
-	listing[i+5] := #9'ldy ' + copy(listing[i+1], 6, 256);
+	listing[i+5] := #9'ldy ' + GetARG(i+1);
 	listing[i+6] := #9'lda (:bp2),y';
 
 	listing[i]   := '';
@@ -231,9 +231,9 @@ begin
         if lda_l(i) then
 	 listing[i+4] := #9'mwy #' + copy(listing[i], 7, 256) + ' :bp2'
 	else
-	 listing[i+4] := #9'mwy ' + copy(listing[i], 6, 256) + ' :bp2';
+	 listing[i+4] := #9'mwy ' + GetARG(i) + ' :bp2';
 
-	listing[i+5] := #9'ldy ' + copy(listing[i+1], 6, 256);
+	listing[i+5] := #9'ldy ' + GetARG(i+1);
 
 	if lda_bp_y(i+6) then listing[i+6] := #9'lda (:bp2),y';
 	if sta_bp_y(i+7) then listing[i+7] := #9'sta (:bp2),y';
@@ -271,9 +271,9 @@ begin
         if (pos('lda <', listing[i]) > 0) and (pos('lda >', listing[i+3]) > 0) then
 	 listing[i+4] := #9'mwy #' + copy(listing[i], 7, 256) + ' :bp2'
 	else
-	 listing[i+4] := #9'mwy ' + copy(listing[i], 6, 256) + ' :bp2';
+	 listing[i+4] := #9'mwy ' + GetARG(i) + ' :bp2';
 
-	listing[i+5] := #9'ldy ' + copy(listing[i+1], 6, 256);
+	listing[i+5] := #9'ldy ' + GetARG(i+1);
 	listing[i+6] := #9'lda (:bp2),y';
 	listing[i+7] := '';
 	listing[i+8] := '';
@@ -298,9 +298,9 @@ begin
         if (pos('lda <', listing[i]) > 0) and (pos('lda >', listing[i+3]) > 0) then
 	 listing[i+4] := #9'mwy #' + copy(listing[i], 7, 256) + ' :bp2'
 	else
-	 listing[i+4] := #9'mwy ' + copy(listing[i], 6, 256) + ' :bp2';
+	 listing[i+4] := #9'mwy ' + GetARG(i) + ' :bp2';
 
-	listing[i+5] := #9'ldy ' + copy(listing[i+1], 6, 256);
+	listing[i+5] := #9'ldy ' + GetARG(i+1);
 	listing[i+6] := #9'lda (:bp2),y';
 	listing[i+7] := '';
 
@@ -332,7 +332,7 @@ begin
 
      for p:=i+1 to l-1 do
       if mwy_bp2(p) and (listing[p] = #9'mwy ' + tmp + ' :bp2') then listing[p] := '' else
-       if bp2_y(p) then begin listing[p] := copy(listing[p], 1, 5) + '(' + tmp + '),y'; yes:=true end else
+       if bp2_y(p) then begin listing[p] := GetCMD(p) + '(' + tmp + '),y'; yes:=true end else
         if (pos('+', listing[p]) = 1) or (pos('-', listing[p]) = 1) then begin
 
 	  if length(listing[p]) = 1 then listing[p] := '';
@@ -374,7 +374,7 @@ begin
 
   if ((pos('+', listing[i]) = 1) or (pos('-', listing[i]) = 1)) and					//+-label				; 0
      ldy_val(i+1) and											// ldy P				; 1
-     lda_val(i+2) and (#9'lda ' + copy(listing[i+1], 6, 256) + '+1' = listing[i+2]) and			// lda P+1				; 2
+     lda_val(i+2) and (#9'lda ' + GetARG(i+1) + '+1' = listing[i+2]) and			// lda P+1				; 2
      sta_bp_1(i+3) then begin										// sta :bp+1				; 3
 
 
@@ -382,7 +382,7 @@ begin
        add_sub(i+5) and										// add|sub				; 5
        sta(i+6) then										// sta					; 6
       begin
-	listing[i+1] := #9'mwy ' + copy(listing[i+1], 6, 256) + ' :bp2';
+	listing[i+1] := #9'mwy ' + GetARG(i+1) + ' :bp2';
 	listing[i+2] := #9'ldy #$00';
 	listing[i+3] := '';
 
@@ -401,7 +401,7 @@ begin
        and_ora_eor(i+5) and									// and|ora|eor				; 5
        sta(i+6) then										// sta					; 6
       begin
-	listing[i+1] := #9'mwy ' + copy(listing[i+1], 6, 256) + ' :bp2';
+	listing[i+1] := #9'mwy ' + GetARG(i+1) + ' :bp2';
 	listing[i+2] := #9'ldy #$00';
 	listing[i+3] := '';
 
@@ -421,7 +421,7 @@ begin
        ldy(i+5) and										// ldy					; 5
        sta(i+6) then										// sta					; 6
       begin
-	listing[i+1] := #9'mwy ' + copy(listing[i+1], 6, 256) + ' :bp2';
+	listing[i+1] := #9'mwy ' + GetARG(i+1) + ' :bp2';
 	listing[i+2] := #9'ldy #$00';
 	listing[i+3] := '';
 
@@ -448,8 +448,8 @@ begin
     if lda(i+7) and										// lda 					; 7
        sta(i+8) then										// sta					; 8
       begin
-	listing[i+1] := #9'mwy ' + copy(listing[i+1], 6, 256) + ' :bp2';
-	listing[i+2] := #9'ldy ' + copy(listing[i+2], 6, 256);
+	listing[i+1] := #9'mwy ' + GetARG(i+1) + ' :bp2';
+	listing[i+2] := #9'ldy ' + GetARG(i+2);
 	listing[i+3] := '';
 	listing[i+4] := '';
 	listing[i+5] := '';

@@ -173,7 +173,7 @@ begin
        sta_a(i+2) then									// sta W				; 2
      if argMatch(i, i+2) then
        begin
-	listing[i]   := #9'inc ' + copy(listing[i], 6, 256);
+	listing[i]   := #9'inc ' + GetARG(i);
 	listing[i+1] := '';
 	listing[i+2] := '';
 
@@ -187,9 +187,9 @@ begin
        sta_a(i+2) and (iy(i+2) = false) and (sta_bp_1(i+2) = false) then		// sta Y				; 2
      if (argMatch(i, i+2) = false) then
      begin
-	listing[i]   := #9'ldy '+copy(listing[i], 6, 256);
+	listing[i]   := #9'ldy '+GetARG(i);
 	listing[i+1] := #9'iny';
-	listing[i+2] := #9'sty '+copy(listing[i+2], 6, 256);
+	listing[i+2] := #9'sty '+GetARG(i+2);
 
 	exit(false);
      end;
@@ -202,7 +202,7 @@ begin
        (iy(i+3) or iy(i+4)) then							// ,y|					; 3
 											//    ,y				; 4
      begin
-	listing[i]   := #9'ldy ' + copy(listing[i], 6, 256);
+	listing[i]   := #9'ldy ' + GetARG(i);
 	listing[i+1] := #9'iny';
 	listing[i+2] := '';
 
@@ -216,14 +216,14 @@ begin
        lda_a(i+3) and									// lda					; 3
        (add_sub(i+4) or sta_a(i+4)) then						// add|sub|sta				; 4
      begin
-	listing[i]   := #9'ldy ' + copy(listing[i], 6, 256);
+	listing[i]   := #9'ldy ' + GetARG(i);
 
         if add_im_1(i+1) then
 	 listing[i+1] := #9'iny'
 	else
 	 listing[i+1] := #9'dey';
 
-	listing[i+2] := #9'sty ' + copy(listing[i+2], 6, 256);
+	listing[i+2] := #9'sty ' + GetARG(i+2);
 
 	exit(false);
      end;
@@ -234,14 +234,14 @@ begin
        sta_val(i+2) and (iy(i+2) = false) and						// sta					; 2	~:STACKORIGIN
        ldy(i+3) then									// ldy					; 3
      begin
-	listing[i]   := #9'ldy ' + copy(listing[i], 6, 256);
+	listing[i]   := #9'ldy ' + GetARG(i);
 
         if add_im_1(i+1) then
 	 listing[i+1] := #9'iny'
 	else
 	 listing[i+1] := #9'dey';
 
-	listing[i+2] := #9'sty ' + copy(listing[i+2], 6, 256);
+	listing[i+2] := #9'sty ' + GetARG(i+2);
 
 	exit(false);
      end;
@@ -289,7 +289,7 @@ begin
       listing[i+2] := '';
       listing[i+3] := '';
       listing[i+4] := '';
-      listing[i+5] := #9'adc ' + copy(listing[i+5], 6, 256);
+      listing[i+5] := #9'adc ' + GetARG(i+5);
 
       exit(false);
      end;
@@ -330,9 +330,9 @@ begin
      begin
 
         if add_stack(i+4) then
-	 listing[i+4]  := #9'add ' + copy(listing[i+1], 6, 256)
+	 listing[i+4]  := #9'add ' + GetARG(i+1)
 	else
-	 listing[i+4]  := #9'sub ' + copy(listing[i+1], 6, 256);
+	 listing[i+4]  := #9'sub ' + GetARG(i+1);
 
 	listing[i+1] := '';
 	listing[i+2] := '';
@@ -350,9 +350,9 @@ begin
      begin
 
 	if add_stack(i+4) then
-	 listing[i+4]  := #9'add ' + copy(listing[i], 6, 256)
+	 listing[i+4]  := #9'add ' + GetARG(i)
 	else
-	 listing[i+4]  := #9'sub ' + copy(listing[i], 6, 256);
+	 listing[i+4]  := #9'sub ' + GetARG(i);
 
 	listing[i]   := '';
 	listing[i+1] := '';
@@ -368,7 +368,7 @@ begin
        add_stack(i+4) then								// add :STACKORIGIN+9			; 4
      if argMatch(i+1, i+4) then
      begin
-	listing[i+3]  := #9'add ' + copy(listing[i+3], 6, 256);
+	listing[i+3]  := #9'add ' + GetARG(i+3);
 
 	listing[i+1] := '';
 	listing[i+4] := '';
@@ -399,10 +399,10 @@ begin
        adc_im_0(i+4) and								// adc #$00				; 4
        sta_bp_1(i+5) then								// sta :bp+1				; 5	!!! sta :bp+1
       begin
-	tmp := listing[i];
+	tmp := GetARG(i);
 
-	listing[i]   := #9'lda ' + copy(listing[i+1], 6, 256);
-	listing[i+1] := #9'add ' + copy(tmp, 6, 256);
+	listing[i]   := #9'lda ' + GetARG(i+1);
+	listing[i+1] := #9'add ' + tmp;
 
 	exit(false);
       end;
@@ -415,15 +415,15 @@ begin
        adc(i+4) and (adc_stack(i+4) = false) and					// adc					; 4	~:STACKWIDTH
        sta_bp_1(i+5) then								// sta :bp+1				; 5	!!! sta :bp+1
       begin
-	tmp := listing[i];
+	tmp := GetARG(i);
 
-	listing[i]   := #9'lda ' + copy(listing[i+1], 6, 256);
-	listing[i+1] := #9'add ' + copy(tmp, 6, 256);
+	listing[i]   := #9'lda ' + GetARG(i+1);
+	listing[i+1] := #9'add ' + tmp;
 
-	tmp := listing[i+3];
+	tmp := GetARG(i+3);
 
-	listing[i+3] := #9'lda ' + copy(listing[i+4], 6, 256);
-	listing[i+4] := #9'adc ' + copy(tmp, 6, 256);
+	listing[i+3] := #9'lda ' + GetARG(i+4);
+	listing[i+4] := #9'adc ' + tmp;
 
 	exit(false);
       end;
@@ -538,8 +538,8 @@ begin
      if argMatch(i+1, i+4) and
 	argMatch(i+2, i+7) then
        begin
-	listing[i+4] := copy(listing[i+4], 1, 5) + copy(listing[i], 6, 256);
-	listing[i+7] := copy(listing[i+7], 1, 5) + copy(listing[i], 6, 256);
+	listing[i+4] := GetCMD(i+4) + GetARG(i);
+	listing[i+7] := GetCMD(i+7) + GetARG(i);
 
 	listing[i]   := '';
 	listing[i+1] := '';
@@ -1150,8 +1150,8 @@ begin
 //       adc_im(i+10) and								// adc #				; 10
        sta_a(i+11) then									// sta :STACKORIGIN+STACKWIDTH*3+10	; 11
       begin
-//	p := GetVAL(copy(listing[i], 6, 256)) + GetVAL(copy(listing[i+3], 6, 256)) shl 8 + GetVAL(copy(listing[i+6], 6, 256)) shl 16 + GetVAL(copy(listing[i+9], 6, 256)) shl 24;
-//	err := GetVAL(copy(listing[i+1], 6, 256)) + GetVAL(copy(listing[i+4], 6, 256)) shl 8 + GetVAL(copy(listing[i+7], 6, 256)) shl 16 + GetVAL(copy(listing[i+10], 6, 256)) shl 24;
+//	p := GetVAL(GetARG(i)) + GetVAL(GetARG(i+3)) shl 8 + GetVAL(GetARG(i+6)) shl 16 + GetVAL(GetARG(i+9)) shl 24;
+//	err := GetVAL(GetARG(i+1)) + GetVAL(GetARG(i+4)) shl 8 + GetVAL(GetARG(i+7)) shl 16 + GetVAL(GetARG(i+10)) shl 24;
 
 	p := GetDWORD(i, i+3, i+6, i+9);
 	q := GetDWORD(i+1, i+4, i+7, i+10);
@@ -1300,8 +1300,8 @@ begin
        (adc(i+10) = false) then								//~adc					; 10
      begin
 
-//      p := GetVAL(copy(listing[i], 6, 256)) + GetVAL(copy(listing[i+3], 6, 256)) shl 8 + GetVAL(copy(listing[i+6], 6, 256)) shl 16;
-//      err := GetVAL(copy(listing[i+1], 6, 256)) + GetVAL(copy(listing[i+4], 6, 256)) shl 8 + GetVAL(copy(listing[i+7], 6, 256)) shl 16;
+//      p := GetVAL(GetARG(i)) + GetVAL(GetARG(i+3)) shl 8 + GetVAL(GetARG(i+6)) shl 16;
+//      err := GetVAL(GetARG(i+1)) + GetVAL(GetARG(i+4)) shl 8 + GetVAL(GetARG(i+7)) shl 16;
 
       p := GetTRIPLE(i, i+3, i+6);
       q := GetTRIPLE(i+1, i+4, i+7);
@@ -1348,10 +1348,10 @@ begin
       listing[i+13] := #9'lda #' + HexByte(byte(p shr 8));
 
       listing[i]   := '';
-      listing[i+1] := #9'lda ' + copy(listing[i+1], 6, 256);
+      listing[i+1] := #9'lda ' + GetARG(i+1);
 
       listing[i+3] := '';
-      listing[i+4] := #9'lda ' + copy(listing[i+4], 6, 256);
+      listing[i+4] := #9'lda ' + GetARG(i+4);
 
       exit(false);
      end;
@@ -1420,10 +1420,10 @@ begin
       listing[i+11] := #9'lda #' + HexByte(byte(p shr 8));
 
       listing[i]   := '';
-      listing[i+1] := #9'lda ' + copy(listing[i+1], 6, 256);
+      listing[i+1] := #9'lda ' + GetARG(i+1);
 
       listing[i+3] := '';
-      listing[i+4] := #9'lda ' + copy(listing[i+4], 6, 256);
+      listing[i+4] := #9'lda ' + GetARG(i+4);
 
       exit(false);
      end;
@@ -1986,13 +1986,13 @@ begin
 	 argMatch(i+6, i+8) and
 	 argMatch(i+9, i+11) then
      begin
-	listing[i]   := #9'inc ' + copy(listing[i], 6, 256);
+	listing[i]   := #9'inc ' + GetARG(i);
 	listing[i+1] := #9'bne @+';
-	listing[i+2] := #9'inc ' + copy(listing[i+3], 6, 256);
+	listing[i+2] := #9'inc ' + GetARG(i+3);
 	listing[i+3] := #9'bne @+';
-	listing[i+4] := #9'inc ' + copy(listing[i+6], 6, 256);
+	listing[i+4] := #9'inc ' + GetARG(i+6);
 	listing[i+5] := #9'bne @+';
-	listing[i+6] := #9'inc ' + copy(listing[i+9], 6, 256);
+	listing[i+6] := #9'inc ' + GetARG(i+9);
 	listing[i+7] := '@';
 	listing[i+8] := '';
 	listing[i+9] := '';
@@ -2019,15 +2019,15 @@ begin
      begin
 
 	if add_im_1(i+1) then begin
-	 listing[i]   := #9'inc ' + copy(listing[i], 6, 256);
+	 listing[i]   := #9'inc ' + GetARG(i);
 	 listing[i+1] := #9'sne';
-	 listing[i+2] := #9'inc ' + copy(listing[i+3], 6, 256);
+	 listing[i+2] := #9'inc ' + GetARG(i+3);
 	 listing[i+3] := '';
 	 listing[i+4] := '';
 	 listing[i+5] := '';
 	end else begin
 	 listing[i+3] := #9'scc';
-	 listing[i+4] := #9'inc ' + copy(listing[i+5], 6, 256);
+	 listing[i+4] := #9'inc ' + GetARG(i+5);
 	 listing[i+5] := '';
 	end;
 
@@ -2071,7 +2071,7 @@ begin
     if argMatch(i+2, i+6) then
        begin
 	listing[i+6] := listing[i];
-	listing[i+7] := #9'adc ' + copy(listing[i+1], 6, 256);
+	listing[i+7] := #9'adc ' + GetARG(i+1);
 
 	listing[i]   := '';
 	listing[i+1] := '';
@@ -2189,7 +2189,7 @@ begin
        begin
 	listing[i+2] := '';
 
-	listing[i+5] := #9'add ' + copy(listing[i+5], 6, 256);
+	listing[i+5] := #9'add ' + GetARG(i+5);
 
 	exit(false);
        end;
@@ -2207,11 +2207,11 @@ begin
        begin
 
 	if add_stack(i+7) then
-	  listing[i+7] := #9'add ' + copy(listing[i], 6, 256)
+	  listing[i+7] := #9'add ' + GetARG(i)
 	else
-	  listing[i+7] := #9'sub ' + copy(listing[i], 6, 256);
+	  listing[i+7] := #9'sub ' + GetARG(i);
 
-	listing[i+4] := #9'add ' + copy(listing[i+4], 6, 256);
+	listing[i+4] := #9'add ' + GetARG(i+4);
 
 	listing[i]   := '';
 	listing[i+1] := '';
@@ -2232,7 +2232,7 @@ begin
        begin
 	listing[i] := '';
 
-	listing[i+1] := #9'add ' + copy(listing[i+1], 6, 256);
+	listing[i+1] := #9'add ' + GetARG(i+1);
 	listing[i+2] := #9'tay';
 	listing[i+3] := #9'iny';
 
@@ -2254,7 +2254,7 @@ begin
      if argMatch(i, i+4) and
 	(pos(listing[i+2], listing[i+5]) > 0) then
        begin
-	listing[i] := #9'add ' + copy(listing[i+3], 6, 256);
+	listing[i] := #9'add ' + GetARG(i+3);
 
 	listing[i+3] := listing[i+1];
 	listing[i+4] := listing[i+2];
@@ -2282,9 +2282,9 @@ begin
       begin
 
         if add_stack(i+6) then
-	 listing[i+6] := #9'add ' + copy(listing[i], 6, 256)
+	 listing[i+6] := #9'add ' + GetARG(i)
 	else
-	 listing[i+6] := #9'sub ' + copy(listing[i], 6, 256);
+	 listing[i+6] := #9'sub ' + GetARG(i);
 
 	listing[i+8] := listing[i+2];
 
@@ -2318,11 +2318,11 @@ begin
       begin
 
         if add_stack(i+9) then begin
-	 listing[i+9] := #9'add ' + copy(listing[i], 6, 256);
-	 listing[i+12]:= #9'adc ' + copy(listing[i+2], 6, 256);
+	 listing[i+9] := #9'add ' + GetARG(i);
+	 listing[i+12]:= #9'adc ' + GetARG(i+2);
 	end else begin
-	 listing[i+9] := #9'sub ' + copy(listing[i], 6, 256);
-	 listing[i+12]:= #9'sbc ' + copy(listing[i+2], 6, 256);
+	 listing[i+9] := #9'sub ' + GetARG(i);
+	 listing[i+12]:= #9'sbc ' + GetARG(i+2);
 	end;
 
 	listing[i]   := '';
@@ -2361,10 +2361,10 @@ begin
 	argMatch(i+5, i+15) and
 	argMatch(i+7, i+18) then
 	begin
-	listing[i+9]  := #9'add ' + copy(listing[i], 6, 256);
-	listing[i+12] := #9'adc ' + copy(listing[i+2], 6, 256);
-	listing[i+15] := #9'adc ' + copy(listing[i+4], 6, 256);
-	listing[i+18] := #9'adc ' + copy(listing[i+6], 6, 256);
+	listing[i+9]  := #9'add ' + GetARG(i);
+	listing[i+12] := #9'adc ' + GetARG(i+2);
+	listing[i+15] := #9'adc ' + GetARG(i+4);
+	listing[i+18] := #9'adc ' + GetARG(i+6);
 
 	listing[i] := '';
 	listing[i+1] := '';
@@ -2395,7 +2395,7 @@ begin
      if argMatch(i+1, i+6) and
 	argMatch(i+3, i+8) then
 	begin
-	listing[i+6]  := #9'add ' + copy(listing[i], 6, 256);
+	listing[i+6]  := #9'add ' + GetARG(i);
 
 	listing[i+8] := listing[i+2];
 
@@ -2421,7 +2421,7 @@ begin
        sta_stack(i+8) then								// sta :STACKORIGIN+STACKWIDTH		; 8
      if argMatch(i+1, i+4) then
 	begin
-	 listing[i+4]  := #9'add ' + copy(listing[i], 6, 256);
+	 listing[i+4]  := #9'add ' + GetARG(i);
 
 	 listing[i] := '';
 	 listing[i+1] := '';
@@ -2456,10 +2456,10 @@ begin
 	argMatch(i+5, i+14) and
 	argMatch(i+6, i+17) then
 	begin
-	listing[i+8]  := #9'add ' + copy(listing[i], 6, 256);
-	listing[i+11] := #9'adc ' + copy(listing[i+2], 6, 256);
-	listing[i+14] := #9'adc ' + copy(listing[i+4], 6, 256);
-	listing[i+17] := #9'adc ' + copy(listing[i+4], 6, 256);
+	listing[i+8]  := #9'add ' + GetARG(i);
+	listing[i+11] := #9'adc ' + GetARG(i+2);
+	listing[i+14] := #9'adc ' + GetARG(i+4);
+	listing[i+17] := #9'adc ' + GetARG(i+4);
 
 	listing[i] := '';
 	listing[i+1] := '';
@@ -2480,7 +2480,7 @@ begin
        sta_a(i+4) then									// sta					; 4
      if argMatch(i+1, i+3) then
       begin
-	listing[i+3] := #9'add ' + copy(listing[i], 6, 256);
+	listing[i+3] := #9'add ' + GetARG(i);
 
 	listing[i]   := '';
 	listing[i+1] := '';
@@ -2496,7 +2496,7 @@ begin
        sta_a(i+4) then									// sta					; 4
      if argMatch(i+1, i+3) then
       begin
-	listing[i+3] := #9'add ' + copy(listing[i+2], 6, 256);
+	listing[i+3] := #9'add ' + GetARG(i+2);
 
 	listing[i+1] := '';
 	listing[i+2] := '';
@@ -2512,7 +2512,7 @@ begin
        sta_a(i+4) then									// sta					; 4
      if argMatch(i, i+3) then
       begin
-	listing[i+1] := #9'add ' + copy(listing[i+1], 6, 256);
+	listing[i+1] := #9'add ' + GetARG(i+1);
 
 	listing[i]   := '';
 
@@ -2532,7 +2532,7 @@ begin
        (adc(i+7) = false) then								//~adc					; 7
      if argMatch(i+1, i+4) then
       begin
-	listing[i+2] := #9'add ' + copy(listing[i+2], 6, 256);
+	listing[i+2] := #9'add ' + GetARG(i+2);
 
 	listing[i+1] := '';
 
@@ -2571,7 +2571,7 @@ begin
 	if lda_im_0(i) then
 	 listing[i+5] := ''
 	else
-	 listing[i+5] := #9'add ' + copy(listing[i], 6, 256);
+	 listing[i+5] := #9'add ' + GetARG(i);
 
 	listing[i]   := '';
 	listing[i+1] := '';
@@ -2607,7 +2607,7 @@ begin
 	listing[i+5] := '';
 	listing[i+6] := '';
 
-	listing[i+11] := #9'adc ' + copy(listing[i+1], 6, 256);
+	listing[i+11] := #9'adc ' + GetARG(i+1);
 
 	listing[i+1] := '';
 	listing[i+2] := '';
@@ -2635,10 +2635,10 @@ begin
     if argMatch(i+2, i+6) and
        argMatch(i+5, i+9) then
        begin
-	listing[i+6] := #9'lda ' + copy(listing[i+1], 6, 256);
+	listing[i+6] := #9'lda ' + GetARG(i+1);
 
-	listing[i+9]  := #9'lda ' + copy(listing[i+4], 6, 256);
-	listing[i+10] := #9'adc ' + copy(listing[i+3], 6, 256);
+	listing[i+9]  := #9'lda ' + GetARG(i+4);
+	listing[i+10] := #9'adc ' + GetARG(i+3);
 
 	listing[i]   := '';
 	listing[i+1] := '';
@@ -2666,9 +2666,9 @@ begin
      if argMatch(i+1, i+5) and
 	argMatch(i+3, i+8) then
       begin
-	listing[i+5] := #9'add ' + copy(listing[i], 6, 256);
+	listing[i+5] := #9'add ' + GetARG(i);
 
-	listing[i+8] := #9'adc ' + copy(listing[i+2], 6, 256);
+	listing[i+8] := #9'adc ' + GetARG(i+2);
 
 	listing[i]   := '';
 	listing[i+1] := '';
@@ -2712,15 +2712,15 @@ begin
        begin
 
 	if add_stack(i+10) then begin
-	 listing[i+10] := #9'add ' + copy(listing[i+1], 6, 256);
-	 listing[i+13] := #9'adc ' + copy(listing[i+3], 6, 256);
-	 listing[i+16] := #9'adc ' + copy(listing[i+5], 6, 256);
-	 listing[i+19] := #9'adc ' + copy(listing[i+7], 6, 256);
+	 listing[i+10] := #9'add ' + GetARG(i+1);
+	 listing[i+13] := #9'adc ' + GetARG(i+3);
+	 listing[i+16] := #9'adc ' + GetARG(i+5);
+	 listing[i+19] := #9'adc ' + GetARG(i+7);
 	end else begin
-	 listing[i+10] := #9'sub ' + copy(listing[i+1], 6, 256);
-	 listing[i+13] := #9'sbc ' + copy(listing[i+3], 6, 256);
-	 listing[i+16] := #9'sbc ' + copy(listing[i+5], 6, 256);
-	 listing[i+19] := #9'sbc ' + copy(listing[i+7], 6, 256);
+	 listing[i+10] := #9'sub ' + GetARG(i+1);
+	 listing[i+13] := #9'sbc ' + GetARG(i+3);
+	 listing[i+16] := #9'sbc ' + GetARG(i+5);
+	 listing[i+19] := #9'sbc ' + GetARG(i+7);
 	end;
 
 	listing[i+1] := '';
@@ -2754,11 +2754,11 @@ begin
        begin
 
 	if add_stack(i+6) then begin
-	 listing[i+6] := #9'add ' + copy(listing[i+1], 6, 256);
-	 listing[i+9] := #9'adc ' + copy(listing[i+3], 6, 256);
+	 listing[i+6] := #9'add ' + GetARG(i+1);
+	 listing[i+9] := #9'adc ' + GetARG(i+3);
 	end else begin
-	 listing[i+6] := #9'sub ' + copy(listing[i+1], 6, 256);
-	 listing[i+9] := #9'sbc ' + copy(listing[i+3], 6, 256);
+	 listing[i+6] := #9'sub ' + GetARG(i+1);
+	 listing[i+9] := #9'sbc ' + GetARG(i+3);
 	end;
 
 	listing[i+1] := '';
@@ -2796,11 +2796,11 @@ begin
        begin
 
 	if add_stack(i+12) then begin
-	 listing[i+12] := #9'add ' + copy(listing[i+7], 6, 256);
-	 listing[i+15] := #9'adc ' + copy(listing[i+9], 6, 256);
+	 listing[i+12] := #9'add ' + GetARG(i+7);
+	 listing[i+15] := #9'adc ' + GetARG(i+9);
 	end else begin
-	 listing[i+12] := #9'sub ' + copy(listing[i+7], 6, 256);
-	 listing[i+15] := #9'sbc ' + copy(listing[i+9], 6, 256);
+	 listing[i+12] := #9'sub ' + GetARG(i+7);
+	 listing[i+15] := #9'sbc ' + GetARG(i+9);
 	end;
 
 	listing[i+7] := '';
@@ -2974,9 +2974,9 @@ begin
 											//					; 7
        (adc(i+8) = false) then								//~adc					; 8
        begin
-        listing[i+2] := #9'add ' + copy(listing[i+1], 6, 256);
+        listing[i+2] := #9'add ' + GetARG(i+1);
 
-	listing[i+5] := #9'adc ' + copy(listing[i+4], 6, 256);
+	listing[i+5] := #9'adc ' + GetARG(i+4);
 
 	listing[i+1] := #9'lda :eax';
 
@@ -3018,9 +3018,9 @@ begin
       begin
 
 	if adc(i+6) then
-	 listing[i+6] := #9'adc ' + copy(listing[i], 6, 256)
+	 listing[i+6] := #9'adc ' + GetARG(i)
 	else
-	 listing[i+6] := #9'sbc ' + copy(listing[i], 6, 256);
+	 listing[i+6] := #9'sbc ' + GetARG(i);
 
 	listing[i]   := '';
 	listing[i+1] := '';
@@ -3039,9 +3039,9 @@ begin
       begin
 
 	if add_eax(i+5) then
-	 listing[i+5] := #9'add ' + copy(listing[i], 6, 256)
+	 listing[i+5] := #9'add ' + GetARG(i)
 	else
-	 listing[i+5] := #9'sub ' + copy(listing[i], 6, 256);
+	 listing[i+5] := #9'sub ' + GetARG(i);
 
 	listing[i]   := '';
 	listing[i+1] := '';
@@ -3069,13 +3069,13 @@ begin
      if argMatch(i+2, i+7) and
 	argMatch(i+5, i+10) then
        begin
-	listing[i+7] := #9'add ' + copy(listing[i], 6, 256);
+	listing[i+7] := #9'add ' + GetARG(i);
 
 	listing[i]   := '';
 	listing[i+1] := '';
 	listing[i+2] := '';
 
-	listing[i+4] := #9'add ' + copy(listing[i+4], 6, 256);
+	listing[i+4] := #9'add ' + GetARG(i+4);
 
 	exit(false);
        end;
@@ -3090,7 +3090,7 @@ begin
 //       adc_im_0(i+4) and								// adc #$00				; 4
        add(i+5) then									// add					; 5
      begin
-	listing[i+4] := #9'adc ' + copy(listing[i+5], 6, 256);
+	listing[i+4] := #9'adc ' + GetARG(i+5);
 	listing[i+5] := '';
 
 	exit(false);
@@ -3106,7 +3106,7 @@ begin
 //       adc_im_0(i+4) and								// adc #$00				; 4
        add(i+5) then									// add					; 5
      begin
-	listing[i+4] := #9'adc ' + copy(listing[i+5], 6, 256);
+	listing[i+4] := #9'adc ' + GetARG(i+5);
 	listing[i+5] := '';
 
 	exit(false);
@@ -3134,7 +3134,7 @@ begin
        argMatch(i+5, i+9) and
        argMatch(i+9, i+11) then
      begin
-      listing[i] := #9'lda ' + copy(listing[i+7],6, 256);
+      listing[i] := #9'lda ' + GetARG(i+7);
 
       listing[i+6] := '';
       listing[i+7] := '';
@@ -3172,7 +3172,7 @@ begin
       (adc(i+7) = false) then								//~adc					; 7
      begin
       listing[i]   := '';
-      listing[i+1] := #9'lda ' + copy(listing[i+1], 6, 256);
+      listing[i+1] := #9'lda ' + GetARG(i+1);
 
       listing[i+4] := '';
 
@@ -3195,7 +3195,7 @@ begin
       (adc(i+10) = false) then								//~adc					; 10
      begin
       listing[i]   := '';
-      listing[i+1] := #9'lda ' + copy(listing[i+1], 6, 256);
+      listing[i+1] := #9'lda ' + GetARG(i+1);
 
       listing[i+4] := '';
 
@@ -3221,13 +3221,13 @@ begin
       listing[i+1] := '';
 
       listing[i+3] := '';
-      listing[i+4] := #9'lda ' + copy(listing[i+4], 6, 256);
+      listing[i+4] := #9'lda ' + GetARG(i+4);
 
       listing[i+6] := '';
-      listing[i+7] := #9'lda ' + copy(listing[i+7], 6, 256);
+      listing[i+7] := #9'lda ' + GetARG(i+7);
 
       listing[i+9]  := '';
-      listing[i+10] := #9'lda ' + copy(listing[i+10], 6, 256);
+      listing[i+10] := #9'lda ' + GetARG(i+10);
 
       exit(false);
      end;
@@ -3287,7 +3287,7 @@ begin
       listing[i+1] := '';
 
       listing[i+3] := '';
-      listing[i+4] := #9'lda ' + copy(listing[i+4], 6, 256);
+      listing[i+4] := #9'lda ' + GetARG(i+4);
 
       exit(false);
      end;
@@ -3318,7 +3318,7 @@ begin
      if (argMatch(i+1, i+2) = false) then
       begin
 	listing[i]   := '';
-	listing[i+1] := #9'lda ' + copy(listing[i+1], 6, 256);
+	listing[i+1] := #9'lda ' + GetARG(i+1);
 
 	exit(false);
       end;
@@ -3332,8 +3332,8 @@ begin
        adc(i+5) then									// adc					; 5
      begin
       listing[i]   := '';
-      listing[i+1] := #9'lda ' + copy(listing[i+1], 6, 256);
-      listing[i+5] := #9'add ' + copy(listing[i+5], 6, 256);
+      listing[i+1] := #9'lda ' + GetARG(i+1);
+      listing[i+5] := #9'add ' + GetARG(i+5);
 
       exit(false);
      end;
@@ -3348,9 +3348,9 @@ begin
        sta_a(i+5) and (sta_bp_1(i+5) = false) then					// sta					; 5	~sta :bp+1	!!!
      begin
       listing[i]   := '';
-      listing[i+1] := #9'lda ' + copy(listing[i+1], 6, 256);
+      listing[i+1] := #9'lda ' + GetARG(i+1);
 
-      listing[i+4] := #9'add ' + copy(listing[i+4], 6, 256);
+      listing[i+4] := #9'add ' + GetARG(i+4);
 
       exit(false);
      end;
@@ -3363,9 +3363,9 @@ begin
        adc(i+4) then									// adc					; 4
      begin
 	listing[i]   := '';
-	listing[i+1] := #9'lda ' + copy(listing[i+1], 6, 256);
+	listing[i+1] := #9'lda ' + GetARG(i+1);
 
-	listing[i+4] := #9'add ' + copy(listing[i+4], 6, 256);
+	listing[i+4] := #9'add ' + GetARG(i+4);
 
 	exit(false);
      end;
@@ -3379,7 +3379,7 @@ begin
      begin
       listing[i+1] := '';
 
-      listing[i+4] := #9'add ' + copy(listing[i+4], 6, 256);
+      listing[i+4] := #9'add ' + GetARG(i+4);
 
       exit(false);
      end;
@@ -3392,7 +3392,7 @@ begin
        (adc(i+4) = false) then								//~adc					; 4
      begin
 	listing[i] := '';
-	listing[i+1] := #9'adc ' + copy(listing[i+1], 6, 256);
+	listing[i+1] := #9'adc ' + GetARG(i+1);
 
 	exit(false);
      end;
@@ -3406,7 +3406,7 @@ begin
        (adc(i+5) = false) then								//~adc					; 5
      begin
 	listing[i] := '';
-	listing[i+2] := #9'adc ' + copy(listing[i+2], 6, 256);
+	listing[i+2] := #9'adc ' + GetARG(i+2);
 
 	exit(false);
      end;
@@ -3471,7 +3471,7 @@ begin
      begin
       listing[i+1] := '';
 
-      listing[i+5] := #9'add ' + copy(listing[i+5], 6, 256);
+      listing[i+5] := #9'add ' + GetARG(i+5);
 
       exit(false);
      end;
@@ -3494,7 +3494,7 @@ begin
        add_stack(i+2) then								// add :STACKORIGIN			; 2
      if argMatch(i, i+2) then
      begin
-	listing[i]   := #9'add ' + copy(listing[i+1], 6, 256);
+	listing[i]   := #9'add ' + GetARG(i+1);
 	listing[i+1] := '';
 	listing[i+2] := '';
 
@@ -3507,7 +3507,7 @@ begin
        sta_a(i+2) then									// sta					; 2
      if argMatch(i, i+1) then
      begin
-	listing[i]   := #9'add ' + copy(listing[i+2], 6, 256);
+	listing[i]   := #9'add ' + GetARG(i+2);
 	listing[i+1] := '';
 
 	exit(false);

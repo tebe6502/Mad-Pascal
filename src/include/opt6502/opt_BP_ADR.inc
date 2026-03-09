@@ -21,7 +21,7 @@ begin
        sta_bp_y(i+8) then								// sta (:bp),y				; 8
     begin
 
-     tmp := #9'sta ' + copy(listing[i+1], 6, 256);
+     tmp := #9'sta ' + GetARG(i+1);
 
      for p:=i-1 downto 0 do
       if listing[p] = tmp then begin
@@ -124,16 +124,16 @@ begin
 	if lda_im(p-2) then begin
 	 q:=GetWORD(p-2, p+1);
 
-	 listing[i+4] := #9'ldy ' + copy(listing[p-1], 6, 256);
+	 listing[i+4] := #9'ldy ' + GetARG(p-1);
 	 listing[i+5] := '';
 	end else begin
 	 q:=GetWORD(p-1, p+2);
 
 	 if iy(p-2) = false then begin
- 	  listing[i+4] := #9'ldy ' + copy(listing[p-2], 6, 256);
+ 	  listing[i+4] := #9'ldy ' + GetARG(p-2);
  	  listing[i+5] := '';
 	 end else begin
-	  listing[i+4] := #9'lda ' + copy(listing[i+1], 6, 256);
+	  listing[i+4] := #9'lda ' + GetARG(i+1);
 	  listing[i+5] := #9'tay';
 	 end;
 
@@ -171,16 +171,16 @@ begin
 	if lda_im(p-2) then begin
 	 q:=GetWORD(p-2, p+1);
 
-	 listing[i+4] := #9'ldy ' + copy(listing[p-1], 6, 256);
+	 listing[i+4] := #9'ldy ' + GetARG(p-1);
 	 listing[i+5] := '';
 	end else begin}
 	 q:=GetWORD(p-1, p+2);
 
 	 if iy(p-2) = false then begin
- 	  listing[i+4] := #9'ldy ' + copy(listing[p-2], 6, 256);
+ 	  listing[i+4] := #9'ldy ' + GetARG(p-2);
  	  listing[i+5] := '';
 	 end else begin
-	  listing[i+4] := #9'lda ' + copy(listing[i+1], 6, 256);
+	  listing[i+4] := #9'lda ' + GetARG(i+1);
 	  listing[i+5] := #9'tay';
 	 end;
 
@@ -274,7 +274,7 @@ begin
        add_sub(i+7) and									// add|sub				; 7
        sta_bp_y(i+8) then								// sta (:bp),y				; 8
     begin
-	listing[i+5] := #9'ldy ' + copy(listing[i+1], 6, 256);
+	listing[i+5] := #9'ldy ' + GetARG(i+1);
 	listing[i+6] := #9'lda ' + copy(listing[i], 7, 256) + ',y';
 	listing[i+8] := #9'sta ' + copy(listing[i], 7, 256) + ',y';
 
@@ -328,7 +328,7 @@ begin
      if copy(listing[i], 7, 256) = copy(listing[i+3], 7, 256) then
       begin
 	listing[i+7] := #9'lda ' + copy(listing[i], 7, 256) + ',y';
-	listing[i+6] := #9'ldy ' + copy(listing[i+1], 6, 256) ;
+	listing[i+6] := #9'ldy ' + GetARG(i+1) ;
 
 	listing[i]   := '';
 	listing[i+1] := '';
@@ -363,7 +363,7 @@ begin
         argMatch(i+3, i+7) and
         argMatch(i+5, i+10) then
       begin
-	listing[i]   := #9'lda ' + copy(listing[i+1], 6, 256);
+	listing[i]   := #9'lda ' + GetARG(i+1);
 	listing[i+1] := #9'asl @';
 	listing[i+2] := #9'asl @';
 	listing[i+3] := #9'tay';
@@ -404,7 +404,7 @@ begin
      if (copy(listing[i+7], 7, 256) = copy(listing[i+9], 7, 256)) and
         argMatch(i+1, i+10) then
       begin
-	listing[i]   := #9'lda ' + copy(listing[i+2], 6, 256);
+	listing[i]   := #9'lda ' + GetARG(i+2);
 	listing[i+1] := #9'asl @';
 	listing[i+2] := #9'asl @';
 	listing[i+3] := #9'tay';

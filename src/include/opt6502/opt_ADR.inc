@@ -18,7 +18,7 @@ begin
        sta_stack(i+5) then 		 						// sta :STACKORIGIN+STACKWIDTH		; 5
     begin
 
-     tmp := #9'sta ' + copy(listing[i], 6, 256);
+     tmp := #9'sta ' + GetARG(i);
 
 // -----------------------------------------------------------------------------
 // -----------------------------------------------------------------------------	// array of CARDINAL
@@ -159,10 +159,10 @@ begin
 
 	if lda_im(p-2) then begin
 	 q:=GetWORD(p-2, p+1);
-	 listing[i] := #9'lda ' + copy(listing[p-1], 6, 256);
+	 listing[i] := #9'lda ' + GetARG(p-1);
 	end else begin
 	 q:=GetWORD(p-1, p+2);
-	 listing[i] := #9'lda ' + copy(listing[p-2], 6, 256);
+	 listing[i] := #9'lda ' + GetARG(p-2);
 	end;
 
 	q:=q * 4;
@@ -208,7 +208,7 @@ begin
       begin
 
 	q:=GetWORD(p-1, p+2);
-	listing[i] := #9'lda ' + copy(listing[p-2], 6, 256);
+	listing[i] := #9'lda ' + GetARG(p-2);
 
 	q:=q * 4;
 
@@ -453,7 +453,7 @@ begin
 
 	q:=GetWORD(p-1, p+2);
 
-	listing[i] := #9'lda ' + copy(listing[p], 6, 256);
+	listing[i] := #9'lda ' + GetARG(p);
 
 	q:=q * 2;
 
@@ -495,7 +495,7 @@ begin
 
 	q:=GetWORD(p-1, p+2);
 
-	listing[i] := #9'lda ' + copy(listing[p], 6, 256);
+	listing[i] := #9'lda ' + GetARG(p);
 
 	q:=q * 2;
 
@@ -538,10 +538,10 @@ begin
 
 	if lda_im(p-2) then begin
 	 q:=GetWORD(p-2, p+1);
-	 listing[i] := #9'lda ' + copy(listing[p-1], 6, 256);
+	 listing[i] := #9'lda ' + GetARG(p-1);
 	end else begin
 	 q:=GetWORD(p-1, p+2);
-	 listing[i] := #9'lda ' + copy(listing[p-2], 6, 256);
+	 listing[i] := #9'lda ' + GetARG(p-2);
 	end;
 
 	q:=q * 2;
@@ -583,7 +583,7 @@ begin
       begin
 
 	q:=GetWORD(p-1, p+2);
-	listing[i] := #9'lda ' + copy(listing[p-2], 6, 256);
+	listing[i] := #9'lda ' + GetARG(p-2);
 
 	q:=q * 2;
 
@@ -646,7 +646,7 @@ begin
 	listing[p-2] := '';
 
 	if lda_eax_1(p+1) and add_eax(p-1) then begin
-	 listing[p-1] := #9'add ' + copy(listing[p-3], 6, 256);
+	 listing[p-1] := #9'add ' + GetARG(p-3);
 
 	 listing[p-3] := #9'lda :eax';
 	end;
@@ -676,7 +676,7 @@ begin
 	listing[p-2] := '';
 
 	if lda_eax_1(p+1) and add_eax(p-1) then begin
-	 listing[p-1] := #9'add ' + copy(listing[p-3], 6, 256);
+	 listing[p-1] := #9'add ' + GetARG(p-3);
 
 	 listing[p-3] := #9'lda :eax';
 	end;
@@ -1274,9 +1274,9 @@ begin
 	else
 		LDA_STA_ADR(i, q, '+');
 
-	listing[p-1] := #9'sub ' + copy(listing[p-8], 6, 256);
+	listing[p-1] := #9'sub ' + GetARG(p-8);
 
-	listing[p+2] := #9'sbc ' + copy(listing[p-5], 6, 256);
+	listing[p+2] := #9'sbc ' + GetARG(p-5);
 
 	listing[p-8] := '';
 	listing[p-7] := '';
@@ -1317,9 +1317,9 @@ begin
 	else
 		LDA_STA_ADR(i, q, '-');
 
-	listing[p-1] := #9'add ' + copy(listing[p-8], 6, 256);
+	listing[p-1] := #9'add ' + GetARG(p-8);
 
-	listing[p+2] := #9'adc ' + copy(listing[p-5], 6, 256);
+	listing[p+2] := #9'adc ' + GetARG(p-5);
 
 	listing[p-8] := '';
 	listing[p-7] := '';
@@ -1464,12 +1464,12 @@ begin
 	if lda_im(p-2) then begin
 	 q:=GetWORD(p-2, p+1);
 
-	 listing[i]   := #9'ldy ' + copy(listing[p-1], 6, 256);
+	 listing[i]   := #9'ldy ' + GetARG(p-1);
 	 listing[i+1] := '';
 	end else begin
 	 q:=GetWORD(p-1, p+2);
 
-	 listing[i]   := #9'ldy ' + copy(listing[p-2], 6, 256);
+	 listing[i]   := #9'ldy ' + GetARG(p-2);
  	 listing[i+1] := '';
 	end;
 
@@ -1506,7 +1506,7 @@ begin
       begin
 	q:=GetWORD(p-1, p+2);
 
- 	listing[i]   := #9'ldy ' + copy(listing[p-2], 6, 256);
+ 	listing[i]   := #9'ldy ' + GetARG(p-2);
  	listing[i+1] := '';
 	listing[i+2]  := '';
 	listing[i+3]  := '';
@@ -1552,7 +1552,7 @@ begin
        Break;
 
       end else	// for p:=
-        if {onBreak(p) or} (listing[p] = #9'asl ' + copy(listing[i], 6, 256)) then Break;	// 'asl :STACKORIGIN' wystepuje przy adresowaniu tablic WORD, CARDINAL
+        if {onBreak(p) or} (listing[p] = #9'asl ' + GetARG(i)) then Break;	// 'asl :STACKORIGIN' wystepuje przy adresowaniu tablic WORD, CARDINAL
 
 // -----------------------------------------------------------------------------
 
@@ -1724,9 +1724,9 @@ begin
 	else
         	LDA_STA_ADR(i+12, q, '-');
 
-	listing[i+7]  := #9'add ' + copy(listing[i], 6, 256);
+	listing[i+7]  := #9'add ' + GetARG(i);
 
-	listing[i+10] := #9'adc ' + copy(listing[i+3], 6, 256);
+	listing[i+10] := #9'adc ' + GetARG(i+3);
 
 	listing[i]   := '';
 	listing[i+1] := '';
@@ -1843,9 +1843,9 @@ begin
 
         	LDA_STA_ADR(i+12, q, '+');
 
-	listing[i+7]  := #9'add ' + copy(listing[i+1], 6, 256);
+	listing[i+7]  := #9'add ' + GetARG(i+1);
 
-	listing[i+10] := #9'adc ' + copy(listing[i+4], 6, 256);
+	listing[i+10] := #9'adc ' + GetARG(i+4);
 
 	listing[i]   := '';
 	listing[i+1] := '';

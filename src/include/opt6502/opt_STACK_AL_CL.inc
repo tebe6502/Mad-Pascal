@@ -250,9 +250,9 @@ begin
        listing[i+1] := #9'lda ' + GetString(i+1);
 
        if listing[i+5] = #9'jsr addAL_CL' then
-        listing[i+2] := #9'add ' + copy(listing[i+3], 6, 256)
+        listing[i+2] := #9'add ' + GetARG(i+3)
        else
-        listing[i+2] := #9'sub ' + copy(listing[i+3], 6, 256);
+        listing[i+2] := #9'sub ' + GetARG(i+3);
 
        listing[i+3] := '';
        listing[i+4] := #9'sta :STACKORIGIN,x';
@@ -419,7 +419,7 @@ begin
 	listing[i+1] := #9'sub :STACKORIGIN,x';
        end;
 
-       listing[i+2] := #9'sta ' + copy(listing[i+3], 6, 256);
+       listing[i+2] := #9'sta ' + GetARG(i+3);
 
        listing[i+3] := #9'dex';
 

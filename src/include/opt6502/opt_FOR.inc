@@ -33,15 +33,15 @@ begin
       if sbc(i) then arg0 := #9'sbc ';
 
       if pos('+3', listing[i]) > 0 then begin
-       if pos(copy(listing[i], 6, 256), optyFOR3) > 0 then listing[i] := arg0 + GetString(optyFOR3);
+       if pos(GetARG(i), optyFOR3) > 0 then listing[i] := arg0 + GetString(optyFOR3);
       end else
       if pos('+2', listing[i]) > 0 then begin
-       if pos(copy(listing[i], 6, 256), optyFOR2) > 0 then listing[i] := arg0 + GetString(optyFOR2);
+       if pos(GetARG(i), optyFOR2) > 0 then listing[i] := arg0 + GetString(optyFOR2);
       end else
       if pos('+1', listing[i]) > 0 then begin
-       if pos(copy(listing[i], 6, 256), optyFOR1) > 0 then listing[i] := arg0 + GetString(optyFOR1);
+       if pos(GetARG(i), optyFOR1) > 0 then listing[i] := arg0 + GetString(optyFOR1);
       end else
-       if pos(copy(listing[i], 6, 256), optyFOR0) > 0 then listing[i] := arg0 + GetString(optyFOR0);
+       if pos(GetARG(i), optyFOR0) > 0 then listing[i] := arg0 + GetString(optyFOR0);
 
      end;
 
@@ -57,7 +57,7 @@ begin
           cmp_im_0(1) and
 	  (pos(#9'jcc l_', listing[2]) > 0 ) then
 	begin
-	 listing[0] := #9'#for:dec ' + copy(listing[0], 6, 256);
+	 listing[0] := #9'#for:dec ' + GetARG(0);
 	 listing[1] := #9'#for';
 	 listing[2] := '';
 	end;
@@ -70,9 +70,9 @@ begin
 	  (listing[3] = #9'beq *+5') and
 	  jmp_l(4) then
         begin
-	 listing[2] := #9'lda ' + copy(listing[1], 6, 256);
-	 listing[3] := #9'cmp ' + copy(listing[0], 6, 256);
-	 listing[4] := #9'jcc ' + copy(listing[4], 6, 256);
+	 listing[2] := #9'lda ' + GetARG(1);
+	 listing[3] := #9'cmp ' + GetARG(0);
+	 listing[4] := #9'jcc ' + GetARG(4);
 
 	 listing[0] := '';
 	 listing[1] := '';
@@ -94,12 +94,12 @@ begin
  	  listing[1] := '';
  	  listing[2] := '';
  	  listing[3] := '';
- 	  listing[4] := #9'jmi ' + copy(listing[4], 6, 256);
+ 	  listing[4] := #9'jmi ' + GetARG(4);
  	 end else begin
 	  listing[1] := #9'cmp #' + HexByte(byte(k));
 	  listing[2] := '';
 	  listing[3] := '';
-	  listing[4] := #9'jcs ' + copy(listing[4], 6, 256);
+	  listing[4] := #9'jcs ' + GetARG(4);
  	 end;
 
         end else begin
@@ -147,7 +147,7 @@ begin
 	  listing[1] := #9'sub #' + HexByte(byte(k));
 
 	  listing[4] := #9'asl @';
-	  listing[5] := #9'jcc ' + copy(listing[6], 6, 256);
+	  listing[5] := #9'jcc ' + GetARG(6);
 	  listing[6] := '';
 	 end;
 
@@ -162,7 +162,7 @@ begin
           (listing[4] = #9'bpl *+5') and
 	  jmp_l(5) then
 	begin
-	 listing[4] := #9'jmi ' + copy(listing[5], 6, 256);
+	 listing[4] := #9'jmi ' + GetARG(5);
 	 listing[5] := '';
 	end;
 
@@ -194,7 +194,7 @@ begin
 	end else begin
 	 listing[5] := listing[4];
 	 listing[4] := listing[3];
-	 listing[3] := #9'jne ' + copy(listing[8], 6, 256);
+	 listing[3] := #9'jne ' + GetARG(8);
 	 listing[2] := #9'bcc @+';
 
 	 listing[6] := #9'bcc @+';
@@ -217,15 +217,15 @@ begin
 	  jmp_l(8) then
         begin
 	 listing[7] := '@';
-	 listing[8] := #9'jcc ' + copy(listing[8], 6, 256);
+	 listing[8] := #9'jcc ' + GetARG(8);
 
-	 listing[5] := #9'lda ' + copy(listing[4], 6, 256);
-	 listing[6] := #9'cmp ' + copy(listing[3], 6, 256);
+	 listing[5] := #9'lda ' + GetARG(4);
+	 listing[6] := #9'cmp ' + GetARG(3);
 
 	 listing[4] := #9'bne @+';
 
-	 listing[2] := #9'lda ' + copy(listing[1], 6, 256);
-	 listing[3] := #9'cmp ' + copy(listing[0], 6, 256);
+	 listing[2] := #9'lda ' + GetARG(1);
+	 listing[3] := #9'cmp ' + GetARG(0);
 
 	 listing[0] := '';
 	 listing[1] := '';
@@ -250,21 +250,21 @@ begin
 	  jmp_l(14) then
 	begin
 	 listing[13] := '@';
-	 listing[14] := #9'jcc ' + copy(listing[14], 6, 256);
+	 listing[14] := #9'jcc ' + GetARG(14);
 
-	 listing[11] := #9'lda ' + copy(listing[10], 6, 256);
-	 listing[12] := #9'cmp ' + copy(listing[9], 6, 256);
+	 listing[11] := #9'lda ' + GetARG(10);
+	 listing[12] := #9'cmp ' + GetARG(9);
 
-	 listing[8] := #9'lda ' + copy(listing[7], 6, 256);
-	 listing[9] := #9'cmp ' + copy(listing[6], 6, 256);
+	 listing[8] := #9'lda ' + GetARG(7);
+	 listing[9] := #9'cmp ' + GetARG(6);
 	 listing[10] := #9'bne @+';
 
-	 listing[5] := #9'lda ' + copy(listing[4], 6, 256);
-	 listing[6] := #9'cmp ' + copy(listing[3], 6, 256);
+	 listing[5] := #9'lda ' + GetARG(4);
+	 listing[6] := #9'cmp ' + GetARG(3);
 	 listing[7] := #9'bne @+';
 
-	 listing[2] := #9'lda ' + copy(listing[1], 6, 256);
-	 listing[3] := #9'cmp ' + copy(listing[0], 6, 256);
+	 listing[2] := #9'lda ' + GetARG(1);
+	 listing[3] := #9'cmp ' + GetARG(0);
 	 listing[4] := #9'bne @+';
 
 	 listing[0] := '';
@@ -369,7 +369,7 @@ begin
 	  listing[8] := #9'svc';
 	  listing[9] := #9'eor #$80';
 	  listing[10] := #9'asl @';
-	  listing[11] := #9'jcc ' + copy(listing[19], 6, 256);
+	  listing[11] := #9'jcc ' + GetARG(19);
 	  listing[12] := '';
 	  listing[13] := '';
 	  listing[14] := '';
@@ -417,7 +417,7 @@ begin
 	  listing[7] := #9'sbc #' + HexByte(byte(k shr 8));
 	  listing[8] := #9'svc';
 	  listing[9] := #9'eor #$80';
-	  listing[10] := #9'jmi ' + copy(listing[18], 6, 256);
+	  listing[10] := #9'jmi ' + GetARG(18);
 	  listing[11] := '';
 	  listing[12] := '';
 	  listing[13] := '';

@@ -237,9 +237,9 @@ begin
        lda_stack_1x(i+6) and									// lda :STACKORIGIN+STACKWIDTH,x	; 6
        sta_a(i+7) then										// sta					; 7
      begin
-       listing[i+4] := #9'lda ' + copy(listing[i], 6, 256);
+       listing[i+4] := #9'lda ' + GetARG(i);
 
-       listing[i+6] := #9'lda ' + copy(listing[i+2], 6, 256);
+       listing[i+6] := #9'lda ' + GetARG(i+2);
 
        listing[i]   := '';
        listing[i+1] := '';
@@ -257,7 +257,7 @@ begin
      begin
 
        if iy(i) = false then begin
-        listing[i]   := #9'ldy ' + copy(listing[i], 6, 256);
+        listing[i]   := #9'ldy ' + GetARG(i);
 	listing[i+1] := '';
        end else
         listing[i+1] := #9'tay';
@@ -275,7 +275,7 @@ begin
      begin
 
        if iy(i) = false then begin
-        listing[i]   := #9'ldy ' + copy(listing[i], 6, 256);
+        listing[i]   := #9'ldy ' + GetARG(i);
 	listing[i+1] := '';
        end else
         listing[i+1] := #9'tay';
@@ -307,7 +307,7 @@ begin
        lda_stack_0x(i+4) and									// lda :STACKORIGIN,x			; 4
        ldy_stack_1x(i+5) then									// ldy :STACKORIGIN+STACKWIDTH,x	; 5
      begin
-       listing[i+4] := #9'lda ' + copy(listing[i], 6, 256);
+       listing[i+4] := #9'lda ' + GetARG(i);
 
        listing[i]   := '';
        listing[i+1] := '';
@@ -663,9 +663,9 @@ begin
      if argMatch(i+1, i+8) and
         argMatch(i+3, i+10) then
      begin
-	listing[i+8]  := #9'lda ' + copy(listing[i], 6, 256);
+	listing[i+8]  := #9'lda ' + GetARG(i);
 
-	listing[i+10] := #9'lda ' + copy(listing[i+2], 6, 256);
+	listing[i+10] := #9'lda ' + GetARG(i+2);
 
 	listing[i]   := '';
 	listing[i+1] := '';
@@ -741,13 +741,13 @@ begin
            argMatch(i+5, i+15) and
            argMatch(i+7, i+18) then
          begin
-	   listing[i+9]  := GetCMD(i+9) + copy(listing[i], 6, 256);
+	   listing[i+9]  := GetCMD(i+9) + GetARG(i);
 
-	   listing[i+12] := GetCMD(i+12) + copy(listing[i+2], 6, 256);
+	   listing[i+12] := GetCMD(i+12) + GetARG(i+2);
 
-   	   listing[i+15] := GetCMD(i+15) + copy(listing[i+4], 6, 256);
+   	   listing[i+15] := GetCMD(i+15) + GetARG(i+4);
 
-	   listing[i+18] := GetCMD(i+18) + copy(listing[i+6], 6, 256);
+	   listing[i+18] := GetCMD(i+18) + GetARG(i+6);
 
 	   listing[i]   := '';
 	   listing[i+1] := '';
@@ -1144,7 +1144,7 @@ begin
        ldy(i+4) then										// ldy					; 4
      if pos(listing[i], listing[i+2]) > 0 then
       begin
-       listing[i]   := #9'mwy ' + copy(listing[i], 6, 256) + ' :bp2';
+       listing[i]   := #9'mwy ' + GetARG(i) + ' :bp2';
        listing[i+1] := '';
        listing[i+2] := '';
        listing[i+3] := '';
@@ -2404,7 +2404,7 @@ begin
        and_ora_eor(i+2) and									// and|ora|eor				; 2
        sta_stack(i+3) then									// sta :STACKORIGIN+STACKWIDTH*3,x	; 3
      if argMatch(i+1, i+3) and
-	(pos(copy(listing[i+1], 6, 256), listing[i]) > 0) then
+	(pos(GetARG(i+1), listing[i]) > 0) then
       begin
 	listing[i]   := #9'lda ' + GetString(i);
 	listing[i+1] := '';
@@ -2497,9 +2497,9 @@ begin
        if bp2_y(p) then begin
 
         if mva_bp2_y(p) then
-         listing[p] := copy(listing[p], 1, 5) + '(' + tmp + '),y' + copy(listing[p], 14, 256)
+         listing[p] := GetCMD(p) + '(' + tmp + '),y' + copy(listing[p], 14, 256)
 	else
-         listing[p] := copy(listing[p], 1, 5) + '(' + tmp + '),y';
+         listing[p] := GetCMD(p) + '(' + tmp + '),y';
 
 	yes:=true;
        end else

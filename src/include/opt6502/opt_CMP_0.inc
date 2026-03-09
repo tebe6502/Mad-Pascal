@@ -89,7 +89,7 @@ begin
 
     if (i>0) and ora(i) then									// lda #$00			; -1
      if lda_im_0(i-1) then begin								// ora				; 0
-	listing[i] := #9'lda ' + copy(listing[i], 6, 256);
+	listing[i] := #9'lda ' + GetARG(i);
 
 	exit(false);
      end;
@@ -157,7 +157,7 @@ begin
      if argMatch(i, i+2) then
        begin
 	listing[i]   := '';
-	listing[i+1] := copy(listing[i+2], 1, 5) + copy(listing[i+1], 6, 256);
+	listing[i+1] := GetCMD(i+2) + GetARG(i+1);
 	listing[i+2] := '';
 
 	exit(false);
@@ -172,7 +172,7 @@ begin
           argMatch(i+1, i+3) then
        begin
 	listing[i]   := #9'tya';
-	listing[i+1] := copy(listing[i+2], 1, 5) + copy(listing[i+1], 6, 256);
+	listing[i+1] := GetCMD(i+2) + GetARG(i+1);
 	listing[i+2] := '';
 
 	exit(false);
@@ -186,7 +186,7 @@ begin
        if argMatch(i, i+2) then
        begin
 	listing[i]   := #9'tya';
-	listing[i+1] := #9'add ' + copy(listing[i+1], 6, 256);
+	listing[i+1] := #9'add ' + GetARG(i+1);
 	listing[i+2] := '';
 
 	exit(false);

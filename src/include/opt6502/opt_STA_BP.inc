@@ -164,7 +164,7 @@ begin
 	listing[i+1] := '';
 
 	if (p = 0) and (ldy_stack(i+2) = false) then begin
-	 listing[i+4] := #9'sta ' + copy(listing[i+2], 6, 256);
+	 listing[i+4] := #9'sta ' + GetARG(i+2);
 
 	 listing[i+2] := '';
 	end else
@@ -182,7 +182,7 @@ begin
         p:=GetBYTE(i);
 
 	if (p = 0) and (ldy_stack(i+2) = false) then begin
-	 listing[i+3] := #9'sta ' + copy(listing[i+2], 6, 256);
+	 listing[i+3] := #9'sta ' + GetARG(i+2);
 
 	 listing[i+2] := '';
 	end else
@@ -210,7 +210,7 @@ begin
       begin
         p:=GetBYTE(i+2);
 
-	listing[i+7] := #9'ldy ' + copy(listing[i], 6, 256);
+	listing[i+7] := #9'ldy ' + GetARG(i);
 	listing[i+8] := #9'sta ' + Hex(p, 2) + '00,y';
 
 	listing[i] := '';
@@ -236,7 +236,7 @@ begin
       begin
         p:=GetBYTE(i+2);
 
-	listing[i+6] := #9'ldy ' + copy(listing[i], 6, 256);
+	listing[i+6] := #9'ldy ' + GetARG(i);
 	listing[i+7] := #9'sta ' + Hex(p, 2) + '00,y';
 
 	listing[i] := '';
@@ -260,7 +260,7 @@ begin
       begin
         p:=GetBYTE(i+2);
 
-	listing[i+4] := #9'ldy ' + copy(listing[i], 6, 256);
+	listing[i+4] := #9'ldy ' + GetARG(i);
 	listing[i+5] := #9'lda ' + Hex(p, 2) + '00,y';
 
 	listing[i] := '';

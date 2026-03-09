@@ -14,10 +14,10 @@
      begin
       listing[i] := '';
 
-      listing[i+4] := #9'jmp ' + copy(listing[i+8], 6, 256);
+      listing[i+4] := #9'jmp ' + GetARG(i+8);
 
       listing[i+6] := '';
-      listing[i+7] := #9'lda ' + copy(listing[i+7], 6, 256);
+      listing[i+7] := #9'lda ' + GetARG(i+7);
 
       Result:=false; Break;
      end;
@@ -34,10 +34,10 @@
      begin
       listing[i] := '';
 
-      listing[i+3] := #9'jmp ' + copy(listing[i+7], 6, 256);
+      listing[i+3] := #9'jmp ' + GetARG(i+7);
 
       listing[i+5] := '';
-      listing[i+6] := #9'lda ' + copy(listing[i+6], 6, 256);
+      listing[i+6] := #9'lda ' + GetARG(i+6);
 
       Result:=false; Break;
      end;
@@ -55,7 +55,7 @@
 
       if test_ORA(i) then begin
 
-       tmp := copy(listing[i+2], 6, 256);
+       tmp := GetARG(i+2);
 
        for p := i-1 downto 0 do begin
 
@@ -82,7 +82,7 @@
 	   listing[p+2] := '';
 	   listing[p+3] := '';
 	  end else begin
-	   listing[p+1] := #9'lda ' + copy(listing[p+2], 6, 256);
+	   listing[p+1] := #9'lda ' + GetARG(p+2);
 	   listing[p+2] := listing[i+3];
 	   listing[p+3] := '';
 	  end;
@@ -92,12 +92,12 @@
 	if dey(p) and								// dey
 	   lab_a(p+1)								//@
 	then
-	  listing[p] := #9'jmp ' + copy(listing[i+3], 6, 256);
+	  listing[p] := #9'jmp ' + GetARG(i+3);
 
        end;
 
        listing[i+1] := '';
-       listing[i+2] := #9'lda ' + copy(listing[i+2], 6, 256);
+       listing[i+2] := #9'lda ' + GetARG(i+2);
 //       listing[i+3] := '';
 
        for p:=i downto 1 do

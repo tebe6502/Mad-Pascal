@@ -54,7 +54,7 @@ begin
 	 lda_a(i+7) and							// lda RSON+1				; 7
 	 adc_stack(i+8) and						// adc :STACKORIGIN+STACKWIDTH		; 8
 //	 sta_bp2_1(i+9) and						// sta :bp2+1				; 9
-         (copy(listing[i+7], 6, 256) = copy(listing[i+5], 6, 256) + '+1') and
+         (GetARG(i+7) = GetARG(i+5) + '+1') and
          argMatch(i+1, i+4) and
 	 argMatch(i+1, i+8) )
 
@@ -74,7 +74,7 @@ begin
 	 lda_a(i+9) and							// lda RSON+1				; 9
 	 adc_stack(i+10) and						// adc :STACKORIGIN+STACKWIDTH		; 10
 //	 sta_bp2_1(i+11) and						// sta :bp2+1				; 11
-         (copy(listing[i+9], 6, 256) = copy(listing[i+6], 6, 256) + '+1') and
+         (GetARG(i+9) = GetARG(i+6) + '+1') and
          argMatch(i+1, i+3) and
 	 argMatch(i+1, i+7) and
 	 argMatch(i+5, i+10) )
@@ -101,7 +101,7 @@ begin
 	 iny(i+15) and							// iny					; 15
 	 lda_tmp_y(i+16) and						// lda (:TMP),y				; 16
 //	 sta_bp2_1(i+17) and						// sta :bp2+1				; 17
-         (copy(listing[i+10], 6, 256) = copy(listing[i+7], 6, 256) + '+1') and
+         (GetARG(i+10) = GetARG(i+7) + '+1') and
          argMatch(i+1, i+3) and
 	 argMatch(i+1, i+6) and
 	 argMatch(i+5, i+9) )
@@ -130,7 +130,7 @@ begin
 	 iny(i+17) and							// iny					; 17
 	 lda_tmp_y(i+18) and						// lda (:TMP),y				; 18
 //	 sta_bp2_1(i+19) and						// sta :bp2+1				; 19
-         (copy(listing[i+12], 6, 256) = copy(listing[i+9], 6, 256) + '+1') and
+         (GetARG(i+12) = GetARG(i+9) + '+1') and
          argMatch(i+2, i+5) and
 	 argMatch(i+7, i+11) and
 	 argMatch(i+5, i+8) )
@@ -157,7 +157,7 @@ begin
 	 iny(i+15) and							// iny					; 15
 	 lda_tmp_y(i+16) and						// lda (:TMP),y				; 16
 //	 sta_bp2_1(i+17) and						// sta :bp2+1				; 17
-         (copy(listing[i+10], 6, 256) = copy(listing[i+7], 6, 256) + '+1') and
+         (GetARG(i+10) = GetARG(i+7) + '+1') and
          argMatch(i+1, i+3) and
 	 argMatch(i+1, i+6) and
 	 argMatch(i+5, i+9) )
@@ -182,7 +182,7 @@ begin
 	 iny(i+13) and							// iny					; 13
 	 lda_tmp_y(i+14) and						// lda (:TMP),y				; 14
 //	 sta_bp2_1(i+15) and						// sta :bp2+1				; 15
-         (copy(listing[i+7], 6, 256) = copy(listing[i+5], 6, 256) + '+1') and
+         (GetARG(i+7) = GetARG(i+5) + '+1') and
          argMatch(i+1, i+4) and
 	 argMatch(i+4, i+8) )
 
@@ -359,7 +359,7 @@ begin
     end else begin
 
      if (optyBP2 <> '') and (sta_a(i) or sty(i) or asl(i) or rol(i) or lsr(i) or ror(i) or inc_(i) or dec_(i)) then
-      if (pos('? '+copy(listing[i], 6, 256)+' ', optyBP2) > 0) or (pos(';'+copy(listing[i], 6, 256)+';', optyBP2) > 0) then optyBP2:='';
+      if (pos('? ' + GetARG(i) + ' ', optyBP2) > 0) or (pos(';' + GetARG(i) + ';', optyBP2) > 0) then optyBP2:='';
 
      if sta_bp2(i) or sta_bp2_1(i) or jsr(i) or lab_l(i) or lab_b(i) or lab_c(i) then optyBP2:='';
 

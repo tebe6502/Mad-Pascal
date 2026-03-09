@@ -365,17 +365,17 @@ begin
        if listing[i+2] = #9'jsr addAX_CX' then begin
 	listing[i+1] := #9'lda :STACKORIGIN-1,x';
 	listing[i+2] := #9'add ' + GetSTRING(i);
-	listing[i+3] := #9'sta ' + copy(listing[i+5], 6, 256);
+	listing[i+3] := #9'sta ' + GetARG(i+5);
 	listing[i+4] := #9'lda :STACKORIGIN-1+STACKWIDTH,x';
 	listing[i+5] := #9'adc ' + GetSTRING(tmp);
-	listing[i+6] := #9'sta ' + copy(listing[i+7], 6, 256);
+	listing[i+6] := #9'sta ' + GetARG(i+7);
        end else begin
 	listing[i+1] := #9'lda :STACKORIGIN-1,x';
 	listing[i+2] := #9'sub ' + GetSTRING(i);
-	listing[i+3] := #9'sta ' + copy(listing[i+5], 6, 256);
+	listing[i+3] := #9'sta ' + GetARG(i+5);
 	listing[i+4] := #9'lda :STACKORIGIN-1+STACKWIDTH,x';
 	listing[i+5] := #9'sbc ' + GetSTRING(tmp);
-	listing[i+6] := #9'sta ' + copy(listing[i+7], 6, 256);
+	listing[i+6] := #9'sta ' + GetARG(i+7);
        end;
 
        listing[i] := '';
@@ -402,17 +402,17 @@ begin
        if listing[i+3] = #9'jsr addAX_CX' then begin
 	listing[i+1] := #9'lda :STACKORIGIN-1,x';
 	listing[i+2] := #9'add :STACKORIGIN,x';
-	listing[i+3] := #9'sta ' + copy(listing[i+6], 6, 256);
+	listing[i+3] := #9'sta ' + GetARG(i+6);
 	listing[i+4] := #9'lda #$00';
 	listing[i+5] := #9'adc #$00';
-	listing[i+6] := #9'sta ' + copy(listing[i+8], 6, 256);
+	listing[i+6] := #9'sta ' + GetARG(i+8);
        end else begin
 	listing[i+1] := #9'lda :STACKORIGIN-1,x';
 	listing[i+2] := #9'sub :STACKORIGIN,x';
-	listing[i+3] := #9'sta ' + copy(listing[i+6], 6, 256);
+	listing[i+3] := #9'sta ' + GetARG(i+6);
 	listing[i+4] := #9'lda #$00';
 	listing[i+5] := #9'sbc #$00';
-	listing[i+6] := #9'sta ' + copy(listing[i+8], 6, 256);
+	listing[i+6] := #9'sta ' + GetARG(i+8);
        end;
 
        listing[i+7] := #9'dex';
@@ -442,19 +442,19 @@ begin
 
 	listing[i+2] := #9'lda :STACKORIGIN-1,x';
 
-	listing[i+4] := #9'sta ' + copy(listing[i+8], 6, 256);
+	listing[i+4] := #9'sta ' + GetARG(i+8);
 	listing[i+5] := #9'lda #$00';
 	listing[i+6] := #9'adc #$00';
-	listing[i+7] := #9'sta ' + copy(listing[i+10], 6, 256);
+	listing[i+7] := #9'sta ' + GetARG(i+10);
        end else begin
 	listing[i+3] := #9'sub ' + GetString(i+2);
 
 	listing[i+2] := #9'lda :STACKORIGIN-1,x';
 
-	listing[i+4] := #9'sta ' + copy(listing[i+8], 6, 256);
+	listing[i+4] := #9'sta ' + GetARG(i+8);
 	listing[i+5] := #9'lda #$00';
 	listing[i+6] := #9'sbc #$00';
-	listing[i+7] := #9'sta ' + copy(listing[i+10], 6, 256);
+	listing[i+7] := #9'sta ' + GetARG(i+10);
        end;
 
        listing[i+8]  := #9'dex';

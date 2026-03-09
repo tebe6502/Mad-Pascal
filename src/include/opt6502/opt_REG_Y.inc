@@ -47,7 +47,7 @@ begin
 
       if optyY <> '' then
        if (optyY[1] = '#') and (optyY[2] = '$') then
-        optyY:='#' + Hex( byte( StrToInt(copy(optyY,2,256)) + 1), 2)						// #$xx
+        optyY:='#' + Hex( byte( StrToInt(copy(optyY, 2, 256)) + 1), 2)						// #$xx
        else
         optyY:='+#$01'+optyY;											// +#$01
 
@@ -63,7 +63,7 @@ begin
 
       if optyY <> '' then
        if (optyY[1] = '#') and (optyY[2] = '$') then
-        optyY:='#' + Hex( byte( StrToInt(copy(optyY,2,256)) - 1), 2)						// #$xx
+        optyY:='#' + Hex( byte( StrToInt(copy(optyY, 2, 256)) - 1), 2)						// #$xx
        else
         optyY:='-#$01'+optyY;											// -#$01
 
@@ -86,8 +86,8 @@ begin
 
       then begin
 
-       if add_im(i-1) and lda_a(i-2) then arg0 := '+' + copy(listing[i-1], 6, 256) + GetString(i-2);			// +#$00Label
-       if sub_im(i-1) and lda_a(i-2) then arg0 := '-' + copy(listing[i-1], 6, 256) + GetString(i-2);			// -#$00Label
+       if add_im(i-1) and lda_a(i-2) then arg0 := '+' + GetARG(i-1) + GetString(i-2);					// +#$00Label
+       if sub_im(i-1) and lda_a(i-2) then arg0 := '-' + GetARG(i-1) + GetString(i-2);					// -#$00Label
 
 
        if add(i-1) and (add_im(i-1) = false) and lda_a(i-2) then							// *+$01Label|Label

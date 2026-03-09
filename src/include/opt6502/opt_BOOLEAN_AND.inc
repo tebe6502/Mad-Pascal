@@ -11,7 +11,7 @@
 
       if test_ORA(i) then begin
 
-       tmp := copy(listing[i+2], 6, 256);
+       tmp := GetARG(i+2);
 
        for p := i-1 downto 0 do begin
 
@@ -38,7 +38,7 @@
 	   listing[p+2] := '';
 	   listing[p+3] := '';
 	  end else begin
-	   listing[p+1] := #9'lda ' + copy(listing[p+2], 6, 256);
+	   listing[p+1] := #9'lda ' + GetARG(p+2);
 	   listing[p+2] := #9'jeq l_' + IntToHex(CodeSize, 4) + 's';
 	   listing[p+3] := '';
 	  end;

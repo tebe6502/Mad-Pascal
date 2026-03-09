@@ -22,7 +22,7 @@ begin
 	listing[i+2] := '';
 	listing[i+3] := '';
 	listing[i+4] := #9'eor #$01';
-	listing[i+5] := #9'sta ' + copy(listing[i+5], 6, 256);
+	listing[i+5] := #9'sta ' + GetARG(i+5);
 
 	exit(false);
        end;

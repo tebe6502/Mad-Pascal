@@ -42,9 +42,9 @@ begin
      begin
 
        if add_im_1(i+1) then
-        listing[i+1] := #9'inc ' + copy(listing[i], 6, 256)
+        listing[i+1] := #9'inc ' + GetARG(i)
        else
-        listing[i+1] := #9'dec ' + copy(listing[i], 6, 256);
+        listing[i+1] := #9'dec ' + GetARG(i);
 
        listing[i] := '';
 
@@ -66,9 +66,9 @@ begin
        else
         listing[i+1] := #9'dey';
 
-       listing[i] := #9'ldy ' + copy(listing[i], 6, 256);
+       listing[i] := #9'ldy ' + GetARG(i);
 
-       listing[i+2] := #9'sty ' + copy(listing[i+2], 6, 256);
+       listing[i+2] := #9'sty ' + GetARG(i+2);
 
        exit(false);
      end;
@@ -109,7 +109,7 @@ begin
        add_im_1(i+2) and									// add #$01				; 2
        tay(i+3) then										// tay					; 3
      begin
-       listing[i+1] := #9'ldy ' + copy(listing[i+1], 6, 256);
+       listing[i+1] := #9'ldy ' + GetARG(i+1);
        listing[i+2] := #9'iny';
        listing[i+3] := '';
 
@@ -127,7 +127,7 @@ begin
      begin
        listing[i+2] := '';
 
-       listing[i+5] := #9'add ' + copy(listing[i+5], 6, 256);
+       listing[i+5] := #9'add ' + GetARG(i+5);
 
         exit(false);
      end;
@@ -142,9 +142,9 @@ begin
        sta(i+6) then										// sta					; 6
      begin
        listing[i+1] := '';
-       listing[i+2] := #9'lda ' + copy(listing[i+2], 6, 256);
+       listing[i+2] := #9'lda ' + GetARG(i+2);
 
-       listing[i+5] := #9'add ' + copy(listing[i+5], 6, 256);
+       listing[i+5] := #9'add ' + GetARG(i+5);
 
         exit(false);
      end;
@@ -186,9 +186,9 @@ begin
        listing[i+2] := '';
 
        if adc_im_0(i+7) then
-	if copy(listing[i+3], 6, 256) + '+1' = copy(listing[i+6], 6, 256) then begin
-	 listing[i+3] := #9'mwy ' + copy(listing[i+3], 6, 256) + ' :bp2';
-	 listing[i+4] := #9'ldy ' + copy(listing[i+4], 6, 256);
+	if GetARG(i+3) + '+1' = GetARG(i+6) then begin
+	 listing[i+3] := #9'mwy ' + GetARG(i+3) + ' :bp2';
+	 listing[i+4] := #9'ldy ' + GetARG(i+4);
 	 listing[i+5] := '';
 	 listing[i+6] := '';
 	 listing[i+7] := '';
@@ -241,7 +241,7 @@ begin
           stack_0x(p+1) and mva_im(p+1) and
 	  stack_1x(p+2) and (mva(p+2) or sta(p+2)) then
 	begin
-       	 listing[i+7] := #9'ldy ' + copy(listing[i+2], 6, 256) + '+' + Hex(GetBYTE(p+1), 2);
+       	 listing[i+7] := #9'ldy ' + GetARG(i+2) + '+' + Hex(GetBYTE(p+1), 2);
 
        	 listing[p+1] := '';
 	 listing[p+2] := '';

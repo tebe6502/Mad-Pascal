@@ -37,10 +37,10 @@ begin
 	argMatch(i+5, i+15) and
 	argMatch(i+7, i+18) then
        begin
-	listing[i+9]  := #9'and ' + copy(listing[i], 6, 256);
-	listing[i+12] := #9'and ' + copy(listing[i+2], 6, 256);
-	listing[i+15] := #9'and ' + copy(listing[i+4], 6, 256);
-	listing[i+18] := #9'and ' + copy(listing[i+6], 6, 256);
+	listing[i+9]  := #9'and ' + GetARG(i);
+	listing[i+12] := #9'and ' + GetARG(i+2);
+	listing[i+15] := #9'and ' + GetARG(i+4);
+	listing[i+18] := #9'and ' + GetARG(i+6);
 
 	listing[i]   := '';
 	listing[i+1] := '';
@@ -122,7 +122,7 @@ begin
      if argMatch(i, i+2) then
      begin
 	listing[i]   := '';
-	listing[i+1] := #9'and ' + copy(listing[i+1], 6, 256);
+	listing[i+1] := #9'and ' + GetARG(i+1);
 	listing[i+2] := '';
 
 	exit(false);

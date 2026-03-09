@@ -110,22 +110,22 @@ begin
 
 	listing_tmp[0] := listing[i];
 	listing_tmp[1] := listing[i+1];
-	listing_tmp[2] := copy(listing[i+13], 1, 5) + copy(listing[i+12], 6, 256);
+	listing_tmp[2] := GetCMD(i+13) + GetARG(i+12);
 	listing_tmp[3] := listing[i+14];
 
 	listing_tmp[4] := listing[i+3];
 	listing_tmp[5] := listing[i+4];
-	listing_tmp[6] := copy(listing[i+16], 1, 5) + copy(listing[i+15], 6, 256);
+	listing_tmp[6] := GetCMD(i+16) + GetARG(i+15);
 	listing_tmp[7] := listing[i+17];
 
 	listing_tmp[8] := listing[i+6];
 	listing_tmp[9] := listing[i+7];
-	listing_tmp[10]:= copy(listing[i+19], 1, 5) + copy(listing[i+18], 6, 256);
+	listing_tmp[10]:= GetCMD(i+19) + GetARG(i+18);
 	listing_tmp[11]:= listing[i+20];
 
 	listing_tmp[12] := listing[i+9];
 	listing_tmp[13] := listing[i+10];
-	listing_tmp[14] := copy(listing[i+22], 1, 5) + copy(listing[i+21], 6, 256);
+	listing_tmp[14] := GetCMD(i+22) + GetARG(i+21);
 	listing_tmp[15] := listing[i+23];
 
 	for p:=0 to 15 do listing[i+p] := listing_tmp[p];
@@ -182,25 +182,25 @@ begin
 	listing_tmp[0] := listing[i];
 	listing_tmp[1] := listing[i+1];
 	listing_tmp[2] := listing[i+2];
-	listing_tmp[3] := copy(listing[i+17], 1, 5) + copy(listing[i+16], 6, 256);
+	listing_tmp[3] := GetCMD(i+17) + GetARG(i+16);
 	listing_tmp[4] := listing[i+18];
 
 	listing_tmp[5] := listing[i+4];
 	listing_tmp[6] := listing[i+5];
 	listing_tmp[7] := listing[i+6];
-	listing_tmp[8] := copy(listing[i+20], 1, 5) + copy(listing[i+19], 6, 256);
+	listing_tmp[8] := GetCMD(i+20) + GetARG(i+19);
 	listing_tmp[9] := listing[i+21];
 
 	listing_tmp[10] := listing[i+8];
 	listing_tmp[11] := listing[i+9];
 	listing_tmp[12] := listing[i+10];
-	listing_tmp[13] := copy(listing[i+23], 1, 5) + copy(listing[i+22], 6, 256);
+	listing_tmp[13] := GetCMD(i+23) + GetARG(i+22);
 	listing_tmp[14] := listing[i+24];
 
 	listing_tmp[15] := listing[i+12];
 	listing_tmp[16] := listing[i+13];
 	listing_tmp[17] := listing[i+14];
-	listing_tmp[18] := copy(listing[i+26], 1, 5) + copy(listing[i+25], 6, 256);
+	listing_tmp[18] := GetCMD(i+26) + GetARG(i+25);
 	listing_tmp[19] := listing[i+27];
 
 	for p:=0 to 19 do listing[i+p] := listing_tmp[p];
@@ -245,10 +245,10 @@ begin
 	argMatch(i+5, i+15) and
 	argMatch(i+7, i+18) then
        begin
-	listing[i+9]  := #9'eor ' + copy(listing[i], 6, 256);
-	listing[i+12] := #9'eor ' + copy(listing[i+2], 6, 256);
-	listing[i+15] := #9'eor ' + copy(listing[i+4], 6, 256);
-	listing[i+18] := #9'eor ' + copy(listing[i+6], 6, 256);
+	listing[i+9]  := #9'eor ' + GetARG(i);
+	listing[i+12] := #9'eor ' + GetARG(i+2);
+	listing[i+15] := #9'eor ' + GetARG(i+4);
+	listing[i+18] := #9'eor ' + GetARG(i+6);
 
 	listing[i] := '';
 	listing[i+1] := '';
@@ -357,7 +357,7 @@ begin
      if argMatch(i, i+2) then
        begin
 	listing[i] := '';
-	listing[i+1] := #9'eor ' + copy(listing[i+1], 6, 256);
+	listing[i+1] := #9'eor ' + GetARG(i+1);
 	listing[i+2] := '';
 
 	exit(false);
@@ -379,7 +379,7 @@ begin
        eor(i+2) and									// eor					; 2
        sta_a(i+3) then									// sta					; 3
      begin
-	listing[i+1] := #9'lda ' + copy(listing[i+2], 6, 256);
+	listing[i+1] := #9'lda ' + GetARG(i+2);
 	listing[i+2] := '';
 	exit(false);
      end;
@@ -402,7 +402,7 @@ begin
        ldy(i+2) and									// ldy					; 2
        sta_a(i+3) then									// sta					; 3
      begin
-	listing[i+1] := #9'eor ' + copy(listing[i+1], 6, 256);
+	listing[i+1] := #9'eor ' + GetARG(i+1);
 	exit(false);
      end;
 
@@ -413,7 +413,7 @@ begin
 											//					; 3
        (sbc(i+4) = false) then								// ~sbc					; 4
      begin
-	listing[i+1] := #9'eor ' + copy(listing[i+1], 6, 256);
+	listing[i+1] := #9'eor ' + GetARG(i+1);
 	exit(false);
      end;
 

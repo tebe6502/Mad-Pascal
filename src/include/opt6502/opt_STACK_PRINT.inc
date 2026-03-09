@@ -43,9 +43,9 @@ begin
        lda_val(i) and										// lda ~:STACKORIGIN			; 0
        ldy(i+1) then										// ldy					; 1
       begin
-        tmp := copy(listing[i], 6, 256);
+        tmp := GetARG(i);
 
-	if tmp + '+1' = copy(listing[i+1], 6, 256) then begin
+	if tmp + '+1' = GetARG(i+1) then begin
 	  listing[i+2] := #9'@printPCHAR ' + tmp;
 
 	  listing[i]   := '';
@@ -78,9 +78,9 @@ begin
        lda_val(i) and										// lda ~:STACKORIGIN			; 0
        ldy(i+1) then										// ldy					; 1
       begin
-        tmp := copy(listing[i], 6, 256);
+        tmp := GetARG(i);
 
-	if tmp + '+1' = copy(listing[i+1], 6, 256) then begin
+	if tmp + '+1' = GetARG(i+1) then begin
 	  listing[i+2] := #9'@printSTRING ' + tmp;
 
 	  listing[i]   := '';
@@ -104,7 +104,7 @@ begin
         argMatch(i+3, i+5) then
       begin
 	listing[i+4] := listing[i];
-	listing[i+5] := #9'ldy ' + copy(listing[i+2], 6, 256);
+	listing[i+5] := #9'ldy ' + GetARG(i+2);
 
 	listing[i]   := '';
 	listing[i+1] := '';
@@ -128,7 +128,7 @@ begin
        ldy_stack(i+3) then									// ldy :STACKORIGIN+STACKWIDTH		; 3
      if argMatch(i+1, i+3) then
       begin
-	listing[i+3] := #9'ldy ' + copy(listing[i], 6, 256);
+	listing[i+3] := #9'ldy ' + GetARG(i);
 
 	listing[i]   := '';
 	listing[i+1] := '';

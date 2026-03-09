@@ -20,15 +20,15 @@ begin
     begin
 
 
-     tmp := #9'sta ' + copy(listing[i+1], 6, 256);
+     tmp := #9'sta ' + GetARG(i+1);
 
 
      if lda_im_0(i) and lda_im_0(i+3) then begin
        listing[i]  := '';
-       listing[i+1]:= #9'lda ' + copy(listing[i+1], 6, 256);
+       listing[i+1]:= #9'lda ' + GetARG(i+1);
 
        listing[i+3]:= '';
-       listing[i+4]:= #9'lda ' + copy(listing[i+4], 6, 256);
+       listing[i+4]:= #9'lda ' + GetARG(i+4);
      end;
 
 
@@ -91,7 +91,7 @@ begin
 	  listing[i+6]  := #9'ldy #' + HexByte(q);
 
 	  listing[p-2] := '';
-	  listing[p-1] := #9'lda ' + copy(listing[p-1], 6, 256);
+	  listing[p-1] := #9'lda ' + GetARG(p-1);
 
 	  listing[p+2] := '';
 
@@ -167,7 +167,7 @@ begin
 	  listing[i+6]  := #9'ldy #' + HexByte(q);
 
 	  listing[p-2] := '';
-	  listing[p-1] := #9'lda ' + copy(listing[p-1], 6, 256);
+	  listing[p-1] := #9'lda ' + GetARG(p-1);
 
 	  listing[p+2] := '';
 
@@ -245,7 +245,7 @@ begin
 
        Break;
       end else	// for p:=
-        if onBreak(p) {or (listing[p] = #9'asl ' + copy(listing[i], 6, 256))} then Break;
+        if onBreak(p) {or (listing[p] = #9'asl ' + GetARG(i))} then Break;
 *)
 
 

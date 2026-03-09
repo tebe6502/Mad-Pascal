@@ -50,7 +50,7 @@ begin
        sta_a(i+2) then									// sta W				; 2
        if argMatch(i, i+2) then
        begin
-	 listing[i]   := #9'dec '+copy(listing[i], 6, 256);
+	 listing[i]   := #9'dec '+GetARG(i);
 	 listing[i+1] := '';
 	 listing[i+2] := '';
 
@@ -71,9 +71,9 @@ begin
 	listing[i]   := #9'lda #' + HexByte(byte(p-1));
 	listing[i+1] := '';
        end else begin
-	listing[i]   := #9'ldy '+copy(listing[i], 6, 256);
+	listing[i]   := #9'ldy '+GetARG(i);
 	listing[i+1] := #9'dey';
-	listing[i+2] := #9'sty '+copy(listing[i+2], 6, 256);
+	listing[i+2] := #9'sty '+GetARG(i+2);
        end;
 
 	exit(false);
@@ -103,7 +103,7 @@ begin
       if argMatch(i, i+3) then
        begin
 	listing[i]   := '';
-	listing[i+1] := #9'add ' + copy(listing[i+1], 6, 256);
+	listing[i+1] := #9'add ' + GetARG(i+1);
 
 	if add(i+2) then
 	 listing[i+3] := #9'iny'
@@ -125,7 +125,7 @@ begin
        sbc(i+4) then									// sbc					; 4
      begin
       listing[i+1] := '';
-      listing[i+4] := #9'sub ' + copy(listing[i+4], 6, 256);
+      listing[i+4] := #9'sub ' + GetARG(i+4);
 
       exit(false);
      end;
@@ -283,10 +283,10 @@ begin
 	argMatch(i+5, i+15) and
 	argMatch(i+7, i+18) then
        begin
-	listing[i+9]  := #9'sub ' + copy(listing[i], 6, 256);
-	listing[i+12] := #9'sbc ' + copy(listing[i+2], 6, 256);
-	listing[i+15] := #9'sbc ' + copy(listing[i+4], 6, 256);
-	listing[i+18] := #9'sbc ' + copy(listing[i+6], 6, 256);
+	listing[i+9]  := #9'sub ' + GetARG(i);
+	listing[i+12] := #9'sbc ' + GetARG(i+2);
+	listing[i+15] := #9'sbc ' + GetARG(i+4);
+	listing[i+18] := #9'sbc ' + GetARG(i+6);
 
 	listing[i]   := '';
 	listing[i+1] := '';
@@ -421,9 +421,9 @@ begin
      if argMatch(i+1, i+5) and
 	argMatch(i+3, i+8) then
       begin
-	listing[i+5] := #9'sub ' + copy(listing[i], 6, 256);
+	listing[i+5] := #9'sub ' + GetARG(i);
 
-	listing[i+8] := #9'sbc ' + copy(listing[i+2], 6, 256);
+	listing[i+8] := #9'sbc ' + GetARG(i+2);
 
 	listing[i]   := '';
 	listing[i+1] := '';
@@ -447,7 +447,7 @@ begin
      if argMatch(i+1, i+5) and
         (argMatch(i+4, i) = false) then
      begin
-	listing[i+5] := #9'lda ' + copy(listing[i], 6, 256);
+	listing[i+5] := #9'lda ' + GetARG(i);
 
 	listing[i]   := '';
 	listing[i+1] := '';
@@ -466,7 +466,7 @@ begin
      if argMatch(i+1, i+4) and
         (argMatch(i+3, i) = false) then
      begin
-	listing[i+4] := #9'lda ' + copy(listing[i], 6, 256);
+	listing[i+4] := #9'lda ' + GetARG(i);
 
 	listing[i]   := '';
 	listing[i+1] := '';
@@ -487,7 +487,7 @@ begin
      if argMatch(i+1, i+7) and
         (argMatch(i+6, i) = false) then
      begin
-	listing[i+7] := #9'lda ' + copy(listing[i], 6, 256);
+	listing[i+7] := #9'lda ' + GetARG(i);
 
 	listing[i]   := '';
 	listing[i+1] := '';
@@ -536,12 +536,12 @@ begin
 	listing[i+3] := #9'bne @+';
 	listing[i+4] := listing[i+6];
 	listing[i+5] := #9'sne';
-	listing[i+6] := #9'dec ' + copy(listing[i+9], 6, 256);
-	listing[i+7] := #9'dec ' + copy(listing[i+4], 6, 256);
+	listing[i+6] := #9'dec ' + GetARG(i+9);
+	listing[i+7] := #9'dec ' + GetARG(i+4);
 	listing[i+8] := '@';
-	listing[i+9] := #9'dec ' + copy(listing[i+2], 6, 256);
+	listing[i+9] := #9'dec ' + GetARG(i+2);
 	listing[i+10] := '@';
-	listing[i+11] := #9'dec ' + copy(listing[i], 6, 256);
+	listing[i+11] := #9'dec ' + GetARG(i);
 
 	exit(false);
     end;
@@ -560,13 +560,13 @@ begin
 
 	if sub_im_1(i+1) then begin
 	 listing[i+1] := #9'bne @+';
-	 listing[i+2] := #9'dec ' + copy(listing[i], 6, 256) + '+1';
+	 listing[i+2] := #9'dec ' + GetARG(i) + '+1';
 	 listing[i+3] := '@';
-	 listing[i+4] := #9'dec ' + copy(listing[i], 6, 256);
+	 listing[i+4] := #9'dec ' + GetARG(i);
 	 listing[i+5] := '';
 	end else begin
 	 listing[i+3] := #9'scs';
-	 listing[i+4] := #9'dec '+copy(listing[i+5], 6, 256);
+	 listing[i+4] := #9'dec '+GetARG(i+5);
 	 listing[i+5] := '';
 	end;
 
@@ -659,8 +659,8 @@ begin
   //     (lda_im(i+9) = false) and							//					; 9
        (sbc(i+10) = false) then								//~sbc					; 10
      begin
-//      p := GetVAL(copy(listing[i], 6, 256)) + GetVAL(copy(listing[i+3], 6, 256)) shl 8 + GetVAL(copy(listing[i+6], 6, 256)) shl 16;
-//      err := GetVAL(copy(listing[i+1], 6, 256)) + GetVAL(copy(listing[i+4], 6, 256)) shl 8 + GetVAL(copy(listing[i+7], 6, 256)) shl 16;
+//      p := GetVAL(GetARG(i)) + GetVAL(GetARG(i+3)) shl 8 + GetVAL(GetARG(i+6)) shl 16;
+//      err := GetVAL(GetARG(i+1)) + GetVAL(GetARG(i+4)) shl 8 + GetVAL(GetARG(i+7)) shl 16;
 
       p := GetTRIPLE(i, i+3, i+6);
       q := GetTRIPLE(i+1, i+4, i+7);
@@ -729,8 +729,8 @@ begin
 //       sbc_im(i+10) and								// sbc #				; 10
        sta_a(i+11) then									// sta :STACKORIGIN+STACKWIDTH*3	; 11
       begin
-//	p := GetVAL(copy(listing[i], 6, 256)) + GetVAL(copy(listing[i+3], 6, 256)) shl 8 + GetVAL(copy(listing[i+6], 6, 256)) shl 16 + GetVAL(copy(listing[i+9], 6, 256)) shl 24;
-//	err := GetVAL(copy(listing[i+1], 6, 256)) + GetVAL(copy(listing[i+4], 6, 256)) shl 8 + GetVAL(copy(listing[i+7], 6, 256)) shl 16 + GetVAL(copy(listing[i+10], 6, 256)) shl 24;
+//	p := GetVAL(GetARG(i)) + GetVAL(GetARG(i+3)) shl 8 + GetVAL(GetARG(i+6)) shl 16 + GetVAL(GetARG(i+9)) shl 24;
+//	err := GetVAL(GetARG(i+1)) + GetVAL(GetARG(i+4)) shl 8 + GetVAL(GetARG(i+7)) shl 16 + GetVAL(GetARG(i+10)) shl 24;
 
 	p := GetDWORD(i, i+3, i+6, i+9);
 	q := GetDWORD(i+1, i+4, i+7, i+10);
@@ -763,8 +763,8 @@ begin
 //       sbc_im(i+7) and								// sbc #				; 7
        sta_a(i+8) then									// sta :STACKORIGIN+STACKWIDTH*2	; 8
       begin
-//	p := GetVAL(copy(listing[i], 6, 256)) + GetVAL(copy(listing[i+3], 6, 256)) shl 8 + GetVAL(copy(listing[i+6], 6, 256)) shl 16;
-//	err := GetVAL(copy(listing[i+1], 6, 256)) + GetVAL(copy(listing[i+4], 6, 256)) shl 8 + GetVAL(copy(listing[i+7], 6, 256)) shl 16;
+//	p := GetVAL(GetARG(i)) + GetVAL(GetARG(i+3)) shl 8 + GetVAL(GetARG(i+6)) shl 16;
+//	err := GetVAL(GetARG(i+1)) + GetVAL(GetARG(i+4)) shl 8 + GetVAL(GetARG(i+7)) shl 16;
 
 	p := GetTRIPLE(i, i+3, i+6);
 	q := GetTRIPLE(i+1, i+4, i+7);
@@ -814,8 +814,8 @@ begin
 	 argMatch(i+8, i+18) and
 	 argMatch(i+11, i+21) then
      begin
-//      p := GetVAL(copy(listing[i+1], 6, 256)) + GetVAL(copy(listing[i+4], 6, 256)) shl 8 + GetVAL(copy(listing[i+7], 6, 256)) shl 16 + GetVAL(copy(listing[i+10], 6, 256)) shl 24;
-//      err :=  GetVAL(copy(listing[i+13], 6, 256)) + GetVAL(copy(listing[i+16], 6, 256)) shl 8 + GetVAL(copy(listing[i+19], 6, 256)) shl 16 + GetVAL(copy(listing[i+22], 6, 256)) shl 24;
+//      p := GetVAL(GetARG(i+1)) + GetVAL(GetARG(i+4)) shl 8 + GetVAL(GetARG(i+7)) shl 16 + GetVAL(GetARG(i+10)) shl 24;
+//      err :=  GetVAL(GetARG(i+13)) + GetVAL(GetARG(i+16)) shl 8 + GetVAL(GetARG(i+19)) shl 16 + GetVAL(GetARG(i+22)) shl 24;
 
       p := GetDWORD(i+1, i+4, i+7, i+10);
       q := GetDWORD(i+13, i+16, i+19, i+22);
@@ -880,8 +880,8 @@ begin
 	 argMatch(i+8, i+18) and
 	 argMatch(i+11, i+21) then
      begin
-//      p := GetVAL(copy(listing[i+1], 6, 256)) + GetVAL(copy(listing[i+4], 6, 256)) shl 8 + GetVAL(copy(listing[i+7], 6, 256)) shl 16 + GetVAL(copy(listing[i+10], 6, 256)) shl 24;
-//      err :=  GetVAL(copy(listing[i+13], 6, 256)) + GetVAL(copy(listing[i+16], 6, 256)) shl 8 + GetVAL(copy(listing[i+19], 6, 256)) shl 16 + GetVAL(copy(listing[i+22], 6, 256)) shl 24;
+//      p := GetVAL(GetARG(i+1)) + GetVAL(GetARG(i+4)) shl 8 + GetVAL(GetARG(i+7)) shl 16 + GetVAL(GetARG(i+10)) shl 24;
+//      err :=  GetVAL(GetARG(i+13)) + GetVAL(GetARG(i+16)) shl 8 + GetVAL(GetARG(i+19)) shl 16 + GetVAL(GetARG(i+22)) shl 24;
 
       p := GetDWORD(i+1, i+4, i+7, i+10);
       q := GetDWORD(i+13, i+16, i+19, i+22);
@@ -926,7 +926,7 @@ begin
     if argMatch(i+2, i+6) then
        begin
 	listing[i+6] := listing[i];
-	listing[i+7] := #9'sbc ' + copy(listing[i+1], 6, 256);
+	listing[i+7] := #9'sbc ' + GetARG(i+1);
 
 	listing[i]   := '';
 	listing[i+1] := '';
@@ -949,7 +949,7 @@ begin
     if argMatch(i+2, i+6) then
        begin
 	listing[i+6] := listing[i];
-	listing[i+7] := #9'sbc ' + copy(listing[i+1], 6, 256);
+	listing[i+7] := #9'sbc ' + GetARG(i+1);
 
 	listing[i]   := '';
 	listing[i+1] := '';
@@ -999,7 +999,7 @@ begin
     if argMatch(i+2, i+4) then
        begin
 	listing[i+2] := #9'clc';
-	listing[i+3] := #9'sbc ' + copy(listing[i+3], 6, 256);
+	listing[i+3] := #9'sbc ' + GetARG(i+3);
 	listing[i+4] := #9'eor #$FF';
 
 	listing[i+6] := #9'scc';
@@ -1018,7 +1018,7 @@ begin
 	argMatch(i+3, i+5) then
      begin
 	listing[i+3] := #9'scs';
-	listing[i+4] := #9'dec '+copy(listing[i+5], 6, 256);
+	listing[i+4] := #9'dec '+GetARG(i+5);
 	listing[i+5] := '';
 
 	exit(false);
