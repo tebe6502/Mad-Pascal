@@ -38,7 +38,7 @@
 
           asm65(#9'mwy ' + GetLocalName(IdentIndex) + ' :bp2');
           asm65(#9'ldy #$00');
-          asm65(#9'lda #$' + IntToHex(TokenAt(i + 2).Value, 2));
+          asm65(#9'lda #' + HexByte(byte(TokenAt(i + 2).Value)));
           asm65(#9'sta (:bp2),y');
           asm65(#9'tya');
           asm65(#9'iny');
@@ -114,9 +114,9 @@
             else
               k := TokenAt(i + 2).StrAddress - CODEORIGIN;
 
-            asm65(#9'lda <CODEORIGIN+' + HexWord(k));
+            asm65(#9'lda <CODEORIGIN+' + HexWord(word(k)));
             asm65(#9'sta @move.src');
-            asm65(#9'lda >CODEORIGIN+' + HexWord(k));
+            asm65(#9'lda >CODEORIGIN+' + HexWord(word(k)));
             asm65(#9'sta @move.src+1');
 
             asm65(#9'@moveSTRING_P ' + svar);

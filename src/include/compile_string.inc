@@ -21,14 +21,14 @@
           asm65(#9'ldy #$00');
           asm65(#9'mva #$01 (:bp2),y');
           asm65(#9'iny');
-          asm65(#9'mva #$' + IntToHex(TokenAt(i + 2).Value, 2) + ' (:bp2),y');
+          asm65(#9'mva #' + HexByte(byte(TokenAt(i + 2).Value)) + ' (:bp2),y');
         end;
 
         ASPOINTERTOARRAYORIGIN:
         begin
           asm65(#9'mwy ' + IdentifierAt(IdentIndex).Name + ' :bp2');
           asm65(#9'ldy :STACKORIGIN,x');
-          asm65(#9'mva #$' + IntToHex(TokenAt(i + 2).Value, 2) + ' (:bp2),y');
+          asm65(#9'mva #' + HexByte(byte(TokenAt(i + 2).Value)) + ' (:bp2),y');
 
           a65(TCode65.subBX);
         end;
@@ -36,7 +36,7 @@
         ASPOINTER:
         begin
           asm65(#9'mva #$01 ' + GetLocalName(IdentIndex, 'adr.'));
-          asm65(#9'mva #$' + IntToHex(TokenAt(i + 2).Value, 2) + ' ' + GetLocalName(IdentIndex, 'adr.') + '+1');
+          asm65(#9'mva #' + HexByte(byte(TokenAt(i + 2).Value)) + ' ' + GetLocalName(IdentIndex, 'adr.') + '+1');
         end;
 
       end;    // case IndirectionLevel
@@ -74,14 +74,14 @@
           if pos('.', IdentifierAt(IdentIndex).Name) > 0 then
           begin
 
-            asm65(#9'mwa #CODEORIGIN+$' + IntToHex(TokenAt(i + 2).StrAddress - CODEORIGIN, 4) + ' @move.src');
+            asm65(#9'mwa #CODEORIGIN+' + HexWord(word(TokenAt(i + 2).StrAddress - CODEORIGIN)) + ' @move.src');
             asm65(#9'adw ' + copy(IdentifierAt(IdentIndex).Name, 1, pos('.', IdentifierAt(IdentIndex).Name) - 1) + ' #' + IdentifierAt(IdentIndex).Name + '-DATAORIGIN @move.dst');
             asm65(#9'mwa #' + IntToStr(Succ(NumCharacters)) + ' @move.cnt');
             asm65(#9'jsr @move');
 
           end
           else
-            asm65(#9'@move #CODEORIGIN+$' + IntToHex(TokenAt(i + 2).StrAddress - CODEORIGIN, 4) + ' ' + IdentifierAt(IdentIndex).Name + ' #' + IntToStr(Succ(NumCharacters)));
+            asm65(#9'@move #CODEORIGIN+' + HexWord(word(TokenAt(i + 2).StrAddress - CODEORIGIN)) + ' ' + IdentifierAt(IdentIndex).Name + ' #' + IntToStr(Succ(NumCharacters)));
 
         ASPOINTERTOARRAYORIGIN:
           CheckCommonType(i + 1, TDataType.CHARTOK, TDataType.POINTERTOK);
@@ -106,10 +106,10 @@
             if vlen <= 256 then
             begin
               asm65(#9'ldy #256-' + IntToStr(vlen));
-              asm65(#9'mva:rne CODEORIGIN+$' + IntToHex(k, 4) + '+' + IntToStr(vlen) + '-256,y ' + GetLocalName(IdentIndex, 'adr.') + '+' + IntToStr(vlen) + '-256,y+');
+              asm65(#9'mva:rne CODEORIGIN+' + HexWord(word(k)) + '+' + IntToStr(vlen) + '-256,y ' + GetLocalName(IdentIndex, 'adr.') + '+' + IntToStr(vlen) + '-256,y+');
             end
             else
-              asm65(#9'@move #CODEORIGIN+$' + IntToHex(k, 4) + ' #' + GetLocalName(IdentIndex, 'adr.'){  IdentifierAt(IdentIndex).Name} + ' #' + IntToStr(vlen));
+              asm65(#9'@move #CODEORIGIN+' + HexWord(word(k)) + ' #' + GetLocalName(IdentIndex, 'adr.'){  IdentifierAt(IdentIndex).Name} + ' #' + IntToStr(vlen));
 
           end;
           //move_1
@@ -117,7 +117,7 @@
           if Succ(TokenAt(i + 2).StrLength) > IdentifierAt(IdentIndex).NumAllocElements then
           begin
             WarningShortStringLength(i + 2);
-            asm65(#9'mva #$' + IntToHex(NumCharacters, 2) + ' ' + GetLocalName(IdentIndex, 'adr.'));
+            asm65(#9'mva #' + HexByte(byte(NumCharacters)) + ' ' + GetLocalName(IdentIndex, 'adr.'));
             //adr.'+IdentifierAt(IdentIndex).Name);
           end;
 

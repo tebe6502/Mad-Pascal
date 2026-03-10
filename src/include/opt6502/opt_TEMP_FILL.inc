@@ -124,7 +124,7 @@ begin
 	end else
 	if k <= 128 then begin
 	  TemporaryBuf[0] := TemporaryBuf[8];
-	  TemporaryBuf[1] := #9'ldy #' + HexByte(k-1);
+	  TemporaryBuf[1] := #9'ldy #' + HexByte(byte(k-1));
 	  TemporaryBuf[2] := #9'sta:rpl ' + Hex(q, 4) + ',y-';
 
 	  TemporaryBuf[3] := '~';
@@ -227,7 +227,7 @@ begin
 	end else
 	if k <= 128 then begin
 	  TemporaryBuf[1] := TemporaryBuf[7];
-	  TemporaryBuf[2] := #9'ldy #' + HexByte(k-1);
+	  TemporaryBuf[2] := #9'ldy #' + HexByte(byte(k-1));
 	  TemporaryBuf[3] := #9'sta:rpl ' + Hex(q, 4) + ',y-';
 
 	  TemporaryBuf[4] := '~';
@@ -311,7 +311,7 @@ begin
 
 	  TemporaryBuf[4] := #9'sta :bp2+1';
 	  TemporaryBuf[5] := #9'lda #$00';
-	  TemporaryBuf[6] := #9'ldy #' + HexByte(k-1);
+	  TemporaryBuf[6] := #9'ldy #' + HexByte(byte(k-1));
 	  TemporaryBuf[7] := #9'sta:rpl (:bp2),y-';
 	  TemporaryBuf[8] := '~';
 	  TemporaryBuf[9] := '~';
@@ -377,7 +377,7 @@ begin
 
 	  TemporaryBuf[3] := #9'sta :bp2+1';
 	  TemporaryBuf[4] := TemporaryBuf[8];
-	  TemporaryBuf[5] := #9'ldy #' + HexByte(k-1);
+	  TemporaryBuf[5] := #9'ldy #' + HexByte(byte(k-1));
 	  TemporaryBuf[6] := #9'sta:rpl (:bp2),y-';
 	  TemporaryBuf[7] := '~';
 	  TemporaryBuf[8] := '~';
@@ -445,7 +445,7 @@ begin
 
 	  TemporaryBuf[5] := #9'sta :bp2+1';
 	  TemporaryBuf[6] := TemporaryBuf[0];
-	  TemporaryBuf[7] := #9'ldy #' + HexByte(k-1);
+	  TemporaryBuf[7] := #9'ldy #' + HexByte(byte(k-1));
 	  TemporaryBuf[8] := #9'sta:rpl (:bp2),y-';
 	  TemporaryBuf[9] := '~';
 	  TemporaryBuf[10] := '~';
@@ -509,7 +509,7 @@ begin
 
 	  TemporaryBuf[4] := #9'sta :bp2';
 	  TemporaryBuf[5] := TemporaryBuf[7];
-	  TemporaryBuf[6] := #9'ldy #' + HexByte(k-1);
+	  TemporaryBuf[6] := #9'ldy #' + HexByte(byte(k-1));
 	  TemporaryBuf[7] := #9'sta:rpl (:bp2),y-';
 	  TemporaryBuf[8] := '~';
 	  TemporaryBuf[9] := '~';
@@ -556,7 +556,7 @@ begin
 
 	  TemporaryBuf[4] := #9'sta :bp2+1';
 	  TemporaryBuf[5] := #9'lda #$00';
-	  TemporaryBuf[6] := #9'ldy #' + HexByte(k-1);
+	  TemporaryBuf[6] := #9'ldy #' + HexByte(byte(k-1));
 	  TemporaryBuf[7] := #9'sta:rpl (:bp2),y-';
 
 	  TemporaryBuf[8] := '~';
@@ -605,7 +605,7 @@ begin
 	  TemporaryBuf[3] := #9'sta :bp2+1';
 
 	  TemporaryBuf[4] := TemporaryBuf[8];
-	  TemporaryBuf[5] := #9'ldy #' + HexByte(k-1);
+	  TemporaryBuf[5] := #9'ldy #' + HexByte(byte(k-1));
 	  TemporaryBuf[6] := #9'sta:rpl (:bp2),y-';
 
 	  TemporaryBuf[7] := '~';

@@ -1353,7 +1353,7 @@ begin
         else begin
 
 	  if Page > 0 then
-	    ParamY := HexByte(Page-1) + '00+' + svar + '-DATAORIGIN'
+	    ParamY := HexByte(byte(Page-1)) + '00+' + svar + '-DATAORIGIN'
 	  else
             asm65(#9'ldy #' + svar + '-DATAORIGIN');
 
@@ -2339,7 +2339,7 @@ begin
 	       (IdentifierAt(IdentTemp).AllocElementType in [TDataType.RECORDTOK, TDataType.OBJECTTOK]) then
 	    begin
 	      Page := GetTypeAtIndex(IdentifierAt(IdentTemp).NumAllocElements).Page;
-	      ParamY := HexByte(Page-1) + '00+' + svar + '-DATAORIGIN';
+	      ParamY := HexByte(byte(Page-1)) + '00+' + svar + '-DATAORIGIN';
 	    end;
 
         end;
@@ -2829,7 +2829,7 @@ var
         else begin
 
 	  if Page > 0 then
-	    ParamY := HexByte(Page-1) + '00+' + svar + '-DATAORIGIN'
+	    ParamY := HexByte(byte(Page-1)) + '00+' + svar + '-DATAORIGIN'
 	  else
             asm65(#9'ldy #' + svar + '-DATAORIGIN');
 
@@ -2958,7 +2958,7 @@ begin
             asm65(#9'lda ' + GetLocalName(IdentTemp, 'adr.') + ',y');
             asm65(#9'sta :bp2');
 
-	    if IdentifierAt(IdentTemp).isStriped then 
+	    if IdentifierAt(IdentTemp).isStriped then
               asm65(#9'lda ' + GetLocalName(IdentTemp, 'adr.') + '+' + IntToStr(NumAllocElements) + ',y')
             else
               asm65(#9'lda ' + GetLocalName(IdentTemp, 'adr.') + '+1,y');
@@ -5073,7 +5073,7 @@ begin
     ASPOINTER:
     begin
 
-      asm65(#9'@printSTRING #CODEORIGIN+' + HexWord(Address - CODEORIGIN));
+      asm65(#9'@printSTRING #CODEORIGIN+' + HexWord(word(Address - CODEORIGIN)));
 
       //    a65(TCode65.subBX);   !!!   bez DEX-a
     end;
@@ -8243,9 +8243,9 @@ begin
                       asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
                       asm65(#9'sta :STACKORIGIN+STACKWIDTH,x');
 
-                      asm65(#9'lda <CODEORIGIN+' + HexWord(TokenAt(i).StrAddress - CODEORIGIN));
+                      asm65(#9'lda <CODEORIGIN+' + HexWord(word(TokenAt(i).StrAddress - CODEORIGIN)));
                       asm65(#9'sta :STACKORIGIN,x');
-                      asm65(#9'lda >CODEORIGIN+' + HexWord(TokenAt(i).StrAddress - CODEORIGIN));
+                      asm65(#9'lda >CODEORIGIN+' + HexWord(word(TokenAt(i).StrAddress - CODEORIGIN)));
                       asm65(#9'sta :STACKORIGIN+STACKWIDTH,x');
                     end;
 
@@ -8283,9 +8283,9 @@ begin
                       asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
                       asm65(#9'sta :STACKORIGIN+STACKWIDTH,x');
 
-                      asm65(#9'lda <CODEORIGIN+' + HexWord(TokenAt(i).StrAddress - CODEORIGIN + 1));
+                      asm65(#9'lda <CODEORIGIN+' + HexWord(word(TokenAt(i).StrAddress - CODEORIGIN + 1)));
                       asm65(#9'sta :STACKORIGIN,x');
-                      asm65(#9'lda >CODEORIGIN+' + HexWord(TokenAt(i).StrAddress - CODEORIGIN + 1));
+                      asm65(#9'lda >CODEORIGIN+' + HexWord(word(TokenAt(i).StrAddress - CODEORIGIN + 1)));
                       asm65(#9'sta :STACKORIGIN+STACKWIDTH,x');
                     end;
 
@@ -8334,7 +8334,7 @@ begin
             else
               if j <= 128 then
               begin
-                asm65(#9'ldy #' + HexByte(j - 1));
+                asm65(#9'ldy #' + HexByte(byte(j - 1)));
                 asm65(#9'mva:rpl (:bp2),y ' + svar + '.adr.' + IdentifierAt(IdentIndex).Param[NumActualParams].Name + ',y-');
               end
               else
@@ -8372,7 +8372,7 @@ begin
               else
                 if j <= 128 then
                 begin
-                  asm65(#9'ldy #' + HexByte(j - 1));
+                  asm65(#9'ldy #' + HexByte(byte(j - 1)));
                   asm65(#9'mva:rpl (:bp2),y ' + svar + '.adr.' + IdentifierAt(IdentIndex).Param[NumActualParams].Name + ',y-');
                 end
                 else
@@ -13059,7 +13059,7 @@ begin
                       if RecordSize(IdentIndex) <= 128 then
                       begin
 
-                        asm65(#9'ldy #' + HexByte(RecordSize(IdentIndex) - 1));
+                        asm65(#9'ldy #' + HexByte(byte(RecordSize(IdentIndex) - 1)));
                         asm65(#9'mva:rpl (:bp2),y ' + GetLocalName(IdentIndex, 'adr.') + ',y-');
 
                       end
@@ -13082,7 +13082,7 @@ begin
                           if RecordSize(IdentIndex) <= 128 then
                           begin
 
-                            asm65(#9'ldy #' + HexByte(RecordSize(IdentIndex) - 1));
+                            asm65(#9'ldy #' + HexByte(byte(RecordSize(IdentIndex) - 1)));
                             asm65(#9'mva:rpl ' + Name + ',y (:bp2),y-');
 
 			  end
@@ -13151,7 +13151,7 @@ begin
                               if RecordSize(IdentIndex) <= 128 then
                               begin
 
-                                asm65(#9'ldy #' + HexByte(RecordSize(IdentIndex) - 1));
+                                asm65(#9'ldy #' + HexByte(byte(RecordSize(IdentIndex) - 1)));
                                 asm65(#9'mva:rpl (:bp2),y ' + GetLocalName(IdentIndex, 'adr.') + ',y-');
 
                               end
@@ -13211,7 +13211,7 @@ begin
                               if RecordSize(IdentIndex) <= 128 then
                               begin
 
-                                asm65(#9'ldy #' + HexByte(RecordSize(IdentIndex) - 1));
+                                asm65(#9'ldy #' + HexByte(byte(RecordSize(IdentIndex) - 1)));
                                 asm65(#9'mva:rpl ' + Name + ',y (:bp2),y-');
 
                               end
@@ -13236,7 +13236,7 @@ begin
                                 else
                                   asm65(#9'mwy ' + GetLocalName(IdentIndex) + ' :bp2');
 
-                                asm65(#9'ldy #' + HexByte(RecordSize(IdentIndex) - 1));
+                                asm65(#9'ldy #' + HexByte(byte(RecordSize(IdentIndex) - 1)));
                                 asm65(#9'mva:rpl ' + Name + ',y (:bp2),y-');
 
                               end
@@ -15073,13 +15073,13 @@ WHILETOK:
             TTokenKind.STRINGLITERALTOK:            // 'text'
             begin
               asm65(#9'ldy #$00');
-              asm65(#9'mva:rne CODEORIGIN+' + HexWord(TokenAt(i + 1).StrAddress - CODEORIGIN + 1) + ',y @buf,y+');
+              asm65(#9'mva:rne CODEORIGIN+' + HexWord(word(TokenAt(i + 1).StrAddress - CODEORIGIN + 1)) + ',y @buf,y+');
 
               if yes then
               begin                 // WRITELN
 
                 asm65(#9'lda #eol');
-                asm65(#9'ldy CODEORIGIN+' + HexWord(TokenAt(i + 1).StrAddress - CODEORIGIN));
+                asm65(#9'ldy CODEORIGIN+' + HexWord(word(TokenAt(i + 1).StrAddress - CODEORIGIN)));
                 asm65(#9'sta @buf,y');
 
                 asm65(#9'mwy ' + GetLocalName(IdentIndex) + ' :bp2');
@@ -15097,7 +15097,7 @@ WHILETOK:
               else
               begin                // WRITE
 
-                asm65(#9'lda CODEORIGIN+' + HexWord(TokenAt(i + 1).StrAddress - CODEORIGIN));
+                asm65(#9'lda CODEORIGIN+' + HexWord(word(TokenAt(i + 1).StrAddress - CODEORIGIN)));
 
                 asm65(#9'mwy ' + GetLocalName(IdentIndex) + ' :bp2');
 
@@ -16106,9 +16106,9 @@ var
     begin
 
       if brackets then
-        Result := #9'= [DATAORIGIN+' + HexWord(IdentifierAt(IdentIndex).Value - DATAORIGIN) + ']'
+        Result := #9'= [DATAORIGIN+' + HexWord(word(IdentifierAt(IdentIndex).Value - DATAORIGIN)) + ']'
       else
-        Result := #9'= DATAORIGIN+' + HexWord(IdentifierAt(IdentIndex).Value - DATAORIGIN);
+        Result := #9'= DATAORIGIN+' + HexWord(word(IdentifierAt(IdentIndex).Value - DATAORIGIN));
 
     end
     else
@@ -16119,8 +16119,7 @@ var
 
         case Byte(abs(IdentifierAt(IdentIndex).Value shr 24) and $7f) of
           1..3: Result := #9'= ' + reg[abs(IdentifierAt(IdentIndex).Value shr 24) and $7f];
-          4..19: Result := #9'= :STACKORIGIN-' + IntToStr(
-              Byte(abs(IdentifierAt(IdentIndex).Value shr 24) and $7f) - 3);
+          4..19: Result := #9'= :STACKORIGIN-' + IntToStr(Byte(abs(IdentifierAt(IdentIndex).Value shr 24) and $7f) - 3);
           else
             Result := #9'= ''out of resource'''
         end;
@@ -17302,10 +17301,10 @@ begin
         if (GetTypeAtIndex(NumAllocElements).Page > 0) then begin
 
 	  if isAbsolute = false then
-	    Error(i, 'Type ' + GetTypeAtIndex(NumAllocElements).Field[0].Name + ' requires absolute address on PAGE ' + HexByte(GetTypeAtIndex(NumAllocElements).Page-1));
+	    Error(i, 'Type ' + GetTypeAtIndex(NumAllocElements).Field[0].Name + ' requires absolute address on PAGE ' + HexByte(byte(GetTypeAtIndex(NumAllocElements).Page-1)));
 
 	  if (ConstVal and $FF00 <> (GetTypeAtIndex(NumAllocElements).Page-1) shl 8) then
-	    Error(i, GetTypeAtIndex(NumAllocElements).Field[0].Name + ' requires PAGE ' + HexByte(GetTypeAtIndex(NumAllocElements).Page-1) + ', got ' + HexByte(ConstVal shr 8));
+	    Error(i, GetTypeAtIndex(NumAllocElements).Field[0].Name + ' requires PAGE ' + HexByte(byte(GetTypeAtIndex(NumAllocElements).Page-1)) + ', got ' + HexByte(byte(ConstVal shr 8)));
 
 //	    writeln(Types[NumAllocElements].Page ,',',ConstVal,',',isAbsolute);
 
@@ -18536,8 +18535,7 @@ begin
 
 
                   if NumAllocElements shr 16 > 0 then
-                    Inc(NumStaticStrChars, ((NumAllocElements and $ffff) * (NumAllocElements shr 16)) *
-                      GetDataSize(AllocElementType))
+                    Inc(NumStaticStrChars, ((NumAllocElements and $ffff) * (NumAllocElements shr 16)) * GetDataSize(AllocElementType))
                   else
                     Inc(NumStaticStrChars, NumAllocElements * GetDataSize(AllocElementType));
 
@@ -18549,6 +18547,7 @@ begin
 
                   if (VarType in [TDataType.SINGLETOK, TDataType.HALFSINGLETOK]) and
                     (ConstValType in [TDataType.SHORTREALTOK, TDataType.REALTOK]) then ConstValType := VarType;
+
                   if (VarType = TDataType.SHORTREALTOK) and (ConstValType = TDataType.REALTOK) then
                     ConstValType := TDataType.SHORTREALTOK;
 
@@ -18598,6 +18597,7 @@ begin
 
             DefineIdent(i + 1, TokenAt(i + 1).Name, TTokenKind.TYPETOK, VarType, NumAllocElements,
               AllocElementType, 0, TokenAt(i + 3).GetDataType);
+
             IdentifierAt(NumIdent).Pass := TPass.CALL_DETERMINATION;
 
           end
@@ -18610,6 +18610,7 @@ begin
 
             DefineIdent(i + 1, TokenAt(i + 1).Name, TTokenKind.TYPETOK, VarType, NumAllocElements,
               AllocElementType, 0, TokenAt(i + 3).GetDataType);
+
             IdentifierAt(NumIdent).Pass := TPass.CALL_DETERMINATION;
 
           end;
@@ -18625,6 +18626,7 @@ begin
 
       i := i + 1;
     end;  // if TTokenKind.TYPETOK
+
     // -----------------------------------------------------------------------------
     //        VAR
     // -----------------------------------------------------------------------------
