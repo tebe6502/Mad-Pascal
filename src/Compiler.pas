@@ -9881,7 +9881,7 @@ begin
             asm65(#9'ldy #$00');
 
             // perl
-            //     writeln(IdentifierAt(IdentIndex).name,',', GetDataSize(IdentifierAt(IdentIndex).AllocElementType],',', IdentifierAt(IdentIndex).AllocElementType ,',',ValType,',',VarType);
+            //     writeln(IdentifierAt(IdentIndex).name,',', GetDataSize(IdentifierAt(IdentIndex).AllocElementType),',', IdentifierAt(IdentIndex).AllocElementType ,',',ValType,',',VarType);
 
             ValType := IdentifierAt(IdentIndex).AllocElementType;
 
@@ -10080,7 +10080,7 @@ begin
               //     yes := (TokenAt(j + 2).Kind = TTokenKind.DEREFERENCETOK);
 
 
-              //  writeln(IdentifierAt(IdentIndex).Name,',',IdentifierAt(IdentIndex).DataType,',',TokenAt(j ].Kind,',',TokenAt(j + 1).Kind,',',TokenAt(j + 2).Kind);
+              //  writeln(IdentifierAt(IdentIndex).Name,',',IdentifierAt(IdentIndex).DataType,',',TokenAt(j).Kind,',',TokenAt(j + 1).Kind,',',TokenAt(j + 2).Kind);
 
               if (IdentifierAt(IdentIndex).AllocElementType in [TDataType.RECORDTOK, TDataType.OBJECTTOK]) or
                 (IdentifierAt(IdentIndex).DataType in [TDataType.RECORDTOK, TDataType.OBJECTTOK]) then
@@ -10309,7 +10309,6 @@ begin
                         if (ValType in [TDataType.RECORDTOK, TDataType.OBJECTTOK]) then
                         begin								// record^.
 
-
                           if (TokenAt(i + 2).Kind = TTokenKind.DOTTOK) then
                           begin
 
@@ -10388,7 +10387,7 @@ begin
                       if (TokenAt(i + 2).Kind = TTokenKind.DEREFERENCETOK) and (ValType in [TDataType.RECORDTOK, TDataType.OBJECTTOK])  then
                       begin								// array[ ]^
 
-//	writeln(valType,' / ',Ident[IdentIndex].name,',',Ident[IdentIndex].DataType,',',Ident[IdentIndex].AllocElementType,',',Ident[IdentIndex].NumAllocElements,',',Ident[IdentIndex].NumAllocElements_);
+			// writeln(valType,' / ',IdentifierAt(IdentIndex).name,',',IdentifierAt(IdentIndex).DataType,',',IdentifierAt(IdentIndex).AllocElementType,',',IdentifierAt(IdentIndex).NumAllocElements,',',IdentifierAt(IdentIndex).NumAllocElements_);
 
                         Inc(i);
 
@@ -10578,7 +10577,7 @@ begin
                          (IdentifierAt(IdentIndex).NumAllocElements = 0) then
                       begin
 
-                        //  writeln(IdentifierAt(IdentIndex).Name,',',IdentifierAt(IdentIndex).DataType,',',IdentifierAt(IdentIndex).AllocElementType,',',IdentifierAt(IdentIndex).NumAllocElements,',',IdentifierAt(IdentIndex).NumAllocElements_,',',IdentifierAt(IdentIndex).idType,'/',IdentifierAt(IdentIndex).Kind,' = ',IdentifierAt(IdentIndex).PassMethod ,' | ',ValType,',',TokenAt(j).Kind,',',TokenAt(j+1].kind);
+                        //  writeln(IdentifierAt(IdentIndex).Name,',',IdentifierAt(IdentIndex).DataType,',',IdentifierAt(IdentIndex).AllocElementType,',',IdentifierAt(IdentIndex).NumAllocElements,',',IdentifierAt(IdentIndex).NumAllocElements_,',',IdentifierAt(IdentIndex).idType,'/',IdentifierAt(IdentIndex).Kind,' = ',IdentifierAt(IdentIndex).PassMethod ,' | ',ValType,',',TokenAt(j).Kind,',',TokenAt(j+1).kind);
 
                         ValType := IdentifierAt(IdentIndex).AllocElementType;
 
@@ -10598,7 +10597,7 @@ begin
 
 
                       // LUCI
-                      //  writeln(IdentifierAt(IdentIndex).Name,',',IdentifierAt(IdentIndex).DataType,',',IdentifierAt(IdentIndex).AllocElementType,',',IdentifierAt(IdentIndex).NumAllocElements,',',IdentifierAt(IdentIndex).NumAllocElements_,',',IdentifierAt(IdentIndex).idType,'/',IdentifierAt(IdentIndex).Kind,' = ',IdentifierAt(IdentIndex).PassMethod ,' | ',ValType,',',TokenAt(j].kind,',',TokenAt(j+1].kind);
+                      //  writeln(IdentifierAt(IdentIndex).Name,',',IdentifierAt(IdentIndex).DataType,',',IdentifierAt(IdentIndex).AllocElementType,',',IdentifierAt(IdentIndex).NumAllocElements,',',IdentifierAt(IdentIndex).NumAllocElements_,',',IdentifierAt(IdentIndex).idType,'/',IdentifierAt(IdentIndex).Kind,' = ',IdentifierAt(IdentIndex).PassMethod ,' | ',ValType,',',TokenAt(j).kind,',',TokenAt(j+1).kind);
 
 
                       if (ValType = TDataType.ENUMTOK) and (IdentifierAt(IdentIndex).DataType = TDataType.ENUMTOK) then
@@ -12496,7 +12495,9 @@ begin
                     begin
                       IndirectionLevel := ASPOINTERTOPOINTER;
 
-                      if IdentifierAt(IdentIndex).AllocElementType = TDataType.UNTYPETOK then
+                      if (IdentifierAt(IdentIndex).AllocElementType = TDataType.UNTYPETOK) or
+		         (IdentifierAt(IdentIndex).IsObjectVariable and (IdentifierAt(IdentIndex).NestedDataType = TDataType.POINTERTOK) and (IdentifierAt(IdentIndex).NestedNumAllocElements = 0) )
+		      then
                         VarType := IdentifierAt(IdentIndex).DataType      // RECORD.
                       else
                         VarType := IdentifierAt(IdentIndex).AllocElementType;
@@ -17313,7 +17314,7 @@ begin
 
       for ParamIndex := 1 to GetTypeAtIndex(NumAllocElements).NumFields do
         if (GetTypeAtIndex(NumAllocElements).BlockIndex = 1) or
-          (GetTypeAtIndex(NumAllocElements).BlockIndex = BlockStackTopBlockIndex) then
+           (GetTypeAtIndex(NumAllocElements).BlockIndex = BlockStackTopBlockIndex) then
         begin
 
           //      writeln('b ',',',VarOfSameType[VarOfSameTypeIndex].Name + '.' + GetTypeAtIndex(NumAllocElements).Field[ParamIndex].Name,',',GetTypeAtIndex(NumAllocElements).Field[ParamIndex].DataType,',',GetTypeAtIndex(NumAllocElements).Field[ParamIndex].AllocElementType,',',GetTypeAtIndex(NumAllocElements).Field[ParamIndex].NumAllocElements,' | ',IdentifierAt(NumIdent).Value);
@@ -17497,8 +17498,7 @@ begin
             NumAllocElements := GetTypeAtIndex(IdentifierAt(BlockIdentIndex).ObjectIndex).Field[
               ParamIndex].NumAllocElements and $ffff;
 
-            if GetTypeAtIndex(IdentifierAt(BlockIdentIndex).ObjectIndex).Field[ParamIndex].NumAllocElements shr
-              16 > 0 then
+            if GetTypeAtIndex(IdentifierAt(BlockIdentIndex).ObjectIndex).Field[ParamIndex].NumAllocElements shr 16 > 0 then
               NumAllocElements := (NumAllocElements *
                 (GetTypeAtIndex(IdentifierAt(BlockIdentIndex).ObjectIndex).Field[ParamIndex].NumAllocElements shr 16));
 
@@ -17508,12 +17508,16 @@ begin
           end
           else
             case GetTypeAtIndex(IdentifierAt(BlockIdentIndex).ObjectIndex).Field[ParamIndex].DataType of
+
               TDataType.FILETOK: NumAllocElements := 12;
+
               TDataType.STRINGPOINTERTOK: NumAllocElements :=
                   GetTypeAtIndex(IdentifierAt(BlockIdentIndex).ObjectIndex).Field[ParamIndex].NumAllocElements;
+
               TDataType.RECORDTOK: NumAllocElements :=
                   ObjectRecordSize(GetTypeAtIndex(IdentifierAt(BlockIdentIndex).ObjectIndex).Field
                   [ParamIndex].NumAllocElements);
+
               else
                 NumAllocElements :=
                   GetDataSize(GetTypeAtIndex(IdentifierAt(BlockIdentIndex).ObjectIndex).Field[ParamIndex].DataType);
@@ -17552,11 +17556,9 @@ begin
       end
       else
         if Param[ParamIndex].DataType in Pointers then
-          DefineIdent(i, Param[ParamIndex].Name, TTokenKind.VARTOK, Param[ParamIndex].DataType, 0,
-            Param[ParamIndex].DataType, 0)
+          DefineIdent(i, Param[ParamIndex].Name, TTokenKind.VARTOK, Param[ParamIndex].DataType, 0, Param[ParamIndex].DataType, 0)
         else
-          DefineIdent(i, Param[ParamIndex].Name, TTokenKind.VARTOK, TDataType.POINTERTOK, 0,
-            Param[ParamIndex].DataType, 0);
+          DefineIdent(i, Param[ParamIndex].Name, TTokenKind.VARTOK, TDataType.POINTERTOK, 0, Param[ParamIndex].DataType, 0);
 
 
       if (Param[ParamIndex].DataType in [TDataType.RECORDTOK, TDataType.OBJECTTOK]) then
@@ -17567,8 +17569,8 @@ begin
         for j := 1 to GetTypeAtIndex(Param[ParamIndex].NumAllocElements).NumFields do
         begin
 
-          DefineIdent(i, Param[ParamIndex].Name + '.' + GetTypeAtIndex(
-            Param[ParamIndex].NumAllocElements).Field[j].Name,
+          DefineIdent(i, Param[ParamIndex].Name + '.' +
+	    GetTypeAtIndex(Param[ParamIndex].NumAllocElements).Field[j].Name,
             TTokenKind.VARTOK,
             GetTypeAtIndex(Param[ParamIndex].NumAllocElements).Field[j].DataType,
             GetTypeAtIndex(Param[ParamIndex].NumAllocElements).Field[j].NumAllocElements,
@@ -17593,10 +17595,8 @@ begin
         else
           IdentifierAt(GetIdentIndex(Param[ParamIndex].Name)).AllocElementType := Param[ParamIndex].DataType;
 
-      IdentifierAt(GetIdentIndex(Param[ParamIndex].Name)).NumAllocElements :=
-        Param[ParamIndex].NumAllocElements and $FFFF;
-      IdentifierAt(GetIdentIndex(Param[ParamIndex].Name)).NumAllocElements_ :=
-        Param[ParamIndex].NumAllocElements shr 16;
+      IdentifierAt(GetIdentIndex(Param[ParamIndex].Name)).NumAllocElements := Param[ParamIndex].NumAllocElements and $FFFF;
+      IdentifierAt(GetIdentIndex(Param[ParamIndex].Name)).NumAllocElements_ := Param[ParamIndex].NumAllocElements shr 16;
 
     end
     else
@@ -17629,8 +17629,8 @@ begin
         for j := 1 to GetTypeAtIndex(Param[ParamIndex].NumAllocElements).NumFields do
         begin
 
-          DefineIdent(i, Param[ParamIndex].Name + '.' + GetTypeAtIndex(
-            Param[ParamIndex].NumAllocElements).Field[j].Name,
+          DefineIdent(i, Param[ParamIndex].Name + '.' +
+	    GetTypeAtIndex(Param[ParamIndex].NumAllocElements).Field[j].Name,
             TTokenKind.VARTOK,
             GetTypeAtIndex(Param[ParamIndex].NumAllocElements).Field[j].DataType,
             GetTypeAtIndex(Param[ParamIndex].NumAllocElements).Field[j].NumAllocElements,
@@ -17656,8 +17656,8 @@ begin
 
             // writeln(Param[ParamIndex].Name + '.' + GetTypeAtIndex(Param[ParamIndex].NumAllocElements).Field[j].Name,',',GetTypeAtIndex(Param[ParamIndex].NumAllocElements).Field[j].DataType,',',GetTypeAtIndex(Param[ParamIndex].NumAllocElements).Field[j].NumAllocElements,',',GetTypeAtIndex(Param[ParamIndex].NumAllocElements).Field[j].AllocElementType);
 
-            DefineIdent(i, Param[ParamIndex].Name + '.' + GetTypeAtIndex(
-              Param[ParamIndex].NumAllocElements).Field[j].Name,
+            DefineIdent(i, Param[ParamIndex].Name + '.' +
+	      GetTypeAtIndex(Param[ParamIndex].NumAllocElements).Field[j].Name,
               TTokenKind.VARTOK,
               GetTypeAtIndex(Param[ParamIndex].NumAllocElements).Field[j].DataType,
               GetTypeAtIndex(Param[ParamIndex].NumAllocElements).Field[j].NumAllocElements,
@@ -17864,15 +17864,26 @@ begin
 
       if GetTypeAtIndex(IdentifierAt(BlockIdentIndex).ObjectIndex).Field[ParamIndex].DataType in
         [TDataType.POINTERTOK, TDataType.STRINGPOINTERTOK] then
+      begin
 
-        DefineIdent(i, GetTypeAtIndex(IdentifierAt(BlockIdentIndex).ObjectIndex).Field[ParamIndex].Name,
-          TTokenKind.VARTOK, GetTypeAtIndex(IdentifierAt(BlockIdentIndex).ObjectIndex).Field[ParamIndex].DataType,
+        DefineIdent(i,
+	  GetTypeAtIndex(IdentifierAt(BlockIdentIndex).ObjectIndex).Field[ParamIndex].Name,
+          TTokenKind.VARTOK,
+	  GetTypeAtIndex(IdentifierAt(BlockIdentIndex).ObjectIndex).Field[ParamIndex].DataType,
           GetTypeAtIndex(IdentifierAt(BlockIdentIndex).ObjectIndex).Field[ParamIndex].NumAllocElements,
-          GetTypeAtIndex(IdentifierAt(BlockIdentIndex).ObjectIndex).Field[ParamIndex].AllocElementType, 0)
+          GetTypeAtIndex(IdentifierAt(BlockIdentIndex).ObjectIndex).Field[ParamIndex].AllocElementType, 0);
+
+        IdentifierAt(NumIdent).NestedDataType := IdentifierAt(NumIdent).DataType;
+        IdentifierAt(NumIdent).NestedAllocElementType := IdentifierAt(NumIdent).AllocElementType;
+        IdentifierAt(NumIdent).NestedNumAllocElements := IdentifierAt(NumIdent).NumAllocElements;
+
+      end
       else
 
-        DefineIdent(i, GetTypeAtIndex(IdentifierAt(BlockIdentIndex).ObjectIndex).Field[ParamIndex].Name,
-          TTokenKind.VARTOK, TDataType.POINTERTOK,
+        DefineIdent(i,
+	  GetTypeAtIndex(IdentifierAt(BlockIdentIndex).ObjectIndex).Field[ParamIndex].Name,
+          TTokenKind.VARTOK,
+	  TDataType.POINTERTOK,
           GetTypeAtIndex(IdentifierAt(BlockIdentIndex).ObjectIndex).Field[ParamIndex].NumAllocElements,
           GetTypeAtIndex(IdentifierAt(BlockIdentIndex).ObjectIndex).Field[ParamIndex].DataType, 0);
 
@@ -17885,8 +17896,8 @@ begin
       begin
         IdentifierAt(NumIdent).Value := ConstVal + DATAORIGIN;
 
-        Inc(ConstVal, GetDataSize(GetTypeAtIndex(IdentifierAt(BlockIdentIndex).ObjectIndex).Field[
-          ParamIndex].DataType));
+        Inc(ConstVal,
+	    GetDataSize(GetTypeAtIndex(IdentifierAt(BlockIdentIndex).ObjectIndex).Field[ParamIndex].DataType));
 
         SetVarDataSize(i, tmpVarDataSize);
       end;

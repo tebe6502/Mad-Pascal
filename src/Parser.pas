@@ -60,7 +60,7 @@ begin
     if IdentifierAt(IdentIndex).AllocElementType in [TDataType.RECORDTOK, TDataType.OBJECTTOK] then
       Result := IdentifierAt(IdentIndex).NumAllocElements_
     else
-      if (IdentifierAt(IdentIndex).NumAllocElements_ = 0) or 
+      if (IdentifierAt(IdentIndex).NumAllocElements_ = 0) or
          (IdentifierAt(IdentIndex).AllocElementType in [TDataType.PROCVARTOK])
       then
         Result := IdentifierAt(IdentIndex).NumAllocElements
@@ -2423,8 +2423,7 @@ var
           Inc(GetTypeAtIndex(RecType).Size, GetDataSize(TDataType.POINTERTOK))
         else
           if NumAllocElements shr 16 > 0 then
-            Inc(GetTypeAtIndex(RecType).Size, (NumAllocElements shr 16) * (NumAllocElements and $FFFF) *
-              GetDataSize(AllocElementType))
+            Inc(GetTypeAtIndex(RecType).Size, (NumAllocElements shr 16) * (NumAllocElements and $FFFF) * GetDataSize(AllocElementType))
           else
             Inc(GetTypeAtIndex(RecType).Size, NumAllocElements * GetDataSize(AllocElementType));
 
@@ -2809,8 +2808,7 @@ begin
 
                     for FieldInListIndex := 1 to NumFieldsInList do
                     begin              // issue #92 fixed
-                      DeclareField(FieldInListName[FieldInListIndex].Name, DataType,
-                        NumAllocElements, AllocElementType);
+                      DeclareField(FieldInListName[FieldInListIndex].Name, DataType, NumAllocElements, AllocElementType);
 
                       if DataType in [TDataType.RECORDTOK, TDataType.OBJECTTOK] then
                         //      for FieldInListIndex := 1 to NumFieldsInList do                //
