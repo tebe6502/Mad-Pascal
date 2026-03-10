@@ -42,7 +42,7 @@ implementation
 constructor reader.fopen(infile:string);
 begin
    //new(buff);
-   GetMem(buff, 4096); 
+   buff := GetMem(4096); 
    
    _eof:=false;
    pos := 0;
@@ -114,7 +114,7 @@ constructor writer.fopen(outfile:string);
 begin
    pos:=0;
    //new(buff);
-   GetMem(buff, 4096); 
+   buff := GetMem(4096);
 
    assign(output,outfile);
    rewrite(output,1);

@@ -60,7 +60,8 @@ begin
 	 inc(fttail);
 	 {add it in the now empty slot}
 
-	 GetMem(freqtable[i], sizeof(charfreq));
+	 freqtable[i] := GetMem(sizeof(charfreq));
+	 
 
 	 freqtable[i].character:=ch;
 	 freqtable[i].frequency:=fr;
@@ -70,7 +71,7 @@ begin
    end;
    {ok it's the worst one add it at the end}
    
-   GetMem(freqtable[fttail], sizeof(charfreq));
+   freqtable[fttail] := GetMem(sizeof(charfreq));
   
    freqtable[fttail].character:=ch;
    freqtable[fttail].frequency:=fr;
@@ -120,7 +121,7 @@ begin
    end
    else
    begin
-      GetMem(hufftree[hufftail], sizeof(treenode));
+      hufftree[hufftail] := GetMem(sizeof(treenode));
    
       {Create a node for this character} 
       hufftree[hufftail].leftChild := -1;
@@ -255,7 +256,7 @@ begin
       pch := $F000 or hufftail;
       addToTable(pch,pfr); {add to the freq table}
       
-      GetMem(hufftree[hufftail], sizeof(treenode));
+      hufftree[hufftail] := GetMem(sizeof(treenode));
 
       {add to the huff coding tree}
       hufftree[hufftail].leftChild := hn1;
