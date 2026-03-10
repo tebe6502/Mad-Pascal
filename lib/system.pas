@@ -1238,14 +1238,14 @@ begin
 
 	Seek(f, i);
 
-asm
-{	mwa f :bp2
+	asm
+	  mwa f :bp2
 
-	ldy #s@file.status
-	lda (:bp2),y
-	and #e@file.eof
-	sta Result
-};
+	  ldy #s@file.status
+	  lda (:bp2),y
+	  and #e@file.eof
+	  sta Result
+	end;
 end;
 
 
@@ -2437,13 +2437,20 @@ asm
 	ldy #$00
 	lda :psptr
 	sta (P),y
+	clc
+	adc size
+	sta :psptr
 	iny
 	lda :psptr+1
 	sta (P),y
+	adc size+1
+	sta :psptr+1
 
-	adw :psptr size
-
-	cpw :psptr #$c000
+	cmp >$c000
+	bne @+
+	lda :psptr
+	cmp <$c000
+@
 	bcc @exit
 
 	@print #$45
@@ -2468,12 +2475,20 @@ Getmem reserves Size bytes memory, and returns a pointer to this memory in Resul
 asm
 	lda :psptr
 	sta Result
+	clc
+	adc size
+	sta :psptr
+
 	lda :psptr+1
 	sta Result+1
+	adc size+1
+	sta :psptr+1
 
-	adw :psptr size
-
-	cpw :psptr #$c000
+	cmp >$c000
+	bne @+
+	lda :psptr
+	cmp <$c000
+@
 	bcc @exit
 
 	@print #$45
