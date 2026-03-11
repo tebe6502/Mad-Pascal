@@ -15217,20 +15217,27 @@ WHILETOK:
                 //    else
 
                 if (ExpressionType in IntegerTypes) then
-                  GenerateWriteString(TokenAt(i).Value, ASVALUE, ExpressionType)  // Integer argument
-                else if (ExpressionType = TDataType.BOOLEANTOK) then
-                    GenerateWriteString(TokenAt(i).Value, ASBOOLEAN_)      // Boolean argument
-                  else if (ExpressionType = TDataType.CHARTOK) then
-                      GenerateWriteString(TokenAt(i).Value, ASCHAR)      // Character argument
-                    else if ExpressionType = TDataType.REALTOK then
-                        GenerateWriteString(TokenAt(i).Value, ASREAL)      // Real argument
-                      else if ExpressionType = TDataType.SHORTREALTOK then
-                          GenerateWriteString(TokenAt(i).Value, ASSHORTREAL)      // ShortReal argument
-                        else if ExpressionType = TDataType.HALFSINGLETOK then
-                            GenerateWriteString(TokenAt(i).Value, ASHALFSINGLE)      // Half Single argument
-                          else if ExpressionType = TDataType.SINGLETOK then
-                              GenerateWriteString(TokenAt(i).Value, ASSINGLE)      // Single argument
-                            else if ExpressionType in Pointers then
+                  GenerateWriteString(TokenAt(i).Value, ASVALUE, ExpressionType)	// Integer argument
+                else
+		if (ExpressionType = TDataType.BOOLEANTOK) then
+                  GenerateWriteString(TokenAt(i).Value, ASBOOLEAN_)	// Boolean argument
+                else
+		if (ExpressionType = TDataType.CHARTOK) then
+                  GenerateWriteString(TokenAt(i).Value, ASCHAR)		// Character argument
+                else
+		if ExpressionType = TDataType.REALTOK then
+                  GenerateWriteString(TokenAt(i).Value, ASREAL)		// Real argument
+                else
+		if ExpressionType = TDataType.SHORTREALTOK then
+                  GenerateWriteString(TokenAt(i).Value, ASSHORTREAL)	// ShortReal argument
+                else
+		if ExpressionType = TDataType.HALFSINGLETOK then
+                  GenerateWriteString(TokenAt(i).Value, ASHALFSINGLE)	// Half Single argument
+                else
+		if ExpressionType = TDataType.SINGLETOK then
+                  GenerateWriteString(TokenAt(i).Value, ASSINGLE)	// Single argument
+                else
+		if ExpressionType in Pointers then
                               begin
 
                                 if TokenAt(j).Kind = TTokenKind.ADDRESSTOK then
@@ -15258,28 +15265,30 @@ WHILETOK:
 
 
                                   if (ExpressionType = TDataType.STRINGPOINTERTOK) then
-                                    GenerateWriteString(IdentifierAt(IdentIndex).Value, ASPOINTERTOPOINTER,
-                                      TDataType.POINTERTOK)
-                                  else if (ExpressionType in IntegerTypes) then
-                                      GenerateWriteString(TokenAt(i).Value, ASVALUE, ExpressionType)
-                                    // Integer argument
-                                    else if (ExpressionType = TDataType.BOOLEANTOK) then
-                                        GenerateWriteString(TokenAt(i).Value, ASBOOLEAN_)      // Boolean argument
-                                      else if (ExpressionType = TDataType.CHARTOK) then
-                                          GenerateWriteString(TokenAt(i).Value, ASCHAR)      // Character argument
-                                        else if ExpressionType = TDataType.REALTOK then
-                                            GenerateWriteString(TokenAt(i).Value, ASREAL)      // Real argument
-                                          else if ExpressionType = TDataType.SHORTREALTOK then
-                                              GenerateWriteString(TokenAt(i).Value, ASSHORTREAL)
-                                            // ShortReal argument
-                                            else if ExpressionType = TDataType.HALFSINGLETOK then
-                                                GenerateWriteString(TokenAt(i).Value, ASHALFSINGLE)
-                                              // Half Single argument
-                                              else if ExpressionType = TDataType.SINGLETOK then
-                                                  GenerateWriteString(TokenAt(i).Value, ASSINGLE)
-                                                // Single argument
-                                                else
-                                                  Error(i, TErrorCode.CantReadWrite);
+                                    GenerateWriteString(IdentifierAt(IdentIndex).Value, ASPOINTERTOPOINTER, TDataType.POINTERTOK)
+                                  else
+				  if (ExpressionType in IntegerTypes) then
+                                    GenerateWriteString(TokenAt(i).Value, ASVALUE, ExpressionType)	// Integer argument
+                                  else
+				  if (ExpressionType = TDataType.BOOLEANTOK) then
+                                    GenerateWriteString(TokenAt(i).Value, ASBOOLEAN_)		// Boolean argument
+                                  else
+				  if (ExpressionType = TDataType.CHARTOK) then
+                                    GenerateWriteString(TokenAt(i).Value, ASCHAR)		// Character argument
+                                  else
+				  if ExpressionType = TDataType.REALTOK then
+                                    GenerateWriteString(TokenAt(i).Value, ASREAL)		// Real argument
+                                  else
+				  if ExpressionType = TDataType.SHORTREALTOK then
+                                    GenerateWriteString(TokenAt(i).Value, ASSHORTREAL)		// ShortReal argument
+                                  else
+				  if ExpressionType = TDataType.HALFSINGLETOK then
+                                    GenerateWriteString(TokenAt(i).Value, ASHALFSINGLE)		// Half Single argument
+                                  else
+				  if ExpressionType = TDataType.SINGLETOK then
+                                    GenerateWriteString(TokenAt(i).Value, ASSINGLE)		// Single argument
+                                  else
+                                    Error(i, TErrorCode.CantReadWrite);
 
                                 end
                                 else
@@ -15481,7 +15490,7 @@ WHILETOK:
         else
           if TokenAt(i + 1).Kind = TTokenKind.DEREFERENCETOK then
             Error(i + 1, TErrorCode.IllegalQualifier)
-          else 
+          else
             ErrorIncompatibleTypes(i + 1, IdentifierAt(IdentIndex).DataType, ExpressionType);
 
       end
@@ -15530,6 +15539,9 @@ WHILETOK:
           j := CompileExpression(j, ActualParamType);
 
         i := j;
+
+        if ExpressionType = TDataType.DEREFERENCEARRAYTOK then ExpressionType := TDataType.WORDTOK;
+
 
         CheckCommonType(i, ExpressionType, ActualParamType);
 

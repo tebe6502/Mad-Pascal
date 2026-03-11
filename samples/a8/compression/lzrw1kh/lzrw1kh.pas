@@ -92,8 +92,9 @@ END;
 FUNCTION  Compression(Source, Dest : BufferPtr;
                       SourceSize   : BufferSize) :BufferSize;
 VAR
-  Bit,Command,Size         : WORD;
-  Key                      : Word;
+  Command,Size		   : WORD;
+  Bit			   : BYTE;
+  Key                      : WORD;
   X,Y,Z,Pos                : BufferIndex;
 BEGIN
   FillChar(Hash^,SizeOf(Hashtable), $FF);
@@ -114,7 +115,7 @@ BEGIN
     END;
     Size := 1;
     WHILE ((Source^[X] = Source^[X+Size]) AND (Size < $FFF)
-                         AND (X+Size < SourceSize)) DO begin
+                         AND (word(X+Size) < SourceSize)) DO begin
               INC(Size);
     end;
     IF (Size >= 16) THEN BEGIN
@@ -141,7 +142,7 @@ BEGIN
         INC(X);
         Command := Command SHL 1
       END;
-    end; { size <= 16 }
+    END; { size <= 16 }
     INC(Bit);
   END; { while x < sourcesize ... }
   Command := Command SHL (16-Bit);
@@ -164,14 +165,19 @@ VAR
   Bit                      : BYTE;
   SaveY                    : BufferIndex; { * dh * unsafe for-loop variable Y }
 
+  src: PByte register;
+  dst: PByte register;
+
 BEGIN
   IF (Source^[0] = FLAG_Copied) THEN  begin
+
     FOR Y := 1 TO PRED(SourceSize) DO begin
       Dest^[PRED(Y)] := Source^[Y];
       SaveY := Y;
-    end;
+    END;
+    
     Y := SaveY;
-  end
+  END
   ELSE BEGIN
     Y := 0;
     X := 3;
@@ -193,16 +199,27 @@ BEGIN
                +(Source^[X+1] SHR 4));
         IF (Pos = 0) THEN BEGIN
           Size := (Source^[X+1] SHL 8) + Source^[X+2] + 15;
-          FOR K := 0 TO Size DO begin
-               Dest^[Y+K] := Source^[X+3];
-          end;
+
+	  FillByte(@Dest^[Y], Size+1, Source^[X+3]);
+
           INC(X,4);
           INC(Y,Size+1)
         END
         ELSE BEGIN  { pos = 0 }
           Size := (Source^[X+1] AND $0F)+2;
-          FOR K := 0 TO Size DO
-               Dest^[Y+K] := Dest^[Y-Pos+K];
+
+	  src:=@Dest[Y-Pos];
+	  dst:=@Dest[Y];
+	  
+	  FOR K := Size downto 0 DO
+	  BEGIN
+               //Dest^[Y+K] := Dest^[Y+K-Pos];
+	       dst^ := src^;
+	       
+	       inc(dst);
+	       inc(src);
+	  END;
+	       
           INC(X,2);
           INC(Y,Size+1)
         END; { pos = 0 }
@@ -214,9 +231,6 @@ BEGIN
   Result := Y
 END;  { decompression }
 
-{
-  Unit "Finalization" as Delphi 2.0 would have it
-}
 
 Initialization
 
