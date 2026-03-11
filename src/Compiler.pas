@@ -15417,9 +15417,7 @@ WHILETOK:
           if ExpressionType = TDataType.CHARTOK then ExpressionType := TDataType.BYTETOK;
           // wyjatkowo TTokenKind.CHARTOK -> TTokenKind.BYTETOK
 
-          if {((IdentifierAt(IdentIndex).DataType in Pointers) and
-       (IdentifierAt(IdentIndex).NumAllocElements=0)) or}
-          (IdentifierAt(IdentIndex).DataType = TDataType.REALTOK) then
+          if (IdentifierAt(IdentIndex).DataType = TDataType.REALTOK) then
             Error(i, 'Left side cannot be assigned to')
           else
           begin
@@ -15461,9 +15459,8 @@ WHILETOK:
       if IdentifierAt(IdentIndex).AllocElementType = TDataType.REALTOK then
         Error(i, TErrorCode.OrdinalExpExpected);
 
-
       if not (IdentifierAt(IdentIndex).idType in [TDataType.PCHARTOK]) and
-        (IdentifierAt(IdentIndex).DataType in Pointers) and (IdentifierAt(IdentIndex).NumAllocElements > 0) and
+        (IdentifierAt(IdentIndex).DataType in Pointers) and not (IdentifierAt(IdentIndex).NumAllocElements in [0, 1]) and
         (not (IdentifierAt(IdentIndex).AllocElementType in [TDataType.RECORDTOK, TDataType.OBJECTTOK])) then
       begin
 
@@ -15484,7 +15481,7 @@ WHILETOK:
         else
           if TokenAt(i + 1).Kind = TTokenKind.DEREFERENCETOK then
             Error(i + 1, TErrorCode.IllegalQualifier)
-          else
+          else 
             ErrorIncompatibleTypes(i + 1, IdentifierAt(IdentIndex).DataType, ExpressionType);
 
       end
@@ -15527,8 +15524,7 @@ WHILETOK:
         j := i + 2;
         yes := False;
 
-        if SafeCompileConstExpression(j, ConstVal, ActualParamType,
-          { IdentifierAt(IdentIndex).DataType } ExpressionType, True) then
+        if SafeCompileConstExpression(j, ConstVal, ActualParamType, ExpressionType, True) then
           yes := True
         else
           j := CompileExpression(j, ActualParamType);
@@ -15545,7 +15541,7 @@ WHILETOK:
           if yes = False then ExpandParam(ExpressionType, ActualParamType);
 
           if (IdentifierAt(IdentIndex).DataType in Pointers) and
-            (IdentifierAt(IdentIndex).AllocElementType in [TDataType.RECORDTOK, TDataType.OBJECTTOK]) then
+             (IdentifierAt(IdentIndex).AllocElementType in [TDataType.RECORDTOK, TDataType.OBJECTTOK]) then
           begin
 
             if yes then
@@ -15556,8 +15552,8 @@ WHILETOK:
           end
           else
             if (IdentifierAt(IdentIndex).DataType in Pointers) and (IdentifierAt(IdentIndex).NumAllocElements = 0) and
-              (IdentifierAt(IdentIndex).AllocElementType in OrdinalTypes) and
-              (IndirectionLevel <> ASPOINTERTOPOINTER) then
+               (IdentifierAt(IdentIndex).AllocElementType in OrdinalTypes) and
+               (IndirectionLevel <> ASPOINTERTOPOINTER) then
             begin      // zwieksz o N * DATASIZE jesli to wskaznik ale nie tablica
 
               if yes then
