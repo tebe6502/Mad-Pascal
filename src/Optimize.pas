@@ -166,7 +166,7 @@ end;
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 
-
+{
 function ElfHash(const Value: String): Cardinal;
 var
   x: Cardinal;
@@ -181,6 +181,26 @@ begin
       Result := Result xor (x shr 24);
     Result := Result and (not x);
   end;
+end;
+}
+
+function ElfHash(const Value: string): Cardinal;
+var
+  p: PChar;
+  x: Cardinal;
+begin
+  Result := 0;
+  p := PChar(Value);
+
+  while p^ <> #0 do
+  begin
+    Result := (Result shl 4) + Ord(p^);
+    x := Result and $F0000000;
+    Result := Result xor (x shr 24) xor x;
+
+    Inc(p);
+  end;
+
 end;
 
 
@@ -1444,10 +1464,12 @@ begin        // OptimizeASM
         arg0 := copy(a, 2, 256);
 
 
-      if length(arg0) > 20 then begin x := 51; resetOpty; Break; end;
+      if (length(arg0) < 4) or (length(arg0) > 20) then begin x := 51; resetOpty; Break; end;
 
 
       elf := ElfHash(arg0);
+
+      if (elf < $00044969) or (elf > $0FEB2AA4) then begin x := 51; resetOpty; Break; end;
 
 
      if elf = $08D58F81 then begin		// @expandSHORT2SMALL1

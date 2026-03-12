@@ -1,6 +1,6 @@
 {
  309
- 35
+ 34
 }
 
 uses crt, sysutils, graph, lzrw1kh;
@@ -62,4 +62,4 @@ begin
 
 end.
 
-// 11443
+// 11439

@@ -195,8 +195,8 @@ BEGIN
            INC(Y)
       END
       ELSE BEGIN  { command and $8000 }
-        Pos := ((Source^[X] SHL 4)
-               +(Source^[X+1] SHR 4));
+        Pos := ((Source^[X] SHL 4) or
+                (Source^[X+1] SHR 4));
         IF (Pos = 0) THEN BEGIN
           Size := (Source^[X+1] SHL 8) + Source^[X+2] + 15;
 

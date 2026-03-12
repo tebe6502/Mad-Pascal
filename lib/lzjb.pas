@@ -4,7 +4,7 @@ unit lzjb;
  @author: Viacheslav Komenda
  @name: LZJB compression/decompression unit
 
- @version: 1.0
+ @version: 1.1
 
  @description:
  <https://en.wikipedia.org/wiki/LZJB>
@@ -66,6 +66,8 @@ VAR     mlen                 : BYTE;
         dst_pos, src_pos     : WORD;
         hashlo, hashhi       : WORD;
         lempel               : ARRAY [0..LEMPEL_SIZE - 1] OF WORD;
+	psrc: PByte register;
+	pdst: PByte register;
 BEGIN
         copymap := 0;
         copymask := 1 SHL (BITS_IN_BYTE - 1);
@@ -92,8 +94,10 @@ BEGIN
                         CONTINUE;
                 END;
 
-                hashlo := (WORD(src[src_pos + 1]) SHL 8) OR WORD(src[src_pos + 2]);
-                hashhi := WORD(src[src_pos]);
+		pdst := @src[src_pos];
+
+                hashlo := (WORD(pdst[1]) SHL 8) OR WORD(pdst[2]);
+                hashhi := WORD(pdst[0]);
                 Inc(hashlo, hashhi SHR 1);
                 Inc(hashlo, (hashhi SHL 3) OR (hashlo SHR 5));
                 hashlo := hashlo AND (LEMPEL_SIZE - 1);
@@ -101,11 +105,14 @@ BEGIN
                 offset := (src_pos - lempel[hashlo]) AND OFFSET_MASK;
                 lempel[hashlo] := src_pos;
                 cpy := src_pos - offset;
+
+		psrc := @src[cpy];
+
                 IF (src_pos >= offset)
                         AND (offset <> 0)
-                        AND (src[src_pos] = src[cpy])
-                        AND (src[src_pos + 1] = src[cpy + 1])
-                        AND (src[src_pos + 2] = src[cpy + 2]) THEN BEGIN
+                        AND (pdst[0] = psrc[0])
+                        AND (pdst[1] = psrc[1])
+                        AND (pdst[2] = psrc[2]) THEN BEGIN
                         dst[copymap] := CHR(ORD(dst[copymap]) OR copymask);
                         mlen := MATCH_MIN;
                         WHILE (mlen < MATCH_MAX) AND (src[src_pos + mlen] = src[cpy + mlen]) DO Inc(mlen);
@@ -130,6 +137,8 @@ FUNCTION lzjb_decompress_mem(src : PCHAR; src_len : WORD; dst : PCHAR) : WORD;
 VAR     copymap, mlen                 : BYTE;
         offset, cpy, src_pos, dst_pos : WORD;
         copymask                      : WORD;
+	psrc: PByte register;
+	pdst: PByte register;
 BEGIN
         src_pos := 0;
         dst_pos := 0;
@@ -142,17 +151,31 @@ BEGIN
                         Inc(src_pos)
                 END;
                 IF (copymap AND copymask) <> 0 THEN BEGIN
-                        mlen := (Ord(src[src_pos]) SHR (BITS_IN_BYTE - MATCH_BITS)) + MATCH_MIN;
-                        offset := ((WORD(src[src_pos]) SHL BITS_IN_BYTE) OR WORD(src[src_pos + 1])) AND OFFSET_MASK;
+
+			psrc := @src[src_pos];
+
+                        mlen := (psrc[0] SHR (BITS_IN_BYTE - MATCH_BITS)) + MATCH_MIN;
+                        offset := ((WORD(psrc[0]) SHL BITS_IN_BYTE) OR WORD(psrc[1])) AND OFFSET_MASK;
                         Inc(src_pos, 2);
+
                         IF dst_pos < offset THEN BREAK;
                         cpy := dst_pos - offset;
-                        WHILE mlen > 0 DO BEGIN
-                                dst[dst_pos] := dst[cpy];
-                                Inc(dst_pos);
-                                Inc(cpy);
+
+			psrc := @dst[cpy];
+			pdst := @dst[dst_pos];
+
+			inc(dst_pos, mlen);
+
+			WHILE mlen > 0 DO BEGIN
+				pdst^ := psrc^;
+				inc(pdst);
+				inc(psrc);
+                                //dst[dst_pos] := dst[cpy];
+                                //Inc(dst_pos);
+                                //Inc(cpy);
                                 Dec(mlen);
                         END;
+
                 END ELSE BEGIN
                         dst[dst_pos] := src[src_pos];
                         Inc(dst_pos);
