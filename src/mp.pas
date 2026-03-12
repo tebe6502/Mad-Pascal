@@ -153,6 +153,7 @@ Contributors:
 # parametry dla imulCL, imulCX w konkretnej kolejnosci 1: ECX, 2: EAX
 
 # wystepuja tylko skoki w przod @+ (@- nie wystepuja)
+# @+1 wystepuje dla INTEGER tylko w GenerateForToDoEpilog -> down i w opt_SUB
 
 # s[x][0..3] := '';            -> lda :STACKORIGIN+...
 # s[x][0..3] := #9'mva #$00';  -> lda #$00

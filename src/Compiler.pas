@@ -4779,9 +4779,9 @@ begin
         asm65(#9'sne');
         asm65(#9'dec ' + svar + '+3');
         asm65(#9'dec ' + svar + '+2');
-        asm65('@');
+        asm65('@:');
         asm65(#9'dec ' + svar + '+1');
-        asm65('@');
+        asm65('@:');
         asm65(#9'dec ' + svar);
       end;
 

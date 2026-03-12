@@ -16,6 +16,8 @@ ptr3	= :eax
 
 	stx @sp
 
+; Copy upwards
+
 	ldy	#0
 
 	ldx     ptr3+1		; Get high byte of n
@@ -58,19 +60,19 @@ done	ldx #0
 
 @move	.proc (.word ptr1, ptr2, ptr3) .var
 
-ptr1	= :edx
-ptr2	= :ecx
-ptr3	= :eax
+ptr1	= :edx	;src
+ptr2	= :ecx	;dst
+ptr3	= :eax	;len
 
 src	= ptr1
 dst	= ptr2
 cnt	= ptr3
 
 	cpw ptr2 ptr1
-	scs
-	jmp @moveu
+	bcc @moveu	; dst < src -> upwards
 
 	stx @sp
+			; dst > src -> downwards
 
 ; Copy downwards. Adjust the pointers to the end of the memory regions.
 

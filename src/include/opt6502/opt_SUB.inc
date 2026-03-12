@@ -538,9 +538,9 @@ begin
 	listing[i+5] := #9'sne';
 	listing[i+6] := #9'dec ' + GetARG(i+9);
 	listing[i+7] := #9'dec ' + GetARG(i+4);
-	listing[i+8] := '@';
+	listing[i+8] := '@:';
 	listing[i+9] := #9'dec ' + GetARG(i+2);
-	listing[i+10] := '@';
+	listing[i+10] := '@:';
 	listing[i+11] := #9'dec ' + GetARG(i);
 
 	exit(false);
