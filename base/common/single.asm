@@ -1,5 +1,6 @@
 ; JAVA IEEE-32 (IEEE-754)
 ; David Schmenk
+; https://github.com/dschmenk/VM02
 ; https://sourceforge.net/projects/vm02/
 ; http://vm02.cvs.sourceforge.net/viewvc/vm02/vm02/src/
 ; changes: 2024-04-06
