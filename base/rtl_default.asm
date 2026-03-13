@@ -79,6 +79,7 @@ numread	.word		; pointer to variable, length of loaded data
 	icl 'common\float16_i2f.asm'	; cmp -> HALFSINGLE		IEEE-754 16bit
 
 	icl 'common\mul40.asm'		; @mul40
+	icl 'common\mul48.asm'		; @mul48
 	icl 'common\mul64.asm'		; @mul64
 	icl 'common\mul96.asm'		; @mul96
 	icl 'common\mul320.asm'		; @mul320
