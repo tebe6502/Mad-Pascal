@@ -533,12 +533,27 @@ var
   ArrayIndexType: TDataType;
   ArrayIndex: Int64;
 
+
   function GetStaticValue(const x: Byte): Int64;
+  var i: word;
   begin
 
-    Result := StaticStringData[IdentifierAt(IdentIndex).Value - CODEORIGIN - CODEORIGIN_BASE + ArrayIndex * GetDataSize(ConstValType) + x];
+    if IdentifierAt(IdentIndex).isStriped then begin
+
+      i := IdentifierAt(IdentIndex).Value - CODEORIGIN - CODEORIGIN_BASE + ArrayIndex;
+
+      case x of
+       0: Result := StaticStringData[ i ];
+       1: Result := StaticStringData[ i + IdentifierAt(IdentIndex).NumAllocElements ];
+       2: Result := StaticStringData[ i + IdentifierAt(IdentIndex).NumAllocElements * 2 ];
+       3: Result := StaticStringData[ i + IdentifierAt(IdentIndex).NumAllocElements * 3 ];
+      end;
+      
+    end else
+      Result := StaticStringData[IdentifierAt(IdentIndex).Value - CODEORIGIN - CODEORIGIN_BASE + ArrayIndex * GetDataSize(ConstValType) + x];
 
   end;
+
 
 begin
 
@@ -1037,7 +1052,8 @@ begin
 
                 if isError then Exit;
 
-                if (ArrayIndex < 0) or (ArrayIndex > IdentifierAt(IdentIndex).NumAllocElements - 1 + Ord(IdentifierAt(IdentIndex).DataType = TDataType.STRINGPOINTERTOK)) then
+                if (ArrayIndex < 0) or 
+		   (ArrayIndex > IdentifierAt(IdentIndex).NumAllocElements - 1 + Ord(IdentifierAt(IdentIndex).DataType = TDataType.STRINGPOINTERTOK)) then
                 begin
                   _isConst := False;
                   Error(i, TErrorCode.SubrangeBounds);

@@ -3997,14 +3997,14 @@ begin
 
   yes := True;
 
-  if not isInt then        // not Interrupt
+  if not isInt then			// not Interrupt
     if not IsFunction then
     begin
       asm65('@exit');
 
       if not isInl then
       begin
-        asm65(#9'.ifdef @new');      // @FreeMem
+        asm65(#9'.ifdef @new');		// @FreeMem
         asm65(#9'lda <@VarData');
         asm65(#9'sta :ztmp');
         asm65(#9'lda >@VarData');
@@ -14051,6 +14051,7 @@ WHILETOK:
     TTokenKind.REPEATTOK:
     begin
       Inc(CodeSize);          // !!! aby dzialaly zagniezdzone REPEAT
+      Inc(CodeSize);
 
       if codealign.loop > 0 then
       begin
@@ -17331,6 +17332,37 @@ end;  //CompileRecordDeclaration
 // ----------------------------------------------------------------------------
 
 
+procedure StripStaticData(DataSize: byte; NumAllocElements: Cardinal);
+var tmp: array [0..1023] of word;
+    i: word;
+begin
+
+ move(StaticStringData[NumStaticStrChars], tmp, sizeof(tmp));
+
+ for i:=0 to NumAllocElements - 1 do
+  case DataSize of
+   
+   2: begin
+       StaticStringData[NumStaticStrChars+i] := tmp[i*2];
+       StaticStringData[NumStaticStrChars+i+NumAllocElements] := tmp[i*2+1];
+      end;
+
+   4: begin
+       StaticStringData[NumStaticStrChars+i] := tmp[i*4];
+       StaticStringData[NumStaticStrChars+i+NumAllocElements] := tmp[i*4+1];
+       StaticStringData[NumStaticStrChars+i+NumAllocElements*2] := tmp[i*4+2];
+       StaticStringData[NumStaticStrChars+i+NumAllocElements*3] := tmp[i*4+3];
+      end;
+
+  end;
+
+end;
+
+
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+
+
 function CompileBlock(i: TTokenIndex; BlockIdentIndex: Integer; NumParams: Integer;
   IsFunction: Boolean; FunctionResultType: TDataType; FunctionNumAllocElements: Cardinal = 0;
   FunctionAllocElementType: TDataType = TDataType.UNTYPETOK): Integer;
@@ -18366,7 +18398,27 @@ begin
 
     if TokenAt(i).Kind = TTokenKind.CONSTTOK then
     begin
+// xxxxxxxxxxxxxxxxxxxxxxxxx
+
+      isStriped := False;
+
       repeat
+
+{
+      if (TokenAt(i + 1).Kind = TTokenKind.OBRACKETTOK) and 
+         (TokenAt(i + 2).Kind = TTokenKind.STRIPEDTOK) then
+      begin
+
+writeln('......');
+
+        CheckTok(i + 3, TTokenKind.CBRACKETTOK);
+        CheckTok(i + 4, TTokenKind.IDENTTOK);
+
+        isStriped := True;
+
+        Inc(i, 3);
+      end;
+}
 
         if TokenAt(i + 1).Kind <> TTokenKind.IDENTTOK then
           Error(i + 1, 'Constant name expected but ' + TokenList.GetTokenSpellingAtIndex(i + 1) + ' found')
@@ -18380,9 +18432,8 @@ begin
             begin
 
               if TokenAt(j).StrLength > 255 then
-                DefineIdent(i + 1, TokenAt(i + 1).Name, TTokenKind.CONSTTOK, TDataType.POINTERTOK,
-                  0, TDataType.CHARTOK,
-                  ConstVal + CODEORIGIN, TDataType.PCHARTOK)
+                DefineIdent(i + 1, TokenAt(i + 1).Name, TTokenKind.CONSTTOK, TDataType.POINTERTOK, 0,
+                  TDataType.CHARTOK, ConstVal + CODEORIGIN, TDataType.PCHARTOK)
               else
                 DefineIdent(i + 1, TokenAt(i + 1).Name, TTokenKind.CONSTTOK, ConstValType, TokenAt(j).StrLength,
                   TDataType.CHARTOK, ConstVal + CODEORIGIN, TokenAt(j).GetDataType);
@@ -18458,9 +18509,8 @@ begin
                 j := CompileConstExpression(j + 2, ConstVal, ConstValType);
 
                 if TokenAt(i + 3).Kind = TTokenKind.PCHARTOK then
-                  DefineIdent(i + 1, TokenAt(i + 1).Name, TTokenKind.CONSTTOK, TDataType.POINTERTOK,
-                    0, TDataType.CHARTOK,
-                    ConstVal + CODEORIGIN + 1, TDataType.PCHARTOK)
+                  DefineIdent(i + 1, TokenAt(i + 1).Name, TTokenKind.CONSTTOK, TDataType.POINTERTOK, 0, 
+		    TDataType.CHARTOK, ConstVal + CODEORIGIN + 1, TDataType.PCHARTOK)
                 else
                   DefineIdent(i + 1, TokenAt(i + 1).Name, TTokenKind.CONSTTOK, ConstValType, TokenAt(j).StrLength,
                     TDataType.CHARTOK, ConstVal + CODEORIGIN, TokenAt(j).GetDataType);
@@ -18474,6 +18524,21 @@ begin
                   DefineIdent(i + 1, TokenAt(i + 1).Name, TTokenKind.CONSTTOK, VarType, NumAllocElements,
                     AllocElementType, NumStaticStrChars + CODEORIGIN + CODEORIGIN_BASE, TDataType.IDENTTOK);
 
+// xxxxxxxxxxxxxxxxxxxx
+
+           	  if isStriped and (GetDataSize(AllocElementType) > 1) then
+                  begin
+
+          	    yes := Elements(NumIdent) <= 256;
+
+                    if yes then
+                      IdentifierAt(NumIdent).isStriped := True
+                    else
+                      WarningStripedAllowed(i);
+
+                  end;
+
+
                   if (IdentifierAt(NumIdent).NumAllocElements in [0, 1]) and (open_array = False) then
                     Error(i, TErrorCode.IllegalExpression)
                   else
@@ -18481,7 +18546,7 @@ begin
                     begin                  // const array of type = [ ]
 
                       if (TokenAt(j + 2).Kind = TTokenKind.STRINGLITERALTOK) and
-                        (AllocElementType = TDataType.CHARTOK) then
+                         (AllocElementType = TDataType.CHARTOK) then
                       begin  // = 'string'
 
                         IdentifierAt(NumIdent).Value := TokenAt(j + 2).StrAddress + CODEORIGIN_BASE;
@@ -18507,7 +18572,7 @@ begin
                     begin                    // const array [] of type = ( )
 
                       if (TokenAt(j + 2).Kind = TTokenKind.STRINGLITERALTOK) and
-                        (AllocElementType = TDataType.CHARTOK) then
+                         (AllocElementType = TDataType.CHARTOK) then
                       begin  // = 'string'
 
                         if TokenAt(j + 2).StrLength > NumAllocElements then
@@ -18528,6 +18593,10 @@ begin
                           NumAllocElements, True, TokenAt(j).Kind = TTokenKind.PCHARTOK);
 
                     end;
+
+
+		  if (Pass = TPass.CODE_GENERATION) and IdentifierAt(NumIdent).isStriped then
+		    StripStaticData(GetDataSize(AllocElementType), NumAllocElements);
 
 
                   if NumAllocElements shr 16 > 0 then
@@ -18637,8 +18706,8 @@ begin
       NestedAllocElementType := TDataType.UNTYPETOK;
       NestedNumAllocElements := 0;
 
-      if (TokenAt(i + 1).Kind = TTokenKind.OBRACKETTOK) and (TokenAt(i + 2).Kind in
-        [TTokenKind.VOLATILETOK, TTokenKind.STRIPEDTOK]) then
+      if (TokenAt(i + 1).Kind = TTokenKind.OBRACKETTOK) and 
+         (TokenAt(i + 2).Kind in [TTokenKind.VOLATILETOK, TTokenKind.STRIPEDTOK]) then
       begin
         CheckTok(i + 3, TTokenKind.CBRACKETTOK);
 
@@ -18924,15 +18993,11 @@ begin
               IdentifierAt(NumIdent).PassMethod := varPassMethod;
 
 
-            if isStriped and (IdentifierAt(NumIdent).PassMethod <> TParameterPassingMethod.VARPASSING) then
+            if isStriped and 
+	       (GetDataSize(AllocElementType) >  1) and
+	       (IdentifierAt(NumIdent).PassMethod <> TParameterPassingMethod.VARPASSING) then
             begin
 
-{
-              if NumAllocElements shr 16 > 0 then
-                yes := (NumAllocElements and $FFFF) * (NumAllocElements shr 16) <= 256
-              else
-                yes := NumAllocElements <= 256;
-}
               yes := Elements(NumIdent) <= 256;
 
               if yes then
@@ -19214,8 +19279,8 @@ begin
         isVolatile := False;
         isStriped := False;
 
-        if (TokenAt(i + 2).Kind = TTokenKind.OBRACKETTOK) and (TokenAt(i + 3).Kind in
-          [TTokenKind.VOLATILETOK, TTokenKind.STRIPEDTOK]) then
+        if (TokenAt(i + 2).Kind = TTokenKind.OBRACKETTOK) and 
+	   (TokenAt(i + 3).Kind in [TTokenKind.VOLATILETOK, TTokenKind.STRIPEDTOK]) then
         begin
           CheckTok(i + 4, TTokenKind.CBRACKETTOK);
 
