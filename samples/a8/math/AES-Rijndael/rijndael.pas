@@ -72,7 +72,7 @@ implementation
         Td4[x] = Ibox[x].[01, 01, 01, 01];
     *)
 
-const Te0: ARRAY [0..255] OF cardinal = (
+const [striped] Te0: ARRAY [0..255] OF cardinal = (
     $c66363a5, $f87c7c84, $ee777799, $f67b7b8d,
     $fff2f20d, $d66b6bbd, $de6f6fb1, $91c5c554,
     $60303050, $02010103, $ce6767a9, $562b2b7d,
@@ -138,7 +138,8 @@ const Te0: ARRAY [0..255] OF cardinal = (
     $824141c3, $299999b0, $5a2d2d77, $1e0f0f11,
     $7bb0b0cb, $a85454fc, $6dbbbbd6, $2c16163a
 );
-const Te1: ARRAY [0..255] OF cardinal = (
+
+const [striped] Te1: ARRAY [0..255] OF cardinal = (
     $a5c66363, $84f87c7c, $99ee7777, $8df67b7b,
     $0dfff2f2, $bdd66b6b, $b1de6f6f, $5491c5c5,
     $50603030, $03020101, $a9ce6767, $7d562b2b,
@@ -204,7 +205,8 @@ const Te1: ARRAY [0..255] OF cardinal = (
     $c3824141, $b0299999, $775a2d2d, $111e0f0f,
     $cb7bb0b0, $fca85454, $d66dbbbb, $3a2c1616
 );
-const Te2: ARRAY [0..255] OF cardinal = (
+
+const [striped] Te2: ARRAY [0..255] OF cardinal = (
     $63a5c663, $7c84f87c, $7799ee77, $7b8df67b,
     $f20dfff2, $6bbdd66b, $6fb1de6f, $c55491c5,
     $30506030, $01030201, $67a9ce67, $2b7d562b,
@@ -270,7 +272,8 @@ const Te2: ARRAY [0..255] OF cardinal = (
     $41c38241, $99b02999, $2d775a2d, $0f111e0f,
     $b0cb7bb0, $54fca854, $bbd66dbb, $163a2c16
 );
-const Te3: ARRAY [0..255] OF cardinal = (
+
+const [striped] Te3: ARRAY [0..255] OF cardinal = (
     $6363a5c6, $7c7c84f8, $777799ee, $7b7b8df6,
     $f2f20dff, $6b6bbdd6, $6f6fb1de, $c5c55491,
     $30305060, $01010302, $6767a9ce, $2b2b7d56,
@@ -336,7 +339,8 @@ const Te3: ARRAY [0..255] OF cardinal = (
     $4141c382, $9999b029, $2d2d775a, $0f0f111e,
     $b0b0cb7b, $5454fca8, $bbbbd66d, $16163a2c
 );
-const Te4: ARRAY [0..255] OF cardinal = (
+
+const [striped] Te4: ARRAY [0..255] OF cardinal = (
     $63636363, $7c7c7c7c, $77777777, $7b7b7b7b,
     $f2f2f2f2, $6b6b6b6b, $6f6f6f6f, $c5c5c5c5,
     $30303030, $01010101, $67676767, $2b2b2b2b,
@@ -402,7 +406,8 @@ const Te4: ARRAY [0..255] OF cardinal = (
     $41414141, $99999999, $2d2d2d2d, $0f0f0f0f,
     $b0b0b0b0, $54545454, $bbbbbbbb, $16161616
 );
-const Td0: ARRAY [0..255] OF cardinal = (
+
+const [striped] Td0: ARRAY [0..255] OF cardinal = (
     $51f4a750, $7e416553, $1a17a4c3, $3a275e96,
     $3bab6bcb, $1f9d45f1, $acfa58ab, $4be30393,
     $2030fa55, $ad766df6, $88cc7691, $f5024c25,
@@ -468,7 +473,8 @@ const Td0: ARRAY [0..255] OF cardinal = (
     $39a80171, $080cb3de, $d8b4e49c, $6456c190,
     $7bcb8461, $d532b670, $486c5c74, $d0b85742
 );
-const Td1: ARRAY [0..255] OF cardinal = (
+
+const [striped] Td1: ARRAY [0..255] OF cardinal = (
     $5051f4a7, $537e4165, $c31a17a4, $963a275e,
     $cb3bab6b, $f11f9d45, $abacfa58, $934be303,
     $552030fa, $f6ad766d, $9188cc76, $25f5024c,
@@ -534,7 +540,8 @@ const Td1: ARRAY [0..255] OF cardinal = (
     $7139a801, $de080cb3, $9cd8b4e4, $906456c1,
     $617bcb84, $70d532b6, $74486c5c, $42d0b857
 );
-const Td2: ARRAY [0..255] OF cardinal = (
+
+const [striped] Td2: ARRAY [0..255] OF cardinal = (
     $a75051f4, $65537e41, $a4c31a17, $5e963a27,
     $6bcb3bab, $45f11f9d, $58abacfa, $03934be3,
     $fa552030, $6df6ad76, $769188cc, $4c25f502,
@@ -600,7 +607,8 @@ const Td2: ARRAY [0..255] OF cardinal = (
     $017139a8, $b3de080c, $e49cd8b4, $c1906456,
     $84617bcb, $b670d532, $5c74486c, $5742d0b8
 );
-const Td3: ARRAY [0..255] OF cardinal = (
+
+const [striped] Td3: ARRAY [0..255] OF cardinal = (
     $f4a75051, $4165537e, $17a4c31a, $275e963a,
     $ab6bcb3b, $9d45f11f, $fa58abac, $e303934b,
     $30fa5520, $766df6ad, $cc769188, $024c25f5,
@@ -666,7 +674,8 @@ const Td3: ARRAY [0..255] OF cardinal = (
     $a8017139, $0cb3de08, $b4e49cd8, $56c19064,
     $cb84617b, $32b670d5, $6c5c7448, $b85742d0
 );
-const Td4: ARRAY [0..255] OF cardinal = (
+
+const [striped] Td4: ARRAY [0..255] OF cardinal = (
     $52525252, $09090909, $6a6a6a6a, $d5d5d5d5,
     $30303030, $36363636, $a5a5a5a5, $38383838,
     $bfbfbfbf, $40404040, $a3a3a3a3, $9e9e9e9e,
@@ -732,7 +741,8 @@ const Td4: ARRAY [0..255] OF cardinal = (
     $e1e1e1e1, $69696969, $14141414, $63636363,
     $55555555, $21212121, $0c0c0c0c, $7d7d7d7d
 );
-const rcon: ARRAY [0..9] OF cardinal = (
+
+const [striped] rcon: ARRAY [0..9] OF cardinal = (
 	$01000000, $02000000, $04000000, $08000000,
 	$10000000, $20000000, $40000000, $80000000,
 	$1B000000, $36000000

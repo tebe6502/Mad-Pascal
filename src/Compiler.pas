@@ -1433,7 +1433,7 @@ begin
             else
             begin
 
-              if IdentifierAt(IdentIndex).IsObjectVariable and 
+              if IdentifierAt(IdentIndex).IsObjectVariable and
 	         (IdentifierAt(IdentIndex).PassMethod = TParameterPassingMethod.VARPASSING) then
               begin
 
@@ -9898,7 +9898,7 @@ begin
             Error(i, TErrorCode.TypeMismatch);
 
 
-          if (ValType = TDataType.POINTERTOK) and 
+          if (ValType = TDataType.POINTERTOK) and
 	     not (IdentifierAt(IdentIndex).DataType in [TDataType.POINTERTOK, TDataType.RECORDTOK, TDataType.OBJECTTOK]) then
           begin
             ValType := IdentifierAt(IdentIndex).DataType;
@@ -11104,7 +11104,7 @@ begin
       j := CompileExpression(i + 2, ValType, TokenAt(i).GetDataType);
 
 
-      if (ValType in Pointers) and 
+      if (ValType in Pointers) and
          (TokenAt(i + 2).Kind = TTokenKind.IDENTTOK) and
          (TokenAt(i + 3).Kind <> TTokenKind.OBRACKETTOK) then
       begin
@@ -11121,7 +11121,7 @@ begin
 	  begin
 
 
-	   if (TokenAt(i).GetDataType = TDataType.PCHARTOK) and 
+	   if (TokenAt(i).GetDataType = TDataType.PCHARTOK) and
 	      (IdentifierAt(IdentIndex).DataType = TDataType.STRINGPOINTERTOK) and
 	      (IdentifierAt(IdentIndex).NumAllocElements > 0) then
 	   begin
@@ -11156,19 +11156,19 @@ begin
 
           case GetDataSize(TokenAt(i).GetDataType) of
 
-            1: 
+            1:
 	    begin
               asm65(#9'mva (:bp2),y' + StackVariable0);
             end;
 
-            2: 
+            2:
 	    begin
               asm65(#9'mva (:bp2),y' + StackVariable0);
               asm65(#9'iny');
               asm65(#9'mva (:bp2),y' + StackVariable1);
             end;
 
-            4: 
+            4:
 	    begin
               asm65(#9'mva (:bp2),y' + StackVariable0);
               asm65(#9'iny');
@@ -11858,9 +11858,9 @@ begin
 
       end;
 
-      i := CompileAddress(i + 1, 
-                          ActualParamType, 
-			  AllocElementType, 
+      i := CompileAddress(i + 1,
+                          ActualParamType,
+			  AllocElementType,
                           fBlockRead_ParamType[NumActualParams] in Pointers);
 
     end
@@ -16306,7 +16306,7 @@ begin
               begin
                 yes := False;
 
-                asm65(IdentifierAt(IdentIndex).Name + 
+                asm65(IdentifierAt(IdentIndex).Name +
 		      copy(txt, 6 + length(IdentifierAt(IdentIndex).Alias), length(txt)));
               end;
 
@@ -16443,7 +16443,7 @@ DCOL  = DATAORIGIN+$017E
 
                   end;
 
-            TTokenKind.CONSTTOK: 
+            TTokenKind.CONSTTOK:
 	      if (IdentifierAt(IdentIndex).DataType in Pointers) and
                  (IdentifierAt(IdentIndex).NumAllocElements > 0) then
               begin
@@ -17341,7 +17341,7 @@ begin
 
  for i:=0 to NumAllocElements - 1 do
   case DataSize of
-   
+
    2: begin
        StaticStringData[NumStaticStrChars+i] := tmp[i*2];
        StaticStringData[NumStaticStrChars+i+NumAllocElements] := tmp[i*2+1];
@@ -18398,27 +18398,23 @@ begin
 
     if TokenAt(i).Kind = TTokenKind.CONSTTOK then
     begin
-// xxxxxxxxxxxxxxxxxxxxxxxxx
-
-      isStriped := False;
 
       repeat
 
-{
-      if (TokenAt(i + 1).Kind = TTokenKind.OBRACKETTOK) and 
-         (TokenAt(i + 2).Kind = TTokenKind.STRIPEDTOK) then
-      begin
+        isStriped := False;
 
-writeln('......');
+        if (TokenAt(i + 1).Kind = TTokenKind.OBRACKETTOK) and
+           (TokenAt(i + 2).Kind = TTokenKind.STRIPEDTOK) then
+        begin
 
-        CheckTok(i + 3, TTokenKind.CBRACKETTOK);
-        CheckTok(i + 4, TTokenKind.IDENTTOK);
+          CheckTok(i + 3, TTokenKind.CBRACKETTOK);
+          CheckTok(i + 4, TTokenKind.IDENTTOK);
 
-        isStriped := True;
+          isStriped := True;
 
-        Inc(i, 3);
-      end;
-}
+          Inc(i, 3);
+        end;
+
 
         if TokenAt(i + 1).Kind <> TTokenKind.IDENTTOK then
           Error(i + 1, 'Constant name expected but ' + TokenList.GetTokenSpellingAtIndex(i + 1) + ' found')
@@ -18509,7 +18505,7 @@ writeln('......');
                 j := CompileConstExpression(j + 2, ConstVal, ConstValType);
 
                 if TokenAt(i + 3).Kind = TTokenKind.PCHARTOK then
-                  DefineIdent(i + 1, TokenAt(i + 1).Name, TTokenKind.CONSTTOK, TDataType.POINTERTOK, 0, 
+                  DefineIdent(i + 1, TokenAt(i + 1).Name, TTokenKind.CONSTTOK, TDataType.POINTERTOK, 0,
 		    TDataType.CHARTOK, ConstVal + CODEORIGIN + 1, TDataType.PCHARTOK)
                 else
                   DefineIdent(i + 1, TokenAt(i + 1).Name, TTokenKind.CONSTTOK, ConstValType, TokenAt(j).StrLength,
@@ -18524,7 +18520,6 @@ writeln('......');
                   DefineIdent(i + 1, TokenAt(i + 1).Name, TTokenKind.CONSTTOK, VarType, NumAllocElements,
                     AllocElementType, NumStaticStrChars + CODEORIGIN + CODEORIGIN_BASE, TDataType.IDENTTOK);
 
-// xxxxxxxxxxxxxxxxxxxx
 
            	  if isStriped and (GetDataSize(AllocElementType) > 1) then
                   begin
@@ -18637,7 +18632,7 @@ writeln('......');
         CheckTok(i + 1, TTokenKind.SEMICOLONTOK);
 
         Inc(i);
-      until TokenAt(i + 1).Kind <> TTokenKind.IDENTTOK;
+      until not (TokenAt(i + 1).Kind in [TTokenKind.IDENTTOK, TTokenKind.OBRACKETTOK]);
 
       Inc(i);
     end;  // if TTokenKind.CONSTTOK
@@ -18706,7 +18701,7 @@ writeln('......');
       NestedAllocElementType := TDataType.UNTYPETOK;
       NestedNumAllocElements := 0;
 
-      if (TokenAt(i + 1).Kind = TTokenKind.OBRACKETTOK) and 
+      if (TokenAt(i + 1).Kind = TTokenKind.OBRACKETTOK) and
          (TokenAt(i + 2).Kind in [TTokenKind.VOLATILETOK, TTokenKind.STRIPEDTOK]) then
       begin
         CheckTok(i + 3, TTokenKind.CBRACKETTOK);
@@ -18993,7 +18988,7 @@ writeln('......');
               IdentifierAt(NumIdent).PassMethod := varPassMethod;
 
 
-            if isStriped and 
+            if isStriped and
 	       (GetDataSize(AllocElementType) >  1) and
 	       (IdentifierAt(NumIdent).PassMethod <> TParameterPassingMethod.VARPASSING) then
             begin
@@ -19279,7 +19274,7 @@ writeln('......');
         isVolatile := False;
         isStriped := False;
 
-        if (TokenAt(i + 2).Kind = TTokenKind.OBRACKETTOK) and 
+        if (TokenAt(i + 2).Kind = TTokenKind.OBRACKETTOK) and
 	   (TokenAt(i + 3).Kind in [TTokenKind.VOLATILETOK, TTokenKind.STRIPEDTOK]) then
         begin
           CheckTok(i + 4, TTokenKind.CBRACKETTOK);

@@ -68,17 +68,6 @@ begin
      end;
 
 
-    if lda_a(i) and (iy(i) = false) and								// lda 					; 0
-       and_im_0(i+1) and									// and #$00				; 1
-       sta_a(i+2) then										// sta 					; 2
-     begin
-	listing[i]   := '';
-	listing[i+1] := #9'lda #$00';
-
-	exit(false);
-     end;
-
-
     if and_im_0(i) and										// and #$00				; 0
        mwy(i+1) and										// mwy					; 1
        ldy(i+2) and										// ldy					; 2
@@ -90,8 +79,49 @@ begin
      end;
 
 
-    if lda_a(i) and										// lda 					; 0
-       (listing[i+1] = #9'and #$FF') and							// and #$FF				; 1
+    if and_im_0(i+1) and									// and #$00				; 1
+
+       lda_a(i) and (iy(i) = false) and								// lda 					; 0
+//       and_im_0(i+1) and									// and #$00				; 1
+       sta_a(i+2) then										// sta 					; 2
+     begin
+	listing[i]   := '';
+	listing[i+1] := #9'lda #$00';
+
+	exit(false);
+     end;
+
+
+    if and_im_0(i+1) and									// and #$00				; 1
+
+       lda_adr(i) and										// lda adr.				; 0
+//       and_im_0(i+1) and									// and #$00				; 1
+       sta_a(i+2) then										// sta 					; 2
+     begin
+	listing[i]   := '';
+	listing[i+1] := #9'lda #$00';
+
+	exit(false);
+     end;
+
+
+    if and_im_0(i+1) and									// and #$00				; 1
+
+       lda_bp2_y(i) and										// lda (:bp2),y				; 0
+//       and_im_0(i+1) and									// and #$00				; 1
+       sta_a(i+2) then										// sta 					; 2
+     begin
+	listing[i]   := '';
+	listing[i+1] := #9'lda #$00';
+
+	exit(false);
+     end;
+
+
+    if (listing[i+1] = #9'and #$FF') and							// and #$FF				; 1
+
+       lda_a(i) and										// lda 					; 0
+//       (listing[i+1] = #9'and #$FF') and							// and #$FF				; 1
        sta_a(i+2) then										// sta 					; 2
      begin
 
@@ -106,8 +136,10 @@ begin
      end;
 
 
-    if and_ora_eor(i) and									// and|ora|eor				; 0
-       (listing[i+1] = #9'and #$FF') and							// and #$FF				; 1
+    if (listing[i+1] = #9'and #$FF') and							// and #$FF				; 1
+
+       and_ora_eor(i) and									// and|ora|eor				; 0
+//       (listing[i+1] = #9'and #$FF') and							// and #$FF				; 1
        sta_a(i+2) then										// sta 					; 2
      begin
 	listing[i+1] := '';
@@ -129,7 +161,9 @@ begin
      end;
 
 
-    if //ldy_im_0(i) and									// ldy #$00				; 0
+    if and_im(i+14) and										// and #				; 14
+
+       //ldy_im_0(i) and									// ldy #$00				; 0
        lda_bp2_y(i+1) and									// lda (:bp2),y				; 1
        and_im(i+2) and										// and #				; 2
        sta_stack(i+3) and									// sta :STACKORIGIN			; 3
@@ -143,7 +177,7 @@ begin
        sta_stack(i+11) and									// sta :STACKORIGIN+STACKWIDTH*2	; 11
        iny(i+12) and										// iny					; 12
        lda_bp2_y(i+13) and									// lda (:bp2),y				; 13
-       and_im(i+14) and										// and #				; 14
+//       and_im(i+14) and									// and #				; 14
        sta_stack(i+15) and									// sta :STACKORIGIN+STACKWIDTH*3	; 15
        lda_a(i+16) and 										// lda					; 16
        eor_stack(i+17) and 									// eor :STACKORIGIN			; 17
@@ -204,15 +238,5 @@ begin
 	exit(false);
        end;
 
-
-    if lda_bp2_y(i) and										// lda (:bp2),y				; 0
-       and_im_0(i+1) and									// and #$00				; 1
-       sta_a(i+2) then										// sta 					; 2
-     begin
-	listing[i]   := '';
-	listing[i+1] := #9'lda #$00';
-
-	exit(false);
-     end;
 
 end;		// function
