@@ -55,13 +55,11 @@
 
        end;
 
-       listing[i+1] := #9'lda:seq #$00';
-       listing[i+2] := 'l_' + IntToHex(CodeSize, 4) + 's'#9'lda #$01';
+       Expand(i+1, 1);
 
-
-//      for p:=0 to l-1 do writeln(listing[p]);
-//      writeln('-------');
-
+       listing[i+1] := #9'lda #$00';
+       listing[i+2] := #9'seq';
+       listing[i+3] := 'l_' + IntToHex(CodeSize, 4) + 's'#9'lda #$01';
 
        Result:=false; Break;
       end;

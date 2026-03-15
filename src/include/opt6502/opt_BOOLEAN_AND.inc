@@ -52,8 +52,11 @@
 
        end;
 
-       listing[i+1] := #9'lda:sne #$01';
-       listing[i+2] := 'l_' + IntToHex(CodeSize, 4) + 's'#9'lda #$00';
+       Expand(i+1, 1);
+
+       listing[i+1] := #9'lda #$01';
+       listing[i+2] := #9'sne';
+       listing[i+3] := 'l_' + IntToHex(CodeSize, 4) + 's'#9'lda #$00';
 
        Result:=false; Break;
       end;

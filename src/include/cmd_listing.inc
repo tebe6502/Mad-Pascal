@@ -646,6 +646,11 @@ begin
   Result := pos1(#9'jmp l_', i);
 end;
 
+function JMP_6(const i: Integer): Boolean;
+begin
+  Result := pos1(#9'jmp *+6', i);
+end;
+
 function LAB_L(const i: Integer): Boolean;
 begin
   Result := pos1_lab('l_', i);
