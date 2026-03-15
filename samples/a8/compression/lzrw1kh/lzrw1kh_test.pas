@@ -1,6 +1,10 @@
 {
+
  309
  34
+
+4483 KORONIS.MIC
+
 }
 
 uses crt, sysutils, graph, lzrw1kh;
@@ -39,13 +43,12 @@ begin
  writeln(pack, 'b (',GetTickCount-tick,' ticks)');
 
 
- write('Decompress ');
+ write('Decompress ', pack, 'b -> ');
 
  tick:=GetTickCount;
  unpack := Decompression(@dst, pointer(dpeek(88)), pack);
 
- writeln(unpack,'b (', GetTickCount-tick,' ticks)');
-
+ writeln(unpack,'b (', GetTickCount-tick,' ticks)'); 
 
  {
  assign(f, 'koronis.lzw'); rewrite(f,1);
@@ -62,4 +65,4 @@ begin
 
 end.
 
-// 11439
+// 11455

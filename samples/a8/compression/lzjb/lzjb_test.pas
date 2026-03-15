@@ -3,6 +3,8 @@
 87
 32
 
+4085 KORONIS.MIC
+
 }
 
 uses crt, lzjb, graph, sysutils;

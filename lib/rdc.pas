@@ -13,19 +13,31 @@ Unit rdc;
 
 Interface
 
+Const
+  BUFF_LEN = 8192;     { size of disk io buffer }
+
+Var
+  inputbuffer,
+  outputbuffer : array [0..BUFF_LEN-1] of byte;
+
 Procedure Comp_FileToFile(Var infile, outfile: File);
 Procedure Decomp_FileToFile(Var infile, outfile: File);
+
+Function RDC_Compress(inbuff     : PByte;
+                      outbuff    : PByte;
+                      inbuff_len : Word) : smallint;
+
+Function RDC_Decompress(inbuff     : PByte;
+                        outbuff    : PByte;
+                        inbuff_len : Word) : smallint;
 
 Implementation
 Const
   HASH_LEN =  4096;    { # hash table entries }
   HASH_SIZE = HASH_LEN * Sizeof(word);
-  BUFF_LEN = 8192;     { size of disk io buffer }
 
 Var
   HashPtr      : array [0..HASH_SIZE-1] of word;
-  inputbuffer,
-  outputbuffer : array [0..BUFF_LEN-1] of byte;
 
 
 (*
@@ -35,10 +47,9 @@ Var
  return length of outbuff, or "0 - inbuff_len"
  if inbuff could not be compressed.
 *)
-Function rdc_compress(inbuff     : PByte;
-                      inbuff_len : Word;
+Function RDC_Compress(inbuff     : PByte;
                       outbuff    : PByte;
-                      hash_tbl   : Pword) : smallint;
+                      inbuff_len : Word) : smallint;
 Var
   in_idx      : PByte;
   in_idxa     : PByte absolute in_idx;
@@ -57,6 +68,8 @@ Var
   outbuff_end : PByte;
 Begin
 
+  FillByte(HashPtr, sizeof(HashPtr), 0);
+  
   in_idx := inbuff;
   
   inbuff_end := Pointer(inbuff + inbuff_len);
@@ -157,8 +170,8 @@ Begin
                  And hashlen;
 
         pat_idx := in_idx;
-        pat_idx^ := hash_tbl[hash];
-        hash_tbl[hash] := Word(in_idx);
+        pat_idx^ := HashPtr[hash];
+        HashPtr[hash] := Word(in_idx);
 
         { compare characters if we're within 4098 bytes }
 
@@ -183,7 +196,7 @@ Begin
 
             If cnt <= 15 Then     { short pattern }
             Begin
-              out_idx^ := (cnt Shl 4) + (gap And $0F);
+              out_idx^ := (cnt Shl 4) or (gap And $0F);
               Inc(out_idx);
               out_idx^ := gap Shr 4;
               Inc(out_idx);
@@ -230,8 +243,8 @@ End;
  return length of outbuff.
 *)
 Function RDC_Decompress(inbuff     : PByte;
-                        inbuff_len : Word;
-                        outbuff    : PByte) : smallint;
+                        outbuff    : PByte;
+                        inbuff_len : Word) : smallint;
 Var
   ctrl_bits    : Word;
   ctrl_mask    : Word;
@@ -327,7 +340,6 @@ Var
   bytes_read   : smallint;
   compress_len : smallint;
 Begin
-  FillByte(hashPtr, sizeof(hashPtr), 0);
 
   { read infile BUFF_LEN bytes at a time }
 
@@ -337,7 +349,7 @@ Begin
     Blockread(infile, inputbuffer, BUFF_LEN, bytes_read);
 
     { compress this load of bytes }
-    compress_len := RDC_Compress(inputbuffer, bytes_read, outputbuffer, HashPtr);
+    compress_len := RDC_Compress(inputbuffer, outputbuffer, bytes_read);
 
     { write length of compressed buffer }
     Blockwrite(outfile, compress_len, 2, code);
@@ -394,7 +406,7 @@ Begin
         If (code <> block_len) then
           err_exit('Can''t read compressed block.'+#13+#10);
         }
-        decomp_len := RDC_Decompress(inputbuffer, block_len, outputbuffer);
+        decomp_len := RDC_Decompress(inputbuffer, outputbuffer, block_len);
       End;
       { and write this buffer outfile }
       Blockwrite(outfile, outputbuffer, decomp_len, code);

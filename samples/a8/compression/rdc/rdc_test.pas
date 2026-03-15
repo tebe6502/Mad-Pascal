@@ -1,55 +1,53 @@
-Program RDCTest;
+{
 
-Uses
-  rdc;
+ 133
+ 29
 
-Var
-  fin, fout : File;
+5172 KORONIS.MIC
 
-BEGIN
+}
 
-{$IFDEF ATARI}
-  Assign(fin, 'D:KORONIS.MIC');
-{$ELSE}
-  Assign(fin, 'KORONIS.MIC');
-{$ENDIF}
-  
-  Reset(fin, 1);
+program test: $400;
 
-{$IFDEF ATARI}
-  Assign(fout, 'D:KORONIS.RDC');
-{$ELSE}
-  Assign(fout, 'KORONIS.RDC');
-{$ENDIF}
+uses crt, sysutils, atari, graph, rdc;
 
-  Rewrite(fout, 1);
+{$r pack.rc}
 
-  Comp_FileToFile(fin, fout);
+const
+       src = $9400;
 
-  Close(fin);
-  Close(fout);
+var
+	ln, pack, unpack: word;
+
+	tick: cardinal;
 
 
-{$IFDEF ATARI}
-  Assign(fin, 'D:KORONIS.RDC');
-{$ELSE}
-  Assign(fin, 'KORONIS.RDC');
-{$ENDIF}
+begin
 
-  Reset(fin, 1);
+ move(pointer(src), rdc.inputbuffer, 7684);   //before 'InitGraph', which will destroy this memory area
 
-{$IFDEF ATARI}
-  Assign(fout, 'D:KORONIS.DAT');
-{$ELSE}
-  Assign(fout, 'KORONIS.DAT');
-{$ENDIF}
 
-  Rewrite(fout, 1);
+ InitGraph(15);
 
-  Decomp_FileToFile(fin, fout);
+ ln:=7684;
+ 
+ write('Compress ', ln, 'b -> ');
 
-  Close(fin);
-  Close(fout);
-END.
+ tick:=GetTickCount;
+ pack := RDC_Compress(@rdc.inputbuffer, @rdc.outputbuffer, ln);
 
-// 4490
+ writeln(pack, 'b (',GetTickCount-tick,' ticks)');
+
+
+ write('Decompress ', pack, 'b -> ');
+
+ tick:=GetTickCount;
+ unpack := RDC_Decompress(@rdc.outputbuffer, pointer(dpeek(88)), pack);
+
+ writeln(unpack,'b (', GetTickCount-tick,' ticks)');
+
+ repeat until keypressed;
+
+end.
+
+// 11281
