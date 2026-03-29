@@ -22,11 +22,11 @@ const
 	engine = $de00;
 	
 	PlayfieldWidth	= 48;
-	PlayfieldHeight	= 32;	// 0..3   the top four rows outside the playing field
-				// 28..31 the four bottom rows outside the playing field
-				// -----------------------------------------------------
-				// 4..27  the visible playing field consists of 24 rows
-				// -----------------------------------------------------
+	PlayfieldHeight	= 32;  // 0..3   the top four rows outside the playing field
+                               // 28..31 the four bottom rows outside the playing field
+                               // -----------------------------------------------------
+                               // 4..27  the visible playing field consists of 24 rows
+                               // -----------------------------------------------------
 
 	Charset0 = $c000;
 	Charset1 = $c400;
