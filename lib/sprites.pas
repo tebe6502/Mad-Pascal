@@ -63,12 +63,12 @@ var
 	dmactls: byte absolute engine+$0d;		// DMACTL shadow
 	colbaks: byte absolute engine+$0e;		// COLBAK shadow
 
-	Playfield: array [0..31, 0..47] of byte absolute engine-$600;		// 32*48 = 1536 bytes ; Playfield [y,x]
+	Playfield: array [0..31, 0..47] of byte absolute engine-$600; // 32*48 = 1536 bytes ; Playfield [y,x]
 
-	Color0: array [0..31] of byte absolute engine+$80;			// valid array values in the range 0..23
-	Color1: array [0..31] of byte absolute engine+$80+$20;			// valid array values in the range 0..23
-	Color2: array [0..31] of byte absolute engine+$80+$20*2;		// valid array values in the range 0..23
-	Color3: array [0..31] of byte absolute engine+$80+$20*3;		// valid array values in the range 0..23
+	Color0: array [0..31] of byte absolute engine+$80;            // valid array values in the range 0..23
+	Color1: array [0..31] of byte absolute engine+$80+$20;        // valid array values in the range 0..23
+	Color2: array [0..31] of byte absolute engine+$80+$20*2;      // valid array values in the range 0..23
+	Color3: array [0..31] of byte absolute engine+$80+$20*3;      // valid array values in the range 0..23
 
 	Sprite0: TSprite absolute engine+$d00;
 	Sprite1: TSprite absolute engine+$d00+sizeof(TSprite);
