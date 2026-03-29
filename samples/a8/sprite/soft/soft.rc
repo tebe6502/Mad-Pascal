@@ -1,0 +1,4 @@
+charset rcdata 'feud_egg_03.fnt'
+scrdata rcdata 'feud_egg_03.scr'
+
+shp0 rcdata 'shapes.obx'

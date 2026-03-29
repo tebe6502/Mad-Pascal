@@ -745,10 +745,26 @@ data_end
 
 .macro	RELOC (nam, lab)
 
-len = .filesize(%%1)
+ .get %%1,0,6
+ 
+ ift main.%%lab+.wget[4] >= $c000
 
- ift main.%%lab+len-16 >= $c000
-	ert 'Use DOSFILE'
+	org RESORIGIN
+
+	.local temp,main.%%lab
+	.link %%1
+	.endl
+
+mcpy	jsr sys.off
+
+	memcpy #.adr(temp) #main.%%lab #.sizeof(temp) 
+
+	jmp sys.on
+
+	ini mcpy
+
+	.print '$R RELOC   ',temp,'..',temp+.sizeof(temp)-1," %%1"
+	
  els
 	org main.%%lab
 	.link %%1

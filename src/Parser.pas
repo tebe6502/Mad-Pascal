@@ -548,7 +548,7 @@ var
        2: Result := StaticStringData[ i + IdentifierAt(IdentIndex).NumAllocElements * 2 ];
        3: Result := StaticStringData[ i + IdentifierAt(IdentIndex).NumAllocElements * 3 ];
       end;
-      
+
     end else
       Result := StaticStringData[IdentifierAt(IdentIndex).Value - CODEORIGIN - CODEORIGIN_BASE + ArrayIndex * GetDataSize(ConstValType) + x];
 
@@ -1052,7 +1052,7 @@ begin
 
                 if isError then Exit;
 
-                if (ArrayIndex < 0) or 
+                if (ArrayIndex < 0) or
 		   (ArrayIndex > IdentifierAt(IdentIndex).NumAllocElements - 1 + Ord(IdentifierAt(IdentIndex).DataType = TDataType.STRINGPOINTERTOK)) then
                 begin
                   _isConst := False;
@@ -1139,10 +1139,10 @@ begin
 
                 if (abs(IdentifierAt(IdentIndex).Value) and $ff = 0) and
 
-                   (Byte(abs(IdentifierAt(IdentIndex).Value shr 24) and $7f) in [1..127]) or 
+                   (Byte(abs(IdentifierAt(IdentIndex).Value shr 24) and $7f) in [1..127]) or
 
 		   ((IdentifierAt(IdentIndex).DataType in Pointers) and
-                    (IdentifierAt(IdentIndex).AllocElementType <> TDataType.UNTYPETOK) and 
+                    (IdentifierAt(IdentIndex).AllocElementType <> TDataType.UNTYPETOK) and
 		    (IdentifierAt(IdentIndex).NumAllocElements in [0..1])) then
                 begin
 
@@ -1179,7 +1179,7 @@ begin
                 //  writeln(IdentifierAt(IdentIndex).name,',',IdentifierAt(IdentIndex).DataType,',',IdentifierAt(IdentIndex).AllocElementType,' / ',ConstVal);
 
                 if (IdentifierAt(IdentIndex).DataType in Pointers) and          // zadziala tylko dla ABSOLUTE
-                   (IdentifierAt(IdentIndex).NumAllocElements > 0) and 
+                   (IdentifierAt(IdentIndex).NumAllocElements > 0) and
 		    (TokenAt(i + 2).Kind = TTokenKind.OBRACKETTOK) then
                 begin
                   j := CompileConstExpression(i + 3, ArrayIndex, ArrayIndexType);      // Array index [xx,
@@ -1218,7 +1218,7 @@ begin
           end;
 
           if (IdentifierAt(IdentIndex).DataType in Pointers) and          // zadziala tylko dla ABSOLUTE
-             (IdentifierAt(IdentIndex).NumAllocElements > 0) and 
+             (IdentifierAt(IdentIndex).NumAllocElements > 0) and
 	     (TokenAt(i + 2).Kind = TTokenKind.OBRACKETTOK) then
           begin
             j := CompileConstExpression(i + 3, ArrayIndex, ArrayIndexType);      // Array index [xx,
@@ -1351,7 +1351,7 @@ begin
       CheckTok(i + 1, TTokenKind.OPARTOK);
 
 
-      if (TokenAt(i + 2).Kind = TTokenKind.IDENTTOK) and 
+      if (TokenAt(i + 2).Kind = TTokenKind.IDENTTOK) and
          (IdentifierAt(GetIdentIndex(TokenAt(i + 2).Name)).Kind = TTokenKind.FUNCTIONTOK)
       then
         _isError := True
@@ -1362,7 +1362,7 @@ begin
       if isError then exit;
 
 
-      if (ConstValType in Pointers) and 
+      if (ConstValType in Pointers) and
          (TokenAt(i + 2).Kind = TTokenKind.IDENTTOK) and
 	 (TokenAt(i + 3).Kind <> TTokenKind.OBRACKETTOK) then
       begin
@@ -2933,14 +2933,13 @@ begin
 
 		  if TokenAt(i + 1).Kind = TTokenKind.OFTOK then begin
 
-		    CheckTok(i + 2, TTokenKind.INTNUMBERTOK);
+                    i := CompileConstExpression(i + 2, ConstVal, ExpressionType);
 
-		    if (TokenAt(i + 2).Value < 0) or (TokenAt(i + 2).Value > 255) then
+		    inc(ConstVal);
+
+		    if (ConstVal < 0) or (ConstVal > 255) then
 		     Error(i + 2, 'Page at $00..$FF');
 
-		    ConstVal := TokenAt(i + 2).Value + 1;
-
-		    inc(i, 2);
 		  end;
 
                   Inc(NumTypes);
