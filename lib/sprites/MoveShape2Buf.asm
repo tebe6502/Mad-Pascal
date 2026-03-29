@@ -75,30 +75,15 @@ bit3	sta ofs3+1
 
 	lda Sprite0+@Spr.xOk,x
 	and #3
-	jne ne0
+	bne ne0
 
 // --------------------- X and 3 = 0 ------------------------
 
 eq0	.local
 
-	lda Sprite0+@Spr.adx,x
-	beq ok
-
 	lda #$ff
 	:21 sta shpBuf+96+8+#
-	jmp skp
 
-ok	lda #{jmp*}
-	sta ofs12
-	sta ofs13
-	sta ofs14
-	sta ofs15
-
-	mwa #ofs1 ofs12+1
-	mwa #ofs2 ofs13+1
-	mwa #ofs3 ofs14+1
-	mwa #ofs20 ofs15+1
-skp
 	lda zp+@zp.hlp2
 	sta adr0+1
 	adc #21
@@ -304,18 +289,5 @@ ofs20
 	dey
 	smi
 _jmp	jmp loop
-
-
-	lda #{ldx $100,y}
-	sta ofs12
-	sta ofs13
-	sta ofs14
-	sta ofs15
-
-	lda >shpBuf
-	sta ofs12+2
-	sta ofs13+2
-	sta ofs14+2
-	sta ofs15+2
 
 	rts

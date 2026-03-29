@@ -3,7 +3,7 @@ unit sprites;
  @type: unit
  @author: Tomasz Biela (Tebe)
  @name: Soft Sprites (NG Engine BUFx1)
- @version: 1.0
+ @version: 1.1
 
  @description:
  $D8..$FF        memory used by the zero page

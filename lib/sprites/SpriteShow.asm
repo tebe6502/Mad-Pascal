@@ -49,13 +49,11 @@
 	ora zp+@zp.hlp1
 	sta (zp+@zp.hlp5),y
 
-	bcs skp
 	iny
 
 	lda (zp+@zp.hlp5),y
 	and #$80
 	ora zp+@zp.hlp1+1
 	sta (zp+@zp.hlp5),y
-skp
 .endm
 

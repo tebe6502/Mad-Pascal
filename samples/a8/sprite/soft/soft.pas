@@ -88,9 +88,9 @@ begin
 
  sprite5.bitmaps:=@spr1;
  sprite5.x:=20*4;
- sprite5.y:=11;
- sprite5.adx:=0;
- sprite5.ady:=2;
+ sprite5.y:=61;
+ sprite5.adx:=1;
+ sprite5.ady:=0;
  sprite5.new:=true;
 
 
@@ -133,7 +133,6 @@ begin
   moveSprites(sprite0);
   moveSprites(sprite1);
   moveSprites(sprite2);
-
 
   moveSprites(sprite3);
   moveSprites(sprite4);

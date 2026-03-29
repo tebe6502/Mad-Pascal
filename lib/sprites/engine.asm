@@ -635,12 +635,6 @@ skp
 	lda Sprite:2.x
 	beq skp
 
-	sec
-	and #3
-	ora Sprite:2.adx
-	seq
-	clc
-
 	lda zp+@zp.old:2:1
 	ldx zp+@zp.old:2:1+1
 
