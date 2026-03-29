@@ -19,7 +19,7 @@ interface
 
 
 const
-	engine = $8000;//$de00;
+	engine = $de00;
 	
 	PlayfieldWidth	= 48;
 	PlayfieldHeight	= 32;	// 0..3   the top four rows outside the playing field
