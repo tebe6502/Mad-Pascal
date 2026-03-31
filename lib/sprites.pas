@@ -3,13 +3,13 @@ unit sprites;
  @type: unit
  @author: Tomasz Biela (Tebe)
  @name: Soft Sprites (NG Engine BUFx1)
- @version: 1.1
+ @version: 1.2
 
  @description:
  $D8..$FF        memory used by the zero page
  $C000..$CFFF    charsets
  $D800..$DDFF    playfield
- $DE00..$FDD0    soft sprites engine
+ $DE00..$FD7F    soft sprites engine
 
 *)
 
@@ -65,10 +65,10 @@ var
 
 	Playfield: array [0..31, 0..47] of byte absolute engine-$600; // 32*48 = 1536 bytes ; Playfield [y,x]
 
-	Color0: array [0..31] of byte absolute engine+$80;            // valid array values in the range 0..23
-	Color1: array [0..31] of byte absolute engine+$80+$20;        // valid array values in the range 0..23
-	Color2: array [0..31] of byte absolute engine+$80+$20*2;      // valid array values in the range 0..23
-	Color3: array [0..31] of byte absolute engine+$80+$20*3;      // valid array values in the range 0..23
+	Color0: array [0..23] of byte absolute engine+$A0;
+	Color1: array [0..23] of byte absolute engine+$A0+24;
+	Color2: array [0..23] of byte absolute engine+$A0+24*2;
+	Color3: array [0..23] of byte absolute engine+$A0+24*3;
 
 	Sprite0: TSprite absolute engine+$d00;
 	Sprite1: TSprite absolute engine+$d00+sizeof(TSprite);

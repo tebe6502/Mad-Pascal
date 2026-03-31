@@ -1,5 +1,122 @@
 
 //---------------------------------------------------------------------
+//	MOVE
+//---------------------------------------------------------------------
+
+	.pages
+
+MOVE
+	ldy #7
+loop
+
+ofs0	ldx shpBuf,y		; row 0
+src0	lda $ffff,y
+	and tMask,x
+	ora tByte,x
+dst0	sta $ffff,y
+
+ofs4	ldx shpBuf+32,y
+src1	lda $ffff,y
+	and tMask,x
+	ora tByte,x
+dst1	sta $ffff,y
+
+ofs8	ldx shpBuf+64,y
+src2	lda $ffff,y
+	and tMask,x
+	ora tByte,x
+dst2	sta $ffff,y
+
+ofs12	ldx shpBuf+96,y
+src3	lda $ffff,y
+	and tMask,x
+	ora tByte,x
+dst3	sta $ffff,y
+
+
+ofs1	ldx shpBuf+8,y		; row 1
+src4	lda $ffff,y
+	and tMask,x
+	ora tByte,x
+dst4	sta $ffff,y
+
+ofs5	ldx shpBuf+8+32,y
+src5	lda $ffff,y
+	and tMask,x
+	ora tByte,x
+dst5	sta $ffff,y
+
+ofs9	ldx shpBuf+8+64,y
+src6	lda $ffff,y
+	and tMask,x
+	ora tByte,x
+dst6	sta $ffff,y
+
+ofs13	ldx shpBuf+8+96,y
+src7	lda $ffff,y
+	and tMask,x
+	ora tByte,x
+dst7	sta $ffff,y
+
+
+ofs2	ldx shpBuf+16,y		; row 2
+src8	lda $ffff,y
+	and tMask,x
+	ora tByte,x
+dst8	sta $ffff,y
+
+ofs6	ldx shpBuf+16+32,y
+src9	lda $ffff,y
+	and tMask,x
+	ora tByte,x
+dst9	sta $ffff,y
+
+ofs10	ldx shpBuf+16+64,y
+src10	lda $ffff,y
+	and tMask,x
+	ora tByte,x
+dst10	sta $ffff,y
+
+ofs14	ldx shpBuf+16+96,y
+src11	lda $ffff,y
+	and tMask,x
+	ora tByte,x
+dst11	sta $ffff,y
+
+
+ofs3	ldx shpBuf+24,y		; row 3
+src12	lda $ffff,y
+	and tMask,x
+	ora tByte,x
+dst12	sta $ffff,y
+
+ofs7	ldx shpBuf+24+32,y
+src13	lda $ffff,y
+	and tMask,x
+	ora tByte,x
+dst13	sta $ffff,y
+
+ofs11	ldx shpBuf+24+64,y
+src14	lda $ffff,y
+	and tMask,x
+	ora tByte,x
+dst14	sta $ffff,y
+
+ofs15	ldx shpBuf+24+96,y
+src15	lda $ffff,y
+	and tMask,x
+	ora tByte,x
+dst15	sta $ffff,y
+
+ofs20
+	dey
+	jpl loop
+
+	.endpg
+
+	rts
+
+//---------------------------------------------------------------------
 //	MOVE SHAPE -> BUF
 //---------------------------------------------------------------------
 
@@ -11,6 +128,7 @@
 	lda Sprite0+@Spr.index,x
 
 	asl @
+
 bck	tay
 	lda (zp+@zp.hlp1),y
 	sta zp+@zp.hlp2
@@ -20,7 +138,7 @@ bck	tay
 
 	lda #0
 	sta Sprite0+@Spr.index,x
-	beq bck
+	jmp bck
 
 skp	sta zp+@zp.hlp2+1
 
@@ -97,7 +215,9 @@ eq0	.local
 	sta adr2+2
 
 	ldy #20
-loop
+
+	.pages
+	
 adr0	lda $ffff,y
 	sta shpBuf+8,y
 
@@ -108,7 +228,9 @@ adr2	lda $ffff,y
 	sta shpBuf+64+8,y
 
 	dey
-	bpl loop
+	bpl adr0
+
+	.endpg
 
 	jmp MOVE
 
@@ -144,11 +266,13 @@ ne0	.local
 	sta adr2+2
 
 	ldy #20
-loop
+
+	.pages
+
 adr2	ldx $ffff,y
 
 tShfH0	lda $ff00,x
-_ORA0	ora #0
+_ORA0	ora #$00
 	sta shpBuf+96+8,y
 
 tShfL0	lda $ff00,x
@@ -166,128 +290,16 @@ tShfH2	ora $ff00,x
 	sta shpBuf+32+8,y
 
 tShfL2	lda $ff00,x
-_ORA1	ora #$f0
+_ORA1	ora #$00
 	sta shpBuf+0+8,y
 
 	dey
-	bpl loop
+	bpl adr2
 
-;	jmp MOVE
+	.endpg
+
+	jmp MOVE
 	.endl
 
 .endl
 
-
-//---------------------------------------------------------------------
-//	MOVE
-//---------------------------------------------------------------------
-
-MOVE
-	ldy #7
-loop
-
-ofs0	ldx shpBuf,y		; row 0
-src0	lda $ffff,y
-	and tMask,x
-	ora tByte,x
-dst0	sta $ffff,y
-
-ofs4	ldx shpBuf+32,y
-src1	lda $ffff,y
-	and tMask,x
-	ora tByte,x
-dst1	sta $ffff,y
-
-ofs8	ldx shpBuf+64,y
-src2	lda $ffff,y
-	and tMask,x
-	ora tByte,x
-dst2	sta $ffff,y
-
-ofs12	ldx shpBuf+96,y
-src3	lda $ffff,y
-	and tMask,x
-	ora tByte,x
-dst3	sta $ffff,y
-
-
-ofs1	ldx shpBuf+8,y		; row 1
-src4	lda $ffff,y
-	and tMask,x
-	ora tByte,x
-dst4	sta $ffff,y
-
-ofs5	ldx shpBuf+40,y
-src5	lda $ffff,y
-	and tMask,x
-	ora tByte,x
-dst5	sta $ffff,y
-
-ofs9	ldx shpBuf+72,y
-src6	lda $ffff,y
-	and tMask,x
-	ora tByte,x
-dst6	sta $ffff,y
-
-ofs13	ldx shpBuf+104,y
-src7	lda $ffff,y
-	and tMask,x
-	ora tByte,x
-dst7	sta $ffff,y
-
-
-ofs2	ldx shpBuf+16,y		; row 2
-src8	lda $ffff,y
-	and tMask,x
-	ora tByte,x
-dst8	sta $ffff,y
-
-ofs6	ldx shpBuf+48,y
-src9	lda $ffff,y
-	and tMask,x
-	ora tByte,x
-dst9	sta $ffff,y
-
-ofs10	ldx shpBuf+80,y
-src10	lda $ffff,y
-	and tMask,x
-	ora tByte,x
-dst10	sta $ffff,y
-
-ofs14	ldx shpBuf+112,y
-src11	lda $ffff,y
-	and tMask,x
-	ora tByte,x
-dst11	sta $ffff,y
-
-
-ofs3	ldx shpBuf+24,y		; row 3
-src12	lda $ffff,y
-	and tMask,x
-	ora tByte,x
-dst12	sta $ffff,y
-
-ofs7	ldx shpBuf+56,y
-src13	lda $ffff,y
-	and tMask,x
-	ora tByte,x
-dst13	sta $ffff,y
-
-ofs11	ldx shpBuf+88,y
-src14	lda $ffff,y
-	and tMask,x
-	ora tByte,x
-dst14	sta $ffff,y
-
-ofs15	ldx shpBuf+120,y
-src15	lda $ffff,y
-	and tMask,x
-	ora tByte,x
-dst15	sta $ffff,y
-
-ofs20
-	dey
-	smi
-_jmp	jmp loop
-
-	rts

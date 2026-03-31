@@ -1,5 +1,5 @@
 
-PlayfieldWidth	= 40+8
+PlayfieldWidth	= 40+8	; 32+8
 PlayfieldHeight	= 24
 
 	ert PlayfieldWidth-8>40||PlayfieldHeight>24

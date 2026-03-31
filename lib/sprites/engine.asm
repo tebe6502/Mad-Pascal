@@ -89,7 +89,7 @@ B0		= 0
 B1		= 1
 
 
-	icl 'Engine_1xBuf.hea'
+	icl 'engine.hea'
 
 	.reloc
 
@@ -99,7 +99,7 @@ B1		= 1
 	.public Sprite0.bitmaps, Sprite1.bitmaps, Sprite2.bitmaps, Sprite3.bitmaps
 	.public Sprite4.bitmaps, Sprite5.bitmaps
 
-	.public Charsets, tColor1, tColor2, tColor3
+	.public Charsets, tColor0, tColor1, tColor2, tColor3
 
 
 //---------------------------------------------------------------------
@@ -161,7 +161,7 @@ B1		= 1
 dlist	dta a(dlist0)
 dlivec	dta a(DLI)
 
-dmactls	
+dmactls
 
 	ift PlayfieldWidth=40
 	dta scr32
@@ -173,7 +173,7 @@ dmactls
 
 colbaks	dta $06
 
-.print dlist,',',dlivec,',',dmactls,',',colbaks
+.print dlist-$100,',',dlivec-$100,',',dmactls-$100,',',colbaks-$100
 
 .macro	@DLIST
 	dta d'pp',$70+$80
@@ -185,8 +185,8 @@ colbaks	dta $06
 
 dlist0	@DLIST PlayfieldBuf+4*PlayfieldWidth+4, dlist0
 
-	:3 brk		; wyrownanie do poczatku strony pamieci
 
+	:19 brk			; wyrownanie do poczatku strony pamieci
 
 
 	:4 brk			; minimalna liczba zestawow znakowych = 4
@@ -221,16 +221,28 @@ Charsets
 	:4 brk
 
 
-tColor0 :32 dta $0c	; color0
+tLShift		dta h(ShiftRight2L, ShiftRight2L, ShiftRight4L, ShiftRight6L)
+tHShift		dta h(ShiftRight2H, ShiftRight2H, ShiftRight4H, ShiftRight6H)
 
-tColor1 :32 dta $00	; color1
+tOraLeft	dta %00000000
+		dta %11000000
+		dta %11110000
+		dta %11111100
 
-tColor2 :32 dta $1a	; color2
+tOraRight	dta %00000000
+		dta %00111111
+		dta %00001111
+		dta %00000011
 
-tColor3 :32 dta $f6	; color3
+tColor0 :24 dta $0c	; color0
 
+tColor1 :24 dta $00	; color1
 
-.print tColor0,',',tColor1,',',tColor2,',',tColor3
+tColor2 :24 dta $1a	; color2
+
+tColor3 :24 dta $f6	; color3
+
+.print 'tColor: ',tColor0-$100,',',tColor1-$100,',',tColor2-$100,',',tColor3-$100
 
 	ert <*<>0,*
 
@@ -329,23 +341,11 @@ Sprite3		@Spr
 Sprite4		@Spr
 Sprite5		@Spr
 
-.print 'sprite :',*,',',Sprite0,',',Sprite1
+.print 'sprite :',Sprite0-$100,',',Sprite1-$100
 
 lAdrPlayfield	:PlayfieldHeight+8	dta l(PlayfieldBuf+#*PlayfieldWidth)
 hAdrPlayfield	:PlayfieldHeight+8	dta h(PlayfieldBuf+#*PlayfieldWidth)
 
-tLShift		dta h(ShiftRight2L, ShiftRight2L, ShiftRight4L, ShiftRight6L)
-tHShift		dta h(ShiftRight2H, ShiftRight2H, ShiftRight4H, ShiftRight6H)
-
-tOraLeft	dta %00000000
-		dta %11000000
-		dta %11110000
-		dta %11111100
-
-tOraRight	dta %00000000
-		dta %00111111
-		dta %00001111
-		dta %00000011
 
 	.endpg
 
@@ -470,33 +470,7 @@ B0	@sprite_create B0 0
 	@sprite_create B0 5
 
 	rts
-
-//---------------------------------------------------------------------
-
-INIT
-	mwa #nmi nmivec
-
-
-RESET	ldy #0				; wszystkie duchy wyłączone
-
-cl	lda #0
-
-	sta Sprite0.x,y
-	sta Sprite0.y,y
-	sta Sprite0.index,y
-	sta Sprite0.delay,y
-	sta Sprite0.new,y
-
-	tya
-	add #.sizeof(@Spr)
-	tay
-	cpy #.sizeof(@Spr)*6
-	bne cl
-
-	rts
-	
 .endl
-
 
 //---------------------------------------------------------------------
 //---------------------------------------------------------------------
@@ -657,7 +631,35 @@ skp
 //---------------------------------------------------------------------
 //---------------------------------------------------------------------
 
-.print 'dli: ',*
+.local	+Engine				; '+' bo chcemy dołączyć do wcześniejszego bloku 'Engine'
+
+INIT
+	mwa #nmi nmivec
+
+RESET	ldy #0				; wszystkie duchy wyłączone
+
+cl	lda #0
+
+	sta Sprite0.x,y
+	sta Sprite0.y,y
+	sta Sprite0.index,y
+	sta Sprite0.delay,y
+	sta Sprite0.new,y
+
+	tya
+	add #.sizeof(@Spr)
+	tay
+	cpy #.sizeof(@Spr)*6
+	bne cl
+
+	rts
+
+.endl
+
+//---------------------------------------------------------------------
+//---------------------------------------------------------------------
+
+.print 'dli: ',*-$100
 
 .local	DLI
 
@@ -682,7 +684,7 @@ DLI:1	sta zp+36		; DLI
 	stx color3
 
 	ift :1<>PlayfieldHeight-1
-	
+
 		ift (>DLI:2) <> (>DLI:1)
 		mwa #DLI:2 NMI.dliv+1
 		els
@@ -690,7 +692,7 @@ DLI:1	sta zp+36		; DLI
 		eif
 
 	eif
-	
+
 	lda zp+36
 	ldx zp+37
 	;ldy zp+38
@@ -728,4 +730,4 @@ vbl	phr
 
 //---------------------------------------------------------------------
 
-.print *
+.print *-$100
