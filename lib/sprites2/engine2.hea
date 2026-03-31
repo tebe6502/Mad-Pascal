@@ -1,0 +1,16 @@
+
+PlayfieldWidth	= 40+8	; 32+8
+PlayfieldHeight	= 24
+
+height = 24
+
+	ert PlayfieldWidth-8>40||PlayfieldHeight>24
+
+PlayfieldBuf	= $d800		; !!! od pocz¹tku strony pamiêci
+
+Charset0	= $c000
+Charset1	= $c400
+Charset2	= $c800
+Charset3	= $cc00
+
+zp = $d8	; $d8..$ff

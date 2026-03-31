@@ -1,8 +1,8 @@
-// sprites 12x21 px
+// sprites 8x16 px
 
-uses sprites;
+uses sprites8x16;
 
-{$r soft.rc}
+{$r soft_8x16.rc}
 
 const
 	charset = $c000;
@@ -11,17 +11,13 @@ const
 	shp0 = $b000;
 	shp1 = shp0+12*64;
 	shp2 = shp1+3*64;
-
-	SprSize = 64;	// the size of a single sprite frame
+	
+	SprSize = 32;
 
 	spr0: array of word = [shp0, shp0+SprSize, shp0+SprSize*2, shp0+SprSize*3, 
 	                       shp0+SprSize*4, shp0+SprSize*5, shp0+SprSize*6, shp0+SprSize*7, 
-			       shp0+SprSize*8, shp0+SprSize*9, shp0+SprSize*10, shp0+SprSize*11, 0];
-
-	spr1: array of word = [shp1, shp1+SprSize, shp1+SprSize*2, 0];
-
-	spr2: array of word =  [shp2, shp2+SprSize, shp2+SprSize*2, shp2+SprSize*3, 
-	                        shp2+SprSize*4, shp2+SprSize*5, shp2+SprSize*6, shp2+SprSize*7 ,0];
+			       shp0+SprSize*8, shp0+SprSize*9, shp0+SprSize*10, shp0+SprSize*11,
+			       shp0+SprSize*12, 0];
 
 
 
@@ -48,7 +44,7 @@ end;
 
 begin
 
- Sprites.init;
+ Sprites8x16.init;
  
  colbaks := 6;
  
@@ -58,46 +54,46 @@ begin
  fillByte(color3, sizeof(color0), $0e);
  
  sprite0.bitmaps:=@spr0;
- sprite0.x:=50;
+ sprite0.x:=32;
  sprite0.y:=41;
- sprite0.adx:=1;
+ sprite0.adx:=0;
  sprite0.ady:=2;
  sprite0.new:=true;
 
- sprite1.bitmaps:=@spr1;
- sprite1.x:=9;
+ sprite1.bitmaps:=@spr0;
+ sprite1.x:=32+24;
  sprite1.y:=141;
- sprite1.adx:=1;
+ sprite1.adx:=0;
  sprite1.ady:=-2;
  sprite1.new:=true;
 
- sprite2.bitmaps:=@spr2;
+ sprite2.bitmaps:=@spr0;
  sprite2.x:=95;
  sprite2.y:=71;
- sprite2.adx:=-1;
+ sprite2.adx:=0;
  sprite2.ady:=2;
  sprite2.new:=true;
 
 
- sprite3.bitmaps:=@spr2;
- sprite3.x:=10*4;
+ sprite3.bitmaps:=@spr0;
+ sprite3.x:=32+24+16;
  sprite3.y:=24*8;
  sprite3.adx:=0;
  sprite3.ady:=2;
  sprite3.new:=true;
 
  sprite4.bitmaps:=@spr0;
- sprite4.x:=15*4;
+ sprite4.x:=32+24+32;
  sprite4.y:=77;
  sprite4.adx:=0;
  sprite4.ady:=-2;
  sprite4.new:=true;
 
- sprite5.bitmaps:=@spr1;
- sprite5.x:=20*4;
+ sprite5.bitmaps:=@spr0;
+ sprite5.x:=0;//32+24+64;
  sprite5.y:=61;
- sprite5.adx:=1;
- sprite5.ady:=0;
+ sprite5.adx:=0;
+ sprite5.ady:=2;
  sprite5.new:=true;
 
 
@@ -135,7 +131,7 @@ begin
  
   pause;
  
-  Sprites.update(@UserProc);
+  Sprites8x16.update(@UserProc);
   
   moveSprites(sprite0);
   moveSprites(sprite1);
@@ -143,7 +139,7 @@ begin
 
   moveSprites(sprite3);
   moveSprites(sprite4);
-  moveSprites(sprite5);
+  //moveSprites(sprite5);
 
  end;
  

@@ -1,3 +1,5 @@
+// sprites 12x21 px
+
 uses sprites;
 
 {$r soft.rc}
@@ -10,11 +12,16 @@ const
 	shp1 = shp0+12*64;
 	shp2 = shp1+3*64;
 
-	spr0: array of word = [shp0, shp0+64, shp0+64*2, shp0+64*3, shp0+64*4, shp0+64*5, shp0+64*6, shp0+64*7, shp0+64*8, shp0+64*9, shp0+64*10, shp0+64*11, 0];
+	SprSize = 64;	// the size of a single sprite frame
 
-	spr1: array of word = [shp1, shp1+64, shp1+64*2, 0];
+	spr0: array of word = [shp0, shp0+SprSize, shp0+SprSize*2, shp0+SprSize*3, 
+	                       shp0+SprSize*4, shp0+SprSize*5, shp0+SprSize*6, shp0+SprSize*7, 
+			       shp0+SprSize*8, shp0+SprSize*9, shp0+SprSize*10, shp0+SprSize*11, 0];
 
-	spr2: array of word =  [shp2, shp2+64, shp2+64*2, shp2+64*3, shp2+64*4, shp2+64*5, shp2+64*6, shp2+64*7 ,0];
+	spr1: array of word = [shp1, shp1+SprSize, shp1+SprSize*2, 0];
+
+	spr2: array of word =  [shp2, shp2+SprSize, shp2+SprSize*2, shp2+SprSize*3, 
+	                        shp2+SprSize*4, shp2+SprSize*5, shp2+SprSize*6, shp2+SprSize*7 ,0];
 
 
 
