@@ -855,7 +855,7 @@ type
 
   procedure Main;
   const
-    MP_REFERENCE_FOLDER = 'master';
+    MP_REFERENCE_BIN_FOLDER = 'windows';
 
     {$IFDEF DARWIN}
   const
@@ -948,7 +948,7 @@ type
 
     if referenceMPFolderPath = '' then referenceMPFolderPath := mpFolderPath;
     if referenceMPExePath = '' then referenceMPExePath :=
-        AppendPath(mpFolderPath, 'bin', MP_BIN_FOLDER, MP_REFERENCE_FOLDER, MP_EXE);
+        AppendPath(mpFolderPath, 'bin', MP_REFERENCE_BIN_FOLDER, MP_EXE);
 
     if inputFolderPath = '' then  inputFolderPath := AppendPath(mpFolderPath, 'samples');
 
