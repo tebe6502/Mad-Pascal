@@ -1,9 +1,9 @@
-unit sprites;
+unit sprites12x16;
 (*
  @type: unit
  @author: Tomasz Biela (Tebe)
- @name: Soft Sprites (NG Engine BUFx1)
- @version: 1.3
+ @name: Soft Sprites (NG Engine BUFx1, 12x16 px)
+ @version: 1.0
 
  @description:
  $D8..$FF        memory used by the zero page
@@ -15,7 +15,7 @@ unit sprites;
 
 interface
 
-{$r sprites.rc}
+{$r sprites12x16.rc}
 
 
 const

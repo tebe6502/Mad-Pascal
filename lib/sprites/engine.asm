@@ -1,4 +1,4 @@
-
+// 12x21 px
 //---------------------------------------------------------------------
 // SOFTWARE SPRITES ENGINE II (CHARS MODE) v2.0 (29.10.2008)
 //---------------------------------------------------------------------
@@ -178,7 +178,7 @@ colbaks	dta $06
 .print dlist-$100,',',dlivec-$100,',',dmactls-$100,',',colbaks-$100
 
 .macro	@DLIST
-	dta d'pp',$70+$80
+	dta d'p',$70+$80
 	dta $44+$80,a(:1)
 	:PlayfieldHeight-2 dta $44+$80,a(:1+#*[PlayfieldWidth]+PlayfieldWidth)
 	dta $44,a(:1+[PlayfieldHeight-1]*[PlayfieldWidth])
@@ -188,7 +188,7 @@ colbaks	dta $06
 dlist0	@DLIST PlayfieldBuf+4*PlayfieldWidth+4, dlist0
 
 
-	:9 brk			; wyrownanie do poczatku strony pamieci
+	:2 brk			; wyrownanie do poczatku strony pamieci
 
 
 	:4 brk			; minimalna liczba zestawow znakowych = 4
@@ -206,7 +206,6 @@ Charsets
 	dta	>Charset1	; row #9
 	dta	>Charset2	; row #10
 	dta	>Charset3	; row #11
-
 	dta	>Charset0	; row #12
 	dta	>Charset1	; row #13
 	dta	>Charset2	; row #14
@@ -219,11 +218,10 @@ Charsets
 	dta	>Charset1	; row #21
 	dta	>Charset2	; row #22
 	dta	>Charset3	; row #23
+	dta	>Charset0	; row #24
+	dta	>Charset1	; row #25
 
 	:4 brk
-
-
-FillChar	:8 dta $ff
 
 tLShift		dta h(ShiftRight2L, ShiftRight2L, ShiftRight4L, ShiftRight6L)
 tHShift		dta h(ShiftRight2H, ShiftRight2H, ShiftRight4H, ShiftRight6H)
@@ -238,13 +236,13 @@ tOraRight	dta %00000000
 		dta %00001111
 		dta %00000011
 
-tColor0 :24 dta $0c	; color0
+tColor0 :PlayfieldHeight dta $0c	; color0
 
-tColor1 :24 dta $00	; color1
+tColor1 :PlayfieldHeight dta $00	; color1
 
-tColor2 :24 dta $1a	; color2
+tColor2 :PlayfieldHeight dta $1a	; color2
 
-tColor3 :24 dta $f6	; color3
+tColor3 :PlayfieldHeight dta $f6	; color3
 
 .print 'tColor: ',tColor0-$100,',',tColor1-$100,',',tColor2-$100,',',tColor3-$100
 
@@ -325,7 +323,9 @@ tMask		.rept 256
 		.endr
 
 
-shpBuf		:256 dta $ff
+shpBuf		:256-8 dta $ff
+
+FillChar	:8 dta $ff
 
 CharsBackup	:256 brk
 
@@ -347,9 +347,11 @@ Sprite5		@Spr
 
 .print 'sprite :',Sprite0-$100,',',Sprite1-$100
 
-lAdrPlayfield	:PlayfieldHeight+8	dta l(PlayfieldBuf+#*PlayfieldWidth)
-hAdrPlayfield	:PlayfieldHeight+8	dta h(PlayfieldBuf+#*PlayfieldWidth)
+lAdrPlayfield	:PlayfieldHeight+4	dta l(PlayfieldBuf+#*PlayfieldWidth)
+		:4	dta l(PlayfieldBuf+#*PlayfieldWidth)
 
+hAdrPlayfield	:PlayfieldHeight+4	dta h(PlayfieldBuf+#*PlayfieldWidth)
+		:4	dta h(PlayfieldBuf+#*PlayfieldWidth)
 
 	.endpg
 
@@ -705,7 +707,7 @@ DLI:1	sta zp+36		; DLI
 	rti
 	.endr
 
-dli24	rti
+dli26	rti
 
 .endl
 

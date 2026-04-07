@@ -2,7 +2,7 @@
 PlayfieldWidth	= 40+8	; 32+8
 PlayfieldHeight	= 26
 
-height = 24
+height = 16
 
 ;	ert PlayfieldWidth-8>40||PlayfieldHeight>24
 

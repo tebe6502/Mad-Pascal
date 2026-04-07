@@ -22,10 +22,10 @@ const
 	engine = $de00;
 	
 	PlayfieldWidth	= 48;
-	PlayfieldHeight	= 32;  // 0..3   the top four rows outside the playing field
-                               // 28..31 the four bottom rows outside the playing field
+	PlayfieldHeight	= 26;  // 0..3   the top four rows outside the playing field
+                               // 0..3 the four bottom rows outside the playing field
                                // -----------------------------------------------------
-                               // 4..27  the visible playing field consists of 24 rows
+                               // 4..29  the visible playing field consists of 26 rows
                                // -----------------------------------------------------
 
 	Charset0 = $c000;
@@ -63,12 +63,12 @@ var
 	dmactls: byte absolute engine+$0F;		// DMACTL shadow
 	colbaks: byte absolute engine+$10;		// COLBAK shadow
 
-	Playfield: array [0..31, 0..47] of byte absolute engine-$600; // 32*48 = 1536 bytes ; Playfield [y,x]
+	Playfield: array [0..25, 0..47] of byte absolute engine-$600+4*48; // Playfield [y,x]
 
-	Color0: array [0..23] of byte absolute engine+$A0;
-	Color1: array [0..23] of byte absolute engine+$A0+24;
-	Color2: array [0..23] of byte absolute engine+$A0+24*2;
-	Color3: array [0..23] of byte absolute engine+$A0+24*3;
+	Color0: array [0..25] of byte absolute engine+$98;
+	Color1: array [0..25] of byte absolute engine+$98+26;
+	Color2: array [0..25] of byte absolute engine+$98+26*2;
+	Color3: array [0..25] of byte absolute engine+$98+26*3;
 
 	Sprite0: TSprite absolute engine+$D00;
 	Sprite1: TSprite absolute engine+$D00+sizeof(TSprite);

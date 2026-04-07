@@ -1,4 +1,4 @@
-// 8x16
+// 12x16
 //---------------------------------------------------------------------
 // SOFTWARE SPRITES ENGINE II (CHARS MODE) v2.0 (29.10.2008)
 //---------------------------------------------------------------------
@@ -6,11 +6,11 @@
 
 ; ZAŁOŻENIA:
 ; - możliwość zdefiniowana liczby zestawów znakowych od 4..N zmienianych co wiersz (tablica CHARSETS) na przerwaniu DLI
-; - kolory pola gry zmieniane co wiersz (przerwanie DLI) na podstawie tablic TCOLOR1, TCOLOR2, TCOLOR3
+; - kolory pola gry zmieniane co wiersz (przerwanie DLI) na podstawie tablic TCOLOR0, TCOLOR1, TCOLOR2, TCOLOR3
 ; - możliwość zdefiniowania szerokości (PLAYFIELDWIDTH) i wysokości pola gry (PLAYFIELDHEIGHT)
 ; - duch na pozycji X:Y = 0:0 jest poza polem gry, na pozycji 32:32 w lewym górnym narożniku pola gry
 ; - stała maksymalna liczba duchów = 6
-; - stały maksymalny rozmiar duchów = 8x16 pixle
+; - stały maksymalny rozmiar duchów = 12x21 pixle
 ; - tylko jeden bufor dla pamięci obrazu, możliwe jest w nim użycie znaków 0..79
 ; - tylko 1 bitmapa kształtu dla 1 klatki ducha (zajmuje 64 bajty), przesuwanie bitów realizowane poprzez tablicę
 ; - bitmapa maski obliczana na podstawie aktualnej bitmapy kształtu poprzez tablicę (nie ma potrzeby jej przesuwać)
@@ -22,7 +22,7 @@
 ; - tylko 1 bufor obrazu, możliwość jego dowolnej modyfikacji poprzez procedurę PLAYFIELD_UPDATE
 
 ; WADY:
-; - 6 duchów wyrabia się w 1 ramce pod warunkiem że pozycja X and 3 = 0, w innym przypadku 5 duchów wyrabia się w 1 ramce
+; - tylko 6 duchów wyrabia się w 2 ramkach na wąskim ekranie, 3 duchy w 1 ramce
 
 ; 	# BUFOR #0
 ;	# duch0 = znak 80, 81, 82, 83
@@ -89,7 +89,7 @@ B0		= 0
 B1		= 1
 
 
-	icl 'engine2.hea'
+	icl 'engine4.hea'
 
 	.reloc
 
@@ -493,9 +493,9 @@ _rts	rts
 	ldy #(PlayfieldWidth-4)*4
 
 	lda Sprite:2.y
-	cmp #(PlayfieldHeight+8)*8-24
+	cmp #(PlayfieldHeight+8)*8-32
 	scc
-	lda #(PlayfieldHeight+8)*8-24
+	lda #(PlayfieldHeight+8)*8-32
 
 	sta Sprite:2.yOk
 	sty Sprite:2.xOk

@@ -1,0 +1,4 @@
+charset rcdata 'alwas.fnt'
+scrdata rcdata 'alwas.scr'
+
+shp0 rcdata 'shape_12x16.obx'
