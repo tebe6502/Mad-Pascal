@@ -2,7 +2,7 @@ unit sprites;
 (*
  @type: unit
  @author: Tomasz Biela (Tebe)
- @name: Soft Sprites (NG Engine BUFx1)
+ @name: Soft Sprites (NG Engine BUFx1, 12x21 px)
  @version: 1.3
 
  @description:
@@ -20,7 +20,7 @@ interface
 
 const
 	engine = $de00;
-	
+
 	PlayfieldWidth	= 48;
 	PlayfieldHeight	= 26;  // 0..3   the top four rows outside the playing field
                                // 0..3 the four bottom rows outside the playing field
@@ -32,7 +32,7 @@ const
 	Charset1 = $c400;
 	Charset2 = $c800;
 	Charset3 = $cc00;
-	
+
 type
 
 TSprite = record of hi(engine+$d00)
