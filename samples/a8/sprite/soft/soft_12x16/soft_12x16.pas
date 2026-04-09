@@ -13,29 +13,28 @@ const
 	SprSize = 64;
 
 	shp0 = $b000;
-	shp1 = shp0 + SprSize*4;
-	shp2 = shp1 + SprSize*4;
-	shp3 = shp2 + SprSize*4;
+	shp1 = shp0 + SprSize*2;
+	shp2 = shp1 + SprSize*2;
+	shp3 = shp2 + SprSize*2;
 
-	shp4 = shp3 + SprSize*4;
+	shp4 = shp3 + SprSize*2;
 
-	shp5 = shp4 + SprSize*4;
-	shp6 = shp5 + SprSize*4;
-	shp7 = shp6 + SprSize*4;
-	shp8 = shp7 + SprSize*4;
+	shp5 = shp4 + SprSize*2;
+	shp6 = shp5 + SprSize*2;
+	shp7 = shp6 + SprSize*2;
+	shp8 = shp7 + SprSize*2;
 
-	spr0: array of word = [shp0, 0, shp0+SprSize, 0, shp0+SprSize*2, 0, shp0+SprSize*3, 0];
-	spr1: array of word = [shp1, 0, shp1+SprSize, 0, shp1+SprSize*2, 0, shp1+SprSize*3, 0];
-	spr2: array of word = [shp2, 0, shp2+SprSize, 0, shp2+SprSize*2, 0, shp2+SprSize*3, 0];
-	spr3: array of word = [shp3, 0, shp3+SprSize, 0, shp3+SprSize*2, 0, shp3+SprSize*3, 0];
+	spr0: array of word = [shp0, 0, shp0+SprSize, 0];
+	spr1: array of word = [shp1, 0, shp1+SprSize, 0];
+	spr2: array of word = [shp2, 0, shp2+SprSize, 0];
+	spr3: array of word = [shp3, 0, shp3+SprSize, 0];
 
-	spr_stand: array of word = [shp4, 0, shp4+SprSize, 0, shp4+SprSize*2, 0, shp4+SprSize*3, 0];
+	spr_stand: array of word = [shp4, 0, shp4+SprSize, 0];
 
-
-	spr0_l: array of word = [shp5, 0, shp5+SprSize, 0, shp5+SprSize*2, 0, shp5+SprSize*3, 0];
-	spr1_l: array of word = [shp6, 0, shp6+SprSize, 0, shp6+SprSize*2, 0, shp6+SprSize*3, 0];
-	spr2_l: array of word = [shp7, 0, shp7+SprSize, 0, shp7+SprSize*2, 0, shp7+SprSize*3, 0];
-	spr3_l: array of word = [shp8, 0, shp8+SprSize, 0, shp8+SprSize*2, 0, shp8+SprSize*3, 0];
+	spr0_l: array of word = [shp5, 0, shp5+SprSize, 0];
+	spr1_l: array of word = [shp6, 0, shp6+SprSize, 0];
+	spr2_l: array of word = [shp7, 0, shp7+SprSize, 0];
+	spr3_l: array of word = [shp8, 0, shp8+SprSize, 0];
 
 
 	walk_r: array [0..3] of pointer = (@spr0, @spr1, @spr2, @spr3);
@@ -159,13 +158,15 @@ begin
  fillByte(color3, sizeof(color0), $0e);
  
  sprite0.bitmaps:=@spr0;
- sprite0.x:=32;
- sprite0.y:=41;
+ sprite0.x:=160;
+ sprite0.y:=174;
  sprite0.adx:=-1;
  sprite0.ady:=2;
  sprite0.new:=true;
 
  sprite1.bitmaps:=@spr0[2];
+ sprite1.x:=sprite0.x;
+ sprite1.y:=sprite0.y+16;
  sprite1.new:=true;
 
 {
@@ -206,6 +207,7 @@ begin
 
  Playfield[27, 43]:=$d;	// y=27 ; x=43	lower-right corner of the playing field
 }
+
 
  while true do begin
  
