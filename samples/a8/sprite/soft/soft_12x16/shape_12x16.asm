@@ -43,6 +43,9 @@
 	@@CutMIC 1 0
 	@@CutMIC 1 2
 
+	@@CutMIC 22 0
+	@@CutMIC 22 2
+
 
 	@@CutMIC 22 4
 	@@CutMIC 22 6
