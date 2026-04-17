@@ -11651,9 +11651,9 @@ begin
           // TDataType.BYTETOK: yes := (ConstVal = Low(byte));  // < 0
           // TDataType.WORDTOK: yes := (ConstVal = Low(word));  // < 0
           // TDataType.CARDINALTOK: yes := (ConstVal = Low(cardinal));  // < 0
-          TDataType.SHORTINTTOK: yes := (ConstVal = Low(Shortint));  // < -128
-          TDataType.SMALLINTTOK: yes := (ConstVal = Low(Smallint));  // < -32768
-          TDataType.INTEGERTOK: yes := (ConstVal = Low(Integer));  // < -2147483648
+          TDataType.SHORTINTTOK: yes := (ConstVal = Low(Shortint));     // < -128
+          TDataType.SMALLINTTOK: yes := (ConstVal = Low(Smallint));     // < -32768
+          TDataType.INTEGERTOK: yes := (ConstVal = Low(Integer));       // < -2147483648
         end;
 
       end
@@ -11665,7 +11665,7 @@ begin
           TDataType.CARDINALTOK: yes := (ConstVal = High(Cardinal));  // > 4294967295
           TDataType.SHORTINTTOK: yes := (ConstVal = High(Shortint));  // > 127
           TDataType.SMALLINTTOK: yes := (ConstVal = High(Smallint));  // > 32767
-          TDataType.INTEGERTOK: yes := (ConstVal = High(Integer));  // > 2147483647
+          TDataType.INTEGERTOK: yes := (ConstVal = High(Integer));    // > 2147483647
         end;
 
       if yes then
@@ -11679,15 +11679,15 @@ begin
 
     if (isZero = TDataType.BYTETOK) and (ValType in UnsignedOrdinalTypes) then
       case TokenAt(i + 1).Kind of
-        //  TTokenKind.LTTOK: WarningAlwaysFalse(i + 2);             // BYTE, WORD, CARDINAL '<' 0
-        TTokenKind.GETOK: WarningAlwaysTrue(i + 2);      // BYTE, WORD, CARDINAL '>', '>=' 0
+        //  TTokenKind.LTTOK: WarningAlwaysFalse(i + 2);    // BYTE, WORD, CARDINAL '<' 0
+        TTokenKind.GETOK: WarningAlwaysTrue(i + 2);         // BYTE, WORD, CARDINAL '>', '>=' 0
       end;
 
 
     if (isZero = TDataType.SHORTINTTOK) and (ValType in UnsignedOrdinalTypes) then
       case TokenAt(i + 1).Kind of
 
-        TTokenKind.EQTOK, TTokenKind.LTTOK, TTokenKind.LETOK: begin        // BYTE, WORD, CARDINAL '=', '<'. '<=' -X
+        TTokenKind.EQTOK, TTokenKind.LTTOK, TTokenKind.LETOK: begin    // BYTE, WORD, CARDINAL '=', '<'. '<=' -X
           WarningAlwaysFalse(i + 2);
           WarningUnreachableCode(i + 2);
         end;
@@ -14551,13 +14551,10 @@ WHILETOK:
 
           if TokenAt(i + 3).Kind <> TTokenKind.COMMATOK then
           begin
-            if IdentifierAt(IdentIndex).NumAllocElements * GetDataSize(
-              IdentifierAt(IdentIndex).AllocElementType) = 0 then
+            if IdentifierAt(IdentIndex).NumAllocElements * GetDataSize(IdentifierAt(IdentIndex).AllocElementType) = 0 then
               Push(128, ASVALUE, 2)
             else
-              Push(Integer(IdentifierAt(IdentIndex).NumAllocElements *
-                GetDataSize(IdentifierAt(IdentIndex).AllocElementType)),
-                ASVALUE, 2);
+              Push(Integer(IdentifierAt(IdentIndex).NumAllocElements * GetDataSize(IdentifierAt(IdentIndex).AllocElementType)), ASVALUE, 2);
             // predefined record by FILE OF (default =128)
 
             Inc(i, 3);
@@ -14612,13 +14609,10 @@ WHILETOK:
           if TokenAt(i + 3).Kind <> TTokenKind.COMMATOK then
           begin
 
-            if IdentifierAt(IdentIndex).NumAllocElements * GetDataSize(
-              IdentifierAt(IdentIndex).AllocElementType) = 0 then
+            if IdentifierAt(IdentIndex).NumAllocElements * GetDataSize(IdentifierAt(IdentIndex).AllocElementType) = 0 then
               Push(128, ASVALUE, 2)
             else
-              Push(Integer(IdentifierAt(IdentIndex).NumAllocElements *
-                GetDataSize(IdentifierAt(IdentIndex).AllocElementType)),
-                ASVALUE, 2);
+              Push(Integer(IdentifierAt(IdentIndex).NumAllocElements * GetDataSize(IdentifierAt(IdentIndex).AllocElementType)), ASVALUE, 2);
             // predefined record by FILE OF (default =128)
 
             Inc(i, 3);
@@ -15553,8 +15547,7 @@ WHILETOK:
                 if IndirectionLevel = ASPOINTERTOARRAYORIGIN then
                   Push(ConstVal, ASVALUE, GetDataSize(IdentifierAt(IdentIndex).DataType))
                 else
-                  Push(ConstVal * GetDataSize(IdentifierAt(IdentIndex).AllocElementType), ASVALUE,
-                    GetDataSize(IdentifierAt(IdentIndex).DataType));
+                  Push(ConstVal * GetDataSize(IdentifierAt(IdentIndex).AllocElementType), ASVALUE, GetDataSize(IdentifierAt(IdentIndex).DataType));
 
               end
               else
