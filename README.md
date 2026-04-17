@@ -192,8 +192,10 @@ This text-mode windowing library has window controls and modern gadgets (widgets
 * [Minimum Spanning Tree](https://github.com/mgr-inz-rafal/atari_msp_test)
 
 ## Compression / Decompression
-* [LZJB](https://en.wikipedia.org/wiki/LZJB): [unit](https://github.com/tebe6502/Mad-Pascal/blob/master/lib/lzjb.pas), [sample](https://github.com/tebe6502/Mad-Pascal/tree/master/samples/a8/compression/lzjb)
-* RDC: [unit](https://github.com/tebe6502/Mad-Pascal/blob/master/lib/rdc.pas), [sample](https://github.com/tebe6502/Mad-Pascal/tree/master/samples/a8/compression/rdc)
+* [LZJB](https://en.wikipedia.org/wiki/LZJB) -> [unit](https://github.com/tebe6502/Mad-Pascal/blob/master/lib/lzjb.pas), [sample](https://github.com/tebe6502/Mad-Pascal/tree/master/samples/a8/compression/lzjb)
+* RDC -> [unit](https://github.com/tebe6502/Mad-Pascal/blob/master/lib/rdc.pas), [sample](https://github.com/tebe6502/Mad-Pascal/tree/master/samples/a8/compression/rdc)
+* [LZW](https://en.wikipedia.org/wiki/Lempel%E2%80%93Ziv%E2%80%93Welch) -> [sample](https://github.com/tebe6502/Mad-Pascal/tree/master/samples/a8/compression/lzw)
+* [LZH](https://en.wikipedia.org/wiki/LHA_(file_format)) -> [sample](https://github.com/tebe6502/Mad-Pascal/tree/master/samples/a8/compression/lzh)
 
 ## Benchmarks
 
