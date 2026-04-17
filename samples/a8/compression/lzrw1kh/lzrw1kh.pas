@@ -97,6 +97,11 @@ VAR
   Key                      : WORD;
   X,Y,Z,Pos                : BufferIndex;
 BEGIN
+  //Hash := Getmem(Sizeof(Hashtable));
+
+  Getmem(Hash, Sizeof(Hashtable));
+
+
   FillChar(Hash^,SizeOf(Hashtable), $FF);
 
   Dest^[0] := FLAG_Compress;
@@ -175,7 +180,7 @@ BEGIN
       Dest^[PRED(Y)] := Source^[Y];
       SaveY := Y;
     END;
-    
+
     Y := SaveY;
   END
   ELSE BEGIN
@@ -210,16 +215,16 @@ BEGIN
 
 	  src:=@Dest[Y-Pos];
 	  dst:=@Dest[Y];
-	  
+
 	  FOR K := Size downto 0 DO
 	  BEGIN
                //Dest^[Y+K] := Dest^[Y+K-Pos];
 	       dst^ := src^;
-	       
+
 	       inc(dst);
 	       inc(src);
 	  END;
-	       
+
           INC(X,2);
           INC(Y,Size+1)
         END; { pos = 0 }
@@ -230,16 +235,5 @@ BEGIN
   END;
   Result := Y
 END;  { decompression }
-
-
-Initialization
-
-{$IFDEF ATARI}
- Hash:=pointer($8000);
-
-{$ELSE}
-  Hash := Nil;
-  Getmem(Hash,Sizeof(Hashtable));
-{$ENDIF}
 
 END.
