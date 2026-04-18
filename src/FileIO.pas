@@ -337,17 +337,47 @@ end;
 
 function TPathList.FindFileInternal(const filePath: TFilePath): TFilePath;
 var
+  fileFolder: TFolderPath;
+  fileName: TFilePath;
+  searchRec: TSearchRec;
+  found: Boolean;
   i: Integer;
 begin
-  Result := TFileSystem.NormalizePath(filePath);
-  if TFileSystem.FileExists_(Result) then Exit;
+  fileFolder := ExtractFilePath(filePath);
+  fileName := ExtractFileName(filePath);
+
+  // Not found
+  Result := '';
+
+  // Perform case-insentive filename lookup.
+  found := (FindFirst(filePath, faAnyFile, searchRec) = 0);
+  FindClose(searchRec);
+  if (found) then
+  begin
+    if (searchRec.Name <> fileName) then
+    begin
+      Writeln('ERROR: Case difference in file name ' + filePath + ' and ' + searchRec.Name);
+    end;
+    Result := fileFolder + searchRec.Name;
+    Exit;
+  end;
 
   for i := Low(paths) to High(paths) do
   begin
     Result := TFileSystem.NormalizePath(paths[i] + filePath);
-    if TFileSystem.FileExists_(Result) then Exit;
+    fileFolder := ExtractFilePath(Result);
+    found := (FindFirst(filePath, faAnyFile, searchRec) = 0);
+    FindClose(searchRec);
+    if (found) then
+    begin
+      if (searchRec.Name <> fileName) then
+        begin
+          Writeln('ERROR: Case difference in file name ' + filePath + ' and ' + searchRec.Name);
+        end;
+      Result := fileFolder + searchRec.Name;
+      Exit;
+    end;
   end;
-  Result := '';
 
 end;
 
@@ -941,13 +971,19 @@ begin
 
   Result := filePath;
 
+  {$IFDEF WINDOWS}
+   if Pos('/', filePath) > 0 then
+   begin
+    Result := StringReplace(filePath, '/', '\', [rfReplaceAll]);
+   end;
+  {$ENDIF}
+
   // https://github.com/tebe6502/Mad-Pascal/issues/113
   {$IFDEF UNIX}
    if Pos('\', filePath) > 0 then
    begin
     Result := StringReplace(filePath, '\', '/', [rfReplaceAll]);
    end;
-
   {$ENDIF}
 
   {$IFDEF SIMULATED_FILE_IO}
