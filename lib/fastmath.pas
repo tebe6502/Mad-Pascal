@@ -3,9 +3,11 @@ unit fastmath;
  @type: unit
  @author: Cruzer/Camelot, Tebe/Madteam
  @name: Fast Math
- @version: 1.0
+ @version: 1.1
 
  @description:
+
+ <https://6502.org/users/mycorner/6502/code/root.html>
 
  <https://codebase64.org/doku.php?id=base:6502_6510_maths>
 
@@ -21,7 +23,7 @@ unit fastmath;
 interface
 
 	function atan2(x1,x2,y1,y2: byte): byte; assembler;
-	function sqrt16(a: word): byte; assembler;
+	function sqrt16(Number: word): byte; assembler;
 
 	procedure FillSinHigh(p: pointer);
 	procedure FillSinLow(p: pointer);
@@ -198,46 +200,83 @@ atan2		lda x1
 end;
 
 
-function sqrt16(a: word): byte; assembler;
+function sqrt16(Number: word): byte; assembler;
 (*
 @description:
 Returns the 8-bit square root of the 16-bit number.
-https://codebase64.org/doku.php?id=base:16bit_and_24bit_sqrt
 
-@param: A - Word
+https://6502.org/users/mycorner/6502/code/root.html
 
-@return: Result - Byte
+; Calculates the 8 bit root and 9 bit remainder of a 16 bit unsigned integer in	
+; Numberl/Numberh. The result is always in the range 0 to 255 and is held in
+; Root, the remainder is in the range 0 to 511 and is held in Reml/Remh
+;
+; partial results are held in templ/temph
+;
+; This routine is the complement to the integer square program.
+;
+; Destroys A, X registers.
+
+; variables - must be in RAM
+
 *)
 asm
-	txa:pha
+Reml		= :EAX		; remainder low byte
+Remh		= :EAX+1	; remainder high byte
+templ		= :EAX+2	; temp partial low byte
+temph		= :EAX+3	; temp partial high byte
 
-	LDY #$01	; lsby of first odd number = 1
-	STY :eax
-	DEY
-	STY :eax+1	; msby of first odd number (sqrt = 0)
-again
-	SEC
-	LDA a		; save remainder in X register
-	TAX		; subtract odd lo from integer lo
-	SBC :eax
-	STA a
-	LDA a+1		; subtract odd hi from integer hi
-	SBC :eax+1
-	STA a+1		; is subtract result negative?
-	BCC nomore	; no. increment square root
-	INY
-	LDA :eax	; calculate next odd number
-	ADC #$01
-	STA :eax
-	BCC again
-	INC :eax+1
-	JMP again
-nomore
-	STY Result	; all done, store square root
+	LDA	#$00		; clear A
+	STA	Reml		; clear remainder low byte
+	STA	Remh		; clear remainder high byte
+	STA	Result		; clear Root
+	LDY	#$08		; 8 pairs of bits to do
+Loop
+	ASL	Result		; Root = Root * 2
 
-;	STX $21		; and remainder
+	ASL	Number		; shift highest bit of number ..
+	ROL	Number+1	;
+	ROL	Reml		; .. into remainder
+	ROL	Remh		;
 
-	pla:tax
+	ASL	Number		; shift highest bit of number ..
+	ROL	Number+1	;
+	ROL	Reml		; .. into remainder
+	ROL	Remh		;
+
+	LDA	Result		; copy Root ..
+	STA	templ		; .. to templ
+	LDA	#$00		; clear byte
+	STA	temph		; clear temp high byte
+
+	SEC			; +1
+	ROL	templ		; temp = temp * 2 + 1
+	ROL	temph		;
+
+	LDA	Remh		; get remainder high byte
+	CMP	temph		; comapre with partial high byte
+	BCC	Next		; skip sub if remainder high byte smaller
+
+	BNE	Subtr		; do sub if <> (must be remainder>partial !)
+
+	LDA	Reml		; get remainder low byte
+	CMP	templ		; comapre with partial low byte
+	BCC	Next		; skip sub if remainder low byte smaller
+
+				; else remainder>=partial so subtract then
+				; and add 1 to root. carry is always set here
+Subtr
+	LDA	Reml		; get remainder low byte
+	SBC	templ		; subtract partial low byte
+	STA	Reml		; save remainder low byte
+	LDA	Remh		; get remainder high byte
+	SBC	temph		; subtract partial high byte
+	STA	Remh		; save remainder high byte
+
+	INC	Result		; increment Root
+Next
+	DEY			; decrement bit pair count
+	BNE	Loop		; loop if not all done
 end;
 
 

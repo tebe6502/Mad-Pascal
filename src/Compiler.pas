@@ -7199,16 +7199,15 @@ begin
                   else
                     if address or VarPass then
                     begin
-                      //       if (IdentifierAt(IdentIndex).DataType in Pointers) and (IdentifierAt(IdentIndex).NumAllocElements = 0) {and (IdentifierAt(IdentIndex).PassMethod <> TParameterPassingMethod.VARPASSING)} then begin
 
                       //  writeln('1: ',IdentifierAt(IdentIndex).Name,',',IdentifierAt(IdentIndex).idType,',',IdentifierAt(IdentIndex).DataType,',',IdentifierAt(IdentIndex).AllocElementType,',',IdentifierAt(IdentIndex).NumAllocElements,'..',IdentifierAt(IdentIndex).NumAllocElements_,',',IdentifierAt(IdentIndex).PassMethod,',',DEREFERENCE,',',varpass,' o ',IdentifierAt(IdentIndex).isAbsolute);
 
                       if (IdentifierAt(IdentIndex).DataType in [TDataType.RECORDTOK, TDataType.OBJECTTOK] + FileTypes) or
-
+{
 		         (VarPass and (IdentifierAt(IdentIndex).DataType = TDataType.POINTERTOK) and
                           (IdentifierAt(IdentIndex).AllocElementType in AllTypes - [TDataType.PROCVARTOK, TDataType.RECORDTOK, TDataType.OBJECTTOK]) and
                           (IdentifierAt(IdentIndex).NumAllocElements = 0)) or
-
+}
                         ((IdentifierAt(IdentIndex).DataType in Pointers) and
                          (IdentifierAt(IdentIndex).AllocElementType in [TDataType.RECORDTOK, TDataType.OBJECTTOK]) and
                          (VarPass or (IdentifierAt(IdentIndex).PassMethod = TParameterPassingMethod.VARPASSING))) or
@@ -12474,6 +12473,7 @@ begin
                       IndirectionLevel := ASPOINTERTOPOINTER;
 
                       if (IdentifierAt(IdentIndex).AllocElementType = TDataType.UNTYPETOK) or
+		         ( (IdentifierAt(IdentIndex).DataType = TDataType.POINTERTOK) and (IdentifierAt(IdentIndex).AllocElementType = TDataType.CHARTOK) and (IdentifierAt(IdentIndex).NumAllocElements = 0) ) or
 		         (IdentifierAt(IdentIndex).IsObjectVariable and (IdentifierAt(IdentIndex).NestedDataType = TDataType.POINTERTOK) and (IdentifierAt(IdentIndex).NestedNumAllocElements = 0) )
 		      then
                         VarType := IdentifierAt(IdentIndex).DataType      // RECORD.
@@ -12588,12 +12588,13 @@ begin
                 end;
 
 
-                (* TODO remove?
+                // TODO remove?
+{
                   if (TokenAt(k).Kind = TTokenKind.IDENTTOK) then
                     writeln(IdentifierAt(IdentIndex).Name,'/',TokenAt(k).Name,',', VarType,':', ExpressionType,' - ', IdentifierAt(IdentIndex).DataType,':',IdentifierAt(IdentIndex).AllocElementType,':',IdentifierAt(IdentIndex).NumAllocElements,' | ',IdentifierAt(GetIdentIndex(TokenAt(k).Name)).DataType,':',IdentifierAt(GetIdentIndex(TokenAt(k).Name)).AllocElementType,':',IdentifierAt(GetIdentIndex(TokenAt(k).Name)).NumAllocElements ,' / ',IndirectionLevel)
                   else
                     writeln(IdentifierAt(IdentIndex).Name,',', VarType,',', ExpressionType,' - ', IdentifierAt(IdentIndex).DataType,':',IdentifierAt(IdentIndex).AllocElementType,':',IdentifierAt(IdentIndex).NumAllocElements,' / ',IndirectionLevel);
-                 *)
+ }
 
 
                 if VarType <> ExpressionType then
@@ -12734,7 +12735,7 @@ begin
                       else
                       begin
 
-                        //     writeln('1> ',IdentifierAt(IdentIndex).Name,',',IdentifierAt(IdentIndex).DataType,',',IdentifierAt(IdentIndex).AllocElementType,',',IdentifierAt(IdentIndex).NumAllocElements,'/',IdentifierAt(IdentIndex).NumAllocElements_,', P:', IdentifierAt(IdentIndex).PassMethod,' | ',VarType,',',ExpressionType,',',IndirectionLevel);
+                        //    writeln('1> ',IdentifierAt(IdentIndex).Name,',',IdentifierAt(IdentIndex).DataType,',',IdentifierAt(IdentIndex).AllocElementType,',',IdentifierAt(IdentIndex).NumAllocElements,'/',IdentifierAt(IdentIndex).NumAllocElements_,', P:', IdentifierAt(IdentIndex).PassMethod,' | ',VarType,',',ExpressionType,',',IndirectionLevel);
 
                         if ((IdentifierAt(IdentIndex).DataType = TDataType.POINTERTOK) and
                            (IdentifierAt(IdentIndex).AllocElementType in [TDataType.RECORDTOK, TDataType.OBJECTTOK])) or
@@ -18950,7 +18951,7 @@ begin
 	    if AllocElementType in [TDataType.RECORDTOK, TDataType.OBJECTTOK] then
               NumAllocElements := NumAllocElements and $FFFF
 	    else
-              NumAllocElements := 1;
+              NumAllocElements := 1-1;
 
           end;
 
