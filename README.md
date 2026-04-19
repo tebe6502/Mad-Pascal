@@ -197,6 +197,7 @@ This text-mode windowing library has window controls and modern gadgets (widgets
 * RDC -> [unit](https://github.com/tebe6502/Mad-Pascal/blob/master/lib/rdc.pas), [sample](https://github.com/tebe6502/Mad-Pascal/tree/master/samples/a8/compression/rdc)
 * [LZW](https://en.wikipedia.org/wiki/Lempel%E2%80%93Ziv%E2%80%93Welch) -> [sample](https://github.com/tebe6502/Mad-Pascal/tree/master/samples/a8/compression/lzw)
 * [LZH](https://en.wikipedia.org/wiki/LHA_(file_format)) -> [sample](https://github.com/tebe6502/Mad-Pascal/tree/master/samples/a8/compression/lzh)
+* [LZRW1KH] -> [unit](https://github.com/tebe6502/Mad-Pascal/blob/master/lib/lzrw1kh.pas), [sample](https://github.com/tebe6502/Mad-Pascal/tree/master/samples/a8/compression/lzrw1kh)
 
 ## Benchmarks
 
