@@ -199,6 +199,19 @@ This text-mode windowing library has window controls and modern gadgets (widgets
 * [LZH](https://en.wikipedia.org/wiki/LHA_(file_format)) -> [sample](https://github.com/tebe6502/Mad-Pascal/tree/master/samples/a8/compression/lzh)
 * [LZRW1KH](https://sunsite.icm.edu.pl/delphi//d10free/tlzrw1.htm) -> [unit](https://github.com/tebe6502/Mad-Pascal/blob/master/lib/lzrw1kh.pas), [sample](https://github.com/tebe6502/Mad-Pascal/tree/master/samples/a8/compression/lzrw1kh)
 
+## Decompression
+* [DEFLATE](https://github.com/pfusik/zlib6502) -> [unit](https://github.com/tebe6502/Mad-Pascal/blob/master/lib/deflate.pas), [sample](https://github.com/tebe6502/Mad-Pascal/tree/master/samples/a8/compression/deflate)
+* [APL](https://github.com/emmanuel-marty/apultra) -> [unit](https://github.com/tebe6502/Mad-Pascal/blob/master/lib/aplib.pas), [sample](https://github.com/tebe6502/Mad-Pascal/tree/master/samples/a8/compression/apl)
+* [LZ4](https://github.com/emmanuel-marty/lz4ultra) -> [unit](https://github.com/tebe6502/Mad-Pascal/blob/master/lib/lz4.pas), [sample](https://github.com/tebe6502/Mad-Pascal/tree/master/samples/a8/compression/lz4)
+* [PACKFIRE](https://github.com/tebe6502/Mad-Assembler/tree/master/examples/compression/packfire) -> [unit](https://github.com/tebe6502/Mad-Pascal/blob/master/lib/packfire.pas), [sample](https://github.com/tebe6502/Mad-Pascal/tree/master/samples/a8/compression/packfire)
+* [Power Packer](https://github.com/retrocoder68/PowerPacker) -> [unit](https://github.com/tebe6502/Mad-Pascal/blob/master/lib/pp.pas), [sample](https://github.com/tebe6502/Mad-Pascal/tree/master/samples/a8/compression/pp)
+* [Snappy](https://github.com/google/snappy/tree/main) -> [unit](https://github.com/tebe6502/Mad-Pascal/blob/master/lib/snappy.pas), [sample](https://github.com/tebe6502/Mad-Pascal/tree/master/samples/a8/compression/snappy)
+* [UPKR](https://github.com/pfusik/upkr6502) -> [unit](https://github.com/tebe6502/Mad-Pascal/blob/master/lib/upk.pas), [sample](https://github.com/tebe6502/Mad-Pascal/tree/master/samples/a8/compression/upkr)
+* [ZX0](https://github.com/einar-saukas/ZX0) -> [unit](https://github.com/tebe6502/Mad-Pascal/blob/master/lib/zx0.pas), [sample](https://github.com/tebe6502/Mad-Pascal/tree/master/samples/a8/compression/zx0)
+* [ZX2](https://github.com/dmsc/zx02) -> [unit](https://github.com/tebe6502/Mad-Pascal/blob/master/lib/zx2.pas), [sample](https://github.com/tebe6502/Mad-Pascal/tree/master/samples/a8/compression/zx2)
+* [ZX5](https://github.com/einar-saukas/ZX5) -> [unit](https://github.com/tebe6502/Mad-Pascal/blob/master/lib/zx5.pas), [sample](https://github.com/tebe6502/Mad-Pascal/tree/master/samples/a8/compression/zx5)
+
+
 ## Benchmarks
 
 |                             |CC65 |Mad-Pascal|Millfork|
