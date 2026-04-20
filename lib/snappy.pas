@@ -2,9 +2,9 @@ unit snappy;
 (*
  @type: unit
  @author: Xelitan, Norbert Orzechowicz
- @name: Snappy decompressor 
+ @name: Snappy decompressor
 
- @version: 1.0
+ @version: 1.1
 
  @description:
  <https://github.com/google/snappy/blob/main/format_description.txt>
@@ -59,16 +59,19 @@ implementation
 
 procedure SnappyDecode(InStream, OutStream: PByte); register;
 var Offset: Cardinal;
-    TempLen: Cardinal;
     OutPos: Word;
-    UncompressedLength: Word;
+    UncompressedLength: Integer;
 
     Buf: array[0..3] of Byte;
 
-    C: Byte register;
+    C: Byte;
+
+    TempLen: Byte;
+
+    Len: Byte register;
+
     SmallLen: Byte register;
     i: Byte register;
-    Len: Byte register;
 
     OutPosition: PByte register;
 
@@ -81,9 +84,9 @@ var Offset: Cardinal;
     Shift := 0;
     while Shift < 32 do begin
       C := InStream[0];
-      
+
       inc(InStream);
-      
+
       Val := C and $7F;
       if byte((Val shl Shift) shr Shift) <> Val then Exit(-1);
       Res := Res or (Val shl Shift);
@@ -101,7 +104,7 @@ begin
 
   OutPos := 0;
 
-  while OutPos < UncompressedLength do begin
+  while OutPos < Word(UncompressedLength) do begin
     C := InStream[0];
 
     inc(InStream);
@@ -119,8 +122,25 @@ begin
 	 inc(InStream);
 	end;
 
-        TempLen := 0;
-        for i:=0 to SmallLen-1 do TempLen := TempLen or (Cardinal(Buf[i]) shl (i shl 3));
+        TempLen := Buf[0];
+        //for i:=1 to SmallLen-1 do TempLen := TempLen or (Cardinal(Buf[i]) shl (i shl 3));
+
+	case SmallLen of
+
+	 2: TempLen := TempLen or (Buf[1] shl (1 shl 3));
+
+	 3: begin
+             TempLen := TempLen or (Buf[1] shl (1 shl 3));
+             TempLen := TempLen or (Buf[2] shl (2 shl 3));
+	    end;
+
+	 4: begin
+             TempLen := TempLen or (Buf[1] shl (1 shl 3));
+             TempLen := TempLen or (Buf[2] shl (2 shl 3));
+             TempLen := TempLen or (Buf[3] shl (3 shl 3));
+	    end;
+	end;
+
         Len := (TempLen and WORD_MASK[SmallLen]) + 1;
       end;
 
@@ -142,9 +162,7 @@ begin
        1: begin
             Len := ((C shr 2) and $7) + 4;
 
-	    Buf[0] := InStream[0];
-
-            Offset := Buf[0] or ((C shr 5) shl 8);
+            Offset := InStream[0] or ((C shr 5) shl 8);
 
 	    inc(InStream);
           end;
