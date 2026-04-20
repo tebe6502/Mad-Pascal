@@ -191,6 +191,7 @@ This text-mode windowing library has window controls and modern gadgets (widgets
 * [kara-t-rex](https://gitlab.com/bocianu/kara-t-rex)
 * [Minimum Spanning Tree](https://github.com/mgr-inz-rafal/atari_msp_test)
 * [Piranhas](https://gitlab.com/bocianu/3.14ranhas)
+* [diagnostyka_serca](https://github.com/mgr-inz-rafal/diagnostyka_serca)
 
 ## Compression / Decompression
 * [LZJB](https://en.wikipedia.org/wiki/LZJB) -> [unit](https://github.com/tebe6502/Mad-Pascal/blob/master/lib/lzjb.pas), [sample](https://github.com/tebe6502/Mad-Pascal/tree/master/samples/a8/compression/lzjb)
