@@ -4,9 +4,9 @@ unit snappy;
  @author: Xelitan, Norbert Orzechowicz, Tomasz Biela (Mad Pascal)
  @name: Snappy decompressor
 
- @version: 1.2
+ @version: 1.3
 
- @description: 
+ @description:
  <https://github.com/Xelitan/Snappy-decompressor-in-Pure-Pascal>
 
  <https://github.com/google/snappy/blob/main/format_description.txt>
@@ -39,7 +39,7 @@ SOFTWARE.
 interface
 
 const
-  WORD_MASK: array[0..4] of Cardinal = (0, $FF, $FFFF, $FFFFFF, $FFFFFFFF);
+  [striped] WORD_MASK: array[0..4] of Cardinal = (0, $FF, $FFFF, $FFFFFF, $FFFFFFFF);
 
   procedure SnappyDecode(InStream, OutStream: PByte); register;
 
@@ -64,7 +64,7 @@ var Offset: Cardinal;
 
 
   function ReadUncompressedLength: Integer;
-  var Res, Val: Word;
+  var Res, Val, Hlp: Word;
       C, Shift: Byte;
   begin
     Res := 0;
@@ -75,8 +75,9 @@ var Offset: Cardinal;
       inc(InStream);
 
       Val := C and $7F;
-      if byte((Val shl Shift) shr Shift) <> Val then Exit(-1);
-      Res := Res or (Val shl Shift);
+      Hlp := Val shl Shift;
+      if (Hlp shr Shift) <> Val then Exit(-1);
+      Res := Res or Hlp;
       if C < 128 then Exit(Res);
       Inc(Shift, 7);
     end;
@@ -98,12 +99,12 @@ begin
 
     if (C and $3) = 0 then begin
       // Handle literal
-      Len := (C shr 2) + 1;
+      Len := byte((C shr 2) + 1);
 
-      if Len > 60 then begin
+      if byte(Len) > 60 then begin
         SmallLen := Len - 60;
 
-	for i:=0 to SmallLen-1 do begin
+	for i:=0 to byte(SmallLen-1) do begin
 	 Buf[i] := InStream[0];
 
 	 inc(InStream);
@@ -140,21 +141,21 @@ begin
       // Handle copy
       case C and $3 of
        1: begin
-            Len := ((C shr 2) and $7) + 4;
+            Len := byte(((C shr 2) and $7) + 4);
 
             Offset := InStream[0] or ((C shr 5) shl 8);
 
 	    inc(InStream);
           end;
        2: begin
-            Len := (C shr 2) + 1;
+            Len := byte((C shr 2) + 1);
 
 	    Offset := PWord(InStream)^;
 
 	    inc(InStream, 2);
           end;
        3: begin
-            Len := (C shr 2) + 1;
+            Len := byte((C shr 2) + 1);
 
 	    Offset := PCardinal(InStream)^;
 
@@ -166,7 +167,7 @@ begin
 
       OutPosition := OutStream - Offset;
 
-      for i:=Len-1 downto 0 do begin
+      for i:=byte(Len-1) downto 0 do begin
 	OutStream[0] := OutPosition[0];
 
 	inc(OutPosition);
