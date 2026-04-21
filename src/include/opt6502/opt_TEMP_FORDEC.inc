@@ -10,8 +10,8 @@ begin
    if (TemporaryBuf[5] = #9'#for') and							// #for				; 5	for i:=N downto 0
       (pos('#for:dec', TemporaryBuf[4]) > 0) and					// #for:dec I			; 4
 
-      (sta(0) or sty(0) or (pos('stz ', TemporaryBuf[0]) > 0)) and			// sta|sty|stz I		; 0
-      (TemporaryBuf[1] = '') and							//				; 1
+      (sta(0) or sty(0) or stz(0)) and							// sta|sty|stz I		; 0
+      ((TemporaryBuf[1] = '') or ldy_im(1)) and						//    |ldy #			; 1
       lab_l(2) and									//l_00FB			; 2
       (TemporaryBuf[3] = '; --- ForToDoCondition') then					//; --- ForToDoCondition	; 3
     begin

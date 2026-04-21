@@ -169,6 +169,11 @@ end;
     Result := pos1(#9'sty ', i)
   end;
 
+  function STZ(const i: Integer): Boolean;
+  begin
+    Result := pos1(#9'stz ', i)
+  end;
+
   function ADD(const i: Integer): Boolean;
   begin
     Result := pos1(#9'add ', i)

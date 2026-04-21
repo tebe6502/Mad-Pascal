@@ -8,7 +8,7 @@ var p: integer;
     tmp: string;
 begin
 
-    if (sta(0) or sty(0)) and								// sta|sty			; 0
+    if (sta(0) or sty(0) or stz(0)) and							// sta|sty|stz			; 0
        (TemporaryBuf[1] = '') and							//				; 1
        lab_l(2) and									//l_xxxx			; 2
        (TemporaryBuf[3] = '; --- ForToDoCondition') then				//; --- ForToDoCondition	; 3

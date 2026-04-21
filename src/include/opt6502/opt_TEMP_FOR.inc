@@ -205,10 +205,10 @@ begin
      end;
 
 
-   if (TemporaryBuf[0] = '') and							//			; 0
+   if ((TemporaryBuf[0] = '') or (ldy_im_0(0) and (TemporaryBuf[3] = '~'))) and		//			; 0
       lab_l(1) and									//l_2092		; 1
       (TemporaryBuf[2] = '; --- ForToDoCondition') and					//; --- ForToDoCondition; 2
-      ldy_im_0(3) and									// ldy #$00		; 3
+      (ldy_im_0(3) or (TemporaryBuf[3] = '~')) and					// ldy #$00		; 3
       lda(4) and									// lda Result		; 4
       add_sub(5) and									// add|sub (P),y	; 5
       sta(6) and									// sta Result		; 6
@@ -222,7 +222,7 @@ begin
       seq(14) and									// seq 			; 14
       (TemporaryBuf[15] = #9'jmp ' + TemporaryBuf[1]) and				// jmp l_2092		; 15
       lab_l(16) then									//l_			; 16
-    if (GetARG(5) = '('+GetARG(11)+'),y') then
+    if (GetARG(5) = '(' + GetARG(11) + '),y') then
      begin
 	TemporaryBuf[3] := TemporaryBuf[2];
 	TemporaryBuf[2] := TemporaryBuf[1];
