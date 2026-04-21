@@ -1,12 +1,14 @@
 unit snappy;
 (*
  @type: unit
- @author: Xelitan, Norbert Orzechowicz
+ @author: Xelitan, Norbert Orzechowicz, Tomasz Biela (Mad Pascal)
  @name: Snappy decompressor
 
- @version: 1.1
+ @version: 1.2
 
- @description:
+ @description: 
+ <https://github.com/Xelitan/Snappy-decompressor-in-Pure-Pascal>
+
  <https://github.com/google/snappy/blob/main/format_description.txt>
 *)
 
@@ -34,20 +36,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 }
 
-
-////////////////////////////////////////////////////////////////////////////////
-//                                                                            //
-// Description:	Snappy decompressor in pure Pascal                            //
-// Version:	0.1                                                           //
-// Date:	22-MAR-2025                                                   //
-// License:     MIT                                                           //
-// Target:	Win64, Free Pascal, Delphi, Mad Pascal                        //
-// Base on:     PHP code by Norbert Orzechowicz                               //
-// Copyright:	(c) 2025 Xelitan.com.                                         //
-//		All rights reserved.                                          //
-//                                                                            //
-////////////////////////////////////////////////////////////////////////////////
-
 interface
 
 const
@@ -64,14 +52,13 @@ var Offset: Cardinal;
 
     Buf: array[0..3] of Byte;
 
-    C: Byte;
+    C, SmallLen: Byte;
 
-    TempLen: Byte;
+    TempLen: Word;
 
-    Len: Byte register;
+    Len: Word register;
 
-    SmallLen: Byte register;
-    i: Byte register;
+    i: Word register;
 
     OutPosition: PByte register;
 
@@ -129,16 +116,10 @@ begin
 
 	 2: TempLen := TempLen or (Buf[1] shl (1 shl 3));
 
-	 3: begin
-             TempLen := TempLen or (Buf[1] shl (1 shl 3));
-             TempLen := TempLen or (Buf[2] shl (2 shl 3));
-	    end;
+	 3: TempLen := TempLen or (Buf[1] shl (1 shl 3)) or (Buf[2] shl (2 shl 3));
 
-	 4: begin
-             TempLen := TempLen or (Buf[1] shl (1 shl 3));
-             TempLen := TempLen or (Buf[2] shl (2 shl 3));
-             TempLen := TempLen or (Buf[3] shl (3 shl 3));
-	    end;
+	 4: TempLen := TempLen or (Buf[1] shl (1 shl 3)) or (Buf[2] shl (2 shl 3)) or (Buf[3] shl (3 shl 3));
+
 	end;
 
         Len := (TempLen and WORD_MASK[SmallLen]) + 1;
@@ -154,7 +135,6 @@ begin
       end;
 
       Inc(OutPos, Len);
-
     end
     else begin
       // Handle copy
@@ -180,8 +160,6 @@ begin
 
 	    inc(InStream, 4);
           end;
-        else
-          Exit;
       end;
 
 //      if (Offset = 0) or (Offset > OutPos) then Exit;
@@ -191,8 +169,8 @@ begin
       for i:=Len-1 downto 0 do begin
 	OutStream[0] := OutPosition[0];
 
-	inc(OutStream);
 	inc(OutPosition);
+	inc(OutStream);
       end;
 
       Inc(OutPos, Len);

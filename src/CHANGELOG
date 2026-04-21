@@ -1,3 +1,6 @@
+20.04.2026
+- opt_TEMP_FOR_REGY, excluding the 'ldy #' register from the FOR loop
+
 19.04.2026
 - new unit SNAPPY
 - fix FASTMATH sqrt16
