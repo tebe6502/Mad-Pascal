@@ -40,6 +40,49 @@ begin
 
 
     if lda_a(i)	and									// lda					; 0
+       and_ora_eor(i+1) and								// and|ora|eor				; 1
+       sta_stack(i+2) and								// sta :STACKORIGIN			; 2
+       lda_a(i+3) and									// lda					; 3
+       and_ora_eor(i+4) and								// and|ora|eor				; 4
+       sta_stack(i+5) and								// sta :STACKORIGIN+STACKWIDTH		; 5
+       lda_stack(i+6) and								// lda :STACKORIGIN			; 6
+       add_sub(i+7) and									// add|sub				; 7
+       sta_val(i+8) and									// sta					; 8
+       lda_stack(i+9) and								// lda :STACKORIGIN+STACKWIDTH		; 9
+       adc_sbc(i+10) and								// adc|sbc				; 10
+       sta_val(i+11) then								// sta					; 11
+     if argMatch(i+2, i+6) and
+        argMatch(i+5, i+9) then     
+     begin
+
+      listing_tmp[0] := listing[i];
+      listing_tmp[1] := listing[i+1];
+      listing_tmp[2] := listing[i+7];
+      listing_tmp[3] := listing[i+8];
+      listing_tmp[4] := listing[i+3];
+      listing_tmp[5] := listing[i+4];
+      listing_tmp[6] := listing[i+10];
+      listing_tmp[7] := listing[i+11];
+      
+      listing[i]   := listing_tmp[0];
+      listing[i+1] := listing_tmp[1];
+      listing[i+2] := listing_tmp[2];
+      listing[i+3] := listing_tmp[3];
+      listing[i+4] := listing_tmp[4];
+      listing[i+5] := listing_tmp[5];
+      listing[i+6] := listing_tmp[6];
+      listing[i+7] := listing_tmp[7];
+  
+      listing[i+8] := '';
+      listing[i+9] := '';
+      listing[i+10]:= '';
+      listing[i+11]:= '';
+
+      exit(false);
+     end;
+
+
+    if lda_a(i)	and									// lda					; 0
        add_sub(i+1) and									// add|sub				; 1
        add_sub(i+2) and									// add|sub				; 2
        add_im_0(i+3) and								// add #$00				; 3
