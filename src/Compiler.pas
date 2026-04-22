@@ -13859,7 +13859,8 @@ begin
 
     end;
 
-    WITHTOK:
+
+    TTokenKind.WITHTOK:
     begin
 
       Inc(CodeSize);        // !!! aby dzialaly zagniezdzone WHILE
@@ -13900,9 +13901,10 @@ begin
 
     end;
 
+
     {$IFDEF WHILEDO}
 
-WHILETOK:
+    TTokenKind.WHILETOK:
     begin
 //    writeln(codesize,',',CodePosStackTop);
 

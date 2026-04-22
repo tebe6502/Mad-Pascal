@@ -206,6 +206,11 @@ end;
     Result := pos1(#9'lda :STACK', i);
   end;
 
+  function AND_STACK(const i: Integer): Boolean;
+  begin
+    Result := pos1(#9'and :STACK', i);
+  end;
+
   function STA_STACK(const i: Integer): Boolean;
   begin
     Result := pos1(#9'sta :STACK', i)
