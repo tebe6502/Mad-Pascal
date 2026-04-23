@@ -4,8 +4,10 @@ unit md5;
  @author: Free Pascal development team, Tomasz Biela (Tebe)
  @name: MD5
 
- @version: 1.2 (2025-09-24) MD5Print
-           1.1 (2022-09-28)
+ @version:
+ 1.3 (2026-04-25) [striped] K
+ 1.2 (2025-09-24) MD5Print
+ 1.1 (2022-09-28)
 
  @description:
  Implements a MD5 digest algorithm (RFC 1321)
@@ -85,6 +87,7 @@ s: array[0..63] of byte = (
 	4, 11, 16, 23,  4, 11, 16, 23,  4, 11, 16, 23,  4, 11, 16, 23,
 	6, 10, 15, 21,  6, 10, 15, 21,  6, 10, 15, 21,  6, 10, 15, 21 );
 
+[striped]
 K: array[0..63] of cardinal = (
 	$d76aa478, $e8c7b756, $242070db, $c1bdceee,
 	$f57c0faf, $4787c62a, $a8304613, $fd469501,
