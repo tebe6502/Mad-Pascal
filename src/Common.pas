@@ -216,6 +216,13 @@ procedure SetVarDataSize(const tokenIndex: TTokenIndex; const size: Integer);
 //  token: TToken;
 begin
   _VarDataSize := size;
+
+  if (size > $FFFF) then
+  begin
+    writeln('ERROR: SetVarDataSize: ', hexStr(size, 8));
+    RaiseHaltException(EHaltException.COMPILING_ABORTED);
+  end;
+
   // token := TokenAt(tokenIndex);
   // LogTrace(Format('SetVarDataSize: TokenIndex=%d: %s %s VarDataSize=%d',
   //  [tokenIndex, token.GetSourceFileLocationString, 'TODO' {*token.GetSpelling*}, _VarDataSize]));
