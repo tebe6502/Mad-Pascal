@@ -6798,7 +6798,7 @@ begin
 
       Push(0, ASVALUE, GetDataSize(ArrayIndexType));
 
-      GenerateBinaryOperation(PLUSTOK, TDataType.WORDTOK);
+      GenerateBinaryOperation(TTokenKind.PLUSTOK, TDataType.WORDTOK);
 
       VarType := TDataType.ARRAYTOK;
     end
@@ -8035,7 +8035,7 @@ begin
           // Evaluate actual parameters and push them onto the stack
 
 
-          //  writeln(IdentifierAt(IdentIndex).name,',', IdentifierAt(IdentIndex).kind,',',IdentifierAt(IdentIndex).Param[NumActualParams].DataType,',',IdentifierAt(IdentIndex).Param[NumActualParams].NumAllocElements,',',IdentifierAt(IdentIndex).Param[NumActualParams].AllocElementType ,'|',ActualParamType);
+          //  writeln(IdentifierAt(IdentIndex).name,',', IdentifierAt(IdentIndex).kind,',',IdentifierAt(IdentIndex).Param[NumActualParams].DataType,',',IdentifierAt(IdentIndex).Param[NumActualParams].NumAllocElements,',',IdentifierAt(IdentIndex).Param[NumActualParams].AllocElementType ,'|',ActualParamType,',',AllocElementType);
 
 
           if (ActualParamType in IntegerTypes) and
