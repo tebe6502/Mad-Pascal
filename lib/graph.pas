@@ -206,6 +206,9 @@ var
 	procedure PutPixel(x,y: smallint; color: byte); overload;
 	function Scanline(y: smallint): PByte;
 
+	procedure SetFillStyle(Pattern: byte; Color: byte);
+	procedure SetLineStyle(LineStyle: byte; Pattern: byte; Thickness: byte);
+
 
 implementation
 
@@ -213,6 +216,18 @@ var
 	Scanline_Width: byte;
 
 	CurrentX, CurrentY: word;
+
+
+procedure SetFillStyle(Pattern: byte; Color: byte);
+begin
+
+end;
+
+
+procedure SetLineStyle(LineStyle: byte; Pattern: byte; Thickness: byte);
+begin
+
+end;
 
 
 function Scanline(y: smallint): PByte;
