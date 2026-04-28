@@ -2766,9 +2766,9 @@ begin        // OptimizeASM
     OptFile.writeln( listing[i]);
   end;
 
- OptFile.writeln();
+ OptFile.writeln('');
  OptFile.writeln( StringOfChar('-', 64));
- OptFile.writeln();
+ OptFile.writeln('');
 
   {$ENDIF}
 

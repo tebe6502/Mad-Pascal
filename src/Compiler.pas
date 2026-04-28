@@ -6777,7 +6777,7 @@ begin
 
       Push(Integer(NumAllocElements_ * Size), ASVALUE, GetDataSize(ArrayIndexType));
 
-      GenerateBinaryOperation(MULTOK, ArrayIndexType);
+      GenerateBinaryOperation(TTokenKind.MULTOK, ArrayIndexType);
 
     end
     else
@@ -12479,7 +12479,7 @@ begin
                     end
                     else
                     begin
-                      IndirectionLevel := ASPOINTER;
+                      IndirectionLevel :=  ASPOINTER;
 
                       VarType := IdentifierAt(IdentIndex).DataType;
                     end;
