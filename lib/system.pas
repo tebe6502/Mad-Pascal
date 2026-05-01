@@ -250,8 +250,7 @@ var
 	procedure FillChar(var a; count: word; value: byte); assembler; register; overload; inline;
 	function FloatToStr(a: real): TString; stdcall; assembler;
 	procedure FreeMem(var p; size: word); assembler; register;
-	procedure GetMem(var p; size: word); assembler; register; overload;
-	function GetMem(size: word): pointer; assembler; register; overload;
+	function GetMem(size: word): pointer; assembler; register;
 	function HexStr(Value: cardinal; Digits: byte): TString; register; assembler;
 	function IsLetter(A: char): Boolean;
 	function IsDigit(A: char): Boolean;
@@ -2425,47 +2424,7 @@ begin
 end;
 
 
-procedure GetMem(var p; size: word); assembler; register; overload;
-(*
-@description:
-Getmem reserves Size bytes memory, and returns a pointer to this memory in p.
-
-@param: p - pointer
-@param: size
-*)
-asm
-	ldy #$00
-	lda :psptr
-	sta (P),y
-	clc
-	adc size
-	sta :psptr
-	iny
-	lda :psptr+1
-	sta (P),y
-	adc size+1
-	sta :psptr+1
-
-	cmp >$c000
-	bne @+
-	lda :psptr
-	cmp <$c000
-@
-	bcc @exit
-
-	@print #$45
-	@print #$52
-	@print #$52
-	@print #$20
-	lda #147		; Insufficient RAM
-	jsr @printBYTE._a
-	@printEOL
-	lda #$02
-	jmp @halt
-end;
-
-
-function GetMem(size: word): pointer; assembler; register; overload;
+function GetMem(size: word): pointer; assembler; register;
 (*
 @description:
 Getmem reserves Size bytes memory, and returns a pointer to this memory in Result.

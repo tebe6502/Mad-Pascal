@@ -7004,7 +7004,6 @@ begin
 
               i := CompileArrayIndex(i, IdentIndex, AllocElementType);
 
-
               if IdentifierAt(IdentIndex).DataType = TDataType.ENUMTOK then
                 NumAllocElements := 0
               else
@@ -7201,7 +7200,7 @@ begin
                     begin
 
                       //  writeln('1: ',IdentifierAt(IdentIndex).Name,',',IdentifierAt(IdentIndex).idType,',',IdentifierAt(IdentIndex).DataType,',',IdentifierAt(IdentIndex).AllocElementType,',',IdentifierAt(IdentIndex).NumAllocElements,'..',IdentifierAt(IdentIndex).NumAllocElements_,',',IdentifierAt(IdentIndex).PassMethod,',',DEREFERENCE,',',varpass,' o ',IdentifierAt(IdentIndex).isAbsolute);
-
+// SWAG
                       if (IdentifierAt(IdentIndex).DataType in [TDataType.RECORDTOK, TDataType.OBJECTTOK] + FileTypes) or
 {
 		         (VarPass and (IdentifierAt(IdentIndex).DataType = TDataType.POINTERTOK) and
@@ -9844,6 +9843,7 @@ begin
 
             i := CompileArrayIndex(i + 1, IdentIndex, AllocElementType);
 
+
             asm65(#9'lda :STACKORIGIN-1,x');
             asm65(#9'add' + StackVariable0);
             asm65(#9'sta :STACKORIGIN-1,x');
@@ -10370,13 +10370,24 @@ begin
 
                       end;
 
-
+// SWAG
                       if ValType = TDataType.ARRAYTOK then
                       begin
+
+			IndirectionLevel := ASPOINTER;
 
                         ValType := TDataType.POINTERTOK;
 
                         Push(0, ASPOINTER, GetDataSize(ValType), IdentIndex, 0);
+
+            		asm65(#9'lda :STACKORIGIN-1,x');
+            		asm65(#9'add' + StackVariable0);
+            		asm65(#9'sta :STACKORIGIN-1,x');
+            		asm65(#9'lda :STACKORIGIN-1+STACKWIDTH,x');
+            		asm65(#9'adc' + StackVariable1);
+            		asm65(#9'sta :STACKORIGIN-1+STACKWIDTH,x');
+
+	                a65(TCode65.subBX);
 
                       end
                       else
@@ -10431,6 +10442,12 @@ begin
 
 
                               i := CompileArrayIndex(i, GetIdentIndex(IdentifierAt(IdentIndex).Name + '.' + TokenAt(i).Name), AllocElementType);
+
+			if AllocElementType = TDataType.ARRAYTOK then begin
+
+			  writeln('a');
+
+			end;
 
                               Push(IdentifierAt(IdentIndex).Value, IndirectionLevel, GetDataSize(ValType), IdentIndex, IdentTemp and $ffff);
 
@@ -12153,6 +12170,14 @@ begin
 
               i := CompileArrayIndex(i, IdentIndex, VarType);
 
+
+			if VarType = TDataType.ARRAYTOK then begin
+
+			  writeln('b');
+
+			end;
+
+
               CheckTok(i + 1, CBRACKETTOK);
 
               Inc(i);
@@ -12299,6 +12324,13 @@ begin
 
                     i := CompileArrayIndex(i, IdentIndex, VarType);
 
+
+			if VarType = TDataType.ARRAYTOK then begin
+
+			  writeln('c');
+
+			end;
+
 		    if IdentifierAt(IdentIndex).AllocElementType in [TDataType.RECORDTOK, TDataType.OBJECTTOK] then VarType := TDataType.POINTERTOK;
 
                     CheckTok(i + 1, TTokenKind.CBRACKETTOK);
@@ -12327,6 +12359,14 @@ begin
                         IndirectionLevel := ASPOINTERTORECORDARRAYORIGIN;
 
                         i := CompileArrayIndex(i + 3, GetIdentIndex(IdentifierAt(IdentIndex).Name + '.' + TokenAt(i + 3).Name), VarType);
+
+
+			if VarType = TDataType.ARRAYTOK then begin
+
+			  writeln('d');
+
+			end;
+
 
                         CheckTok(i + 1, TTokenKind.CBRACKETTOK);
 
@@ -12370,11 +12410,27 @@ begin
                       //           Push(0, ASPOINTERTOARRAYORIGIN2, GetDataSize(VarType), IdentIndex, 0);
                     end;
 
+// SWAG
                     if VarType = TDataType.ARRAYTOK then
                     begin
+
                       IndirectionLevel := ASPOINTER;
+
                       VarType := TDataType.POINTERTOK;
+
+                      Push(0, ASPOINTER, GetDataSize(VarType), IdentIndex, 0);
+
+		      asm65(#9'lda :STACKORIGIN-1,x');
+            	      asm65(#9'add' + StackVariable0);
+            	      asm65(#9'sta :STACKORIGIN-1,x');
+            	      asm65(#9'lda :STACKORIGIN-1+STACKWIDTH,x');
+            	      asm65(#9'adc' + StackVariable1);
+            	      asm65(#9'sta :STACKORIGIN-1+STACKWIDTH,x');
+
+	              a65(TCode65.subBX);
+
                     end;
+
 
                     // label.field[index] -> label + field[index]
 
@@ -13326,25 +13382,52 @@ begin
         ResetOpty;
 }
 
+// SWAG
                           if j <> Integer(Elements(IdentTemp) * GetDataSize(IdentifierAt(IdentTemp).AllocElementType)) then
                           begin
 
-                            if (IdentifierAt(IdentIndex).NumAllocElements_ > 0) and
+                               //WriteLn(IdentifierAt(IdentIndex).Name,'/',IdentifierAt(IdentTemp).Name,',',
+			       //        IdentifierAt(IdentIndex).NumAllocElements_,',',IdentifierAt(IdentTemp).NumAllocElements,' | ',
+			       //        IdentifierAt(IdentIndex).NumAllocElements_,',',IdentifierAt(IdentTemp).NumAllocElements_);
+
+                            if (IdentifierAt(IdentIndex).NumAllocElements_ = 0) and	// tab[ ] :=
+			       (IdentifierAt(IdentIndex).NumAllocElements > 0) and
+                               ((IdentifierAt(IdentIndex).NumAllocElements = IdentifierAt(IdentTemp).NumAllocElements) or
+			       (IdentifierAt(IdentIndex).NumAllocElements = IdentifierAt(IdentTemp).NumAllocElements_)) then
+                            begin
+
+                              asm65(#9'lda ' + GetLocalName(IdentIndex));
+                              asm65(#9'sta @move.dst');
+                              asm65(#9'lda ' + GetLocalName(IdentIndex) + '+1');
+                              asm65(#9'sta @move.dst+1');
+
+                              asm65(#9'lda :STACKORIGIN,x');
+                              asm65(#9'sta @move.src');
+                              asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
+                              asm65(#9'sta @move.src+1');
+
+                              a65(TCode65.subBX);
+
+                              StopOptimization;
+                              ResetOpty;
+
+                              asm65(#9'lda <' + IntToStr(IdentifierAt(IdentIndex).NumAllocElements * GetDataSize(IdentifierAt(IdentIndex).AllocElementType)));
+                              asm65(#9'sta @move.cnt');
+                              asm65(#9'lda >' + IntToStr(IdentifierAt(IdentIndex).NumAllocElements * GetDataSize(IdentifierAt(IdentIndex).AllocElementType)));
+                              asm65(#9'sta @move.cnt+1');
+
+                              asm65(#9'jsr @move');
+
+			    end else
+
+                            if (IdentifierAt(IdentIndex).NumAllocElements_ > 0) and	// tab[ , ] :=
                                ((IdentifierAt(IdentIndex).NumAllocElements_ = IdentifierAt(IdentTemp).NumAllocElements) or
 			       (IdentifierAt(IdentIndex).NumAllocElements_ = IdentifierAt(IdentTemp).NumAllocElements_)) then
                             begin
 
-                              // WriteLn(TokenAt(k].line,',', IdentifierAt(IdentTemp).NumAllocElements_);
 
                               if IdentifierAt(IdentTemp).NumAllocElements_ = 0 then
                               begin
-
-                                asm65(#9'lda ' + GetLocalName(IdentIndex));
-                                asm65(#9'add :STACKORIGIN-1,x');
-                                asm65(#9'sta @move.dst');
-                                asm65(#9'lda ' + GetLocalName(IdentIndex) + '+1');
-                                asm65(#9'adc :STACKORIGIN-1+STACKWIDTH,x');
-                                asm65(#9'sta @move.dst+1');
 
                                 asm65(#9'lda ' + GetLocalName(IdentTemp));
                                 asm65(#9'sta @move.src');
@@ -13354,26 +13437,21 @@ begin
                               end
                               else
                               begin
-                                a65(TCode65.subBX);
 
-                                asm65(#9'lda ' + GetLocalName(IdentIndex));
-                                asm65(#9'add :STACKORIGIN-1,x');
-                                asm65(#9'sta @move.dst');
-                                asm65(#9'lda ' + GetLocalName(IdentIndex) + '+1');
-                                asm65(#9'adc :STACKORIGIN-1+STACKWIDTH,x');
-                                asm65(#9'sta @move.dst+1');
-
-                                asm65(#9'lda ' + GetLocalName(IdentTemp));
-                                asm65(#9'add' + StackVariable0);
+                                asm65(#9'lda :STACKORIGIN,x');
                                 asm65(#9'sta @move.src');
-                                asm65(#9'lda ' + GetLocalName(IdentTemp) + '+1');
-                                asm65(#9'adc' + StackVariable1);
+                                asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
                                 asm65(#9'sta @move.src+1');
 
                               end;
 
+                              asm65(#9'lda :STACKORIGIN-1,x');
+                              asm65(#9'sta @move.dst');
+                              asm65(#9'lda :STACKORIGIN-1+STACKWIDTH,x');
+                              asm65(#9'sta @move.dst+1');
+
                               a65(TCode65.subBX);
-                              a65(TCode65.subBX);
+			      a65(TCode65.subBX);
 
                               StopOptimization;
                               ResetOpty;
@@ -13388,7 +13466,7 @@ begin
                             end
                             else
                             begin
-
+{
                               //writeln('2: ',IdentifierAt(IdentIndex).NumAllocElements);
 
                               asm65(#9'lda ' + GetLocalName(IdentIndex));
@@ -13415,7 +13493,7 @@ begin
                               asm65(#9'sta @move.cnt+1');
 
                               asm65(#9'jsr @move');
-
+}
                             end;
 
                           end

@@ -240,6 +240,6 @@ END;  { decompression }
 
 initialization
 
-Getmem(Hash,Sizeof(Hashtable));
+Hash := Getmem(Sizeof(Hashtable));
 
 END.

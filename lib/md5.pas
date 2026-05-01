@@ -314,7 +314,7 @@ begin
 
   if IOResult < 128 then
   begin
-    GetMem(Buf, 256);
+    Buf := GetMem(256);
 
     repeat
 
