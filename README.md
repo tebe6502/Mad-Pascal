@@ -177,7 +177,7 @@ This text-mode windowing library has window controls and modern gadgets (widgets
 * [µSoukoban](https://github.com/zbyti/pikoban)
 * [Time Wizard](https://gitlab.com/amarok8bit/time-wizard)
 * [run-fox-run](https://gitlab.com/bocianu/run-fox-run)
-* [Robots Rumble](https://github.com/tebe6502/robotsrumble)
+* [Robots Rumble-VBXE](https://github.com/tebe6502/robotsrumble)
 * [neo-pas-template](https://gitlab.com/bocianu/neo-pas-template)
 * [neo-sandbox](https://gitlab.com/bocianu/neo-sandbox)
 * [neo-swimo](https://gitlab.com/bocianu/neo-swimo)
@@ -191,6 +191,7 @@ This text-mode windowing library has window controls and modern gadgets (widgets
 * [kara-t-rex](https://gitlab.com/bocianu/kara-t-rex)
 * [Minimum Spanning Tree](https://github.com/mgr-inz-rafal/atari_msp_test)
 * [Piranhas](https://gitlab.com/bocianu/3.14ranhas)
+* [Nurek](https://github.com/mgr-inz-rafal/nurek_madp)
 * [diagnostyka_serca](https://github.com/mgr-inz-rafal/diagnostyka_serca)
 * [Tetris-VBXE](https://github.com/tebe6502/Tetris-VBXE)
 
