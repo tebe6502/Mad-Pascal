@@ -4,6 +4,8 @@
 /*
 	CMC		RAM / ROM
 	CMCPLAY		RAM / ROM
+	TMC		RAM / ROM
+	TMCPLAY		RAM / ROM
 	DOSFILE		RAM / ROM
 	EXTMEM
 	LIBRARY		PORTB -> RAM
@@ -354,6 +356,40 @@ data
 	.print '$R CMCPLAY ',main.%%lab,'..',main.%%lab+len-1,', $FC..$FF'
 .endm
 
+
+/* ----------------------------------------------------------------------- */
+/* TMCPLAY
+/* ----------------------------------------------------------------------- */
+
+.macro	TMCPLAY (nam, lab)
+
+	org RESORIGIN
+
+len = .sizeof(_%%2)
+
+mcpy	ift (main.%%lab < $bc20)&&(main.%%lab+len >= $bc20)
+	mva #0 sdmctl
+	sta dmactl
+	eif
+
+	jsr sys.off
+
+	memcpy #data #main.%%lab #len
+
+	jmp sys.on
+data
+
+.local	_%%2, main.%%lab
+
+	.link 'atari\players\tmc_player_reloc.obx'
+
+.endl
+	ini mcpy
+
+	m@romfont main.%%lab, main.%%lab+len-1
+
+	.print '$R TMCPLAY ',main.%%lab,'..',main.%%lab+len-1,', $FA..$FF'
+.endm
 
 
 /* ----------------------------------------------------------------------- */
@@ -1241,6 +1277,121 @@ data	cmc_relocator %%1,main.%%lab
 	cmc_relocator %%1,main.%%lab	
  eif
  	.print '$R CMC     ',main.%%lab,'..',main.%%lab+len-6," %%1"
+.endm
+
+
+/* ----------------------------------------------------------------------- */
+
+/*
+  TMC111 Relocator
+
+  $0000..$001C	- bajty informacyjne
+  $001D		- musi byc tu zawsze spacja ($20)
+  $001E		- tempo, jest to wartosc o jeden mniejsza niz w CMC, MPT lub Delcie
+  $001F		- czestotliwosc odtwarzenia na ramke
+  $0020..$005F	- mlodsze bajty adresow instrumentow
+  $0060..$009F	- starsze bajty adresow instrumentow (jezeli po zORowaniu daja 0, to znaczy, ze dzwiek jest pusty)
+  $00A0..$011F	- mlodsze bajty adresow patternow
+  $0120..$019F	- starsze bajty adresow patternow
+
+  Example:
+		tmc_relocator 'file.tmc' , new_address
+*/
+
+.macro	tmc_relocator
+
+	.get :1						// wczytaj plik do bufora MADS'a
+
+	ift .wget[0] <> $FFFF
+	 ert 'Bad file format'
+	eif
+
+new_add	equ :2						// nowy adres modulu TMC
+
+old_add	equ .wget[2]					// stary adres modulu TMC
+
+	.def ?length = .wget[4]- old_add + 1		// dlugosc pliku TMC bez naglowka DOS'u
+
+	.put[2] = .lo(new_add)				// poprawiamy naglowek DOS'a
+	.put[3] = .hi(new_add)				// tak aby zawieral informacje o nowym
+
+	.put[4] = .lo(new_add + ?length - 1)		// adresie modulu TMC
+	.put[5] = .hi(new_add + ?length - 1)
+
+ofs	equ 6
+
+	.def fps = .get[ofs+$1f]			// liczba wywolana playera na ramke
+
+	?tmp = .get[ofs+$20] + .get[ofs+$60]<<8		// sprawdzamy adres pierwszego instrumentu
+
+	ift ?tmp = 0					// jesli adres = 0 tzn ze plik jest pusty
+	 ert 'Song is empty'
+	eif
+
+// instruments
+
+	.rept 64
+
+	?tmp = .get[ofs+$20+#] + .get[ofs+$60+#]<<8
+
+	ift ?tmp <> 0
+	?hlp = ?tmp - old_add + new_add
+
+	.put[ofs+$20+#] = .lo(?hlp)
+	.put[ofs+$60+#] = .hi(?hlp)
+	eif
+
+	.endr
+
+// patterns
+
+	.rept 128
+
+	?tmp = .get[ofs+$00a0+#] + .get[ofs+$0120+#]<<8
+
+	?hlp = ?tmp - old_add + new_add
+
+	.put[ofs+$00a0+#] = .lo(?hlp)
+	.put[ofs+$0120+#] = .hi(?hlp)
+
+	.endr
+
+// out new file
+
+	.sav [6] ?length				// zapisujemy zawartosc bufora MADS'a do pliku
+
+.endm
+
+
+/* ----------------------------------------------------------------------- */
+/* TMC
+/* ----------------------------------------------------------------------- */
+
+.macro	TMC (nam, lab)
+
+len = .filesize(%%1)
+
+	ert main.%%lab+len-6>$FFFF,'Memory overrun ',main.%%lab+len-6
+
+ ift main.%%lab+len-6 >= $c000
+ 	org RESORIGIN
+
+mcpy	jsr sys.off
+
+	memcpy #data #main.%%lab #len-6
+
+	jmp sys.on
+
+data	tmc_relocator %%1,main.%%lab
+
+	m@romfont main.%%lab, main.%%lab+len-6
+
+	ini mcpy
+ els
+	org main.%%lab
+	tmc_relocator %%1,main.%%lab	
+ eif
+ 	.print '$R TMC     ',main.%%lab,'..',main.%%lab+len-6," %%1",', call x ',fps
 .endm
 
 

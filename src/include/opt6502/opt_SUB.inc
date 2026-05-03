@@ -61,7 +61,7 @@ begin
     if (l = 3) and
        lda_a(i) and (iy(i) = false) and							// lda X 				; 0
        sub_im_1(i+1) and								// sub #$01				; 1
-       sta_a(i+2) and (iy(i+2) = false) then						// sta Y				; 2
+       sta_a(i+2) and (iy(i+2) = false) and (sta_bp_1(i+2) = false) then		// sta Y				; 2
       if (argMatch(i, i+2) = false) then
      begin
 

@@ -6757,20 +6757,9 @@ begin
       asm65(#9'sta' + StackVariable3);
     end;
 
-    if GetDataSize(ArrayIndexType) = 1 then
-    begin
-      ExpandParam(TDataType.WORDTOK, ArrayIndexType);
-      //      ArrayIndexType := WORDTOK;
-    end
-    else
-      ArrayIndexType := TDataType.WORDTOK;
+    ExpandParam(TDataType.WORDTOK, ArrayIndexType);
 
-    if (Size > 1) or (Elements(IdentIndex) > 256) or (Elements(IdentIndex) in [0, 1]) {or (NumAllocElements_ > 0)} then
-    begin
-      //        ExpandParam(WORDTOK, ArrayIndexType);
-      ArrayIndexType := TDataType.WORDTOK;
-    end;
-
+    ArrayIndexType := TDataType.WORDTOK;
 
     if NumAllocElements_ > 0 then
     begin
@@ -6857,18 +6846,9 @@ begin
         asm65(#9'sta' + StackVariable3);
       end;
 
-      if GetDataSize(ArrayIndexType) = 1 then
-      begin
-        ExpandParam(TDataType.WORDTOK, ArrayIndexType);
-        ArrayIndexType := TDataType.WORDTOK;
-      end
-      else
-        ArrayIndexType := TDataType.WORDTOK;
+      ExpandParam(TDataType.WORDTOK, ArrayIndexType);
 
-      //      if (Size > 1) or (Elements(IdentIndex) > 256) or (Elements(IdentIndex) in [0,1]) {or (NumAllocElements_ > 0)} then begin
-      //        ExpandParam(WORDTOK, ArrayIndexType);
-      //        ArrayIndexType := WORDTOK;
-      //      end;
+      ArrayIndexType := TDataType.WORDTOK;
 
       if IdentifierAt(IdentIndex).isStriped = False then GenerateIndexShift(IdentifierAt(IdentIndex).AllocElementType);
 
@@ -9843,6 +9823,7 @@ begin
 
             i := CompileArrayIndex(i + 1, IdentIndex, AllocElementType);
 
+// SWAG
 
             asm65(#9'lda :STACKORIGIN-1,x');
             asm65(#9'add' + StackVariable0);
@@ -12170,17 +12151,11 @@ begin
 
               i := CompileArrayIndex(i, IdentIndex, VarType);
 
-
-			if VarType = TDataType.ARRAYTOK then begin
-
-			  writeln('b');
-
-			end;
-
-
               CheckTok(i + 1, CBRACKETTOK);
 
               Inc(i);
+
+// SWAG
 
               asm65(#9'lda :STACKORIGIN-1,x');
               asm65(#9'add' + StackVariable0);

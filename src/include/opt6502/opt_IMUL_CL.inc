@@ -145,12 +145,13 @@ function imulCL_opt: Boolean;
      sta_eax(m+3) then									// sta :eax				; 3
   begin
 
+   s[x-1][1] := #9'mva #$00';
+   s[x-1][2] := '';
+   s[x-1][3] := '';
 
    case k of
 
     3: begin
-
-	s[x-1][1] := #9'mva #$00';
 
 	if lda_val(m) then
 	 s[x-1][0] := #9'mva #$00'
@@ -192,8 +193,6 @@ function imulCL_opt: Boolean;
 
 
     5: begin
-
-       	s[x-1][1] := #9'mva #$00';
 
 	if lda_val(m) then
 	 s[x-1][0] := #9'mva #$00'
@@ -238,8 +237,6 @@ function imulCL_opt: Boolean;
 
     6: begin
 
-       	s[x-1][1] := #9'mva #$00';
-
 	if lda_val(m) then
 	 s[x-1][0] := #9'mva #$00'
 	else
@@ -282,8 +279,6 @@ function imulCL_opt: Boolean;
 
 
     7: begin
-
-	s[x-1][1] := #9'mva #$00';
 
 	if lda_val(m) then
 	 s[x-1][0] := #9'mva #$00'
@@ -331,7 +326,6 @@ function imulCL_opt: Boolean;
     9: begin
 
 	s[x-1][0] := '';
-       	s[x-1][1] := #9'mva #$00';
 
 	listing[m+1] := #9'sta ' + GetARG(0, x-1);
 
@@ -366,7 +360,6 @@ function imulCL_opt: Boolean;
    10: begin
 
 	s[x-1][0] := '';
-       	s[x-1][1] := #9'mva #$00';
 
 	listing[m+1] := #9'sta ' + GetARG(0, x-1);
 
@@ -400,8 +393,6 @@ function imulCL_opt: Boolean;
 
 
    24: begin
-
-       	s[x-1][1] := #9'mva #$00';
 
 	if lda_val(m) then
 	 s[x-1][0] := #9'mva #$00'

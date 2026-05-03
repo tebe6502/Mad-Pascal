@@ -52,7 +52,7 @@ begin
        adc_sbc(i+10) and								// adc|sbc				; 10
        sta_val(i+11) then								// sta					; 11
      if argMatch(i+2, i+6) and
-        argMatch(i+5, i+9) then     
+        argMatch(i+5, i+9) then
      begin
 
       listing_tmp[0] := listing[i];
@@ -63,7 +63,7 @@ begin
       listing_tmp[5] := listing[i+4];
       listing_tmp[6] := listing[i+10];
       listing_tmp[7] := listing[i+11];
-      
+
       listing[i]   := listing_tmp[0];
       listing[i+1] := listing_tmp[1];
       listing[i+2] := listing_tmp[2];
@@ -72,7 +72,7 @@ begin
       listing[i+5] := listing_tmp[5];
       listing[i+6] := listing_tmp[6];
       listing[i+7] := listing_tmp[7];
-  
+
       listing[i+8] := '';
       listing[i+9] := '';
       listing[i+10]:= '';
@@ -230,9 +230,17 @@ begin
        sta_a(i+2) and (iy(i+2) = false) and (sta_bp_1(i+2) = false) then		// sta Y				; 2
      if (argMatch(i, i+2) = false) then
      begin
-	listing[i]   := #9'ldy '+GetARG(i);
+
+       if lda_im(i) then begin
+	p := GetBYTE(i);
+
+	listing[i]   := #9'lda #' + HexByte(byte(p+1));
+	listing[i+1] := '';
+       end else begin
+	listing[i]   := #9'ldy ' + GetARG(i);
 	listing[i+1] := #9'iny';
-	listing[i+2] := #9'sty '+GetARG(i+2);
+	listing[i+2] := #9'sty ' + GetARG(i+2);
+       end;
 
 	exit(false);
      end;
