@@ -4,12 +4,12 @@ unit zx0;
 * @author: Einar Saukas, Daniel Serpell, Krzysztof 'XXL' Dudek, Tomasz 'Tebe' Biela
 * @name: ZX0 decompression unit
 *
-* @version: 1.2
+* @version: 1.3
 *
 * @description:
 * ZX0 decompressor
 *
-* zx0.exe input_filename output_filename
+* zx0.exe -f -c input_filename output_filename
 *
 * <https://github.com/einar-saukas/ZX0>
 *
@@ -24,7 +24,7 @@ unZX0
 
 interface
 
-	procedure unZX0f(inputPointer, outputPointer: pointer); assembler; register; overload;
+//	procedure unZX0f(inputPointer, outputPointer: pointer); assembler; register; overload;
 	procedure unZX0(inputPointer, ZX0_OUTPUT: pointer); assembler; register; overload;
 	procedure unZX0(fnam: PString; outputPointer: pointer); register; overload;
 
@@ -395,7 +395,8 @@ to_exit       ldx #0
 end;
 
 
-procedure unZX0f(inputPointer, outputPointer: pointer); assembler; register; overload;
+
+//procedure unZX0f(inputPointer, outputPointer: pointer); assembler; register; overload;
 (*
 @description:
 ZX0 decompressor Daniel Serpell
@@ -404,6 +405,7 @@ zx0 -2 input.bin output.zx0
 @param: inputPointer - source data address, :EDX
 @param: ZX0_OUTPUT   - destination data address, :ECX
 *)
+{
 asm
 ; De-compressor for ZX0 files
 ; ---------------------------
@@ -560,5 +562,6 @@ to_exit       ldx #0
 @sp           equ *-1
 
 end;
+}
 
 end.

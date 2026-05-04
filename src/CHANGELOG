@@ -1,3 +1,19 @@
+03.05.2026
+- unit TMC
+
+01.05.2026
+- SYSTEM: GetMem(pointer, size) removed as potentially dangerous; GetMem(size) is the most reliable
+
+25.04.2026
+- fix type punning
+
+20.04.2026
+- opt_TEMP_FOR_REGY, excluding the 'ldy #' register from the FOR loop
+
+19.04.2026
+- new unit SNAPPY
+- fix FASTMATH sqrt16
+
 14.03.2026
 - const [striped] array
 

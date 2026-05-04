@@ -999,7 +999,7 @@ begin
        ldy(i+5) and										// ldy					; 5
        lda_stack(i+6) and									// lda :STACKORIGIN			; 6
        STA_BP2_Y(i+7) and									// sta (:bp2),y				; 7
-       iny(i+8) and										// iny					; 8	
+       iny(i+8) and										// iny					; 8
        lda_stack(i+9) and									// lda :STACKORIGIN+STACKWIDTH		; 9
 //       STA_BP2_Y(i+10) and									// sta (:bp2),y				; 10
        (iny(i+11) = false) then									//~iny					; 11
@@ -1690,8 +1690,16 @@ begin
        adc_sbc_im_0(i+6) and									// adc|sbc #$00				; 6
        sta_a(i+7) then										// sta					; 7
       begin
+	//listing[i+1] := '';
 
-	listing[i+1] := '';
+        p := i + 1;
+
+	while rol_stack(p) do begin
+
+	  listing[p] := '';
+	  dec(p, 2);
+
+	end;
 
 	exit(false);
       end;
@@ -1708,7 +1716,6 @@ begin
        adc_sbc_im_0(i+6) and									// adc|sbc #$00				; 6
        sta_a(i+7) then										// sta					; 7
       begin
-
 	listing[i] := '';
 
 	exit(false);

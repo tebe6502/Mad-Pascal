@@ -1217,7 +1217,6 @@ end;
 
   begin      // OptimizeAssignment
 
-
     repeat until PeepholeOptimization;
     DebugCall('OptimizeASM:OptimizeAssignment.PeepholeOptimization', ListingToString(listing));
     while RemoveUnusedSTACK do repeat until PeepholeOptimization;
@@ -2766,9 +2765,9 @@ begin        // OptimizeASM
     OptFile.writeln( listing[i]);
   end;
 
- OptFile.writeln();
+ OptFile.writeln('');
  OptFile.writeln( StringOfChar('-', 64));
- OptFile.writeln();
+ OptFile.writeln('');
 
   {$ENDIF}
 

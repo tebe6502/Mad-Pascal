@@ -326,7 +326,7 @@ begin
 
   if IOResult = 1 then		// PC -> IORESULT=0 ; ATARI -> IORESULT = 1
   begin
-    GetMem(Buf, BufSize);
+    Buf := GetMem(BufSize);
     repeat
       BlockRead(F, Buf^, Bufsize, Count);
 

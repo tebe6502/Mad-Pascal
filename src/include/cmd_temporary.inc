@@ -169,6 +169,11 @@ end;
     Result := pos1(#9'sty ', i)
   end;
 
+  function STZ(const i: Integer): Boolean;
+  begin
+    Result := pos1(#9'stz ', i)
+  end;
+
   function ADD(const i: Integer): Boolean;
   begin
     Result := pos1(#9'add ', i)
@@ -199,6 +204,11 @@ end;
   function LDA_STACK(const i: Integer): Boolean;
   begin
     Result := pos1(#9'lda :STACK', i);
+  end;
+
+  function AND_STACK(const i: Integer): Boolean;
+  begin
+    Result := pos1(#9'and :STACK', i);
   end;
 
   function STA_STACK(const i: Integer): Boolean;

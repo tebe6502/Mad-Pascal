@@ -8,7 +8,7 @@ uses Classes, SysUtils, CommonTypes, CompilerTypes, DataTypes, FileIO, Memory, S
   Targets, Tokens;
 
 const
-  title = '1.7.6-Test';
+  title = '1.7.8';
 
 
 
@@ -216,6 +216,13 @@ procedure SetVarDataSize(const tokenIndex: TTokenIndex; const size: Integer);
 //  token: TToken;
 begin
   _VarDataSize := size;
+
+  if (size > $FFFF) then
+  begin
+    writeln('ERROR: SetVarDataSize: ', hexStr(size, 8));
+    RaiseHaltException(EHaltException.COMPILING_ABORTED);
+  end;
+
   // token := TokenAt(tokenIndex);
   // LogTrace(Format('SetVarDataSize: TokenIndex=%d: %s %s VarDataSize=%d',
   //  [tokenIndex, token.GetSourceFileLocationString, 'TODO' {*token.GetSpelling*}, _VarDataSize]));

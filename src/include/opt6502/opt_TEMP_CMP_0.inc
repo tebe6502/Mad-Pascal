@@ -8,6 +8,37 @@ var p: integer;
 begin
 
 
+    if ldy_1(2) and										// ldy #1		; 2
+       lda(3) and										// lda			; 3
+       cmp_im_0(4) and										// cmp #$00		; 4
+       beq_a(5) and										// beq @+		; 5
+       dey(6) and										// dey			; 6
+       lab_a(7) and										//@			; 7
+       sty_stack(8) and										// sty :STACKORIGIN	; 8
+       ldy_1(9) and										// ldy #1		; 9
+       lda(10) and										// lda			; 10
+       cmp_im_0(11) and										// cmp #$00		; 11
+       beq_a(12) and										// beq @+		; 12
+       dey(13) and										// dey			; 13
+       lab_a(14) and										//@			; 14
+       tya(15) and										// tya			; 15
+       and_stack(16) then									// and :STACKORIGIN	; 16
+     if argMatch(8, 16) then
+     begin
+      TemporaryBuf[16] := '~';
+
+      TemporaryBuf[11] := #9'ora ' + GetARG(3);
+
+      TemporaryBuf[2] := '~';
+      TemporaryBuf[3] := '~';
+      TemporaryBuf[4] := '~';
+      TemporaryBuf[5] := '~';
+      TemporaryBuf[6] := '~';
+      TemporaryBuf[7] := '~';
+      TemporaryBuf[8] := '~';
+     end;
+
+
     if (cmp_im_0(2) or lda(2)) and (IFTMP(2) = false) and					// lda|cmp #$00		; 2	~lda IFTMP_
        jne_l(3) and										// jne l_		; 3
        (lab_l(4) = false) then									//~l_xxxx		; 4

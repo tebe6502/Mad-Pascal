@@ -914,7 +914,16 @@ begin
        (adc_sbc(p+5) = false) then							//~adc|sbc				; p+5
      if argMatch(p-3, p+3) then
       begin
-	listing[p-3] := '';
+	//listing[p-3] := '';
+
+	q := p - 3;
+
+	while rol_stack(q) do begin
+
+	  listing[q] := '';
+	  dec(q, 2);
+
+	end;
 
 	listing[p+1] := '';
 	listing[p+2] := '';
@@ -941,7 +950,16 @@ begin
        (adc_sbc(p+5) = false) then							//~adc|sbc				; p+5
      if argMatch(p-3, p+3) then
       begin
-	listing[p-3] := '';
+	//listing[p-3] := '';
+
+	q := p - 3;
+
+	while rol_stack(q) do begin
+
+	  listing[q] := '';
+	  dec(q, 2);
+
+	end;
 
 	listing[p+1] := '';
 	listing[p+2] := '';
@@ -955,20 +973,30 @@ begin
       end;
 
 
-{
     if (p > 2) and
-       rol_stack(p-3) and								// rol :STACKORIGIN+STACKWIDTH		; p-3		+-BYTE
-       asl_a(p-2) and									// asl @				; p-2
+       asl_a(p-3) and									// asl @				; p-3		+-BYTE
+       rol_stack(p-2) and								// rol :STACKORIGIN+STACKWIDTH+?	; p-2
        add_sub_stack(p-1) and								// add|sub :STACKORIGIN			; p-1
 											// sta :STACKORIGIN			; p
-       lda_a(p+1) and									// lda					; p+1
+       lda_stack(p+1) and								// lda :STACKORIGIN+STACKWIDTH		; p+1
        adc_sbc(p+2) and									// adc|sbc				; p+2
        sta_stack(p+3) and								// sta :STACKORIGIN+STACKWIDTH		; p+3
 											// 					; p+4
        (adc_sbc(p+5) = false) then							//~adc|sbc				; p+5
-     if (argMatch(p-3, p) = false) then
+     if (argMatch(p-2, p-1) = false) and
+        (argMatch(p-2, p+1) = false) and
+        (argMatch(p-2, p+2) = false) then
       begin
-      	listing[p-3] := '';
+      	//listing[p-2] := '';
+
+	q := p - 2;
+
+	while rol_stack(q) do begin
+
+	  listing[q] := '';
+	  dec(q, 2);
+
+	end;
 
 	listing[p+1] := '';
 	listing[p+2] := '';
@@ -980,7 +1008,44 @@ begin
 
 	Result:=false; Break;
       end;
-}
+
+
+    if (p > 3) and
+       asl_a(p-4) and									// asl @				; p-4		+-BYTE
+       rol_stack(p-3) and								// rol :STACKORIGIN+STACKWIDTH+?	; p-3
+       add_sub_im(p-2) and								// add|sub #				; p-2
+       add_sub_stack(p-1) and								// add|sub :STACKORIGIN			; p-1
+											// sta :STACKORIGIN			; p
+       lda_stack(p+1) and								// lda :STACKORIGIN+STACKWIDTH		; p+1
+       adc_sbc(p+2) and									// adc|sbc				; p+2
+       sta_stack(p+3) and								// sta :STACKORIGIN+STACKWIDTH		; p+3
+											// 					; p+4
+       (adc_sbc(p+5) = false) then							//~adc|sbc				; p+5
+     if (argMatch(p-3, p-1) = false) and
+        (argMatch(p-3, p+1) = false) and
+        (argMatch(p-3, p+2) = false) then
+      begin
+      	//listing[p-3] := '';
+
+	q := p - 3;
+
+	while rol_stack(q) do begin
+
+	  listing[q] := '';
+	  dec(q, 2);
+
+	end;
+
+	listing[p+1] := '';
+	listing[p+2] := '';
+	listing[p+3] := '';
+
+	listing[i+3] := '';
+	listing[i+4] := '';
+	listing[i+5] := '';
+
+	Result:=false; Break;
+      end;
 
 
     if (p > 1) and

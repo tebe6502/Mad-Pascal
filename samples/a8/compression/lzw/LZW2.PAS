@@ -270,7 +270,7 @@ VAR
 BEGIN
 
   FOR I:=0 TO High(Rules) DO
-   GetMem(Rules[I], sizeof(RULEtag));
+   Rules[I] := GetMem(sizeof(RULEtag));
    
 
   Prefix := Input;

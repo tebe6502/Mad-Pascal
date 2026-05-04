@@ -125,12 +125,13 @@ begin
         // WriteLn('DEBUG: ', res.resName, ',', res.resType, ',', res.resFile);
 
         if (res.resType = 'RCDATA') or (res.resType = 'RCASM') or (res.resType = 'DOSFILE') or
-          (res.resType = 'RELOC') or (res.resType = 'RMT') or (res.resType = 'MPT') or
-          (res.resType = 'CMC') or (res.resType = 'RMTPLAY') or (res.resType = 'RMTPLAY2') or
-          (res.resType = 'RMTPLAYV') or (res.resType = 'MPTPLAY') or (res.resType = 'CMCPLAY') or
-          (res.resType = 'EXTMEM') or (res.resType = 'XBMP') or (res.resType = 'SAPR') or
-          (res.resType = 'SAPRPLAY') or (res.resType = 'PP') or (res.resType = 'LIBRARY') or
-          (res.resType = 'MD1PLAY') or (res.resType = 'MD1') then
+           (res.resType = 'RELOC') or
+	   (res.resType = 'RMT') or (res.resType = 'MPT') or (res.resType = 'CMC') or (res.resType = 'TMC') or
+	   (res.resType = 'RMTPLAY') or (res.resType = 'RMTPLAY2') or (res.resType = 'RMTPLAYV') or
+	   (res.resType = 'MPTPLAY') or (res.resType = 'CMCPLAY') or (res.resType = 'TMCPLAY') or
+           (res.resType = 'EXTMEM') or (res.resType = 'XBMP') or (res.resType = 'SAPR') or
+           (res.resType = 'SAPRPLAY') or (res.resType = 'PP') or (res.resType = 'LIBRARY') or
+           (res.resType = 'MD1PLAY') or (res.resType = 'MD1') then
 
         else
           Error(NumTok, TMessage.Create(TErrorCode.UndefinedResourceType,

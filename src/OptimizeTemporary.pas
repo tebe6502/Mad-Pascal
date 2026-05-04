@@ -84,7 +84,7 @@ var
 	   mwy(i) or
 	   _IF(i) or
            (pos(#9'.LOCAL ', TemporaryBuf[i]) > 0) or
-           (pos(#9'@print', TemporaryBuf[i]) > 0) then Result:=true else Result:=false;
+           (pos(#9'@', TemporaryBuf[i]) > 0) then Result:=true else Result:=false;
   end;
 
 
@@ -194,6 +194,7 @@ var
   {$i include/opt6502/opt_TEMP_WHILE.inc}
   {$i include/opt6502/opt_TEMP_FOR.inc}
   {$i include/opt6502/opt_TEMP_FORDEC.inc}
+  {$i include/opt6502/opt_TEMP_FOR_REGY.inc}
   {$i include/opt6502/opt_TEMP_IMUL_CX.inc}
   {$i include/opt6502/opt_TEMP_IFTMP.inc}
   {$i include/opt6502/opt_TEMP_ORD.inc}
@@ -226,6 +227,7 @@ end;
   opt_TEMP_WHILE;
   opt_TEMP_FORDEC;
   opt_TEMP_FOR;
+  opt_TEMP_FOR_REGY;
   opt_TEMP_X;
   opt_TEMP_EAX;
   opt_TEMP_JMP;
