@@ -15,10 +15,10 @@ rem Ensure the current version is compiled.
 call %MP_FOLDER%\src\Makefile.bat
 
 set MP_EXE_PATH=%MP_FOLDER%\bin\windows_x86_64\mp.exe
-rem For 1.7.4
+rem For reference in the reference folder
 rem set MP_REFERENCE_EXE_PATH= %MP_REFERECE_FOLDER%\bin\windows_x86_64\mp.exe
-rem For 1.7.5-master
-set MP_REFERENCE_EXE_PATH= %MP_FOLDER%\bin\windows_x86_64\origin\mp.exe
+rem For reference in the same main folder
+set MP_REFERENCE_EXE_PATH=%MP_FOLDER%\bin\windows\mp.exe
 
 MakeMadPascal.exe -allThreads -allFiles -mpFolderPath .\.. -compileReference -compile -compare -openResults ^
 -mpExePath          %MP_EXE_PATH% ^
