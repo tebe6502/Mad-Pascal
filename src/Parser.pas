@@ -15,6 +15,7 @@ function CompileConstExpression(i: TTokenIndex; out ConstVal: Int64; out ConstVa
   const VarType: TDataType = TDataType.INTEGERTOK; const Err: Boolean = False; const War: Boolean = True): TTokenIndex;
 
 function CompileConstTerm(i: TTokenIndex; out ConstVal: Int64; out ConstValType: TDataType): TTokenIndex;
+function CompileConstFactor(i: TTokenIndex; out ConstVal: Int64; out ConstValType: TDataType): TTokenIndex;
 
 function DefineIdent(const tokenIndex: TTokenIndex; Name: TIdentifierName; Kind: TTokenKind;
   DataType: TDataType; NumAllocElements: Cardinal; AllocElementType: TDataType; Data: Int64;
