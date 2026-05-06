@@ -10534,13 +10534,12 @@ begin
                       resetOPTY;
                     end;
 
-
+// xxxxxxxxxxx
                     i := CompileConstTerm(i, ConstVal, ValType);
-
-                    if isError then
+// xxxxxxxxxxx
+                    if isError {or (_isVarExpr and _isConst)} then
                     begin
                       i := j;
-
 
                       if (IdentifierAt(IdentIndex).PassMethod = TParameterPassingMethod.VARPASSING) and
                          (IdentifierAt(IdentIndex).NumAllocElements = 0) then
@@ -11267,6 +11266,9 @@ begin
 
   end;
 
+
+  _isVarExpr := true;
+
   while TokenAt(j + 1).Kind in [TTokenKind.MULTOK, TTokenKind.DIVTOK, TTokenKind.MODTOK,
       TTokenKind.IDIVTOK, TTokenKind.SHLTOK, TTokenKind.SHRTOK, TTokenKind.ANDTOK] do
   begin
@@ -11348,6 +11350,8 @@ begin
     j := k;
   end;
 
+ _isVarExpr:=false;
+
   Result := j;
 end;  //CompileTerm
 
@@ -11363,7 +11367,8 @@ var
   RightValType: TDataType;
 begin
 
-  if TokenAt(i).Kind in [TTokenKind.PLUSTOK, TTokenKind.MINUSTOK] then j := i + 1
+  if TokenAt(i).Kind in [TTokenKind.PLUSTOK, TTokenKind.MINUSTOK] then
+    j := i + 1
   else
     j := i;
 

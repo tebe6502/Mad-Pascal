@@ -381,7 +381,7 @@ begin
     fl := ToSingle(ftmp);
     fl_ := ToSingle(ftmp_);
 
-    fl := fl + fl_;
+    fl := fl - fl_;
 
     ftmp := ToTFloat(fl);
 

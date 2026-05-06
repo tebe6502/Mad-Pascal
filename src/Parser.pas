@@ -1522,9 +1522,11 @@ begin
   ConstValType := TDataType.UNTYPETOK;
   Result := i;
 
-  if TokenAt(i).Kind in [TTokenKind.PLUSTOK, TTokenKind.MINUSTOK] then j := i + 1
+  if TokenAt(i).Kind in [TTokenKind.PLUSTOK, TTokenKind.MINUSTOK] then
+    j := i + 1
   else
     j := i;
+
   j := CompileConstTerm(j, ConstVal, ConstValType);
 
   if isError then exit;
