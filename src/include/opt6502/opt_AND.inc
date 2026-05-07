@@ -118,10 +118,10 @@ begin
      end;
 
 
-    if (listing[i+1] = #9'and #$FF') and							// and #$FF				; 1
+    if and_im_ff(i+1) and									// and #$FF				; 1
 
        lda_a(i) and										// lda 					; 0
-//       (listing[i+1] = #9'and #$FF') and							// and #$FF				; 1
+//     and_im_ff(i+1) and									// and #$FF				; 1
        sta_a(i+2) then										// sta 					; 2
      begin
 
@@ -136,10 +136,10 @@ begin
      end;
 
 
-    if (listing[i+1] = #9'and #$FF') and							// and #$FF				; 1
+    if and_im_ff(i+1) and									// and #$FF				; 1
 
        and_ora_eor(i) and									// and|ora|eor				; 0
-//       (listing[i+1] = #9'and #$FF') and							// and #$FF				; 1
+//     and_im_ff(i+1) and									// and #$FF				; 1
        sta_a(i+2) then										// sta 					; 2
      begin
 	listing[i+1] := '';
@@ -200,13 +200,16 @@ begin
         for p:=0 to 3 do
 
 	if and_im_0(p*4+i+2) then begin
+
 	  listing[p*4+i+1] := '';
 	  listing[p*4+i+2] := '';
 	  listing[p*4+i+3] := '';
 
 	  listing[p*3+i+17] := '';
+
 	end else
-	if listing[p*4+i+2] = #9'and #$FF' then begin
+	if and_im_ff(p*4+i+2) then begin
+
 	  listing[p*4+i+1] := listing[p*3+i+16];
 	  listing[p*4+i+2] := #9'eor (:bp2),y';
 	  listing[p*4+i+3] := listing[p*3+i+18];
@@ -214,6 +217,7 @@ begin
 	  listing[p*3+i+16] := '';
 	  listing[p*3+i+17] := '';
 	  listing[p*3+i+18] := '';
+
 	end;
 
 
