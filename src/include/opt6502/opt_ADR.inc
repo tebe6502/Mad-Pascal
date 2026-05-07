@@ -1749,6 +1749,37 @@ begin
        end;
 
 
+    if (lda_adr(i+12) or sta_adr(i+13)) and						// lda adr.|				; 12
+											//         |sta adr.			; 13
+
+       add_sub_val(i) and (add_sub_im(i) = false) and					// add|sub				; 0
+       add_stack(i+1) and								// add :STACKORIGIN			; 1
+       sta_stack(i+2) and								// sta :STACKORIGIN			; 2
+       lda_stack(i+3) and								// lda :STACKORIGIN+STACKWIDTH		; 3
+       adc_im_0(i+4) and								// adc #$00				; 4
+       sta_stack(i+5) and		 						// sta :STACKORIGIN+STACKWIDTH		; 5
+
+       lda_stack(i+6) and								// lda :STACKORIGIN			; 6
+       add_im(i+7) and									// add #				; 7
+       tay(i+8) and									// tay					; 8
+       lda_stack(i+9) and								// lda :STACKORIGIN+STACKWIDTH		; 9
+       adc_im_0(i+10) and								// adc #$00				; 10
+       sta_stack(i+11) then		 						// sta :STACKORIGIN+STACKWIDTH		; 11
+     if argMatch(i+2, i+6) and
+        argMatch(i+5, i+9) then
+       begin
+	listing[i+3] := '';
+	listing[i+4] := '';
+	listing[i+5] := '';
+
+	listing[i+9] := '';
+	listing[i+10] := '';
+	listing[i+11] := '';
+
+	exit(false);
+       end;
+
+
 // 2D ARRAY [BYTE..BYTE -> 256b] of BYTE
 
     if (lda_adr_y(i+18) or sta_adr_y(i+19)) and						// lda adr.|				; 18

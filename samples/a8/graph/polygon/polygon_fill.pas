@@ -12,14 +12,14 @@ var
 begin
 
  for i:=0 to High(pt)-1 do
-  GetMem(pt[i], sizeof(TPoint));
+  pt[i] := GetMem(sizeof(TPoint));
 
  InitGraph(8);
  SetColor(1);
 
 
  // shape
- 
+
 {
  pt[0]^:=Point(63,17);
  pt[1]^:=Point(78, 47);
@@ -32,8 +32,8 @@ begin
  pt[8]^:=Point(29,70);
  pt[9]^:=Point(59,50);
  }
- 
- 
+
+
  pt[0].x:=63;
  pt[0].y:=17;
 
@@ -62,7 +62,7 @@ begin
  pt[8].y:=70;
 
  pt[9].x:=59;
- pt[9].y:=50; 
+ pt[9].y:=50;
 
  DrawPoly(10, pt);
 
