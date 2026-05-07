@@ -80,16 +80,17 @@ begin
      end;
 
 
-    if add_sub_AX_CX(i+6) and									// jsr addAX_CX|subAX_CX		; 6
+    if dex(i+7) and										// dex					; 7
+       add_sub_AX_CX(i+6) and									// jsr addAX_CX|subAX_CX		; 6
 
        inx(i) and										// inx					; 0
        mva(i+1) and										// mva  :STACKORIGIN,x			; 1
        inx(i+2) and										// inx					; 2
        mva(i+3) and										// mva  :STACKORIGIN,x			; 3
        mva(i+4) and										// mva  :STACKORIGIN+STACKWIDTH,x	; 4
-       mva(i+5) and 										// mva  :STACKORIGIN-1+STACKWIDTH,x	; 5
+       mva(i+5) then 										// mva  :STACKORIGIN-1+STACKWIDTH,x	; 5
 //     add_sub_AX_CX(i+6) and									// jsr addAX_CX|subAX_CX		; 6
-       dex(i+7) then										// dex					; 7
+//     dex(i+7) then										// dex					; 7
      if stack_0x(i+1) and
      	stack_0x(i+3) and
 	stack_1x(i+4) and
@@ -122,15 +123,16 @@ begin
      end;
 
 
-    if add_sub_AX_CX(i+5) and									// jsr addAX_CX|subAX_CX		; 5
+    if dex(i+6) and										// dex					; 6
+       add_sub_AX_CX(i+5) and									// jsr addAX_CX|subAX_CX		; 5
 
        mva(i) and (mva_im(i) = false) and							// mva  :STACKORIGIN,x			; 0
        mva(i+1) and 										// mva  :STACKORIGIN+STACKWIDTH,x	; 1
        inx(i+2) and  										// inx					; 2
        mva(i+3) and 										// mva  :STACKORIGIN,x			; 3
-       mva(i+4) and 										// mva  :STACKORIGIN+STACKWIDTH,x	; 4
+       mva(i+4) then 										// mva  :STACKORIGIN+STACKWIDTH,x	; 4
 //     add_sub_AX_CX(i+5) and									// jsr addAX_CX|subAX_CX		; 5
-       dex(i+6) then										// dex					; 6
+//     dex(i+6) then										// dex					; 6
      if stack_0x(i) and
      	stack_0x(i+3) and
      	stack_1x(i+1) and
@@ -160,15 +162,16 @@ begin
      end;
 
 
-    if add_sub_AX_CX(i+5) and									// jsr addAX_CX|subAX_CX		; 5
+    if dex(i+6) and										// dex					; 6
+       add_sub_AX_CX(i+5) and									// jsr addAX_CX|subAX_CX		; 5
     
        (mva(i) = false) and									//~mva					; 0
        mva(i+1) and 										// mva  :STACKORIGIN+STACKWIDTH,x	; 1
        inx(i+2) and  										// inx					; 2
        mva(i+3) and 										// mva  :STACKORIGIN,x			; 3
-       mva(i+4) and 										// mva  :STACKORIGIN+STACKWIDTH,x	; 4
+       mva(i+4) then 										// mva  :STACKORIGIN+STACKWIDTH,x	; 4
 //     add_sub_AX_CX(i+5) and									// jsr addAX_CX|subAX_CX		; 5
-       dex(i+6) then										// dex					; 6
+//     dex(i+6) then										// dex					; 6
      if	stack_0x(i+3) and
      	stack_1x(i+1) and
      	stack_1x(i+4) then
