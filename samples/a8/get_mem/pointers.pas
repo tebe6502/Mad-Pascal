@@ -16,8 +16,8 @@ var  My_Name : ^Name; (* My_Name is a pointer to a string[20] *)
      
 begin
 
-   GetMem(My_Name, sizeof(Name));
-   GetMem(My_Age, sizeof(Integer));
+   My_Name := GetMem(sizeof(Name));
+   My_Age := GetMem(sizeof(Integer));
 
    My_Name^ := 'John Q Doe';
    My_Age^ := 27;

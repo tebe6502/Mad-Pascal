@@ -827,8 +827,8 @@ begin
 
   c:=FloodFillStack[stackPointer];
 
-  a := hi(c);
-  b := lo(c);
+  a := c shr 16;
+  b := c and $FFFF;
 
   FloodFillExec;
 

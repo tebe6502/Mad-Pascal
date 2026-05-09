@@ -10534,10 +10534,10 @@ begin
                       resetOPTY;
                     end;
 
-// xxxxxxxxxxx
-                    i := CompileConstTerm(i, ConstVal, ValType);
-// xxxxxxxxxxx
-                    if isError {or (_isVarExpr and _isConst)} then
+
+		    i := CompileConstFactor(i, ConstVal, ValType);
+
+                    if isError then
                     begin
                       i := j;
 
@@ -11267,8 +11267,6 @@ begin
   end;
 
 
-  _isVarExpr := true;
-
   while TokenAt(j + 1).Kind in [TTokenKind.MULTOK, TTokenKind.DIVTOK, TTokenKind.MODTOK,
       TTokenKind.IDIVTOK, TTokenKind.SHLTOK, TTokenKind.SHRTOK, TTokenKind.ANDTOK] do
   begin
@@ -11349,8 +11347,6 @@ begin
 
     j := k;
   end;
-
- _isVarExpr:=false;
 
   Result := j;
 end;  //CompileTerm

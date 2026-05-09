@@ -110,7 +110,7 @@ var
 
   PROGRAMTOK_USE, INTERFACETOK_USE, LIBRARYTOK_USE, LIBRARY_USE, RCLIBRARY, OutputDisabled: Boolean;
 
-  _isConst, _isError, _isVarExpr: Boolean;
+  _isConst, _isError: Boolean;
 
 function IsConst: Boolean;
 function isError: Boolean;

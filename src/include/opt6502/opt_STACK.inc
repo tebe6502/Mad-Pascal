@@ -156,6 +156,17 @@ begin
      end;
 
 
+    if (ora_im_0(i+1) or and_im_ff(i+1)) and							// ora #$00|and #$FF			; 1
+
+      (lda_a(i) or tya(i)) and									// lda|tya				; 0
+//     ora_im_0(i+1) and									// ora #$00|and #$FF			; 1
+       sta_a(i+2) then										// sta					; 2
+     begin
+       listing[i+1] := '';
+       exit(false);
+     end;
+
+
     if lda_val(i) and										// lda					; 0	~:STACKORIGIN
        sta_stack(i+1) and									// sta :STACKORIGIN			; 1
        lda_val(i+2) and										// lda					; 2	~:STACKORIGIN
