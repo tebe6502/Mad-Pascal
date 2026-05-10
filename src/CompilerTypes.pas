@@ -25,8 +25,6 @@ type
     );
 
 
-
-
 const
 
   // Compiler parameters
@@ -38,9 +36,9 @@ const
   //  MAXTOKENS    = 32768;
   MAXPOSSTACK = 512;
   MAXIDENTS = 16384;
-  MAXBLOCKS = 16384;  // Maximum number of blocks
-  MAXPARAMS = 8;    // Maximum number of parameters for PROC, FUNC
-  MAXVARS = 256;    // Maximum number of parameters for VAR
+  MAXBLOCKS = 16384;   // Maximum number of blocks
+  MAXPARAMS = 8;       // Maximum number of parameters for PROC, FUNC
+  MAXVARS = 256;       // Maximum number of parameters for VAR
   MAXALLOWEDUNITS = 256;
   MAXDEFINES = 256;    // Max number of $DEFINEs
 
@@ -56,7 +54,7 @@ const
   ASVALUE = 0;
   ASPOINTER = 1;
   ASPOINTERTOPOINTER = 2;
-  ASPOINTERTOARRAYORIGIN = 3;  // + GenerateIndexShift
+  ASPOINTERTOARRAYORIGIN = 3;   // + GenerateIndexShift
   ASPOINTERTOARRAYORIGIN2 = 4;  // - GenerateIndexShift
   ASPOINTERTORECORD = 5;
   ASPOINTERTOARRAYRECORD = 6;
@@ -67,7 +65,7 @@ const
   ASARRAYORIGINOFPOINTERTORECORDARRAYORIGIN = 11;
   ASPOINTERTOARRAYRECORDTOSTRING = 12;
 
-  ASCHAR = 6;  // GenerateWriteString
+  ASCHAR = 6;       // GenerateWriteString
   ASBOOLEAN_ = 7;   // TODO Remove _, tempoary solution to prevent formatting
   ASREAL = 8;
   ASSHORTREAL = 9;
@@ -1254,7 +1252,7 @@ var
           for ChildIdentIndex := 1 to NumIdent do
           begin
             ChildIdentifier := IdentfierList.GetIdentifierAtIndex(ChildIdentIndex);
-            if { (ChildIdentifier.ProcAsBlockIndex > 0) and  } 
+            if { (ChildIdentifier.ProcAsBlockIndex > 0) and  }
 	       (ChildIdentifier.ProcAsBlockIndex = CallGraphNode.GetChild(ChildIndex)) then
             begin
               MarkNotDead(ChildIdentifier);
