@@ -9,12 +9,36 @@ implementation
 
 uses Asserts, DataTypes, Numbers, SysUtils;
 
-procedure AssertNumberEquals(actual, expected: TNumber);
+procedure AssertNumberEquals(const actual, expected: TNumber);
 begin
   Assert(actual = expected, Format('The actual number ''%x'' is not equal to the expected number ''%x''.',
     [actual, expected]));
+  WriteLn(Format('The actual number ''%x'' is equal to the expected number ''%x''.', [actual, expected]));
 end;
 
+
+procedure TestOperations(const ResultDataType: TDataType;
+  const Number1, Number2, AddResult, SubtractResult, MultiplyResult, DivideResult: TNumber);
+var
+  Result: TNumber;
+begin
+  Result := Add(ResultDataType, Number1, Number2);
+  AssertNumberEquals(Result, AddResult);
+  Result := Subtract(ResultDataType, Number1, Number2);
+  AssertNumberEquals(Result, SubtractResult);
+  Result := Multiply(ResultDataType, Number1, Number2);
+  AssertNumberEquals(Result, MultiplyResult);
+  Result := Divide(ResultDataType, Number1, Number2);
+  AssertNumberEquals(Result, DivideResult);
+end;
+
+procedure TestOperationsFor(const IntegerValue1, IntegerValue2: Int64);
+begin
+
+  TestOperations(TDataType.INTEGERTOK, IntegerValue1, IntegerValue2, IntegerValue1 + IntegerValue2,
+    IntegerValue1 - IntegerValue2, IntegerValue1 * IntegerValue2, System.Trunc(IntegerValue1 / IntegerValue2));
+
+end;
 
 procedure Test;
 const
@@ -27,8 +51,6 @@ var
 
   IntegerNumber1: TNumber;
   IntegerNumber2: TNumber;
-  IntegerResult: TNumber;
-  ExpectedIntegerResult: TNumber;
 
   SingleNumber1: TNumber;
   SingleNumber2: TNumber;
@@ -52,16 +74,10 @@ begin
   RealNumber1 := CastToReal(SingleNumber1);
   HalfSingleNumber1 := CastToHalfSingle(SingleNumber1);
 
+  TestOperationsFor(4, 2);
 
-  ResultDataType:=TDataType.INTEGERTOK;
-  IntegerResult := Add(ResultDataType, IntegerValue1, IntegerValue2);
-  AssertNumberEquals(IntegerResult, IntegerValue1 + IntegerValue2);
-  IntegerResult := Subtract(ResultDataType, IntegerValue1, IntegerValue2);
-  AssertNumberEquals(IntegerResult, IntegerValue1 - IntegerValue2);
-   IntegerResult := Multiply(ResultDataType, IntegerValue1, IntegerValue2);
-  AssertNumberEquals(IntegerResult, IntegerValue1 * IntegerValue2);
-  // IntegerResult := Divide(ResultDataType, IntegerValue1, IntegerValue2);
-  // AssertNumberEquals(IntegerResult, System.Trunc(IntegerValue1 / IntegerValue2));
+  TestOperationsFor(IntegerValue1, IntegerValue2);
+
 
   IntegerNumber2 := FromInt64(IntegerConstant2);
   SingleNumber2 := FromSingle(876.54321);
