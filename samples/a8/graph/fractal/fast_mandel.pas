@@ -3,8 +3,6 @@ program FastMandel;
 { Uses FF's enhanced block method to do the mandelbrot or julia set }
 { 8/16/90 - LK }
 
-{ The following checks are turned off for speed: }
-
 uses
   Crt, Graph;
 
@@ -92,7 +90,7 @@ begin
   If Count > MaxCount then
     GetMandel := 7
   else
-    GetMandel := count mod 7 + 1;
+    GetMandel := Count mod 7 + 1;
 end;
 
 
@@ -140,11 +138,12 @@ begin
   If Color <> -2 then
     PutABox(SX+AX-1,SY+AY-1,SX+AX-1+Size,SY+AY-1+Size,Color)
   else
-    begin   
-      DoSmallBlock (SX,SY,AX,AY,Size div 2);
-      DoSmallBlock (SX,SY,AX+Size div 2,AY,Size div 2);
-      DoSmallBlock (SX,SY,AX,AY+Size div 2,Size div 2);
-      DoSmallBlock (SX,SY,AX+Size div 2,AY+Size div 2,Size div 2); 
+    begin
+      Size:=Size shr 1;
+      DoSmallBlock (SX,SY,AX,AY,Size);
+      DoSmallBlock (SX,SY,AX+Size,AY,Size);
+      DoSmallBlock (SX,SY,AX,AY+Size,Size);
+      DoSmallBlock (SX,SY,AX+Size,AY+Size,Size); 
     end;
 
 end;
