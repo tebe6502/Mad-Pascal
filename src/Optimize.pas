@@ -1,5 +1,49 @@
 unit Optimize;
 
+{
+
+argMatch
+ASM65Internal
+Expand
+GetARG
+GetBYTE
+GetCMD
+GetDWORD
+GetOptyBP2
+GetSourceFileLine
+GetSourceFileName
+GetString
+GetStringLast
+GetTRIPLE
+GetWORD
+IFDEF_MUL16
+IFDEF_MUL8
+index
+Initialize
+IsASM65BufferEmpty
+LabelIsUsed
+LDA_STA_ADR
+LDA_STA_BP
+ListingToString
+onBreak
+OptimizeRelation
+PeepholeOptimization
+PeepholeOptimization_STA
+Rebuild
+RemoveUnusedSTACK
+ResetForTmp
+ResetOpty
+SetOptyA
+SetOptyBP2
+SetOptyY
+SKIP
+StartOptimization
+UNUSED_A
+WriteInstruction
+WriteOut
+
+}
+
 // TODO JAC! Use "array of const" for debugger output, incl. callback function for formatting TListing etc.
 // See https://forum.lazarus.freepascal.org/index.php?topic=61986.0
 {$I Defines.inc}

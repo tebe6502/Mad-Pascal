@@ -218,6 +218,7 @@ if (pos('#for:dec', TemporaryBuf[10]) > 0) then begin
 end;
 }
 
+
   opt_TEMP_BOOLEAN_OR;
   opt_TEMP_ORD;
   opt_TEMP_CMP;
