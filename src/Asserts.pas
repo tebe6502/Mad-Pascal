@@ -5,7 +5,8 @@ interface
 uses SysUtils;
 
 procedure AssertEquals(actual, expected: String); overload;
-procedure AssertEquals(actual, expected: Longint); overload;
+procedure AssertEquals(actual, expected: Longint); overload;  // 32-bit
+procedure AssertEquals(actual, expected: Int64); overload; // 64-bit
 procedure AssertEquals(actual, expected: TStringArray); overload;
 
 implementation
@@ -18,6 +19,13 @@ end;
 
 
 procedure AssertEquals(actual, expected: Longint); overload;
+begin
+  Assert(actual = expected, Format('The actual value ''%d'' is not equal to the expected value ''%d''.',
+    [actual, expected]));
+end;
+
+
+procedure AssertEquals(actual, expected: Int64); overload;
 begin
   Assert(actual = expected, Format('The actual value ''%d'' is not equal to the expected value ''%d''.',
     [actual, expected]));
