@@ -1,8 +1,73 @@
 unit Compiler;
 
-interface
+{
+
+AbsoluteBasePointer
+asm65
+CheckForwardResolutions
+CompileActualParameters
+CompileAddress
+CompileArrayIndex
+CompileDataOrigin
+CompileExpression
+CompileFactor
+CompileMemoryWord
+CompileStaticData
+CompilerTitle
+CompileProgram
+CompileRecordDeclaration
+CompileResources
+CompileSimpleExpression
+CompileStatement
+CompileTerm
+ExpandExpression
+ExtractName
+FormalParameterList
+GenerateAsmLabels
+GenerateCaseEpilog
+GenerateCaseStatementEpilog
+GenerateCaseStatementProlog
+GenerateFileOpen
+GenerateForToDoEpilog
+GenerateForToDoProlog
+GenerateIfThenEpilog
+GenerateIndexShift
+GenerateLocal
+GenerateRepeatUntilEpilog
+GenerateRepeatUntilProlog
+GenerateWhileDoEpilog
+GenerateWhileDoProlog
+GetIdent
+GetIdentProc
+GetIdentResult
+GetLocalName
+GetOverloadName
+InfoAboutSize
+IsOptimizationActive
+LoadBP2
+NumActualParameters
+OptimizeCode
+Push
+ReadDataOpenArray
+RealTypeConversion
+RemoveFromSystemStack
+ResetOpty
+SaveData
+SaveToStaticDataSegment
+SetOptimizationActive
+StartOptimization
+StopOptimization
+TestIdentProc
+TestName
+TEvaluationContext.Create
+TEvaluationContext.GetConstantName
+TEvaluationContext.GetConstantValue
+
+}
 
 {$I Defines.inc}
+
+interface
 
 uses FileIO, CompilerTypes;
 
@@ -122,6 +187,10 @@ begin
 end;
 
 
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+
+
 procedure StartOptimization(const tokenIndex: TTokenIndex);
 begin
 
@@ -179,6 +248,10 @@ begin
 end;
 
 
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+
+
 function GetLocalName(IdentIndex: Integer; a: String = ''): String;
 begin
 
@@ -191,6 +264,10 @@ begin
     Result := a + IdentifierAt(IdentIndex).Name;
 
 end;
+
+
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 
 function ExtractName(IdentIndex: Integer; const a: String): String;
@@ -216,6 +293,10 @@ begin
     Result := copy(a, 1, a.IndexOf('.'));
 
 end;
+
+
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 
 function TestName(IdentIndex: Integer; a: String): Boolean;
@@ -280,14 +361,16 @@ begin
 
 
         for i := 1 to NumParams do
-          if (((Identifier.Param[i].DataType in UnsignedOrdinalTypes) and (Param[i].DataType in UnsignedOrdinalTypes)) and
-            (GetDataSize(Identifier.Param[i].DataType) >= GetDataSize(Param[i].DataType)))
+          if
+	    (((Identifier.Param[i].DataType in UnsignedOrdinalTypes) and (Param[i].DataType in UnsignedOrdinalTypes)) //and
+            {(GetDataSize(Identifier.Param[i].DataType) >= GetDataSize(Param[i].DataType))} )
             // .
-            or (((Identifier.Param[i].DataType in SignedOrdinalTypes) and (Param[i].DataType in SignedOrdinalTypes)) and
-            (GetDataSize(Identifier.Param[i].DataType) >= GetDataSize(Param[i].DataType)))
+            or (((Identifier.Param[i].DataType in SignedOrdinalTypes) and (Param[i].DataType in SignedOrdinalTypes)) //and
+            {(GetDataSize(Identifier.Param[i].DataType) >= GetDataSize(Param[i].DataType))} )
             // .
-            or (((Identifier.Param[i].DataType in SignedOrdinalTypes) and (Param[i].DataType in UnsignedOrdinalTypes)) and  // smallint > byte
-            (GetDataSize(Identifier.Param[i].DataType) >= GetDataSize(Param[i].DataType)))
+            or (((Identifier.Param[i].DataType in SignedOrdinalTypes) and (Param[i].DataType in UnsignedOrdinalTypes)) //and  // smallint > byte
+            {(GetDataSize(Identifier.Param[i].DataType) >= GetDataSize(Param[i].DataType))} )
+
             // .
             or ((Identifier.Param[i].DataType = Param[i].DataType) {and (Identifier.Param[i].AllocElementType = Param[i].AllocElementType)})
             // .
@@ -337,9 +420,9 @@ writeln('_C: ', Identifier.Name);
 }
 
             if (Identifier.Param[i].DataType = TDataType.UNTYPETOK) and
-              (Param[i].DataType = TDataType.POINTERTOK) and
-              (Identifier.Param[i].AllocElementType = TDataType.UNTYPETOK) and
-              (Param[i].AllocElementType <> TDataType.UNTYPETOK) and (Param[i].NumAllocElements > 0)
+               (Param[i].DataType = TDataType.POINTERTOK) and
+               (Identifier.Param[i].AllocElementType = TDataType.UNTYPETOK) and
+               (Param[i].AllocElementType <> TDataType.UNTYPETOK) and (Param[i].NumAllocElements > 0)
             {and (Identifier.Param[i].NumAllocElements = Param[i].NumAllocElements)} then
             begin
 {
@@ -352,7 +435,7 @@ writeln('_A: ', Identifier.Name);
 }
 
               if (Param[i].AllocElementType in [TDataType.OBJECTTOK, TDataType.RECORDTOK]) and
-                (Param[i].NumAllocElements_ = 0) then
+                 (Param[i].NumAllocElements_ = 0) then
 
               else
                 Inc(hits);
@@ -367,7 +450,7 @@ writeln('_A: ', Identifier.Name);
               begin
 
                 b := GetDataSize(Identifier.Param[i].DataType);  // required parameter type
-                k := GetDataSize(Param[i].DataType);      // type of parameter passed
+                k := GetDataSize(Param[i].DataType);             // type of parameter passed
 
                 //       writeln('+ ',Identifier.Name,' - ',b,',',k,',',4 - abs(b-k),' / ',Param[i].DataType,' | ',Identifier.Param[i].DataType);
 
@@ -385,7 +468,7 @@ writeln('_A: ', Identifier.Name);
               begin            // signed
 
                 b := GetDataSize(Identifier.Param[i].DataType);  // required parameter type
-                k := GetDataSize(Param[i].DataType);      // type of parameter passed
+                k := GetDataSize(Param[i].DataType);             // type of parameter passed
 
                 if Param[i].DataType in [TDataType.BYTETOK, TDataType.WORDTOK] then Inc(k);  // -> signed
 
@@ -406,8 +489,8 @@ writeln('_A: ', Identifier.Name);
 
 
             if (Identifier.Param[i].DataType = Param[i].DataType) and
-              (Identifier.Param[i].AllocElementType <> TDataType.UNTYPETOK) and
-              (Identifier.Param[i].AllocElementType = Param[i].AllocElementType) then
+               (Identifier.Param[i].AllocElementType <> TDataType.UNTYPETOK) and
+               (Identifier.Param[i].AllocElementType = Param[i].AllocElementType) then
 
             begin
 {
@@ -424,13 +507,13 @@ writeln('_D: ', Identifier.Name);
 
 
             if (Identifier.Param[i].DataType = Param[i].DataType) and
-              ((Identifier.Param[i].AllocElementType = Param[i].AllocElementType) or
-              ((Identifier.Param[i].AllocElementType = TDataType.UNTYPETOK) and
-              (Param[i].AllocElementType <> TDataType.UNTYPETOK) and
-              (Identifier.Param[i].NumAllocElements = Param[i].NumAllocElements)) or
-              ((Identifier.Param[i].AllocElementType <> TDataType.UNTYPETOK) and
-              (Param[i].AllocElementType = TDataType.UNTYPETOK) and
-              (Identifier.Param[i].NumAllocElements = Param[i].NumAllocElements))) then
+               ((Identifier.Param[i].AllocElementType = Param[i].AllocElementType) or
+               ((Identifier.Param[i].AllocElementType = TDataType.UNTYPETOK) and
+               (Param[i].AllocElementType <> TDataType.UNTYPETOK) and
+               (Identifier.Param[i].NumAllocElements = Param[i].NumAllocElements)) or
+               ((Identifier.Param[i].AllocElementType <> TDataType.UNTYPETOK) and
+               (Param[i].AllocElementType = TDataType.UNTYPETOK) and
+               (Identifier.Param[i].NumAllocElements = Param[i].NumAllocElements))) then
             begin
 {
 writeln('_B: ', Identifier.Name);
@@ -623,8 +706,7 @@ begin
 
         SetLength(l, k + 2);
 
-        addOverlay(Identifier.SourceFile.UnitIndex, Identifier.BlockIndex,
-          Identifier.isOverload);
+        addOverlay(Identifier.SourceFile.UnitIndex, Identifier.BlockIndex, Identifier.isOverload);
       end;
     end;
     block := Block.ParentBlock;
@@ -7274,7 +7356,7 @@ end;  //CompileAddress
 function NumActualParameters(i: TTokenIndex; IdentIndex: TIdentIndex; out NumActualParams: Integer): TParamList;
   (*----------------------------------------------------------------------------*)
   (* moze istniec wiele funkcji/procedur o tej samej nazwie ale roznej liczbie  *)
-  (* parametrow                      *)
+  (* parametrow                                                                 *)
   (*----------------------------------------------------------------------------*)
 var
   ActualParamType, AllocElementType: TDataType;
@@ -7313,7 +7395,8 @@ begin
 
   i := CompileAddress(i + 1, ActualParamType, AllocElementType);
 
-       end else}
+       end else
+}
 
       i := CompileExpression(i + 2, ActualParamType{, IdentifierAt(IdentIndex).Param[NumActualParams].DataType});
       // Evaluate actual parameters and push them onto the stack
@@ -7395,6 +7478,7 @@ end;  //NumActualParameters
 
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
+
 
 procedure RealTypeConversion(var ValType, RightValType: TDataType; castDataType: TDataType = TDataType.UNTYPETOK);
 begin
@@ -8759,7 +8843,8 @@ begin
       if IdentifierAt(IdentIndex).DataType = TDataType.STRINGPOINTERTOK then
       begin
         a65(TCode65.addBX);
-        asm65(#9'lda adr.' + GetLocalName(IdentIndex));
+
+	asm65(#9'lda adr.' + GetLocalName(IdentIndex));
         asm65(#9'sta' + StackVariable0);
 
         ValType := TDataType.BYTETOK;
@@ -11497,8 +11582,7 @@ end;  //CompileSimpleExpression
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 
-function CompileExpression(i: TTokenIndex; out ValType: TDataType;
-  VarType: TDataType = TDataType.INTEGERTOK): TTokenIndex;
+function CompileExpression(i: TTokenIndex; out ValType: TDataType; VarType: TDataType = TDataType.INTEGERTOK): TTokenIndex;
 var
   j, k: TTokenIndex;
   RightValType, ConstValType: TDataType;
@@ -11547,7 +11631,7 @@ begin
 
   ConstValRight := 0;
 
-  sLeft := False;    // stringLeft
+  sLeft := False;     // stringLeft
   sRight := False;    // stringRight
 
 
@@ -16117,7 +16201,7 @@ var
   function Value(dorig: Boolean = False; brackets: Boolean = False): String;
   const
     reg: array [1..3] of String = (':EDX', ':ECX', ':EAX');
-    // !!! kolejnosc edx, ecx, eax !!! korzysta z tego memmove, memset !!!
+    // !!! kolejnosc EDX, ECX, EAX !!! korzysta z tego memmove, memset !!!
   var
     v: Int64;
   begin
@@ -16338,8 +16422,7 @@ begin
             begin
               HeaFile.Close;
 
-              Error(IdentifierAt(IdentIndex).Libraries, 'Error: MADS header file ''' + fnam +
- ''' has invalid format.');
+              Error(IdentifierAt(IdentIndex).Libraries, 'Error: MADS header file ''' + fnam + ''' has invalid format.');
             end;
 
             if (txt.IndexOf('.@EXIT') < 0) and (txt.IndexOf('.@VARDATA') < 0) then      // skip '@.EXIT', '.@VARDATA'
@@ -17386,15 +17469,15 @@ begin
   case DataSize of
 
    2: begin
-       StaticStringData[NumStaticStrChars+i] := tmp[i*2];
-       StaticStringData[NumStaticStrChars+i+NumAllocElements] := tmp[i*2+1];
+       StaticStringData[NumStaticStrChars + i] := tmp[i * 2];
+       StaticStringData[NumStaticStrChars + i + word(NumAllocElements)] := tmp[i * 2 + 1];
       end;
 
    4: begin
-       StaticStringData[NumStaticStrChars+i] := tmp[i*4];
-       StaticStringData[NumStaticStrChars+i+NumAllocElements] := tmp[i*4+1];
-       StaticStringData[NumStaticStrChars+i+NumAllocElements*2] := tmp[i*4+2];
-       StaticStringData[NumStaticStrChars+i+NumAllocElements*3] := tmp[i*4+3];
+       StaticStringData[NumStaticStrChars + i] := tmp[i * 4];
+       StaticStringData[NumStaticStrChars + i + word(NumAllocElements)] := tmp[i * 4 + 1];
+       StaticStringData[NumStaticStrChars + i + word(NumAllocElements * 2)] := tmp[i * 4 + 2];
+       StaticStringData[NumStaticStrChars + i + word(NumAllocElements * 3)] := tmp[i * 4 + 3];
       end;
 
   end;
@@ -19705,7 +19788,9 @@ procedure CompileMemoryWord(const memory: TWordMemory; const index: Integer; var
 var
   Value: Word;
 begin
+
   Value := Memory[index];
+
   if (Value and $c000) = $8000 then
     tmp := tmp + ' <[DATAORIGIN+' + HexWord(Byte(Value) or Byte(memory[index + 1]) shl 8) + ']'
   else
