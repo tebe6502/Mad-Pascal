@@ -15,6 +15,7 @@ uses
   LanguageTest,
   MathEvaluateTest,
   MessagesTest,
+  NumbersTest,
   OptimizerTest,
   OptimizeTemporaryTest,
   StringUtilitiesTest,
@@ -29,6 +30,7 @@ begin
     DataTypesTest.Test;
     MathEvaluateTest.Test;
     MessagesTest.Test;
+    NumbersTest.Test;
     StringUtilitiesTest.Test;
     OptimizerTest.Test;
     OptimizeTemporaryTest.Test;
