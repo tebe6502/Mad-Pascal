@@ -2,7 +2,7 @@
 
 uses sprites;
 
-{$r soft.rc}
+{$r soft_12x21.rc}
 
 const
 	charset = $c000;
@@ -78,7 +78,7 @@ begin
  sprite2.ady:=2;
  sprite2.new:=true;
 
-{
+
  sprite3.bitmaps:=@spr2;
  sprite3.x:=10*4;
  sprite3.y:=24*8;
@@ -99,7 +99,7 @@ begin
  sprite5.adx:=1;
  sprite5.ady:=0;
  sprite5.new:=true;
-}
+
 
 
  color0[21]:=$12;	// change the colors of the last three rows of the playing field
@@ -140,11 +140,11 @@ begin
   moveSprites(sprite0);
   moveSprites(sprite1);
   moveSprites(sprite2);
-{
+
   moveSprites(sprite3);
   moveSprites(sprite4);
   moveSprites(sprite5);
-}
+
  end;
  
 end.
