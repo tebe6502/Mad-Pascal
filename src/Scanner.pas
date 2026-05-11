@@ -257,7 +257,7 @@ end;
 
 procedure TScanner.TokenizeProgram(programUnit: TSourceFile; UsesOn: Boolean);
 var
-  Text: String;
+  Text1: String;
   Num, Frac: TString;
   OldNumTok: Integer;
   ActiveSourceFile: TSourceFile; // Currently tokenized source file
@@ -317,7 +317,7 @@ var
         begin
 
           CheckTok(i, TTokenKind.IDENTTOK);
-
+          //" TODO: Use case-sensitive name
           filePath := FindFile(TokenAt(i).Name + '.pas', 'unit');
 
         end;
@@ -335,8 +335,6 @@ var
 
         _line := Line;
         _uidx := ActiveSourceFile;
-
-        // TODO
 
 
         // TODO Move check to TSourceFileList and use exceptions
@@ -1138,11 +1136,10 @@ var
           'Syntax error, ''string'' expected but ''' + ch + ''' found'));
     end;
 
-
     function ReadFractionalPart(var ch: Char): String; overload;
     begin
       Result := '.';
-      while UpCase(ch) in ['0'..'9'] do
+      while ch in ['0'..'9'] do
       begin
         Result := Result + ch;
         SafeReadChar(ch);
@@ -1155,14 +1152,14 @@ var
         SafeReadChar(ch);
 
         // Negative exponent or digit
-        if UpCase(ch) in ['0'..'9', '-'] then
+        if ch in ['0'..'9', '-'] then
         begin
           Result := Result + ch;
           SafeReadChar(ch);
         end;
 
         // More digits
-        while UpCase(ch) in ['0'..'9'] do
+        while ch in ['0'..'9'] do
         begin
           Result := Result + ch;
           SafeReadChar(ch);
@@ -1170,67 +1167,15 @@ var
       end;
     end;
 
-    procedure TextInvers(p: Integer);
-    var
-      i: Integer;
+    procedure TextToInverse(const startPosition: Integer);
     begin
-
-      for i := p to length(Text) do
-        if Ord(Text[i]) < 128 then
-          Text[i] := chr(Ord(Text[i]) + $80);
-
+      Targets.ConvertStringToInverse(target.id, TextBuffer, startPosition);
     end;
 
 
-    procedure TextInternal(p: Integer);
-    var
-      i: Integer;
-
-      function ata2int(const a: Byte): Byte;
-        (*----------------------------------------------------------------------------*)
-        (*  zamiana znakow ATASCII na INTERNAL          *)
-        (*----------------------------------------------------------------------------*)
-      begin
-        Result := a;
-
-        case (a and $7f) of
-          0..31: Inc(Result, 64);
-          32..95: Dec(Result, 32);
-        end;
-
-      end;
-
-
-      function cbm(const a: Char): Byte;
-      begin
-        Result := Ord(a);
-
-        case a of
-          'a'..'z': Dec(Result, 96);
-          '['..'_': Dec(Result, 64);
-          '`': Result := 64;
-          '@': Result := 0;
-        end;
-
-      end;
-
+    procedure TextToInternal(const startPosition: Integer);
     begin
-
-      if target.id = TTargetID.A8 then
-      begin
-
-        for i := p to length(Text) do
-          Text[i] := chr(ata2int(Ord(Text[i])));
-
-      end
-      else
-      begin
-
-        for i := p to length(Text) do
-          Text[i] := chr(cbm(Text[i]));
-
-      end;
-
+      Targets.ConvertStringToInternal(target.id, TextBuffer, startPosition);
     end;
 
 
@@ -1291,7 +1236,7 @@ var
     inFile.Assign(filePath);
     inFile.Reset(1);
 
-    Text := '';
+    TextBuffer := '';
     ch := ' ';
 
     try
@@ -1299,17 +1244,15 @@ var
       begin
         OldNumTok := NumTok;
 
+        // Skip space, tab, line feed, carriage return, comment braces
         repeat
           ReadChar(ch);
 
           if ch in [' ', TAB] then Inc(Spaces);
 
         until not (ch in [' ', TAB, LF, CR, '{'(*, '}'*)]);
-        // Skip space, tab, line feed, carriage return, comment braces
-
 
         ch := UpCase(ch);
-
 
         Num := '';
         if ch in ['0'..'9', '$', '%'] then ReadNumber;
@@ -1348,11 +1291,11 @@ var
 
         if ch in ['A'..'Z', '_'] then    // Keyword or identifier expected
         begin
-          Text := '';
+          TextBuffer := '';
 
           err := 0;
           repeat
-            Text := Text + ch;
+            TextBuffer := TextBuffer + ch;
             ch2 := ch;
             SafeReadChar(ch);
 
@@ -1365,9 +1308,9 @@ var
             Inc(err);
           until not (ch in ['A'..'Z', '_', '0'..'9', '.']);
 
-          if Text[length(Text)] = '.' then
+          if TextBuffer[length(TextBuffer)] = '.' then
           begin
-            SetLength(Text, length(Text) - 1);
+            SetLength(TextBuffer, length(TextBuffer) - 1);
             InFile.Seek2(InFile.FilePos() - 2);
             Dec(err);
           end;
@@ -1376,12 +1319,12 @@ var
             Error(NumTok, TMessage.Create(TErrorCode.ConstantStringTooLong,
               'Constant strings can''t be longer than 255 chars'));
 
-          if Length(Text) > 0 then
+          if Length(TextBuffer) > 0 then
           begin
 
-            CurToken := GetStandardToken(Text);
+            CurToken := GetStandardToken(TextBuffer);
 
-            im := SearchDefine(Text);
+            im := SearchDefine(TextBuffer);
 
             if (im > 0) and (Defines[im].Macro <> '') then
             begin
@@ -1412,7 +1355,7 @@ var
 
                 if High(StrParams) > MAXPARAMS then
                   Error(NumTok, TMessage.Create(TErrorCode.TooManyFormalParameters,
-                    'Too many formal parameters in ' + Text));
+                    'Too many formal parameters in ' + TextBuffer));
 
               end;
 
@@ -1454,7 +1397,7 @@ var
 
               if CurToken = TTokenKind.EXTERNALTOK then ExternalFound := True;
 
-              AddToken(TTokenKind.UNTYPETOK, ActiveSourceFile, Line, length(Text) + Spaces, 0);
+              AddToken(TTokenKind.UNTYPETOK, ActiveSourceFile, Line, length(TextBuffer) + Spaces, 0);
               Spaces := 0;
 
             end;
@@ -1488,7 +1431,7 @@ var
                 InFile.Read(ch);
 
                 AsmBlock[AsmBlockIndex] := '';
-                Text := '';
+                TextBuffer := '';
 
 {
      if ch in [CR,LF] then begin      // skip EOL after 'ASM'
@@ -1512,9 +1455,9 @@ var
 
                   SaveAsmBlock(ch);
 
-                  Text := Text + UpperCase(ch);
+                  TextBuffer := TextBuffer + UpCase(ch);
 
-                  if pos('END;', Text) > 0 then
+                  if pos('END;', TextBuffer) > 0 then
                   begin
                     SetLength(AsmBlock[AsmBlockIndex], length(AsmBlock[AsmBlockIndex]) - 4);
 
@@ -1525,7 +1468,7 @@ var
                   if ch in [CR, LF] then
                   begin
                     if ch = LF then Inc(line);
-                    Text := '';
+                    TextBuffer := '';
                   end;
 
                 end;
@@ -1580,12 +1523,12 @@ var
                 else
                 begin        // Identifier found
                   TokenAt(NumTok).Kind := TTokenKind.IDENTTOK;
-                  TokenAt(NumTok).Name := Text;
+                  TokenAt(NumTok).Name := TextBuffer;
                 end;
 
             end;
 
-            Text := '';
+            TextBuffer := '';
           end;
 
         end;
@@ -1594,7 +1537,7 @@ var
         if ch in ['''', '#'] then
         begin
 
-          Text := '';
+          TextBuffer := '';
           yes := True;
 
           repeat
@@ -1605,7 +1548,7 @@ var
 
                 if yes then
                 begin
-                  TextPos := Length(Text) + 1;
+                  TextPos := Length(TextBuffer) + 1;
                   yes := False;
                 end;
 
@@ -1618,7 +1561,7 @@ var
                     Error(NumTok, TMessage.Create(TErrorCode.StringExceedsLine, 'String exceeds line'));
 
                   if not (ch in ['''', CR, LF]) then
-                    Text := Text + ch
+                    TextBuffer := TextBuffer + ch
                   else
                   begin
 
@@ -1626,7 +1569,7 @@ var
 
                     if ch2 = '''' then
                     begin
-                      Text := Text + '''';
+                      TextBuffer := TextBuffer + '''';
                       ch := #0;
                     end
                     else
@@ -1656,20 +1599,20 @@ var
                 if ch = '*' then
                 begin
                   Inc(Spaces);
-                  TextInvers(TextPos);
+                  TextToInverse(TextPos);
                   SafeReadChar(ch);
                 end;
 
                 if ch = '~' then
                 begin
                   Inc(Spaces);
-                  TextInternal(TextPos);
+                  TextToInternal(TextPos);
                   SafeReadChar(ch);
 
                   if ch = '*' then
                   begin
                     Inc(Spaces);
-                    TextInvers(TextPos);
+                    TextToInverse(TextPos);
                     SafeReadChar(ch);
                   end;
 
@@ -1705,7 +1648,7 @@ var
                 ReadNumber;
 
                 if Length(Num) > 0 then
-                  Text := Text + chr(StrToInt(Num))
+                  TextBuffer := TextBuffer + chr(StrToInt(Num))
                 else
                   Error(NumTok, TMessage.Create(TErrorCode.ConstantExpressionExpected,
                     'Constant expression expected'));
@@ -1735,34 +1678,34 @@ var
 
           case ch of
             '*': begin
-              TextInvers(TextPos);
+              TextToInverse(TextPos);
               SafeReadChar(ch);
             end;      // Invers
             '~': begin
-              TextInternal(TextPos);
+              TextToInternal(TextPos);
               SafeReadChar(ch);
             end;    // Antic
           end;
 
           // if Length(Text) > 0 then
-          if Length(Text) = 1 then
+          if Length(TextBuffer) = 1 then
           begin
-            AddToken(TTokenKind.CHARLITERALTOK, ActiveSourceFile, Line, 1 + Spaces, Ord(Text[1]));
+            AddToken(TTokenKind.CHARLITERALTOK, ActiveSourceFile, Line, 1 + Spaces, Ord(TextBuffer[1]));
             Spaces := 0;
           end
           else
           begin
-            AddToken(TTokenKind.STRINGLITERALTOK, ActiveSourceFile, Line, length(Text) + Spaces, 0);
+            AddToken(TTokenKind.STRINGLITERALTOK, ActiveSourceFile, Line, length(TextBuffer) + Spaces, 0);
             Spaces := 0;
 
             if ExternalFound then
-              DefineFilename(NumTok, Text)
+              DefineFilename(NumTok, TextBuffer)
             else
-              DefineStaticString(NumTok, Text);
+              DefineStaticString(NumTok, TextBuffer);
 
           end;
 
-          Text := '';
+          TextBuffer := '';
 
         end;
 
@@ -1852,16 +1795,16 @@ var
       begin // EOF reached
        // if e.ErrorCode > 0 then  // TODO: Distinguish EOF from other EInOutError by their ErroCode
        // begin
-          if Text <> '' then
+          if TextBuffer <> '' then
           begin
-            if Text = 'END.' then
+            if TextBuffer = 'END.' then
             begin
               AddToken(TTokenKind.ENDTOK, ActiveSourceFile, Line, 3, 0);
               AddToken(TTokenKind.DOTTOK, ActiveSourceFile, Line, 1, 0);
             end
             else
             begin
-              AddToken(GetStandardToken(Text), ActiveSourceFile, Line, length(Text) + Spaces, 0);
+              AddToken(GetStandardToken(TextBuffer), ActiveSourceFile, Line, length(TextBuffer) + Spaces, 0);
               Spaces := 0;
             end;
           end;
