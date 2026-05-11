@@ -326,7 +326,7 @@ end;
 
 function TPathList.FindFile(const filePath: TFilePath): TFilePath;
 begin
-  if cachedResult.ContainsKey(filePath) then
+  if cached and cachedResult.ContainsKey(filePath) then
     Result := cachedResult[filePath]
   else
   begin
@@ -337,17 +337,51 @@ end;
 
 function TPathList.FindFileInternal(const filePath: TFilePath): TFilePath;
 var
+  fileFolder: TFolderPath;
+  fileName: TFilePath;
+  compoundFilePath:  TFilePath;
+  searchRec: TSearchRec;
+  found: Boolean;
   i: Integer;
 begin
-  Result := TFileSystem.NormalizePath(filePath);
-  if TFileSystem.FileExists_(Result) then Exit;
+
+  // Not found
+  Result := '';
+
+  fileFolder := ExtractFilePath(filePath);
+  fileName := ExtractFileName(filePath);
+
+  // Perform case-insensitive filename lookup.
+  found := (FindFirst(filePath, faAnyFile, searchRec) = 0);
+  FindClose(searchRec);
+  if (found) then
+  begin
+    if (searchRec.Name <> fileName) then
+    begin
+      // TODO: For https://github.com/tebe6502/Mad-Pascal/issues/215
+      Writeln('INFO: Case difference in file name ' + filePath + ' and ' + searchRec.Name);
+    end;
+    Result := fileFolder + searchRec.Name;
+    Exit;
+  end;
 
   for i := Low(paths) to High(paths) do
   begin
-    Result := TFileSystem.NormalizePath(paths[i] + filePath);
-    if TFileSystem.FileExists_(Result) then Exit;
+    compoundFilePath := TFileSystem.NormalizePath(paths[i] + filePath);
+    fileFolder := ExtractFilePath(compoundFilePath);
+    found := (FindFirst(compoundFilePath, faAnyFile, searchRec) = 0);
+    FindClose(searchRec);
+    if (found) then
+    begin
+      if (searchRec.Name <> fileName) then
+        begin
+          // TODO: For https://github.com/tebe6502/Mad-Pascal/issues/215
+          Writeln('INFO: Case difference in file name ' + filePath + ' and ' + searchRec.Name);
+        end;
+      Result := fileFolder + searchRec.Name;
+      Exit;
+    end;
   end;
-  Result := '';
 
 end;
 
@@ -941,13 +975,19 @@ begin
 
   Result := filePath;
 
+  {$IFDEF WINDOWS}
+   if Pos('/', filePath) > 0 then
+   begin
+    Result := StringReplace(filePath, '/', '\', [rfReplaceAll]);
+   end;
+  {$ENDIF}
+
   // https://github.com/tebe6502/Mad-Pascal/issues/113
   {$IFDEF UNIX}
    if Pos('\', filePath) > 0 then
    begin
     Result := StringReplace(filePath, '\', '/', [rfReplaceAll]);
    end;
-
   {$ENDIF}
 
   {$IFDEF SIMULATED_FILE_IO}
