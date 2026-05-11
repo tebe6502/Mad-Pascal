@@ -10,6 +10,7 @@ uses Asserts, Common, CompilerTypes, FileIO, Tokens, Utilities;
 
 procedure Test;
 var
+  testFilePath: TFilePath;
   filePath: TFilePath;
   sourceFileList: TSourceFileList;
   sourceFile: TSourceFile;
@@ -44,16 +45,17 @@ begin
   // Unit Common.unitPathList, Common.FindFile
   unitPathList := TPathList.Create;
   unitPathList.AddFolder('libnone');
+  testFilePath := 'TestUnit.xyz';
   filePath := '';
   try
-    filePath := FindFile('TestUnit', 'unit');
+    filePath := FindFile(testFilePath, 'unit');
   except
     on  ex: EHaltException do
     begin
       Assert(ex.GetExitCode = EHaltException.COMPILING_ABORTED);
     end;
   end;
-  Assert(filePath = '', 'Non-existing TestUnit found');
+  Assert(filePath = '', 'Non-existing file ''' + testFilePath + ''' found at ''' + filePath + '''.');
 
 end;
 

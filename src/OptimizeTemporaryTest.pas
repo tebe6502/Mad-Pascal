@@ -14,6 +14,10 @@ var
   s: String;
   i: Integer;
 begin
+
+  if not TFileSystem.FileExists_(filePath) then
+    raise EFileNotFoundException.Create('File '''+filePath+''' not found.');
+
   textFile := TFileSystem.CreateTextFile;
   textFile.Assign(filePath);
   textFile.Reset;
