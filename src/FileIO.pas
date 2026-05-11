@@ -326,7 +326,7 @@ end;
 
 function TPathList.FindFile(const filePath: TFilePath): TFilePath;
 begin
-  if cachedResult.ContainsKey(filePath) then
+  if cached and cachedResult.ContainsKey(filePath) then
     Result := cachedResult[filePath]
   else
   begin
@@ -339,17 +339,19 @@ function TPathList.FindFileInternal(const filePath: TFilePath): TFilePath;
 var
   fileFolder: TFolderPath;
   fileName: TFilePath;
+  compoundFilePath:  TFilePath;
   searchRec: TSearchRec;
   found: Boolean;
   i: Integer;
 begin
-  fileFolder := ExtractFilePath(filePath);
-  fileName := ExtractFileName(filePath);
 
   // Not found
   Result := '';
 
-  // Perform case-insentive filename lookup.
+  fileFolder := ExtractFilePath(filePath);
+  fileName := ExtractFileName(filePath);
+
+  // Perform case-insensitive filename lookup.
   found := (FindFirst(filePath, faAnyFile, searchRec) = 0);
   FindClose(searchRec);
   if (found) then
@@ -364,9 +366,9 @@ begin
 
   for i := Low(paths) to High(paths) do
   begin
-    Result := TFileSystem.NormalizePath(paths[i] + filePath);
-    fileFolder := ExtractFilePath(Result);
-    found := (FindFirst(filePath, faAnyFile, searchRec) = 0);
+    compoundFilePath := TFileSystem.NormalizePath(paths[i] + filePath);
+    fileFolder := ExtractFilePath(compoundFilePath);
+    found := (FindFirst(compoundFilePath, faAnyFile, searchRec) = 0);
     FindClose(searchRec);
     if (found) then
     begin
