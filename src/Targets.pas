@@ -23,6 +23,10 @@ type
 
 procedure Init(const id: TTargetID; var target: TTarget);
 
+// Target-specific string handling.
+procedure ConvertStringToInternal(const id: TTargetID; var s: String; const startPosition: Integer);
+procedure ConvertStringToInverse(const id: TTargetID; var s: String; const startPosition: Integer);
+
 implementation
 
 
@@ -132,5 +136,67 @@ begin
 
   end;
 end;
+
+procedure ConvertStringToInternal(const id: TTargetID; var s: String; const startPosition: Integer);
+var
+  i: Integer;
+
+// Conversion of ATASCII characters to Atari INTERNAL characters
+// Preserves inverse bit.
+  function ata2int(const a: Byte): Byte;
+  begin
+    Result := a;
+
+    case (a and $7f) of
+      0..31: Inc(Result, 64);  // Control characters
+      32..95: Dec(Result, 32); // Number, uppercase and lowercase letters
+    end;
+
+  end;
+
+  // Conversion of PETSCII characters to CBM screen codes.
+  function cbm(const a: Char): Byte;
+  begin
+    Result := Ord(a);
+
+    case a of
+      'a'..'z': Dec(Result, 96);
+      '['..'_': Dec(Result, 64);
+      '`': Result := 64;
+      '@': Result := 0;
+    end;
+
+  end;
+
+begin
+
+  if id = TTargetID.A8 then
+  begin
+
+    for i := startPosition to length(s) do
+      s[i] := chr(ata2int(Ord(s[i])));
+
+  end
+  else
+  begin
+
+    for i := startPosition to length(s) do
+      s[i] := chr(cbm(s[i]));
+
+  end;
+
+end;
+
+procedure ConvertStringToInverse(const id: TTargetID; var s: String; const startPosition: Integer);
+var
+  i: Integer;
+begin
+
+  for i := startPosition to length(s) do
+    if Ord(s[i]) < 128 then
+      s[i] := chr(Ord(s[i]) + $80);
+
+end;
+
 
 end.
