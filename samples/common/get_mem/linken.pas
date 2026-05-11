@@ -1,60 +1,62 @@
 
-program LinkEcho(intput,output);
+program LinkEcho(intput, output);
 
-uses crt;
+uses
+  crt;
 
 type
-   ElementPointer = ^Element;
+  ElementPointer = ^Element;
 
-   Element = record
-                Number : Integer;
-                Next : ElementPointer;
-             end;
+  Element = record
+    Number: Integer;
+    Next: ElementPointer;
+  end;
 
 var
-   FirstElement : ElementPointer;
-   CurrentElement : ElementPointer;
-   Number : Integer;
+  FirstElement: ElementPointer;
+  CurrentElement: ElementPointer;
+  Number: Integer;
 
-(* Main Program *)
+  (* Main Program *)
 begin
 
-   clrscr;
+  clrscr;
 
-   (* Initialize the list and its pointers. *)
-   GetMem(FirstElement, sizeof(Element));
-   FirstElement^.Next := Nil;
-   CurrentElement := FirstElement;
+  (* Initialize the list and its pointers. *)
+  FirstElement := GetMem(sizeof(Element));
+  FirstElement^.Next := nil;
+  CurrentElement := FirstElement;
 
-   (* Fill the linked list *)
-   repeat
-      write('Enter number or 0 to exit:');
-      readln(Number);
-      writeln;
+  (* Fill the linked list *)
+  repeat
+    Write('Enter number or 0 to exit:');
+    readln(Number);
+    writeln;
 
-      if Number > 0 then
-      begin
+    if Number > 0 then
+    begin
 
-         (* Add each number to the list, then add an element. *)
-         CurrentElement^.Number := Number;
-         GetMem(CurrentElement^.Next, sizeof(Element));
-         CurrentElement := CurrentElement^.Next;
-         CurrentElement^.Next := Nil;
+      (* Add each number to the list, then add an element. *)
+      CurrentElement^.Number := Number;
+      CurrentElement^.Next := GetMem(sizeof(Element));
+      CurrentElement := CurrentElement^.Next;
+      CurrentElement^.Next := nil;
 
-      end;
-   until Number <= 0;
+    end;
+  until Number <= 0;
 
-   (* Write the linked list back out *)
-   if CurrentElement<>FirstElement then
-   begin
-      CurrentElement:=FirstElement;
-      while CurrentElement^.Next <> Nil do
-      begin
-         writeln(CurrentElement^.Number);
-         CurrentElement:= CurrentElement^.Next
-      end (* while loop *)
-   end; (* if *)
+  (* Write the linked list back out *)
+  if CurrentElement <> FirstElement then
+  begin
+    CurrentElement := FirstElement;
+    while CurrentElement^.Next <> nil do
+    begin
+      writeln(CurrentElement^.Number);
+      CurrentElement := CurrentElement^.Next;
+    end; (* while loop *)
+  end; (* if *)
 
- repeat until keypressed;
+  repeat
+  until keypressed;
 
 end.
