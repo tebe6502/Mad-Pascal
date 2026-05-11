@@ -467,8 +467,9 @@ end;
 //o-------------------------------------------------------------o
 
 begin
+  game_over := true;
   prepare;
-  game_over := false; sys_init;
+  sys_init;
   welcome_scr;
   hi_score_bcd := $0; set_game;
 
