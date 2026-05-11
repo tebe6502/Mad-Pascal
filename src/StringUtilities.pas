@@ -283,7 +283,7 @@ end;
 
 
 (*----------------------------------------------------------------------------*)
-(* Read sequence of characters separated by 'separatorCharacter'.             *)
+(* Read a sequence of characters separated by 'separatorCharacter'.           *)
 (* If there are characters opening the string, read such a string             *)
 (*----------------------------------------------------------------------------*)
 function SplitStr(const a: String; const separatorCharacter: Char): TStringArray;
@@ -299,7 +299,7 @@ var
     (*------------------------------------------------------------------------*)
   var
     nawias, len: Integer;
-    znak, lewa, prawa: Char;
+    ch, lewa, prawa: Char;
     petla: Boolean;
     txt: String;
   begin
@@ -319,11 +319,11 @@ var
     while petla and (i <= len) do
     begin
 
-      znak := a[i];
+      ch := a[i];
 
-      if znak = lewa then Inc(nawias)
+      if ch = lewa then Inc(nawias)
       else
-        if znak = prawa then Dec(nawias);
+        if ch = prawa then Dec(nawias);
 
       //  if not(zag) then
       //   if nawias>1 then test_nawias(a,lewa,0);
@@ -331,19 +331,19 @@ var
       //  if nawias=0 then petla:=false;
       petla := not (nawias = 0);
 
-      if znak in AllowQuotes then
+      if ch in AllowQuotes then
       begin
 
         txt := GetStringUpperCase(a, i);
 
-        Result := Result + znak + txt + znak;
+        Result := Result + ch + txt + ch;
 
-        if txt = znak then Result := Result + znak;
+        if txt = ch then Result := Result + ch;
 
       end
       else
       begin
-        Result := Result + znak;
+        Result := Result + ch;
         Inc(i);
       end;
 
@@ -391,13 +391,13 @@ begin
 
         '''', '"':
         begin
-          znak := a[i];
+          ch := a[i];
 
           txt := GetStringUpperCase(a, i);
 
-          s := s + znak + txt + znak;
+          s := s + ch + txt + ch;
 
-          if znak = txt then s := s + znak;
+          if ch = txt then s := s + ch;
 
         end;
 
