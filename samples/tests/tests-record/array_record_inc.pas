@@ -1,3 +1,5 @@
+program array_record_inc;
+
 {
 
 0,0
@@ -12,45 +14,48 @@ Let's move first monster
 }
 
 
-uses crt;
+uses
+  crt;
 
 type
-	monsters = packed record
-   	  x: byte ;
-	  a: cardinal;
-	  y: byte;
-	end;
+  monsters = packed record
+    x: Byte;
+    a: Cardinal;
+    y: Byte;
+  end;
 
 var
-	monster: array [0..3] of ^monsters;
-	i: byte;
+  monster: array [0..3] of ^monsters;
+  i: Byte;
 
-procedure MoveMonster(p : byte);
-begin
-  monster[p].x := monster[p].x + 2;
-end;
+  procedure MoveMonster(p: Byte);
+  begin
+    monster[p].x := monster[p].x + 2;
+  end;
 
 begin
-  for i:=0 to High(monster) do begin
-    GetMem(monster[i], sizeof(monsters));
+  for i := 0 to High(monster) do
+  begin
+    monster[i] := GetMem(sizeof(monsters));
 
     monster[i].x := i;
     monster[i].a := $ffffffff;
     monster[i].y := i * 2;
   end;
 
-  for i:=0 to High(monster) do
-    writeln(monster[i].x,',', monster[i].y);
+  for i := 0 to High(monster) do
+    writeln(monster[i].x, ',', monster[i].y);
 
   // Let's move first monster
   writeln('');
   writeln('Let''s move first monster');
-//  monster[0].x := 2;
+  //  monster[0].x := 2;
   monster[0].x := monster[0].x + 2;
-  writeln(monster[0].x,',', monster[0].y);
+  writeln(monster[0].x, ',', monster[0].y);
 
   MoveMonster(0);
-  writeln(monster[0].x,',', monster[0].y);
+  writeln(monster[0].x, ',', monster[0].y);
 
-  repeat until keypressed;
+  repeat
+  until keypressed;
 end.

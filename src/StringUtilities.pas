@@ -283,13 +283,13 @@ end;
 
 
 (*----------------------------------------------------------------------------*)
-(* Read sequence of characters separated by 'separatorCharacter'.             *)
+(* Read a sequence of characters separated by 'separatorCharacter'.           *)
 (* If there are characters opening the string, read such a string             *)
 (*----------------------------------------------------------------------------*)
 function SplitStr(const a: String; const separatorCharacter: Char): TStringArray;
 var
-  znak: Char;
-  i, len: Integer;
+  ch: Char;
+  i, StringLength: Integer;
   txt, s: String;
 
   function GetParenthesizedString(const a: String; var i: TStringIndex): String;
@@ -298,52 +298,50 @@ var
     (* The characters '(' and ')' can be nested                               *)
     (*------------------------------------------------------------------------*)
   var
-    nawias, len: Integer;
-    znak, lewa, prawa: Char;
-    petla: Boolean;
+    ParenthesesCount, StringLength: Integer;
+    ch, LeftChar, RightChar: Char;
+    ScanMore: Boolean;
     txt: String;
   begin
     Result := '';
 
     if not (a[i] in ['(']) then exit;
 
-    lewa := a[i];
-    if lewa = '(' then prawa := ')'
+    LeftChar := a[i];
+    // TODO: Really required? We only have "(", ")" here.
+    if LeftChar = '(' then
+      RightChar := ')'
     else
-      prawa := chr(Ord(lewa) + 2);
+      RightChar := chr(Ord(LeftChar) + 2);
 
-    nawias := 0;
-    petla := True;
-    len := length(a);
+    ParenthesesCount := 0;
+    ScanMore := True;
+    StringLength := Length(a);
 
-    while petla and (i <= len) do
+    while ScanMore and (i <= StringLength) do
     begin
 
-      znak := a[i];
+      ch := a[i];
 
-      if znak = lewa then Inc(nawias)
+      if ch = LeftChar then Inc(ParenthesesCount)
       else
-        if znak = prawa then Dec(nawias);
+        if ch = RightChar then Dec(ParenthesesCount);
 
-      //  if not(zag) then
-      //   if nawias>1 then test_nawias(a,lewa,0);
+      ScanMore := not (ParenthesesCount = 0);
 
-      //  if nawias=0 then petla:=false;
-      petla := not (nawias = 0);
-
-      if znak in AllowQuotes then
+      if ch in AllowQuotes then
       begin
 
         txt := GetStringUpperCase(a, i);
 
-        Result := Result + znak + txt + znak;
+        Result := Result + ch + txt + ch;
 
-        if txt = znak then Result := Result + znak;
+        if txt = ch then Result := Result + ch;
 
       end
       else
       begin
-        Result := Result + znak;
+        Result := Result + ch;
         Inc(i);
       end;
 
@@ -369,12 +367,11 @@ begin
   SetLength(Result, 1);
 
   i := 1;
-
-  len := length(a);
+  StringLength := Length(a);
 
   s := '';
 
-  while i <= len do
+  while i <= StringLength do
 
     if a[i] = separatorCharacter then
     begin
@@ -391,13 +388,13 @@ begin
 
         '''', '"':
         begin
-          znak := a[i];
+          ch := a[i];
 
           txt := GetStringUpperCase(a, i);
 
-          s := s + znak + txt + znak;
+          s := s + ch + txt + ch;
 
-          if znak = txt then s := s + znak;
+          if ch = txt then s := s + ch;
 
         end;
 
@@ -427,5 +424,4 @@ initialization
 
   InitializeStrings;
 
-end.
 end.
