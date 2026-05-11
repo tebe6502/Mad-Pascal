@@ -28,4 +28,4 @@ samples/WinMerge.txt
 test/config.ini
 
 origin/mp.exe
-/mp
+bin/mp
