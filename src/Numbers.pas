@@ -36,11 +36,11 @@ implementation
 uses SysUtils;
 
 
-// Low-Level TFloat representation
+  // Low-Level TFloat representation
 const
   TWOPOWERFRACBITS = 256;  // Factor for 8-bit fractional part
 
-// Fixed-point 32-bit real number storage
+  // Fixed-point 32-bit real number storage
 type
   TFloat = array [0..1] of Integer; // 2*32 bits
 
@@ -69,16 +69,16 @@ end;
 
 procedure MoveTFloat(const ConstVal: TNumber; var ftmp: TFloat); overload;
 begin
-{$IFNDEF PAS2JS}
+  {$IFNDEF PAS2JS}
   move(ConstVal, ftmp, sizeof(ftmp));
-{$ENDIF}
+  {$ENDIF}
 end;
 
 procedure MoveTFloat(const ftmp: TFloat; var ConstVal: TNumber); overload;
 begin
-{$IFNDEF PAS2JS}
+  {$IFNDEF PAS2JS}
   move(ftmp, ConstVal, sizeof(ftmp));
-{$ENDIF}
+  {$ENDIF}
 
 end;
 
@@ -113,7 +113,6 @@ var
   var
     //  fltInt32: uint32;
     fltInt16, tmp: Uint16;
-
   begin
     //  fltInt32 := PLongWord(@Float)^;
     fltInt16 := (fltInt32 shr 31) shl 5;
@@ -125,7 +124,7 @@ var
 
 begin
 
-{$IFNDEF PAS2JS}// TODO
+  {$IFNDEF PAS2JS}// TODO
 
   s := PSingle(@Src)^;
 
@@ -214,7 +213,7 @@ begin
 
   end;
 
-{$ENDIF}
+  {$ENDIF}
 
 end;  // CardToHalf32
 
@@ -223,9 +222,9 @@ function CardToHalf(const ftmp: TFloat): Word; overload;
 var
   Value: Uint32;
 begin
-{$RANGECHECKS OFF}
+  {$RANGECHECKS OFF}
   Value := ftmp[1];
-{$RANGECHECKS ON}
+  {$RANGECHECKS ON}
   Result := CardToHalf32(Value);
 end;
 
@@ -237,7 +236,6 @@ function FromInt64(const i: Int64): TNumber;
 var
   fl: Single;
   ftmp: TFloat;
-
 begin
 
   fl := Integer(i);
@@ -381,7 +379,7 @@ begin
     fl := ToSingle(ftmp);
     fl_ := ToSingle(ftmp_);
 
-    fl := fl + fl_;
+    fl := fl - fl_;
 
     ftmp := ToTFloat(fl);
 
@@ -429,27 +427,37 @@ var
   ftmp, ftmp_: TFloat;
   fl, fl_: Single;
 begin
-  ftmp := Zero;
-  ftmp_ := Zero;
+  if valtype in RealTypes then
+  begin
+    ftmp := Zero;
+    ftmp_ := Zero;
 
-  MoveTFloat(a, ftmp);
-  MoveTFloat(b, ftmp_);
+    MoveTFloat(a, ftmp);
+    MoveTFloat(b, ftmp_);
 
-  fl := ToSingle(ftmp);
-  fl_ := ToSingle(ftmp_);
+    fl := ToSingle(ftmp);
+    fl_ := ToSingle(ftmp_);
 
-  if fl_ = 0 then raise EDivByZero.Create('Division by Zero');
+    if fl_ = 0 then raise EDivByZero.Create('Division by Zero');
 
-  fl := fl / fl_;
+    fl := fl / fl_;
 
-  ftmp := ToTFloat(fl);
+    ftmp := ToTFloat(fl);
 
-  Result := 0;
-  MoveTFloat(ftmp, Result);
+    Result := 0;
+    MoveTFloat(ftmp, Result);
+  end
+  else
+  begin
+
+    // In the partser, the result of DIVTOK is always a real.
+    // For integer division there is IDIVTOK.
+    // Therefore this ELSE was missing in earlier version.
+    Result := a div b;
+  end;
 end;
 
 function Trunc(const valType: TDataType; const a: TNumber): TNumber;
-
 var
   ftmp: TFloat;
   fl: Single;
@@ -480,7 +488,6 @@ end;
 
 
 function Frac(const valType: TDataType; const a: TNumber): TNumber;
-
 var
   ftmp: TFloat;
   fl: Single;

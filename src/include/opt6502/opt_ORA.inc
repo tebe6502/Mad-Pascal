@@ -135,8 +135,10 @@ begin
 // -----------------------------------------------------------------------------
 
 
-    if lda_a(i) and									// lda			; 0
-       ora_im_0(i+1) and								// ora #$00		; 1
+    if ora_im_0(i+1) and								// ora #$00		; 1
+
+       lda_a(i) and									// lda			; 0
+//     ora_im_0(i+1) and								// ora #$00		; 1
        sta_a(i+2) then									// sta			; 2
      begin
 
@@ -151,8 +153,10 @@ begin
      end;
 
 
-    if lda_a(i) and									// lda			; 0
-       ora_im_0(i+1) and								// ora #$00		; 1
+    if ora_im_0(i+1) and								// ora #$00		; 1
+
+       lda_a(i) and									// lda			; 0
+//     ora_im_0(i+1) and								// ora #$00		; 1
        and_ora_eor(i+2) then								// and|ora|eor		; 2
      begin
 	listing[i+1] := '';
@@ -161,8 +165,10 @@ begin
      end;
 
 
-    if and_ora_eor(i) and								// and|ora|eor		; 0
-       ora_im_0(i+1) then								// ora #$00		; 1
+    if ora_im_0(i+1) and								// ora #$00		; 1  
+
+       and_ora_eor(i) then								// and|ora|eor		; 0
+//     ora_im_0(i+1) then								// ora #$00		; 1
      begin
 	listing[i+1] := '';
 

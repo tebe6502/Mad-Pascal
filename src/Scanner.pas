@@ -1,5 +1,41 @@
 unit Scanner;
 
+{
+
+AddResource
+AddToken
+AddToken_
+ata2int
+bin2csv
+cbm
+newMsgUser
+ReadChar
+ReadDirective
+ReadFractionalPart
+ReadNumber
+ReadParameters
+ReadSingleLineComment
+ReadUses
+RemoveDefine
+SafeReadChar
+SaveAsmBlock
+skip_spaces
+SkipCodeUntilDirective
+SkipWhiteSpace
+TextInternal
+TextInvers
+Tokenize
+TokenizeMacro
+TokenizeProgram
+TokenizeProgramInitialization
+TokenizeUnit
+TScanner.AddToken
+TScanner.AddToken_
+TScanner.TokenizeMacro
+TScanner.TokenizeProgram
+
+}
+
 {$I Defines.inc}
 
 interface
@@ -970,6 +1006,8 @@ var
       directive: String;
       _line: Integer;
     begin
+
+      c2:= #0;
 
       InFile.Read(c);
 

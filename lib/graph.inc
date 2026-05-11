@@ -827,8 +827,8 @@ begin
 
   c:=FloodFillStack[stackPointer];
 
-  a := hi(c);
-  b := lo(c);
+  a := c shr 16;
+  b := c and $FFFF;
 
   FloodFillExec;
 
@@ -856,6 +856,12 @@ Draw filled rectangle
 *)
 var i: smallint;
 begin
+
+ if y1 > y2 then begin
+  i:=y2;
+  y2:=y1;
+  y1:=i; 
+ end;
 
  for i:=y1 to y2 do HLine(x1,x2, i);
 

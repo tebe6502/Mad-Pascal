@@ -21,7 +21,7 @@ begin
    clrscr;
 
    (* Initialize the list and its pointers. *)
-   GetMem(FirstElement, sizeof(Element));
+   FirstElement := GetMem(sizeof(Element));
 
    FirstElement^.Next := Nil;
    CurrentElement := FirstElement;
@@ -37,7 +37,7 @@ begin
 
          (* Add each number to the list, then add an element. *)
          CurrentElement^.Number := Number;
-         GetMem(CurrentElement^.Next, sizeof(Element));
+         CurrentElement^.Next := GetMem(sizeof(Element));
          CurrentElement := CurrentElement^.Next;
          CurrentElement^.Next := Nil;
 

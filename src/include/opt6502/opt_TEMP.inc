@@ -761,7 +761,7 @@ begin
       (TemporaryBuf[3] = '') and							//			; 3
       opti(4) and									//; optimize 		; 4
       (TemporaryBuf[5] = '') and							//			; 5
-      (pos('mwy ', TemporaryBuf[6]) > 0) and (pos(' :bp2', TemporaryBuf[6]) > 0) then	// mwy W :bp2		; 6
+      mwy(6) and (pos(' :bp2', TemporaryBuf[6]) > 0) then				// mwy W :bp2		; 6
     if (pos(TemporaryBuf[0], TemporaryBuf[2]) > 0) and
        (#9'mwy ' + GetARG(0) + ' :bp2' = TemporaryBuf[6]) then
     begin

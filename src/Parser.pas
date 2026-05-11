@@ -1,5 +1,24 @@
 unit Parser;
 
+{
+
+CompileConstExpression
+CompileConstFactor
+CompileConstTerm
+CompileType
+DefineFunction
+DefineIdent
+Elements
+GetIdentIndex
+GetSizeOf
+ObjectRecordSize
+RecordSize
+SaveToDataSegment
+Search
+SearchCurrenSourceFile
+
+}
+
 {$I Defines.inc}
 
 interface
@@ -15,6 +34,7 @@ function CompileConstExpression(i: TTokenIndex; out ConstVal: Int64; out ConstVa
   const VarType: TDataType = TDataType.INTEGERTOK; const Err: Boolean = False; const War: Boolean = True): TTokenIndex;
 
 function CompileConstTerm(i: TTokenIndex; out ConstVal: Int64; out ConstValType: TDataType): TTokenIndex;
+function CompileConstFactor(i: TTokenIndex; out ConstVal: Int64; out ConstValType: TDataType): TTokenIndex;
 
 function DefineIdent(const tokenIndex: TTokenIndex; Name: TIdentifierName; Kind: TTokenKind;
   DataType: TDataType; NumAllocElements: Cardinal; AllocElementType: TDataType; Data: Int64;
@@ -1522,9 +1542,11 @@ begin
   ConstValType := TDataType.UNTYPETOK;
   Result := i;
 
-  if TokenAt(i).Kind in [TTokenKind.PLUSTOK, TTokenKind.MINUSTOK] then j := i + 1
+  if TokenAt(i).Kind in [TTokenKind.PLUSTOK, TTokenKind.MINUSTOK] then
+    j := i + 1
   else
     j := i;
+
   j := CompileConstTerm(j, ConstVal, ConstValType);
 
   if isError then exit;
@@ -2365,6 +2387,7 @@ var
   ExitLoop, isForward, IsNestedFunction, isInt, isInl, isOvr: Boolean;
   Name: TString;
 
+// ----------------------------------------------------------------------------
 
   function BoundaryType: TDataType;
   begin
@@ -2392,6 +2415,7 @@ var
 
   end;
 
+// ----------------------------------------------------------------------------
 
   procedure DeclareField(const Name: TName; FieldType: TDataType; NumAllocElements: Cardinal = 0;
     AllocElementType: TDataType = TDataType.UNTYPETOK; Data: Int64 = 0);

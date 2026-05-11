@@ -20,6 +20,23 @@ begin
      end;
 
 
+    if ldy(i) and										// ldy					; 0
+       lda_a(i+1) and										// lda					; 1
+       sta_a(i+2) and										// sta					; 2
+       sty(i+3) then										// sty					; 3
+     begin
+      listing_tmp[0] := listing[i+1];
+      listing_tmp[1] := listing[i+2];
+      listing_tmp[2] := listing[i];
+      listing_tmp[3] := listing[i+3];
+
+      listing[i]   := listing_tmp[0];
+      listing[i+1] := listing_tmp[1];
+      listing[i+2] := listing_tmp[2];
+      listing[i+3] := listing_tmp[3];
+     end;
+
+
     if ldy_1(i+2) and										// ldy #1				; 2
 
        (iny(i) or dey(i)) and									// iny|dey				; 0

@@ -26,7 +26,7 @@ begin
 
         if (TemporaryBuf[p] = #9'jmp ' + TemporaryBuf[2]) and			//; --- ForToDoEpilog	// p-5
 	   (TemporaryBuf[p-5] = '; --- ForToDoEpilog') and			// dec I		// p-4
-	   (pos('dec ', TemporaryBuf[p-4]) > 0) and				// lda I		// p-3
+	   dec_(p-4) and							// lda I		// p-3
 	   seq(p-1) and								// cmp #$FF		// p-2
 	   (TemporaryBuf[p-2] = #9'cmp #$FF') then				// seq			// p-1
 	   begin								// jmp l_00FB		// p

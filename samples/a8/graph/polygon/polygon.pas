@@ -19,7 +19,7 @@ var px, py: array [0..9] of real;
 begin
 
 	for i:=0 to High(pt)-1 do
-	  GetMem(pt[i], sizeof(TPoint));
+	  pt[i] := GetMem(sizeof(TPoint));
 
 
 	for i:=0 to 9 do begin

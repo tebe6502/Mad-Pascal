@@ -490,6 +490,11 @@ begin
   Result := listing[i] = #9'and #$00';
 end;
 
+function AND_IM_FF(const i: Integer): Boolean;
+begin
+  Result := listing[i] = #9'and #$FF';
+end;
+
 function ORA_IM_0(const i: Integer): Boolean;
 begin
   Result := listing[i] = #9'ora #$00';
