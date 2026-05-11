@@ -37,7 +37,7 @@ var
 
 begin  (* main program *)
   //   New(Self);   (* create the dynamic variable *)
-  GetMem(Self, sizeof(Person));
+  Self := GetMem(sizeof(Person));
 
   Self^.Name.First_Name := 'Charley';
   Self^.Name.Initial := 'Z';
