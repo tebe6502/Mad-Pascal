@@ -1,5 +1,24 @@
 unit Parser;
 
+{
+
+CompileConstExpression
+CompileConstFactor
+CompileConstTerm
+CompileType
+DefineFunction
+DefineIdent
+Elements
+GetIdentIndex
+GetSizeOf
+ObjectRecordSize
+RecordSize
+SaveToDataSegment
+Search
+SearchCurrenSourceFile
+
+}
+
 {$I Defines.inc}
 
 interface
@@ -2368,6 +2387,7 @@ var
   ExitLoop, isForward, IsNestedFunction, isInt, isInl, isOvr: Boolean;
   Name: TString;
 
+// ----------------------------------------------------------------------------
 
   function BoundaryType: TDataType;
   begin
@@ -2395,6 +2415,7 @@ var
 
   end;
 
+// ----------------------------------------------------------------------------
 
   procedure DeclareField(const Name: TName; FieldType: TDataType; NumAllocElements: Cardinal = 0;
     AllocElementType: TDataType = TDataType.UNTYPETOK; Data: Int64 = 0);

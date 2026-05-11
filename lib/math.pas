@@ -4,12 +4,12 @@ unit math;
  @author: Tomasz Biela (Tebe)
  @name: Additional mathematical routines
 
- @version: 1.0
+ @version: 1.1
 
  @description:
  <http://www.freepascal.org/docs-html/rtl/math/index-5.html>
 
- <https://github.com/graemeg/freepascal/blob/master/rtl/objpas/math.pp>
+ <https://github.com/alrieckert/freepascal/blob/24965ff2f1d125c4ab471c2991cf0c80a55fc468/rtl/objpas/math.pp>
 
  hypot function from AMath library (C) Copyright 2009-2013 Wolfgang Ehrhardt
 *)
@@ -455,7 +455,9 @@ end;
 
 function RandG(mean, stddev : single) : single;
 (*
-@description: Return gaussian distributed random number.
+@description:
+Return gaussian distributed random number.
+RandG returns a random number which - when produced in large quantities - has a Gaussian distribution with mean 'mean' and standarddeviation 'stddev'.
 
 *)
 Var U1,S2 : single;
