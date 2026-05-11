@@ -358,7 +358,8 @@ begin
   begin
     if (searchRec.Name <> fileName) then
     begin
-      Writeln('ERROR: Case difference in file name ' + filePath + ' and ' + searchRec.Name);
+      // TODO: For https://github.com/tebe6502/Mad-Pascal/issues/215
+      Writeln('INFO: Case difference in file name ' + filePath + ' and ' + searchRec.Name);
     end;
     Result := fileFolder + searchRec.Name;
     Exit;
@@ -374,7 +375,8 @@ begin
     begin
       if (searchRec.Name <> fileName) then
         begin
-          Writeln('ERROR: Case difference in file name ' + filePath + ' and ' + searchRec.Name);
+          // TODO: For https://github.com/tebe6502/Mad-Pascal/issues/215
+          Writeln('INFO: Case difference in file name ' + filePath + ' and ' + searchRec.Name);
         end;
       Result := fileFolder + searchRec.Name;
       Exit;
