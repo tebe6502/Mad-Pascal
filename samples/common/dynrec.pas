@@ -52,17 +52,17 @@ begin  (* main program *)
   Self^.Birthday.Year := 1938;    //   (* all data for self now defined *)
 
   //   New(Mother);
-  GetMem(Mother, sizeof(Person));
+  Mother := GetMem(sizeof(Person));
   Mother := Self;
 
   //   New(Father);
-  GetMem(Father, sizeof(Person));
+  Father := GetMem(sizeof(Person));
 
   Father^ := Mother^;
   for Index := 0 to Number_Of_Friends - 1 do
   begin
     //      New(Friend[Index]);
-    GetMem(Friend[Index], sizeof(Person));
+    Friend[Index] := GetMem(sizeof(Person));
 
     Friend[Index]^ := Mother^;
   end;
