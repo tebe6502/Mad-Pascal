@@ -8278,7 +8278,7 @@ begin
                     if Pass = TPass.CODE_GENERATION then
                     begin
                       DefineStaticString(i, chr(TokenAt(i).Value));
-                      TokenAt(i).Kind := TTokenKind.STRINGLITERALTOK;
+                      TokenAt(i).MakeKind(TTokenKind.STRINGLITERALTOK);
 
                       asm65(#9'lda' + StackVariable0);
                       asm65(#9'sta' + StackVariable0);
@@ -8318,7 +8318,7 @@ begin
                     if Pass = TPass.CODE_GENERATION then
                     begin
                       DefineStaticString(i, chr(TokenAt(i).Value));
-                      TokenAt(i).Kind := TTokenKind.STRINGLITERALTOK;
+                      TokenAt(i).MakeKind(TTokenKind.STRINGLITERALTOK);
 
                       asm65(#9'lda' + StackVariable0);
                       asm65(#9'sta' + StackVariable0);

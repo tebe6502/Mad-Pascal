@@ -338,11 +338,29 @@ type
   TTokenIndex = Integer;
 
   TToken = class
+
+    // Because token after always accessed by reference, the properties are read-only
+    // to prevent accidential write access outside of the scanner.
+  private
+  var
+    TokenIndex_: TTokenIndex;
+
+    Kind_: TTokenKind;
+
+    // For Kind=IDENTTOK:
+    Name_: TIdentifierName; // Always in upper case for case-insentive handling
+    OriginalName_: TIdentifierName;  // Always in original case for case-sensitive handling
+
+    function GetTokenIndex: TTokenIndex;
+
+    function GetKind: TTokenKind;
+
+    function GetName: TIdentifierName;
+    function GetOriginalName: TIdentifierName;
+  public
     TokenIndex: TTokenIndex;
     SourceLocation: TSourceLocation;
-    Kind: TTokenKind;
-    // For Kind=IDENTTOK:
-    Name: TIdentifierName;
+
     // For Kind=INTNUMBERTOK:
     Value: TInteger;
     // For Kind=FRACNUMBERTOK:
@@ -350,6 +368,15 @@ type
     // For Kind=STRINGLITERALTOK:
     StrAddress: Word;
     StrLength: Word;
+
+    property Kind: TTokenKind read GetKind;
+    property Name: TIdentifierName read GetName;
+    property OriginalName: TIdentifierName read GetOriginalName;
+
+    constructor Create(const TokenIndex: TTokenIndex; const Kind: TTokenKind; const SourceFile: TSourceFile);
+    procedure MakeKind(const Kind: TTokenKind);
+    procedure MakeIdentifier(const Name: TIdentifierName);
+    procedure MakeFracNumber(const FracValue: Single);
 
     function GetSourceFile: TSourceFile;
     function GetSourceFileName: TSourceFileName;
@@ -361,6 +388,7 @@ type
     function GetDataType: TDataType;
 
     function GetSpelling: TString;
+
 
   end;
 
@@ -852,6 +880,53 @@ end;
 // ----------------------------------------------------------------------------
 // Class TToken
 // ----------------------------------------------------------------------------
+
+constructor TToken.Create(const TokenIndex: TTokenIndex; const Kind: TTokenKind; const SourceFile: TSourceFile);
+begin
+  TokenIndex_ := TokenIndex;
+  Self.Kind_ := Kind;
+  Self.SourceLocation.SourceFile := SourceFile;
+end;
+
+function TToken.GetTokenIndex: TTokenIndex;
+begin
+  Result := TokenIndex_;
+end;
+
+procedure TToken.MakeKind(const Kind: TTokenKind);
+begin
+  Kind_ := Kind;
+end;
+
+procedure TToken.MakeIdentifier(const Name: TIdentifierName);
+begin
+  Kind_ := TTokenKind.IDENTTOK;
+  Name_ := Name;
+  OriginalName_ := Name;
+end;
+
+procedure TToken.MakeFracNumber(const FracValue: Single);
+begin
+  Kind_ := TTokenKind.FRACNUMBERTOK;
+  Self.FracValue := FracValue;
+end;
+
+function TToken.GetKind: TTokenKind;
+begin
+  Result := Kind_;
+end;
+
+function TToken.GetName: TIdentifierName;
+begin
+  Result := Name_;
+end;
+
+
+function TToken.GetOriginalName: TIdentifierName;
+begin
+  Result := OriginalName_;
+end;
+
 function TToken.GetSourceFile: TSourceFile;
 begin
   Result := SourceLocation.SourceFile;
@@ -918,7 +993,7 @@ begin
 
   // Valid token indexes start at 1. The token at index 0 is kept as UNTYPED token.
   SetLength(tokenArray, 1);
-  tokenArray[0] := TToken.Create;
+  tokenArray[0] := TToken.Create(0, TTokenKind.UNTYPETOK, nil);
 end;
 
 function TTokenList.AddToken(Kind: TTokenKind; SourceFile: TSourceFile; Line, Column: Integer;
@@ -928,16 +1003,11 @@ var
 begin
   assert(SourceFile <> nil, 'No source code file specified');
 
-  Result := TToken.Create;
-
+  i := size + 1;
   // if size >= MAXTOKENS then
   //    Error(NumTok, 'Out of resources, TOK');
-  i := size + 1;
 
-  Result.TokenIndex := i;
-  Result.SourceLocation.SourceFile := SourceFile;
-  // Result.UnitIndex:=SourceFile.UnitIndex;
-  Result.Kind := Kind;
+  Result := TToken.Create(i, Kind, SourceFile);
   Result.Value := Value;
 
   if i = 1 then
@@ -1253,7 +1323,7 @@ var
           begin
             ChildIdentifier := IdentfierList.GetIdentifierAtIndex(ChildIdentIndex);
             if { (ChildIdentifier.ProcAsBlockIndex > 0) and  }
-	       (ChildIdentifier.ProcAsBlockIndex = CallGraphNode.GetChild(ChildIndex)) then
+            (ChildIdentifier.ProcAsBlockIndex = CallGraphNode.GetChild(ChildIndex)) then
             begin
               MarkNotDead(ChildIdentifier);
             end;
