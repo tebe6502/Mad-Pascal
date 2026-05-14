@@ -351,14 +351,8 @@ type
     Name_: TIdentifierName; // Always in upper case for case-insentive handling
     OriginalName_: TIdentifierName;  // Always in original case for case-sensitive handling
 
-    function GetTokenIndex: TTokenIndex;
-
-    function GetKind: TTokenKind;
-
-    function GetName: TIdentifierName;
-    function GetOriginalName: TIdentifierName;
   public
-    TokenIndex: TTokenIndex;
+
     SourceLocation: TSourceLocation;
 
     // For Kind=INTNUMBERTOK:
@@ -369,9 +363,10 @@ type
     StrAddress: Word;
     StrLength: Word;
 
-    property Kind: TTokenKind read GetKind;
-    property Name: TIdentifierName read GetName;
-    property OriginalName: TIdentifierName read GetOriginalName;
+    property TokenIndex: TTokenIndex read TokenIndex_;
+    property Kind: TTokenKind read Kind_;
+    property Name: TIdentifierName read Name_;
+    property OriginalName: TIdentifierName read OriginalName_;
 
     constructor Create(const TokenIndex: TTokenIndex; const Kind: TTokenKind; const SourceFile: TSourceFile);
     procedure MakeKind(const Kind: TTokenKind);
@@ -888,10 +883,6 @@ begin
   Self.SourceLocation.SourceFile := SourceFile;
 end;
 
-function TToken.GetTokenIndex: TTokenIndex;
-begin
-  Result := TokenIndex_;
-end;
 
 procedure TToken.MakeKind(const Kind: TTokenKind);
 begin
@@ -909,22 +900,6 @@ procedure TToken.MakeFracNumber(const FracValue: Single);
 begin
   Kind_ := TTokenKind.FRACNUMBERTOK;
   Self.FracValue := FracValue;
-end;
-
-function TToken.GetKind: TTokenKind;
-begin
-  Result := Kind_;
-end;
-
-function TToken.GetName: TIdentifierName;
-begin
-  Result := Name_;
-end;
-
-
-function TToken.GetOriginalName: TIdentifierName;
-begin
-  Result := OriginalName_;
 end;
 
 function TToken.GetSourceFile: TSourceFile;
