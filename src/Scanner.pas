@@ -20,8 +20,8 @@ type
     procedure TokenizeProgram(const ProgramUnit: TSourceFile; const UsesOn: Boolean);
 
   private
-    procedure AddToken(Kind: TTokenKind; SourceFile: TSourceFile; Line, Column: Integer; Value: TInteger);
-    procedure AddMacroToken(Kind: TTokenKind; Line, Column: Integer; Value: TInteger);
+    function AddToken(Kind: TTokenKind; SourceFile: TSourceFile; Line, Column: Integer; Value: TInteger): TToken;
+    function AddMacroToken(Kind: TTokenKind; Line, Column: Integer; Value: TInteger): TToken;
     procedure TokenizeMacro(a: String; Line, Spaces: Integer);
   end;
 
@@ -186,14 +186,14 @@ end;  //AddResource
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 
-procedure TScanner.AddToken(Kind: TTokenKind; SourceFile: TSourceFile; Line, Column: Integer; Value: TInteger);
+function TScanner.AddToken(Kind: TTokenKind; SourceFile: TSourceFile; Line, Column: Integer; Value: TInteger): TToken;
 begin
-  tokenList.AddToken(kind, SourceFile, line, Column, Value);
+  Result := tokenList.AddToken(kind, SourceFile, line, Column, Value);
 end;
 
-procedure TScanner.AddMacroToken(Kind: TTokenKind; Line, Column: Integer; Value: TInteger);
+function TScanner.AddMacroToken(Kind: TTokenKind; Line, Column: Integer; Value: TInteger): TToken;
 begin
-  AddToken(kind, SourceFileList.GetSourceFile(SYSTEM_UNIT_INDEX), line, Column, Value);
+  Result := AddToken(kind, SourceFileList.GetSourceFile(SYSTEM_UNIT_INDEX), line, Column, Value);
 end;
 
 
@@ -686,7 +686,7 @@ var
 
                               CheckCommonConstType(NumTok, TDataType.WORDTOK, GetValueType(v));
 
-                              TokenAt(NumTok).Value := v;
+                              TokenAt(NumTok).SetIntegerValue(v);
 
                               AddToken(TTokenKind.SEMICOLONTOK, ActiveSourceFile, Line, 1, 0);
 
@@ -1171,6 +1171,8 @@ var
 
     end;
 
+  var
+    token: TToken;
   begin
 
     inFile := TFileSystem.CreateBinaryFile(SCANNER_CACHED);
@@ -1200,7 +1202,7 @@ var
 
         if Length(Num) > 0 then      // Number found
         begin
-          AddToken(TTokenKind.INTNUMBERTOK, ActiveSourceFile, Line, length(Num) + Spaces, StrToInt(Num));
+          token := AddToken(TTokenKind.INTNUMBERTOK, ActiveSourceFile, Line, length(Num) + Spaces, StrToInt(Num));
           Spaces := 0;
 
           if ch = '.' then      // Fractional part expected
@@ -1212,14 +1214,12 @@ var
             begin        // Fractional part found
               Frac := ReadFractionalPart(ch);
 
-              TokenAt(NumTok).Kind := TTokenKind.FRACNUMBERTOK;
-
               if length(Num) > 17 then
-                TokenAt(NumTok).FracValue := 0
+                Token.MakeFracNumber(0)
               else
-                TokenAt(NumTok).FracValue := StrToFloat(Num + Frac);
+                Token.MakeFracNumber(StrToFloat(Num + Frac));
 
-              TokenAt(NumTok).SourceLocation.Column :=
+              Token.SourceLocation.Column :=
                 TokenAt(NumTok - 1).SourceLocation.Column + length(Num) + length(Frac) + Spaces;
               Spaces := 0;
             end;
@@ -1347,8 +1347,8 @@ var
             if CurToken = TTokenKind.ASMTOK then
             begin
 
-              TokenAt(NumTok).Kind := CurToken;
-              TokenAt(NumTok).Value := 0;
+              TokenAt(NumTok).MakeKind(CurToken);
+              TokenAt(NumTok).SetIntegerValue(0);
 
               tmp := InFile.FilePos();
 
@@ -1366,7 +1366,7 @@ var
 
                 line := _line; // Start reading again after 'ASM'
 
-                TokenAt(NumTok).Value := 1;
+                TokenAt(NumTok).SetIntegerValue(1);
 
                 InFile.Seek2(tmp - 1);
 
@@ -1433,7 +1433,7 @@ var
 
                 if CurToken <> TTokenKind.UNTYPETOK then
                 begin // Keyword found
-                  TokenAt(NumTok).Kind := CurToken;
+                  TokenAt(NumTok).MakeKind(CurToken);
 
                   if CurToken = TTokenKind.USESTOK then UsesFound := True;
 
@@ -1446,8 +1446,7 @@ var
                 end
                 else
                 begin // Identifier found
-                  TokenAt(NumTok).Kind := TTokenKind.IDENTTOK;
-                  TokenAt(NumTok).Name := TextBuffer.GetString();
+                  TokenAt(NumTok).MakeIdentifier(TextBuffer.GetString());
                   // if TextBuffer.GetString() = 'RIJNDAEL' then
                   // begin
                   //   WriteLn('INFO: Identifier found ' + TextBuffer.GetString());
@@ -1673,13 +1672,12 @@ var
             if (ch = '.') and (ch2 in ['0'..'9']) then
             begin  // Fractional part found
 
-              AddToken(TTokenKind.INTNUMBERTOK, ActiveSourceFile, Line, 0, 0);
+              token := AddToken(TTokenKind.INTNUMBERTOK, ActiveSourceFile, Line, 0, 0);
 
               Frac := ReadFractionalPart(ch2);
 
-              TokenAt(NumTok).Kind := TTokenKind.FRACNUMBERTOK;
-              TokenAt(NumTok).FracValue := StrToFloat('0' + Frac);
-              TokenAt(NumTok).SourceLocation.Column :=
+              token.MakeFracNumber(StrToFloat('0' + Frac));
+              token.SourceLocation.Column :=
                 TokenAt(NumTok - 1).SourceLocation.Column + length(Frac) + Spaces;
               Spaces := 0;
 
@@ -1928,6 +1926,8 @@ var
 
   end;
 
+var
+  Token: TToken;
   // TokenizeMacro
 begin
 
@@ -1967,7 +1967,7 @@ begin
 
       if Length(Num) > 0 then      // Number found
       begin
-        AddMacroToken(TTokenKind.INTNUMBERTOK, Line, length(Num) + Spaces, StrToInt(Num));
+        token := AddMacroToken(TTokenKind.INTNUMBERTOK, Line, length(Num) + Spaces, StrToInt(Num));
         Spaces := 0;
 
         if ch = '.' then      // Fractional part expected
@@ -1982,9 +1982,8 @@ begin
           begin        // Fractional part found
             Frac := ReadFractionalPart(a, i, ch);
 
-            TokenAt(NumTok).Kind := TTokenKind.FRACNUMBERTOK;
-            TokenAt(NumTok).FracValue := StrToFloat(Num + Frac);
-            TokenAt(NumTok).SourceLocation.Column :=
+            token.MakeFracNumber(StrToFloat(Num + Frac));
+            token.SourceLocation.Column :=
               TokenAt(NumTok - 1).SourceLocation.Column + length(Num) + length(Frac) + Spaces;
             Spaces := 0;
           end;
@@ -2059,13 +2058,12 @@ begin
             if CurToken <> TTokenKind.UNTYPETOK then
             begin // Keyword found
 
-              TokenAt(NumTok).Kind := CurToken;
+              TokenAt(NumTok).MakeKind(CurToken);
 
             end
             else
             begin // Identifier found
-              TokenAt(NumTok).Kind := TTokenKind.IDENTTOK;
-              TokenAt(NumTok).Name := TextBuffer.GetString();
+              TokenAt(NumTok).MakeIdentifier(TextBuffer.GetString());
             end;
 
         end;
@@ -2288,12 +2286,11 @@ begin
           if (ch = '.') and (ch2 in ['0'..'9']) then
           begin
 
-            AddMacroToken(TTokenKind.INTNUMBERTOK, Line, 0, 0);
+            Token := AddMacroToken(TTokenKind.INTNUMBERTOK, Line, 0, 0);
             Frac := ReadFractionalPart(a, i, ch2);
 
-            TokenAt(NumTok).Kind := TTokenKind.FRACNUMBERTOK;
-            TokenAt(NumTok).FracValue := StrToFloat('0' + Frac);
-            TokenAt(NumTok).SourceLocation.Column := TokenAt(NumTok - 1).SourceLocation.Column + length(Frac) + Spaces;
+            Token.MakeFracNumber(StrToFloat('0' + Frac));
+            Token.SourceLocation.Column := TokenAt(NumTok - 1).SourceLocation.Column + length(Frac) + Spaces;
             Spaces := 0;
 
             Frac := '';

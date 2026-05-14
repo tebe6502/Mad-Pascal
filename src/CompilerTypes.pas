@@ -338,18 +338,53 @@ type
   TTokenIndex = Integer;
 
   TToken = class
-    TokenIndex: TTokenIndex;
-    SourceLocation: TSourceLocation;
-    Kind: TTokenKind;
+
+    // Because token after always accessed by reference, the properties are read-only
+    // to prevent accidential write access outside of the scanner.
+  private
+  var
+    TokenIndex_: TTokenIndex;
+
+    Kind_: TTokenKind;
+
     // For Kind=IDENTTOK:
-    Name: TIdentifierName;
-    // For Kind=INTNUMBERTOK:
-    Value: TInteger;
+    Name_: TIdentifierName; // Always in upper case for case-insentive handling
+    OriginalName_: TIdentifierName;  // Always in original case for case-sensitive handling
+    // For Kind=INTNUMBERTOK: Value
+    // For Kind=CHARLITERALTOK: Ord(c)
+    // For Kind=STRINGLITERALTOK: Length(s)
+    Value_: TInteger;
     // For Kind=FRACNUMBERTOK:
-    FracValue: Single;
+    FracValue_: Single;
     // For Kind=STRINGLITERALTOK:
-    StrAddress: Word;
-    StrLength: Word;
+    StrAddress_: Word;
+    StrLength_: Word;
+  public
+
+    SourceLocation: TSourceLocation;
+
+    property TokenIndex: TTokenIndex read TokenIndex_;
+    property Kind: TTokenKind read Kind_;
+
+    // For Kind=IDENTTOK:
+    property Name: TIdentifierName read Name_;
+    property OriginalName: TIdentifierName read OriginalName_;
+    // For Kind=INTNUMBERTOK:
+    property Value: TInteger read Value_;
+    procedure SetValue(const Value: TInteger);
+    procedure SetIntegerValue(const Value: TInteger);
+    procedure SetStringValue(const StrAddress: Word; const StrLength: Word);
+
+    // For Kind=FRACNUMBERTOK:
+    property FracValue: Single read FracValue_;
+    // For Kind=STRINGLITERALTOK:
+    property StrAddress: Word read StrAddress_;
+    property StrLength: Word read StrLength_;
+
+    constructor Create(const TokenIndex: TTokenIndex; const Kind: TTokenKind; const SourceFile: TSourceFile);
+    procedure MakeKind(const Kind: TTokenKind);
+    procedure MakeIdentifier(const Name: TIdentifierName);
+    procedure MakeFracNumber(const FracValue: Single);
 
     function GetSourceFile: TSourceFile;
     function GetSourceFileName: TSourceFileName;
@@ -361,6 +396,7 @@ type
     function GetDataType: TDataType;
 
     function GetSpelling: TString;
+
 
   end;
 
@@ -852,6 +888,48 @@ end;
 // ----------------------------------------------------------------------------
 // Class TToken
 // ----------------------------------------------------------------------------
+
+constructor TToken.Create(const TokenIndex: TTokenIndex; const Kind: TTokenKind; const SourceFile: TSourceFile);
+begin
+  TokenIndex_ := TokenIndex;
+  Self.Kind_ := Kind;
+  Self.SourceLocation.SourceFile := SourceFile;
+end;
+
+procedure TToken.SetValue(const Value: TInteger);
+begin
+  Value_ := Value;
+end;
+
+procedure TToken.SetIntegerValue(const Value: TInteger);
+begin
+  Value_ := Value;
+end;
+
+procedure TToken.SetStringValue(const StrAddress: Word; const StrLength: Word);
+begin
+  StrAddress_ := StrAddress;
+  StrLength_ := StrLength;
+end;
+
+procedure TToken.MakeKind(const Kind: TTokenKind);
+begin
+  Kind_ := Kind;
+end;
+
+procedure TToken.MakeIdentifier(const Name: TIdentifierName);
+begin
+  Kind_ := TTokenKind.IDENTTOK;
+  Name_ := Name;
+  OriginalName_ := Name;
+end;
+
+procedure TToken.MakeFracNumber(const FracValue: Single);
+begin
+  Kind_ := TTokenKind.FRACNUMBERTOK;
+  FracValue_ := FracValue;
+end;
+
 function TToken.GetSourceFile: TSourceFile;
 begin
   Result := SourceLocation.SourceFile;
@@ -918,7 +996,7 @@ begin
 
   // Valid token indexes start at 1. The token at index 0 is kept as UNTYPED token.
   SetLength(tokenArray, 1);
-  tokenArray[0] := TToken.Create;
+  tokenArray[0] := TToken.Create(0, TTokenKind.UNTYPETOK, nil);
 end;
 
 function TTokenList.AddToken(Kind: TTokenKind; SourceFile: TSourceFile; Line, Column: Integer;
@@ -928,17 +1006,12 @@ var
 begin
   assert(SourceFile <> nil, 'No source code file specified');
 
-  Result := TToken.Create;
-
+  i := size + 1;
   // if size >= MAXTOKENS then
   //    Error(NumTok, 'Out of resources, TOK');
-  i := size + 1;
 
-  Result.TokenIndex := i;
-  Result.SourceLocation.SourceFile := SourceFile;
-  // Result.UnitIndex:=SourceFile.UnitIndex;
-  Result.Kind := Kind;
-  Result.Value := Value;
+  Result := TToken.Create(i, Kind, SourceFile);
+  Result.SetValue(Value);
 
   if i = 1 then
     Column := 1
@@ -1253,7 +1326,7 @@ var
           begin
             ChildIdentifier := IdentfierList.GetIdentifierAtIndex(ChildIdentIndex);
             if { (ChildIdentifier.ProcAsBlockIndex > 0) and  }
-	       (ChildIdentifier.ProcAsBlockIndex = CallGraphNode.GetChild(ChildIndex)) then
+            (ChildIdentifier.ProcAsBlockIndex = CallGraphNode.GetChild(ChildIndex)) then
             begin
               MarkNotDead(ChildIdentifier);
             end;

@@ -1,5 +1,7 @@
-program fujitalk;
 {$librarypath 'blibs'}
+
+program fujitalk;
+
 uses atari, http_client, crt, b_system, efast, fn_cookies, joystick;
 
 const 
@@ -791,7 +793,7 @@ begin
         if cmd[c+1]<>char(strPtr[c+2]) then exit(false);
         Inc(c);
     end;
-    if (char(strPtr[c+2])<>' '~) and (c < Length(strPtr)-1) then exit(false);
+    if (char(strPtr[c+2])<>' '~) and (c < Length(^strPtr)-1) then exit(false);
 end;
 
 procedure FetchArg(count:byte;var s:string);

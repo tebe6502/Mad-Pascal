@@ -8278,7 +8278,7 @@ begin
                     if Pass = TPass.CODE_GENERATION then
                     begin
                       DefineStaticString(i, chr(TokenAt(i).Value));
-                      TokenAt(i).Kind := TTokenKind.STRINGLITERALTOK;
+                      TokenAt(i).MakeKind(TTokenKind.STRINGLITERALTOK);
 
                       asm65(#9'lda' + StackVariable0);
                       asm65(#9'sta' + StackVariable0);
@@ -8318,7 +8318,7 @@ begin
                     if Pass = TPass.CODE_GENERATION then
                     begin
                       DefineStaticString(i, chr(TokenAt(i).Value));
-                      TokenAt(i).Kind := TTokenKind.STRINGLITERALTOK;
+                      TokenAt(i).MakeKind(TTokenKind.STRINGLITERALTOK);
 
                       asm65(#9'lda' + StackVariable0);
                       asm65(#9'sta' + StackVariable0);
@@ -16711,7 +16711,7 @@ var
 
 
     if (ConstValType = TDataType.STRINGPOINTERTOK) and (ActualParamType = TDataType.CHARTOK) then
-    begin  // rejestrujemy CHAR jako STRING
+    begin  // Register CHAR as STRING
 
       if StaticData then
         Error(i, 'Memory overlap due conversion CHAR to STRING, use VAR instead CONST');
@@ -16720,7 +16720,7 @@ var
       DefineStaticString(i, chr(ch));
 
       ConstVal := TokenAt(i).StrAddress - CODEORIGIN + CODEORIGIN_BASE;
-      TokenAt(i).Value := ch;
+      // TODO JAC! Why write back the same value TokenAt(i).Value := ch;?
 
       ActualParamType := TDataType.STRINGPOINTERTOK;
 
@@ -16909,7 +16909,7 @@ var
 
 
     if (ConstValType = TDataType.STRINGPOINTERTOK) and (ActualParamType = TDataType.CHARTOK) then
-    begin  // rejestrujemy CHAR jako STRING
+    begin  // Register CHAR as STRING
 
       if StaticData then
         Error(i, 'Memory overlap due conversion CHAR to STRING, use VAR instead CONST');
@@ -16918,7 +16918,7 @@ var
       DefineStaticString(i, chr(ch));
 
       ConstVal := TokenAt(i).StrAddress - CODEORIGIN + CODEORIGIN_BASE;
-      TokenAt(i).Value := ch;
+      // TODO JAC! Why write back the same value TokenAt(i).Value := ch;?
 
       ActualParamType := TDataType.STRINGPOINTERTOK;
 
