@@ -107,6 +107,7 @@ var
   cs: TRTLCriticalSection;
   startTickCount: QWord;
   endTickCount: QWord;
+  duration: QWord;
   seconds: QWord;
   minutes: QWord;
 
@@ -789,6 +790,9 @@ type
     i: Integer;
     parallelData: TParallelData;
   begin
+
+    if ProgramFiles.Count = 0 then exit;
+
     startTickCount := GetTickCount64;
 
     SetLength(operation.results, ProgramFiles.Count);
@@ -1013,6 +1017,11 @@ type
         fileInfo.Free;
       end;
 
+      if (ProgramFiles.Count = 0) then
+      begin
+        Log('No matching files found.');
+        Exit;
+      end;
 
 
       if (options.AllThreads) then
@@ -1184,7 +1193,8 @@ begin
     end;
   end;
   endTickCount := GetTickCount64;
-  seconds := trunc((endTickCount - startTickCount) / 1000);
+  duration := Max(endTickCount - startTickCount, 1);
+  seconds := trunc(duration / 1000);
   minutes := Trunc(seconds / 60);
   seconds := seconds - minutes * 60;
   Log(Format('Main completed after %d minutes, %d seconds.', [minutes, seconds]));
