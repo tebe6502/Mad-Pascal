@@ -146,6 +146,7 @@ This text-mode windowing library has window controls and modern gadgets (widgets
 * [artur](https://gitlab.com/bocianu/artur)
 * [jcq](https://gitlab.com/bocianu/jcq)
 * [Fujinet udp shoutbox](https://gitlab.com/bocianu/fujinet-udp-shoutbox)
+* [Fujitalk-client](https://gitlab.com/bocianu/fujitalk-client)
 * [speedway](https://gitlab.com/bocianu/speedway)
 * [chessnet](https://gitlab.com/bocianu/chessnet)
 * [gr9Lab](https://gitlab.com/amarok8bit/gr9Lab)
