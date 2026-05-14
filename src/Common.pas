@@ -609,7 +609,7 @@ begin
   for i := 0 to High(linkObj) - 1 do
     if linkObj[i] = StrValue then
     begin
-      TokenAt(tokenIndex).Value := i;
+      TokenAt(tokenIndex).SetValue( i);
       exit;
     end;
 
@@ -618,7 +618,7 @@ begin
 
   SetLength(linkObj, i + 2);
 
-  TokenAt(tokenIndex).Value := i;
+  TokenAt(tokenIndex).SetValue( i);
 
 end;
 
@@ -630,8 +630,9 @@ procedure DefineStaticString(StrTokenIndex: TTokenIndex; StrValue: String);
 var
   i, len: Integer;
   Data: TWordMemory;
+  Token: TToken;
 begin
-
+  Token := TokenAt(StrTokenIndex);
   len := Length(StrValue);
 
   // TODO: Error?
@@ -650,18 +651,16 @@ begin
   //   IntToStr(len) + ' Value=' + StrValue);
   for i := 1 to len do Data[i] := Ord(StrValue[i]);
 
+  // Find and reuse already existing string literal.
   for i := 0 to NumStaticStrChars - len - 1 do
     if CompareWord(Data[0], StaticStringData[i], Len + 1) = 0 then
     begin
-
-      TokenAt(StrTokenIndex).StrLength := len;
-      TokenAt(StrTokenIndex).StrAddress := CODEORIGIN + i;
+      Token.SetStringValue(CODEORIGIN + i, len);
 
       exit;
     end;
 
-  TokenAt(StrTokenIndex).StrLength := len;
-  TokenAt(StrTokenIndex).StrAddress := CODEORIGIN + NumStaticStrChars;
+  Token.SetStringValue(CODEORIGIN + NumStaticStrChars, len);
 
   StaticStringData[NumStaticStrChars] := Data[0]; //length(StrValue);
   Inc(NumStaticStrChars);

@@ -350,23 +350,36 @@ type
     // For Kind=IDENTTOK:
     Name_: TIdentifierName; // Always in upper case for case-insentive handling
     OriginalName_: TIdentifierName;  // Always in original case for case-sensitive handling
-
+    // For Kind=INTNUMBERTOK: Value
+    // For Kind=CHARLITERALTOK: Ord(c)
+    // For Kind=STRINGLITERALTOK: Length(s)
+    Value_: TInteger;
+    // For Kind=FRACNUMBERTOK:
+    FracValue_: Single;
+    // For Kind=STRINGLITERALTOK:
+    StrAddress_: Word;
+    StrLength_: Word;
   public
 
     SourceLocation: TSourceLocation;
 
-    // For Kind=INTNUMBERTOK:
-    Value: TInteger;
-    // For Kind=FRACNUMBERTOK:
-    FracValue: Single;
-    // For Kind=STRINGLITERALTOK:
-    StrAddress: Word;
-    StrLength: Word;
-
     property TokenIndex: TTokenIndex read TokenIndex_;
     property Kind: TTokenKind read Kind_;
+
+    // For Kind=IDENTTOK:
     property Name: TIdentifierName read Name_;
     property OriginalName: TIdentifierName read OriginalName_;
+    // For Kind=INTNUMBERTOK:
+    property Value: TInteger read Value_;
+    procedure SetValue(const Value: TInteger);
+    procedure SetIntegerValue(const Value: TInteger);
+    procedure SetStringValue(const StrAddress: Word; const StrLength: Word);
+
+    // For Kind=FRACNUMBERTOK:
+    property FracValue: Single read FracValue_;
+    // For Kind=STRINGLITERALTOK:
+    property StrAddress: Word read StrAddress_;
+    property StrLength: Word read StrLength_;
 
     constructor Create(const TokenIndex: TTokenIndex; const Kind: TTokenKind; const SourceFile: TSourceFile);
     procedure MakeKind(const Kind: TTokenKind);
@@ -883,6 +896,21 @@ begin
   Self.SourceLocation.SourceFile := SourceFile;
 end;
 
+procedure TToken.SetValue(const Value: TInteger);
+begin
+  Value_ := Value;
+end;
+
+procedure TToken.SetIntegerValue(const Value: TInteger);
+begin
+  Value_ := Value;
+end;
+
+procedure TToken.SetStringValue(const StrAddress: Word; const StrLength: Word);
+begin
+  StrAddress_ := StrAddress;
+  StrLength_ := StrLength;
+end;
 
 procedure TToken.MakeKind(const Kind: TTokenKind);
 begin
@@ -899,7 +927,7 @@ end;
 procedure TToken.MakeFracNumber(const FracValue: Single);
 begin
   Kind_ := TTokenKind.FRACNUMBERTOK;
-  Self.FracValue := FracValue;
+  FracValue_ := FracValue;
 end;
 
 function TToken.GetSourceFile: TSourceFile;
@@ -983,7 +1011,7 @@ begin
   //    Error(NumTok, 'Out of resources, TOK');
 
   Result := TToken.Create(i, Kind, SourceFile);
-  Result.Value := Value;
+  Result.SetValue(Value);
 
   if i = 1 then
     Column := 1

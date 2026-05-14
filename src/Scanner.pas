@@ -686,7 +686,7 @@ var
 
                               CheckCommonConstType(NumTok, TDataType.WORDTOK, GetValueType(v));
 
-                              TokenAt(NumTok).Value := v;
+                              TokenAt(NumTok).SetIntegerValue(v);
 
                               AddToken(TTokenKind.SEMICOLONTOK, ActiveSourceFile, Line, 1, 0);
 
@@ -1348,7 +1348,7 @@ var
             begin
 
               TokenAt(NumTok).MakeKind(CurToken);
-              TokenAt(NumTok).Value := 0;
+              TokenAt(NumTok).SetIntegerValue(0);
 
               tmp := InFile.FilePos();
 
@@ -1366,7 +1366,7 @@ var
 
                 line := _line; // Start reading again after 'ASM'
 
-                TokenAt(NumTok).Value := 1;
+                TokenAt(NumTok).SetIntegerValue(1);
 
                 InFile.Seek2(tmp - 1);
 
