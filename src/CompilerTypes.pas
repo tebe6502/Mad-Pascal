@@ -373,6 +373,7 @@ type
     property Value: TInteger read Value_;
     procedure SetValue(const Value: TInteger);
     procedure SetIntegerValue(const Value: TInteger);
+    procedure SetCharValue(const Value: Char);
     procedure SetStringValue(const StrAddress: Word; const StrLength: Word);
 
     // For Kind=FRACNUMBERTOK:
@@ -904,6 +905,12 @@ end;
 procedure TToken.SetIntegerValue(const Value: TInteger);
 begin
   Value_ := Value;
+end;
+
+
+procedure TToken.SetCharValue(const Value: Char);
+begin
+  Value_ := Ord(Value);
 end;
 
 procedure TToken.SetStringValue(const StrAddress: Word; const StrLength: Word);
