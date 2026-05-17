@@ -1,45 +1,13 @@
-{$librarypath 'blibs'}
-
 program fujitalk;
-
+{$librarypath '../blibs/'}
 uses atari, http_client, crt, b_system, efast, fn_cookies, joystick;
 
 const 
 {$i const.inc}
 {$r resources.rc}
 {$i interrupts.inc}
+{$i types.inc}
 
-type TConfig = record
-    currentTheme:byte;
-    sioAudio:byte;
-    consoleEveryTab:byte;
-end;
-
-type TUser = record
-    id: cardinal;
-    nick: string[12];
-    key: string[8];
-end;
-
-type TState = record
-    activeTab: byte;
-    tabCount: byte;
-    lastLine: array[0..4] of cardinal;
-    unreadTab: array[0..4] of byte;
-    xcur: array[0..4] of byte;
-    ycur: array[0..4] of byte;
-end;
-
-type TStatus = record
-    tabCount: byte;
-    forceTabOpen: byte;
-    lastLine: array[0..4] of cardinal;
-    name0:string[16];
-    name1:string[16];
-    name2:string[16];
-    name3:string[16];
-    name4:string[16];
-end;    
 
    
 var
@@ -68,7 +36,6 @@ var
     upass,unick: TString;
     inputfg: byte;
 
-
     oldvbl: pointer;
     HELPFG: byte absolute $2DC;
     VDELAY: byte absolute $D01C;    
@@ -92,14 +59,32 @@ var
     strPtr: ^string;
     
     tabCarret: array [0..4] of byte;
+    tabLines: array [0..4] of byte;
     
     loggedIn: boolean;
     lastKey: char;
 
     refreshDelay: word;
+    tabUpScroll: byte;
 
-procedure StateCheck;forward; keep;
+procedure StateCheck;forward;keep;
+procedure TryAutoLogin;forward;keep;
 
+procedure DrawScrollBar(tab:byte);
+var ps,pe,b,i:byte;
+begin
+    if tabLines[tab]<=VIEW_HEIGHT then begin
+        fillByte(pointer(PAGER_OFFSET),PAGER_HEIGHT+1,1);
+    end else begin
+        ps := (((tabLines[tab] - VIEW_HEIGHT) - tabUpScroll) * PAGER_HEIGHT) div tabLines[tab];;
+        pe := PAGER_HEIGHT - ((tabUpScroll * PAGER_HEIGHT) div tabLines[tab]); 
+        for i:=0 to PAGER_HEIGHT do begin
+            b:=1;
+            if (i>=ps) and (i<=pe) then b:=4;
+            poke(PAGER_OFFSET + i, b);
+        end;
+    end;
+end;
 
 function Atascii2Antic(c: char): char; overload;
 begin
@@ -133,6 +118,23 @@ begin
         ror
         sta result;
     };
+end;
+
+
+procedure InitPMG;
+begin
+    SDMCTL := %00101110;    
+    GPRIOR := $21;    
+    PMBASE := Hi(PMG_ADDRESS);
+    GRACTL := %00000011;
+    sizep0 := 0;
+    sizep1 := 0;
+    sizem  := 0;
+    //hposp0 := SPINNER_LEFT;
+    //hposp1 := SPINNER_LEFT;
+    hposm0 := VBAR_LEFT;
+    hposm1 := VBAR_LEFT;
+    vdelay := $0f;
 end;
 
 procedure Str2Antic(var s: string);
@@ -209,7 +211,7 @@ var carret:shortInt;
     row:byte;
     dest,dlist:word;
 begin
-    carret := tabCarret[tnum] - VIEW_HEIGHT;
+    carret := tabCarret[tnum] - VIEW_HEIGHT - tabUpScroll;
     dlist := DISPLAY_LIST_ADDRESS + 7;
     if carret < 0 then carret := TAB_LINES + carret; 
     for row := 0 to VIEW_HEIGHT - 1 do begin
@@ -221,6 +223,7 @@ begin
     end;
     inc(dlist, 1);
     dpoke(dlist, inputsVram[tnum]);
+    DrawScrollBar(tnum);
 end;
 
 
@@ -244,15 +247,16 @@ var tab,i :byte;
     dest:word;
     off:byte;
 begin
-    fillbyte(pointer(VRAM_STATUS),40,0);
+    fillbyte(pointer(VRAM_STATUS),80,0);
     for tab := 0 to state.tabCount - 1 do begin
         dest := VRAM_STATUS + tabOffsets[tab];
         strPtr := tabNames[tab];
         off := 0;
         if tab = state.activeTab then off := 128;
         for i:=1 to strPtr[0] do begin
-            if i>9 then break;
+            if i>8 then break;
             poke(dest, byte(Atascii2Antic(strPtr[i]))+off);
+            if state.unreadTab[tab] = 0 then poke(dest+LINE_WIDTH, byte(Atascii2Antic(strPtr[i]))+off);
             inc(dest);
         end;
     
@@ -281,6 +285,7 @@ procedure Tabs14Clear();
 begin
     FillByte(pointer(VRAM_TAB1),BUFFER_ADDRESS-VRAM_TAB1,0);
     FillByte(@tabCarret[1],4,0);
+    FillByte(@tabLines[1],4,0);
     fillByte(@state.lastLine[1],4*4,$ff);
 end;
 
@@ -288,6 +293,7 @@ procedure TabClear(tab: byte);
 begin
     FillByte(pointer(tabVram[tab]),TAB_SIZE,0);
     tabCarret[tab] := 0;
+    tabLines[tab] := 0;
     InitInput(tab);
 end;
 
@@ -296,6 +302,7 @@ procedure TabCarretPush(tnum:byte);
 begin
     tabCarret[tnum] := tabCarret[tnum] + 1;
     if (tabCarret[tnum] = TAB_LINES) then tabCarret[tnum]:=0;
+    if tabLines[tnum]<TAB_LINES then tabLines[tnum] := tabLines[tnum] + 1;
 end;
 
 
@@ -344,7 +351,7 @@ begin
     TabAppendLines(tnum,count,@responseBuffer[0]);
 end;
 
-procedure ShowError;
+function ShowError:byte;
 var tmpstr:Tstring;
     err:byte;
 begin
@@ -357,6 +364,7 @@ begin
     strPtr := pointer(@responseBuffer[2]);
     strTemp := Concat(strTemp, strPtr);
     TabAppendStr(0,strTemp);
+    result := err;
 end;
 
 procedure ShowIOerror(errCode:byte);
@@ -496,14 +504,12 @@ begin
             lastKey := key;
             case key of
 
-                //char(29): result := I_DOWN;
-                //char(28): result := I_UP;
-                //char(31): result := I_RIGHT;
-                //char(30): result := I_LEFT;
-
+                char(21): result := I_UP;  // ctrl-u
+                char(4): result := I_DOWN; // ctrl-d
+                char(27): result := I_BOTTOM; // esc
                 char(155): result := INPUT_ENTER;
                 char(127): result := INPUT_TAB;
-                
+                char(8): result := INPUT_HIDE;
             end;
             
         end;
@@ -523,6 +529,7 @@ end;
 procedure PostUrlData(var s: string);
 begin
     RequestInit();
+    Pause;
     HTTP_Post(@url[1], @responseBuffer[0], @s[1], word(s[0]));
     strFlush();
     if HTTP_error <> 1 then begin
@@ -538,7 +545,7 @@ begin
     url := Concat(url, '/');
 end;
 
-procedure SendInput();
+procedure SendInput(strAddress:word);
 var tabnum:string[3];
 begin
     BuildUrl;
@@ -546,7 +553,7 @@ begin
     url := Concat(url, 'say/');
     url := Concat(url, tabnum);
     url := Concat(url, #0);
-    strPtr := pointer(inputsVram[state.activeTab]-1);
+    strPtr := pointer(strAddress);
     strPtr := Str2Atascii(strPtr);
     PostUrlData(strPtr);
 end;
@@ -555,6 +562,7 @@ end;
 procedure ProcessResponse;
 var targetTab: byte;
     lineCount: byte;
+    errCode: byte;
     lastLine: cardinal;
 begin
     //if HTTP_reqSize = 0 then exit;
@@ -569,7 +577,18 @@ begin
         SaveAuth;
     end;
     
-    if isResponse(TOKEN_ERROR) then ShowError;
+    if isResponse(TOKEN_ERROR) then begin
+        errCode := ShowError;
+        case errCode of
+            ERROR_LOGIN_FAILED,
+            ERROR_SIGNUP_FAILED,
+            ERROR_UNAUTHORIZED: begin
+                loggedIn := false;
+                if errCode = ERROR_UNAUTHORIZED then TryAutoLogin();
+            end;
+            
+        end;
+    end;
 
     if isResponse(TOKEN_STATUS) then begin
         move(@responseBuffer[1], @status, sizeOf(status));
@@ -592,6 +611,7 @@ end;
 procedure GetUrlData();
 begin
     RequestInit();
+    Pause;
     HTTP_GetWithHeaders(@url[1], @responseBuffer[0]);
     strFlush();
     //showIOError(HTTP_errorCode);
@@ -633,6 +653,7 @@ begin
     state.xcur[state.activeTab] := colcrs;
     state.ycur[state.activeTab] := rowcrs;
     state.activeTab := tnum;
+    tabUpScroll := 0;
     TabShow(tnum);
     RestoreInput;
     TabsDraw();
@@ -642,7 +663,7 @@ begin
    
 end;
 
-procedure StateCheck; keep;
+procedure StateCheck;
 var tab:byte;
     changed:boolean;
 begin
@@ -751,7 +772,7 @@ begin
     TabAppendStr(0, '  '+#$05#$06#$07#$08#$09#$17#$18#$19#$0f#$10#$11#$12#$13+' by bocianu@gmail.com');
     TabAppendStr(0, '  '+#$20#$20#$20#$20#$20#$20#$1d#$1e#$1f#$20#$20#$20#$20);
     TabAppendStr(0, '  ');
-    TabAppendStr(0, '  version 0.2.6');
+    TabAppendStr(0, '  version 0.3.3');
     TabAppendStr(0, '  ');
     TabAppendStr(0, '  ');
     TabAppendStr(0, '  Type /help to learn more commands.');
@@ -767,19 +788,11 @@ begin
     TabAppendStr(0, '    '+'/register nick password'*);
     TabAppendStr(0, '  Login:');
     TabAppendStr(0, '    '+'/login nick password'*);
-    TabAppendStr(0, '  Authorize using stored key:');
-    TabAppendStr(0, '    '+'/auth'*);
-    TabAppendStr(0, '  Show channels list:');
-    TabAppendStr(0, '    '+'/clist'*);
-    TabAppendStr(0, '  Join channel:');
-    TabAppendStr(0, '    '+'/join channelname'*);
-    TabAppendStr(0, '  Check private messages:');
-    TabAppendStr(0, '    '+'/priv'*);
-    TabAppendStr(0, '  Join private conversation:');
-    TabAppendStr(0, '    '+'/join @nick'*);
     TabAppendStr(0, '  ');
     TabAppendStr(0, '  '+'SELECT'*+' next tab  '+'START'*+' server tab  ');
     TabAppendStr(0, '  '+'OPTION'*+' theme');
+    TabAppendStr(0, '  ');
+    TabAppendStr(0, '  After logging in, ask for /help again');
 end;    
 
 
@@ -793,7 +806,7 @@ begin
         if cmd[c+1]<>char(strPtr[c+2]) then exit(false);
         Inc(c);
     end;
-    if (char(strPtr[c+2])<>' '~) and (c < Length(^strPtr)-1) then exit(false);
+    if (char(strPtr[c+2])<>' '~) and (c < Length(strPtr^)-1) then exit(false);
 end;
 
 procedure FetchArg(count:byte;var s:string);
@@ -834,38 +847,55 @@ begin
 end;
 
 procedure SetConfig(var opt:string;var value:string);
-var success:boolean;
+var success,show0,show1:boolean;
     optval:byte;
+
+procedure ShowOption(o:byte);
+begin
+    o := o + $30;
+    strTemp[Length(strTemp)] := char(o);
+    TabAppendStr(0,strTemp);
+end;
+    
 begin
     optval := getOptVal(value);
     success := false;
+    show0 := false;
+    show1 := false;
+    if opt = '' then begin
+        show0 := true;
+        show1 := true;
+        strTemp := '* Current Configuration:';
+        TabAppendStr(0,strTemp);
+    end;
     if opt = 'sioaudio' then begin
         success := true;
         if optval <> NONE then config.sioAudio := optval;
-        optval := config.sioAudio;
-        strTemp := '* sioaudio  ';
+        show0 := true;
     end;
     if opt = 'console' then begin
         success := true;
         if optval <> NONE then config.consoleEveryTab := optval;
-        optval := config.consoleEveryTab;
-        strTemp := '* console  ';
+        show1 := true;
     end;
+    if show0 then begin
+        strTemp := '* sioaudio  ';
+        ShowOption(config.sioAudio);
+    end;
+    if show1 then begin
+        strTemp := '* console  ';
+        ShowOption(config.consoleEveryTab);
+    end;
+
     if success then begin
-        optval := optval + $30;
-        strTemp[Length(strTemp)] := char(optval);
-        TabAppendStr(0,strTemp);
         SaveConfig();
     end else begin;
-        TabAppendStr(0,'* invalid parameters');
+        //TabAppendStr(0,'* invalid parameters');
+        SendInput(inputsVram[state.activeTab]-1);
         exit;
     end;
     
-    SaveConfig();
 end;
-
-
-
 
 
 procedure ProcessInput;
@@ -883,6 +913,10 @@ begin
 
         if commandIs('reload'~) then begin
             if state.activeTab>0 then begin
+                //TabClear(state.activeTab);
+                FillByte(pointer(tabVram[state.activeTab]),TAB_SIZE,0);
+                tabCarret[state.activeTab] := 0;
+                tabLines[state.activeTab] := 0;
                 GetLines(state.activeTab,0);
             end;
             exit;
@@ -905,7 +939,7 @@ begin
         end;
 
         if commandIs('logout'~) then begin
-            SendInput;  
+            SendInput(word(@strPtr));  
             UnAuth();
             Tabs14Clear();
             TabsDraw();
@@ -919,8 +953,7 @@ begin
         end;
 
         if commandIs('help'~) then begin
-            ShowHelp;
-            exit;
+            if not loggedIn then ShowHelp();
         end;
 
         if commandIs('server'~) then begin
@@ -936,16 +969,40 @@ begin
         end;
     
     end;
-    SendInput;
+    if loggedIn then SendInput(inputsVram[state.activeTab]-1);
     
 end;
 
+procedure scrollUp();
+var linesup:byte;
+begin
+    linesup:=0;
+    if tabLines[state.activeTab]>VIEW_HEIGHT then linesup:=tabLines[state.activeTab]-VIEW_HEIGHT;
+    if tabUpScroll<linesup then Inc(tabUpScroll);
+    TabShow(state.activeTab);
+end;
+
+procedure scrollDown();
+begin
+    if tabUpScroll>0 then Dec(tabUpScroll);
+    TabShow(state.activeTab);
+end;
+
+procedure scrollReset();
+begin
+    tabUpScroll:=0;
+    TabShow(state.activeTab);
+end;
+
 procedure ProcessKey(key:byte);
+var cmd: Tstring;
 begin
     case key of
         INPUT_START: begin
             TabOpen(0);                
+            
         end;
+        INPUT_TAB,
         INPUT_SELECT: begin
             TabNext();                
         end;
@@ -953,7 +1010,35 @@ begin
             SwitchTheme();                
         end;
         
+        I_UP: begin
+            scrollUp();
+        end;
+
+        I_DOWN: begin
+            scrollDown();
+        end;
+
+        I_BOTTOM: begin
+            scrollReset();
+        end;
+        
+        INPUT_HIDE: begin
+            cmd := '/conf verbose X'~;
+            SendInput(word(@cmd));
+            GetStatus();
+        end;
+        
         INPUT_KEY: begin
+
+            if (lastKey = #27) then begin
+                scrollUp;
+                exit;
+            end;
+
+            if (lastKey = #129) then begin
+                scrollReset;
+                exit;
+            end;
             
             //if lastKey = #$ff then exit; // no
             if byte(lastKey) and %01111111 < $1b then exit;
@@ -987,9 +1072,6 @@ begin
     until result = 0;
 end;
 
-
-
-
 // ************************************************************************************************************
 // ************************************************************************************************************
 // ************************************************************************************************************
@@ -997,14 +1079,13 @@ end;
 // ************************************************************************************************************
 
 begin
-
     // copy system charset to user location
     Move(pointer($e000), pointer(CHARSET), $400);
     // update with Fujinet logo characters
     Move(pointer(LOGO_CHARSET), pointer(CHARSET + $200), $100);
-    
 
     Pause; 
+    portb:=$ff;
     nmien := $0;
     GetIntVec(iVBL, oldvbl);
     SetIntVec(iVBL, @vbl);
@@ -1015,7 +1096,9 @@ begin
     SetScreen();
     InitAll();
     strFlush();
+    InitPMG();
     ShowWelcomeScreen();
+
 
     TabAppendStr(0,'* Loading configuration ');
     LoadConfig();
@@ -1034,37 +1117,32 @@ begin
     InitInput();
 
     repeat
-
-        
         repeat 
-        
             repeat 
-                pause();
+
+                Pause();
                 input := GetUserInput();
                 
                 if refreshDelay = 0 then begin
-                    GetStatus();
+                    if loggedIn then GetStatus();
                 end else Dec(refreshDelay);
             
             until input <> INPUT_IDLE;
             
             ProcessKey(input);
-            refreshDelay := STATUS_REFRESH_INTERVAL;                
+            if refreshDelay < (STATUS_REFRESH_INTERVAL div 2) then Inc(refreshDelay,20);
 
         until input = INPUT_ENTER;
         
         strPtr := pointer(inputsVram[state.activeTab]-1);
         strPtr[0] := char(GetInputLength());
         
-        if Length(strPtr) > 0 then begin
+        if Length(strPtr^) > 0 then begin
             inputfg := theme[1]+2;
             ProcessInput();
             InitInput();
             GetStatus();
         end else InitInput();
-
-        
-    
         
     until false;
     

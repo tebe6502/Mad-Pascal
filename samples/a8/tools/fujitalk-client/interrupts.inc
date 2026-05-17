@@ -44,6 +44,17 @@ asm {
     stx atari.colpf1
 
     mwa #dlitop atari.vdslst
+
+    lda 20
+    lsr:lsr:lsr:lsr
+    and #1
+    beq @+
+    mwa #VRAM_STATUS DISPLAY_LIST_ADDRESS+3
+    jmp end_i
+@    
+    mwa #VRAM_STATUS2 DISPLAY_LIST_ADDRESS+3
+
+end_i
     
     plr ; restore registers
 };
@@ -66,6 +77,7 @@ asm {
     sta atari.pcolr0
     lda adr.theme+10
     sta atari.pcolr1
+
 
     plr ; restore registers
     jmp $E462 ; jump to system VBL handler

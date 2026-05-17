@@ -41,7 +41,7 @@ DL_JVB = %01000001; // Jump to begining
 dlist_content
   dta $70, $70 + DL_DLI, $42, a(vram_status)
   dta $10 + DL_DLI
-  :20 dta $42, a(vram_content)
+  :20 dta $42, a(vram_address)
   dta $10 + DL_DLI
   dta $42, a(vram_input0), $02, $02, $02, $41, a(dlist_content)  
   
