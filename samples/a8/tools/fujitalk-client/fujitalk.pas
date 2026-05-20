@@ -1,8 +1,5 @@
-{$librarypath 'blibs'}
-
-// See https://gitlab.com/bocianu/fujitalk-client
 program fujitalk;
-
+{$librarypath '../blibs/'}
 uses atari, http_client, crt, b_system, efast, fn_cookies, joystick;
 
 const 
