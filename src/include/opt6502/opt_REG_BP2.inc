@@ -352,16 +352,16 @@ begin
 
 	end;
 
-	optyBP2 := arg0;
+	SetOptyBP2(arg0);
 
 	inc(i, k);
 
     end else begin
 
      if (optyBP2 <> '') and (sta_a(i) or sty(i) or asl(i) or rol(i) or lsr(i) or ror(i) or inc_(i) or dec_(i)) then
-      if (pos('? ' + GetARG(i) + ' ', optyBP2) > 0) or (pos(';' + GetARG(i) + ';', optyBP2) > 0) then optyBP2:='';
+      if (pos('? ' + GetARG(i) + ' ', optyBP2) > 0) or (pos(';' + GetARG(i) + ';', optyBP2) > 0) then SetOptyBP2('');
 
-     if sta_bp2(i) or sta_bp2_1(i) or jsr(i) or lab_l(i) or lab_b(i) or lab_c(i) then optyBP2:='';
+     if sta_bp2(i) or sta_bp2_1(i) or jsr(i) or lab_l(i) or lab_b(i) or lab_c(i) then SetOptyBP2('');
 
      inc(i);
 
