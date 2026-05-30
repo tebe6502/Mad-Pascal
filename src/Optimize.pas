@@ -383,12 +383,15 @@ var
 
       case optyY[1] of
 
-        '+', '-': Result := (listing[i] = mne + copy(optyY, 6, 256));
+        '+', '-': 
+	Result := (listing[i] = mne + copy(optyY, 6, 256));
 
-        '*': if optyY[2] in ['+', '-'] then
-	          Result := (listing[i] = mne + copy(optyY,6,pos('|',optyY) - 6)) or (listing[i] = mne + copy(optyY,pos('|',optyY) + 1,256))
-          else
-            Result := (listing[i] = mne + copy(optyY, 6, 256));
+        '*': 
+	if optyY[2] in ['+', '-'] then
+	  Result := (listing[i] = mne + copy(optyY,6,pos('|',optyY) - 6)) or 
+	            (listing[i] = mne + copy(optyY,pos('|',optyY) + 1,256))
+        else
+          Result := (listing[i] = mne + copy(optyY, 6, 256));
 
         else
           Result := (listing[i] = mne + optyY);
@@ -2718,10 +2721,10 @@ begin        // OptimizeASM
     if optyA <> '' then
       for i := 0 to l - 1 do
         if (listing[i] = #9'inc ' + optyA) or (listing[i] = #9'dec ' + optyA) or //((optyY <> '') and (optyA = optyY)) or
-	  _if(i) or
-          lda_a(i) or mva(i) or mwa(i) or tya(i) or lab_a(i) or jsr(i) or jmp(i) then
+          lda_a(i) or mva(i) or mwa(i) or tya(i) or 
+	  lab_a(i) or jsr(i) or jmp(i) or _if(i) then
         begin
-          optyA := '';
+          SetOptyA('');
           Break;
         end;
 
@@ -2731,10 +2734,10 @@ begin        // OptimizeASM
     if optyY <> '' then
       for i := 0 to l - 1 do
         if LabelIsUsed(i) or //((optyA <> '') and (optyA = optyY)) or
-	  _if(i) or
-          ldy(i) or mvy(i) or mwy(i) or iny(i) or dey(i) or tay(i) or lab_a(i) or jsr(i) or jmp(i) then
+          ldy(i) or mvy(i) or mwy(i) or iny(i) or dey(i) or tay(i) or 
+	  lab_a(i) or jsr(i) or jmp(i) or _if(i) then
         begin
-          optyY := '';
+          SetOptyY('');
           Break;
         end;
 
@@ -2748,13 +2751,13 @@ begin        // OptimizeASM
         if (optyBP2 <> '') and (sta_a(i) or sty(i) or asl(i) or rol(i) or lsr(i) or ror(i) or inc_(i) or dec_(i)) then
           if (pos('? ' + copy(listing[i], 6, 256) + ' ', optyBP2) > 0) or (pos(';' + copy(listing[i], 6, 256) + ';', optyBP2) > 0) then
           begin
-            optyBP2 := '';
+            SetOptyBP2('');
             Break;
           end;
 
         if sta_bp2(i) or sta_bp2_1(i) or jsr(i) or jmp(i) then
         begin
-          optyBP2 := '';
+          SetOptyBP2('');
           Break;
         end;
 

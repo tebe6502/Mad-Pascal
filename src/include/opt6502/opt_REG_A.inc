@@ -63,9 +63,8 @@ begin
 
      end else
      if ((optyA <> '') and sty(i) and (listing[i] = #9'sty ' + optyA)) or
-        lda_a(i) or mva(i) or mwa(i) or tya(i) or lab_a(i) or jsr(i) or
-        lab_l(i) or lab_b(i) or lab_c(i) or //SKIP(i) or
+        lda_a(i) or mva(i) or mwa(i) or tya(i) or jsr(i) or
+        lab_a(i) or lab_l(i) or lab_b(i) or lab_c(i) or
 	_for(i) or _if(i) then begin arg0 := ''; SetOptyA('') end;
-
 
 end;		// procedure

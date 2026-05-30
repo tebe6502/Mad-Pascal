@@ -1210,23 +1210,32 @@ var
           token.SetIntegerValue(StrToInt(Num));
           Spaces := 0;
 
+
+	  if UpCase(ch) = 'E' then
+	  begin
+
+            Frac := ReadFractionalPart(ch);
+            Token.MakeFracNumber(StrToFloat(Num + Frac));
+
+            Token.SourceLocation.Column := TokenAt(NumTok - 1).SourceLocation.Column + length(Num) + length(Frac) + Spaces;
+            Spaces := 0;
+
+	  end else
+
           if ch = '.' then      // Fractional part expected
           begin
             SafeReadChar(ch);
             if ch = '.' then
               InFile.SeekBack   // Range ('..') token
             else
-            begin        // Fractional part found
+            begin               // Fractional part found
+
               Frac := ReadFractionalPart(ch);
+              Token.MakeFracNumber(StrToFloat(Num + Frac));
 
-              if length(Num) > 17 then
-                Token.MakeFracNumber(0)
-              else
-                Token.MakeFracNumber(StrToFloat(Num + Frac));
-
-              Token.SourceLocation.Column :=
-                TokenAt(NumTok - 1).SourceLocation.Column + length(Num) + length(Frac) + Spaces;
+              Token.SourceLocation.Column := TokenAt(NumTok - 1).SourceLocation.Column + length(Num) + length(Frac) + Spaces;
               Spaces := 0;
+
             end;
           end;
 
@@ -1977,22 +1986,33 @@ begin
         token.SetIntegerValue(StrToInt(Num));
         Spaces := 0;
 
-        if ch = '.' then      // Fractional part expected
+	if UpCase(ch) = 'E' then begin
+
+          Frac := ReadFractionalPart(a, i, ch);
+
+          token.MakeFracNumber(StrToFloat(Num + Frac));
+          token.SourceLocation.Column := TokenAt(NumTok - 1).SourceLocation.Column + length(Num) + length(Frac) + Spaces;
+          Spaces := 0;
+
+	end else
+
+        if ch = '.' then     // Fractional part expected
         begin
 
           ch := a[i];
           Inc(i);
 
           if ch = '.' then
-            Dec(i)        // Range ('..') token
+            Dec(i)           // Range ('..') token
           else
-          begin        // Fractional part found
+          begin              // Fractional part found
+
             Frac := ReadFractionalPart(a, i, ch);
 
             token.MakeFracNumber(StrToFloat(Num + Frac));
-            token.SourceLocation.Column :=
-              TokenAt(NumTok - 1).SourceLocation.Column + length(Num) + length(Frac) + Spaces;
+            token.SourceLocation.Column := TokenAt(NumTok - 1).SourceLocation.Column + length(Num) + length(Frac) + Spaces;
             Spaces := 0;
+
           end;
         end;
 

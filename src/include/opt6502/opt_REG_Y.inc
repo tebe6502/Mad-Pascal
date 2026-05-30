@@ -10,12 +10,12 @@ begin
   Rebuild('opt_REG_Y');
 
    for i := 0 to l - 1 do
-    if ldy_val(i) {and (iny(i+1) = false) and (dey(i+1) = false)} then begin
+    if ldy_val(i) then begin
 
      arg0:=GetString(i);
 
      if ldy_im_0(i) and lda(i+1) and spl(i+2) then begin
-      arg0:=''; optyY:='';
+      arg0:=''; SetOptyY('');
      end else
 
      if arg0 = optyY then
@@ -31,7 +31,7 @@ begin
 
        end;
 
-       optyY := arg0;
+       SetOptyY(arg0);
 
      end;
 
@@ -42,14 +42,14 @@ begin
      if iny(i) then begin
 
       if SKIP(i-1) then begin
-       arg0:=''; optyY:='';
+       arg0:=''; SetOptyY('');
       end else
 
       if optyY <> '' then
        if (optyY[1] = '#') and (optyY[2] = '$') then
-        optyY:='#' + Hex( byte( StrToInt(copy(optyY, 2, 256)) + 1), 2)						// #$xx
+        SetOptyY('#' + Hex( byte( StrToInt(copy(optyY, 2, 256)) + 1), 2))					// #$xx
        else
-        optyY:='+#$01'+optyY;											// +#$01
+        SetOptyY('+#$01'+optyY);										// +#$01
 
      end else
 // --------------------------------------------------------------------------
@@ -58,14 +58,14 @@ begin
      if dey(i) then begin
 
       if SKIP(i-1) then begin
-       arg0:=''; optyY:='';
+       arg0:=''; SetOptyY('');
       end else
 
       if optyY <> '' then
        if (optyY[1] = '#') and (optyY[2] = '$') then
-        optyY:='#' + Hex( byte( StrToInt(copy(optyY, 2, 256)) - 1), 2)						// #$xx
+        SetOptyY('#' + Hex( byte( StrToInt(copy(optyY, 2, 256)) - 1), 2))					// #$xx
        else
-        optyY:='-#$01'+optyY;											// -#$01
+        SetOptyY('-#$01'+optyY);										// -#$01
 
      end else
 // --------------------------------------------------------------------------
@@ -110,7 +110,8 @@ begin
 
        if (i > 2) and add(i-1) and asl_a(i-2) and lda_a(i-3) then arg0 := '*#$03' + GetString(i-3);			// *#$03Label
 
-       if (i > 5) and add(i-1) and asl_a(i-2) and add(i-3) and asl_a(i-4) and asl_a(i-5) and lda_a(i-6) then arg0 := '*#$0A' + GetString(i-6)+'+'+GetString(i-1);	// *#$0ALabel1+Label2
+       if (i > 5) and add(i-1) and asl_a(i-2) and add(i-3) and 
+          asl_a(i-4) and asl_a(i-5) and lda_a(i-6) then arg0 := '*#$0A' + GetString(i-6)+'+'+GetString(i-1);		// *#$0ALabel1+Label2
 
 
        if arg0 = optyY then begin
@@ -212,18 +213,18 @@ begin
 
         end;
 
-       optyY := arg0;
+       SetOptyY(arg0);
 
       end else begin
-       arg0 := ''; optyY := '';
+       arg0 := ''; SetOptyY('');
       end;
 
      end else
 
-     if LabelIsUsed(i) or iny(i) or dey(i) or tay(i) or ldy_stack(i) or mvy(i) or mwy(i) or jsr(i) or
-        (pos(',y-', listing[i]) > 0) or (pos(',y+', listing[i]) > 0) or ((optyA <> '') and (optyA = optyY)) or
-        {(listing[i] = '@') or} lab_l(i) or lab_b(i) or lab_c(i) or
-	_for(i) or _if(i) then begin arg0 := ''; optyY := '' end;
-
+     if LabelIsUsed(i) or
+        ((optyA <> '') and (optyA = optyY)) or
+        iny(i) or dey(i) or tay(i) or ldy_stack(i) or mvy(i) or mwy(i) or jsr(i) or
+        lab_l(i) or lab_b(i) or lab_c(i) or _for(i) or _if(i) or 
+	(pos(',y-', listing[i]) > 0) or (pos(',y+', listing[i]) > 0) then begin arg0 := ''; SetOptyY('') end;
 
 end;		// procedure
