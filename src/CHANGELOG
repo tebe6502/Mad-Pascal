@@ -1,5 +1,5 @@
-17.05.2026
-- bugfixes and optimizations
+01.06.2026
+- Common.pas (FindFile) -> AnsiLowerCase, AnsiUpperCase
 
 06.05.2026
 - bugfixes in mix real types variables and constant expressions
