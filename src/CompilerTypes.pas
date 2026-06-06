@@ -20,7 +20,7 @@ type
   TParameterPassingMethod = (
     UNDEFINED,
     VALPASSING,   // By value, modifiable
-    CONSTPASSING, // By const, unodifiable
+    CONSTPASSING, // By const, unmodifiable
     VARPASSING    // By reference, modifiable
     );
 
@@ -348,7 +348,7 @@ type
     Kind_: TTokenKind;
 
     // For Kind=IDENTTOK:
-    Name_: TIdentifierName; // Always in upper case for case-insentive handling
+    Name_: TIdentifierName; // Always in upper case for case-insensitive handling
     OriginalName_: TIdentifierName;  // Always in original case for case-sensitive handling
     // For Kind=INTNUMBERTOK: Value
     // For Kind=CHARLITERALTOK: Ord(c)
@@ -373,6 +373,7 @@ type
     property Value: TInteger read Value_;
     procedure SetValue(const Value: TInteger);
     procedure SetIntegerValue(const Value: TInteger);
+    procedure SetCharValue(const Value: Char);
     procedure SetStringValue(const StrAddress: Word; const StrLength: Word);
 
     // For Kind=FRACNUMBERTOK:
@@ -383,7 +384,7 @@ type
 
     constructor Create(const TokenIndex: TTokenIndex; const Kind: TTokenKind; const SourceFile: TSourceFile);
     procedure MakeKind(const Kind: TTokenKind);
-    procedure MakeIdentifier(const Name: TIdentifierName);
+    procedure MakeIdentifier(const Name, OriginalName: TIdentifierName);
     procedure MakeFracNumber(const FracValue: Single);
 
     function GetSourceFile: TSourceFile;
@@ -906,6 +907,12 @@ begin
   Value_ := Value;
 end;
 
+
+procedure TToken.SetCharValue(const Value: Char);
+begin
+  Value_ := Ord(Value);
+end;
+
 procedure TToken.SetStringValue(const StrAddress: Word; const StrLength: Word);
 begin
   StrAddress_ := StrAddress;
@@ -917,11 +924,11 @@ begin
   Kind_ := Kind;
 end;
 
-procedure TToken.MakeIdentifier(const Name: TIdentifierName);
+procedure TToken.MakeIdentifier(const Name, OriginalName: TIdentifierName);
 begin
   Kind_ := TTokenKind.IDENTTOK;
   Name_ := Name;
-  OriginalName_ := Name;
+  OriginalName_ := OriginalName;
 end;
 
 procedure TToken.MakeFracNumber(const FracValue: Single);
@@ -1034,7 +1041,13 @@ begin
   SetLength(tokenArray, i + 1);
   tokenArray[i] := Result;
 
-  // WriteLn('Added token at index ' + IntToStr(i) + ': ' + GetTokenSpelling(kind));
+  (*
+  WriteLn(Format('INFO: Added token at index %d: %s in %s:%d', [i, GetTokenSpelling(kind), SourceFile.Path, Line, Column]));
+  if (line=786) then
+  begin
+        I:=0;
+  end;
+  *)
 end;
 
 procedure TTokenList.RemoveToken;

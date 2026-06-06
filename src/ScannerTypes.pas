@@ -9,6 +9,7 @@ type
     procedure Clear;
     function Length: Integer;
     function GetString: String;
+    function GetUpperCaseString: String;
 
     procedure Append(const c: Char);
     function CharAt(const position: Integer): Char;
@@ -27,6 +28,7 @@ type
     procedure Clear;
     function Length: Integer;
     function GetString: String;
+    function GetUpperCaseString: String;
 
     procedure Append(const c: Char);
     function CharAt(const position: Integer): Char;
@@ -44,6 +46,8 @@ type
   end;
 
 implementation
+
+uses SysUtils;
 
 constructor TTextBuffer.Create(const TargetID: TTargetID);
 begin
@@ -65,15 +69,14 @@ begin
   Result := TextBuffer_;
 end;
 
+function TTextBuffer.GetUpperCaseString: String;
+begin
+  Result := AnsiUpperCase(TextBuffer_);
+end;
+
 procedure TTextBuffer.Append(const c: Char);
 begin
   TextBuffer_ := TextBuffer_ + C;
-
-  // TODO JAC!
-  // if TextBuffer_ = 'RIJ' then
-  // begin
-  //   WriteLn('TEST');
-  // end;
 end;
 
 function TTextBuffer.CharAt(const Position: Integer): Char;

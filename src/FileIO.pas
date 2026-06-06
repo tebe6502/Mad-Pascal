@@ -1,12 +1,12 @@
 unit FileIO;
 // Interfaced objects are implicitly reference counted and freed.
-// Therefore there are no explicit Free method on the files.
+// Therefore there are no explicit Free method on the files.  
 
 {$I Defines.inc}
 
 interface
 
-uses SysUtils, {CommonTypes,} Generics.Collections;
+uses SysUtils, CommonTypes, Generics.Collections;
 
   {$SCOPEDENUMS ON}
 
@@ -356,13 +356,11 @@ begin
   FindClose(searchRec);
   if (found) then
   begin
-{
     if (searchRec.Name <> fileName) then
     begin
       // TODO: For https://github.com/tebe6502/Mad-Pascal/issues/215
       Writeln('INFO: Case difference in file name ' + filePath + ' and ' + searchRec.Name);
     end;
-}
     Result := fileFolder + searchRec.Name;
     Exit;
   end;
@@ -375,13 +373,11 @@ begin
     FindClose(searchRec);
     if (found) then
     begin
- {
       if (searchRec.Name <> fileName) then
         begin
           // TODO: For https://github.com/tebe6502/Mad-Pascal/issues/215
           Writeln('INFO: Case difference in file name ' + filePath + ' and ' + searchRec.Name);
         end;
- }
       Result := fileFolder + searchRec.Name;
       Exit;
     end;
