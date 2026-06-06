@@ -384,7 +384,7 @@ type
 
     constructor Create(const TokenIndex: TTokenIndex; const Kind: TTokenKind; const SourceFile: TSourceFile);
     procedure MakeKind(const Kind: TTokenKind);
-    procedure MakeIdentifier(const Name: TIdentifierName);
+    procedure MakeIdentifier(const Name, OriginalName: TIdentifierName);
     procedure MakeFracNumber(const FracValue: Single);
 
     function GetSourceFile: TSourceFile;
@@ -924,11 +924,11 @@ begin
   Kind_ := Kind;
 end;
 
-procedure TToken.MakeIdentifier(const Name: TIdentifierName);
+procedure TToken.MakeIdentifier(const Name, OriginalName: TIdentifierName);
 begin
   Kind_ := TTokenKind.IDENTTOK;
   Name_ := Name;
-  OriginalName_ := Name;
+  OriginalName_ := OriginalName;
 end;
 
 procedure TToken.MakeFracNumber(const FracValue: Single);

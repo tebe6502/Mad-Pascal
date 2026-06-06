@@ -4,7 +4,7 @@ unit Scanner;
 
 interface
 
-uses CommonTypes, CompilerTypes, Tokens;
+uses CompilerTypes, Tokens;
 
   // ----------------------------------------------------------------------------
 
@@ -273,8 +273,8 @@ var
         begin
 
           CheckTok(i, TTokenKind.IDENTTOK);
-          //" TODO: Use case-sensitive name
-          filePath := FindFile(TokenAt(i).Name + '.pas', 'unit');
+          // Use case-sensitive unit name.
+          filePath := FindFile(TokenAt(i).OriginalName + '.pas', 'unit');
 
         end;
 
@@ -1277,9 +1277,9 @@ var
           if TextBuffer.Length() > 0 then
           begin
 
-            CurToken := GetStandardToken(TextBuffer.GetString);
+            CurToken := GetStandardToken(TextBuffer.GetUpperCaseString);
 
-            im := SearchDefine(TextBuffer.GetString);
+            im := SearchDefine(TextBuffer.GetUpperCaseString);
 
             if (im > 0) and (Defines[im].Macro <> '') then
             begin
@@ -1387,7 +1387,7 @@ var
                 InFile.Read(ch);
 
                 AsmBlock[AsmBlockIndex] := '';
-                TextBuffer.Clear;
+                TextBuffer.Clear;  // Only used to detect END;
 
                 while True do
                 begin
@@ -1460,7 +1460,7 @@ var
                 end
                 else
                 begin // Identifier found
-                  TokenAt(NumTok).MakeIdentifier(TextBuffer.GetString());
+                  TokenAt(NumTok).MakeIdentifier(TextBuffer.GetUpperCaseString(), TextBuffer.GetString());
                   // if TextBuffer.GetString() = 'RIJNDAEL' then
                   // begin
                   //   WriteLn('INFO: Identifier found ' + TextBuffer.GetString());
@@ -1739,14 +1739,14 @@ var
         // begin
         if TextBuffer.Length > 0 then
         begin
-          if TextBuffer.GetString() = 'END.' then
+          if TextBuffer.GetUpperCaseString() = 'END.' then
           begin
             AddToken(TTokenKind.ENDTOK, ActiveSourceFile, Line, 3);
             AddToken(TTokenKind.DOTTOK, ActiveSourceFile, Line, 1);
           end
           else
           begin
-            AddToken(GetStandardToken(TextBuffer.GetString()), ActiveSourceFile, Line,
+            AddToken(GetStandardToken(TextBuffer.GetUpperCaseString()), ActiveSourceFile, Line,
               TextBuffer.Length() + Spaces);
             Spaces := 0;
           end;
@@ -1866,7 +1866,7 @@ var
   Num, Frac: TString;
   Err, Line2, TextPos, im: Integer;
   yes: Boolean;
-  ch, ch2: Char;
+  OriginalCh, ch, ch2: Char;
   CurToken: TTokenKind;
 
 
@@ -1973,7 +1973,8 @@ begin
     if i <= length(a) then
     begin
 
-      ch := UpCase(a[i]);
+      OriginalCh := a[i];
+      ch := UpCase(OriginalCh);
       Inc(i);
 
 
@@ -1986,7 +1987,7 @@ begin
         token.SetIntegerValue(StrToInt(Num));
         Spaces := 0;
 
-	if UpCase(ch) = 'E' then begin
+	if ch = 'E' then begin
 
           Frac := ReadFractionalPart(a, i, ch);
 
@@ -2032,10 +2033,11 @@ begin
 
         while ch in ['A'..'Z', '_', '0'..'9', '.'] do
         begin
-          TextBuffer.Append(ch);
+          TextBuffer.Append(OriginalCh);
           Inc(err);
 
-          ch := UpCase(a[i]);
+          OriginalCh := a[i];
+          ch := UpCase(OriginalCh);
           Inc(i);
         end;
 
@@ -2047,9 +2049,9 @@ begin
         if TextBuffer.Length() > 0 then
         begin
 
-          CurToken := GetStandardToken(TextBuffer.GetString());
+          CurToken := GetStandardToken(TextBuffer.GetUpperCaseString());
 
-          im := SearchDefine(TextBuffer.GetString());
+          im := SearchDefine(TextBuffer.GetUpperCaseString());
 
           if (im > 0) and (Defines[im].Macro <> '') then
           begin
@@ -2090,7 +2092,7 @@ begin
             end
             else
             begin // Identifier found
-              TokenAt(NumTok).MakeIdentifier(TextBuffer.GetString());
+              TokenAt(NumTok).MakeIdentifier(TextBuffer.GetUpperCaseString(), TextBuffer.GetString());
             end;
 
         end;
