@@ -226,7 +226,7 @@ var
 
   procedure Tokenize(const FilePath: TFilePath; const TestSourceFile: Boolean = False);
   var
-    InFile: IBinaryFile;
+    _InFile: IBinaryFile;
     _line: Integer;
     _uidx: TSourceFile;
 
@@ -235,6 +235,17 @@ var
     OldNumTok: Integer;
 
     ch, ch2, ch_: Char;
+
+    procedure InFileRead(var c: Char);
+    begin
+      _InFile.Read(c);
+      // Write(c);
+    end;
+
+    procedure InFileSeekBack;
+    begin
+      _InFile.SeekBack;
+    end;
 
     procedure ReadUses;
     var
@@ -273,7 +284,6 @@ var
         begin
 
           CheckTok(i, TTokenKind.IDENTTOK);
-          // Use case-sensitive unit name.
           filePath := FindFile(TokenAt(i).OriginalName + '.pas', 'unit');
 
         end;
@@ -343,7 +353,7 @@ var
 
       repeat
         c := ' ';
-        InFile.Read(c);
+        InFileRead(c);
 
         if c = LF then Inc(Line);
         case i of
@@ -370,9 +380,9 @@ var
               Result := '';
             end;
           6:
-            if UpCase(c) in AllowLabelFirstChars then
+            if c in AllowLabelFirstChars then
             begin
-              Result := UpCase(c);
+              Result := c;
               i := 7;
             end
             else
@@ -381,8 +391,8 @@ var
               Result := '';
             end;
           7:
-            if UpCase(c) in AllowLabelChars then
-              Result := Result + UpCase(c)
+            if c in AllowLabelChars then
+              Result := Result +c
             else if c = '}' then
                 i := 9
               else
@@ -502,7 +512,7 @@ var
 
       Param := Default(TDefineParams);
 
-      if UpCase(d[1]) in AllowLabelFirstChars then
+      if d[1] in AllowLabelFirstChars then
       begin
 
         i := 1;
@@ -868,7 +878,7 @@ var
 
                                                   TokenAt(NumTok).SourceLocation.Line := line;
 
-                                                  if not (UpCase(d[i]) in AllowLabelFirstChars) then
+                                                  if not (d[i] in AllowLabelFirstChars) then
                                                     Error(NumTok,
                                                       TMessage.Create(TErrorCode.SyntaxError,
                                                       'Syntax error, ''identifier'' expected'));
@@ -897,7 +907,7 @@ var
                                                       Inc(i);
                                                       skip_spaces;
 
-                                                      if not (UpCase(d[i]) in AllowLabelFirstChars) then
+                                                      if not (d[i] in AllowLabelFirstChars) then
                                                         Error(NumTok,
                                                           TMessage.Create(TErrorCode.IdentifierExpected,
                                                           'Syntax error, ''identifier'' expected'));
@@ -952,7 +962,7 @@ var
     begin
 
       while (ch <> LF) do
-        InFile.Read(ch);
+        InFileRead(ch);
 
     end;
 
@@ -967,28 +977,28 @@ var
 
       c2 := #0;
 
-      InFile.Read(c);
+      InFileRead(c);
 
       if c = '(' then
       begin
         c2 := ' ';
-        InFile.Read(c2);
+        InFileRead(c2);
 
         if c2 = '*' then
         begin        // Skip comments (*   *)
 
           repeat
             c2 := c;
-            InFile.Read(c);
+            InFileRead(c);
 
             if c = LF then Inc(Line);
           until (c2 = '*') and (c = ')');
 
-          InFile.Read(c);
+          InFileRead(c);
 
         end
         else
-          InFile.SeekBack;
+          InFileSeekBack;
 
       end;
 
@@ -1001,15 +1011,15 @@ var
 
         _line := Line;
 
-        InFile.Read(c2);
+        InFileRead(c2);
 
         if c2 = '$' then
           dir := True
         else
-          InFile.SeekBack;
+          InFileSeekBack;
 
         repeat            // Skip comments {  } / read directives
-          InFile.Read(c);
+          InFileRead(c);
 
           if dir then directive := directive + c;
 
@@ -1021,18 +1031,18 @@ var
 
         if dir then ReadDirective(directive, _line);
 
-        InFile.Read(c);
+        InFileRead(c);
 
       end
       else
         if c = '/' then
         begin
-          InFile.Read(c2);
+          InFileRead(c2);
 
           if c2 = '/' then
             ReadSingleLineComment
           else
-            InFile.SeekBack;
+            InFileSeekBack;
 
         end;
 
@@ -1073,11 +1083,9 @@ var
 
       ReadChar(c);
 
-      c := UpCase(c);
-
       if c in [' ', TAB] then Inc(Spaces);
 
-      if not (c in ['''', ' ', '#', '~', '$', TAB, LF, CR, '{', (*'}',*) 'A'..'Z', '_',
+      if not (c in ['''', ' ', '#', '~', '$', TAB, LF, CR, '{', (*'}',*) 'A'..'Z', 'a'..'z', '_',
         '0'..'9', '=', '.', ',', ';', '(', ')', '*', '/', '+', '-', ':', '>', '<', '^', '@', '[', ']']) then
       begin
         Error(NumTok, TMessage.Create(TErrorCode.UnexpectedCharacter, 'Unexpected unknown character: ' + c));
@@ -1105,9 +1113,9 @@ var
       end;
 
       // Scientific exponent syntax?
-      if UpCase(ch) in ['E'] then
+      if ch in ['e', 'E'] then
       begin
-        Result := Result + ch;
+        Result := Result + 'E';
         SafeReadChar(ch);
 
         // Negative exponent or digit
@@ -1179,9 +1187,9 @@ var
     token: TToken;
   begin
 
-    inFile := TFileSystem.CreateBinaryFile(SCANNER_CACHED);
-    inFile.Assign(filePath);
-    inFile.Reset(1);
+    _inFile := TFileSystem.CreateBinaryFile(SCANNER_CACHED);
+    _inFile.Assign(filePath);
+    _inFile.Reset(1);
 
     TextBuffer := TTextBuffer.Create(Target.ID);
     ch := ' ';
@@ -1199,8 +1207,6 @@ var
 
         until not (ch in [' ', TAB, LF, CR, '{'(*, '}'*)]);
 
-        ch := UpCase(ch);
-
         Num := '';
         if ch in ['0'..'9', '$', '%'] then ReadNumber;
 
@@ -1211,7 +1217,7 @@ var
           Spaces := 0;
 
 
-	  if UpCase(ch) = 'E' then
+	  if ch in ['e', 'E'] then
 	  begin
 
             Frac := ReadFractionalPart(ch);
@@ -1226,7 +1232,7 @@ var
           begin
             SafeReadChar(ch);
             if ch = '.' then
-              InFile.SeekBack   // Range ('..') token
+              InFileSeekBack   // Range ('..') token
             else
             begin               // Fractional part found
 
@@ -1244,7 +1250,7 @@ var
         end;
 
 
-        if ch in ['A'..'Z', '_'] then    // Keyword or identifier expected
+        if ch in ['A'..'Z', 'a'..'z', '_'] then    // Keyword or identifier expected
         begin
           TextBuffer.Clear;
 
@@ -1261,12 +1267,12 @@ var
             end;
 
             Inc(err);
-          until not (ch in ['A'..'Z', '_', '0'..'9', '.']);
+          until not (ch in ['A'..'Z', 'a'..'z','_', '0'..'9', '.']);
 
           if TextBuffer.EndsWith('.') then
           begin
             TextBuffer.DeleteLastChar;
-            InFile.Seek2(InFile.FilePos() - 2);
+            _InFile.Seek2(_InFile.FilePos() - 2);
             Dec(err);
           end;
 
@@ -1284,7 +1290,7 @@ var
             if (im > 0) and (Defines[im].Macro <> '') then
             begin
 
-              tmp := InFile.FilePos();
+              tmp := _InFile.FilePos();
               ch2 := ch;
               Num := '';      // Read parameters, max 255 chars
 
@@ -1301,7 +1307,7 @@ var
 
               if Num = '' then
               begin
-                InFile.Seek2(tmp);
+                _InFile.Seek2(tmp);
                 ch := ch2;
               end
               else
@@ -1364,13 +1370,13 @@ var
               TokenAt(NumTok).MakeKind(CurToken);
               TokenAt(NumTok).SetIntegerValue(0);
 
-              tmp := InFile.FilePos();
+              tmp := _InFile.FilePos();
 
               _line := line;
 
               // Skip whitespace characters and check which character we encounter.
               repeat
-                InFile.Read(ch);
+                InFileRead(ch);
                 if ch = LF then Inc(line);
               until not (ch in AllowWhiteSpaces);
 
@@ -1382,20 +1388,20 @@ var
 
                 TokenAt(NumTok).SetIntegerValue(1);
 
-                InFile.Seek2(tmp - 1);
+                _InFile.Seek2(tmp - 1);
 
-                InFile.Read(ch);
+                InFileRead(ch);
 
                 AsmBlock[AsmBlockIndex] := '';
                 TextBuffer.Clear;  // Only used to detect END;
 
                 while True do
                 begin
-                  InFile.Read(ch);
+                  InFileRead(ch);
 
                   SaveAsmBlock(ch);
 
-                  TextBuffer.Append(UpCase(ch));
+                  TextBuffer.Append(UpCase(ch)); // UpCase, only to detect "END;"
 
                   if pos('END;', TextBuffer.GetString()) > 0 then
                   begin
@@ -1415,7 +1421,7 @@ var
               else
               begin
 
-                InFile.SeekBack;
+                InFileSeekBack;
 
                 AsmFound := True;
 
@@ -1461,10 +1467,6 @@ var
                 else
                 begin // Identifier found
                   TokenAt(NumTok).MakeIdentifier(TextBuffer.GetUpperCaseString(), TextBuffer.GetString());
-                  // if TextBuffer.GetString() = 'RIJNDAEL' then
-                  // begin
-                  //   WriteLn('INFO: Identifier found ' + TextBuffer.GetString());
-                  // end;
                 end;
 
             end;
@@ -1496,7 +1498,7 @@ var
                 Inc(Spaces);
 
                 repeat
-                  InFile.Read(ch);
+                  InFileRead(ch);
 
                   if ch = LF then
                     Error(NumTok, TMessage.Create(TErrorCode.StringExceedsLine, 'String exceeds line'));
@@ -1506,7 +1508,7 @@ var
                   else
                   begin
 
-                    InFile.Read(ch2);
+                    InFileRead(ch2);
 
                     if ch2 = '''' then
                     begin
@@ -1514,7 +1516,7 @@ var
                       ch := #0;
                     end
                     else
-                      InFile.SeekBack;
+                      InFileSeekBack;
 
                   end;
 
@@ -1527,13 +1529,13 @@ var
                 if ch in [' ', TAB] then
                 begin
                   ch2 := ch;
-                  Err := InFile.FilePos();
-                  while ch2 in [' ', TAB] do InFile.Read(ch2);
+                  Err := _InFile.FilePos();
+                  while ch2 in [' ', TAB] do InFileRead(ch2);
 
                   if ch2 in ['*', '~', '+'] then
                     ch := ch2
                   else
-                    InFile.Seek2(Err);
+                    _InFile.Seek2(Err);
                 end;
 
 
@@ -1563,13 +1565,13 @@ var
                 if ch in [' ', TAB] then
                 begin
                   ch2 := ch;
-                  Err := InFile.FilePos();
-                  while ch2 in [' ', TAB] do InFile.Read(ch2);
+                  Err := _InFile.FilePos();
+                  while ch2 in [' ', TAB] do _InFile.Read(ch2);
 
                   if ch2 in ['''', '+'] then
                     ch := ch2
                   else
-                    InFile.Seek2(Err);
+                    _InFile.Seek2(Err);
                 end;
 
 
@@ -1597,13 +1599,13 @@ var
                 if ch in [' ', TAB] then
                 begin
                   ch2 := ch;
-                  Err := InFile.FilePos();
-                  while ch2 in [' ', TAB] do InFile.Read(ch2);
+                  Err := _InFile.FilePos();
+                  while ch2 in [' ', TAB] do InFileRead(ch2);
 
                   if ch2 in ['''', '+'] then
                     ch := ch2
                   else
-                    InFile.Seek2(Err);
+                    _InFile.Seek2(Err);
                 end;
 
                 if ch = '+' then
@@ -1680,7 +1682,7 @@ var
 
           if (ch2 = '=') or ((ch = '<') and (ch2 = '>')) or ((ch = '.') and (ch2 = '.')) then
           begin        // Double-character token found
-            AddToken(GetStandardToken(ch + ch2), ActiveSourceFile, Line, 2 + Spaces);
+            AddToken(GetStandardToken(AnsiUpperCase(ch + ch2)), ActiveSourceFile, Line, 2 + Spaces);
             Spaces := 0;
           end
           else
@@ -1698,17 +1700,17 @@ var
 
               Frac := '';
 
-              InFile.SeekBack;
+              InFileSeekBack;
 
             end
             else
             begin
-              InFile.SeekBack;
+              InFileSeekBack;
               Line := Line2;
 
               if ch in [':', '>', '<', '.'] then
               begin        // Single-character token found
-                AddToken(GetStandardToken(ch), ActiveSourceFile, Line, 1 + Spaces);
+                AddToken(GetStandardToken(UpCase(ch)), ActiveSourceFile, Line, 1 + Spaces);
                 Spaces := 0;
               end
               else
@@ -1759,7 +1761,7 @@ var
       //  end;
       //end;
     end;// try
-    InFile.Close;
+    _InFile.Close;
   end;
 
 
@@ -1826,7 +1828,7 @@ begin
 
   begin
     Result := '.';
-    while UpCase(ch) in ['0'..'9'] do
+    while ch in ['0'..'9'] do
     begin
       Result := Result + ch;
       ch := a[i];
@@ -1834,14 +1836,14 @@ begin
     end;
 
     // Scientific exponent syntax?
-    if UpCase(ch) in ['E'] then
+    if ch in ['e', 'E'] then
     begin
-      Result := Result + ch;
+      Result := Result + 'E';
       ch := a[i];
       Inc(i);
 
       // Negative exponent or digit
-      if UpCase(ch) in ['0'..'9', '-'] then
+      if ch in ['0'..'9', '-'] then
       begin
         Result := Result + ch;
         ch := a[i];
@@ -1849,7 +1851,7 @@ begin
       end;
 
       // More digits
-      while UpCase(ch) in ['0'..'9'] do
+      while ch in ['0'..'9'] do
       begin
         Result := Result + ch;
         ch := a[i];
@@ -1917,9 +1919,9 @@ var
         ch := a[i];
         Inc(i);
 
-        while UpCase(ch) in AllowDigitChars do
+        while ch in AllowDigitChars do
         begin
-          Num := Num + ch;
+          Num := Num + ch;   // TODO: Normalize with UpCase?
           ch := a[i];
           Inc(i);
         end;
@@ -1987,7 +1989,7 @@ begin
         token.SetIntegerValue(StrToInt(Num));
         Spaces := 0;
 
-	if ch = 'E' then begin
+	if ch in ['e', 'E'] then begin
 
           Frac := ReadFractionalPart(a, i, ch);
 
@@ -2022,7 +2024,7 @@ begin
       end;
 
 
-      if ch in ['A'..'Z', '_'] then    // Keyword or identifier expected
+      if ch in ['A'..'Z', 'a'..'z', '_'] then    // Keyword or identifier expected
       begin
 
         TextBuffer.Clear;
@@ -2031,7 +2033,7 @@ begin
 
         TextPos := i - 1;
 
-        while ch in ['A'..'Z', '_', '0'..'9', '.'] do
+        while ch in ['A'..'Z', 'a'..'z', '_', '0'..'9', '.'] do
         begin
           TextBuffer.Append(OriginalCh);
           Inc(err);
@@ -2294,7 +2296,7 @@ begin
 
       if ch in ['=', ',', ';', '(', ')', '*', '/', '+', '-', '^', '@', '[', ']'] then
       begin
-        AddMacroToken(GetStandardToken(ch), Line, 1 + Spaces);
+        AddMacroToken(GetStandardToken(UpCase(ch)), Line, 1 + Spaces);
         Spaces := 0;
       end;
 
@@ -2309,7 +2311,7 @@ begin
 
         if (ch2 = '=') or ((ch = '<') and (ch2 = '>')) or ((ch = '.') and (ch2 = '.')) then
         begin // Double-character token found
-          AddMacroToken(GetStandardToken(ch + ch2), Line, 2 + Spaces);
+          AddMacroToken(GetStandardToken(AnsiUpperCase(ch + ch2)), Line, 2 + Spaces);
           Spaces := 0;
         end
         else
@@ -2335,7 +2337,7 @@ begin
 
             if ch in [':', '>', '<', '.'] then
             begin        // Single-character token found
-              AddMacroToken(GetStandardToken(ch), Line, 1 + Spaces);
+              AddMacroToken(GetStandardToken(UpCase(ch)), Line, 1 + Spaces);
               Spaces := 0;
             end;
 

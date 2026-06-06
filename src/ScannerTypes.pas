@@ -77,12 +77,6 @@ end;
 procedure TTextBuffer.Append(const c: Char);
 begin
   TextBuffer_ := TextBuffer_ + C;
-
-  // TODO JAC!
-  // if TextBuffer_ = 'RIJ' then
-  // begin
-  //   WriteLn('TEST');
-  // end;
 end;
 
 function TTextBuffer.CharAt(const Position: Integer): Char;

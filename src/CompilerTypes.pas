@@ -20,7 +20,7 @@ type
   TParameterPassingMethod = (
     UNDEFINED,
     VALPASSING,   // By value, modifiable
-    CONSTPASSING, // By const, unodifiable
+    CONSTPASSING, // By const, unmodifiable
     VARPASSING    // By reference, modifiable
     );
 
@@ -348,7 +348,7 @@ type
     Kind_: TTokenKind;
 
     // For Kind=IDENTTOK:
-    Name_: TIdentifierName; // Always in upper case for case-insentive handling
+    Name_: TIdentifierName; // Always in upper case for case-insensitive handling
     OriginalName_: TIdentifierName;  // Always in original case for case-sensitive handling
     // For Kind=INTNUMBERTOK: Value
     // For Kind=CHARLITERALTOK: Ord(c)
