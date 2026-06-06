@@ -210,8 +210,6 @@ begin
   Result := _VarDataSize;
 end;
 
-// ----------------------------------------------------------------------------
-// ----------------------------------------------------------------------------
 
 procedure SetVarDataSize(const tokenIndex: TTokenIndex; const size: Integer);
 //var
@@ -230,24 +228,17 @@ begin
   //  [tokenIndex, token.GetSourceFileLocationString, 'TODO' {*token.GetSpelling*}, _VarDataSize]));
 end;
 
-// ----------------------------------------------------------------------------
-// ----------------------------------------------------------------------------
 
 procedure IncVarDataSize(const tokenIndex: TTokenIndex; const size: Integer);
 begin
   SetVarDataSize(tokenIndex, _VarDataSize + size);
 end;
 
-// ----------------------------------------------------------------------------
-// ----------------------------------------------------------------------------
 
 function GetTypeAtIndex(const typeIndex: TTypeIndex): TType;
 begin
   Result := TypeList.GetTypeAtIndex(typeIndex);
 end;
-
-// ----------------------------------------------------------------------------
-// ----------------------------------------------------------------------------
 
 function FindFile(FileName: String; ftyp: TString): TFilePath; overload;
 var
@@ -255,10 +246,6 @@ var
   msg: IMessage;
 begin
   Result := unitPathList.FindFile(FileName);
-
-  if Result = '' then Result := unitPathList.FindFile(AnsiLowerCase(FileName));
-  if Result = '' then Result := unitPathList.FindFile(AnsiUpperCase(FileName));
-
   if Result = '' then
   begin
     if unitPathList.GetSize() = 0 then
@@ -315,6 +302,7 @@ end;
 
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
+
 
 function GetEnumName(IdentIndex: Integer): TString;
 var
