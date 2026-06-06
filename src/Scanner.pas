@@ -414,6 +414,7 @@ var
       lvl := 0;
       repeat
         dir := SkipCodeUntilDirective;
+        dir := AnsiUpperCase(dir);
         if dir = 'ENDIF' then
         begin
           Dec(lvl);
@@ -1285,6 +1286,8 @@ var
 
             CurToken := GetStandardToken(TextBuffer.GetUpperCaseString);
 
+            // WriteLn(CurToken);
+
             im := SearchDefine(TextBuffer.GetUpperCaseString);
 
             if (im > 0) and (Defines[im].Macro <> '') then
@@ -1393,7 +1396,7 @@ var
                 InFileRead(ch);
 
                 AsmBlock[AsmBlockIndex] := '';
-                TextBuffer.Clear;  // Only used to detect END;
+                TextBuffer.Clear;
 
                 while True do
                 begin
@@ -1401,9 +1404,9 @@ var
 
                   SaveAsmBlock(ch);
 
-                  TextBuffer.Append(UpCase(ch)); // UpCase, only to detect "END;"
+                  TextBuffer.Append(ch);
 
-                  if pos('END;', TextBuffer.GetString()) > 0 then
+                  if pos('END;', TextBuffer.GetUpperCaseString()) > 0 then
                   begin
                     SetLength(AsmBlock[AsmBlockIndex], length(AsmBlock[AsmBlockIndex]) - 4);
                     Break;
@@ -1868,7 +1871,7 @@ var
   Num, Frac: TString;
   Err, Line2, TextPos, im: Integer;
   yes: Boolean;
-  OriginalCh, ch, ch2: Char;
+  ch, ch2: Char;
   CurToken: TTokenKind;
 
 
@@ -1975,8 +1978,7 @@ begin
     if i <= length(a) then
     begin
 
-      OriginalCh := a[i];
-      ch := UpCase(OriginalCh);
+      ch := a[i];
       Inc(i);
 
 
@@ -2035,11 +2037,10 @@ begin
 
         while ch in ['A'..'Z', 'a'..'z', '_', '0'..'9', '.'] do
         begin
-          TextBuffer.Append(OriginalCh);
+          TextBuffer.Append(ch);
           Inc(err);
 
-          OriginalCh := a[i];
-          ch := UpCase(OriginalCh);
+          ch := a[i];
           Inc(i);
         end;
 

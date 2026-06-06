@@ -1041,7 +1041,13 @@ begin
   SetLength(tokenArray, i + 1);
   tokenArray[i] := Result;
 
-  // WriteLn('Added token at index ' + IntToStr(i) + ': ' + GetTokenSpelling(kind));
+  (*
+  WriteLn(Format('INFO: Added token at index %d: %s in %s:%d', [i, GetTokenSpelling(kind), SourceFile.Path, Line, Column]));
+  if (line=786) then
+  begin
+        I:=0;
+  end;
+  *)
 end;
 
 procedure TTokenList.RemoveToken;
