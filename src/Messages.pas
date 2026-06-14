@@ -17,7 +17,7 @@ type
     SubrangeBounds, TooManyParameters, CantDetermine, UpperBoundOfRange, HighLimit,
     IllegalTypeConversion, IncompatibleTypesArray, IllegalExpression, AlwaysTrue, AlwaysFalse,
     UnreachableCode, IllegalQualifier, LoHi, StripedModifierIgnoredBecauseOfRange,
-    StripedModifierIgnoredBecauseOfElementType, FileNotFound, FileNotFoundWithWrongCase, WrongParameterList,
+    StripedModifierIgnoredBecauseOfElementType, FileNotFound, FileFoundWithWarning, WrongParameterList,
     OperatorNotOverloaded, OperationNotSupportedForTypes, NotAllDeclarationsOverloaded, SyntaxError,
     CantAsignValuesToAnAddress, UndefinedResourceType, ResourceFileNotFound, DuplicateResource,
     OutOfResources, WrongSwitchToggle, IllegalOptimizationSpecified, IllegalAlignmentDirective,
@@ -54,7 +54,7 @@ type
     function GetText: String;
   private
   var
-    ErrorCode: TErrorCode;
+    errorCode: TErrorCode;
     Text: String;
   end;
 
@@ -89,7 +89,7 @@ procedure ErrorIdentifierIncompatibleTypesArrayIdentifier(const tokenIndex: TTok
 
 procedure ErrorRangeCheckError(const tokenIndex: TTokenIndex; const Value: TInteger; const dstType: TDataType);
 
-procedure Warning(const tokenIndex: TTokenIndex; const msg: IMessage);
+procedure Warning(const tokenIndex: TTokenIndex; const msg: IMessage; Always: Boolean = True);
 
 procedure WarningAlwaysTrue(const tokenIndex: TTokenIndex);
 procedure WarningAlwaysFalse(const tokenIndex: TTokenIndex);
@@ -156,7 +156,7 @@ begin
           '8': Self.Text := Self.Text + variable8;
           '9': Self.Text := Self.Text + variable9;
           else
-            Assert(False, 'Internal program error.');
+            assert(False, 'Internal program error.');
         end;
       end;
     end
@@ -171,7 +171,7 @@ end;
 
 function TMessage.GetErrorCode: TErrorCode;
 begin
-  Result := ErrorCode;
+  Result := errorCode;
 end;
 
 function TMessage.GetText: String;
@@ -258,12 +258,12 @@ begin
 
     TErrorCode.IncompatibleTypeOf:
     begin
-      Result := 'Incompatible type of ' + IdentifierAt(IdentIndex).Name;
+      Result := 'Incompatible type of ' + IdentifierAt(identIndex).Name;
     end;
 
     TErrorCode.WrongNumberOfParameters:
     begin
-      Result := 'Wrong number of parameters specified for call to "' + IdentifierAt(IdentIndex).Name + '"';
+      Result := 'Wrong number of parameters specified for call to "' + IdentifierAt(identIndex).Name + '"';
     end;
 
     TErrorCode.CantAdrConstantExp:
@@ -273,7 +273,7 @@ begin
 
     TErrorCode.ConstantExpected:
     begin
-      Result := 'Constant expected but "' + IdentifierAt(IdentIndex).Name + '" found';
+      Result := 'Constant expected but "' + IdentifierAt(identIndex).Name + '" found';
     end;
 
     TErrorCode.OParExpected:
@@ -312,7 +312,7 @@ begin
     TErrorCode.StringTruncated:
     begin
       Result := 'String constant truncated to fit STRING[' +
-        IntToStr(IdentifierAt(IdentIndex).NumAllocElements - 1) + ']';
+        IntToStr(IdentifierAt(identIndex).NumAllocElements - 1) + ']';
     end;
 
     TErrorCode.CantReadWrite:
@@ -334,12 +334,12 @@ begin
     end;
 
     TErrorCode.TooManyParameters: begin
-      Result := 'Too many formal parameters in ' + IdentifierAt(IdentIndex).Name;
+      Result := 'Too many formal parameters in ' + IdentifierAt(identIndex).Name;
     end;
 
     TErrorCode.CantDetermine:
     begin
-      Result := 'Can''t determine which overloaded function ''' + IdentifierAt(IdentIndex).Name + ''' to call';
+      Result := 'Can''t determine which overloaded function ''' + IdentifierAt(identIndex).Name + ''' to call';
     end;
 
     TErrorCode.UpperBoundOfRange:
@@ -371,7 +371,7 @@ begin
   for i := fromTokenIndex to toTokenIndex do
   begin
     token := TokenAt(i);
-    WriteLn(Format('%s (line %d, column %d): kind=%s name=%s.',
+    writeln(Format('%s (line %d, column %d): kind=%s name=%s.',
       [token.SourceLocation.SourceFile.Path, token.SourceLocation.Line, token.SourceLocation.Column,
       GetTokenKindName(token.Kind), token.Name]));
   end;
@@ -418,18 +418,18 @@ begin
       if (effectiveTokenIndex > 1) then
       begin
         previousToken := TokenAt(effectiveTokenIndex - 1);
-        WriteLn(Format('%s (line %d, column %d): Error: %s', [token.SourceLocation.SourceFile.Path,
+        writeln(Format('%s (line %d, column %d): Error: %s', [token.SourceLocation.SourceFile.Path,
           token.SourceLocation.Line, Succ(previousToken.SourceLocation.Column), msg]));
       end
       else
       begin
-        WriteLn(Format('%s (line %d): Error: %s', [token.SourceLocation.SourceFile.Path,
+        writeln(Format('%s (line %d): Error: %s', [token.SourceLocation.SourceFile.Path,
           token.SourceLocation.Line, msg]));
       end;
     end
     else
     begin
-      WriteLn('Error: ' + msg);
+      writeln('Error: ' + msg);
     end;
 
 
@@ -472,7 +472,7 @@ begin
 
   if dstPointer then msg := msg + '^';
 
-  msg := msg + InfoAboutDataType(DstType) + '"';
+  msg := msg + InfoAboutDataType(dstType) + '"';
 
   Error(tokenIndex, TMessage.Create(TErrorCode.IncompatibleTypes, msg));
 end;
@@ -507,7 +507,7 @@ var
 begin
 
   msg := 'Incompatible types: got "' + Common.GetEnumName(srcEnumIndex) + '" expected "' +
-    InfoAboutDataType(DstType) + '"';
+    InfoAboutDataType(dstType) + '"';
 
   Error(tokenIndex, TMessage.Create(TErrorCode.IncompatibleEnum, msg));
 end;
@@ -521,9 +521,9 @@ var
   msg: String;
 begin
 
-  Assert((ErrorCode = TErrorCode.IllegalTypeConversion) or (ErrorCode = TErrorCode.IncompatibleTypesArray));
+  assert((errorCode = TErrorCode.IllegalTypeConversion) or (errorCode = TErrorCode.IncompatibleTypesArray));
 
-  identifier := IdentifierAt(IdentIndex);
+  identifier := IdentifierAt(identIndex);
   if errorCode = TErrorCode.IllegalTypeConversion then
     msg := 'Illegal type conversion: "Array[0..'
   else
@@ -570,7 +570,7 @@ begin
         else
         begin
 
-          if arrayIdentifier.DataType in [TDataType.RECORDTOK, TDataType.OBJECTTOK] then
+          if arrayIdentifier.dataType in [TDataType.RECORDTOK, TDataType.OBJECTTOK] then
             msg := msg + '"' + GetTypeAtIndex(arrayIdentifier.NumAllocElements).Field[0].Name + '"'
           else
             msg := msg + '"Array[0..' + IntToStr(arrayIdentifier.NumAllocElements - 1) +
@@ -636,12 +636,12 @@ end;
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 
-procedure Warning(const tokenIndex: TTokenIndex; const msg: IMessage);
+procedure Warning(const tokenIndex: TTokenIndex; const msg: IMessage; Always: Boolean = True);
 var
   a: String;
 begin
 
-  if pass = TPass.CODE_GENERATION then
+  if (pass = TPass.CODE_GENERATION) or Always then
   begin
 
     a := TokenAt(tokenIndex).SourceLocation.SourceFile.Path + ' (' +
@@ -703,7 +703,7 @@ end;
 procedure WarningVariableNotInitialized(const tokenIndex: TTokenIndex; const identIndex: TIdentIndex);
 begin
   Warning(tokenIndex, TMessage.Create(TErrorCode.VariableNotInit, 'Variable ''' +
-    IdentifierAt(IdentIndex).Name + ''' does not seem to be initialized'));
+    IdentifierAt(identIndex).Name + ''' does not seem to be initialized'));
 end;
 
 
@@ -722,21 +722,21 @@ var
   a: String;
 begin
 
-  if Pass = TPass.CODE_GENERATION then
-    if pos('.', IdentifierAt(IdentIndex).Name) = 0 then
+  if pass = TPass.CODE_GENERATION then
+    if pos('.', IdentifierAt(identIndex).Name) = 0 then
     begin
 
       a := TokenAt(tokenIndex).GetSourceFileLineString + ' Note: Local ';
 
-      if IdentifierAt(IdentIndex).Kind <> TTokenKind.UNITTOK then
+      if IdentifierAt(identIndex).Kind <> TTokenKind.UNITTOK then
       begin
 
-        case IdentifierAt(IdentIndex).Kind of
+        case IdentifierAt(identIndex).Kind of
           TTokenKind.CONSTTOK: a := a + 'const';
           TTokenKind.TYPETOK: a := a + 'type';
           TTokenKind.LABELTOK: a := a + 'label';
 
-          TTokenKind.VARTOK: if IdentifierAt(IdentIndex).isAbsolute then
+          TTokenKind.VARTOK: if IdentifierAt(identIndex).isAbsolute then
               a := a + 'absolutevar'
             else
               a := a + 'variable';
@@ -745,9 +745,9 @@ begin
           TTokenKind.FUNCTIONTOK: a := a + 'func';
         end;
 
-        a := a + ' ''' + IdentifierAt(IdentIndex).Name + '''' + ' not used';
+        a := a + ' ''' + IdentifierAt(identIndex).Name + '''' + ' not used';
 
-        if pos('@FN', IdentifierAt(IdentIndex).Name) = 1 then
+        if pos('@FN', IdentifierAt(identIndex).Name) = 1 then
 
         else
           msgLists.msgNote.Add(a);
@@ -768,7 +768,7 @@ var
   a: String;
 begin
 
-  if Pass = TPass.CODE_GENERATION then
+  if pass = TPass.CODE_GENERATION then
   begin
 
     a := TokenAt(tokenIndex).GetSourceFileLineString + ' Note: ' + msg;

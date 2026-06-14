@@ -157,7 +157,7 @@ procedure DefineStaticString(StrTokenIndex: TTokenIndex; StrValue: String);
 
 procedure DefineFilename(TokenIndex: TTokenIndex; StrValue: String);
 
-function FindFile(FileName: String; ftyp: TString): TFilePath; overload;
+function FindFile(FileName: String; FileType: TString): TFilePath; overload;
 
 procedure CheckCommonConstType(const TokenIndex: TTokenIndex; const DstType: TDataType; const SrcType: TDataType);
 
@@ -240,11 +240,11 @@ begin
   Result := TypeList.GetTypeAtIndex(typeIndex);
 end;
 
-function FindFile(FileName: String; ftyp: TString): TFilePath; overload;
+function FindFile(FileName: String; FileType: TString): TFilePath; overload;
 var
   FindFileResult: TPathListFindFileResult;
-  unitPathText: String;
-  msg: IMessage;
+  UnitPathText: String;
+  Msg: IMessage;
 begin
   FindFileResult := UnitPathList.FindFile(FileName);
   Result := FindFileResult.FilePath;
@@ -252,32 +252,36 @@ begin
   begin
     if UnitPathList.GetSize() = 0 then
     begin
-      unitPathText :=
+      UnitPathText :=
         'an empty unit path. Specify the folders for the unit path via the ''-ipath:<folder>'' command line parameter';
     end
     else
     begin
-      unitPathText := 'unit path ''' + UnitPathList.ToString + '''';
+      UnitPathText := 'unit path ''' + UnitPathList.ToString + '''';
     end;
-    if ftyp = 'unit' then
+    if FileType = 'unit' then
     begin
-      msg := TMessage.Create(TErrorCode.FileNotFound, 'Cannot find {0} ''{1}'' used by program ''{2}'' in {3}.',
-        ftyp, ChangeFileExt(FileName, ''), PROGRAM_NAME, unitPathText);
+      Msg := TMessage.Create(TErrorCode.FileNotFound, 'Cannot find {0} ''{1}'' used by program ''{2}'' in {3}.',
+        FileType, ChangeFileExt(FileName, ''), PROGRAM_NAME, UnitPathText);
 
     end
     else
     begin
-      msg := TMessage.Create(TErrorCode.FileNotFound, 'Cannot find {0} ''{1}'' used by program ''{2}'' in {3}.',
-        ftyp, FileName, PROGRAM_NAME, unitPathText);
+      Msg := TMessage.Create(TErrorCode.FileNotFound, 'Cannot find {0} ''{1}'' used by program ''{2}'' in {3}.',
+        FileType, FileName, PROGRAM_NAME, UnitPathText);
     end;
-    Error(NumTok, msg);
+    Error(NumTok, Msg);
   end
   else
   begin
-    msg := TMessage.Create(TErrorCode.FileNotFoundWithWrongCase,
-      'Warning for {0} ''{1}'' used by program ''{2}'' in {3}: {4}.', ftyp, FileName,
-      PROGRAM_NAME, unitPathText, FindFileResult.message);
-    Warning(NumTok, msg);
+    if FindFileResult.message <> '' then
+    begin
+      Msg := TMessage.Create(TErrorCode.FileFoundWithWarning,
+        'Warning for {0} ''{1}'' used by program ''{2}'' in {3}: {4}', FileType, FileName,
+        PROGRAM_NAME, UnitPathText, FindFileResult.message);
+      Warning(NumTok, Msg, True);
+    end;
+
   end;
 end;
 
