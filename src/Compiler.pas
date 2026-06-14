@@ -15559,11 +15559,10 @@ begin
                                     (IdentifierAt(IdentIndex).Kind = TTokenKind.FUNCTIONTOK) or
                                     ((ExpressionType = TDataType.POINTERTOK) and
                                     (IdentifierAt(IdentIndex).DataType = TDataType.STRINGPOINTERTOK)) then
-                                    begin
-                                      Writeln( IdentifierAt(IdentIndex).Name);
+                                  begin
                                     GenerateWriteString(IdentifierAt(IdentIndex).Value, ASPOINTERTOPOINTER,
-                                      IdentifierAt(IdentIndex).DataType)
-                                      end
+                                      IdentifierAt(IdentIndex).DataType);
+                                  end
                                   else
                                     if (ExpressionType = TDataType.PCHARTOK) or
                                       (IdentifierAt(IdentIndex).AllocElementType in
