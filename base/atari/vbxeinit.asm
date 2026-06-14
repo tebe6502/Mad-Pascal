@@ -9,6 +9,9 @@
 	ldx #.sizeof(s@xdl)-1
 	mva:rpl xdlist,x MAIN.SYSTEM.VBXE_XDLADR+MAIN.SYSTEM.VBXE_WINDOW,x-
 
+	lda #$00		; clear HiRes pattern
+	sta colpf0s
+
 	jsr cmapini		; init color map
 
 	fxsa FX_P1		; A = 0
@@ -21,8 +24,6 @@
 	fxsa FX_XDL_ADR0	; XDLIST PROGRAM ADDRES (VBXE_XDLADR = $0000) = bank #0
 	fxsa FX_XDL_ADR1
 	fxsa FX_XDL_ADR2
-
-	sta colpf0s
 
 	fxs FX_P0 #$ff
 
@@ -59,7 +60,7 @@ lop
 	iny
 	mva colpf2s (:bp),y
 	iny
-	lda #%00010000		; playfield palette #0 ; overlay palette #1
+	lda #%00010000		; bit 7..6 playfield palette #0 ; bit 5..4 overlay palette #1
 	sta (:bp),y
 
 	iny
