@@ -20521,6 +20521,8 @@ begin
 
   Writeln('Compiling ' + programUnit.Name);
 
+  Messages.Initialize;
+
   // ----------------------------------------------------------------------------
   // Set defines for first pass.
   scanner := TScanner.Create;
