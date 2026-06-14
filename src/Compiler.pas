@@ -17618,26 +17618,30 @@ end;  //CompileRecordDeclaration
 
 
 procedure StripeStaticData(DataSize: Byte; NumAllocElements: Cardinal);
+const MAXSIZE = MAXSTRIPEDARRAYSIZE*4;
 var
-  tmp: array [0..1023] of Word;
+  Size: Word;
+  tmp: array [0..MAXSIZE*4-1] of Word;
   i: Word;
 begin
 
-  move(StaticStringData[NumStaticStrChars], tmp, sizeof(tmp));
+  if NumAllocElements > MAXSTRIPEDARRAYSIZE then
+  Size:=NumAllocElements;
+  Move(StaticStringData[NumStaticStrChars], tmp, MAXSIZE);
 
   for i := 0 to NumAllocElements - 1 do
     case DataSize of
 
       2: begin
         StaticStringData[NumStaticStrChars + i] := tmp[i * 2];
-        StaticStringData[NumStaticStrChars + i + Word(NumAllocElements)] := tmp[i * 2 + 1];
+        StaticStringData[NumStaticStrChars + i + Size] := tmp[i * 2 + 1];
       end;
 
       4: begin
         StaticStringData[NumStaticStrChars + i] := tmp[i * 4];
-        StaticStringData[NumStaticStrChars + i + Word(NumAllocElements)] := tmp[i * 4 + 1];
-        StaticStringData[NumStaticStrChars + i + Word(NumAllocElements * 2)] := tmp[i * 4 + 2];
-        StaticStringData[NumStaticStrChars + i + Word(NumAllocElements * 3)] := tmp[i * 4 + 3];
+        StaticStringData[NumStaticStrChars + i + Size] := tmp[i * 4 + 1];
+        StaticStringData[NumStaticStrChars + i + Size * 2] := tmp[i * 4 + 2];
+        StaticStringData[NumStaticStrChars + i + Size * 3] := tmp[i * 4 + 3];
       end;
 
     end;
@@ -18796,16 +18800,21 @@ begin
                   DefineIdent(i + 1, TokenAt(i + 1).Name, TTokenKind.CONSTTOK, VarType, NumAllocElements, AllocElementType, NumStaticStrChars + CODEORIGIN + CODEORIGIN_BASE, TDataType.IDENTTOK);
 
 
-           	  if isStriped and (GetDataSize(AllocElementType) > 1) then
+                  if isStriped then
                   begin
+                    if (GetDataSize(AllocElementType) > 1) then
+                    begin
 
-          	    yes := Elements(NumIdent) <= 256;
+                      if Elements(NumIdent) <= MAXSTRIPEDARRAYSIZE then
+                        IdentifierAt(NumIdent).isStriped := True
+                      else
+                        WarningStripedModifierIgnoredBecauseOfRange(i);
 
-                    if yes then
-                      IdentifierAt(NumIdent).isStriped := True
+                    end
                     else
-                      WarningStripedAllowed(i);
-
+                    begin
+                      WarningStripedModifierIgnoredBecauseOfElementType(i);
+                    end;
                   end;
 
 
@@ -19258,20 +19267,22 @@ begin
               IdentifierAt(NumIdent).PassMethod := varPassMethod;
 
 
-            if isStriped and
-	       (GetDataSize(AllocElementType) >  1) and
-	       (IdentifierAt(NumIdent).PassMethod <> TParameterPassingMethod.VARPASSING) then
+            if isStriped and (IdentifierAt(NumIdent).PassMethod <> TParameterPassingMethod.VARPASSING) then
             begin
+              if (GetDataSize(AllocElementType) > 1) then
+              begin
 
-              yes := Elements(NumIdent) <= 256;
+                if Elements(NumIdent) <= MAXSTRIPEDARRAYSIZE then
+                  IdentifierAt(NumIdent).isStriped := True
+                else
+                  WarningStripedModifierIgnoredBecauseOfRange(i);
 
-              if yes then
-                IdentifierAt(NumIdent).isStriped := True
+              end
               else
-                WarningStripedAllowed(i);
-
+              begin
+                WarningStripedModifierIgnoredBecauseOfElementType(i);
+              end;
             end;
-
 
             varPassMethod := TParameterPassingMethod.UNDEFINED;
 

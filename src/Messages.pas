@@ -16,7 +16,8 @@ type
     VariableNotInit, ShortStringLength, StringTruncated, TypeMismatch, CantReadWrite,
     SubrangeBounds, TooManyParameters, CantDetermine, UpperBoundOfRange, HighLimit,
     IllegalTypeConversion, IncompatibleTypesArray, IllegalExpression, AlwaysTrue, AlwaysFalse,
-    UnreachableCode, IllegalQualifier, LoHi, StripedAllowed, FileNotFound, WrongParameterList,
+    UnreachableCode, IllegalQualifier, LoHi, StripedModifierIgnoredBecauseOfRange,
+    StripedModifierIgnoredBecauseOfElementType, FileNotFound, WrongParameterList,
     OperatorNotOverloaded, OperationNotSupportedForTypes, NotAllDeclarationsOverloaded, SyntaxError,
     CantAsignValuesToAnAddress, UndefinedResourceType, ResourceFileNotFound, DuplicateResource,
     OutOfResources, WrongSwitchToggle, IllegalOptimizationSpecified, IllegalAlignmentDirective,
@@ -95,7 +96,8 @@ procedure WarningAlwaysFalse(const tokenIndex: TTokenIndex);
 procedure WarningUnreachableCode(const tokenIndex: TTokenIndex);
 procedure WarningLoHi(const tokenIndex: TTokenIndex);
 procedure WarningShortStringLength(const tokenIndex: TTokenIndex);
-procedure WarningStripedAllowed(const tokenIndex: TTokenIndex);
+procedure WarningStripedModifierIgnoredBecauseOfRange(const tokenIndex: TTokenIndex);
+procedure WarningStripedModifierIgnoredBecauseOfElementType(const tokenIndex: TTokenIndex);
 procedure WarningUserDefined(const tokenIndex: TTokenIndex);
 procedure WarningVariableNotInitialized(const tokenIndex: TTokenIndex; const identIndex: TIdentIndex);
 procedure WarningForRangeCheckError(const tokenIndex: TTokenIndex; const Value: TInteger; const dstType: TDataType);
@@ -680,10 +682,16 @@ begin
     'String literal has more characters than short string length'));
 end;
 
-procedure WarningStripedAllowed(const tokenIndex: TTokenIndex);
+procedure WarningStripedModifierIgnoredBecauseOfRange(const tokenIndex: TTokenIndex);
 begin
-  Warning(tokenIndex, TMessage.Create(TErrorCode.StripedAllowed,
-    'Striped array is only allowed for maximum size of [0..255]'));
+  Warning(tokenIndex, TMessage.Create(TErrorCode.StripedModifierIgnoredBecauseOfRange,
+    'The STRIPED modifier for arrays is only allowed for a maximum index range of [0..255]. The addition will be ignored.'));
+end;
+
+procedure WarningStripedModifierIgnoredBecauseOfElementType(const tokenIndex: TTokenIndex);
+begin
+  Warning(tokenIndex, TMessage.Create(TErrorCode.StripedModifierIgnoredBecauseOfElementType,
+    'The STRIPED modifier for arrays is only allowed element datatype with a size greater than one byte. The addition will be ignored.'));
 end;
 
 procedure WarningUserDefined(const tokenIndex: TTokenIndex);
