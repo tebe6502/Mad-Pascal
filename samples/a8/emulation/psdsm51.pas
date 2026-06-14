@@ -219,6 +219,7 @@ var
   PC: Word;
   // Czy pamiec wspoldzielona
   SharedMem: Boolean;
+  // Auxiliary chain. Unused lower 128 bytes of the SFR variable.
   // Lancuch pomocniczy. Niewykorzystane dolne 128 bajtow zmiennej SFR
   StrBuf: String[125] absolute SFR;
   // Aktualna pozycja bufora
