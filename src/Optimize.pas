@@ -50,7 +50,7 @@ WriteOut
 
 interface
 
-uses CompilerTypes, CommonIO, OptimizeTemporary, Targets;
+uses CompilerTypes, OptimizeTemporary, Targets;
 
   // ----------------------------------------------------------------------------
 
@@ -60,9 +60,9 @@ procedure StartOptimization(SourceLocation: TSourceLocation);
 
 // Re/Set temporary variables for register optimizations.
 procedure ResetOpty;
-procedure SetOptyY(const value: TString);
+procedure SetOptyY(const Value: TString);
 function GetOptyBP2(): TString;
-procedure SetOptyBP2(const value: TString);
+procedure SetOptyBP2(const Value: TString);
 
 procedure ASM65Internal(const a: String; const comment: String; const optimizeCode: Boolean; const CodeSize: Integer; const IsInterrupt: Boolean);
 
@@ -126,10 +126,10 @@ begin
   result:=optyBP2;
 end;
 
-procedure SetOptyBP2(const value: TString);
+procedure SetOptyBP2(const Value: TString);
 begin
-  optyBP2:= value;
-  DebugCall( 'SetOptyBP2', value);
+  optyBP2 := Value;
+  DebugCall('SetOptyBP2', Value);
 end;
 
 procedure ResetOpty;

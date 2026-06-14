@@ -44,7 +44,7 @@ var
 
 implementation
 
-uses Common, SysUtils, Utilities;
+uses Common, SysUtils;
 
 constructor TProfiler.Create;
 begin

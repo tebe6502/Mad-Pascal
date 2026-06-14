@@ -4,7 +4,11 @@ unit CompilerTypes;
 
 interface
 
-uses SysUtils, CommonTypes, DataTypes, FileIO, Tokens;
+uses SysUtils, CommonTypes, DataTypes, FileIO, Tokens
+    {$IFDEF ASSERT_ARRAY_BOUNDARIES}
+    , Utilities
+    {$ENDIF}
+    ;
 
   // ----------------------------------------------------------------------------
 
@@ -280,7 +284,6 @@ type
 
   private
   var
-    Count: Integer;
     TypeArray: array of TType;
   end;
 

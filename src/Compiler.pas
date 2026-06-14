@@ -5072,7 +5072,7 @@ end;  // GenerateRead
 // ----------------------------------------------------------------------------
 
 
-procedure GenerateWriteString(Address: Word; IndirectionLevel: Byte; ValueType: TDataType = TDataType.INTEGERTOK);
+procedure GenerateWriteString(Address: Int64; IndirectionLevel: Byte; ValueType: TDataType = TDataType.INTEGERTOK);
 begin
   //Gen; Gen;              // mov ah, 09h
 
@@ -5165,9 +5165,13 @@ begin
     ASPOINTER:
     begin
 
+
+      // TODO: Do we want to support this? See PSDSM51.pas
+      if (address < 0) or (address > 65536) then RaiseHaltException(EHaltException.COMPILING_ABORTED);
+
       asm65(#9'@printSTRING #CODEORIGIN+' + HexWord(word(Address - CODEORIGIN)));
 
-      //    a65(TCode65.subBX);   !!!   bez DEX-a
+      // a65(TCode65.subBX); Intentionally without "DEX"
     end;
 
     ASPOINTERTOPOINTER:
@@ -11687,7 +11691,7 @@ var
   ConstVal, ConstValRight: Int64;
 begin
 
-  Debugger.debugger.CompileExpression(i, ValType, VarType);
+  ValType := TDataType.UNTYPETOK;
 
   ConstVal := 0;
 
@@ -15555,8 +15559,10 @@ begin
                                     (IdentifierAt(IdentIndex).Kind = TTokenKind.FUNCTIONTOK) or
                                     ((ExpressionType = TDataType.POINTERTOK) and
                                     (IdentifierAt(IdentIndex).DataType = TDataType.STRINGPOINTERTOK)) then
+                                  begin
                                     GenerateWriteString(IdentifierAt(IdentIndex).Value, ASPOINTERTOPOINTER,
-                                      IdentifierAt(IdentIndex).DataType)
+                                      IdentifierAt(IdentIndex).DataType);
+                                  end
                                   else
                                     if (ExpressionType = TDataType.PCHARTOK) or
                                       (IdentifierAt(IdentIndex).AllocElementType in
@@ -17607,32 +17613,34 @@ end;  //CompileRecordDeclaration
 
 
 // ----------------------------------------------------------------------------
+// Convert linear array to striped array.
 // ----------------------------------------------------------------------------
 
 
-procedure StripStaticData(DataSize: byte; NumAllocElements: Cardinal);
-var tmp: array [0..1023] of word;
-    i: word;
+procedure StripeStaticData(DataSize: Byte; NumAllocElements: Cardinal);
+var
+  tmp: array [0..1023] of Word;
+  i: Word;
 begin
 
- move(StaticStringData[NumStaticStrChars], tmp, sizeof(tmp));
+  move(StaticStringData[NumStaticStrChars], tmp, sizeof(tmp));
 
- for i:=0 to NumAllocElements - 1 do
-  case DataSize of
+  for i := 0 to NumAllocElements - 1 do
+    case DataSize of
 
-   2: begin
-       StaticStringData[NumStaticStrChars + i] := tmp[i * 2];
-       StaticStringData[NumStaticStrChars + i + word(NumAllocElements)] := tmp[i * 2 + 1];
+      2: begin
+        StaticStringData[NumStaticStrChars + i] := tmp[i * 2];
+        StaticStringData[NumStaticStrChars + i + Word(NumAllocElements)] := tmp[i * 2 + 1];
       end;
 
-   4: begin
-       StaticStringData[NumStaticStrChars + i] := tmp[i * 4];
-       StaticStringData[NumStaticStrChars + i + word(NumAllocElements)] := tmp[i * 4 + 1];
-       StaticStringData[NumStaticStrChars + i + word(NumAllocElements * 2)] := tmp[i * 4 + 2];
-       StaticStringData[NumStaticStrChars + i + word(NumAllocElements * 3)] := tmp[i * 4 + 3];
+      4: begin
+        StaticStringData[NumStaticStrChars + i] := tmp[i * 4];
+        StaticStringData[NumStaticStrChars + i + Word(NumAllocElements)] := tmp[i * 4 + 1];
+        StaticStringData[NumStaticStrChars + i + Word(NumAllocElements * 2)] := tmp[i * 4 + 2];
+        StaticStringData[NumStaticStrChars + i + Word(NumAllocElements * 3)] := tmp[i * 4 + 3];
       end;
 
-  end;
+    end;
 
 end;
 
@@ -18858,7 +18866,7 @@ begin
 
 
 		  if (Pass = TPass.CODE_GENERATION) and IdentifierAt(NumIdent).isStriped then
-		    StripStaticData(GetDataSize(AllocElementType), NumAllocElements);
+		    StripeStaticData(GetDataSize(AllocElementType), NumAllocElements);
 
 
                   if NumAllocElements shr 16 > 0 then
