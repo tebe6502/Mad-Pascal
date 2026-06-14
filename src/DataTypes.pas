@@ -4,7 +4,7 @@ interface
 
 uses CommonTypes;
 
-// TDataType uses the same constant names, but is a different enum type.
+  // TDataType uses the same constant names, but is a different enum type.
 type
   TDataType = (
       {$I 'Tokens.inc'}
@@ -26,11 +26,11 @@ const
 
   FileTypes = [TDataType.FILETOK, TDataType.TEXTFILETOK];
 
-  function GetDataTypeName(const dataType: TDataType): String;
-  function GetDataSize(const dataType: TDataType): Byte;
-  function GetValueType(const Value: TInteger): TDataType;
+function GetDataTypeName(const DataType: TDataType): String;
+function GetDataSize(const DataType: TDataType): Byte;
+function GetValueType(const Value: TInteger): TDataType;
 
-  function IsCommonConstType(const DstType: TDataType; const SrcType: TDataType): Boolean;
+function IsCommonConstType(const DstType: TDataType; const SrcType: TDataType): Boolean;
 
 implementation
 
@@ -65,17 +65,17 @@ const
     );
 
 
-  function GetDataTypeName(const dataType: TDataType): String;
-  begin
-    WriteStr(Result, dataType);
-  end;
+function GetDataTypeName(const DataType: TDataType): String;
+begin
+  WriteStr(Result, DataType);
+end;
 
-function GetDataSize(const dataType: TDataType): Byte;
+function GetDataSize(const DataType: TDataType): Byte;
 var
   index: Byte;
 begin
-  index := Ord(dataType);
-  if dataType = TDataType.UNTYPETOK then
+  index := Ord(DataType);
+  if DataType = TDataType.UNTYPETOK then
   begin
     Result := 0;
   end
@@ -142,7 +142,6 @@ begin
     TDataType.POINTERTOK, TDataType.DATAORIGINOFFSET, TDataType.CODEORIGINOFFSET, TDataType.STRINGPOINTERTOK]))
     // .
     or ((SrcType in IntegerTypes) and (DstType in [TDataType.CHARTOK, TDataType.BOOLEANTOK]));
-
 
 end;
 

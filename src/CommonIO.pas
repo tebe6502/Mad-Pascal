@@ -22,7 +22,7 @@ type
   TFileReader = class(TInterfacedObject, IReader)
 
   public
-    constructor Create(const textFile: ITextFile);
+    constructor Create(const TextFile: ITextFile);
 
     function ReadLn(var Text: TText): Boolean;
 
@@ -34,7 +34,7 @@ type
   TFileWriter = class(TInterfacedObject, IWriter)
 
   public
-    constructor Create(const textFile: ITextFile);
+    constructor Create(const TextFile: ITextFile);
 
     procedure WriteLn(const Text: TText);
 
@@ -61,7 +61,7 @@ implementation
 // Class TFileReader
 // ----------------------------------------------------------------------------
 
-constructor TFileReader.Create(const textFile: ITextFile);
+constructor TFileReader.Create(const TextFile: ITextFile);
 begin
   Self.TextFile := TextFile;
 end;
@@ -88,7 +88,7 @@ end;
 // Class TFileWriter
 // ----------------------------------------------------------------------------
 
-constructor TFileWriter.Create(const textFile: ITextFile);
+constructor TFileWriter.Create(const TextFile: ITextFile);
 begin
   Self.TextFile := TextFile;
 end;
