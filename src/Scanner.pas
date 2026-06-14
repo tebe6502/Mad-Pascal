@@ -134,7 +134,7 @@ begin
             'Undefined resource type: Type = ''' + res.resType + ''', Name = ''' + res.resName + ''''));
 
 
-        if (res.resFile <> '') and (unitPathList.FindFile(res.resFile) = '') then
+        if (res.resFile <> '') and (unitPathList.FindFile(res.resFile).FilePath  = '') then
         begin
           // TODO Have message for special case empty unit path
           Error(NumTok, TMessage.Create(TErrorCode.ResourceFileNotFound,

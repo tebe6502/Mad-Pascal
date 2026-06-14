@@ -14,11 +14,14 @@ type
   TFilePath = String;
   TFolderPath = TFilePath;
 
+  TPathListFindFileResult = record
+    filePath: TFilePath;
+  end;
 
   IPathList = interface
 
     procedure AddFolder(const folderPath: TFolderPath);
-    function FindFile(const filePath: TFilePath): TFilePath;
+    function FindFile(const filePath: TFilePath): TPathListFindFileResult;
     function GetSize: Integer;
     function ToString: String;
   end;
@@ -30,17 +33,17 @@ type
     constructor Create(const cached: Boolean = False);
     destructor Free;
     procedure AddFolder(const folderPath: TFolderPath);
-    function FindFile(const filePath: TFilePath): TFilePath;
+    function FindFile(const filePath: TFilePath): TPathListFindFileResult;
     function GetSize: Integer;
     function ToString: String; override;
   private
-  type TCachedResult = TDictionary<TFilePath, TFilePath>;
+  type TCachedResult = TDictionary<TFilePath, TPathListFindFileResult>;
   var
     paths: array of TFilePath;
     cached: Boolean;
     cachedResult: TCachedResult;
 
-    function FindFileInternal(const filePath: TFilePath): TFilePath;
+    function FindFileInternal(const filePath: TFilePath): TPathListFindFileResult;
   end;
 
 
@@ -324,7 +327,7 @@ begin
   cachedResult.Clear;
 end;
 
-function TPathList.FindFile(const filePath: TFilePath): TFilePath;
+function TPathList.FindFile(const filePath: TFilePath): TPathListFindFileResult;
 begin
   if cached and cachedResult.ContainsKey(filePath) then
     Result := cachedResult[filePath]
@@ -335,7 +338,7 @@ begin
   end;
 end;
 
-function TPathList.FindFileInternal(const filePath: TFilePath): TFilePath;
+function TPathList.FindFileInternal(const filePath: TFilePath): TPathListFindFileResult;
 var
   fileFolder: TFolderPath;
   fileName: TFilePath;
@@ -346,7 +349,7 @@ var
 begin
 
   // Not found
-  Result := '';
+  Result.filePath := '';
 
   fileFolder := ExtractFilePath(filePath);
   fileName := ExtractFileName(filePath);
@@ -360,8 +363,11 @@ begin
     begin
       // TODO: For https://github.com/tebe6502/Mad-Pascal/issues/215
       Writeln('INFO: Case difference in file name ' + filePath + ' and ' + searchRec.Name);
+      end
+   else
+      begin
     end;
-    Result := fileFolder + searchRec.Name;
+    Result.filePath := fileFolder + searchRec.Name;
     Exit;
   end;
 
@@ -378,7 +384,7 @@ begin
           // TODO: For https://github.com/tebe6502/Mad-Pascal/issues/215
           Writeln('INFO: Case difference in file name ' + filePath + ' and ' + searchRec.Name);
         end;
-      Result := fileFolder + searchRec.Name;
+      Result.FilePath := fileFolder + searchRec.Name;
       Exit;
     end;
   end;

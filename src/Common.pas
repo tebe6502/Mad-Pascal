@@ -242,10 +242,12 @@ end;
 
 function FindFile(FileName: String; ftyp: TString): TFilePath; overload;
 var
+  FindFileResult: TPathListFindFileResult;
   unitPathText: String;
   msg: IMessage;
 begin
-  Result := unitPathList.FindFile(FileName);
+  FindFileResult := unitPathList.FindFile(FileName);
+  Result:=FindFileResult.FilePath;
   if Result = '' then
   begin
     if unitPathList.GetSize() = 0 then
