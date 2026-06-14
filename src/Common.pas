@@ -157,7 +157,7 @@ procedure DefineStaticString(StrTokenIndex: TTokenIndex; StrValue: String);
 
 procedure DefineFilename(TokenIndex: TTokenIndex; StrValue: String);
 
-function FindFile(FileName: String; FileType: TString): TFilePath; overload;
+function FindFile(const FileName: String; const FileType: TString): TFilePath;
 
 procedure CheckCommonConstType(const TokenIndex: TTokenIndex; const DstType: TDataType; const SrcType: TDataType);
 
@@ -240,7 +240,7 @@ begin
   Result := TypeList.GetTypeAtIndex(typeIndex);
 end;
 
-function FindFile(FileName: String; FileType: TString): TFilePath; overload;
+function FindFile(const FileName: String; const FileType: TString): TFilePath;
 var
   FindFileResult: TPathListFindFileResult;
   UnitPathText: String;
@@ -261,13 +261,13 @@ begin
     end;
     if FileType = 'unit' then
     begin
-      Msg := TMessage.Create(TErrorCode.FileNotFound, 'Cannot find {0} ''{1}'' used by program ''{2}'' in {3}.',
+      Msg := TMessage.Create(TErrorCode.FileNotFound, 'Cannot find {0} ''{1}'' used by program ''{2}'' in path ''{3}''.',
         FileType, ChangeFileExt(FileName, ''), PROGRAM_NAME, UnitPathText);
 
     end
     else
     begin
-      Msg := TMessage.Create(TErrorCode.FileNotFound, 'Cannot find {0} ''{1}'' used by program ''{2}'' in {3}.',
+      Msg := TMessage.Create(TErrorCode.FileNotFound, 'Cannot find {0} ''{1}'' used by program ''{2}'' in path ''{3}''.',
         FileType, FileName, PROGRAM_NAME, UnitPathText);
     end;
     Error(NumTok, Msg);
@@ -277,7 +277,7 @@ begin
     if FindFileResult.message <> '' then
     begin
       Msg := TMessage.Create(TErrorCode.FileFoundWithWarning,
-        'Warning for {0} ''{1}'' used by program ''{2}'' in {3}: {4}', FileType, FileName,
+        'Warning for {0} ''{1}'' used by program ''{2}'' in path ''{3}'': {4}', FileType, FileName,
         PROGRAM_NAME, UnitPathText, FindFileResult.message);
       Warning(NumTok, Msg, True);
     end;
