@@ -61,8 +61,6 @@ begin
   SetLength(linkObj, 1);
   SetLength(resArray, 1);
 
-  Messages.Initialize;
-
   BlockManager.Initialize;
 
   CodeSize := 0;

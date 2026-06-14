@@ -462,8 +462,8 @@ type
 
     ObjectIndex: TTypeIndex;
 
-    isUnresolvedForward, updateResolvedForward, isOverload, isRegister, isInterrupt,
-    isRecursion, isStdCall, isPascal, isInline, isAsm, isExternal, isKeep, isVolatile, isStriped, IsAlive: Boolean;
+    IsUnresolvedForward, updateResolvedForward, IsOverload, IsRegister, IsInterrupt,
+    IsRecursion, IsStdCall, IsPascal, IsInline, IsAsm, IsExternal, IsKeep, IsVolatile, IsStriped, IsAlive: Boolean;
 
     //  For kind=VARIABLE, USERTYPE:
     NumAllocElements, NumAllocElements_: Cardinal;

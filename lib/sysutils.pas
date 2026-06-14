@@ -114,7 +114,7 @@ const
 
 implementation
 
-uses DOS, StrUtils;
+uses dos, strutils;
 
 
 {$i './targets/sysutils.inc'}
