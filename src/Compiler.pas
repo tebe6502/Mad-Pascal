@@ -12112,7 +12112,7 @@ end;
 
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
-procedure LogDebug(const message: String);
+procedure LogDebug(const Message: String);
 begin
   // WriteLn(StdErr,message);
 end;
