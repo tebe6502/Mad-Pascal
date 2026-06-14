@@ -15511,15 +15511,14 @@ begin
                                     ((ExpressionType = TDataType.POINTERTOK) and
                                     (IdentifierAt(IdentIndex).DataType = TDataType.STRINGPOINTERTOK)) then
                                   begin
-                                    GenerateWriteString(IdentifierAt(IdentIndex).Value, ASPOINTERTOPOINTER,
-                                      IdentifierAt(IdentIndex).DataType);
+
+                                    GenerateWriteString(IdentifierAt(IdentIndex).Value, ASPOINTERTOPOINTER, IdentifierAt(IdentIndex).DataType);
                                   end
                                   else
                                     if (ExpressionType = TDataType.PCHARTOK) or
-                                      (IdentifierAt(IdentIndex).AllocElementType in
-                                      [TDataType.CHARTOK, TDataType.POINTERTOK]) then
-                                      GenerateWriteString(IdentifierAt(IdentIndex).Value,
-                                        ASPCHAR, IdentifierAt(IdentIndex).DataType)
+                                       (IdentifierAt(IdentIndex).AllocElementType in [TDataType.CHARTOK, TDataType.POINTERTOK]) then
+
+                                      GenerateWriteString(IdentifierAt(IdentIndex).Value, ASPCHAR, IdentifierAt(IdentIndex).DataType)
                                     else
                                       Error(i, TErrorCode.CantReadWrite);
 
@@ -19395,10 +19394,17 @@ begin
                 else
                   if (TokenAt(i).Kind = TTokenKind.STRINGLITERALTOK) and (open_array = False) and
                     (VarType = TDataType.POINTERTOK) and (AllocElementType = TDataType.CHARTOK) then
+		  begin
 
-                    SaveToDataSegment(idx, TokenAt(i).StrAddress - CODEORIGIN + 1, TDataType.CODEORIGINOFFSET)
+                   // SaveToDataSegment(idx, TokenAt(i).StrAddress - CODEORIGIN + 1, TDataType.CODEORIGINOFFSET)
 
-                  else
+                   for j := 0 to IdentifierAt(NumIdent).NumAllocElements-1 do
+                    if j > TokenAt(i).StrLength-1 then
+                      SaveToDataSegment(idx + j, ord(' '), TDataType.CHARTOK)
+                    else
+                      SaveToDataSegment(idx + j, ord( StaticStringData[ TokenAt(i).StrAddress - CODEORIGIN + j + 1] ), TDataType.CHARTOK);
+
+                  end else
 
 {
     if (TokenAt(i).Kind = TTokenKind.STRINGLITERALTOK) and (open_array = false) then begin
