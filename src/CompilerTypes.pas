@@ -5,10 +5,10 @@ unit CompilerTypes;
 interface
 
 uses SysUtils, CommonTypes, DataTypes, FileIO, Tokens
-    {$IFDEF ASSERT_ARRAY_BOUNDARIES}
+  {$IFDEF ASSERT_ARRAY_BOUNDARIES}
     , Utilities
-    {$ENDIF}
-    ;
+  {$ENDIF}
+  ;
 
   // ----------------------------------------------------------------------------
 
@@ -161,9 +161,9 @@ type
 
     constructor Create(const ParentBlock: TBlock);
     destructor Free;
-    procedure AddIdentifer(const identifier: TIdentifier);
+    procedure AddIdentifer(const Identifier: TIdentifier);
     function NumIdentifiers: Integer;
-    function GetIdentifierAtIndex(const index: Integer): TIdentifier;
+    function GetIdentifierAtIndex(const Index: Integer): TIdentifier;
 
   private
     NumIdentifiers_: Integer;
@@ -177,10 +177,10 @@ type
     constructor Create;
     destructor Free;
 
-    procedure Clear(const fromIndex: TBlockIndex = 0);
+    procedure Clear(const FromBlockIndex: TBlockIndex = 0);
     function AddBlock(const ParentBlock: TBlock): TBlock;
     function Count: Integer;
-    function GetBlockAtIndex(const blockIndex: TBlockIndex): TBlock;
+    function GetBlockAtIndex(const BlockIndex: TBlockIndex): TBlock;
 
   private
 
@@ -200,11 +200,11 @@ type
     destructor Free;
 
     procedure Clear;
-    procedure Push(const block: TBlock);
+    procedure Push(const Block: TBlock);
     function Pop: TBlock;
     function Top: TBlock;
     function TopIndex: TBlockStackIndex;
-    function GetBlockAtIndex(const blockStackIndex: TBlockStackIndex): TBlock;
+    function GetBlockAtIndex(const BlockStackIndex: TBlockStackIndex): TBlock;
     function ToString: String; override;
 
   private
@@ -213,7 +213,7 @@ type
     TBlockArray = array of TBlock;
   var
     topIndex_: TBlockStackIndex;
-    array_: TBlockArray;
+    Array_: TBlockArray;
 
   end;
 
@@ -254,7 +254,7 @@ type
     NumAllocElements: TNumAllocElements;
     AllocElementType: TDataType;
     Kind: TFieldKind;
-    ObjectVariable: Boolean;
+    OBJECTVARIABLE: Boolean;
   end;
 
 
@@ -278,7 +278,7 @@ type
 
     function Size: Integer;
     // function AddType(BlockIndex: TBlockIndex): TType;
-    function GetTypeAtIndex(const typeIndex: TTypeIndex): TType;
+    function GetTypeAtIndex(const TypeIndex: TTypeIndex): TType;
 
   const
     MAXTYPES = 1024;
@@ -343,8 +343,8 @@ type
 
   TToken = class
 
-    // Because token after always accessed by reference, the properties are read-only
-    // to prevent accidential write access outside of the scanner.
+    // Because token after always accessed by reference, the properties are
+    // read-only to prevent accidential write access outside of the scanner.
   private
   var
     TokenIndex_: TTokenIndex;
@@ -416,8 +416,8 @@ type
     procedure Clear;
     function AddToken(Kind: TTokenKind; SourceFile: TSourceFile; Line, Column: Integer; Value: TInteger): TToken;
     procedure RemoveToken;
-    function GetTokenAtIndex(const tokenIndex: TTokenIndex): TToken; inline;
-    function GetTokenSpellingAtIndex(const tokenIndex: TTokenIndex): TString;
+    function GetTokenAtIndex(const TokenIndex: TTokenIndex): TToken; inline;
+    function GetTokenSpellingAtIndex(const TokenIndex: TTokenIndex): TString;
 
   private
   type TTokenArray = array of TToken;
@@ -473,9 +473,6 @@ type
     constructor Create;
     function CastKindToDataType: TDataType;
 
-(**
-    function GetIdentResult: TIdentifierIndex;
-**)
   end;
 
   // An identifier list owns identifier instances.
@@ -488,13 +485,13 @@ type
     function Size: Integer;
     procedure Clear;
     function AddIdentifier: TIdentifier;
-    function GetIdentifierAtIndex(const identifierIndex: TIdentifierIndex): TIdentifier; inline;
+    function GetIdentifierAtIndex(const IdentifierIndex: TIdentifierIndex): TIdentifier; inline;
 
     // The following type and array should be considered private.
     // The are only public for access in specially optimized prodedures.
   type TIdentifierArray = array of TIdentifier;
   var
-    identifierArray: TIdentifierArray;
+    IdentifierArray: TIdentifierArray;
 
   end;
 
@@ -502,7 +499,7 @@ type
 
   public
     constructor Create;
-    procedure AddChild(const blockIndex: TBlockIndex);
+    procedure AddChild(const BlockIndex: TBlockIndex);
     function NumChildren: Word;
     function GetChild(Index: Word): TBlockIndex;
   private
@@ -521,7 +518,7 @@ type
     destructor Free;
 
     procedure AddChild(const ParentBlock, ChildBlock: TBlockIndex);
-    function GetCallGraphNode(blockIndex: TBlockIndex): TCallGraphNode;
+    function GetCallGraphNode(BlockIndex: TBlockIndex): TCallGraphNode;
 
     // Mark all identifiers in the identifier list from 1...NumIdent as alive, if the are (in)directly called by the root identifier.
     procedure MarkAlive(const IdentfierList: TIdentifierList; const NumIdent: Integer;
@@ -592,7 +589,7 @@ end;
 
 constructor TBlock.Create(const ParentBlock: TBlock);
 begin
-  Self.ParentBlock := parentBlock;
+  Self.ParentBlock := ParentBlock;
   NumIdentifiers_ := 0;
   IdentifierArray := nil;
 end;
@@ -603,7 +600,7 @@ begin
   NumIdentifiers_ := 0;
 end;
 
-procedure TBlock.AddIdentifer(const identifier: TIdentifier);
+procedure TBlock.AddIdentifer(const Identifier: TIdentifier);
 var
   //  otherIdentifier: TIdentifier;
   capacity: Integer;
@@ -615,7 +612,7 @@ begin
   capacity := Length(IdentifierArray);
   if capacity = 0 then SetLength(IdentifierArray, 10)
   else if NumIdentifiers_ = capacity then SetLength(IdentifierArray, 2 * capacity);
-  IdentifierArray[NumIdentifiers_] := identifier;
+  IdentifierArray[NumIdentifiers_] := Identifier;
   Inc(NumIdentifiers_);
 end;
 
@@ -625,9 +622,9 @@ begin
   Result := NumIdentifiers_;
 end;
 
-function TBlock.GetIdentifierAtIndex(const index: Integer): TIdentifier;
+function TBlock.GetIdentifierAtIndex(const Index: Integer): TIdentifier;
 begin
-  Result := IdentifierArray[index - 1];
+  Result := IdentifierArray[Index - 1];
 end;
 
 // ----------------------------------------------------------------------------
@@ -644,24 +641,24 @@ begin
   Clear;
 end;
 
-procedure TBlockList.Clear(const fromIndex: TBlockIndex = 0);
+procedure TBlockList.Clear(const FromBlockIndex: TBlockIndex = 0);
 var
   i: Integer;
 begin
-  if array_ <> nil then
+  if Array_ <> nil then
   begin
-    for i := fromIndex to Count_ do FreeAndNil(Array_[i]);
-    if (fromIndex = 0) then Array_ := nil;
-    Count_ := fromIndex - 1;
+    for i := FromBlockIndex to Count_ do FreeAndNil(Array_[i]);
+    if (FromBlockIndex = 0) then Array_ := nil;
+    Count_ := FromBlockIndex - 1;
   end;
 end;
 
 function TBlockList.AddBlock(const ParentBlock: TBlock): TBlock;
 var
-  Capacity: Integer;
+  capacity: Integer;
 begin
   Inc(Count_);
-  Capacity := Length(Array_);
+  capacity := Length(Array_);
   if capacity = 0 then SetLength(Array_, 256)
   else if Count_ = capacity then SetLength(Array_, 2 * capacity);
   Result := TBlock.Create(ParentBlock);
@@ -676,10 +673,10 @@ begin
 end;
 
 
-function TBlockList.GetBlockAtIndex(const blockIndex: TBlockIndex): TBlock;
+function TBlockList.GetBlockAtIndex(const BlockIndex: TBlockIndex): TBlock;
 begin
-  assert((blockIndex >= 0) and (blockIndex <= Count_));
-  Result := Array_[blockIndex];
+  assert((BlockIndex >= 0) and (BlockIndex <= Count_));
+  Result := Array_[BlockIndex];
 end;
 
 
@@ -700,17 +697,17 @@ end;
 procedure TBlockStack.Clear;
 begin
   topIndex_ := -1;
-  SetLength(array_, 10);
+  SetLength(Array_, 10);
 end;
 
-procedure TBlockStack.Push(const block: TBlock);
+procedure TBlockStack.Push(const Block: TBlock);
 var
-  Capacity: Integer;
+  capacity: Integer;
 begin
   Inc(topIndex_);
-  Capacity := Length(array_); // Never 0
-  if topIndex_ = Capacity then SetLength(array_, Capacity * 2);
-  array_[topIndex_] := block;
+  capacity := Length(Array_); // Never 0
+  if topIndex_ = capacity then SetLength(Array_, capacity * 2);
+  Array_[topIndex_] := Block;
 
   //if     block.BlockIndex=134 then
   //WriteLn(' TBlockStack.Push: ', block.BlockIndex, ' topIndex=', topIndex_);
@@ -719,14 +716,14 @@ end;
 function TBlockStack.Pop: TBlock;
 begin
   assert(topIndex_ >= 0);
-  Result := array_[topIndex_];
+  Result := Array_[topIndex_];
   Dec(topIndex_);
   // WriteLn(' TBlockStack.Pop: ', Result.BlockIndex, ' topIndex=', topIndex_);
 end;
 
-function TBlockStack.GetBlockAtIndex(const blockStackIndex: TBlockStackIndex): TBlock;
+function TBlockStack.GetBlockAtIndex(const BlockStackIndex: TBlockStackIndex): TBlock;
 begin
-  Result := array_[blockStackIndex];
+  Result := Array_[BlockStackIndex];
 end;
 
 function TBlockStack.TopIndex: TBlockStackIndex;
@@ -736,7 +733,7 @@ end;
 
 function TBlockStack.Top: TBlock;
 begin
-  Result := array_[topIndex];
+  Result := Array_[TopIndex];
 end;
 
 
@@ -772,7 +769,7 @@ procedure TBlockManager.Initialize;
 begin
   BlockStack.Clear;
   BlockList.Clear(1);
-  BlockStack.Push(block0);
+  BlockStack.Push(Block0);
 end;
 
 function TBlockManager.AddBlock: TBlock;
@@ -856,8 +853,8 @@ end;
 
 function TSourceFileList.AddUnit(SourceFileType: TSourceFileType; Name: TSourceFileName; Path: TFilePath): TSourceFile;
 begin
-  Assert(IsValidIdent(path) = False, 'Name ''' + Name + ''' is not a valid identifier.');
-  Assert(Length(path) >= 0, 'Path not specified.');
+  assert(IsValidIdent(Path) = False, 'Name ''' + Name + ''' is not a valid identifier.');
+  assert(Length(Path) >= 0, 'Path not specified.');
 
   // Writeln('Adding unit ''' + Name + ''' with path ''' + path + '''.');
 
@@ -967,12 +964,12 @@ end;
 
 function TToken.GetDataType: TDataType;
 begin
-  Result := GetTokenDataType(kind);
+  Result := GetTokenDataType(Kind);
 end;
 
 function TToken.GetSpelling: TString;
 begin
-  Result := GetHumanReadbleTokenSpelling(kind);
+  Result := GetHumanReadbleTokenSpelling(Kind);
 end;
 
 
@@ -1017,7 +1014,7 @@ var
 begin
   assert(SourceFile <> nil, 'No source code file specified');
 
-  i := size + 1;
+  i := Size + 1;
   // if size >= MAXTOKENS then
   //    Error(NumTok, 'Out of resources, TOK');
 
@@ -1058,14 +1055,14 @@ procedure TTokenList.RemoveToken;
 var
   i: Integer;
 begin
-  i := size;
+  i := Size;
   tokenArray[i].Free;
   tokenArray[i] := nil;
   SetLength(tokenArray, i);
 
 end;
 
-function TTokenList.GetTokenAtIndex(const tokenIndex: TTokenIndex): TToken; inline;
+function TTokenList.GetTokenAtIndex(const TokenIndex: TTokenIndex): TToken; inline;
 begin
   {$IFDEF ASSERT_ARRAY_BOUNDARIES}
   if (tokenIndex < Low(tokenArray)) then
@@ -1080,20 +1077,20 @@ begin
     RaiseHaltException(EHaltException.COMPILING_ABORTED);
   end;
   {$ENDIF}
-  Result := tokenArray[tokenIndex];
+  Result := tokenArray[TokenIndex];
 end;
 
-function TTokenList.GetTokenSpellingAtIndex(const tokenIndex: TTokenIndex): TString;
+function TTokenList.GetTokenSpellingAtIndex(const TokenIndex: TTokenIndex): TString;
 var
-  kind: TTokenKind;
+  Kind: TTokenKind;
 begin
   Result := '';
-  if tokenIndex > Size then
+  if TokenIndex > Size then
     Result := 'no token'
   else
   begin
-    kind := tokenArray[tokenIndex].Kind;
-    GetHumanReadbleTokenSpelling(kind);
+    Kind := tokenArray[TokenIndex].Kind;
+    GetHumanReadbleTokenSpelling(Kind);
   end;
 end;
 
@@ -1108,23 +1105,8 @@ end;
 function TIdentifier.CastKindToDataType: TDataType;
 begin
   // TODO Check that this can really be converted to a data type.
-  Result := GetTokenDataType(kind);
+  Result := GetTokenDataType(Kind);
 end;
-
-(**
-function TIdentifier.GetIdentResult: TIdentIndex;
-var
-  IdentIndex: Integer;
-begin
-
-  Result := 0;
-
-  for IdentIndex := 1 to NumIdent do
-    if (IdentifierAt(IdentIndex).BlockIndex = ProcAsBlock) and (IdentifierAt(IdentIndex).Name = 'RESULT') then
-      exit(IdentIndex);
-
-end;
-**)
 
 // ----------------------------------------------------------------------------
 // Class TIdentifierList
@@ -1150,14 +1132,14 @@ procedure TIdentifierList.Clear;
 var
   i: Integer;
 begin
-  if identifierArray <> nil then
+  if IdentifierArray <> nil then
   begin
-    for i := Low(identifierArray) to High(identifierArray) do identifierArray[i].Free;
+    for i := Low(IdentifierArray) to High(IdentifierArray) do IdentifierArray[i].Free;
   end;
 
   // Valid identifier indexes start at 1. The identifier at index 0 is kept as UNTYPED identifier.
-  SetLength(identifierArray, 1);
-  identifierArray[0] := TIdentifier.Create;
+  SetLength(IdentifierArray, 1);
+  IdentifierArray[0] := TIdentifier.Create;
 end;
 
 function TIdentifierList.AddIdentifier(): TIdentifier;
@@ -1168,16 +1150,16 @@ begin
 
   // if size >= MAXIDENTS then
   //    Error(NumIdent, 'Out of resources, IDENT');
-  i := size + 1;
+  i := Size + 1;
 
   // Result.IdentifierIndex := i;
 
-  SetLength(identifierArray, i + 1);
-  identifierArray[i] := Result;
+  SetLength(IdentifierArray, i + 1);
+  IdentifierArray[i] := Result;
 end;
 
 
-function TIdentifierList.GetIdentifierAtIndex(const identifierIndex: TIdentifierIndex): TIdentifier; inline;
+function TIdentifierList.GetIdentifierAtIndex(const IdentifierIndex: TIdentifierIndex): TIdentifier; inline;
 begin
   {$IFDEF ASSERT_ARRAY_BOUNDARIES}
   if (identifierIndex < Low(identifierArray)) then
@@ -1192,7 +1174,7 @@ begin
     RaiseHaltException(EHaltException.COMPILING_ABORTED);
   end;
   {$ENDIF}
-  Result := identifierArray[identifierIndex];
+  Result := IdentifierArray[IdentifierIndex];
 end;
 
 // ----------------------------------------------------------------------------
@@ -1252,14 +1234,14 @@ begin
   ChildBlockArray := nil;
 end;
 
-procedure TCallGraphNode.AddChild(const blockIndex: TBlockIndex);
+procedure TCallGraphNode.AddChild(const BlockIndex: TBlockIndex);
 var
-  Capacity: Integer;
+  capacity: Integer;
 begin
-  Capacity := Length(ChildBlockArray);
-  if Capacity = 0 then SetLength(ChildBlockArray, 10)
-  else if NumChildren_ = Capacity then SetLength(ChildBlockArray, 2 * capacity);
-  ChildBlockArray[NumChildren_] := blockIndex;
+  capacity := Length(ChildBlockArray);
+  if capacity = 0 then SetLength(ChildBlockArray, 10)
+  else if NumChildren_ = capacity then SetLength(ChildBlockArray, 2 * capacity);
+  ChildBlockArray[NumChildren_] := BlockIndex;
   Inc(NumChildren_);
 end;
 
@@ -1305,9 +1287,9 @@ begin
 
 end;
 
-function TCallGraph.GetCallGraphNode(blockIndex: TBlockIndex): TCallGraphNode;
+function TCallGraph.GetCallGraphNode(BlockIndex: TBlockIndex): TCallGraphNode;
 begin
-  Result := CallGraphNodeArray[blockIndex];
+  Result := CallGraphNodeArray[BlockIndex];
 end;
 
 procedure TCallGraph.MarkAlive(const IdentfierList: TIdentifierList; const NumIdent: Integer;
@@ -1387,7 +1369,7 @@ begin
     TIOCode.FileMode: Result := $f0;
     TIOCode.Close: Result := $ff;
     else
-      Assert(False, 'Invalid ioCode.');
+      assert(False, 'Invalid ioCode.');
   end;
 end;
 

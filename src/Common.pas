@@ -80,30 +80,30 @@ var
 
   OldConstValType: TDataType;
 
-  NumPredefIdent, NumStaticStrChars, run_func, NumProc, CodeSize, NumStaticStrCharsTmp, IfCnt,
+  NumPredefIdent, NumStaticStrChars, Run_Func, NumProc, CodeSize, NumStaticStrCharsTmp, IfCnt,
   CaseCnt, IfdefLevel: Integer;
 
-  pass: TPass;
+  Pass: TPass;
 
   ActiveSourceFile: TSourceFile; // Initialized in Scanner.TokenizeProgramInitialization
 
   FastMul: Integer;
   // Initialized in Scanner.TokenizeProgramInitialization to -1, updated to page address from {$F [page address]}
 
-  resArray: array of TResource;
+  ResArray: array of TResource;
 
-  msgLists: record
+  MsgLists: record
     msgWarning: TStringList;
     msgNote: TStringList;
     msgUser: TStringList;
     end;
 
   LinkObj: TStringArray;
-  unitPathList: IPathList;
+  UnitPathList: IPathList;
 
   WithName: TStringArray;
 
-  codealign: record
+  CodeAlign: record
     proc, loop, link: Integer;
     end;
 
@@ -134,13 +134,13 @@ var
   // ----------------------------------------------------------------------------
 
 function NumTok: Integer;
-function TokenAt(tokenIndex: TTokenIndex): TToken;
+function TokenAt(TokenIndex: TTokenIndex): TToken;
 
 function NumIdent: Integer;
-function IdentifierAt(identifierIndex: TIdentifierIndex): TIdentifier;
+function IdentifierAt(IdentifierIndex: TIdentifierIndex): TIdentifier;
 
-procedure AddDefine(const defineName: TDefineName);
-function SearchDefine(const defineName: TDefineName): TDefineIndex;
+procedure AddDefine(const DefineName: TDefineName);
+function SearchDefine(const DefineName: TDefineName): TDefineIndex;
 
 procedure CheckArrayIndex(i: TTokenIndex; IdentIndex: TIdentIndex; ArrayIndex: TIdentIndex; ArrayIndexType: TDataType);
 
@@ -155,19 +155,19 @@ procedure CheckTok(const Token: TToken; const ExpectedTokenCode: TTokenKind); ov
 
 procedure DefineStaticString(StrTokenIndex: TTokenIndex; StrValue: String);
 
-procedure DefineFilename(tokenIndex: TTokenIndex; StrValue: String);
+procedure DefineFilename(TokenIndex: TTokenIndex; StrValue: String);
 
-function FindFile(FileName: String; ftyp: TString): TFilePath; overload;
+function FindFile(FileName: String; FileType: TString): TFilePath; overload;
 
-procedure CheckCommonConstType(const tokenIndex: TTokenIndex; const DstType: TDataType; const SrcType: TDataType);
+procedure CheckCommonConstType(const TokenIndex: TTokenIndex; const DstType: TDataType; const SrcType: TDataType);
 
-function GetCommonConstType(const tokenIndex: TTokenIndex; const DstType: TDataType;
+function GetCommonConstType(const TokenIndex: TTokenIndex; const DstType: TDataType;
   const SrcType: TDataType; const err: Boolean = True): Boolean;
 
 
-procedure CheckCommonType(const tokenIndex: TTokenIndex; const LeftType: TDataType; const RightType: TDataType);
+procedure CheckCommonType(const TokenIndex: TTokenIndex; const LeftType: TDataType; const RightType: TDataType);
 
-function GetCommonType(const tokenIndex: TTokenIndex; const LeftType: TDataType;
+function GetCommonType(const TokenIndex: TTokenIndex; const LeftType: TDataType;
   const RightType: TDataType): TDataType;
 
 function GetEnumName(IdentIndex: TIdentIndex): TString;
@@ -177,8 +177,8 @@ function HighBound(const i: TTokenIndex; const DataType: TDataType): TInteger;
 
 
 function GetVarDataSize: Integer;
-procedure SetVarDataSize(const tokenIndex: TTokenIndex; const size: Integer);
-procedure IncVarDataSize(const tokenIndex: TTokenIndex; const size: Integer);
+procedure SetVarDataSize(const TokenIndex: TTokenIndex; const size: Integer);
+procedure IncVarDataSize(const TokenIndex: TTokenIndex; const size: Integer);
 
 function GetTypeAtIndex(const typeIndex: TTypeIndex): TType;
 
@@ -211,7 +211,7 @@ begin
 end;
 
 
-procedure SetVarDataSize(const tokenIndex: TTokenIndex; const size: Integer);
+procedure SetVarDataSize(const TokenIndex: TTokenIndex; const size: Integer);
 //var
 //  token: TToken;
 begin
@@ -223,15 +223,15 @@ begin
     RaiseHaltException(EHaltException.COMPILING_ABORTED);
   end;
 
-  // token := TokenAt(tokenIndex);
+  // token := TokenAt(TokenIndex);
   // LogTrace(Format('SetVarDataSize: TokenIndex=%d: %s %s VarDataSize=%d',
-  //  [tokenIndex, token.GetSourceFileLocationString, 'TODO' {*token.GetSpelling*}, _VarDataSize]));
+  //  [TokenIndex, token.GetSourceFileLocationString, 'TODO' {*token.GetSpelling*}, _VarDataSize]));
 end;
 
 
-procedure IncVarDataSize(const tokenIndex: TTokenIndex; const size: Integer);
+procedure IncVarDataSize(const TokenIndex: TTokenIndex; const size: Integer);
 begin
-  SetVarDataSize(tokenIndex, _VarDataSize + size);
+  SetVarDataSize(TokenIndex, _VarDataSize + size);
 end;
 
 
@@ -240,47 +240,60 @@ begin
   Result := TypeList.GetTypeAtIndex(typeIndex);
 end;
 
-function FindFile(FileName: String; ftyp: TString): TFilePath; overload;
+function FindFile(FileName: String; FileType: TString): TFilePath; overload;
 var
-  unitPathText: String;
-  msg: IMessage;
+  FindFileResult: TPathListFindFileResult;
+  UnitPathText: String;
+  Msg: IMessage;
 begin
-  Result := unitPathList.FindFile(FileName);
+  FindFileResult := UnitPathList.FindFile(FileName);
+  Result := FindFileResult.FilePath;
   if Result = '' then
   begin
-    if unitPathList.GetSize() = 0 then
+    if UnitPathList.GetSize() = 0 then
     begin
-      unitPathText :=
+      UnitPathText :=
         'an empty unit path. Specify the folders for the unit path via the ''-ipath:<folder>'' command line parameter';
     end
     else
     begin
-      unitPathText := 'unit path ''' + unitPathList.ToString + '''';
+      UnitPathText := 'unit path ''' + UnitPathList.ToString + '''';
     end;
-    if ftyp = 'unit' then
+    if FileType = 'unit' then
     begin
-      msg := TMessage.Create(TErrorCode.FileNotFound, 'Cannot find {0} ''{1}'' used by program ''{2}'' in {3}.',
-        ftyp, ChangeFileExt(FileName, ''), PROGRAM_NAME, unitPathText);
+      Msg := TMessage.Create(TErrorCode.FileNotFound, 'Cannot find {0} ''{1}'' used by program ''{2}'' in {3}.',
+        FileType, ChangeFileExt(FileName, ''), PROGRAM_NAME, UnitPathText);
 
     end
     else
     begin
-      msg := TMessage.Create(TErrorCode.FileNotFound, 'Cannot find {0} ''{1}'' used by program ''{2}'' in {3}.',
-        ftyp, FileName, PROGRAM_NAME, unitPathText);
+      Msg := TMessage.Create(TErrorCode.FileNotFound, 'Cannot find {0} ''{1}'' used by program ''{2}'' in {3}.',
+        FileType, FileName, PROGRAM_NAME, UnitPathText);
     end;
-    Error(NumTok, msg);
+    Error(NumTok, Msg);
+  end
+  else
+  begin
+    if FindFileResult.message <> '' then
+    begin
+      Msg := TMessage.Create(TErrorCode.FileFoundWithWarning,
+        'Warning for {0} ''{1}'' used by program ''{2}'' in {3}: {4}', FileType, FileName,
+        PROGRAM_NAME, UnitPathText, FindFileResult.message);
+      Warning(NumTok, Msg, True);
+    end;
+
   end;
 end;
 
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 
-procedure AddDefine(const defineName: TDefineName);
+procedure AddDefine(const DefineName: TDefineName);
 begin
-  if SearchDefine(defineName) = 0 then
+  if SearchDefine(DefineName) = 0 then
   begin
     Inc(NumDefines);
-    Defines[NumDefines].Name := defineName;
+    Defines[NumDefines].Name := DefineName;
 
     Defines[NumDefines].Macro := '';
     Defines[NumDefines].Line := 0;
@@ -288,12 +301,12 @@ begin
 end;
 
 
-function SearchDefine(const defineName: TDefineName): TDefineIndex;
+function SearchDefine(const DefineName: TDefineName): TDefineIndex;
 var
   i: Integer;
 begin
   for i := 1 to NumDefines do
-    if Defines[i].Name = defineName then
+    if Defines[i].Name = DefineName then
     begin
       Exit(i);
     end;
@@ -327,9 +340,9 @@ var
       begin
         Identifier := Block.GetIdentifierAtIndex(Index);
         if (Identifier.DataType = TDataType.ENUMTOK) and (Identifier.NumAllocElements = Num) then
-          exit(Identifier.IdentifierIndex);
+          Exit(Identifier.IdentifierIndex);
       end;
-      Block:=Block.ParentBlock;
+      Block := Block.ParentBlock;
     end;
   end;
 
@@ -510,7 +523,7 @@ begin
   if Token.Kind <> ExpectedTokenCode then
   begin
 
-    found := token.GetSpelling;
+    found := Token.GetSpelling;
     expected := GetHumanReadbleTokenSpelling(ExpectedTokenCode);
 
     Error(Token.TokenIndex, TMessage.Create(TErrorCode.SyntaxError, 'Syntax error, ' + '''' +
@@ -527,7 +540,7 @@ begin
   if Token.Kind <> ExpectedTokenCode then
   begin
 
-    found := token.GetSpelling;
+    found := Token.GetSpelling;
     expected := GetHumanReadbleTokenSpelling(ExpectedTokenCode);
 
     Error(Token.TokenIndex, TMessage.Create(TErrorCode.SyntaxError, 'Syntax error, ' + '''' +
@@ -540,12 +553,12 @@ end;
 
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
-procedure CheckCommonConstType(const tokenIndex: TTokenIndex; const DstType: TDataType; const SrcType: TDataType);
+procedure CheckCommonConstType(const TokenIndex: TTokenIndex; const DstType: TDataType; const SrcType: TDataType);
 begin
-  GetCommonConstType(tokenIndex, DstType, SrcType, True);
+  GetCommonConstType(TokenIndex, DstType, SrcType, True);
 end;
 
-function GetCommonConstType(const tokenIndex: TTokenIndex; const DstType: TDataType;
+function GetCommonConstType(const TokenIndex: TTokenIndex; const DstType: TDataType;
   const SrcType: TDataType; const err: Boolean = True): Boolean;
 begin
 
@@ -554,7 +567,7 @@ begin
   if IsCommonConstType(DstType, SrcType) then
 
     if err then
-      ErrorIncompatibleTypes(tokenIndex, SrcType, DstType)
+      ErrorIncompatibleTypes(TokenIndex, SrcType, DstType)
     else
       Result := True;
 
@@ -566,9 +579,9 @@ end;
 
 
 
-procedure CheckCommonType(const tokenIndex: TTokenIndex; const LeftType: TDataType; const RightType: TDataType);
+procedure CheckCommonType(const TokenIndex: TTokenIndex; const LeftType: TDataType; const RightType: TDataType);
 begin
-  GetCommonType(tokenIndex, LeftType, RightType);
+  GetCommonType(TokenIndex, LeftType, RightType);
 end;
 
 // TOO Move core to TDataType
@@ -601,24 +614,24 @@ end;
 // ----------------------------------------------------------------------------
 
 
-procedure DefineFilename(tokenIndex: TTokenIndex; StrValue: String);
+procedure DefineFilename(TokenIndex: TTokenIndex; StrValue: String);
 var
   i: Integer;
 begin
 
-  for i := 0 to High(linkObj) - 1 do
-    if linkObj[i] = StrValue then
+  for i := 0 to High(LinkObj) - 1 do
+    if LinkObj[i] = StrValue then
     begin
-      TokenAt(tokenIndex).SetValue( i);
-      exit;
+      TokenAt(TokenIndex).SetValue(i);
+      Exit;
     end;
 
-  i := High(linkObj);
-  linkObj[i] := StrValue;
+  i := High(LinkObj);
+  LinkObj[i] := StrValue;
 
-  SetLength(linkObj, i + 2);
+  SetLength(LinkObj, i + 2);
 
-  TokenAt(tokenIndex).SetValue( i);
+  TokenAt(TokenIndex).SetValue(i);
 
 end;
 
@@ -653,11 +666,11 @@ begin
 
   // Find and reuse already existing string literal.
   for i := 0 to NumStaticStrChars - len - 1 do
-    if CompareWord(Data[0], StaticStringData[i], Len + 1) = 0 then
+    if CompareWord(Data[0], StaticStringData[i], len + 1) = 0 then
     begin
       Token.SetStringValue(CODEORIGIN + i, len);
 
-      exit;
+      Exit;
     end;
 
   Token.SetStringValue(CODEORIGIN + NumStaticStrChars, len);
@@ -690,18 +703,18 @@ end;
 function NumTok: Integer;
 begin
   Result := 0;
-  if tokenList <> nil then
+  if TokenList <> nil then
   begin
-    Result := tokenList.Size;
+    Result := TokenList.size;
   end;
 end;
 
-function TokenAt(tokenIndex: TTokenIndex): TToken;
+function TokenAt(TokenIndex: TTokenIndex): TToken;
 begin
-  // Result := TokenArrayPtr^[tokenIndex];
+  // Result := TokenArrayPtr^[TokenIndex];
   Assert(TokenList <> nil, 'TokenList not yet created.');
-  Result := TokenList.GetTokenAtIndex(tokenIndex);
-  // if tokenIndex=9024  then Writeln(tokenIndex);
+  Result := TokenList.GetTokenAtIndex(TokenIndex);
+  // if TokenIndex=9024  then Writeln(TokenIndex);
 end;
 
 function NumIdent: Integer;
@@ -709,10 +722,10 @@ begin
   Result := NumIdent_;
 end;
 
-function IdentifierAt(identifierIndex: TIdentifierIndex): TIdentifier;
+function IdentifierAt(IdentifierIndex: TIdentifierIndex): TIdentifier;
 begin
   Assert(IdentifierList <> nil, 'IdentifierList not yet created.');
-  Result := IdentifierList.GetIdentifierAtIndex(identifierIndex);
+  Result := IdentifierList.GetIdentifierAtIndex(IdentifierIndex);
 end;
 
 

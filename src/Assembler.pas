@@ -22,7 +22,7 @@ function HexLongWord(const Value: Int64): String;
 function HexValue(const Value: Int64; const digits: Byte): String;
 
 // Get the value of an immediate value string "#123" or "#$1234"
-function GetVAL(const a: String): Integer;
+function GetVAL(const Value: String): Integer;
 
 // ----------------------------------------------------------------------------
 
@@ -83,8 +83,8 @@ end;
 
 
 function HexByte(const Value: Int64): String; overload;
-const
-  msg = 'HexByte() called with argument datatype larger than Byte';
+//const
+//  msg = 'HexByte() called with argument datatype larger than Byte';
 begin
   //Writeln('ERROR: ', msg);
   //Assert(False, msg);
@@ -95,20 +95,20 @@ end;
 function HexWord(const Value: Word): String;
 begin
   Result := '$' + HexBytes[(Value shr 8) and $ff] + HexBytes[Value and $ff];
-  if Value = 2 then
-  begin
-    // WriteLn;
-  end;
+  // if Value = 2 then
+  // begin
+  // WriteLn;
+  // end;
   // DoCount;
 end;
 
 function HexWord(const Value: Int64): String; overload;
-const
-  msg = 'HexWord() called with argument datatype larger than Word';
+// const
+//   msg = 'HexWord() called with argument datatype larger than Word';
 begin
-  //Writeln('ERROR: ', msg);
-  //Assert(False, msg);
-  //Result := '$????';
+  // Writeln('ERROR: ', msg);
+  // Assert(False, msg);
+  // Result := '$????';
   Result := Hex(Value, 4);
 end;
 
@@ -138,25 +138,25 @@ begin
 end;
 
 // ----------------------------------------------------------------------------
-// Get the value of an immediate string "#abc" or
+// Get the value of an immediate string "#abc" or "#$1234"
 // ----------------------------------------------------------------------------
 
-function GetVAL(const a: String): Integer;
+function GetVAL(const Value: String): Integer;
 var
-  err: Integer;
+  Code: Word;
 begin
 
   Result := -1;
 
-  if a <> '' then
-    if a[1] = '#' then
+  if Value <> '' then
+    if Value[1] = '#' then
     begin
-      val(copy(a, 2, length(a)), Result, err);
+      Val(copy(Value, 2, length(Value)), Result, Code);
 
-      if err > 0 then
+      if Code > 0 then
       begin
         Result := -1;
-        // TODO Writeln('ERROR: Cannot get value of ' + a);
+        // TODO Writeln('ERROR: Cannot get value of ' + Value);
       end;
 
     end;

@@ -8,10 +8,10 @@ type
   IDebugger = interface
 
     // Debugging unit "Compiler".
-    procedure BeginPass(const pass: TPass);
-    procedure CompileStatement(const tokenIndex: TTokenIndex; const isAsm: Boolean);
-    procedure CompileExpression(const tokenIndex: TTokenIndex; const ValType: TDataType; const VarType: TDataType);
-    procedure DefineIdent(const tokenIndex: TTokenIndex; const Name: TIdentifierName;
+    procedure BeginPass(const Pass: TPass);
+    procedure CompileStatement(const TokenIndex: TTokenIndex; const IsAsm: Boolean);
+    procedure CompileExpression(const TokenIndex: TTokenIndex; const ValType: TDataType; const VarType: TDataType);
+    procedure DefineIdent(const TokenIndex: TTokenIndex; const Name: TIdentifierName;
       const Kind: TTokenKind; const DataType: TDataType; const NumAllocElements: TNumAllocElements;
       const AllocElementType: TDataType; const Data: Int64; const IdType: TDataType);
 
@@ -27,10 +27,10 @@ type
     constructor Create;
 
 
-    procedure BeginPass(const pass: TPass);
-    procedure CompileStatement(const tokenIndex: TTokenIndex; const isAsm: Boolean);
-    procedure CompileExpression(const tokenIndex: TTokenIndex; const ValType: TDataType; const VarType: TDataType);
-    procedure DefineIdent(const tokenIndex: TTokenIndex; const Name: TIdentifierName;
+    procedure BeginPass(const Pass: TPass);
+    procedure CompileStatement(const TokenIndex: TTokenIndex; const IsAsm: Boolean);
+    procedure CompileExpression(const TokenIndex: TTokenIndex; const ValType: TDataType; const VarType: TDataType);
+    procedure DefineIdent(const TokenIndex: TTokenIndex; const Name: TIdentifierName;
       const Kind: TTokenKind; const DataType: TDataType; const NumAllocElements: TNumAllocElements;
       const AllocElementType: TDataType; const Data: Int64; const IdType: TDataType);
 
@@ -42,8 +42,8 @@ type
     WriteOutLine: Integer;
 
     function isActive: Boolean;
-    function TokenToStr(const tokenIndex: TTokenIndex): String;
-    function TokenLocationToStr(const tokenIndex: TTokenIndex): String;
+    function TokenToStr(const TokenIndex: TTokenIndex): String;
+    function TokenLocationToStr(const TokenIndex: TTokenIndex): String;
     procedure LogDebug(const message: String);
     procedure StopAtBreakPoint;
   end;
@@ -51,7 +51,7 @@ type
 
   // Currently global, because COmpiler, Parser,... share it.
 var
-  debugger: IDebugger;
+  Debugger: IDebugger;
 
 implementation
 
@@ -75,13 +75,13 @@ begin
 
 end;
 
-function TDebugger.TokenToStr(const tokenIndex: TTokenIndex): String;
+function TDebugger.TokenToStr(const TokenIndex: TTokenIndex): String;
 var
   token: TToken;
   lineString: String;
   identifierIndex: TIdentifierIndex;
 begin
-  token := TokenAt(tokenIndex);
+  token := TokenAt(TokenIndex);
   lineString := token.GetSpelling() + ' ' + token.Name;
 
   identifierIndex := GetIdentIndex(token.Name);
@@ -89,48 +89,48 @@ begin
       Format('%s: %s (identifierIndex=%d)', [lineString, InfoAboutDataType(IdentifierAt(identifierIndex).DataType),
       identifierIndex]);
 
-  Result := Format('%d=%s', [tokenIndex, lineString]);
+  Result := Format('%d=%s', [TokenIndex, lineString]);
 
 end;
 
-function TDebugger.TokenLocationToStr(const tokenIndex: TTokenIndex): String;
+function TDebugger.TokenLocationToStr(const TokenIndex: TTokenIndex): String;
 var
   token: TToken;
 begin
-  token := TokenAt(tokenIndex);
+  token := TokenAt(TokenIndex);
   Result := SourceLocationToString(token.SourceLocation);
 end;
 
-procedure TDebugger.BeginPass(const pass: TPass);
+procedure TDebugger.BeginPass(const Pass: TPass);
 begin
-  LogDebug(Format('Pass %d', [Ord(pass)]));
+  LogDebug(Format('Pass %d', [Ord(Pass)]));
 end;
 
-procedure TDebugger.CompileStatement(const tokenIndex: TTokenIndex; const isAsm: Boolean);
+procedure TDebugger.CompileStatement(const TokenIndex: TTokenIndex; const IsAsm: Boolean);
 begin
   if isActive then
   begin
     LogDebug(Format('CompileStatement (tokenIndex: %s; isAsm: %s) in %s',
-      [TokenToStr(tokenIndex), BoolToStr(isAsm, True), TokenLocationToStr(tokenIndex)]));
-    if (tokenIndex = 9978) then
+      [TokenToStr(TokenIndex), BoolToStr(IsAsm, True), TokenLocationToStr(TokenIndex)]));
+    if (TokenIndex = 9978) then
     begin
       StopAtBreakPoint;
     end;
   end;
 end;
 
-procedure TDebugger.CompileExpression(const tokenIndex: TTokenIndex; const ValType: TDataType;
+procedure TDebugger.CompileExpression(const TokenIndex: TTokenIndex; const ValType: TDataType;
   const VarType: TDataType);
 begin
   if isActive then
   begin
     LogDebug(Format('CompileExpression(tokenIndex: %s; out ValType: %s; VarType: %s) in %s',
-      [TokenToStr(tokenIndex), InfoAboutDataType(ValType), InfoAboutDataType(VarType),
-      TokenLocationToStr(tokenIndex)]));
+      [TokenToStr(TokenIndex), InfoAboutDataType(ValType), InfoAboutDataType(VarType),
+      TokenLocationToStr(TokenIndex)]));
   end;
 end;
 
-procedure TDebugger.DefineIdent(const tokenIndex: TTokenIndex; const Name: TIdentifierName;
+procedure TDebugger.DefineIdent(const TokenIndex: TTokenIndex; const Name: TIdentifierName;
   const Kind: TTokenKind; const DataType: TDataType; const NumAllocElements: TNumAllocElements;
   const AllocElementType: TDataType; const Data: Int64; const IdType: TDataType);
 begin
@@ -138,9 +138,9 @@ begin
   begin
     LogDebug(Format(
       'DefineIdent      (tokenIndex: %s; Name: %s; Kind: %s; DataType: %s; NumAllocElements: %d; AllocElementType: %s; Data: %X; IdType: %s) in %s',
-      [TokenToStr(tokenIndex), Name, GetTokenSpelling(Kind), InfoAboutDataType(DataType),
+      [TokenToStr(TokenIndex), Name, GetTokenSpelling(Kind), InfoAboutDataType(DataType),
       NumAllocElements, InfoAboutDataType(AllocElementType), Data, InfoAboutDataType(IdType),
-      TokenLocationToStr(tokenIndex)]));
+      TokenLocationToStr(TokenIndex)]));
   end;
 end;
 

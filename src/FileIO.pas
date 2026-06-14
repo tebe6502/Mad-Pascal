@@ -14,11 +14,15 @@ type
   TFilePath = String;
   TFolderPath = TFilePath;
 
+  TPathListFindFileResult = record
+    FilePath: TFilePath;
+    Message: String;
+  end;
 
   IPathList = interface
 
-    procedure AddFolder(const folderPath: TFolderPath);
-    function FindFile(const filePath: TFilePath): TFilePath;
+    procedure AddFolder(const FolderPath: TFolderPath);
+    function FindFile(const FilePath: TFilePath): TPathListFindFileResult;
     function GetSize: Integer;
     function ToString: String;
   end;
@@ -29,18 +33,18 @@ type
     // Adding an additional folder via "AddFolder" clears the cache.
     constructor Create(const cached: Boolean = False);
     destructor Free;
-    procedure AddFolder(const folderPath: TFolderPath);
-    function FindFile(const filePath: TFilePath): TFilePath;
+    procedure AddFolder(const FolderPath: TFolderPath);
+    function FindFile(const FilePath: TFilePath): TPathListFindFileResult;
     function GetSize: Integer;
     function ToString: String; override;
   private
-  type TCachedResult = TDictionary<TFilePath, TFilePath>;
+  type TCachedResult = TDictionary<TFilePath, TPathListFindFileResult>;
   var
     paths: array of TFilePath;
     cached: Boolean;
     cachedResult: TCachedResult;
 
-    function FindFileInternal(const filePath: TFilePath): TFilePath;
+    function FindFileInternal(const FilePath: TFilePath): TPathListFindFileResult;
   end;
 
 
@@ -53,7 +57,7 @@ type
     function GetFilePath: TFilePath;
     function GetAbsoluteFilePath: TFilePath;
 
-    procedure Assign(const filePath: TFilePath);
+    procedure Assign(const FilePath: TFilePath);
     procedure Close;
     procedure Erase();
     function EOF(): Boolean;
@@ -98,7 +102,7 @@ type
   type TFileType = (TextFile, BinaryFile, Folder);
 
   public
-    filePath: TFilePath;
+    FilePath: TFilePath;
     fileType: TFileType;
     content: String;
   end;
@@ -107,9 +111,9 @@ type
   TFileMap = class
   public
     constructor Create;
-    function AddEntry(const filePath: TFilePath; const fileType: TFileMapEntry.TFileType): TFileMapEntry;
-    function GetEntry(const filePath: TFilePath): TFileMapEntry;
-    procedure RemoveEntry(const filePath: TFilePath);
+    function AddEntry(const FilePath: TFilePath; const fileType: TFileMapEntry.TFileType): TFileMapEntry;
+    function GetEntry(const FilePath: TFilePath): TFileMapEntry;
+    procedure RemoveEntry(const FilePath: TFilePath);
 
   private
     entries: array of TFileMapEntry;
@@ -128,10 +132,10 @@ type
     {$ENDIF}
     class function CreateBinaryFile(const cached: Boolean = False): IBinaryFile; static;
     class function CreateTextFile: ITextFile; static;
-    class function FileExists_(const filePath: TFilePath): Boolean;
-    class function FolderExists(const folderPath: TFolderPath): Boolean;
-    class function NormalizePath(const filePath: TFilePath): TFilePath;
-    class function GetAbsolutePath(const filePath: TFilePath): TFilePath;
+    class function FileExists_(const FilePath: TFilePath): Boolean;
+    class function FolderExists(const FolderPath: TFolderPath): Boolean;
+    class function NormalizePath(const FilePath: TFilePath): TFilePath;
+    class function GetAbsolutePath(const FilePath: TFilePath): TFilePath;
 
     {$IFDEF SIMULATED_FILE_IO}
     class function GetFileMap: TFileMap;
@@ -149,14 +153,14 @@ var
 type
   TFile = class(TInterfacedObject, IFile)
   protected
-    filePath: TFilePath;
+    FilePath: TFilePath;
   public
   type TFileMode = (Read, Write);
     constructor Create;
     function GetFilePath(): TFilePath;
     function GetAbsoluteFilePath(): TFilePath;
 
-    procedure Assign(const filePath: TFilePath); virtual; abstract;
+    procedure Assign(const FilePath: TFilePath); virtual; abstract;
     procedure Close; virtual; abstract;
     procedure Erase(); virtual; abstract;
     function EOF(): Boolean; virtual; abstract;
@@ -183,7 +187,7 @@ type
   public
     constructor Create;
 
-    procedure Assign(const filePath: TFilePath); override;
+    procedure Assign(const FilePath: TFilePath); override;
     procedure Close; override;
     procedure Erase(); override;
     function EOF(): Boolean; override;
@@ -224,7 +228,7 @@ private
     constructor Create;
     function GetFileSize(): TFileSize;
 
-    procedure Assign(const filePath: TFilePath); override;
+    procedure Assign(const FilePath: TFilePath); override;
     // https://www.freepascal.org/docs-html/rtl/system/blockread.html
     procedure BlockRead(var Buf; const Count: TFileSize; var Result: TFileSize);
     procedure Close; override;
@@ -256,7 +260,7 @@ type
   TCachedBinaryFile = class(TFile, IBinaryFile)
   private
   var
-    binaryFile: IBinaryFile;
+    BinaryFile: IBinaryFile;
     fileSize: TFileSize;
     content: array of Char;
     filePosition: TFilePosition;
@@ -266,7 +270,7 @@ type
 
     // Form TFile
     function GetFileSize(): TFileSize;
-    procedure Assign(const filePath: TFilePath); overload;
+    procedure Assign(const FilePath: TFilePath); overload;
     procedure Close; overload;
     procedure Erase(); overload;
     function EOF(): Boolean; overload;
@@ -278,7 +282,7 @@ type
     function FilePos(): TFilePosition;
     procedure Read(var c: Char);
     procedure Reset(const l: Longint); overload; // l = record size
-    procedure Seekback;
+    procedure SeekBack;
     procedure Seek2(const Pos: TFilePosition);
 
   end;
@@ -301,14 +305,14 @@ begin
   FreeAndNil(cachedResult);
 end;
 
-procedure TPathList.AddFolder(const folderPath: TFolderPath);
+procedure TPathList.AddFolder(const FolderPath: TFolderPath);
 var
   normalizedFolderPath: TFolderPath;
   i, size: Integer;
 begin
 
-  normalizedFolderPath := IncludeTrailingPathDelimiter(folderPath);
-  normalizedFolderPath := TFileSystem.NormalizePath(folderPath);
+  normalizedFolderPath := IncludeTrailingPathDelimiter(FolderPath);
+  normalizedFolderPath := TFileSystem.NormalizePath(FolderPath);
 
   // Do not add duplicates.
   for i := Low(paths) to High(paths) do
@@ -324,62 +328,60 @@ begin
   cachedResult.Clear;
 end;
 
-function TPathList.FindFile(const filePath: TFilePath): TFilePath;
+function TPathList.FindFile(const FilePath: TFilePath): TPathListFindFileResult;
 begin
-  if cached and cachedResult.ContainsKey(filePath) then
-    Result := cachedResult[filePath]
+  if cached and cachedResult.ContainsKey(FilePath) then
+    Result := cachedResult[FilePath]
   else
   begin
-    Result := FindFileInternal(filePath);
-    cachedResult.Add(filePath, Result);
+    Result := FindFileInternal(FilePath);
+    cachedResult.Add(FilePath, Result);
   end;
 end;
 
-function TPathList.FindFileInternal(const filePath: TFilePath): TFilePath;
+function TPathList.FindFileInternal(const FilePath: TFilePath): TPathListFindFileResult;
 var
   fileFolder: TFolderPath;
   fileName: TFilePath;
-  compoundFilePath:  TFilePath;
+  compoundFilePath: TFilePath;
   searchRec: TSearchRec;
   found: Boolean;
   i: Integer;
 begin
 
   // Not found
-  Result := '';
-
-  fileFolder := ExtractFilePath(filePath);
-  fileName := ExtractFileName(filePath);
+  Result.FilePath := '';
+  Result.Message := '';
+  fileFolder := ExtractFilePath(FilePath);
+  fileName := ExtractFileName(FilePath);
 
   // Perform case-insensitive filename lookup.
-  found := (FindFirst(filePath, faAnyFile, searchRec) = 0);
+  found := (FindFirst(FilePath, faAnyFile, searchRec) = 0);
   FindClose(searchRec);
   if (found) then
   begin
+    Result.FilePath := fileFolder + searchRec.Name;
     if (searchRec.Name <> fileName) then
     begin
-      // TODO: For https://github.com/tebe6502/Mad-Pascal/issues/215
-      Writeln('INFO: Case difference in file name ' + filePath + ' and ' + searchRec.Name);
+      Result.Message := 'Case difference in file name ' + FilePath + ' and ' + searchRec.Name;
     end;
-    Result := fileFolder + searchRec.Name;
-    Exit;
+    exit;
   end;
 
   for i := Low(paths) to High(paths) do
   begin
-    compoundFilePath := TFileSystem.NormalizePath(paths[i] + filePath);
+    compoundFilePath := TFileSystem.NormalizePath(paths[i] + FilePath);
     fileFolder := ExtractFilePath(compoundFilePath);
     found := (FindFirst(compoundFilePath, faAnyFile, searchRec) = 0);
     FindClose(searchRec);
     if (found) then
     begin
+      Result.FilePath := fileFolder + searchRec.Name;
       if (searchRec.Name <> fileName) then
-        begin
-          // TODO: For https://github.com/tebe6502/Mad-Pascal/issues/215
-          Writeln('INFO: Case difference in file name ' + filePath + ' and ' + searchRec.Name);
-        end;
-      Result := fileFolder + searchRec.Name;
-      Exit;
+      begin
+        Result.Message := 'Case difference in file name ' + FilePath + ' and ' + searchRec.Name;
+      end;
+      exit;
     end;
   end;
 
@@ -412,17 +414,17 @@ end;
 
 constructor TFile.Create;
 begin
-  filePath := '';
+  FilePath := '';
 end;
 
 function TFile.GetFilePath(): TFilePath;
 begin
-  Result := filePath;
+  Result := FilePath;
 end;
 
 function TFile.GetAbsoluteFilePath(): TFilePath;
 begin
-  Result := TFileSystem.GetAbsolutePath(filePath);
+  Result := TFileSystem.GetAbsolutePath(FilePath);
 end;
 
 // ----------------------------------------------------------------------------
@@ -437,11 +439,11 @@ begin
   {$ENDIF}
 end;
 
-procedure TTextFile.Assign(const filePath: TFilePath);
+procedure TTextFile.Assign(const FilePath: TFilePath);
 begin
-  Self.filePath := filePath;
+  self.FilePath := FilePath;
   {$IFNDEF SIMULATED_FILE_IO}
-  AssignFile(f, filePath);
+  AssignFile(f, FilePath);
   {$ENDIF}
 end;
 
@@ -548,7 +550,7 @@ begin
   fileMapEntry.content := fileMapEntry.content + s;
   filePosition := filePosition + length(s);
   {$ENDIF}
-  Result := Self;
+  Result := self;
 end;
 
 function TTextFile.Write(s: String; w: Integer): ITextFile;
@@ -558,7 +560,7 @@ begin
   // TODO: Implement width padding using w
   sFormatted := s;
   Write(sFormatted);
-  Result := Self;
+  Result := self;
 end;
 
 function TTextFile.Write(i: Integer; w: Integer): ITextFile;
@@ -567,7 +569,7 @@ var
 begin
   sFormatted := IntToStr(i);
   Write(sFormatted, w);
-  Result := Self;
+  Result := self;
 end;
 
 procedure TTextFile.WriteLn();
@@ -619,17 +621,17 @@ end;
 function TBinaryFile.GetFileSize: TFileSize;
 begin
   {$IFNDEF SIMULATED_FILE_IO}
-  Result := FileSize(f);
+  Result := fileSize(f);
   {$ELSE}
   Result := Length(fileMapEntry.content);
   {$ENDIF}
 end;
 
-procedure TBinaryFile.Assign(const filePath: TFilePath);
+procedure TBinaryFile.Assign(const FilePath: TFilePath);
 begin
-  Self.filePath := filePath;
+  self.FilePath := FilePath;
   {$IFNDEF SIMULATED_FILE_IO}
-  AssignFile(f, filePath);
+  AssignFile(f, FilePath);
   {$ELSE}
   Close;
   {$ENDIF}
@@ -748,7 +750,7 @@ end;
 procedure TBinaryFile.Seek2(const Pos: TFilePosition);
 begin
   {$IFNDEF SIMULATED_FILE_IO}
-  System.Seek(f, pos);
+  System.Seek(f, Pos);
   {$ELSE}
   filePosition:=Pos;
   {$ENDIF}
@@ -762,7 +764,7 @@ end;
 //PROFILE-NO
 constructor TCachedBinaryFile.Create;
 begin
-  binaryFile := TBinaryFile.Create;
+  BinaryFile := TBinaryFile.Create;
   fileSize := 0;
   content := nil;
   filePosition := 0;
@@ -773,14 +775,14 @@ begin
   Result := fileSize;
 end;
 
-procedure TCachedBinaryFile.Assign(const filePath: TFilePath);
+procedure TCachedBinaryFile.Assign(const FilePath: TFilePath);
 begin
-  binaryFile.Assign(filePath);
+  BinaryFile.Assign(FilePath);
 end;
 
 procedure TCachedBinaryFile.Close;
 begin
-  binaryFile.Close;
+  BinaryFile.Close;
   fileSize := 0;
   content := nil;
   filePosition := 0;
@@ -808,13 +810,13 @@ begin
   if l <> 1 then raise EInOutError.Create('Unsupported record size ' + IntToStr(l) +
       ' specified. Only record size 1 is supported.');
 
-  binaryFile.Reset(l);
-  fileSize := binaryFile.GetFileSize;
+  BinaryFile.Reset(l);
+  fileSize := BinaryFile.GetFileSize;
   SetLength(content, fileSize);
   Result := -1;
   if (fileSize > 0) then
   begin
-    binaryFile.BlockRead(content[0], fileSize, Result);
+    BinaryFile.BlockRead(content[0], fileSize, Result);
     Assert(fileSize = Result);
   end;
 end;
@@ -883,21 +885,21 @@ begin
   SetLength(entries, 0);
 end;
 
-function TFileMap.AddEntry(const filePath: TFilePath; const fileType: TFileMapEntry.TFileType): TFileMapEntry;
+function TFileMap.AddEntry(const FilePath: TFilePath; const fileType: TFileMapEntry.TFileType): TFileMapEntry;
 var
   entry: TFileMapEntry;
 begin
-  entry := GetEntry(filePath);
-  Assert(entry = nil, 'Entry with file path ''' + filePath + ''' is already in the file map.');
+  entry := GetEntry(FilePath);
+  Assert(entry = nil, 'Entry with file path ''' + FilePath + ''' is already in the file map.');
   entry := TFileMapEntry.Create;
-  entry.filePath := filePath;
+  entry.FilePath := FilePath;
   entry.fileType := fileType;
   SetLength(entries, Length(entries) + 1);
   entries[High(entries)] := entry;
   Result := entry;
 end;
 
-function TFileMap.GetEntry(const filePath: TFilePath): TFileMapEntry;
+function TFileMap.GetEntry(const FilePath: TFilePath): TFileMapEntry;
 var
   i: Integer;
 begin
@@ -906,7 +908,7 @@ begin
   begin
     for i := Low(entries) to High(entries) do
     begin
-      if entries[i].filePath = filePath then
+      if entries[i].FilePath = FilePath then
       begin
         Result := entries[i];
         exit;
@@ -915,13 +917,13 @@ begin
   end;
 end;
 
-procedure TFileMap.RemoveEntry(const filePath: TFilePath);
+procedure TFileMap.RemoveEntry(const FilePath: TFilePath);
 var
   i: Integer;
 begin
   for i := Low(entries) to High(entries) do
   begin
-    if entries[i].filePath = filePath then
+    if entries[i].FilePath = FilePath then
     begin
       Delete(entries, i, 1);
       exit;
@@ -949,31 +951,31 @@ begin
   Result := TTextFile.Create;
 end;
 
-class function TFileSystem.FileExists_(const filePath: TFilePath): Boolean;
+class function TFileSystem.FileExists_(const FilePath: TFilePath): Boolean;
 begin
 
   {$IFNDEF SIMULATED_FILE_IO}
-  Result := FileExists(filePath);
+  Result := FileExists(FilePath);
   {$ELSE}
   Result := fileMap.GetEntry(filePath) <> nil;
   {$ENDIF}
   // Writeln('TFileSystem.FileExists:' , filePath,' - ',Result);
 end;
 
-class function TFileSystem.FolderExists(const folderPath: TFolderPath): Boolean;
+class function TFileSystem.FolderExists(const FolderPath: TFolderPath): Boolean;
 begin
   {$IFNDEF SIMULATED_FILE_IO}
-  Result := DirectoryExists(folderPath);
+  Result := DirectoryExists(FolderPath);
   {$ELSE}
   Result := fileMap.GetEntry(folderPath) <> nil;
   {$ENDIF}
   // Writeln('TFileSystem.FolderExists:' , folderPath,' - ',Result);
 end;
 
-class function TFileSystem.NormalizePath(const filePath: TFilePath): TFilePath;
+class function TFileSystem.NormalizePath(const FilePath: TFilePath): TFilePath;
 begin
 
-  Result := filePath;
+  Result := FilePath;
 
   {$IFDEF WINDOWS}
    if Pos('/', filePath) > 0 then
@@ -1001,10 +1003,10 @@ begin
 end;
 
 
-class function TFileSystem.GetAbsolutePath(const filePath: TFilePath): TFilePath;
+class function TFileSystem.GetAbsolutePath(const FilePath: TFilePath): TFilePath;
 begin
   {$IFNDEF SIMULATED_FILE_IO}
-  Result := ExpandFileName(filePath);
+  Result := ExpandFileName(FilePath);
   {$ELSE}
   Result := filePath;
   {$ENDIF}

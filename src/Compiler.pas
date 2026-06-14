@@ -5165,9 +5165,12 @@ begin
     ASPOINTER:
     begin
 
-
       // TODO: Do we want to support this? See PSDSM51.pas
-      if (address < 0) or (address > 65536) then RaiseHaltException(EHaltException.COMPILING_ABORTED);
+      if (Address < 0) or (Address > 65536) then
+      begin
+        WriteLn('ERROR: Address '+ IntToHex(Address)+ ' is out of accepted range [$0000..$ffff].');
+        RaiseHaltException(EHaltException.COMPILING_ABORTED);
+      end;
 
       asm65(#9'@printSTRING #CODEORIGIN+' + HexWord(word(Address - CODEORIGIN)));
 
@@ -17616,38 +17619,44 @@ end;  //CompileRecordDeclaration
 // Convert linear array to striped array.
 // ----------------------------------------------------------------------------
 
-
-procedure StripeStaticData(DataSize: Byte; NumAllocElements: Cardinal);
-const MAXSIZE = MAXSTRIPEDARRAYSIZE*4;
+procedure StripeStaticData(dataSize: Byte; NumAllocElements: Cardinal);
+const
+  MAXSIZE = MAXSTRIPEDARRAYSIZE * 4;
+type
+  TTempArray = array [0..MAXSIZE - 1] of Word;
 var
   Size: Word;
-  tmp: array [0..MAXSIZE*4-1] of Word;
+  Temp: TTempArray;
   i: Word;
 begin
 
   if NumAllocElements > MAXSTRIPEDARRAYSIZE then
-  Size:=NumAllocElements;
-  Move(StaticStringData[NumStaticStrChars], tmp, MAXSIZE);
+  begin
+    WriteLn('ERROR: Striped array of size ' + IntToStr(NumAllocElements) + ' exceeds allowed size ' +
+      IntToStr(MAXSTRIPEDARRAYSIZE) + '.');
+    RaiseHaltException(EHaltException.COMPILING_ABORTED);
+  end;
 
-  for i := 0 to NumAllocElements - 1 do
-    case DataSize of
+  Size := NumAllocElements;
+  Temp := Default(TTempArray);
+  Move(StaticStringData[NumStaticStrChars], Temp, SizeOf(Temp));
+
+  for i := 0 to Size - 1 do
+    case dataSize of
 
       2: begin
-        StaticStringData[NumStaticStrChars + i] := tmp[i * 2];
-        StaticStringData[NumStaticStrChars + i + Size] := tmp[i * 2 + 1];
+        StaticStringData[NumStaticStrChars + i + Size * 0] := Temp[i * 2];
+        StaticStringData[NumStaticStrChars + i + Size * 1] := Temp[i * 2 + 1];
       end;
 
       4: begin
-        StaticStringData[NumStaticStrChars + i] := tmp[i * 4];
-        StaticStringData[NumStaticStrChars + i + Size] := tmp[i * 4 + 1];
-        StaticStringData[NumStaticStrChars + i + Size * 2] := tmp[i * 4 + 2];
-        StaticStringData[NumStaticStrChars + i + Size * 3] := tmp[i * 4 + 3];
+        StaticStringData[NumStaticStrChars + i + Size * 0] := Temp[i * 4];
+        StaticStringData[NumStaticStrChars + i + Size * 1] := Temp[i * 4 + 1];
+        StaticStringData[NumStaticStrChars + i + Size * 2] := Temp[i * 4 + 2];
+        StaticStringData[NumStaticStrChars + i + Size * 3] := Temp[i * 4 + 3];
       end;
-
     end;
-
 end;
-
 
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------

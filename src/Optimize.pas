@@ -2700,7 +2700,7 @@ begin        // OptimizeASM
 
     if l > High(listing) then
     begin
-      WriteLn('Out of resources, LISTING');
+      WriteLn('ERROR: Out of resources, LISTING');
       RaiseHaltException(EHaltException.COMPILING_ABORTED);
     end;
 

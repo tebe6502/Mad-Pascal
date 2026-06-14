@@ -134,7 +134,7 @@ begin
             'Undefined resource type: Type = ''' + res.resType + ''', Name = ''' + res.resName + ''''));
 
 
-        if (res.resFile <> '') and (unitPathList.FindFile(res.resFile) = '') then
+        if (res.resFile <> '') and (unitPathList.FindFile(res.resFile).FilePath = '') then
         begin
           // TODO Have message for special case empty unit path
           Error(NumTok, TMessage.Create(TErrorCode.ResourceFileNotFound,
@@ -392,7 +392,7 @@ var
             end;
           7:
             if c in AllowLabelChars then
-              Result := Result +c
+              Result := Result + c
             else if c = '}' then
                 i := 9
               else
@@ -1086,8 +1086,8 @@ var
 
       if c in [' ', TAB] then Inc(Spaces);
 
-      if not (c in ['''', ' ', '#', '~', '$', TAB, LF, CR, '{', (*'}',*) 'A'..'Z', 'a'..'z', '_',
-        '0'..'9', '=', '.', ',', ';', '(', ')', '*', '/', '+', '-', ':', '>', '<', '^', '@', '[', ']']) then
+      if not (c in ['''', ' ', '#', '~', '$', TAB, LF, CR, '{', (*'}',*) 'A'..'Z', 'a'..'z',
+        '_', '0'..'9', '=', '.', ',', ';', '(', ')', '*', '/', '+', '-', ':', '>', '<', '^', '@', '[', ']']) then
       begin
         Error(NumTok, TMessage.Create(TErrorCode.UnexpectedCharacter, 'Unexpected unknown character: ' + c));
       end;
@@ -1218,33 +1218,36 @@ var
           Spaces := 0;
 
 
-	  if ch in ['e', 'E'] then
-	  begin
+          if ch in ['e', 'E'] then
+          begin
 
             Frac := ReadFractionalPart(ch);
             Token.MakeFracNumber(StrToFloat(Num + Frac));
 
-            Token.SourceLocation.Column := TokenAt(NumTok - 1).SourceLocation.Column + length(Num) + length(Frac) + Spaces;
+            Token.SourceLocation.Column := TokenAt(NumTok - 1).SourceLocation.Column +
+              length(Num) + length(Frac) + Spaces;
             Spaces := 0;
 
-	  end else
+          end
+          else
 
-          if ch = '.' then      // Fractional part expected
-          begin
-            SafeReadChar(ch);
-            if ch = '.' then
-              InFileSeekBack   // Range ('..') token
-            else
-            begin               // Fractional part found
+            if ch = '.' then      // Fractional part expected
+            begin
+              SafeReadChar(ch);
+              if ch = '.' then
+                InFileSeekBack   // Range ('..') token
+              else
+              begin               // Fractional part found
 
-              Frac := ReadFractionalPart(ch);
-              Token.MakeFracNumber(StrToFloat(Num + Frac));
+                Frac := ReadFractionalPart(ch);
+                Token.MakeFracNumber(StrToFloat(Num + Frac));
 
-              Token.SourceLocation.Column := TokenAt(NumTok - 1).SourceLocation.Column + length(Num) + length(Frac) + Spaces;
-              Spaces := 0;
+                Token.SourceLocation.Column := TokenAt(NumTok - 1).SourceLocation.Column +
+                  length(Num) + length(Frac) + Spaces;
+                Spaces := 0;
 
+              end;
             end;
-          end;
 
           Num := '';
           Frac := '';
@@ -1268,7 +1271,7 @@ var
             end;
 
             Inc(err);
-          until not (ch in ['A'..'Z', 'a'..'z','_', '0'..'9', '.']);
+          until not (ch in ['A'..'Z', 'a'..'z', '_', '0'..'9', '.']);
 
           if TextBuffer.EndsWith('.') then
           begin
@@ -1991,35 +1994,39 @@ begin
         token.SetIntegerValue(StrToInt(Num));
         Spaces := 0;
 
-	if ch in ['e', 'E'] then begin
+        if ch in ['e', 'E'] then
+        begin
 
           Frac := ReadFractionalPart(a, i, ch);
 
           token.MakeFracNumber(StrToFloat(Num + Frac));
-          token.SourceLocation.Column := TokenAt(NumTok - 1).SourceLocation.Column + length(Num) + length(Frac) + Spaces;
+          token.SourceLocation.Column := TokenAt(NumTok - 1).SourceLocation.Column + length(Num) +
+            length(Frac) + Spaces;
           Spaces := 0;
 
-	end else
+        end
+        else
 
-        if ch = '.' then     // Fractional part expected
-        begin
+          if ch = '.' then     // Fractional part expected
+          begin
 
-          ch := a[i];
-          Inc(i);
+            ch := a[i];
+            Inc(i);
 
-          if ch = '.' then
-            Dec(i)           // Range ('..') token
-          else
-          begin              // Fractional part found
+            if ch = '.' then
+              Dec(i)           // Range ('..') token
+            else
+            begin              // Fractional part found
 
-            Frac := ReadFractionalPart(a, i, ch);
+              Frac := ReadFractionalPart(a, i, ch);
 
-            token.MakeFracNumber(StrToFloat(Num + Frac));
-            token.SourceLocation.Column := TokenAt(NumTok - 1).SourceLocation.Column + length(Num) + length(Frac) + Spaces;
-            Spaces := 0;
+              token.MakeFracNumber(StrToFloat(Num + Frac));
+              token.SourceLocation.Column := TokenAt(NumTok - 1).SourceLocation.Column +
+                length(Num) + length(Frac) + Spaces;
+              Spaces := 0;
 
+            end;
           end;
-        end;
 
         Num := '';
         Frac := '';
