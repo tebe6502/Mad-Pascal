@@ -17,7 +17,7 @@ type
     SubrangeBounds, TooManyParameters, CantDetermine, UpperBoundOfRange, HighLimit,
     IllegalTypeConversion, IncompatibleTypesArray, IllegalExpression, AlwaysTrue, AlwaysFalse,
     UnreachableCode, IllegalQualifier, LoHi, StripedModifierIgnoredBecauseOfRange,
-    StripedModifierIgnoredBecauseOfElementType, FileNotFound, WrongParameterList,
+    StripedModifierIgnoredBecauseOfElementType, FileNotFound, FileNotFoundWithWrongCase, WrongParameterList,
     OperatorNotOverloaded, OperationNotSupportedForTypes, NotAllDeclarationsOverloaded, SyntaxError,
     CantAsignValuesToAnAddress, UndefinedResourceType, ResourceFileNotFound, DuplicateResource,
     OutOfResources, WrongSwitchToggle, IllegalOptimizationSpecified, IllegalAlignmentDirective,

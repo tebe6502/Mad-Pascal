@@ -16,6 +16,7 @@ type
 
   TPathListFindFileResult = record
     FilePath: TFilePath;
+    Message: String;
   end;
 
   IPathList = interface
@@ -350,7 +351,7 @@ begin
 
   // Not found
   Result.FilePath := '';
-
+  Result.Message := '';
   fileFolder := ExtractFilePath(FilePath);
   fileName := ExtractFileName(FilePath);
 
@@ -359,15 +360,11 @@ begin
   FindClose(searchRec);
   if (found) then
   begin
+    Result.FilePath := fileFolder + searchRec.Name;
     if (searchRec.Name <> fileName) then
     begin
-      // TODO: For https://github.com/tebe6502/Mad-Pascal/issues/215
-      WriteLn('INFO: Case difference in file name ' + FilePath + ' and ' + searchRec.Name);
-    end
-    else
-    begin
+      Result.Message := 'Case difference in file name ' + FilePath + ' and ' + searchRec.Name;
     end;
-    Result.FilePath := fileFolder + searchRec.Name;
     exit;
   end;
 
@@ -379,12 +376,11 @@ begin
     FindClose(searchRec);
     if (found) then
     begin
+      Result.FilePath := fileFolder + searchRec.Name;
       if (searchRec.Name <> fileName) then
       begin
-        // TODO: For https://github.com/tebe6502/Mad-Pascal/issues/215
-        WriteLn('INFO: Case difference in file name ' + FilePath + ' and ' + searchRec.Name);
+        Result.Message := 'Case difference in file name ' + FilePath + ' and ' + searchRec.Name;
       end;
-      Result.FilePath := fileFolder + searchRec.Name;
       exit;
     end;
   end;

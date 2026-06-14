@@ -271,6 +271,13 @@ begin
         ftyp, FileName, PROGRAM_NAME, unitPathText);
     end;
     Error(NumTok, msg);
+  end
+  else
+  begin
+    msg := TMessage.Create(TErrorCode.FileNotFoundWithWrongCase,
+      'Warning for {0} ''{1}'' used by program ''{2}'' in {3}: {4}.', ftyp, FileName,
+      PROGRAM_NAME, unitPathText, FindFileResult.message);
+    Warning(NumTok, msg);
   end;
 end;
 
