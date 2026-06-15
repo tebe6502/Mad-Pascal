@@ -628,9 +628,7 @@ uses
     TraceFile.Close;
     {$ENDIF}
 
-    {$IFDEF USEOPTFILE}
-    OptFile.Close;
-    {$ENDIF}
+    if OptFile <> nil then OptFile.Close;
 
 
     // Diagnostics

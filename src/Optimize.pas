@@ -2411,16 +2411,13 @@ begin        // OptimizeASM
       else
       if elf = $094C38C5 then		// @F16_GTE		accepted
 
+      else
+      begin
 
-      else begin
+        if OptFile <> nil then OptFile.WriteLn(arg0);
 
-{$IFDEF USEOPTFILE}
-
-	writeln(arg0);
-
-{$ENDIF}
-
-	x:=51; Break;
+        x := 51;
+        Break;
 
       end;
 
@@ -2734,30 +2731,31 @@ begin        // OptimizeASM
   end;
 
 
-  {$IFDEF USEOPTFILE}
-
- OptFile.WriteLn( StringOfChar('-', 32));
- OptFile.WriteLn( 'SOURCE');
- OptFile.WriteLn( StringOfChar('-', 32));
-
-  for i := 0 to High(OptimizeBuf) - 1 do
+  if OptFile <> nil then
   begin
-    OptFile.WriteLn( OptimizeBuf[i]);
+
+    OptFile.WriteLn(StringOfChar('-', 32));
+    OptFile.WriteLn('SOURCE');
+    OptFile.WriteLn(StringOfChar('-', 32));
+
+    for i := 0 to High(OptimizeBuf) - 1 do
+    begin
+      OptFile.WriteLn(OptimizeBuf[i]);
+    end;
+
+    OptFile.WriteLn(StringOfChar('-', 32));
+    OptFile.WriteLn('OPTIMIZE ' + BoolToStr((x = 0) and inxUse) + ', x=' + IntToStr(x) + ', (' + GetSourceFileName + ') line = ', IntToStr(GetSourceFileLine));
+    OptFile.WriteLn(StringOfChar('-', 32));
+
+    for i := 0 to l - 1 do
+    begin
+      OptFile.WriteLn(listing[i]);
+    end;
+
+    OptFile.WriteLn('');
+    OptFile.WriteLn(StringOfChar('-', 64));
+    OptFile.WriteLn('');
   end;
-
- OptFile.WriteLn( StringOfChar('-', 32));
- OptFile.WriteLn( 'OPTIMIZE '+BoolToStr((x = 0) and inxUse)+', x='+IntToStr(x)+', ('+GetSourceFileName+') line = ',IntToStr(GetSourceFileLine));
- OptFile.WriteLn( StringOfChar('-', 32));
-
-  for i := 0 to l - 1 do
-  begin
-    OptFile.WriteLn( listing[i]);
-  end;
-
- OptFile.WriteLn('');
- OptFile.WriteLn( StringOfChar('-', 64));
- OptFile.WriteLn('');
-  {$ENDIF}
 
   SetLength(OptimizeBuf, 1);
 
