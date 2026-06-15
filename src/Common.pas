@@ -125,11 +125,8 @@ var
 
   PublicSection: Boolean;  // Initialized in Scanner.TokenizeProgramInitialization
 
-{$IFDEF USEOPTFILE}
-
   OptFile: ITextFile;
 
-{$ENDIF}
 
   // ----------------------------------------------------------------------------
 

@@ -1,60 +1,16 @@
 unit Optimize;
 
-{
-
-argMatch
-ASM65Internal
-Expand
-GetARG
-GetBYTE
-GetCMD
-GetDWORD
-GetOptyBP2
-GetSourceFileLine
-GetSourceFileName
-GetString
-GetStringLast
-GetTRIPLE
-GetWORD
-IFDEF_MUL16
-IFDEF_MUL8
-index
-Initialize
-IsASM65BufferEmpty
-LabelIsUsed
-LDA_STA_ADR
-LDA_STA_BP
-ListingToString
-onBreak
-OptimizeRelation
-PeepholeOptimization
-PeepholeOptimization_STA
-Rebuild
-RemoveUnusedSTACK
-ResetForTmp
-ResetOpty
-SetOptyA
-SetOptyBP2
-SetOptyY
-SKIP
-StartOptimization
-UNUSED_A
-WriteInstruction
-WriteOut
-
-}
-
 // TODO JAC! Use "array of const" for debugger output, incl. callback function for formatting TListing etc.
 // See https://forum.lazarus.freepascal.org/index.php?topic=61986.0
 {$I Defines.inc}
 
 interface
 
-uses CompilerTypes, OptimizeTemporary, Targets;
+uses CompilerTypes, FileIO, OptimizeTemporary, Targets;
 
   // ----------------------------------------------------------------------------
 
-procedure Initialize(const aTarget: TTarget; const anOptimizeTemporary: IOptimizeTemporary);
+procedure Initialize(const aTarget: TTarget; const anOptimizeTemporary: IOptimizeTemporary; const anOptFile: ITextFile);
 
 procedure StartOptimization(SourceLocation: TSourceLocation);
 
@@ -74,18 +30,20 @@ procedure Finalize;
 
 implementation
 
-uses SysUtils, Assembler, Console, Debugger, OptimizerTypes, StringUtilities , Utilities;
+uses SysUtils, Assembler, Console, Debugger, OptimizerTypes, StringUtilities, Utilities;
 
+var
+  Target: TTarget;
+  OptimizeTemporary: IOptimizeTemporary;
+  OptFile: ITextFile;
 
-var OptimizeTemporary: IOptimizeTemporary;
-var Target:TTarget;
-
-var OptimizerStepList: TOptimizerStepList;
+var
+  OptimizerStepList: TOptimizerStepList;
 
 var
   OptimizeBuf: TStringArray;
 
-  optimize: record
+  Optimize: record
     SourceFile: TSourceFile;
     line, oldLine: Integer;
     end;
@@ -145,11 +103,12 @@ end;
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 
-procedure Initialize(const aTarget: TTarget; const anOptimizeTemporary: IOptimizeTemporary);
+procedure Initialize(const aTarget: TTarget; const anOptimizeTemporary: IOptimizeTemporary; const anOptFile: ITextFile);
 begin
-  Target:=aTarget;
-  OptimizeTemporary:=anOptimizeTemporary;
-  OptimizerStepList:=TOptimizerStepList.Create;
+  Target := aTarget;
+  OptimizeTemporary := anOptimizeTemporary;
+  OptFile := anOptFile;
+  OptimizerStepList := TOptimizerStepList.Create;
 
 
 
@@ -158,7 +117,7 @@ begin
   ResetForTmp;
   ResetOpty;
 
-  ShrShlCnt:=0;
+  ShrShlCnt := 0;
 end;
 
 procedure StartOptimization(SourceLocation: TSourceLocation);
@@ -208,29 +167,12 @@ end;
 
 
 // ----------------------------------------------------------------------------
+// Hash value of a string.
 // ----------------------------------------------------------------------------
 
-{
 function ElfHash(const Value: String): Cardinal;
 var
-  x: Cardinal;
-  i: Byte;
-begin
-  Result := 0;
-  for i := 1 to Length(Value) do
-  begin
-    Result := (Result shl 4) + Ord(Value[i]);
-    x := Result and $F0000000;
-    if (x <> 0) then
-      Result := Result xor (x shr 24);
-    Result := Result and (not x);
-  end;
-end;
-}
-
-function ElfHash(const Value: string): Cardinal;
-var
-  p: PChar;
+  p: Pchar;
   x: Cardinal;
 begin
   Result := 0;
@@ -250,8 +192,8 @@ end;
 
 procedure OptimizeASM(const CodeSize: Integer; const IsInterrupt: Boolean);
 (* -------------------------------------------------------------------------- *)
-(* optymalizacja powiodla sie jesli na wyjsciu X=0                            *)
-(* peephole optimization                                                      *)
+(* Peephole optimization                                                      *)
+(* The optimization was successful if X=0 at the output.                      *)
 (* -------------------------------------------------------------------------- *)
 type
   TListing_tmp = array [0..63] of String;
@@ -2794,28 +2736,27 @@ begin        // OptimizeASM
 
   {$IFDEF USEOPTFILE}
 
- OptFile.writeln( StringOfChar('-', 32));
- OptFile.writeln( 'SOURCE');
- OptFile.writeln( StringOfChar('-', 32));
+ OptFile.WriteLn( StringOfChar('-', 32));
+ OptFile.WriteLn( 'SOURCE');
+ OptFile.WriteLn( StringOfChar('-', 32));
 
   for i := 0 to High(OptimizeBuf) - 1 do
   begin
-    OptFile.writeln( OptimizeBuf[i]);
+    OptFile.WriteLn( OptimizeBuf[i]);
   end;
 
- OptFile.writeln( StringOfChar('-', 32));
- OptFile.writeln( 'OPTIMIZE '+BoolToStr((x = 0) and inxUse)+', x='+IntToStr(x)+', ('+GetSourceFileName+') line = ',IntToStr(GetSourceFileLine));
- OptFile.writeln( StringOfChar('-', 32));
+ OptFile.WriteLn( StringOfChar('-', 32));
+ OptFile.WriteLn( 'OPTIMIZE '+BoolToStr((x = 0) and inxUse)+', x='+IntToStr(x)+', ('+GetSourceFileName+') line = ',IntToStr(GetSourceFileLine));
+ OptFile.WriteLn( StringOfChar('-', 32));
 
   for i := 0 to l - 1 do
   begin
-    OptFile.writeln( listing[i]);
+    OptFile.WriteLn( listing[i]);
   end;
 
- OptFile.writeln('');
- OptFile.writeln( StringOfChar('-', 64));
- OptFile.writeln('');
-
+ OptFile.WriteLn('');
+ OptFile.WriteLn( StringOfChar('-', 64));
+ OptFile.WriteLn('');
   {$ENDIF}
 
   SetLength(OptimizeBuf, 1);

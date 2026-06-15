@@ -1,17 +1,16 @@
-// Preliminary class
+// Preliminary class that can only have a single instance representing the unit "Optimize"
 
 unit Optimizer;
 
 
 interface
 
-uses CompilerTypes, CommonIO, Targets;
+uses CompilerTypes, CommonIO, FileIO, Targets;
 
 type
   IOptimizer = interface
 
-    procedure Initialize(const Target: TTarget; const AsmBlockArray: TAsmBlockArray;
-      const AsmBlockArrayHigh: Integer; const Writer: IWriter);
+    procedure Initialize(const Target: TTarget; const AsmBlockArray: TAsmBlockArray; const AsmBlockArrayHigh: Integer; const Writer: IWriter; const OptFile: ITextFile);
 
     procedure StartOptimization(SourceLocation: TSourceLocation);
 
@@ -21,8 +20,7 @@ type
     function GetOptyBP2(): TString;
     procedure SetOptyBP2(const Value: TString);
 
-    procedure AssembleLine(const Line: String; const Comment: String; const OptimizeCode: Boolean;
-      const CodeSize: Integer; const IsInterrupt: Boolean);
+    procedure AssembleLine(const Line: String; const Comment: String; const OptimizeCode: Boolean; const CodeSize: Integer; const IsInterrupt: Boolean);
 
     function IsAssemblyBufferEmpty: Boolean;
 
@@ -47,8 +45,7 @@ type
   public
     constructor Create;
 
-    procedure Initialize(const Target: TTarget;
-  const AsmBlockArray: TAsmBlockArray; const AsmBlockArrayHigh: Integer; const Writer: IWriter);
+    procedure Initialize(const Target: TTarget; const AsmBlockArray: TAsmBlockArray; const AsmBlockArrayHigh: Integer; const Writer: IWriter; const OptFile: ITextFile);
 
     procedure StartOptimization(SourceLocation: TSourceLocation);
 
@@ -58,8 +55,7 @@ type
     function GetOptyBP2(): TString;
     procedure SetOptyBP2(const Value: TString);
 
-    procedure AssembleLine(const Line: String; const Comment: String; const OptimizeCode: Boolean;
-      const CodeSize: Integer; const IsInterrupt: Boolean);
+    procedure AssembleLine(const Line: String; const Comment: String; const OptimizeCode: Boolean; const CodeSize: Integer; const IsInterrupt: Boolean);
 
     function IsAssemblyBufferEmpty: Boolean;
 
@@ -73,8 +69,7 @@ constructor TDummyOptimizer.Create;
 begin
 end;
 
-procedure TDummyOptimizer.Initialize(const Target: TTarget;
-  const AsmBlockArray: TAsmBlockArray; const AsmBlockArrayHigh: Integer; const Writer: IWriter);
+procedure TDummyOptimizer.Initialize(const Target: TTarget; const AsmBlockArray: TAsmBlockArray; const AsmBlockArrayHigh: Integer; const Writer: IWriter; const OptFile: ITextFile);
 begin
 end;
 
@@ -101,8 +96,7 @@ begin
 
 end;
 
-procedure TDummyOptimizer.AssembleLine(const Line: String; const Comment: String;
-  const OptimizeCode: Boolean; const CodeSize: Integer; const IsInterrupt: Boolean);
+procedure TDummyOptimizer.AssembleLine(const Line: String; const Comment: String; const OptimizeCode: Boolean; const CodeSize: Integer; const IsInterrupt: Boolean);
 begin
 
 end;
@@ -123,8 +117,7 @@ type
   public
     constructor Create(LogWriter: IWriter);
 
-    procedure Initialize(const Target: TTarget;
-  const AsmBlockArray: TAsmBlockArray; const AsmBlockArrayHigh: Integer; const Writer: IWriter);
+    procedure Initialize(const Target: TTarget; const AsmBlockArray: TAsmBlockArray; const AsmBlockArrayHigh: Integer; const Writer: IWriter; const OptFile: ITextFile);
 
     procedure StartOptimization(SourceLocation: TSourceLocation);
 
@@ -134,8 +127,7 @@ type
     function GetOptyBP2(): TString;
     procedure SetOptyBP2(const Value: TString);
 
-    procedure AssembleLine(const Line: String; const Comment: String; const OptimizeCode: Boolean;
-      const CodeSize: Integer; const IsInterrupt: Boolean);
+    procedure AssembleLine(const Line: String; const Comment: String; const OptimizeCode: Boolean; const CodeSize: Integer; const IsInterrupt: Boolean);
 
     function IsAssemblyBufferEmpty: Boolean;
 
@@ -152,7 +144,7 @@ begin
 end;
 
 procedure TOptimizer.Initialize(const Target: TTarget;
-  const AsmBlockArray: TAsmBlockArray; const AsmBlockArrayHigh: Integer; const Writer: IWriter);
+  const AsmBlockArray: TAsmBlockArray; const AsmBlockArrayHigh: Integer; const Writer: IWriter; const OptFile: ITextFile);
 var
   i: Integer;
   OptimizeTemporary: IOptimizeTemporary;
@@ -167,7 +159,7 @@ begin
   end;
   OptimizeTemporary := TOptimizeTemporary.Create;
   OptimizeTemporary.Initialize(AsmBlockArray, Writer);
-  Optimize.Initialize(Target, OptimizeTemporary);
+  Optimize.Initialize(Target, OptimizeTemporary, OptFile);
 end;
 
 procedure TOptimizer.StartOptimization(SourceLocation: TSourceLocation);
