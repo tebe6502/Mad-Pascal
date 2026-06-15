@@ -550,7 +550,7 @@ uses
  // TODO Make command line option
 
     OptFile := TFileSystem.CreateTextFile();
-    OptFile.Assign(ChangeFileExt(programUnit.Name, '.opt'));
+    OptFile.Assign(ChangeFileExt(programUnit.Name, '-opt.log'));
     try
       OptFile.Rewrite();
 
@@ -558,14 +558,14 @@ uses
       on e: EInOutError do
       begin
       Console.TextColor(Console.LightRed);
-        WriteLn(Format('ERROR: Cannot open optimization file "%s" for writing. %s.', [OptFile.GetAbsoluteFilePath(), e.Message]));
+        WriteLn(Format('ERROR: Cannot open optimization log file "%s" for writing. %s.', [OptFile.GetAbsoluteFilePath(), e.Message]));
         Console.NormVideo;
         Result := EHaltException.COMPILING_NOT_STARTED;
         Exit();
       end;
     end;
-
-
+    {$ELSE}
+    OptFile := nil;
     {$ENDIF}
 
     OutFile := TFileSystem.CreateTextFile;
@@ -628,9 +628,7 @@ uses
     TraceFile.Close;
     {$ENDIF}
 
-    {$IFDEF USEOPTFILE}
-    OptFile.Close;
-    {$ENDIF}
+    if OptFile <> nil then OptFile.Close;
 
 
     // Diagnostics
