@@ -15,7 +15,7 @@ begin
      begin
 
       tmp := '';				// szukamy pierwszego 'ldy #'
-      for p:=4 to High(TemporaryBuf) do
+      for p:=4 to High(TemporaryBuf)-1 do
 
        if (lab_l(p+1) and (pos(TemporaryBuf[2], TemporaryBuf[p]) > 0)) then Break else
 
@@ -38,7 +38,7 @@ begin
 	 end else
 	  TemporaryBuf[1] := tmp;
 
-         for p:=4 to High(TemporaryBuf) do
+         for p:=4 to High(TemporaryBuf)-1 do
           if lab_l(p+1) and (pos(TemporaryBuf[2], TemporaryBuf[p]) > 0) then Break else
 	   if ldy_im(p) then TemporaryBuf[p] := '~';
 
