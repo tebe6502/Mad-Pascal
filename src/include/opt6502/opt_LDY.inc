@@ -258,7 +258,7 @@ begin
     if sty_stack(i) and										// sty :STACKORIGIN			; 0
        tya(i+1) and										// tya					; 1
        sta_stack(i+2) and									// sta :STACKORIGIN			; 2
-       lda(i+3) then										// lda					; 3
+       lda_a(i+3) then										// lda					; 3
       if argMatch(i, i+2) then
        begin
 	listing[i+1] := '';
@@ -272,7 +272,7 @@ begin
 
        sty_stack(i) and										// sty :STACKORIGIN			; 0
        lda_a(i+1) and 										// lda					; 1
-       add_sub(i+2) and 									// add|sub				; 2
+       (add_sub(i+2) or and_ora_eor(i+2)) and							// add|sub|and|ora|eor			; 2
 //       ldy_stack(i+3) and									// ldy :STACKORIGIN			; 3
        (SKIP(i+4) = false) then									//~SKIP					; 4
      if argMatch(i, i+3) then
@@ -289,10 +289,10 @@ begin
 
        sta_stack(i) and										// sta :STACKORIGIN			; 0
        tay(i+1) and										// tay					; 1
-       lda_val(i+2) and										// lda					; 2	~:STACKORIGIN
-       add_sub_val(i+3) and									// add|sub				; 3
+       lda_a(i+2) and										// lda					; 2
+       (add_sub(i+3) or and_ora_eor(i+3)) and							// add|sub|and|ora|eor			; 3
 //       ldy_stack(i+4) and									// ldy :STACKORIGIN			; 4
-       sta_val(i+5) then									// sta					; 5	~:STACKORIGN
+       sta_a(i+5) then										// sta					; 5
       if argMatch(i, i+4) then
        begin
 	listing[i] := '';

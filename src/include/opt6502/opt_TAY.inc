@@ -416,7 +416,59 @@ begin
 // -----------------------------------------------------------------------------
 
 
-    if lda(i) and (listing[i] = listing[i+5]) and						// lda U				; 0
+    if tay(i+7) and										// tay					; 7
+
+       lda_a(i) and (listing[i] = listing[i+4])	and						// lda I				; 0
+       lsr_a(i+1) and										// lsr @				; 1
+       lsr_a(i+2) and										// lsr @				; 2
+       sta_stack(i+3) and									// sta :STACKORIGIN			; 3
+//       lda_a(i+4) and										// lda I				; 4
+       lsr_a(i+5) and										// lsr @				; 5
+       lsr_a(i+6) then										// lsr @				; 6
+//       tay(i+7) then										// tay					; 7
+     begin
+	listing[i+4] := #9'sty ' + GetARG(i+3);
+
+	listing[i+3] := #9'tay';
+
+	listing[i+5] := '';
+	listing[i+6] := '';
+	listing[i+7] := '';
+
+	exit(false);
+     end;
+
+
+    if tay(i+9) and										// tay					; 9
+
+       lda_a(i) and (listing[i] = listing[i+5])	and						// lda I				; 0
+       lsr_a(i+1) and										// lsr @				; 1
+       lsr_a(i+2) and										// lsr @				; 2
+       lsr_a(i+3) and										// lsr @				; 3
+       sta_stack(i+4) and									// sta :STACKORIGIN			; 4
+//       lda_a(i+5) and										// lda I				; 5
+       lsr_a(i+6) and										// lsr @				; 6
+       lsr_a(i+7) and										// lsr @				; 7
+       lsr_a(i+8) then										// lsr @				; 8
+//       tay(i+9) then										// tay					; 9
+     begin
+	listing[i+5] := #9'sty ' + GetARG(i+4);
+
+	listing[i+4] := #9'tay';
+
+	listing[i+6] := '';
+	listing[i+7] := '';
+	listing[i+8] := '';
+	listing[i+9] := '';
+
+	exit(false);
+     end;
+
+
+// -----------------------------------------------------------------------------
+
+
+    if lda_a(i) and (listing[i] = listing[i+5]) and						// lda U				; 0
        asl_a(i+1) and (listing[i+1] = listing[i+6]) and						// asl @				; 1
        tay(i+2) and (listing[i+2] = listing[i+7]) and						// tay					; 2
        lda_a(i+3) and										// lda					; 3

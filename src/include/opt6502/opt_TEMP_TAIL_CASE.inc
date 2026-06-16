@@ -24,7 +24,7 @@ begin
 
       yes:=false;
 
-      for p:=i+1 to High(TemporaryBuf) do
+      for p:=i+1 to High(TemporaryBuf)-1 do
        if (TemporaryBuf[p] = tmp) and			// jmp a_xxxx
           lab_s(p+1) then				//s_xxxx
 	begin

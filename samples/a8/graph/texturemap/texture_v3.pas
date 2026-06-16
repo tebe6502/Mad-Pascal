@@ -86,8 +86,8 @@ Begin
 
     End;
 
-    pxStep := fastdivS(smallint((px2-px1) Shl 8), byte(x2-x1+1));
-    pyStep := fastdivS(smallint((py2-py1) Shl 8), byte(x2-x1+1));
+    pxStep := fastdivS(word((px2-px1) Shl 8), byte(x2-x1+1));
+    pyStep := fastdivS(word((py2-py1) Shl 8), byte(x2-x1+1));
 
     pxVal := px1 shl 8;
     pyVal := py1 shl 8;
@@ -165,7 +165,7 @@ Begin
 //    Side := @Left;
 
     XVal := xStart Shl 8;
-    XStep := fastdivS(smallint((xEnd-xStart) Shl 8), byte(yEnd-yStart+1));
+    XStep := fastdivS(word((xEnd-xStart) Shl 8), byte(yEnd-yStart+1));
     pxVal := pxStart Shl 8;
     pxStep := fastdivS(word((pxEnd-pxStart) Shl 8), byte(yEnd-yStart+1));
 
@@ -183,7 +183,7 @@ Begin
 //    Side := @Right;
 
     XVal := xStart Shl 8;
-    XStep := fastdivS(smallint((xEnd-xStart) Shl 8), byte(yEnd-yStart+1));
+    XStep := fastdivS(word((xEnd-xStart) Shl 8), byte(yEnd-yStart+1));
     pxVal := pxStart Shl 8;
     pxStep := fastdivS(word((pxEnd-pxStart) Shl 8), byte(yEnd-yStart+1));
 
@@ -218,7 +218,7 @@ Begin
 //    Side := @Left;
 
     XVal := xStart Shl 8;
-    XStep := fastdivS(smallint((xEnd-xStart) Shl 8), byte(yEnd-yStart+1));
+    XStep := fastdivS(word((xEnd-xStart) Shl 8), byte(yEnd-yStart+1));
     pyVal := pyStart Shl 8;
     pyStep := fastdivS(word((pyEnd-pyStart) Shl 8), byte(yEnd-yStart+1));
 
@@ -236,7 +236,7 @@ Begin
 //    Side := @Right;
 
     XVal := xStart Shl 8;
-    XStep := fastdivS(smallint((xEnd-xStart) Shl 8), byte(yEnd-yStart+1));
+    XStep := fastdivS(word((xEnd-xStart) Shl 8), byte(yEnd-yStart+1));
     pyVal := pyStart Shl 8;
     pyStep := fastdivS(word((pyEnd-pyStart) Shl 8), byte(yEnd-yStart+1));
 
@@ -271,7 +271,7 @@ Begin
     //Side := @Left;
 
     XVal := xStart Shl 8;
-    XStep := fastdivS(smallint((xEnd-xStart) Shl 8), byte(yEnd-yStart+1));
+    XStep := fastdivS(word((xEnd-xStart) Shl 8), byte(yEnd-yStart+1));
     pxVal := pxStart Shl 8;
     pxStep := fastdivS(word((pxEnd-pxStart) Shl 8), byte(yEnd-yStart+1));
 
@@ -289,7 +289,7 @@ Begin
 //    Side := @Right;
 
     XVal := xStart Shl 8;
-    XStep := fastdivS(smallint((xEnd-xStart) Shl 8), byte(yEnd-yStart+1));
+    XStep := fastdivS(word((xEnd-xStart) Shl 8), byte(yEnd-yStart+1));
     pxVal := pxStart Shl 8;
     pxStep := fastdivS(word((pxEnd-pxStart) Shl 8), byte(yEnd-yStart+1));
 
@@ -325,7 +325,7 @@ Begin
 //      Side := @Left;
 
     XVal := xStart Shl 8;
-    XStep := fastdivS(smallint((xEnd-xStart) Shl 8), byte(yEnd-yStart+1));
+    XStep := fastdivS(word((xEnd-xStart) Shl 8), byte(yEnd-yStart+1));
     pyVal := pyStart Shl 8;
     pyStep := fastdivS(word((pyEnd-pyStart) Shl 8), byte(yEnd-yStart+1));
 
@@ -343,7 +343,7 @@ Begin
 //      Side := @Right;
 
     XVal := xStart Shl 8;
-    XStep := fastdivS(smallint((xEnd-xStart) Shl 8), byte(yEnd-yStart+1));
+    XStep := fastdivS(word((xEnd-xStart) Shl 8), byte(yEnd-yStart+1));
     pyVal := pyStart Shl 8;
     pyStep := fastdivS(word((pyEnd-pyStart) Shl 8), byte(yEnd-yStart+1));
 
