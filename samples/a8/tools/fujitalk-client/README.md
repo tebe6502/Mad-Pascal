@@ -12,7 +12,9 @@ It is similar to IRC clients, but much simplier.
 |OPTION     |Changes colour theme.|
 |ctrl-u     |Scrolls tab up.|
 |ctrl-d     |Scrolls tab down.|
+|ESC        |Scrolls down to the latest message.|
 |ctrl-v     |Toggles verbose mode.|
+|ctrl-r     |Reload tab content.|
 
 ## Commands
 

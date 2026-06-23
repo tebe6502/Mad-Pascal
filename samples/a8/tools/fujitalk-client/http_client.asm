@@ -1,5 +1,6 @@
 ;; fujinet tiny web client by bocianu
-CLIENT_ADDRESS = $5C00;
+;; uses JSIO SIO extensions for HTTP communication
+    icl 'const.inc'
 
 _R = $40;  // Read - predefined values for data transfer direction (to be set in DSTATS)
 _W = $80;  // Write
@@ -31,7 +32,7 @@ DCB = $300;      // DCB struct address
 
 ZPW = $f0;
 
-    org CLIENT_ADDRESS
+    org HTTP_CLIENT_ADDRESS
 
 request
                         ;; open HTTP connection
@@ -286,7 +287,7 @@ structsEnd
     .ERROR "DBA structs splited on two memory pages!"
 .ENDIF
    
-.PRINT "LOADER_SIZE = ", *-CLIENT_ADDRESS, ";"
+.PRINT "LOADER_SIZE = ", *-HTTP_CLIENT_ADDRESS, ";"
 .PRINT "REQUEST_VECTOR = ", request, ";"
 .PRINT "URI_ADDRESS = ", connection_string_address, ";"
 .PRINT "METHOD_BYTE = ", open_aux1, ";"
