@@ -636,7 +636,7 @@ begin
     end;
 end;
 
-procedure GetStatus;keep;
+procedure GetStatus;
 begin
     BuildUrl;
     url := Concat(url, 'status'#0);
@@ -678,7 +678,7 @@ begin
    
 end;
 
-procedure StateCheck();keep;
+procedure StateCheck();
 var tab:byte;
     changed:boolean;
 begin
@@ -842,7 +842,7 @@ begin
         if cmd[c+1]<>char(strPtr[c+2]) then exit(false);
         Inc(c);
     end;
-    if (char(strPtr[c+2])<>' '~) and (c < Length(strPtr)-1) then exit(false);
+    if (char(strPtr[c+2])<>' '~) and (c < Length(strPtr^)-1) then exit(false);
 end;
 
 procedure FetchArg(count:byte;var s:string);
@@ -865,7 +865,7 @@ begin
        
 end;
 
-procedure TryAutoLogin();keep;
+procedure TryAutoLogin();
 begin
     LoadAuth;
     if(user.key[0]<>#0) then begin
@@ -1179,7 +1179,7 @@ begin
         strPtr := pointer(inputsVram[state.activeTab]-1);
         strPtr[0] := char(GetInputLength());
         
-        if Length(strPtr) > 0 then begin
+        if Length(strPtr^) > 0 then begin
             inputfg := theme[1]+2;
             ProcessInput();
             InitInput();
