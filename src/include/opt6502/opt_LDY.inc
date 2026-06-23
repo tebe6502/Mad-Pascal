@@ -924,7 +924,7 @@ begin
        sta_a(i+8) and										// sta					; 8
        lda_stack(i+9) and									// lda :STACKORIGIN+STACKWIDTH		; 9
        adc_sbc(i+10) and									// adc|sbc				; 10
-       sta_stack(i+11) then									// sta					; 11
+       sta_a(i+11) then										// sta					; 11
      if argMatch(i, i+5) and
         argMatch(i+2, i+6) and
         argMatch(i+4, i+9) then
@@ -932,6 +932,42 @@ begin
 	listing[i+6] := listing[i+1];
 
 	listing[i+9] := listing[i+3];
+
+	listing[i+1] := '';
+	listing[i+2] := '';
+	listing[i+3] := '';
+	listing[i+4] := '';
+	listing[i+5] := '';
+
+	exit(false);
+      end;
+
+
+    if (ldy(i) or sty(i)) and ldy(i+5) and 							// ldy|sty				; 0
+
+       lda_adr(i+1) and										// lda adr.				; 1
+       sta_stack(i+2) and 									// sta :STACKORIGIN			; 2
+       lda_adr(i+3) and										// lda adr.				; 3
+       sta_stack(i+4) and									// sta :STACKORIGIN+STACKWIDTH		; 4
+//       ldy(i+5) and										// ldy I				; 5
+       lda_a(i+6) and										// lda					; 6
+       add_sub_stack(i+7) and									// add|sub :STACKORIGIN			; 7
+       sta_a(i+8) and										// sta					; 8
+       lda_a(i+9) and										// lda 					; 9
+       adc_sbc_stack(i+10) and									// adc|sbc :STACKORIGIN+STACKWIDTH	; 10
+       sta_a(i+11) then										// sta					; 11
+     if argMatch(i, i+5) and
+        argMatch(i+2, i+7) and
+        argMatch(i+4, i+10) then
+      begin
+
+        if add_stack(i+7) then begin
+	 listing[i+7] := #9'add ' + GetARG(i+1);
+	 listing[i+10] := #9'adc ' + GetARG(i+3);
+	end else begin
+	 listing[i+7] := #9'sub ' + GetARG(i+1);
+	 listing[i+10] := #9'sbc ' + GetARG(i+3);
+	end;
 
 	listing[i+1] := '';
 	listing[i+2] := '';
