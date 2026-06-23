@@ -1,6 +1,21 @@
 
 .proc	fmulinit
 
+	.ifdef MAIN.@DEFINES.ATARI
+	bit VCOUNT
+	bmi *-3
+	bit VCOUNT
+	bpl *-3
+
+	sei
+	inc nmien
+	lda portb
+	pha
+
+	lda #$fe
+	sta portb
+	eif
+
 	ldx #$00
 	txa
 	.byte $c9	; CMP #immediate - skip TYA and clear carry flag
@@ -36,6 +51,13 @@ lp	lda square1_hi+1,x
 	inx
 	bne lp
 
-	rts
+	.ifdef MAIN.@DEFINES.ATARI
+	pla
+	sta portb
 
+	dec nmien
+	cli
+	eif
+
+	rts
 .endp
