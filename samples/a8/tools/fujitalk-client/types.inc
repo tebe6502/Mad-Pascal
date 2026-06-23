@@ -3,6 +3,7 @@ type TConfig = record
     currentTheme:byte;
     sioAudio:byte;
     consoleEveryTab:byte;
+    sam:byte;
 end;
 
 type TUser = record

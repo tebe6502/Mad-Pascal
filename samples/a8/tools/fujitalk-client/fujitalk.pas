@@ -1,16 +1,17 @@
+{$LIBRARYPATH 'blibs'}
+
 program fujitalk;
-{$librarypath '../blibs/'}
+
 uses atari, http_client, crt, b_system, efast, fn_cookies, joystick;
 
 const 
-{$i const.inc}
-{$r resources.rc}
-{$i interrupts.inc}
-{$i types.inc}
-
-
+{$I const.inc}
+{$R resources.rc}
+{$I interrupts.inc}
+{$I types.inc}
    
 var
+    version: string[8] = '0.4.2';
     url: string[120];
     server: string[60] = 'fujinet.pl:2137';
        
@@ -67,8 +68,9 @@ var
     refreshDelay: word;
     tabUpScroll: byte;
 
-procedure StateCheck;forward;keep;
-procedure TryAutoLogin;forward;keep;
+procedure StateCheck;forward;
+procedure TryAutoLogin;forward;
+procedure GetStatus;forward;
 
 procedure DrawScrollBar(tab:byte);
 var ps,pe,b,i:byte;
@@ -137,9 +139,10 @@ begin
     vdelay := $0f;
 end;
 
-procedure Str2Antic(var s: string);
+function Str2Antic(var s: string):string;
 var i:byte;
 begin
+    result[0] := s[0];
     for i:=1 to byte(s[0]) do s[i] := Atascii2Antic(s[i]);
 end;
 
@@ -274,7 +277,7 @@ end;
 
 procedure InitAll;
 begin
-    FillByte(pointer(VRAM_ADDRESS),$2000,0);
+    FillByte(pointer(VRAM_ADDRESS),$3000,0);
     UnAuth();
     TabShow(0);
     TabsDraw();
@@ -438,7 +441,7 @@ end;
     
      
     
-procedure SetScreen();
+procedure SetupScreen();
 begin
     Pause;
     SDLSTL := DISPLAY_LIST_ADDRESS;
@@ -510,6 +513,7 @@ begin
                 char(155): result := INPUT_ENTER;
                 char(127): result := INPUT_TAB;
                 char(8): result := INPUT_HIDE;
+                char(18): result := INPUT_RELOAD;
             end;
             
         end;
@@ -547,6 +551,7 @@ end;
 
 procedure SendInput(strAddress:word);
 var tabnum:string[3];
+    msgLen: byte;
 begin
     BuildUrl;
     Str(state.activeTab,tabnum);
@@ -554,8 +559,11 @@ begin
     url := Concat(url, tabnum);
     url := Concat(url, #0);
     strPtr := pointer(strAddress);
-    strPtr := Str2Atascii(strPtr);
-    PostUrlData(strPtr);
+    msgLen := byte(strPtr[0]);
+    strTemp[0] := char(msgLen);
+    move(strPtr[1], strTemp[1], msgLen);
+    strTemp := Str2Atascii(strTemp);
+    PostUrlData(strTemp);
 end;
 
 
@@ -574,7 +582,11 @@ begin
         strTemp := Concat(strTemp, user.nick);
         loggedIn := true;
         TabAppendStr(0,strTemp);
-        SaveAuth;
+        SaveAuth();
+        ClearStatus();
+        TabsDraw();
+        InitInput();
+        GetStatus();
     end;
     
     if isResponse(TOKEN_ERROR) then begin
@@ -584,7 +596,11 @@ begin
             ERROR_SIGNUP_FAILED,
             ERROR_UNAUTHORIZED: begin
                 loggedIn := false;
-                if errCode = ERROR_UNAUTHORIZED then TryAutoLogin();
+                if errCode = ERROR_UNAUTHORIZED then begin
+                    Tabs14Clear();
+                    Unauth();
+                    TryAutoLogin();
+                end;
             end;
             
         end;
@@ -608,7 +624,7 @@ begin
 end;
 
 
-procedure GetUrlData();
+procedure GetUrlData;
 begin
     RequestInit();
     Pause;
@@ -620,14 +636,13 @@ begin
     end;
 end;
 
-
-procedure GetStatus();
+procedure GetStatus;keep;
 begin
     BuildUrl;
     url := Concat(url, 'status'#0);
     GetUrlData();
     ProcessResponse();
-    refreshDelay := STATUS_REFRESH_INTERVAL;                
+    refreshDelay := STATUS_REFRESH_INTERVAL;
 end;
 
 procedure GetLines(tab:byte;lastLine:cardinal);
@@ -663,7 +678,7 @@ begin
    
 end;
 
-procedure StateCheck;
+procedure StateCheck();keep;
 var tab:byte;
     changed:boolean;
 begin
@@ -688,8 +703,6 @@ begin
         status.forceTabOpen := NONE;
         changed := true;
     end;
-
-    TabsDraw();
     
     if (state.unreadTab[state.activeTab] > 0) then begin
        GetLines(state.activeTab, state.lastLine[state.activeTab]);
@@ -699,9 +712,18 @@ begin
        GetLines(0, state.lastLine[state.activeTab]);
     end;
     
+    TabsDraw();
     
 end;
 
+procedure TabReload(tab:byte);
+begin
+    if tab=0 then exit;
+    FillByte(pointer(tabVram[tab]),TAB_SIZE,0);
+    tabCarret[tab] := 0;
+    tabLines[tab] := 0;
+    GetLines(tab,0);
+end;
 
 procedure TabNext;
 var npage:byte;
@@ -759,6 +781,15 @@ begin
     ProcessResponse();
 end;
 
+procedure ServerCheck;
+begin
+    BuildUrl;
+    url := Concat(url, 'version/');
+    url := Concat(url, version);
+    url := Concat(url, #0);
+    GetUrlData();
+    ProcessResponse();
+end;
 
 // *********************************************************************************************** UI DRAW
 // ***********************************************************************************************
@@ -766,14 +797,19 @@ end;
 // ***********************************************************************************************
 
 procedure ShowWelcomeScreen;
+
 begin
     TabAppendStr(0, '  '+#$20#$20#$20#$20#$20#$1a#$1b#$1c#$20#$20#$20#$20#$20);
     TabAppendStr(0, '  '+#$00#$01#$02#$03#$04#$14#$15#$16#$0a#$0b#$0c#$0d#$0e+' FujiTalk client'); 
     TabAppendStr(0, '  '+#$05#$06#$07#$08#$09#$17#$18#$19#$0f#$10#$11#$12#$13+' by bocianu@gmail.com');
     TabAppendStr(0, '  '+#$20#$20#$20#$20#$20#$20#$1d#$1e#$1f#$20#$20#$20#$20);
     TabAppendStr(0, '  ');
-    TabAppendStr(0, '  version 0.3.3');
+    strTemp := '  version ';
+    strTemp := Concat(strTemp, version);
+    TabAppendStr(0, strTemp);
     TabAppendStr(0, '  ');
+    TabAppendStr(0, '  '+'FujiTalk requires firmware version'*);
+    TabAppendStr(0, '  '+'0.5.fd038d41 (5.06.2022) or newer.'*);
     TabAppendStr(0, '  ');
     TabAppendStr(0, '  Type /help to learn more commands.');
     TabAppendStr(0, '  ');
@@ -806,7 +842,7 @@ begin
         if cmd[c+1]<>char(strPtr[c+2]) then exit(false);
         Inc(c);
     end;
-    if (char(strPtr[c+2])<>' '~) and (c < Length(strPtr^)-1) then exit(false);
+    if (char(strPtr[c+2])<>' '~) and (c < Length(strPtr)-1) then exit(false);
 end;
 
 procedure FetchArg(count:byte;var s:string);
@@ -829,14 +865,14 @@ begin
        
 end;
 
-
-procedure TryAutoLogin;
+procedure TryAutoLogin();keep;
 begin
     LoadAuth;
     if(user.key[0]<>#0) then begin
         TabAppendStr(0, '* Trying to autologin ');
         GetAuth;
     end;
+    ServerCheck;
 end;
 
 function getOptVal(var opt:string):byte;
@@ -911,16 +947,18 @@ begin
             exit;
         end;
 
+        if commandIs('version'~) then begin
+            strTemp := '* client version: ';
+            strTemp := ConCat(strTemp, version);
+            TabAppendStr(0, strTemp);
+        end;
+
+
         if commandIs('reload'~) then begin
-            if state.activeTab>0 then begin
-                //TabClear(state.activeTab);
-                FillByte(pointer(tabVram[state.activeTab]),TAB_SIZE,0);
-                tabCarret[state.activeTab] := 0;
-                tabLines[state.activeTab] := 0;
-                GetLines(state.activeTab,0);
-            end;
+            TabReload(state.activeTab);
             exit;
         end;
+        
 
         if commandIs('login'~) then begin
             TabAppendStr(0,'* Trying to authenticate');
@@ -1022,8 +1060,12 @@ begin
             scrollReset();
         end;
         
+        INPUT_RELOAD: begin
+            TabReload(state.activeTab);
+        end;
+        
         INPUT_HIDE: begin
-            cmd := '/conf verbose X'~;
+            cmd := '/conf verbose X '~;
             SendInput(word(@cmd));
             GetStatus();
         end;
@@ -1093,7 +1135,7 @@ begin
     nmien := $40;
     Poke(702,0); // shift up
     lmargin := 0;
-    SetScreen();
+    SetupScreen();
     InitAll();
     strFlush();
     InitPMG();
@@ -1137,7 +1179,7 @@ begin
         strPtr := pointer(inputsVram[state.activeTab]-1);
         strPtr[0] := char(GetInputLength());
         
-        if Length(strPtr^) > 0 then begin
+        if Length(strPtr) > 0 then begin
             inputfg := theme[1]+2;
             ProcessInput();
             InitInput();
