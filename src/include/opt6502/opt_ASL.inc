@@ -56,6 +56,34 @@ begin
       end;
 
 
+    if spl(i+3) and										// spl					; 3  
+       
+       rol_a(i) and										// rol @				; 0
+       ldy(i+1) and										// ldy					; 1
+       lda_a(i+2) then										// lda					; 2
+//       spl(i+3) then										// spl					; 3
+      begin
+	listing[i] := '';
+
+	exit(false);
+      end;
+
+
+    if spl(i+5) and										// spl					; 5 
+
+       rol_a(i) and										// rol @				; 0
+       asl_stack(i+1) and									// asl :STACKORIGIN			; 1
+       rol_stack(i+2) and									// rol :STACKORIGIN+STACKWIDTH		; 2
+       ldy(i+3) and										// ldy					; 3
+       lda_a(i+4) then										// lda					; 4
+//       spl(i+5) then										// spl					; 5
+      begin
+	listing[i] := '';
+
+	exit(false);
+      end;
+
+
     if rol_a(i) and										// rol @				; 0
        lda_a(i+1) and										// lda					; 1
        (and_ora_eor(i+2) or add_sub(i+2)) and							// and|ora|eor|add|sub			; 2
