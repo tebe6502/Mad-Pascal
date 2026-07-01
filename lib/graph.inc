@@ -860,7 +860,7 @@ begin
  if y1 > y2 then begin
   i:=y2;
   y2:=y1;
-  y1:=i; 
+  y1:=i;
  end;
 
  for i:=y1 to y2 do HLine(x1,x2, i);
@@ -1011,22 +1011,22 @@ begin
          // pozostale przypadki - przeciecie z krawedzia okna
          if (rcode and 1) <> 0 then
          begin
-            y := y1+smallint(smallint(y2-y1)*smallint(WIN_LEFT-x1)) div smallint(x2-x1);
+            y := y1+(smallint(y2-y1)*smallint(WIN_LEFT-x1)) div smallint(x2-x1);
             x := WIN_LEFT;
          end
          else if (rcode and 2) <> 0 then
          begin
-            y := y1+smallint(smallint(y2-y1)*smallint(WIN_RIGHT-x1)) div smallint(x2-x1);
+            y := y1+(smallint(y2-y1)*smallint(WIN_RIGHT-x1)) div smallint(x2-x1);
             x := WIN_RIGHT;
          end
          else if (rcode and 4) <> 0 then
          begin
-            x := x1+smallint(smallint(x2-x1)*smallint(WIN_BOTTOM-y1)) div smallint(y2-y1);
+            x := x1+(smallint(x2-x1)*smallint(WIN_BOTTOM-y1)) div smallint(y2-y1);
             y := WIN_BOTTOM;
          end
          else if (rcode and 8) <> 0 then
          begin
-            x := x1+smallint(smallint(x2-x1)*smallint(WIN_TOP-y1)) div smallint(y2-y1);
+            x := x1+(smallint(x2-x1)*smallint(WIN_TOP-y1)) div smallint(y2-y1);
             y := WIN_TOP;
          end;
 
@@ -1060,7 +1060,7 @@ begin
 	 else
           Line(x1, y1, x2, y2);
 	 end;
-	 
+
       end
 //      else
 //      begin
