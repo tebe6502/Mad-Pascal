@@ -951,6 +951,16 @@ begin
 end;
 
 
+procedure ClipLine(x1, y1, x2, y2: smallint);
+(*
+@description:
+Line clipping (Cohen-Sutherland algorithm)
+*)
+var
+   rcode1, rcode2, rcode: byte;
+   x, y: smallint;
+
+
 function calcRegCode(x, y: smallint): byte;
 begin
    result := 0;
@@ -962,14 +972,6 @@ begin
 end;
 
 
-procedure ClipLine(x1, y1, x2, y2: smallint);
-(*
-@description:
-Line clipping (Cohen-Sutherland algorithm)
-*)
-var
-   rcode1, rcode2, rcode: byte;
-   x, y: smallint;
 begin
 
    // Algorytm Cohena-Sutherlanda
@@ -1011,22 +1013,42 @@ begin
          // pozostale przypadki - przeciecie z krawedzia okna
          if (rcode and 1) <> 0 then
          begin
-            y := y1+(smallint(y2-y1)*smallint(WIN_LEFT-x1)) div smallint(x2-x1);
+
+	    if smallint(x2-x1) = 0 then
+	     exit
+	    else
+             y := y1 + (smallint(y2-y1)*smallint(WIN_LEFT-x1)) div smallint(x2-x1);
+	     
             x := WIN_LEFT;
          end
          else if (rcode and 2) <> 0 then
          begin
-            y := y1+(smallint(y2-y1)*smallint(WIN_RIGHT-x1)) div smallint(x2-x1);
+
+	    if smallint(x2-x1) = 0 then
+	     exit
+	    else
+             y := y1 + (smallint(y2-y1)*smallint(WIN_RIGHT-x1)) div smallint(x2-x1);
+
             x := WIN_RIGHT;
          end
          else if (rcode and 4) <> 0 then
          begin
-            x := x1+(smallint(x2-x1)*smallint(WIN_BOTTOM-y1)) div smallint(y2-y1);
+
+	    if smallint(y2-y1) = 0 then
+	     exit
+	    else
+             x := x1 + (smallint(x2-x1)*smallint(WIN_BOTTOM-y1)) div smallint(y2-y1);
+
             y := WIN_BOTTOM;
          end
          else if (rcode and 8) <> 0 then
          begin
-            x := x1+(smallint(x2-x1)*smallint(WIN_TOP-y1)) div smallint(y2-y1);
+
+	    if smallint(y2-y1) = 0 then
+	     exit
+	    else
+             x := x1 + (smallint(x2-x1)*smallint(WIN_TOP-y1)) div smallint(y2-y1);
+
             y := WIN_TOP;
          end;
 
