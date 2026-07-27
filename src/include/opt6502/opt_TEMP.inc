@@ -702,6 +702,14 @@ begin
 
 
    if sta(0) and									// sta PRIME		; 0
+      lda(1) then									// lda PRIME		; 1
+    if argMatch(0, 1) then
+    begin
+     TemporaryBuf[1] := '~';
+    end;
+
+
+   if sta(0) and									// sta PRIME		; 0
       dex(1) and									// dex			; 1
       (TemporaryBuf[2] = '') and							//			; 2
       opti(3) and									//; optimize 		; 3

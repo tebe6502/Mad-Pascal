@@ -1399,6 +1399,21 @@
      end;
 
 
+    if ldy_im_0(i) and									// ldy #$00				; 0
+       cmp(i+1) and									// cmp					; 1
+       spl(i+2) and									// spl					; 2
+       dey(i+3) and									// dey					; 3
+       sta_val(i+4) then								// sta					; 4	~:STACKORIGIN
+     begin
+	listing[i] := '';
+	listing[i+1] := '';
+	listing[i+2] := '';
+	listing[i+3] := '';
+
+	Result:=false; Break;
+     end;
+
+
     if UNUSED_A(i) and									// UNUSED_A				; 0
        lda_a(i+1) and									// lda :STACKORIGIN			; 1
        sta_val(i+2) and									// sta					; 2	~:STACKORIGIN

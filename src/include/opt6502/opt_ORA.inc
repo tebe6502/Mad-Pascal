@@ -165,7 +165,7 @@ begin
      end;
 
 
-    if ora_im_0(i+1) and								// ora #$00		; 1  
+    if ora_im_0(i+1) and								// ora #$00		; 1
 
        and_ora_eor(i) then								// and|ora|eor		; 0
 //     ora_im_0(i+1) then								// ora #$00		; 1
@@ -206,6 +206,21 @@ begin
 	listing[i] := '';
 	listing[i+1] := #9'ora ' + GetARG(i+1);
 	listing[i+2] := '';
+
+	exit(false);
+       end;
+
+
+    if sta_stack(i) and 								// sta :STACKORIGIN	; 0
+       ldy_val(i+1) and									// ldy			; 1	~:STACKORIGIN
+       lda_a(i+2) and 									// lda 			; 2	~:STACKORIGIN
+       ora_stack(i+3) then								// ora :STACKORIGIN	; 3
+     if argMatch(i, i+3) then
+       begin
+	listing[i] := '';
+
+	listing[i+2] := #9'ora ' + GetARG(i+2);
+	listing[i+3] := '';
 
 	exit(false);
        end;

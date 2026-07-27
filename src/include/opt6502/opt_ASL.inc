@@ -56,8 +56,8 @@ begin
       end;
 
 
-    if spl(i+3) and										// spl					; 3  
-       
+    if spl(i+3) and										// spl					; 3
+
        rol_a(i) and										// rol @				; 0
        ldy(i+1) and										// ldy					; 1
        lda_a(i+2) then										// lda					; 2
@@ -69,7 +69,7 @@ begin
       end;
 
 
-    if spl(i+5) and										// spl					; 5 
+    if spl(i+5) and										// spl					; 5
 
        rol_a(i) and										// rol @				; 0
        asl_stack(i+1) and									// asl :STACKORIGIN			; 1
@@ -79,6 +79,31 @@ begin
 //       spl(i+5) then										// spl					; 5
       begin
 	listing[i] := '';
+
+	exit(false);
+      end;
+
+
+    if spl(i+7) and										// spl					; 7
+
+       sta_stack(i) and										// sta :STACKORIGIN+STACKWIDTH		; 0
+       asl_stack(i+1) and									// asl :STACKORIGIN			; 1
+       rol_stack(i+2) and									// rol :STACKORIGIN+STACKWIDTH		; 2
+       asl_stack(i+3) and									// asl :STACKORIGIN			; 3
+       rol_stack(i+4) and									// rol :STACKORIGIN+STACKWIDTH		; 4
+       ldy(i+5) and										// ldy					; 5
+       lda_stack(i+6) then									// lda:STACKORIGIN+STACKWIDTH		; 6
+//       spl(i+7) then										// spl					; 7
+     if argMatch(i, i+2) and
+        argMatch(i+2, i+6) then
+      begin
+	listing[i] := '';
+
+	listing[i+2] := #9'rol @';
+
+	listing[i+4] := #9'rol @';
+
+	listing[i+6] := #9'cmp #$00';
 
 	exit(false);
       end;
