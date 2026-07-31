@@ -325,12 +325,12 @@ var
 
       case optyY[1] of
 
-        '+', '-': 
+        '+', '-':
 	Result := (listing[i] = mne + copy(optyY, 6, 256));
 
-        '*': 
+        '*':
 	if optyY[2] in ['+', '-'] then
-	  Result := (listing[i] = mne + copy(optyY,6,pos('|',optyY) - 6)) or 
+	  Result := (listing[i] = mne + copy(optyY,6,pos('|',optyY) - 6)) or
 	            (listing[i] = mne + copy(optyY,pos('|',optyY) + 1,256))
         else
           Result := (listing[i] = mne + copy(optyY, 6, 256));
@@ -475,13 +475,10 @@ var
   procedure Rebuild(const context: String);
   var
     k, i: TListingIndex;
-    // oldListing, newListing: String;
    begin
 
-
-    // oldListing := ListingToString(listing);
-
     k := 0;
+
     for i := 0 to l - 1 do
       if (listing[i] <> '') and (listing[i][1] <> ';') then
       begin
@@ -2660,7 +2657,7 @@ begin        // OptimizeASM
     if optyA <> '' then
       for i := 0 to l - 1 do
         if (listing[i] = #9'inc ' + optyA) or (listing[i] = #9'dec ' + optyA) or //((optyY <> '') and (optyA = optyY)) or
-          lda_a(i) or mva(i) or mwa(i) or tya(i) or 
+          lda_a(i) or mva(i) or mwa(i) or tya(i) or
 	  lab_a(i) or jsr(i) or jmp(i) or _if(i) then
         begin
           SetOptyA('');
@@ -2673,7 +2670,7 @@ begin        // OptimizeASM
     if optyY <> '' then
       for i := 0 to l - 1 do
         if LabelIsUsed(i) or //((optyA <> '') and (optyA = optyY)) or
-          ldy(i) or mvy(i) or mwy(i) or iny(i) or dey(i) or tay(i) or 
+          ldy(i) or mvy(i) or mwy(i) or iny(i) or dey(i) or tay(i) or
 	  lab_a(i) or jsr(i) or jmp(i) or _if(i) then
         begin
           SetOptyY('');
