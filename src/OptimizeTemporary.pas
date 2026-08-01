@@ -210,7 +210,7 @@ var
 begin
 
 {
-if (pos('#for:dec', TemporaryBuf[10]) > 0) then begin
+if (pos('sta C', TemporaryBuf[10]) > 0) then begin
 
       for p:=0 to 30 do writeln(TemporaryBuf[p]);
       writeln('-------');

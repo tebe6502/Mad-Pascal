@@ -112,6 +112,7 @@ begin
 
 	listing[i+1] := listing[i+2];
 	listing[i+2] := tmp;
+
 	exit(false);
      end;
 
@@ -516,7 +517,7 @@ begin
     if lda_val(i) and										// lda					; 0	~lda :STACKORIGIN
        sta_stack(i+1) and									// sta :STACKORIGIN			; 1
        lda_stack(i+2) and									// lda :STACKORIGIN			; 2
-       (add_im_0(i+3) = false) then								//~add #$00
+       (add_im_0(i+3) = false) then								//~add #$00				; 3
      if argMatch(i+1, i+2) then
      begin
        listing[i+2] := '';

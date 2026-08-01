@@ -189,14 +189,16 @@ begin
        end;
 
 
-    if //lda_a(i) and										// lda					; 0
+    if rol_a(i+7) and										// rol @				; 7
+
+//       lda_a(i) and										// lda					; 0
        add_sub(i+1) and										// add|sub				; 1
        sta_stack(i+2) and									// sta :STACKORIGIN			; 2
        lda_a(i+3) and										// lda					; 3
        adc_sbc(i+4) and										// adc|sbc				; 4
        sta_stack(i+5) and									// sta :STACKORIGIN+STACKWIDHT		; 5
-       asl_stack(i+6) and									// asl :STACKORIGIN			; 6
-       rol_a(i+7) then										// rol @				; 7
+       asl_stack(i+6) then									// asl :STACKORIGIN			; 6
+//       rol_a(i+7) then									// rol @				; 7
      if argMatch(i+2, i+6) then
        begin
 
@@ -327,11 +329,13 @@ begin
      end;
 
 
-    if sta_stack(i) and										// sta :STACKORIGIN			; 0
+    if sta_im_0(i+4) and 									// sta #$00				; 4
+
+       sta_stack(i) and										// sta :STACKORIGIN			; 0
        lda(i+1) and										// lda					; 1
        adc_sbc(i+2) and										// adc|sbc				; 2
        (asl(i+3) or lsr(i+3)) and								// asl|lsr				; 3
-       sta_im_0(i+4) and 									// sta #$00				; 4
+//       sta_im_0(i+4) and 									// sta #$00				; 4
        (ror_stack(i+5) or rol_stack(i+5)) then							// ror|rol :STACKORIGIN			; 5
      if argMatch(i, i+5) then begin
 	listing[i+4] := '';
@@ -340,8 +344,9 @@ begin
      end;
 
 
-    if asl_im_0(i) and										// asl #$00				; 0
-       rol_im_0(i+1) then									// rol #$00				; 1
+    if rol_im_0(i+1) and									// rol #$00				; 1
+
+       asl_im_0(i) then										// asl #$00				; 0
      begin
 	listing[i]   := '';
 	listing[i+1] := '';
@@ -350,8 +355,9 @@ begin
      end;
 
 
-    if (asl_stack(i) or asl_a(i)) and								// asl @|asl :STACKORIGIN		; 0
-       rol_im_0(i+1) then									// rol #$00				; 1
+    if rol_im_0(i+1) and									// rol #$00				; 1
+
+       (asl_a(i) or asl_stack(i)) then								// asl @|asl :STACKORIGIN		; 0
      begin
 	listing[i+1] := '';
 
@@ -359,8 +365,9 @@ begin
      end;
 
 
-    if rol_stack(i) and										// rol :STACKORIGIN			; 0
-       rol_im_0(i+1) then									// rol #$00				; 1
+    if rol_im_0(i+1) and									// rol #$00				; 1
+
+       rol_stack(i) then									// rol :STACKORIGIN			; 0
      begin
 	listing[i+1] := '';
 
@@ -368,10 +375,12 @@ begin
      end;
 
 
-    if sta_stack(i) and										// sta :STACKORIGIN			; 0
+    if ldy_stack(i+3) and									// ldy :STACKORIGIN			; 3
+
+       sta_stack(i) and										// sta :STACKORIGIN			; 0
        asl_stack(i+1) and									// asl :STACKORIGIN			; 1
-       asl_stack(i+2) and									// asl :STACKORIGIN			; 2
-       ldy_stack(i+3) then									// ldy :STACKORIGIN			; 3
+       asl_stack(i+2) then									// asl :STACKORIGIN			; 2
+//       ldy_stack(i+3) then									// ldy :STACKORIGIN			; 3
      if argMatch(i, i+1) and
 	argMatch(i, i+2) and
 	argMatch(i, i+3) then
@@ -399,8 +408,10 @@ begin
       end;
 
 
-    if sta_stack(i) and										// sta :STACKORIGIN			; 0
-       asl_a(i+1) and										// asl @				; 1
+    if asl_a(i+1) and										// asl @				; 1
+
+       sta_stack(i) and										// sta :STACKORIGIN			; 0
+//       asl_a(i+1) and										// asl @				; 1
        sta_stack(i+2) then									// sta :STACKORIGIN			; 2
      if argMatch(i, i+2) then
       begin
@@ -446,9 +457,11 @@ begin
       end;
 
 
-    if sta_stack(i) and										// sta :STACKORIGIN			; 0
-       asl_stack(i+1) and									// asl :STACKORIGIN			; 1
-       ldy_stack(i+2) then									// ldy :STACKORIGIN			; 2
+    if ldy_stack(i+2) and									// ldy :STACKORIGIN			; 2
+
+       sta_stack(i) and										// sta :STACKORIGIN			; 0
+       asl_stack(i+1) then									// asl :STACKORIGIN			; 1
+//       ldy_stack(i+2) then									// ldy :STACKORIGIN			; 2
      if argMatch(i, i+1) and
 	argMatch(i, i+2) then
       begin
@@ -460,10 +473,12 @@ begin
       end;
 
 
-    if sta_stack(i) and										// sta :STACKORIGIN			; 0
+    if ldy_stack(i+3) and									// ldy :STACKORIGIN			; 3
+
+       sta_stack(i) and										// sta :STACKORIGIN			; 0
        lda_a(i+1) and										// lda					; 1
-       asl_stack(i+2) and									// asl :STACKORIGIN			; 2
-       ldy_stack(i+3) then									// ldy :STACKORIGIN			; 3
+       asl_stack(i+2) then									// asl :STACKORIGIN			; 2
+//       ldy_stack(i+3) then									// ldy :STACKORIGIN			; 3
      if argMatch(i, i+2) and
 	argMatch(i, i+3) then
       begin
@@ -476,11 +491,13 @@ begin
       end;
 
 
-    if asl_a(i) and										// asl @				; 0
+    if ldy_stack(i+4) and									// ldy :STACKORIGIN			; 4
+
+       asl_a(i) and										// asl @				; 0
        rol_stack(i+1) and									// rol :STACKORIGIN+STACKWIDTH		; 1
        sta_stack(i+2) and									// sta :STACKORIGIN			; 2
-       lda_val(i+3) and										// lda					; 3	~:STACKORIGIN
-       ldy_stack(i+4) then									// ldy :STACKORIGIN			; 4
+       lda_val(i+3) then									// lda					; 3	~:STACKORIGIN
+//       ldy_stack(i+4) then									// ldy :STACKORIGIN			; 4
      if argMatch(i+2, i+4) then
       begin
 	listing[i+1] := '';
@@ -861,7 +878,7 @@ begin
        rol_stack(i+2) and									// rol :STACKORIGIN+STACKWIDTH		; 2
        lda_stack(i+3) and									// lda :STACKORIGIN+STACKWIDTH		; 3
        sta_val(i+4) and										// sta					; 4	~:STACKORIGN
-       (lda_stack(i+5) = false) then								//~lda :STACKORIGIN+			; 5
+       (lda_stack(i+5) = false) then								//~lda :STACKORIGIN			; 5
      if argMatch(i, i+2) and
         argMatch(i+2, i+3) then
        begin
@@ -1307,7 +1324,7 @@ begin
        add_sub_stack(i+2) and									// add|sub :STACKORIGIN+9		; 2
        and_ora_eor_val(i+3) and									// and|ora|eor				; 3	~:STACKORIGIN
        sta(i+4) and										// sta					; 4
-       (lda(i+5) = false) then									//~lda					; 5
+       (lda_a(i+5) = false) then								//~lda					; 5
       if (argMatch(i+1, i+2) = false) then
        begin
 
@@ -1476,6 +1493,109 @@ begin
 	listing[i+9] := #9'inc ' + GetARG(i+9);
 
 	exit(false);
+       end;
+
+
+// -----------------------------------------------------------------------------
+//                 CSE — Common Subexpression Elimination
+// -----------------------------------------------------------------------------
+
+
+    if asl_a(i+17) and										// asl @				; 17
+
+       lda_im_0(i) and										// lda #$00 				; 0
+       sta_stack(i+1) and									// sta :STACKORIGIN+STACKWIDTH+9	; 1
+       lda_val(i+2) and	(listing[i+2] = listing[i+12])	and					// lda TT				; 2	~:STACKORIGIN
+       asl_a(i+3) and										// asl @				; 3
+       rol(i+4) and										// rol :STACKORIGIN+STACKWIDTH+9	; 4
+       asl_a(i+5) and										// asl @				; 5
+       rol(i+6) and										// rol :STACKORIGIN+STACKWIDTH+9	; 6
+       asl_a(i+7) and										// asl @				; 7
+       rol(i+8) and										// rol :STACKORIGIN+STACKWIDTH+9	; 8
+       sta_stack(i+9) and									// sta :STACKORIGIN+9			; 9
+
+       lda_im_0(i+10) and									// lda #$00 				; 10
+       sta_stack(i+11) and									// sta :STACKORIGIN+STACKWIDTH+10	; 11
+//       lda_val(i+12) and									// lda TT				; 12	~:STACKORIGIN
+       asl_a(i+13) and										// asl @				; 13
+       rol(i+14) and										// rol :STACKORIGIN+STACKWIDTH+10	; 14
+       asl_a(i+15) and										// asl @				; 15
+       rol(i+16) and										// rol :STACKORIGIN+STACKWIDTH+10	; 16
+//       asl_a(i+17) and									// asl @				; 17
+       rol(i+18) and										// rol :STACKORIGIN+STACKWIDTH+10	; 18
+       sta_stack(i+19) then									// sta :STACKORIGIN+10			; 19
+      if argMatch(i+1, i+4) and
+	 argMatch(i+11, i+14) then
+       begin
+        listing[i+10] := #9'sta ' + GetARG(i+19);
+	listing[i+11] := #9'lda ' + GetARG(i+8);
+        listing[i+12] := #9'sta ' + GetARG(i+18);
+
+        listing[i+13] := '';
+        listing[i+14] := '';
+        listing[i+15] := '';
+        listing[i+16] := '';
+        listing[i+17] := '';
+        listing[i+18] := '';
+        listing[i+19] := '';
+
+        exit(false);
+       end;
+
+
+    if asl_a(i+21) and										// asl @				; 21
+
+       lda_im_0(i) and										// lda #$00 				; 0
+       sta_stack(i+1) and									// sta :STACKORIGIN+STACKWIDTH+9	; 1
+       lda_val(i+2) and	(listing[i+2] = listing[i+16])	and					// lda TT				; 2	~:STACKORIGIN
+       asl_a(i+3) and										// asl @				; 3
+       rol(i+4) and										// rol :STACKORIGIN+STACKWIDTH+9	; 4
+       asl_a(i+5) and										// asl @				; 5
+       rol(i+6) and										// rol :STACKORIGIN+STACKWIDTH+9	; 6
+       asl_a(i+7) and										// asl @				; 7
+       rol(i+8) and										// rol :STACKORIGIN+STACKWIDTH+9	; 8
+       add_sub(i+9) and (listing[i+9] = listing[i+23]) and					// add|sub				; 9
+       sta_stack(i+10) and									// sta :STACKORIGIN+9			; 10
+       lda_stack(i+11) and									// lda :STACKORIGIN+STACKWIDTH+9	; 11
+       adc_sbc(i+12) and (listing[i+12] = listing[i+26]) and					// adc|sbc				; 12
+       sta_stack(i+13) and									// sta :STACKORIGIN+STACKWIDTH+9	; 13
+
+       lda_im_0(i+14) and									// lda #$00 				; 14
+       sta_stack(i+15) and									// sta :STACKORIGIN+STACKWIDTH+10	; 15
+//       lda_val(i+16) and									// lda TT				; 16	~:STACKORIGIN
+       asl_a(i+17) and										// asl @				; 17
+       rol(i+18) and										// rol :STACKORIGIN+STACKWIDTH+10	; 18
+       asl_a(i+19) and										// asl @				; 19
+       rol(i+20) and										// rol :STACKORIGIN+STACKWIDTH+10	; 20
+//       asl_a(i+21) and									// asl @				; 21
+       rol(i+22) and										// rol :STACKORIGIN+STACKWIDTH+10	; 22
+       add_sub(i+23) and									// add|sub				; 23
+       sta_stack(i+24) and									// sta :STACKORIGIN+10			; 24
+       lda_stack(i+25) and									// lda :STACKORIGIN+STACKWIDTH+10	; 25
+       adc_sbc(i+26) and									// adc|sbc				; 26
+       sta_stack(i+27) then									// sta :STACKORIGIN+STACKWIDTH+10	; 27
+
+      if argMatch(i+1, i+11) and
+	 argMatch(i+15, i+25) then
+       begin
+	listing[i+14] := #9'lda ' + GetARG(i+10);
+	listing[i+15] := listing[i+24];
+	listing[i+16] := listing[i+11];
+	listing[i+17] := listing[i+27];
+
+	listing[i+18] := #9'lda ' + GetARG(i+24);
+	listing[i+19] := listing[i+24];
+	listing[i+20] := #9'lda ' + GetARG(i+27);
+	listing[i+21] := listing[i+27];
+
+        listing[i+22] := '';
+        listing[i+23] := '';
+        listing[i+24] := '';
+        listing[i+25] := '';
+        listing[i+26] := '';
+        listing[i+27] := '';
+
+        exit(false);
        end;
 
 

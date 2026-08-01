@@ -300,6 +300,15 @@ begin
 
 
     if sta_im_0(i) and										// sta #$00			; 0
+       add_sub(i+1) then									// add|sub			; 1
+     begin
+	listing[i] := '';
+
+	exit(false);
+     end;
+
+
+    if sta_im_0(i) and										// sta #$00			; 0
        lda_a(i+1) and (lda_im_0(i+1) = false) and						// lda				; 1
        adc_sbc_im_0(i+2) then									// adc|sbc #$00			; 2
      begin
