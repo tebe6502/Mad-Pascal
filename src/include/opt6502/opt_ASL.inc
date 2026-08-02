@@ -1527,9 +1527,10 @@ begin
       if argMatch(i+1, i+4) and
 	 argMatch(i+11, i+14) then
        begin
-        listing[i+10] := #9'sta ' + GetARG(i+19);
+        listing[i+12] := listing[i+11];
+
+        listing[i+10] := listing[i+19];
 	listing[i+11] := #9'lda ' + GetARG(i+8);
-        listing[i+12] := #9'sta ' + GetARG(i+18);
 
         listing[i+13] := '';
         listing[i+14] := '';
@@ -1554,10 +1555,10 @@ begin
        rol(i+6) and										// rol :STACKORIGIN+STACKWIDTH+9	; 6
        asl_a(i+7) and										// asl @				; 7
        rol(i+8) and										// rol :STACKORIGIN+STACKWIDTH+9	; 8
-       add_sub(i+9) and (listing[i+9] = listing[i+23]) and					// add|sub				; 9
+       add_sub(i+9) and (listing[i+9] = listing[i+23]) and					// add|sub A				; 9
        sta_stack(i+10) and									// sta :STACKORIGIN+9			; 10
        lda_stack(i+11) and									// lda :STACKORIGIN+STACKWIDTH+9	; 11
-       adc_sbc(i+12) and (listing[i+12] = listing[i+26]) and					// adc|sbc				; 12
+       adc_sbc(i+12) and (listing[i+12] = listing[i+26]) and					// adc|sbc A+1				; 12
        sta_stack(i+13) and									// sta :STACKORIGIN+STACKWIDTH+9	; 13
 
        lda_im_0(i+14) and									// lda #$00 				; 14
@@ -1569,12 +1570,11 @@ begin
        rol(i+20) and										// rol :STACKORIGIN+STACKWIDTH+10	; 20
 //       asl_a(i+21) and									// asl @				; 21
        rol(i+22) and										// rol :STACKORIGIN+STACKWIDTH+10	; 22
-       add_sub(i+23) and									// add|sub				; 23
+//       add_sub(i+23) and									// add|sub A				; 23
        sta_stack(i+24) and									// sta :STACKORIGIN+10			; 24
        lda_stack(i+25) and									// lda :STACKORIGIN+STACKWIDTH+10	; 25
-       adc_sbc(i+26) and									// adc|sbc				; 26
+//       adc_sbc(i+26) and									// adc|sbc A+1				; 26
        sta_stack(i+27) then									// sta :STACKORIGIN+STACKWIDTH+10	; 27
-
       if argMatch(i+1, i+11) and
 	 argMatch(i+15, i+25) then
        begin
@@ -1583,17 +1583,101 @@ begin
 	listing[i+16] := listing[i+11];
 	listing[i+17] := listing[i+27];
 
-	listing[i+18] := #9'lda ' + GetARG(i+24);
-	listing[i+19] := listing[i+24];
-	listing[i+20] := #9'lda ' + GetARG(i+27);
-	listing[i+21] := listing[i+27];
-
+        listing[i+18] := '';
+        listing[i+19] := '';
+        listing[i+20] := '';
+        listing[i+21] := '';
         listing[i+22] := '';
         listing[i+23] := '';
         listing[i+24] := '';
         listing[i+25] := '';
         listing[i+26] := '';
         listing[i+27] := '';
+
+        exit(false);
+       end;
+
+
+    if asl_a(i+13) and										// asl @				; 13
+
+       lda_im_0(i) and										// lda #$00 				; 0
+       sta_stack(i+1) and									// sta :STACKORIGIN+STACKWIDTH+9	; 1
+       lda_val(i+2) and	(listing[i+2] = listing[i+10])	and					// lda TT				; 2	~:STACKORIGIN
+       asl_a(i+3) and										// asl @				; 3
+       rol(i+4) and										// rol :STACKORIGIN+STACKWIDTH+9	; 4
+       asl_a(i+5) and										// asl @				; 5
+       rol(i+6) and										// rol :STACKORIGIN+STACKWIDTH+9	; 6
+       sta_stack(i+7) and									// sta :STACKORIGIN+9			; 7
+
+       lda_im_0(i+8) and									// lda #$00 				; 8
+       sta_stack(i+9) and									// sta :STACKORIGIN+STACKWIDTH+10	; 9
+//       lda_val(i+10) and									// lda TT				; 10	~:STACKORIGIN
+       asl_a(i+11) and										// asl @				; 11
+       rol(i+12) and										// rol :STACKORIGIN+STACKWIDTH+10	; 12
+//       asl_a(i+13) and									// asl @				; 13
+       rol(i+14) and										// rol :STACKORIGIN+STACKWIDTH+10	; 14
+       sta_stack(i+15) then									// sta :STACKORIGIN+10			; 15
+      if argMatch(i+1, i+4) and
+	 argMatch(i+9, i+12) then
+       begin
+        listing[i+10] := listing[i+9];
+
+        listing[i+8] := listing[i+15];
+	listing[i+9] := #9'lda ' + GetARG(i+6);
+
+        listing[i+11] := '';
+        listing[i+12] := '';
+        listing[i+13] := '';
+        listing[i+14] := '';
+        listing[i+15] := '';
+
+        exit(false);
+       end;
+
+
+    if asl_a(i+17) and										// asl @				; 17
+
+       lda_im_0(i) and										// lda #$00 				; 0
+       sta_stack(i+1) and									// sta :STACKORIGIN+STACKWIDTH+9	; 1
+       lda_val(i+2) and	(listing[i+2] = listing[i+14])	and					// lda TT				; 2	~:STACKORIGIN
+       asl_a(i+3) and										// asl @				; 3
+       rol(i+4) and										// rol :STACKORIGIN+STACKWIDTH+9	; 4
+       asl_a(i+5) and										// asl @				; 5
+       rol(i+6) and										// rol :STACKORIGIN+STACKWIDTH+9	; 6
+       add_sub(i+7) and (listing[i+7] = listing[i+19]) and					// add|sub A				; 7
+       sta_stack(i+8) and									// sta :STACKORIGIN+9			; 8
+       lda_stack(i+9) and									// lda :STACKORIGIN+STACKWIDTH+9	; 9
+       adc_sbc(i+10) and (listing[i+10] = listing[i+22]) and					// adc|sbc A+1				; 10
+       sta_stack(i+11) and									// sta :STACKORIGIN+STACKWIDTH+9	; 11
+
+       lda_im_0(i+12) and									// lda #$00 				; 12
+       sta_stack(i+13) and									// sta :STACKORIGIN+STACKWIDTH+10	; 13
+//       lda_val(i+14) and									// lda TT				; 14	~:STACKORIGIN
+       asl_a(i+15) and										// asl @				; 15
+       rol(i+16) and										// rol :STACKORIGIN+STACKWIDTH+10	; 16
+//       asl_a(i+17) and									// asl @				; 17
+       rol(i+18) and										// rol :STACKORIGIN+STACKWIDTH+10	; 18
+//       add_sub(i+19) and									// add|sub A				; 19
+       sta_stack(i+20) and									// sta :STACKORIGIN+10			; 20
+       lda_stack(i+21) and									// lda :STACKORIGIN+STACKWIDTH+10	; 21
+//       adc_sbc(i+22) and									// adc|sbc A+1				; 22
+       sta_stack(i+23) then									// sta :STACKORIGIN+STACKWIDTH+10	; 23
+      if argMatch(i+1, i+9) and
+	 argMatch(i+13, i+21) then
+       begin
+	listing[i+12] := #9'lda ' + GetARG(i+8);
+	listing[i+13] := listing[i+20];
+	listing[i+14] := listing[i+9];
+	listing[i+15] := listing[i+23];
+
+        listing[i+16] := '';
+        listing[i+17] := '';
+        listing[i+18] := '';
+        listing[i+19] := '';
+        listing[i+20] := '';
+        listing[i+21] := '';
+        listing[i+22] := '';
+        listing[i+23] := '';
 
         exit(false);
        end;
