@@ -3,7 +3,7 @@
 ; https://github.com/dschmenk/VM02
 ; https://sourceforge.net/projects/vm02/
 ; http://vm02.cvs.sourceforge.net/viewvc/vm02/vm02/src/
-; changes: 2024-04-06
+; changes: 2024-04-06 ; 2026-08-02
 
 /*
 
@@ -241,9 +241,10 @@ ENTER	ROL
 	INY
 	LDA	FP2EXP
 	STA	FPEXP
-	LDA	FP1MAN3
+
+;	LDA	FP1MAN3	
 	CPY	#24		; KEEP SHIFT RANGE VALID
-	BCC	FP1SHFT
+	BCC	FP1SHFT_
 	
 	LDA	FP2MAN0
 	STA	FPMAN0
@@ -254,7 +255,10 @@ ENTER	ROL
 	LDA	FP2MAN3
 	JMP	EXIT
 
-FP1SHFT:	
+FP1SHFT_
+	LDA	FP1MAN3
+
+FP1SHFT:
 	CMP	#$80		; SHIFT FP1 DOWN
 	ROR
 	ROR	FP1MAN2
@@ -266,9 +270,9 @@ FP1SHFT:
 	JMP	@FADDMAN
 
 @	TAY
-	LDA	FP2MAN3
+;	LDA	FP2MAN3
 	CPY	#24		; KEEP SHIFT RANGE VALID
-	BCC	FP2SHFT
+	BCC	FP2SHFT_
 
 	LDA	FP1MAN0
 	STA	FPMAN0
@@ -279,6 +283,9 @@ FP1SHFT:
 	LDA	FP1MAN3
 	JMP	EXIT
 
+FP2SHFT_
+	LDA	FP2MAN3
+
 FP2SHFT:	
 	CMP	#$80		; SHIFT FP2 DOWN
 	ROR
@@ -288,7 +295,8 @@ FP2SHFT:
 	DEY
 	BNE	FP2SHFT
 	STA	FP2MAN3
-@FADDMAN:	
+
+@FADDMAN:
 	LDA	FP1MAN0
 	CLC
 	ADC	FP2MAN0
@@ -345,28 +353,6 @@ FPNORMRIGHT:
 
 	JMP	EXIT
 
-/*
-	LDA	FPEXP
-	LSR
-	ORA	FPSGN
-
-	STA	FPMAN3
-	ROR	FPMAN2
-
-	;lda FPMAN3
-	asl @
-	tay
-	lda FPMAN2
-	spl
-	iny
-	cpy #MIN_EXPONENT	; to small 6.018531E-36
-	bcc zero
-	cpy #MAX_EXPONENT
-	beq zero		; number is infinity (if the mantissa is zero) or a NaN (if the mantissa is non-zero)
-
-	rts
-*/
-
 FPNORMLEFT:
 	LDA	FPMAN2
 	BNE	FPNORMLEFT1
@@ -375,7 +361,7 @@ FPNORMLEFT:
 	LDA	FPMAN0
 	BNE	FPNORMLEFT16
 		
-zero	LDA	#$00		; RESULT IS ZERO
+ZERO:	LDA	#$00		; RESULT IS ZERO
 
 	STA	FPMAN0
 	STA	FPMAN1
@@ -433,9 +419,9 @@ EXIT:
 	spl
 	iny
 	cpy #MIN_EXPONENT	; to small 6.018531E-36
-	bcc zero
+	bcc ZERO
 	cpy #MAX_EXPONENT
-	beq zero		; number is infinity (if the mantissa is zero) or a NaN (if the mantissa is non-zero)
+	beq ZERO		; number is infinity (if the mantissa is zero) or a NaN (if the mantissa is non-zero)
 
 	ldx @rx
 
@@ -481,10 +467,17 @@ ZERO:	STA	FPMAN0
 
 	LDA	FP1MAN3
 	ROL
-	STA	FP1EXP
 	BEQ	ZERO		; MUL BY ZERO, RESULT ZERO
 
+	STA	FP1EXP
+
 	LDA	#$00
+
+	STA	FPMAN0
+	STA	FPMAN1
+	STA	FPMAN2
+	STA	FPMAN3
+
 	ROR
 	EOR	FPSGN
 	STA	FPSGN
@@ -494,16 +487,11 @@ ZERO:	STA	FPMAN0
 	SEC			; SUBTRACT BIAS
 	SBC	#$7F
 	STA	FPEXP
-
-	LDX	#$00
-	STX	FPMAN0
-	STX	FPMAN1
-	STX	FPMAN2
-	STX	FPMAN3
 	
 	LDX	#-3
 	STX	TMP
 FMULNEXTBYTE:
+	LDX	TMP
 	LDA	FP1MAN0-253,X
 	BNE	@+
 	LDX	FPMAN1		; SHORT CIRCUIT BYTE OF ZERO BITS
@@ -515,11 +503,11 @@ FMULNEXTBYTE:
 	STA	FPMAN3
 
 	INC	TMP
-	LDX	TMP
+;	LDX	TMP
 ;	CPX	#$03
 	BNE	FMULNEXTBYTE
 
-	LDA	FPMAN3
+;	LDA	FPMAN3
 	JMP	@FPNORM
 
 @	EOR	#$FF
@@ -550,7 +538,7 @@ FMULNEXTTST:
 	BNE	FMULTSTBITS
 
 	INC	TMP
-	LDX	TMP
+;	LDX	TMP
 ;	CPX	#$03
 	BNE	FMULNEXTBYTE
 
@@ -596,8 +584,9 @@ ZERO:	STA	FPMAN0
 
 	LDA	FP1MAN3
 	ROL
-	STA	FP1EXP
 	BEQ	ZERO		; DIVIDE ZERO, RESULT ZERO
+
+	STA	FP1EXP
 
 	LDA	#$00
 	STA	FP1MAN3
