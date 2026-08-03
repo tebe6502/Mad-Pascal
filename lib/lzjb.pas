@@ -4,7 +4,7 @@ unit lzjb;
  @author: Viacheslav Komenda
  @name: LZJB compression/decompression unit
 
- @version: 1.1
+ @version: 1.2
 
  @description:
  <https://en.wikipedia.org/wiki/LZJB>
@@ -60,11 +60,12 @@ LEMPEL_SIZE  = $400; { 1024 }
 
 
 FUNCTION lzjb_compress_mem(src : PCHAR; src_len : WORD; dst : PCHAR; dst_len : WORD) : WORD;
-VAR     mlen                 : BYTE;
+VAR     mlen                 : BYTE register;
 	copymask             : WORD;
         offset, copymap, cpy : WORD;
         dst_pos, src_pos     : WORD;
-        hashlo, hashhi       : WORD;
+        hashlo               : WORD register;
+	hashhi               : WORD register;
         lempel               : ARRAY [0..LEMPEL_SIZE - 1] OF WORD;
 	psrc: PByte register;
 	pdst: PByte register;
@@ -134,8 +135,11 @@ END;
 
 
 FUNCTION lzjb_decompress_mem(src : PCHAR; src_len : WORD; dst : PCHAR) : WORD;
-VAR     copymap, mlen                 : BYTE;
-        offset, cpy, src_pos, dst_pos : WORD;
+VAR     copymap                       : BYTE;
+        mlen                          : BYTE;
+        offset, cpy                   : WORD;
+	src_pos                       : WORD;
+	dst_pos                       : WORD;
         copymask                      : WORD;
 	psrc: PByte register;
 	pdst: PByte register;

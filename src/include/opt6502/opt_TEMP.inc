@@ -763,6 +763,46 @@ begin
     end;
 
 
+   if lda(0) and (TemporaryBuf[0] = TemporaryBuf[11]) and				// lda A		; 0
+      add(1) and (TemporaryBuf[1] = TemporaryBuf[12]) and				// add B		; 1
+      tay(2) and									// tay	 		; 2
+      lda(3) and (TemporaryBuf[3] = TemporaryBuf[14]) and				// lda A+1		; 3
+      adc(4) and (TemporaryBuf[4] = TemporaryBuf[15]) and				// adc B+1		; 4
+      sta_bp_1(5) and									// sta :bp+1		; 5
+      lda(6) and									// lda			; 6
+      sta_bp_y(7) and									// sta (:bp),y		; 7
+      (TemporaryBuf[8] = '') and							//			; 8
+      opti(9) and									//; optimize 		; 9
+      (TemporaryBuf[10] = '') and							//			; 10
+//      lda(11) and									// lda A		; 11
+//      add(12) and									// add B		; 12
+      sta_bp2(13) and									// sta :bp2 		; 13
+//      lda(14) and									// lda A+1		; 14
+//      adc(15) and									// adc B+1		; 15
+      sta_bp2_1(16) then								// sta :bp2+1		; 16
+    begin
+      TemporaryBuf[2] := #9'sta :bp2';
+
+      TemporaryBuf[5] := #9'sta :bp2+1';
+
+      TemporaryBuf[7] := #9'sta (:bp2),y';
+
+      TemporaryBuf[11]:= TemporaryBuf[10];
+      TemporaryBuf[10]:= TemporaryBuf[9];
+      TemporaryBuf[9] := TemporaryBuf[8];
+      TemporaryBuf[8] := TemporaryBuf[7];
+      TemporaryBuf[7] := TemporaryBuf[6];
+
+      TemporaryBuf[6] := #9'ldy #$00';
+
+      TemporaryBuf[12] := '~';
+      TemporaryBuf[13] := '~';
+      TemporaryBuf[14] := '~';
+      TemporaryBuf[15] := '~';
+      TemporaryBuf[16] := '~';
+    end;
+
+
    if sta(0) and									// sta W		; 0
       lda(1) and									// lda			; 1
       sta(2) and									// sta W+1		; 2
@@ -817,15 +857,15 @@ begin
       (TemporaryBuf[1] = '') and							//			; 1
       opti(2) and									//; optimize 		; 2
       (TemporaryBuf[3] = '') and							//			; 3
-      lda(4) and									// lda K+1		; 4
+      lda(4) and (TemporaryBuf[4] = TemporaryBuf[12]) and				// lda K+1		; 4
       SKIP(5) and									// SKIP			; 5
       (TemporaryBuf[6] = '') and							//			; 6
       opti(7) and									//; optimize 		; 7
       (TemporaryBuf[8] = '') and							// 			; 8
       lda(9) and									// lda K		; 9
       add_sub(10) and									// add|sub		; 10
-      sta(11) and									// sta			; 11
-      (TemporaryBuf[12] = TemporaryBuf[4]) then						// lda K+1		; 12
+      sta(11) then									// sta			; 11
+//      lda(12) then									// lda K+1		; 12
     begin
 	TemporaryBuf[4] := #9'ldy ' + GetARG(4);
 
