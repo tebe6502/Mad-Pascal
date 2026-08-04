@@ -280,6 +280,9 @@ ptr3 = :ECX
 	lda	ptr1+1
 	beq	imulCX_AL
 
+	lda	ptr3
+	sta	ptr3_l
+
         lda     #0
         sta     sreg+1
 
@@ -290,12 +293,15 @@ ptr3 = :ECX
 @L0:    bcc     @L1
 
         clc
-        adc     ptr3
-        pha
+        adc     ptr3_l: #$00
+
+        sta	sreg
+
         lda     ptr3+1
         adc     sreg+1
         sta     sreg+1
-        pla
+
+        lda	sreg
 
 @L1:    ror     sreg+1
         ror     @
@@ -356,7 +362,7 @@ ptr3 = :ECX
 @L0:    bcc     @L1
 
         clc
-        pha
+        sta	ptr1
 
         lda	ptr3
         adc     ptr1+1
@@ -365,7 +371,7 @@ ptr3 = :ECX
         adc     sreg
         sta     sreg
 
-        pla
+        lda	ptr1
 
 @L1:    ror     sreg
         ror     ptr1+1
