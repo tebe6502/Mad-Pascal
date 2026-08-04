@@ -2,9 +2,9 @@ UNIT lzrw1kh;
 (*
  @type: unit
  @author: Kurt Haenen
- @name: LZRW1KH compressor / decompressor 
+ @name: LZRW1KH compressor / decompressor
 
- @version: 1.0
+ @version: 1.1
 
  @description:
 *)
@@ -80,8 +80,19 @@ VAR
   HashValue      : WORD;
   TmpHash        : Int16;
 BEGIN
-  HashValue := (40543*(((byte(Source^[X] SHL 4) XOR Source^[X+1]) SHL 4) XOR
-                                     Source^[X+2]) SHR 4) AND $0FFF;
+
+//  HashValue := (40543*(((byte(Source^[X] SHL 4) XOR Source^[X+1]) SHL 4) XOR
+//                                     Source^[X+2]) SHR 4) AND $0FFF;
+
+// CHATGPT has improved the performance of the hashing function
+
+  HashValue := (WORD(Source^[X]) shl 8) xor (WORD(Source^[X+1]) shl 4) xor Source^[X+2];
+
+  HashValue := HashValue xor (HashValue shr 7);
+  HashValue := HashValue xor (HashValue shr 3);
+  HashValue := HashValue and $0FFF;
+
+
   Result := FALSE;
   TmpHash := Hash^[HashValue];
   IF (TmpHash <> -1) and (word(X - TmpHash) < 4096) THEN BEGIN
@@ -182,7 +193,7 @@ BEGIN
       Dest^[PRED(Y)] := Source^[Y];
       SaveY := Y;
     END;
-    
+
     Y := SaveY;
   END
   ELSE BEGIN
@@ -217,16 +228,16 @@ BEGIN
 
 	  src:=@Dest[Y-Pos];
 	  dst:=@Dest[Y];
-	  
+
 	  FOR K := Size downto 0 DO
 	  BEGIN
                //Dest^[Y+K] := Dest^[Y+K-Pos];
 	       dst^ := src^;
-	       
+
 	       inc(dst);
 	       inc(src);
 	  END;
-	       
+
           INC(X,2);
           INC(Y,Size+1)
         END; { pos = 0 }

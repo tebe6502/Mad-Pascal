@@ -1,6 +1,6 @@
 {
 
-87
+84
 32
 
 4085 KORONIS.MIC
@@ -30,7 +30,7 @@ begin
  write('Compress ', ln, 'b -> ');
 
  tick:=GetTickCount;
- ln := lzjb_compress_mem(p, ln, @dst, ln);
+ ln := lzjb_compress_mem(p, ln, @dst);
 
  writeln(ln,'b (',GetTickCount-tick,' ticks)');
 

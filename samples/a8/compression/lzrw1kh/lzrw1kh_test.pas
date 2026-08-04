@@ -1,9 +1,9 @@
 {
 
- 309
- 34
+ 203
+ 35
 
-4483 KORONIS.MIC
+4168 KORONIS.MIC
 
 }
 
@@ -39,7 +39,7 @@ begin
  tick:=GetTickCount;
  unpack := Decompression(@dst, pointer(dpeek(88)), pack);
 
- writeln(unpack,'b (', GetTickCount-tick,' ticks)'); 
+ writeln(unpack,'b (', GetTickCount-tick,' ticks)');
 
 
  repeat until keypressed;
