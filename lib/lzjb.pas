@@ -38,7 +38,7 @@ SOFTWARE.
 INTERFACE
 
 { return 0, if could not compress }
-FUNCTION lzjb_compress_mem(src : PCHAR; src_len : WORD; dst : PCHAR; dst_len : WORD) : WORD;
+FUNCTION lzjb_compress_mem(src : PCHAR; src_len : WORD; dst : PCHAR) : WORD;
 (*
 @description:
 *)
@@ -59,10 +59,11 @@ OFFSET_MASK  = (1 SHL (16 - MATCH_BITS)) - 1;
 LEMPEL_SIZE  = $400; { 1024 }
 
 
-FUNCTION lzjb_compress_mem(src : PCHAR; src_len : WORD; dst : PCHAR; dst_len : WORD) : WORD;
+FUNCTION lzjb_compress_mem(src : PCHAR; src_len : WORD; dst : PCHAR) : WORD;
 VAR     mlen                 : BYTE register;
 	copymask             : WORD;
         offset, copymap, cpy : WORD;
+	dst_len              : WORD;
         dst_pos, src_pos     : WORD;
         hashlo               : WORD register;
 	hashhi               : WORD register;
@@ -70,12 +71,15 @@ VAR     mlen                 : BYTE register;
 	psrc: PByte register;
 	pdst: PByte register;
 BEGIN
-        copymap := 0;
-        copymask := 1 SHL (BITS_IN_BYTE - 1);
-
         FillByte(lempel, SizeOf(lempel), 0);
         src_pos := 0;
         dst_pos := 0;
+
+        copymap := 0;
+        copymask := 1 SHL (BITS_IN_BYTE - 1);
+	
+	dst_len := src_len;
+
         WHILE src_pos < src_len DO BEGIN
                 copymask := copymask  SHL 1;
                 IF copymask  = (1 SHL BITS_IN_BYTE) THEN BEGIN
@@ -146,7 +150,9 @@ VAR     copymap                       : BYTE;
 BEGIN
         src_pos := 0;
         dst_pos := 0;
+
         copymask := 1 SHL (BITS_IN_BYTE - 1);
+
         WHILE src_pos < src_len DO BEGIN
                 copymask := copymask SHL 1;
                 IF copymask = (1 SHL BITS_IN_BYTE) THEN BEGIN
