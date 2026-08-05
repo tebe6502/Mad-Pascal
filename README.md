@@ -195,6 +195,7 @@ This text-mode windowing library has window controls and modern gadgets (widgets
 * [Nurek z wielkim...](https://github.com/mgr-inz-rafal/nurek_madp)
 * [diagnostyka_serca](https://github.com/mgr-inz-rafal/diagnostyka_serca)
 * [Tetris-VBXE](https://github.com/tebe6502/Tetris-VBXE)
+* [Dither-Lab](https://gitlab.com/amarok8bit/dither-lab)
 
 ## Compression / Decompression
 * [LZJB](https://en.wikipedia.org/wiki/LZJB) -> [unit](https://github.com/tebe6502/Mad-Pascal/blob/master/lib/lzjb.pas), [sample](https://github.com/tebe6502/Mad-Pascal/tree/master/samples/a8/compression/lzjb)
