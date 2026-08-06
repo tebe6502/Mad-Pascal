@@ -4,16 +4,9 @@
 
 > _New trading game in space for the ATARI XL/XE computer._
 
-<table>
-<tr>
-<td width="340">
-
 <a href="images/01.png">
 <img src="images/01.png" width="320" height="240" alt="StarVagrant">
 </a>
-
-</td>
-<td valign="top">
 
 **Repository**  
 https://github.com/MADRAFi/StarVagrant
@@ -24,11 +17,7 @@ Atari 8-bit
 **Author**  
 Rafał Czemko
 
-</td>
-</tr>
-</table>
-
----
+<br clear="left"/>
 
 ## 2. Mad Kingdom (Vox Regis)
 
@@ -40,12 +29,13 @@ Rafał Czemko
 
 [https://gitlab.com/bocianu/MadKingdom](https://gitlab.com/bocianu/MadKingdom)
 
-**Platform:** Atari 8-bit  
-**Author:** Wojciech Bociański
+**Platform:**
+Atari 8-bit  
+
+**Author:**
+Wojciech Bociański
 
 <br clear="left"/>
-
----
 
 ## 3. ZILCH
 
