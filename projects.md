@@ -1,13 +1,32 @@
 # Projects in Mad-Pascal
 
 ## 1. StarVagrant
+
 > _New trading game in space for the ATARI XL/XE computer._
 
-[![StarVagrant — screenshot](images/01.png)](images/01.png)
+<table>
+<tr>
+<td width="340">
 
-[https://github.com/MADRAFi/StarVagrant](https://github.com/MADRAFi/StarVagrant)
+<a href="images/01.png">
+<img src="images/01.png" width="320" height="240" alt="StarVagrant">
+</a>
 
-platform: Atari 8-bit<br>author: Rafał Czemko
+</td>
+<td valign="top">
+
+**Repository**  
+https://github.com/MADRAFi/StarVagrant
+
+**Platform**  
+Atari 8-bit
+
+**Author**  
+Rafał Czemko
+
+</td>
+</tr>
+</table>
 
 ---
 
