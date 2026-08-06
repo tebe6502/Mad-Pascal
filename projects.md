@@ -31,10 +31,10 @@ Rafał Czemko
 
 [https://gitlab.com/bocianu/MadKingdom](https://gitlab.com/bocianu/MadKingdom)
 
-**Platform:**
+**Platform**  
 Atari 8-bit  
 
-**Author:**
+**Author**  
 Wojciech Bociański
 
 <br clear="left"/>
