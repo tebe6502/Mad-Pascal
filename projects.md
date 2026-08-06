@@ -19,6 +19,8 @@ Rafał Czemko
 
 <br clear="left"/>
 
+---
+
 ## 2. Mad Kingdom (Vox Regis)
 
 > _Zarządzaj dumnie swym królestwem! Dokonuj tylko mądrych wyborów._
@@ -36,6 +38,8 @@ Atari 8-bit
 Wojciech Bociański
 
 <br clear="left"/>
+
+---
 
 ## 3. ZILCH
 
