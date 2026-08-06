@@ -34,7 +34,9 @@ Rafał Czemko
 
 > _Zarządzaj dumnie swym królestwem! Dokonuj tylko mądrych wyborów._
 
-[![MadKingdom — screenshot](images/02.png)](images/02.png)
+<a href="images/02.png">
+  <img align="left" src="images/02.png" width="320" height="240" alt="MadKingdom">
+</a>
 
 [https://gitlab.com/bocianu/MadKingdom](https://gitlab.com/bocianu/MadKingdom)
 
