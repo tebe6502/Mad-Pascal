@@ -5,7 +5,7 @@
 > _New trading game in space for the ATARI XL/XE computer._
 
 <a href="images/01.png">
-<img src="images/01.png" width="320" height="240" alt="StarVagrant">
+  <img align="left" src="images/01.png" width="320" height="240" alt="StarVagrant">
 </a>
 
 **Repository**  
