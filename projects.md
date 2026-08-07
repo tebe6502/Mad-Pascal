@@ -263,7 +263,7 @@ Wojciech Bociański
 
 **Platform**  
 Atari 8-bit  
-FujiNet  
+[FujiNet](https://fujinet.online/)  
 
 **Author**  
 Wojciech Bociański<br clear="left"/>
@@ -279,7 +279,7 @@ It is similar to IRC clients, but much simplier._
 
 **Platform**  
 Atari 8-bit  
-FujiNet  
+[FujiNet](https://fujinet.online/)  
 
 **Author**  
 Wojciech Bociański<br clear="left"/>
@@ -314,7 +314,7 @@ Wojciech Bociański
 
 **Platform**  
 Atari 8-bit  
-FujiNet  
+[FujiNet](https://fujinet.online/)    
 
 **Author**  
 Wojciech Bociański<br clear="left"/>
