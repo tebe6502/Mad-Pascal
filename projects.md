@@ -821,7 +821,7 @@ Wojciech Bociański<br clear="left"/>
 [https://github.com/tebe6502/robotsrumble](https://github.com/tebe6502/robotsrumble)
 
 **Platform**  
-Atari 8-bit
+Atari 8-bit  
 [VBXE](https://lotharek.pl/productdetail.php?id=53)
 
 **Author**  
@@ -1074,7 +1074,7 @@ Rafał Chabowski
 [https://github.com/tebe6502/Tetris-VBXE](https://github.com/tebe6502/Tetris-VBXE)
 
 **Platform**  
-Atari 8-bit
+Atari 8-bit  
 [VBXE](https://lotharek.pl/productdetail.php?id=53)
 
 **Author**  
