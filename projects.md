@@ -133,10 +133,6 @@ Wojciech Bociański
 
 ## 8. neo-PacMad
 
-<a href="images/08.png">
-  <img align="left" src="images/08.png" width="320" height="240" alt="PacMad neo6502">
-</a>
-
 [https://gitlab.com/bocianu/neo-pacmad](https://gitlab.com/bocianu/neo-pacmad)
 
 **Platform**  
@@ -152,7 +148,7 @@ Wojciech Bociański
 ## 9. k12trailer
 
 <a href="images/09.png">
-  <img align="left" src="images/09.png" width="320" height="240" alt="PacMad neo6502">
+  <img align="left" src="images/09.png" width="320" height="240" alt="k12trailer">
 </a>
 
 [https://gitlab.com/bocianu/k12trailer](https://gitlab.com/bocianu/k12trailer)
@@ -169,11 +165,15 @@ Wojciech Bociański
 
 ## 10. gr10
 
-<a href="images/10.png">
-  <img align="left" src="images/10.png" width="320" height="240" alt="gr10">
-</a>
+> _Graphics 10 mode ++ (GTIA) library_
 
 [https://gitlab.com/bocianu/gr10](https://gitlab.com/bocianu/gr10)
+
+**Platform**  
+Atari 8-bit
+
+**Author**  
+Wojciech Bociański
 
 <br clear="left"/>
 
@@ -221,19 +221,13 @@ Rafał Czemko
 
 ## 13. Old Mansion C64
 
-<a href="images/13.png">
-  <img align="left" src="images/13.png" width="320" height="240" alt="Old Mansion C64">
-</a>
-
 [https://gitlab.com/t-m/old_mansion_c64](https://gitlab.com/t-m/old_mansion_c64)
 
 **Platform**  
 C64
 
 **Author**  
-Tomasz Wolak
-
-<br clear="left"/>
+Tomasz Wolak<br clear="left"/>
 
 ---
 
@@ -255,7 +249,7 @@ Wojciech Bociański
 
 ---
 
-## 15. jcq
+## 15. Jaskinia City Quest
 
 <a href="images/15.png">
   <img align="left" src="images/15.png" width="320" height="240" alt="jcq">
@@ -273,39 +267,32 @@ Wojciech Bociański
 
 ---
 
-## 16. Fujinet udp shoutbox
-
-<a href="images/16.png">
-  <img align="left" src="images/16.png" width="320" height="240" alt="Fujinet udp shoutbox">
-</a>
+## 16. Fujinet UDP shoutbox
 
 [https://gitlab.com/bocianu/fujinet-udp-shoutbox](https://gitlab.com/bocianu/fujinet-udp-shoutbox)
 
 **Platform**  
-Atari 8-bit
+Atari 8-bit  
+FujiNet  
 
 **Author**  
-Wojciech Bociański
-
-<br clear="left"/>
+Wojciech Bociański<br clear="left"/>
 
 ---
 
 ## 17. Fujitalk-client
 
-<a href="images/17.png">
-  <img align="left" src="images/17.png" width="320" height="240" alt="Fujitalk-client">
-</a>
+> _FujiTalk is a chat client for 8-bit atari computers equipped with FujiNet interface.
+It is similar to IRC clients, but much simplier._
 
 [https://gitlab.com/bocianu/fujitalk-client](https://gitlab.com/bocianu/fujitalk-client)
 
 **Platform**  
-Atari 8-bit
+Atari 8-bit  
+FujiNet  
 
 **Author**  
-Wojciech Bociański
-
-<br clear="left"/>
+Wojciech Bociański<br clear="left"/>
 
 ---
 
@@ -329,16 +316,15 @@ Wojciech Bociański
 
 ---
 
-## 19. chessnet
+## 19. chessNet
 
-<a href="images/19.png">
-  <img align="left" src="images/19.png" width="320" height="240" alt="chessnet">
-</a>
+> _Klient serwera FICS pozwalający na grę w szachy przez internet._
 
 [https://gitlab.com/bocianu/chessnet](https://gitlab.com/bocianu/chessnet)
 
 **Platform**  
-Atari 8-bit
+Atari 8-bit  
+FujiNet  
 
 **Author**  
 Wojciech Bociański
@@ -389,14 +375,13 @@ Amarok
 
 ## 22. weather
 
-<a href="images/22.png">
-  <img align="left" src="images/22.png" width="320" height="240" alt="weather">
-</a>
+> _Connects to OpenWeatherMap to get current conditions and an 8-day forecast._
 
 [https://gitlab.com/bocianu/weather](https://gitlab.com/bocianu/weather)
 
 **Platform**  
-Atari 8-bit
+Atari 8-bit  
+FujiNet  
 
 **Author**  
 Wojciech Bociański
@@ -407,9 +392,7 @@ Wojciech Bociański
 
 ## 23. cart builder
 
-<a href="images/23.png">
-  <img align="left" src="images/23.png" width="320" height="240" alt="cart builder">
-</a>
+> _Simple toolchain for building Atari MaxFlash cartridge images._
 
 [https://gitlab.com/bocianu/cart_builder](https://gitlab.com/bocianu/cart_builder)
 
@@ -428,7 +411,7 @@ Wojciech Bociański
 > _Port of the game KRET from PC to Atari 8-bit. Arcade and logic game._
 
 <a href="images/24.png">
-  <img align="left" src="images/24.png" width="320" height="240" alt="weather">
+  <img align="left" src="images/24.png" width="320" height="240" alt="Mole">
 </a>
 
 [https://github.com/GSoftwareDevelopment/Mole](https://github.com/GSoftwareDevelopment/Mole)
