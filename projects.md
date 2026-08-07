@@ -16,7 +16,6 @@ Atari 8-bit
 
 **Author**  
 Rafał Czemko
-
 <br clear="left"/>
 
 ---
@@ -36,7 +35,6 @@ Atari 8-bit
 
 **Author**  
 Wojciech Bociański
-
 <br clear="left"/>
 
 ---
@@ -54,7 +52,6 @@ Atari 8-bit
 
 **Author**  
 Wojciech Bociański
-
 <br clear="left"/>
 
 ---
@@ -72,7 +69,6 @@ Atari 8-bit
 
 **Author**  
 Wojciech Bociański
-
 <br clear="left"/>
 
 ---
@@ -90,7 +86,6 @@ Atari 8-bit
 
 **Author**  
 Wojciech Bociański
-
 <br clear="left"/>
 
 ---
@@ -108,7 +103,6 @@ Atari 8-bit
 
 **Author**  
 Michael Jaskula
-
 <br clear="left"/>
 
 ---
@@ -126,7 +120,6 @@ Atari 8-bit
 
 **Author**  
 Wojciech Bociański
-
 <br clear="left"/>
 
 ---
@@ -140,12 +133,11 @@ neo6502
 
 **Author**  
 Wojciech Bociański
-
 <br clear="left"/>
 
 ---
 
-## 9. k12trailer
+## 9. K12: The Golden Ticket - teaser
 
 <a href="images/09.png">
   <img align="left" src="images/09.png" width="320" height="240" alt="k12trailer">
@@ -154,12 +146,11 @@ Wojciech Bociański
 [https://gitlab.com/bocianu/k12trailer](https://gitlab.com/bocianu/k12trailer)
 
 **Platform**  
-Atari 8-bit
+Atari 8-bit  
+Compy Shop 256K
 
 **Author**  
-Wojciech Bociański
-
-<br clear="left"/>
+Wojciech Bociański<br clear="left"/>
 
 ---
 
@@ -174,7 +165,6 @@ Atari 8-bit
 
 **Author**  
 Wojciech Bociański
-
 <br clear="left"/>
 
 ---
@@ -327,9 +317,7 @@ Atari 8-bit
 FujiNet  
 
 **Author**  
-Wojciech Bociański
-
-<br clear="left"/>
+Wojciech Bociański<br clear="left"/>
 
 ---
 
@@ -347,7 +335,7 @@ Wojciech Bociański
 Atari 8-bit
 
 **Author**  
-Amarok
+Krzysztof Piotrowski
 
 <br clear="left"/>
 
@@ -367,7 +355,7 @@ Amarok
 Atari 8-bit
 
 **Author**  
-Amarok
+Krzysztof Piotrowski
 
 <br clear="left"/>
 
@@ -384,9 +372,7 @@ Atari 8-bit
 FujiNet  
 
 **Author**  
-Wojciech Bociański
-
-<br clear="left"/>
+Wojciech Bociański<br clear="left"/>
 
 ---
 
@@ -400,9 +386,7 @@ Wojciech Bociański
 Atari 8-bit
 
 **Author**  
-Wojciech Bociański
-
-<br clear="left"/>
+Wojciech Bociański<br clear="left"/>
 
 ---
 
@@ -420,7 +404,7 @@ Wojciech Bociański
 Atari 8-bit
 
 **Author**  
-PeBe
+Paweł Banaś
 
 <br clear="left"/>
 
@@ -440,7 +424,7 @@ PeBe
 Atari 8-bit
 
 **Author**  
-PeBe
+Paweł Banaś
 
 <br clear="left"/>
 
@@ -456,9 +440,7 @@ PeBe
 Atari 8-bit
 
 **Author**  
-PeBe
-
-<br clear="left"/>
+Paweł Banaś<br clear="left"/>
 
 ---
 
@@ -470,9 +452,7 @@ PeBe
 Atari 8-bit
 
 **Author**  
-PeBe
-
-<br clear="left"/>
+Paweł Banaś<br clear="left"/>
 
 ---
 
@@ -486,15 +466,17 @@ PeBe
 Atari 8-bit
 
 **Author**  
-PeBe
-
-<br clear="left"/>
+Paweł Banaś<br clear="left"/>
 
 ---
 
-## 29. heatmap
+## 29. Heatmap
 
-[![heatmap — screenshot](images/29.png)](images/29.png)
+> _I was inspired by Thom's posts on one of the retrocomputing groups on the engineering use of computers, where he showed how data analysis could be solved using a heatmap._
+
+<a href="images/29.png">
+  <img align="left" src="images/29.png" width="320" height="240" alt="SFX-Tracker">
+</a>
 
 [https://gitlab.com/delysio/heatmap](https://gitlab.com/delysio/heatmap)
 
@@ -510,9 +492,17 @@ Daniel Koźmiński
 
 ## 30. sinus scroll 2x2
 
-[![sinus scroll 2x2 — screenshot](images/30.png)](images/30.png)
+<a href="images/30.png">
+  <img align="left" src="images/30.png" width="320" height="240" alt="sinus scroll 2x2">
+</a>
 
 [https://gitlab.com/delysio/mad-pascal/-/tree/master/demoEffects/2x2%20sinus%20scroll](https://gitlab.com/delysio/mad-pascal/-/tree/master/demoEffects/2x2%20sinus%20scroll)
+
+**Platform**  
+Atari 8-bit
+
+**Author**  
+Daniel Koźmiński
 
 <br clear="left"/>
 
@@ -544,13 +534,17 @@ Wojciech Bociański
 
 [https://atariage.com/forums/topic/319655-ultima-v-world-explorer-in-antic-mode-e/page/2/?tab=comments#comment-4903483](https://atariage.com/forums/topic/319655-ultima-v-world-explorer-in-antic-mode-e/page/2/?tab=comments#comment-4903483)
 
+**Platform**  
+Atari 8-bit
+
+**Author**  
+Atland Roland
+
 <br clear="left"/>
 
 ---
 
 ## 33. mad-pascal-playground
-
-[![mad-pascal-playground — screenshot](images/33.png)](images/33.png)
 
 [https://github.com/zbyti/mad-pascal-playground](https://github.com/zbyti/mad-pascal-playground)
 
@@ -558,15 +552,11 @@ Wojciech Bociański
 Atari 8-bit
 
 **Author**  
-Bartosz Zbytniewski
-
-<br clear="left"/>
+Bartosz Zbytniewski<br clear="left"/>
 
 ---
 
 ## 34. simple-games-easy-for-develop
-
-[![simple-games-easy-for-develop — screenshot](images/34.png)](images/34.png)
 
 [https://github.com/zbyti/simple-games-easy-for-develop](https://github.com/zbyti/simple-games-easy-for-develop)
 
@@ -574,9 +564,7 @@ Bartosz Zbytniewski
 Atari 8-bit
 
 **Author**  
-Bartosz Zbytniewski
-
-<br clear="left"/>
+Bartosz Zbytniewski<br clear="left"/>
 
 ---
 
@@ -594,9 +582,7 @@ Commodore Plus/4
 **Author**  
 Bartosz Zbytniewski  
 Csabo  
-Carrion  
-
-<br clear="left"/>
+Carrion<br clear="left"/>
 
 ---
 
@@ -650,7 +636,7 @@ Wojciech Bociański
 Atari 8-bit
 
 **Author**  
-Amarok
+Krzysztof Piotrowski
 
 <br clear="left"/>
 
@@ -668,7 +654,7 @@ Amarok
 Atari 8-bit
 
 **Author**  
-Amarok
+Krzysztof Piotrowski
 
 <br clear="left"/>
 
@@ -682,9 +668,7 @@ Amarok
 Atari 8-bit
 
 **Author**  
-Wojciech Bociański
-
-<br clear="left"/>
+Wojciech Bociański<br clear="left"/>
 
 ---
 
@@ -772,9 +756,7 @@ Daniel Koźmiński
 neo6502
 
 **Author**  
-Wojciech Bociański
-
-<br clear="left"/>
+Wojciech Bociański<br clear="left"/>
 
 ---
 
@@ -808,7 +790,7 @@ Bartosz Zbytniewski
 Atari 8-bit
 
 **Author**  
-Amarok
+Krzysztof Piotrowski
 
 <br clear="left"/>
 
@@ -826,9 +808,7 @@ Amarok
 Atari 8-bit
 
 **Author**  
-Wojciech Bociański
-
-<br clear="left"/>
+Wojciech Bociański<br clear="left"/>
 
 ---
 
@@ -860,9 +840,7 @@ Tomasz Biela
 neo6502
 
 **Author**  
-Wojciech Bociański
-
-<br clear="left"/>
+Wojciech Bociański<br clear="left"/>
 
 ---
 
@@ -874,9 +852,7 @@ Wojciech Bociański
 neo6502
 
 **Author**  
-Wojciech Bociański
-
-<br clear="left"/>
+Wojciech Bociański<br clear="left"/>
 
 ---
 
@@ -888,9 +864,7 @@ Wojciech Bociański
 neo6502
 
 **Author**  
-Wojciech Bociański
-
-<br clear="left"/>
+Wojciech Bociański<br clear="left"/>
 
 ---
 
@@ -902,9 +876,7 @@ Wojciech Bociański
 neo6502
 
 **Author**  
-Wojciech Bociański
-
-<br clear="left"/>
+Wojciech Bociański<br clear="left"/>
 
 ---
 
@@ -918,9 +890,7 @@ Wojciech Bociański
 neo6502
 
 **Author**  
-Wojciech Bociański
-
-<br clear="left"/>
+Wojciech Bociański<br clear="left"/>
 
 ---
 
@@ -934,9 +904,7 @@ Wojciech Bociański
 neo6502
 
 **Author**  
-Wojciech Bociański
-
-<br clear="left"/>
+Wojciech Bociański<br clear="left"/>
 
 ---
 
@@ -966,9 +934,7 @@ drunkeneye
 Atari 8-bit
 
 **Author**  
-Rafał Czemko
-
-<br clear="left"/>
+Rafał Czemko<br clear="left"/>
 
 ---
 
@@ -1130,7 +1096,7 @@ Tomasz Biela
 Atari 8-bit
 
 **Author**  
-Amarok
+Krzysztof Piotrowski
 
 <br clear="left"/>
 
