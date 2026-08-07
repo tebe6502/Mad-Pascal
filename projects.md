@@ -369,7 +369,7 @@ Krzysztof Piotrowski
 
 **Platform**  
 Atari 8-bit  
-FujiNet  
+[FujiNet](https://fujinet.online/)  
 
 **Author**  
 Wojciech Bociański<br clear="left"/>
