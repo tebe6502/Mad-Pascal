@@ -812,7 +812,7 @@ Wojciech Bociański<br clear="left"/>
 
 ---
 
-## 49. Robots Rumble-VBXE
+## 49. Robots Rumble
 
 <a href="images/49.png">
   <img align="left" src="images/49.png" width="320" height="240" alt="Robots Rumble">
@@ -822,6 +822,7 @@ Wojciech Bociański<br clear="left"/>
 
 **Platform**  
 Atari 8-bit
+[VBXE](https://lotharek.pl/productdetail.php?id=53)
 
 **Author**  
 Tomasz Biela
@@ -1064,7 +1065,7 @@ Rafał Chabowski
 
 ---
 
-## 65. Tetris-VBXE
+## 65. Tetris
 
 <a href="images/65.png">
   <img align="left" src="images/65.png" width="320" height="240" alt="Tetris-VBXE">
@@ -1074,6 +1075,7 @@ Rafał Chabowski
 
 **Platform**  
 Atari 8-bit
+[VBXE](https://lotharek.pl/productdetail.php?id=53)
 
 **Author**  
 Tomasz Biela
