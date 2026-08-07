@@ -99,6 +99,7 @@ Contributors:
 
 + Rafal Czemko :
   - system X16 (-t x16)
+  - PokeyMAX
 
 + Samuel Vin :
   - RMTPLAYV (base/atari/players/rmt_playerv_reloc.asm)
