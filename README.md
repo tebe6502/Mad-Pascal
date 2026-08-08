@@ -82,6 +82,8 @@ BAT
     mp.exe -t raw filename.pas -ipath:<MadPascalPath>\lib
     mads.exe filename.a65 -x -i:<MadPascalPath>\base
 
+---
+
 ## [Tools](tools.md)
 
 ## [Projects in Mad-Pascal](projects.md)
@@ -91,6 +93,8 @@ BAT
 This text-mode windowing library has window controls and modern gadgets (widgets). The gadgets allow you to build input forms that use buttons, radio buttons, input strings (with scrolled lengths and type restrictions), check boxes, progress bars, etc. This allows you to build applications with "modern" interfaces.
 
 ## [Mad-Pascal libraries](https://mads.atari8.info/library/doc/index.html)
+
+---
 
 ## Compression / Decompression
 * [LZJB](https://en.wikipedia.org/wiki/LZJB) -> [unit](https://github.com/tebe6502/Mad-Pascal/blob/master/lib/lzjb.pas), [sample](https://github.com/tebe6502/Mad-Pascal/tree/master/samples/a8/compression/lzjb)
@@ -111,6 +115,7 @@ This text-mode windowing library has window controls and modern gadgets (widgets
 * [ZX2](https://github.com/dmsc/zx02) -> [unit](https://github.com/tebe6502/Mad-Pascal/blob/master/lib/zx2.pas), [sample](https://github.com/tebe6502/Mad-Pascal/tree/master/samples/a8/compression/zx2)
 * [ZX5](https://github.com/einar-saukas/ZX5) -> [unit](https://github.com/tebe6502/Mad-Pascal/blob/master/lib/zx5.pas), [sample](https://github.com/tebe6502/Mad-Pascal/tree/master/samples/a8/compression/zx5)
 
+---
 
 ## Benchmarks
 
