@@ -122,7 +122,7 @@ begin
 
 	TemporaryBuf[12] := #9'clc';
 	TemporaryBuf[13] := '@';
-
+	TemporaryBuf[14] := '~';
 	TemporaryBuf[15] := #9'adc ' + GetARG(15);
     end;
 
@@ -138,12 +138,51 @@ begin
 
 	TemporaryBuf[12] := #9'sec';
 	TemporaryBuf[13] := '@';
-
+	TemporaryBuf[14] := '~';
 	TemporaryBuf[15] := #9'sbc ' + GetARG(15);
     end;
 
 
 // -----------------------------------------------------------------------------
+
+
+   if lda(0) and									// lda			; 0
+      sta(1) and									// sta I+1		; 1
+      (TemporaryBuf[2] = '') and							//			; 2
+      opti(3) and									//; optimize 		; 3
+      (TemporaryBuf[4] = '') and							//			; 4
+      inc_(5) and									// inc I		; 5
+      sne(6) and									// sne			; 6
+      inc_(7) then									// inc I+1		; 7
+    if argMatch(1, 7) then
+    begin
+    	TemporaryBuf[0] := #9'ldy ' + GetARG(0);
+
+	TemporaryBuf[7] := #9'sty ' + GetARG(7);
+    
+	TemporaryBuf[1] := TemporaryBuf[2];
+	TemporaryBuf[2] := TemporaryBuf[3];
+	TemporaryBuf[3] := TemporaryBuf[4];
+	TemporaryBuf[4] := TemporaryBuf[5];
+	TemporaryBuf[5] := TemporaryBuf[6];
+	TemporaryBuf[6] := #9'iny';
+    end;
+
+
+   if ldy(0) and									// ldy I		; 0
+      lda(1) and									// lda			; 1
+      add_sub(2) and									// add|sub		; 2
+      sta_bp_1(3) and									// sta :bp+1		; 3
+      lda(4) and									// lda			; 4
+      sta_bp_y(5) and									// sta (:bp),y		; 5
+      (TemporaryBuf[6] = '') and							//			; 6
+      opti(7) and									//; optimize 		; 7
+      (TemporaryBuf[8] = '') and							//			; 8
+      lda(9) then									// lda I		; 9
+    if argMatch(0, 9) then
+    begin
+	TemporaryBuf[9] := #9'tya';
+    end;
 
 
    if ldy(0) and									// ldy I		; 0
