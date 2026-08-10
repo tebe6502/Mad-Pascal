@@ -351,9 +351,11 @@ begin
        end;
 
 
-    if sta_stack(i) and 								// sta :STACKORIGIN+10			; 0
-       lda_a(i+1) and 									// lda 					; 1
-       eor_stack(i+2) then								// eor :STACKORIGIN+10			; 2
+    if eor_stack(i+2) and								// eor :STACKORIGIN+10			; 2
+
+       sta_stack(i) and 								// sta :STACKORIGIN+10			; 0
+       lda_a(i+1) then 									// lda 					; 1
+//       eor_stack(i+2) then								// eor :STACKORIGIN+10			; 2
      if argMatch(i, i+2) then
        begin
 	listing[i] := '';
@@ -364,9 +366,28 @@ begin
        end;
 
 
-    if (iny(i) = false) and								// iny					; 0
+    if eor_stack(i+3) and								// eor :STACKORIGIN+10			; 3
+
+       sta_stack(i) and 								// sta :STACKORIGIN+10			; 0
+       ldy(i+1) and									// ldy					; 1
+       lda_a(i+2) then 									// lda 					; 2
+//       eor_stack(i+3) then								// eor :STACKORIGIN+10			; 3
+     if argMatch(i, i+3) then
+       begin
+	listing[i] := '';
+
+	listing[i+2] := #9'eor ' + GetARG(i+2);
+	listing[i+3] := '';
+
+	exit(false);
+       end;
+
+
+    if eor_im_0(i+2) and								// eor #$00				; 2
+
+       (iny(i) = false) and								// iny					; 0
        lda_a(i+1) and									// lda 					; 1
-       eor_im_0(i+2) and								// eor #$00				; 2
+//       eor_im_0(i+2) and								// eor #$00				; 2
        sta_a(i+3) then									// sta					; 3
      begin
 	listing[i+2] := '';
@@ -374,9 +395,11 @@ begin
      end;
 
 
-    if (iny(i) = false) and								// iny					; 0
+    if eor(i+2) and									// eor					; 2
+
+       (iny(i) = false) and								// iny					; 0
        lda_im_0(i+1) and								// lda #$00				; 1
-       eor(i+2) and									// eor					; 2
+//       eor(i+2) and									// eor					; 2
        sta_a(i+3) then									// sta					; 3
      begin
 	listing[i+1] := #9'lda ' + GetARG(i+2);
@@ -385,8 +408,10 @@ begin
      end;
 
 
-    if lda_im(i) and									// lda #				; 0
-       eor_im(i+1) and									// eor #				; 1
+    if eor_im(i+1) and									// eor #				; 1
+
+       lda_im(i) and									// lda #				; 0
+//       eor_im(i+1) and								// eor #				; 1
        sta_a(i+2) then									// sta					; 2
      begin
 	p := GetBYTE(i) xor GetBYTE(i+1);
