@@ -1,10 +1,10 @@
-// intel i3	~8.60 sec
-// intel i5	~3.90 sec
+// intel i3	~8.50 sec
+// intel i5	~3.20 sec
 
 
-// v128		804 ticks
-// v192		917 ticks
-// v256		1034 ticks
+// v128		1059 ticks
+// v192		1220 ticks
+// v256		1412 ticks
 
 (**
  * Rijndael-Test.pas
@@ -35,7 +35,7 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *)
-program RijndaelTest; 
+program RijndaelTest;
 
     USES crt,sysutils,rijndael;
 
@@ -49,6 +49,7 @@ program RijndaelTest;
     CONST
 
 {$ifdef v128}
+
         testVectors128: TestVectors = (
           ( $66, $e9, $4b, $d4, $ef, $8a, $2c, $3b, $88, $4c, $fa, $59, $ca, $34, $2b, $2e ),
           ( $e1, $4d, $5d, $0e, $e2, $77, $15, $df, $08, $b4, $15, $2b, $a2, $3d, $a8, $e0 ),
@@ -925,4 +926,4 @@ BEGIN
 
 END { program RijndaelTest }.
 
-// 33593
+// 36467
