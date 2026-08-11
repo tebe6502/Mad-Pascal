@@ -22,12 +22,12 @@ begin
       exit(false);
      end;
 
-
+{
     if lda_bp2_y(i+3) and									// lda (:bp2),y				; 3
 
        lda_im(i) and										// lda #				; 0
        sta_stack(i+1) and									// sta :STACKORIGIN			; 1
-       ldy_im(i+2) and										// ldy #				; 2
+       (iny(i+2) or ldy_im(i+2)) and								// iny|ldy #				; 2
 //       lda_bp2_y(i+3) and									// lda (:bp2),y				; 3
        sta_stack(i+4) and									// sta :STACKORIGIN+STACKWIDTH		; 4
        lda_a(i+5) and										// lda					; 5
@@ -48,7 +48,7 @@ begin
 
 //      exit(false);
      end;
-
+}
 
     if add_im_1(i+4) and									// add #$01				; 4
 
@@ -1485,24 +1485,25 @@ begin
        end;
 
 
-    if LDA_BP2_Y(i+11) and									// lda (:bp2),y				; 11
+    if LDA_BP2_Y(i+12) and									// lda (:bp2),y				; 12
 
        lda_val(i) and										// lda					; 0	~STACKORIGIN
        sta_stack(i+1) and									// sta :STACKORIGIN+STACKWIDTH		; 1
-       LDA_BP2_Y(i+2) and									// lda (:bp2),y				; 2
-       sta_stack(i+3) and									// sta :STACKORIGIN+STACKWIDTH*2	; 3
-       lda_val(i+4) and										// lda OFFSET				; 4	~STACKORIGIN
-       add_sub_val(i+5) and									// add|sub				; 5	~STACKORIGIN
-       sta_bp2(i+6) and										// sta :bp2				; 6
-       lda_a(i+7) and										// lda OFFSET+1				; 7
-       adc_sbc(i+8) and										// adc|sbc				; 8
-       sta_bp2_1(i+9) and									// sta :bp2+1				; 9
-       ldy_val(i+10) and									// ldy					; 10	~STACKORIGIN
-//       LDA_BP2_Y(i+11) and									// lda (:bp2),y				; 11
-       (add_sub_stack(i+12) or and_ora_eor_stack(i+12)) then					// add|sub| :STACKORIGIN+STACKWIDTH	; 12
-     if argMatch(i+1, i+12) then
+       (iny(i+2) or ldy(i+2)) and								// iny|ldy				; 2
+       LDA_BP2_Y(i+3) and									// lda (:bp2),y				; 3
+       sta_stack(i+4) and									// sta :STACKORIGIN+STACKWIDTH*2	; 4
+       lda_val(i+5) and										// lda OFFSET				; 5	~STACKORIGIN
+       add_sub_val(i+6) and									// add|sub				; 6	~STACKORIGIN
+       sta_bp2(i+7) and										// sta :bp2				; 7
+       lda_a(i+8) and										// lda OFFSET+1				; 8
+       adc_sbc(i+9) and										// adc|sbc				; 9
+       sta_bp2_1(i+10) and									// sta :bp2+1				; 10
+       ldy_val(i+11) and									// ldy					; 11	~STACKORIGIN
+//       LDA_BP2_Y(i+12) and									// lda (:bp2),y				; 12
+       (add_sub_stack(i+13) or and_ora_eor_stack(i+13)) then					// add|sub| :STACKORIGIN+STACKWIDTH	; 13
+     if argMatch(i+1, i+13) then
        begin
-	listing[i+12] := GetCMD(i+12) + GetARG(i);
+	listing[i+13] := GetCMD(i+13) + GetARG(i);
 
         listing[i]   := '';
         listing[i+1] := '';
