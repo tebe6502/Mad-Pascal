@@ -12,11 +12,15 @@ begin
 
     if lda_im(i) and										// lda #				; 0
        sta_stack(i+1) and									// sta :STACKORIGIN			; 1
-       iny(i+2) then										// iny					; 2
+       (iny(i+2) or ldy_im(i+2)) then								// iny|ldy#				; 2
       begin
-	listing[i+2] := listing[i+1];
-	listing[i+1] := listing[i];
-	listing[i]   := #9'iny';
+        listing_tmp[0] := listing[i+2];
+        listing_tmp[1] := listing[i];
+        listing_tmp[2] := listing[i+1];
+
+	listing[i]   := listing_tmp[0];
+	listing[i+1] := listing_tmp[1];
+	listing[i+2] := listing_tmp[2];
 //	exit(false);
       end;
 
