@@ -63,7 +63,7 @@ begin
 
 
     if sta_stack(i) and										// sta :STACKORIGIN+10			; 0
-       (sta_a(i+1) or sty(i+1) or ldy(i+1) or iny(i+1) or dey(i+1)) and (ldy_1(i+1) = false) and// sty|iny|dey|ldy			; 1
+       (sta_a(i+1) or sty(i+1) or ldy(i+1) or iny(i+1) or dey(i+1)) and (ldy_1(i+1) = false) and// sta|sty|iny|dey|ldy			; 1	~ldy #1
        lda_stack(i+2) and									// lda :STACKORIGIN+10			; 2
        (SKIP(i+3) = false) and (cmp(i+3) = false) then						//~cmp					; 3
      if argMatch(i, i+2) then
@@ -147,10 +147,12 @@ begin
       end;
 
 
-    if sta_stack(i) and										// sta :STACKORIGIN			; 0
+    if ldy(i+3) and										// ldy					; 3
+
+       sta_stack(i) and										// sta :STACKORIGIN			; 0
        ldy(i+1) and										// ldy					; 1
        sty(i+2) and										// sty					; 2
-       ldy(i+3) and										// ldy					; 3
+//       ldy(i+3) and										// ldy					; 3
        lda_stack(i+4) then									// lda :STACKORIGIN			; 4
      if argMatch(i, i+4) then
        begin
@@ -175,9 +177,11 @@ begin
      end;
 
 
-    if (lda_a(i) or adc_sbc(i)) and								// lda|adc|sbc				; 0
+    if ldy(i+2) and										// ldy					; 2
+
+       (lda_a(i) or adc_sbc(i)) and								// lda|adc|sbc				; 0
        mwy(i+1) and										// mwy					; 1
-       ldy(i+2) and										// ldy					; 2
+//       ldy(i+2) and										// ldy					; 2
        lda_a(i+3) then										// lda					; 3
      begin
        listing[i] := '';
@@ -195,9 +199,11 @@ begin
 
 
 
-    if lda_val(i) and										// lda 					; 0	~:STACKORIGIN
+    if ldy_val(i+2) and										// ldy					; 2	~:STACKORIGIN
+
+       lda_val(i) and										// lda 					; 0	~:STACKORIGIN
        asl_stack(i+1) and									// asl :STACKORIGIN			; 1
-       ldy_val(i+2) and										// ldy					; 2	~:STACKORIGIN
+//       ldy_val(i+2) and									// ldy					; 2	~:STACKORIGIN
        lda_val(i+3) then									// lda					; 3	~:STACKORIGIN
       begin
 	listing[i] := '';
@@ -247,15 +253,35 @@ begin
       end;
 
 
-    if lda_stack(i+6) and									// lda :STACKORIGIN+STACKWIDTH		; 6
+    if ldy_val(i+2) and										// ldy					; 2	~:STACKORIGIN
+
+       lda_val(i) and (iy(i) = false) and							// lda					; 0	~:STACKORIGIN
+       sta_stack(i+1) and									// sta :STACKORIGIN			; 1
+//       ldy_val(i+2) and									// ldy					; 2	~:STACKORIGIN
+       lda_val(i+3) and										// lda					; 3	~:STACKORIGIN
+       sta_a(i+4) and										// sta					; 4
+       lda_stack(i+5) then									// lda :STACKORIGIN			; 5
+     if (argMatch(i, i+4) = false) and
+	argMatch(i+1, i+5) then
+      begin
+	listing[i+5] := listing[i];
+
+	listing[i]   := '';
+	listing[i+1] := '';
+
+	exit(false);
+      end;
+
+
+    if ldy_val(i+3) and										// ldy					; 3	~:STACKORIGIN
 
        lda_val(i) and (iy(i) = false) and							// lda					; 0	~:STACKORIGIN
        sta_stack(i+1) and									// sta :STACKORIGIN+STACKWIDTH		; 1
        sta_stack(i+2) and									// sta :STACKORIGIN			; 2
-       ldy_val(i+3) and										// ldy					; 3	~:STACKORIGIN
+//       ldy_val(i+3) and									// ldy					; 3	~:STACKORIGIN
        lda_stack(i+4) and									// lda :STACKORIGIN			; 4
        sta_a(i+5) and										// sta					; 5
-//       lda_stack(i+6) and									// lda :STACKORIGIN+STACKWIDTH		; 6
+       lda_stack(i+6) and									// lda :STACKORIGIN+STACKWIDTH		; 6
        sta_a(i+7) then										// sta					; 7
      if argMatch(i+2, i+4) and
 	argMatch(i+1, i+6) then
@@ -266,26 +292,6 @@ begin
 	listing[i]   := '';
 	listing[i+1] := '';
 	listing[i+2] := '';
-
-	exit(false);
-      end;
-
-
-    if lda_stack(i+5) and									// lda :STACKORIGIN			; 5
-
-       lda_val(i) and (iy(i) = false) and							// lda					; 0	~:STACKORIGIN
-       sta_stack(i+1) and									// sta :STACKORIGIN			; 1
-       ldy_val(i+2) and										// ldy					; 2	~:STACKORIGIN
-       lda_val(i+3) and										// lda					; 3	~:STACKORIGIN
-       sta_a(i+4) then										// sta					; 4
-//       lda_stack(i+5) then									// lda :STACKORIGIN			; 5
-     if (argMatch(i, i+4) = false) and
-	argMatch(i+1, i+5) then
-      begin
-	listing[i+5] := listing[i];
-
-	listing[i]   := '';
-	listing[i+1] := '';
 
 	exit(false);
       end;
