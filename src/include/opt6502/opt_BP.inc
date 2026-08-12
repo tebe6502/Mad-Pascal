@@ -1030,10 +1030,10 @@ begin
        sta_stack(i+5) and									// sta :STACKORIGIN+STACKWIDTH		; 5
        lda_stack(i+6) and									// lda :STACKORIGIN			; 6
        (add_sub(i+7) or and_ora_eor(i+7)) and (iy(i+7) = false) and				// add|sub|and|ora|eor A		; 7
-       sta(i+8) and										// sta 					; 8
+       sta_a(i+8) and (bp2(i+8) = false) and							// sta 					; 8
        lda_stack(i+9) and									// lda :STACKORIGIN+STACKWIDTH		; 9
        (adc_sbc(i+10) or and_ora_eor(i+10)) and							// adc|sbc|and|ora|eor A+1	 	; 10
-       sta(i+11) then										// sta 					; 11
+       sta_a(i+11) and (bp2(i+11) = false) then							// sta 					; 11
      if argMatch(i+2, i+6) and
 	argMatch(i+5, i+9) then
        begin
@@ -1064,10 +1064,10 @@ begin
        sta_stack(i+5) and									// sta :STACKORIGIN+STACKWIDTH		; 5
        lda_a(i+6) and (iy(i+6) = false) and							// lda					; 6
        (add_sub_stack(i+7) or and_ora_eor_stack(i+7)) and					// add|sub|and|ora|eor :STACKORIGIN	; 7
-       sta(i+8) and										// sta 					; 8
+       sta_a(i+8) and (bp2(i+8) = false) and							// sta 					; 8
        lda_a(i+9) and (iy(i+9) = false) and							// lda					; 9
        (adc_sbc_stack(i+10) or and_ora_eor_stack(i+10)) and					// adc|sbc|and|ora|eor :STACKORIGIN+ 	; 10
-       sta(i+11) then										// sta 					; 11
+       sta_a(i+11) and (bp2(i+11) = false) then							// sta 					; 11
      if argMatch(i+2, i+7) and
 	argMatch(i+5, i+10) then
        begin
@@ -1448,7 +1448,7 @@ begin
 
     if LDA_BP2_Y(i+10) and									// lda (:bp2),y				; 10
 
-       lda_val(i) and										// lda					; 0	~STACKORIGIN
+       lda_val(i) and (iy(i) = false) and							// lda					; 0	~STACKORIGIN
        sta_stack(i+1) and									// sta :STACKORIGIN+STACKWIDTH		; 1
        sta_stack(i+2) and									// sta :STACKORIGIN+STACKWIDTH*2	; 2
        lda_a(i+3) and										// lda OFFSET				; 3
@@ -1472,7 +1472,7 @@ begin
 
     if LDA_BP2_Y(i+12) and									// lda (:bp2),y				; 12
 
-       lda_val(i) and										// lda					; 0	~STACKORIGIN
+       lda_val(i) and (iy(i) = false) and							// lda					; 0	~STACKORIGIN
        sta_stack(i+1) and									// sta :STACKORIGIN+STACKWIDTH		; 1
        (iny(i+2) or ldy(i+2)) and								// iny|ldy				; 2
        LDA_BP2_Y(i+3) and									// lda (:bp2),y				; 3
@@ -5044,8 +5044,8 @@ begin
     if sta_bp_1(i+9) and									// sta :bp+1				; 9
 
        sta_stack(i) and										// sta :STACKORIGIN			; 0
-       lda_a(i+1) and										// lda					; 1
-       adc_sbc(i+2) and										// adc|sbc				; 2
+       lda_a(i+1) and (iy(i+1) = false) and							// lda					; 1
+       adc_sbc(i+2) and (iy(i+2) = false) and							// adc|sbc				; 2
        sta_stack(i+3) and									// sta :STACKORIGIN+STACKWIDTH		; 3
        lda_im_0(i+4) and									// lda #$00				; 4
        add_stack(i+5) and 									// add :STACKORIGIN			; 5
@@ -5073,9 +5073,9 @@ begin
 
     if sta_bp_1(i+12) and									// sta :bp+1				; 12
 
-       add_sub(i) and										// add|sub				; 0
+       add_sub(i) and 										// add|sub				; 0
        tay(i+1) and										// tay					; 1
-       lda_val(i+2) and										// lda					; 2
+       lda_val(i+2) and 									// lda					; 2
        adc_sbc(i+3) and										// adc|sbc				; 3
        sta_bp_1(i+4) and									// sta :bp+1				; 4
        lda_bp_y(i+5) and 									// lda (:bp),y				; 5
