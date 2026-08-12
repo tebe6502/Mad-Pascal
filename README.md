@@ -115,6 +115,10 @@ This text-mode windowing library has window controls and modern gadgets (widgets
 * [ZX2](https://github.com/dmsc/zx02) -> [unit](https://github.com/tebe6502/Mad-Pascal/blob/master/lib/zx2.pas), [sample](https://github.com/tebe6502/Mad-Pascal/tree/master/samples/a8/compression/zx2)
 * [ZX5](https://github.com/einar-saukas/ZX5) -> [unit](https://github.com/tebe6502/Mad-Pascal/blob/master/lib/zx5.pas), [sample](https://github.com/tebe6502/Mad-Pascal/tree/master/samples/a8/compression/zx5)
 
+## VBXE
+* [Gif 87/89](https://github.com/tebe6502/Mad-Pascal/tree/master/samples/a8/graph_vbxe/gif)
+* [ANSI](https://github.com/tebe6502/Mad-Pascal/tree/master/samples/a8/graph_vbxe_ansi)
+  
 ---
 
 ## Benchmarks
