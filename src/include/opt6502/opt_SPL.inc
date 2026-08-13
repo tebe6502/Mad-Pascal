@@ -10,10 +10,13 @@ begin
 // -----------------------------------------------------------------------------
 
 
-    if spl(i+2) and										// spl					; 2
+  if spl(i+2) and										// spl					; 2
 
-       ldy_im_0(i) and										// ldy #$00				; 0
-       lda_im(i+1) and (lda_im_0(i+1) = false) and						// lda #				; 1
+     ldy_im_0(i) then										// ldy #$00				; 0
+  begin
+
+
+    if lda_im(i+1) and (lda_im_0(i+1) = false) and						// lda #				; 1
 //       spl(i+2) and										// spl					; 2
        dey(i+3) then										// dey					; 3
      begin
@@ -28,10 +31,7 @@ begin
      end;
 
 
-    if spl(i+2) and										// spl					; 2
-
-       ldy_im_0(i) and										// ldy #$00				; 0
-       lda_stack(i+1) and									// lda :STACKORIGIN			; 1
+    if lda_stack(i+1) and									// lda :STACKORIGIN			; 1
 //       spl(i+2) and										// spl					; 2
        dey(i+3) and										// dey					; 3
        sty_stack(i+4) and									// sty :STACKORIGIN+STACKWIDTH		; 4
@@ -44,10 +44,7 @@ begin
      end;
 
 
-    if spl(i+2) and										// spl					; 2
-
-       ldy_im_0(i) and										// ldy #$00				; 0
-       lda_a(i+1) and										// lda					; 1
+    if lda_a(i+1) and										// lda					; 1
 //       spl(i+2) and										// spl					; 2
        dey(i+3) and										// dey					; 3
        sty_stack(i+4) and									// sty :STACKORIGIN+STACKWIDTH		; 4
@@ -65,10 +62,7 @@ begin
      end;
 
 
-    if spl(i+2) and										// spl					; 2
-
-       ldy_im_0(i) and										// ldy #$00				; 0
-       lda_stack(i+1) and									// lda :STACKORIGIN			; 1
+    if lda_stack(i+1) and									// lda :STACKORIGIN			; 1
 //       spl(i+2) and										// spl					; 2
        dey(i+3) and										// dey					; 3
        lda_stack(i+4) then									// lda :STACKORIGIN			; 4
@@ -82,10 +76,7 @@ begin
      end;
 
 
-    if spl(i+2) and										// spl					; 2
-
-       ldy_im_0(i) and										// ldy #$00				; 0
-       lda_val(i+1) and										// lda					; 1	~:STACKORIGIN
+    if lda_val(i+1) and										// lda					; 1	~:STACKORIGIN
 //       spl(i+2) and										// spl					; 2
        dey(i+3) and										// dey					; 3
        add_sub_val(i+4) and									// add|sub				; 4	~:STACKORIGIN
@@ -106,10 +97,7 @@ begin
        end;
 
 
-    if spl(i+2) and										// spl					; 2
-
-       ldy_im_0(i) and										// ldy #$00				; 0
-       lda_val(i+1) and										// lda					; 1	~:STACKORIGIN
+    if lda_val(i+1) and										// lda					; 1	~:STACKORIGIN
 //       spl(i+2) and										// spl					; 2
        dey(i+3) and										// dey					; 3
        add_sub(i+4) and										// add|sub				; 4
@@ -125,10 +113,7 @@ begin
        end;
 
 
-    if spl(i+2) and										// spl					; 2
-
-       ldy_im_0(i) and										// ldy #$00				; 0
-       lda_im_0(i+1) and									// lda #$00				; 1
+    if lda_im_0(i+1) and									// lda #$00				; 1
 //       spl(i+2) and										// spl					; 2
        dey(i+3) and										// dey					; 3
        sta_stack(i+4) and									// sta :STACKORIGIN			; 4
@@ -149,10 +134,7 @@ begin
      end;
 
 
-    if spl(i+2) and										// spl					; 2
-
-       ldy_im_0(i) and										// ldy #$00				; 0
-       lda_im_0(i+1) and									// lda #$00				; 1
+    if lda_im_0(i+1) and									// lda #$00				; 1
 //       spl(i+2) and										// spl					; 2
        dey(i+3) and										// dey					; 3
        sta_stack(i+4) and									// sta :STACKORIGIN+STACKWIDTH		; 4
@@ -172,10 +154,7 @@ begin
      end;
 
 
-    if spl(i+2) and										// spl					; 2
-
-       ldy_im_0(i) and										// ldy #$00				; 0
-       lda_stack(i+1) and									// lda :STACKORIGIN			; 1
+    if lda_stack(i+1) and									// lda :STACKORIGIN			; 1
 //       spl(i+2) and										// spl					; 2
        dey(i+3) and										// dey 					; 3
        sty_stack(i+4) and									// sty :STACKORIGIN+STACKWIDTH		; 4
@@ -192,10 +171,7 @@ begin
        end;
 
 
-    if spl(i+2) and										// spl					; 2
-
-       ldy_im_0(i) and										// ldy #$00				; 0
-       lda_val(i+1) and										// lda					; 1	~:STACKORIGIN
+    if lda_val(i+1) and										// lda					; 1	~:STACKORIGIN
 //       spl(i+2) and										// spl					; 2
        dey(i+3) and										// dey 					; 3
        sta_stack(i+4) and									// sta :STACKORIGIN			; 4
@@ -217,10 +193,7 @@ begin
        end;
 
 
-    if spl(i+2) and										// spl					; 2
-
-       ldy_im_0(i) and										// ldy #$00				; 0
-       lda_stack(i+1) and									// lda :STACKORIGIN+STACKWIDTH		; 1
+    if lda_stack(i+1) and									// lda :STACKORIGIN+STACKWIDTH		; 1
 //       spl(i+2) and										// spl					; 2
        dey(i+3) and										// dey 					; 3
        sta_stack(i+4) and									// sta :STACKORIGIN+STACKWIDTH		; 4
@@ -249,7 +222,14 @@ begin
        end;
 
 
+  end;
+
+
+// -----------------------------------------------------------------------------
+
+
     if spl(i+10) and										// spl					; 10
+
        spl(i+2) and										// spl					; 2
 
        ldy_im_0(i) and										// ldy #$00				; 0
@@ -467,7 +447,6 @@ begin
        end;
 
 
-
     if spl(i+4) and										// spl					; 4
 
        ldy_im_0(i) and										// ldy #$00				; 0
@@ -595,9 +574,11 @@ begin
 // -----------------------------------------------------------------------------
 
 
-  if ldy_im_0(i) and										// ldy #$00				; 0
+  if spl(i+2) and										// spl					; 2
+
+     ldy_im_0(i) and										// ldy #$00				; 0
      (lda_a(i+1) or and_ora_eor(i+1)) and							// lda|and|ora|eor			; 1
-     spl(i+2) and										// spl					; 2
+//     spl(i+2) and										// spl					; 2
      dey(i+3) then										// dey					; 3
   begin
 

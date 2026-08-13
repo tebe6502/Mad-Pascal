@@ -11,13 +11,13 @@ begin
 
 
     if lab_a(i+2) and										//@				; 2
-    
+
        lab_a(i) and										//@				; 0
        (jcc(i+1) or jcs(i+1) or jeq(i+1) or jne(i+1) or jpl(i+1) or jmi(i+1)) then		// jcc|jcs|jeq|jne|jpl|jmi	; 1
 //       lab_a(i+2) then 									//@				; 2
      begin
       listing[i+2] := '';
-     
+
       exit(false);
      end;
 
@@ -193,12 +193,14 @@ begin
        end;
 
 
-    if sta_stack(i) and										// sta :STACKORIGIN+STACKWIDTH	; 0
+    if bne(i+5) and										// bne @+			; 5
+
+       sta_stack(i) and										// sta :STACKORIGIN+STACKWIDTH	; 0
        lda_stack(i+1) and									// lda :STACKORIGIN		; 1
        AND_ORA_EOR(i+2) and (and_ora_eor_stack(i+2) = false) and				// ora|and|eor			; 2
        sta_stack(i+3) and									// sta :STACKORIGIN		; 3
        lda_stack(i+4) and									// lda :STACKORIGIN+STACKWIDTH	; 4
-       bne(i+5) and										// bne @+			; 5
+ //      bne(i+5) and										// bne @+			; 5
        lda_stack(i+6) then									// lda :STACKORIGIN		; 6
        if argMatch(i, i+4) and
           argMatch(i+1, i+3) and
@@ -216,9 +218,11 @@ begin
        end;
 
 
-    if (and_ora_eor(i) or asl_a(i) or rol_a(i) or lsr_a(i) or ror_a(i)) and (iy(i) = false) and	// and|ora|eor			; 0
+    if ldy_1(i+2) and										// ldy #1			; 2
+
+       (and_ora_eor(i) or asl_a(i) or rol_a(i) or lsr_a(i) or ror_a(i)) and (iy(i) = false) and	// and|ora|eor			; 0
        sta_stack(i+1) and									// sta :STACKORIGIN+N		; 1
-       ldy_1(i+2) and										// ldy #1			; 2
+//       ldy_1(i+2) and										// ldy #1			; 2
        lda_stack(i+3) and 									// lda :STACKORIGIN+N		; 3
        (bne(i+4) or beq(i+4)) then								// bne|beq			; 4
      if argMatch(i+1, i+3) then
