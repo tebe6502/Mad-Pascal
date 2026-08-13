@@ -352,6 +352,11 @@ end;
     Result := TemporaryBuf[i] = #9'sta :bp+1'
   end;
 
+  function LDA_BP_Y(const i: Integer): Boolean;
+  begin
+    Result := TemporaryBuf[i] = #9'lda (:bp),y'
+  end;
+
   function STA_BP_Y(const i: Integer): Boolean;
   begin
     Result := TemporaryBuf[i] = #9'sta (:bp),y'

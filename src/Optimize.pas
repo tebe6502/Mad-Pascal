@@ -970,7 +970,7 @@ var
 
 
 {
-if (pos('subEAX_ECX', listing[i]) > 0) then begin
+if (pos('addAX_CX', listing[i]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');
@@ -1088,7 +1088,7 @@ end;
 
     function PeepholeOptimization_STA: Boolean;
     var
-      i: Integer;
+      i: TListingIndex;
     begin
 
       Result := True;
@@ -1146,7 +1146,7 @@ end;
 
     function PeepholeOptimization: Boolean;
     var
-      i: Integer;
+      i: TListingIndex;
     begin
 
       Result := True;
@@ -1159,7 +1159,7 @@ end;
 
 
 {
-if (pos('sub W', listing[i]) > 0) then begin
+if (pos('lda (:bp2),y', listing[i]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');
@@ -1224,7 +1224,7 @@ end;
 
   function OptimizeRelation(const CodeSize: Integer): Boolean;
   var
-    i, p: Integer;
+    p, i: TListingIndex;
     tmp: String;
 
 
@@ -1247,9 +1247,9 @@ end;
     end;
 
 
-    function test_ORA(i: Integer): Boolean;
+    function test_ORA(i: TListingIndex): Boolean;
     var
-      p: Integer;
+      p: TListingIndex;
     begin
 
       Result := True;
@@ -1268,7 +1268,6 @@ end;
 
     Result := True;
 
-
     Rebuild('OptimizeRelation');
 
     for i := 0 to l - 1 do
@@ -1276,7 +1275,7 @@ end;
 
 
 {
-if (pos('lda AMOUNT', listing[i]) > 0) then begin
+if (pos('and #$40', listing[i]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');

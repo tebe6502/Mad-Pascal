@@ -74,15 +74,19 @@ begin
      end;
 
 
-    if (jeq(i+5) or jne(i+5) or beq(i+5) or bne(i+5)) and					// jeq|jne|beq|bne	; 5
+    if lab_a(i+4) and										// @			; 4
+
+       cmp_im_0(i+1) and									// cmp #$00		; 1
+
+       (jeq(i+5) or jne(i+5) or beq(i+5) or bne(i+5)) and					// jeq|jne|beq|bne	; 5
        (SKIP(i+6) = false) and (dey(i+6) = false) and						//~SKIP|dey		; 6
 
-       (SKIP(i-1) = false) and
+       (SKIP(i-1) = false) and									//
        lda_a(i) and (lda_bp2_y(i) = false) and							// lda			; 0	!!! tylko dla <>0 lub =0 !!!  beq|bne !!!
-       cmp_im_0(i+1) and									// cmp #$00		; 1
+//       cmp_im_0(i+1) and									// cmp #$00		; 1
        (beq(i+2) or bne(i+2)) and								// beq|bne		; 2
-       lda_a(i+3) and										// lda			; 3
-       lab_a(i+4) then										// @			; 4
+       lda_a(i+3) then										// lda			; 3
+//       lab_a(i+4) then									// @			; 4
      begin
 	listing[i+1] := '';
 
@@ -90,13 +94,17 @@ begin
      end;
 
 
-    if (jeq(i+3) or jne(i+3) or beq(i+3) or bne(i+3)) and					// jeq|jne|beq|bne	; 3
+    if lab_a(i+2) and										// @			; 2	!!! to oznacza krotki test !!!
+
+       cmp_im_0(i+1) and									// cmp #$00		; 1
+
+       (jeq(i+3) or jne(i+3) or beq(i+3) or bne(i+3)) and					// jeq|jne|beq|bne	; 3
        (SKIP(i+4) = false) and (dey(i+4) = false) and						//~SKIP|dey		; 4
 
        (SKIP(i-1) = false) and
-       lda_a(i) and (lda_bp2_y(i) = false) and							// lda			; 0	!!! tylko dla <>0 lub =0 !!!  beq|bne !!!
-       cmp_im_0(i+1) and									// cmp #$00		; 1
-       lab_a(i+2) then										// @			; 2	!!! to oznacza krotki test !!!
+       lda_a(i) and (lda_bp2_y(i) = false) then							// lda			; 0	!!! tylko dla <>0 lub =0 !!!  beq|bne !!!
+//       cmp_im_0(i+1) and									// cmp #$00		; 1
+//       lab_a(i+2) then									// @			; 2	!!! to oznacza krotki test !!!
      begin
 	listing[i+1] := '';
 
@@ -104,9 +112,13 @@ begin
      end;
 
 
-     if lda_im_0(i) and										// lda #$00		; 0	!!! tylko dla <>0
+     if bne(i+2) and										// bne			; 2	!!! to oznacza krotki test !!!
+
         cmp_im_0(i+1) and									// cmp #$00		; 1
-       	bne(i+2) and										// bne			; 2	!!! to oznacza krotki test !!!
+
+        lda_im_0(i) and										// lda #$00		; 0	!!! tylko dla <>0
+//        cmp_im_0(i+1) and									// cmp #$00		; 1
+//	  bne(i+2) and										// bne			; 2	!!! to oznacza krotki test !!!
 	(listing[i+2] <> #9'bne L1') and (listing[i+5] <> #9'bne L1') then
      begin
 	listing[i]   := '';
@@ -127,11 +139,15 @@ begin
      end;
 
 
-    if lda(i) and										// lda			; 0
+    if lab_a(i+4) and										// @			; 4    
+
+       lda_im_0(i+3) and									// lda #$00		; 3
+
+       lda(i) and										// lda			; 0
        and_ora_eor(i+1) and									// and|ora|eor		; 1
        bne(i+2) and										// bne			; 2
-       lda_im_0(i+3) and									// lda #$00		; 3
-       lab_a(i+4) and										// @			; 4
+//       lda_im_0(i+3) and									// lda #$00		; 3
+//       lab_a(i+4) and										// @			; 4
        (beq(i+5) or jeq(i+5)) then								// beq|jeq		; 5
      begin
 	listing[i+3] := '';
@@ -159,15 +175,63 @@ begin
      end;
 
 
-    if (SKIP(i-1) = false) and
+    if lab_a(i+6) and										//@			; 6
+
+       (listing[i+3] = #9'cmp #$40') and							// cmp #$40		; 3
+
+       lda_val(i) and (lda_im(i) = false) and (iy(i) = false) and				// lda			; 0	~:STACKORIGIN
+       ldy_1(i+1) and										// ldy #1		; 1
+       (listing[i+2] = #9'and #$40') and							// and #$40		; 2
+//       (listing[i+3] = #9'cmp #$40') and							// cmp #$40		; 3
+       beq(i+4) and										// beq @+		; 4
+       dey(i+5) then										// dey			; 5
+//       lab_a(i+6) then									//@			; 6
+     begin
+	listing[i+2] := #9'lda #$40';
+
+	listing[i+3] := #9'bit ' + GetARG(i);
+	listing[i+4] := #9'bne @+';
+
+	exit(false);
+     end;
+
+
+    if lab_a(i+6) and										//@			; 6
+
+       (listing[i+3] = #9'cmp #$80') and							// cmp #$80		; 3
+
+       lda_a(i) and (iy(i) = false) and								// lda			; 0
+       ldy_1(i+1) and										// ldy #1		; 1
+       (listing[i+2] = #9'and #$80') and							// and #$80		; 2
+//       (listing[i+3] = #9'cmp #$80') and							// cmp #$80		; 3
+       beq(i+4) and										// beq @+		; 4
+       dey(i+5) then										// dey			; 5
+//       lab_a(i+6) then									//@			; 6
+     begin
+	listing[i+2] := listing[i];
+
+	listing[i] := '';
+
+	listing[i+3] := '';
+	listing[i+4] := #9'bmi @+';
+
+	exit(false);
+     end;
+
+
+    if jeq(i+7) and										// jeq			; 7
+
+       ora_im_0(i+3) and									// ora #$00		; 3
+
+       (SKIP(i-1) = false) and
        lda_a(i) and 										// lda			; 0
        (listing[i+1] = #9'and #$80') and							// and #$80		; 1
        ldy_1(i+2) and										// ldy #1		; 2
-       ora_im_0(i+3) and									// ora #$00		; 3
+//       ora_im_0(i+3) and									// ora #$00		; 3
        sne(i+4) and										// sne			; 4
        dey(i+5) and										// dey			; 5
        tya(i+6) and										// tya			; 6
-       jeq(i+7) and										// jeq			; 7
+//       jeq(i+7) and										// jeq			; 7
        (SKIP(i+8) = false) then									//~SKIP			; 8
      begin
 	listing[i+1] := #9'jpl ' + GetARG(i+7);
@@ -182,14 +246,18 @@ begin
      end;
 
 
-    if (SKIP(i-1) = false) and
+    if lab_a(i+6) and										//@			; 6
+
+       cmp_im_0(i+5) and									// cmp #$00		; 5
+
+       (SKIP(i-1) = false) and
        lda(i) and 										// lda			; 0
        (listing[i+1] = #9'and #$80') and							// and #$80		; 1
        (listing[i+2] = #9'cmp #$80') and							// cmp #$80		; 2
        bne(i+3) and										// bne			; 3
        lda_im_0(i+4) and									// lda #$00		; 4
-       cmp_im_0(i+5) and									// cmp #$00		; 5
-       lab_a(i+6) and										//@			; 6
+//       cmp_im_0(i+5) and									// cmp #$00		; 5
+//       lab_a(i+6) and										//@			; 6
        (jeq(i+7) or jne(i+7)) then								// jeq|jne		; 7
      begin
 	listing[i+1] := '';
@@ -208,14 +276,18 @@ begin
      end;
 
 
-    if (SKIP(i-1) = false) and
+    if lab_a(i+6) and										//@			; 6
+
+       cmp_im_0(i+5) and									// cmp #$00		; 5
+
+       (SKIP(i-1) = false) and
        lda(i) and 										// lda			; 0
        (listing[i+1] = #9'and #$80') and							// and #$80		; 1
        cmp_im_0(i+2) and									// cmp #$00		; 2
        bne(i+3) and										// bne			; 3
        lda_im_0(i+4) and									// lda #$00		; 4
-       cmp_im_0(i+5) and									// cmp #$00		; 5
-       lab_a(i+6) and										//@			; 6
+//       cmp_im_0(i+5) and									// cmp #$00		; 5
+//       lab_a(i+6) and										//@			; 6
        (jeq(i+7) or jne(i+7)) then								// jeq|jne		; 7
      begin
 	listing[i+1] := '';
@@ -248,10 +320,14 @@ begin
      end;
 
 
-    if bne_a(i) and										// bne @+		; 0
-       lda_a(i+1) and										// lda			; 1
+    if lab_a(i+3) and										//@			; 3
+
        cmp_im_0(i+2) and									// cmp #$00		; 2
-       lab_a(i+3) and										//@			; 3
+
+       bne_a(i) and										// bne @+		; 0
+       lda_a(i+1) and										// lda			; 1
+//       cmp_im_0(i+2) and									// cmp #$00		; 2
+//       lab_a(i+3) and										//@			; 3
        jcs(i+4) and										// jcs _lxxxx		; 4
        (SKIP(i+5) = false) then									//~SKIP			; 5
       begin
@@ -265,11 +341,13 @@ begin
 
 // -------------------------------------------------------------------------------------------
 
-    if (ENDL(i-1) = false) and
+    if lab_a(i+3) and										//@			; 3 
+
+       (ENDL(i-1) = false) and
        smi(i) and										// smi			; 0
        bne_a(i+1) and										// bne @+		; 1
        dey(i+2) and										// dey			; 2
-       lab_a(i+3) and										//@			; 3
+//       lab_a(i+3) and										//@			; 3
        tya(i+4) and										// tya			; 4
        jeq(i+5) then										// jeq			; 5
       begin
@@ -331,12 +409,16 @@ begin
       end;
 
 
-    if (SKIP(i) = false) and (ENDL(i) = false) and						//~SKIP|.ENDL		; 0
+    if lab_a(i+3) and										//@			; 3  
+
+       jeq(i+5) and										// jeq			; 5
+
+       (SKIP(i) = false) and (ENDL(i) = false) and						//~SKIP|.ENDL		; 0
        bpl_a(i+1) and										// bpl @+		; 1
        dey(i+2) and										// dey			; 2
-       lab_a(i+3) and										//@			; 3
-       tya(i+4) and										// tya			; 4
-       jeq(i+5) then										// jeq			; 5
+//       lab_a(i+3) and										//@			; 3
+       tya(i+4) then										// tya			; 4
+//       jeq(i+5) then										// jeq			; 5
       begin
        listing[i+1] := #9'jmi ' + GetARG(i+5);
        listing[i+2] := '';
@@ -351,12 +433,16 @@ begin
       end;
 
 
-    if (SKIP(i) = false) and (ENDL(i) = false) and						//~SKIP|.ENDL		; 0
+    if lab_a(i+3) and										//@			; 3
+
+       jeq(i+5) and										// jeq			; 5
+
+       (SKIP(i) = false) and (ENDL(i) = false) and						//~SKIP|.ENDL		; 0
        bmi_a(i+1) and										// bmi @+		; 1
        dey(i+2) and										// dey			; 2
-       lab_a(i+3) and										//@			; 3
-       tya(i+4) and										// tya			; 4
-       jeq(i+5) then										// jeq			; 5
+//       lab_a(i+3) and										//@			; 3
+       tya(i+4) then										// tya			; 4
+//       jeq(i+5) then										// jeq			; 5
       begin
        listing[i+1] := #9'jpl ' + GetARG(i+5);
        listing[i+2] := '';
@@ -371,16 +457,20 @@ begin
       end;
 
 
-    if (SKIP(i) = false) and 									//~SKIP			; 0		integer <= 0
+    if lab_a(i+7) and										//@			; 7  
+
+       jeq(i+9) and										// jeq			; 9
+
+       (SKIP(i) = false) and 									//~SKIP			; 0		integer <= 0
        bmi_a(i+1) and										// bmi @+		; 1
        ora(i+2) and										// ora			; 2
        ora(i+3) and										// ora			; 3
        ora(i+4) and										// ora			; 4
        seq(i+5) and										// seq			; 5
        dey(i+6) and										// dey			; 6
-       lab_a(i+7) and										//@			; 7
+//       lab_a(i+7) and										//@			; 7
        tya(i+8) and										// tya			; 8
-       jeq(i+9) and										// jeq			; 9
+//       jeq(i+9) and										// jeq			; 9
        (SKIP(i+10) = false) then								//~SKIP			; 10
       begin
        	listing[i+5] := #9'jne ' + GetARG(i+9);
@@ -397,7 +487,11 @@ begin
       end;
 
 
-    if (SKIP(i) = false) and 									//~SKIP			; 0		while integer > 0
+    if lab_a(i+8) and										//@			; 8
+
+       lab_a(i+6) and										//@			; 6
+
+       (SKIP(i) = false) and 									//~SKIP			; 0		while integer > 0
        bmi_a(i+1) and										// bmi @+		; 1
        ora(i+2) and										// ora			; 2
        ora(i+3) and										// ora			; 3
@@ -405,7 +499,7 @@ begin
        sne(i+5) and										// sne			; 5
        lab_a(i+6) and										//@			; 6
        dey(i+7) and										// dey			; 7
-       lab_a(i+8) and										//@			; 8
+//       lab_a(i+8) and										//@			; 8
        tya(i+9) and										// tya			; 9
        jne(i+10) and										// jne			; 10
        (SKIP(i+11) = false) then								//~SKIP			; 11
@@ -424,15 +518,19 @@ begin
       end;
 
 
-    if (SKIP(i) = false) and 									//~SKIP			; 0		integer > 0
+    if lab_a(i+8) and										//@			; 8
+
+       lab_a(i+6) and										//@			; 6
+
+       (SKIP(i) = false) and 									//~SKIP			; 0		integer > 0
        bmi_a(i+1) and										// bmi @+		; 1
        ora(i+2) and										// ora			; 2
        ora(i+3) and										// ora			; 3
        ora(i+4) and										// ora			; 4
        sne(i+5) and										// sne			; 5
-       lab_a(i+6) and										//@			; 6
+//       lab_a(i+6) and										//@			; 6
        dey(i+7) and										// dey			; 7
-       lab_a(i+8) and										//@			; 8
+//       lab_a(i+8) and										//@			; 8
        tya(i+9) and										// tya			; 9
        jeq(i+10) and										// jeq			; 10
        (SKIP(i+11) = false) then								//~SKIP			; 11
@@ -454,14 +552,18 @@ begin
       end;
 
 
-    if (SKIP(i) = false) and 									//~SKIP			; 0
+    if lab_a(i+5) and										//@			; 5
+
+       jeq(i+7) and										// jeq			; 7
+
+       (SKIP(i) = false) and 									//~SKIP			; 0
        bmi_a(i+1) and										// bmi @+		; 1
        ora(i+2) and										// ora			; 2
        seq(i+3) and										// seq			; 3
        dey(i+4) and										// dey			; 4
-       lab_a(i+5) and										//@			; 5
+//       lab_a(i+5) and										//@			; 5
        tya(i+6) and										// tya			; 6
-       jeq(i+7) and										// jeq			; 7
+//       jeq(i+7) and										// jeq			; 7
        (SKIP(i+8) = false) then									//~SKIP			; 8
       begin
        	listing[i+3] := #9'jne ' + GetARG(i+7);
@@ -478,10 +580,14 @@ begin
       end;
 
 
-    if (SKIP(i) = false) and (ENDL(i) = false) and						//~SKIP|.ENDL		; 0
+    if lab_a(i+3) and										//@			; 3
+
        beq(i+1) and										// beq @+		; 1
+
+       (SKIP(i) = false) and (ENDL(i) = false) and						//~SKIP|.ENDL		; 0
+//       beq(i+1) and										// beq @+		; 1
        dey(i+2) and										// dey			; 2
-       lab_a(i+3) and										//@			; 3
+//       lab_a(i+3) and										//@			; 3
        tya(i+4) and										// tya			; 4
        (jeq(i+5) or jne(i+5)) then								// jeq|jne		; 5
       begin
@@ -503,10 +609,14 @@ begin
       end;
 
 
-    if (SKIP(i) = false) and (ENDL(i) = false) and						//~SKIP|.ENDL		; 0
+    if lab_a(i+3) and										//@			; 3   
+
        bne(i+1) and										// bne @+		; 1
+
+       (SKIP(i) = false) and (ENDL(i) = false) and						//~SKIP|.ENDL		; 0
+//       bne(i+1) and										// bne @+		; 1
        dey(i+2) and										// dey			; 2
-       lab_a(i+3) and										//@			; 3
+//       lab_a(i+3) and										//@			; 3
        tya(i+4) and										// tya			; 4
        (jeq(i+5) or jne(i+5)) then								// jeq|jne l_		; 5
       begin
@@ -522,13 +632,17 @@ begin
       end;
 
 
-    if (ENDL(i) = false) and									//~.ENDL		; 0
+    if lab_a(i+4) and										//@			; 4
+
+       jne(i+6) and										// jne l_		; 6
+
+       (ENDL(i) = false) and									//~.ENDL		; 0
        bmi_a(i+1) and										// bmi @+		; 1
        beq(i+2) and										// beq @+		; 2
        dey(i+3) and										// dey			; 3
-       lab_a(i+4) and										//@			; 4
-       tya(i+5) and										// tya			; 5
-       jne(i+6) then										// jne l_		; 6
+//       lab_a(i+4) and										//@			; 4
+       tya(i+5) then										// tya			; 5
+//       jne(i+6) then										// jne l_		; 6
       begin
        listing[i+1] := #9'jmi ' + GetARG(i+6);
        listing[i+2] := #9'jeq ' + GetARG(i+6);
@@ -544,13 +658,17 @@ begin
       end;
 
 
-    if (ENDL(i) = false) and									//~.ENDL		; 0
+    if lab_a(i+4) and										//@			; 4  
+
+       jeq(i+6) and										// jeq l_		; 6
+
+       (ENDL(i) = false) and									//~.ENDL		; 0
        bmi_a(i+1) and										// bmi @+		; 1
        beq(i+2) and										// beq @+		; 2
        dey(i+3) and										// dey			; 3
-       lab_a(i+4) and										//@			; 4
-       tya(i+5) and										// tya			; 5
-       jeq(i+6) then										// jeq l_		; 6
+//       lab_a(i+4) and										//@			; 4
+       tya(i+5) then										// tya			; 5
+//       jeq(i+6) then										// jeq l_		; 6
       begin
        listing[i+2] := #9'jne ' + GetARG(i+6);
        listing[i+3] := '';
@@ -565,12 +683,16 @@ begin
       end;
 
 
-    if (SKIP(i) = false) and (ENDL(i) = false) and						//~SKIP|.ENDL		; 0
+    if lab_a(i+3) and										//@			; 3
+
+       jne(i+5) and										// jne l_		; 5
+
+       (SKIP(i) = false) and (ENDL(i) = false) and						//~SKIP|.ENDL		; 0
        bmi_a(i+1) and										// bmi @+		; 1
        dey(i+2) and										// dey			; 2
-       lab_a(i+3) and										//@			; 3
-       tya(i+4) and										// tya			; 4
-       jne(i+5) then										// jne l_		; 5
+//       lab_a(i+3) and										//@			; 3
+       tya(i+4) then										// tya			; 4
+//       jne(i+5) then										// jne l_		; 5
       begin
        listing[i+1] := #9'jmi ' + GetARG(i+5);
        listing[i+2] := '';
@@ -585,12 +707,16 @@ begin
       end;
 
 
-    if (SKIP(i) = false) and (ENDL(i) = false) and						//~SKIP|.ENDL		; 0
+    if lab_a(i+3) and										//@			; 3
+
+       jne(i+5) and										// jne l_		; 5
+
+       (SKIP(i) = false) and (ENDL(i) = false) and						//~SKIP|.ENDL		; 0
        bpl_a(i+1) and										// bpl @+		; 1
        dey(i+2) and										// dey			; 2
-       lab_a(i+3) and										//@			; 3
-       tya(i+4) and										// tya			; 4
-       jne(i+5) then										// jne l_		; 5
+//       lab_a(i+3) and										//@			; 3
+       tya(i+4) then										// tya			; 4
+//       jne(i+5) then										// jne l_		; 5
       begin
        listing[i+1] := #9'jpl ' + GetARG(i+5);
        listing[i+2] := '';
@@ -605,12 +731,16 @@ begin
       end;
 
 
-    if (SKIP(i) = false) and (ENDL(i) = false) and						//~SKIP|.ENDL		; 0
+    if lab_a(i+3) and										//@			; 3
+
+       jeq(i+5) and										// jeq l_		; 5
+
+       (SKIP(i) = false) and (ENDL(i) = false) and						//~SKIP|.ENDL		; 0
        bpl_a(i+1) and										// bpl @+		; 1
        dey(i+2) and										// dey			; 2
-       lab_a(i+3) and										//@			; 3
-       tya(i+4) and										// tya			; 4
-       jeq(i+5) then										// jeq l_		; 5
+//       lab_a(i+3) and										//@			; 3
+       tya(i+4) then										// tya			; 4
+//       jeq(i+5) then										// jeq l_		; 5
       begin
        listing[i+1] := #9'jmi ' + GetARG(i+5);
        listing[i+2] := '';
@@ -625,13 +755,17 @@ begin
       end;
 
 
-    if (ENDL(i-1) = false) and
+    if lab_a(i+3) and										//@			; 3    
+
+       jeq(i+5) and										// jeq l_		; 5
+
+       (ENDL(i-1) = false) and
        seq(i) and										// seq			; 0
        bcs_a(i+1) and										// bcs @+		; 1
        dey(i+2) and										// dey			; 2
-       lab_a(i+3) and										//@			; 3
-       tya(i+4) and										// tya			; 4
-       jeq(i+5) then										// jeq l_		; 5
+//       lab_a(i+3) and										//@			; 3
+       tya(i+4) then										// tya			; 4
+//       jeq(i+5) then										// jeq l_		; 5
      begin
        listing[i]   := #9'jcc ' + GetARG(i+5);
        listing[i+1] := #9'jeq ' + GetARG(i+5);
@@ -647,13 +781,17 @@ begin
      end;
 
 
-    if (ENDL(i-1) = false) and
+    if lab_a(i+3) and										//@			; 3
+
+       jne(i+5) and										// jne l_		; 5
+
+       (ENDL(i-1) = false) and
        seq(i) and										// seq			; 0
        bcs_a(i+1) and										// bcs @+		; 1
        dey(i+2) and										// dey			; 2
-       lab_a(i+3) and										//@			; 3
-       tya(i+4) and										// tya			; 4
-       jne(i+5) then										// jne l_		; 5
+//       lab_a(i+3) and										//@			; 3
+       tya(i+4) then										// tya			; 4
+//       jne(i+5) then										// jne l_		; 5
      begin
        listing[i]   := #9'beq @+';
        listing[i+1] := #9'jcs ' + GetARG(i+5);
@@ -669,12 +807,16 @@ begin
      end;
 
 
-    if (SKIP(i-1) = false) and (ENDL(i-1) = false) and
+    if lab_a(i+2) and										//@			; 2    
+
+       jne(i+4) and										// jne l_		; 4
+
+       (SKIP(i-1) = false) and (ENDL(i-1) = false) and
        bcc_a(i) and										// bcc @+		; 0
        dey(i+1) and										// dey			; 1
-       lab_a(i+2) and										//@			; 2
-       tya(i+3) and										// tya			; 3
-       jne(i+4) then										// jne l_		; 4
+//       lab_a(i+2) and										//@			; 2
+       tya(i+3) then										// tya			; 3
+//       jne(i+4) then										// jne l_		; 4
      begin
        listing[i]   := #9'jcc ' + GetARG(i+4);
        listing[i+1] := '';
@@ -689,12 +831,16 @@ begin
      end;
 
 
-    if (SKIP(i-1) = false) and (ENDL(i-1) = false) and
+    if lab_a(i+2) and										//@			; 2    
+
+       jeq(i+4) and										// jeq l_		; 4
+
+       (SKIP(i-1) = false) and (ENDL(i-1) = false) and
        bcc_a(i) and										// bcc @+		; 0
        dey(i+1) and										// dey			; 1
-       lab_a(i+2) and										//@			; 2
-       tya(i+3) and										// tya			; 3
-       jeq(i+4) then										// jeq l_		; 4
+//       lab_a(i+2) and										//@			; 2
+       tya(i+3) then										// tya			; 3
+//       jeq(i+4) then										// jeq l_		; 4
      begin
        listing[i]   := #9'jcs ' + GetARG(i+4);
        listing[i+1] := '';
@@ -709,12 +855,16 @@ begin
      end;
 
 
-    if (SKIP(i-1) = false) and (ENDL(i-1) = false) and
+    if lab_a(i+2) and										//@			; 2
+
+       jeq(i+4) and										// jeq l_		; 4
+
+       (SKIP(i-1) = false) and (ENDL(i-1) = false) and
        bcs_a(i) and										// bcs @+		; 0
        dey(i+1) and										// dey			; 1
-       lab_a(i+2) and										//@			; 2
-       tya(i+3) and										// tya			; 3
-       jeq(i+4) then										// jeq l_		; 4
+//       lab_a(i+2) and										//@			; 2
+       tya(i+3) then										// tya			; 3
+//       jeq(i+4) then										// jeq l_		; 4
      begin
        listing[i]   := #9'jcc ' + GetARG(i+4);
        listing[i+1] := '';
@@ -729,12 +879,16 @@ begin
      end;
 
 
-    if (SKIP(i-1) = false) and (ENDL(i-1) = false) and
+    if lab_a(i+2) and										//@			; 2
+
+       jne(i+4) and										// jne l_		; 4
+
+       (SKIP(i-1) = false) and (ENDL(i-1) = false) and
        bcs_a(i) and										// bcs @+		; 0
        dey(i+1) and										// dey			; 1
-       lab_a(i+2) and										//@			; 2
-       tya(i+3) and										// tya			; 3
-       jne(i+4) then										// jne l_		; 4
+//       lab_a(i+2) and										//@			; 2
+       tya(i+3) then										// tya			; 3
+//       jne(i+4) then										// jne l_		; 4
      begin
       listing[i]   := #9'jcs ' + GetARG(i+4);
       listing[i+1] := '';
@@ -749,13 +903,17 @@ begin
      end;
 
 
-    if (ENDL(i-1) = false) and
+    if lab_a(i+3) and										//@			; 3   
+
+       jne(i+5) and 										// jne l_		; 5
+
+       (ENDL(i-1) = false) and
        bcc_a(i) and										// bcc @+		; 0
        beq(i+1) and										// beq @+		; 1
        dey(i+2) and										// dey			; 2
-       lab_a(i+3) and										//@			; 3
-       tya(i+4) and										// tya			; 4
-       jne(i+5) then 										// jne l_		; 5
+//       lab_a(i+3) and										//@			; 3
+       tya(i+4) then										// tya			; 4
+//       jne(i+5) then 										// jne l_		; 5
      begin
 
       listing[i]   := #9'jcc ' + GetARG(i+5);
@@ -772,13 +930,17 @@ begin
      end;
 
 
-    if (ENDL(i-1) = false) and
+    if lab_a(i+3) and										//@			; 3    
+
+       jeq(i+5) and 										// jeq l_		; 5
+
+       (ENDL(i-1) = false) and
        bcc_a(i) and										// bcc @+		; 0
        beq(i+1) and										// beq @+		; 1
        dey(i+2) and										// dey			; 2
-       lab_a(i+3) and										//@			; 3
-       tya(i+4) and										// tya			; 4
-       jeq(i+5) then 										// jeq l_		; 5
+//       lab_a(i+3) and										//@			; 3
+       tya(i+4) then										// tya			; 4
+//       jeq(i+5) then 										// jeq l_		; 5
      begin
 
       listing[i]   := #9'bcc @+';
@@ -798,11 +960,15 @@ begin
 // -------------------------------------------------------------------------------------------
 
 
-    if (SKIP(i-1) = false) and
-       cmp(i) and										// cmp			; 0
+    if lab_a(i+3) and										// @			; 3
+
        beq(i+1) and										// beq @+		; 1
-       jmp_l(i+2) and										// jmp l_		; 2
-       lab_a(i+3) then										// @			; 3
+
+       (SKIP(i-1) = false) and
+       cmp(i) and										// cmp			; 0
+//       beq(i+1) and										// beq @+		; 1
+       jmp_l(i+2) then										// jmp l_		; 2
+//       lab_a(i+3) then									// @			; 3
      begin
        listing[i+1] := #9'jne ' + GetARG(i+2);
        listing[i+2] := '';
@@ -812,11 +978,15 @@ begin
      end;
 
 
-    if (SKIP(i-1) = false) and
-       cmp(i) and										// cmp			; 0
+    if lab_a(i+3) and										// @			; 3
+
        bcc_a(i+1) and										// bcc @+		; 1
-       jmp_l(i+2) and										// jmp l_		; 2
-       lab_a(i+3) then										// @			; 3
+
+       (SKIP(i-1) = false) and
+       cmp(i) and										// cmp			; 0
+//       bcc_a(i+1) and										// bcc @+		; 1
+       jmp_l(i+2) then										// jmp l_		; 2
+//       lab_a(i+3) then									// @			; 3
      begin
        listing[i+1] := #9'jcs ' + GetARG(i+2);
        listing[i+2] := '';
@@ -826,11 +996,14 @@ begin
      end;
 
 
-    if //(listing[i] = #9'.ENDL') and								//
-       bmi_a(i+1) and										// bmi @+		; 1
+    if lab_a(i+4) and										//@			; 4
+
        beq(i+2) and										// beq @+		; 2
-       jmp_l(i+3) and										// jmp l_		; 3
-       lab_a(i+4) then										//@			; 4
+
+       bmi_a(i+1) and										// bmi @+		; 1
+//       beq(i+2) and										// beq @+		; 2
+       jmp_l(i+3) then										// jmp l_		; 3
+//       lab_a(i+4) then									//@			; 4
       begin
        listing[i+2] := #9'jne ' + GetARG(i+3);
        listing[i+3] := '';
@@ -839,11 +1012,14 @@ begin
       end;
 
 
-    if //(listing[i] = #9'.ENDL') and								//
-       seq(i+1) and										// seq			; 1
+    if lab_a(i+4) and										//@			; 4
+
        bpl_a(i+2) and										// bpl @+		; 2
-       jmp_l(i+3) and										// jmp l_		; 3
-       lab_a(i+4) then										//@			; 4
+
+       seq(i+1) and										// seq			; 1
+//       bpl_a(i+2) and										// bpl @+		; 2
+       jmp_l(i+3) then										// jmp l_		; 3
+//       lab_a(i+4) then										//@			; 4
       begin
        listing[i+1] := #9'jmi ' + GetARG(i+3);
        listing[i+2] := #9'jeq ' + GetARG(i+3);
@@ -854,10 +1030,14 @@ begin
       end;
 
 
-    if (SKIP(i) = false) and									//
+    if lab_a(i+3) and										//@			; 3
+
        bpl_a(i+1) and										// bpl @+		; 1
-       jmp_l(i+2) and										// jmp l_		; 2
-       lab_a(i+3) then										//@			; 3
+
+       (SKIP(i) = false) and									//
+//       bpl_a(i+1) and										// bpl @+		; 1
+       jmp_l(i+2) then										// jmp l_		; 2
+//       lab_a(i+3) then									//@			; 3
       begin
        listing[i+1] := #9'jmi ' + GetARG(i+2);
        listing[i+2] := '';
@@ -867,10 +1047,14 @@ begin
       end;
 
 
-    if (SKIP(i) = false) and									//
+    if lab_a(i+3) and										//@			; 3   
+
        bmi_a(i+1) and										// bmi @+		; 1
-       jmp_l(i+2) and										// jmp l_		; 2
-       lab_a(i+3) then										//@			; 3
+
+       (SKIP(i) = false) and									//
+       bmi_a(i+1) and										// bmi @+		; 1
+       jmp_l(i+2) then										// jmp l_		; 2
+//       lab_a(i+3) then									//@			; 3
       begin
        listing[i+1] := #9'jpl ' + GetARG(i+2);
        listing[i+2] := '';
@@ -880,10 +1064,14 @@ begin
       end;
 
 
-    if bcc_a(i) and										// bcc @+		; 0
+    if lab_a(i+3) and										//@			; 3
+
        beq(i+1) and										// beq @+		; 1
-       jmp_l(i+2) and										// jmp l_		; 2
-       lab_a(i+3) then										//@			; 3
+
+       bcc_a(i) and										// bcc @+		; 0
+       beq(i+1) and										// beq @+		; 1
+       jmp_l(i+2) then										// jmp l_		; 2
+//       lab_a(i+3) then									//@			; 3
       begin
        listing[i+1] := #9'jne ' + GetARG(i+2);
        listing[i+2] := '';
@@ -892,10 +1080,14 @@ begin
       end;
 
 
-    if (SKIP(i-1) = false) and
+    if lab_a(i+2) and										//@			; 2
+
        bne(i) and										// bne @+		; 0
-       jmp_l(i+1) and										// jmp l_		; 1
-       lab_a(i+2) then										//@			; 2
+
+       (SKIP(i-1) = false) and
+//       bne(i) and										// bne @+		; 0
+       jmp_l(i+1) then										// jmp l_		; 1
+//       lab_a(i+2) then									//@			; 2
      begin
        listing[i]   := #9'jeq ' + GetARG(i+1);
        listing[i+1] := '';
@@ -905,10 +1097,14 @@ begin
      end;
 
 
-    if seq(i) and										// seq			; 0
+    if lab_a(i+3) and										//@			; 3
+
        bcs_a(i+1) and										// bcs @+		; 1
-       jmp_l(i+2) and										// jmp l_		; 2
-       lab_a(i+3) then										//@			; 3
+
+       seq(i) and										// seq			; 0
+//       bcs_a(i+1) and										// bcs @+		; 1
+       jmp_l(i+2) then										// jmp l_		; 2
+//       lab_a(i+3) then									//@			; 3
      begin
        listing[i]   := #9'jcc ' + GetARG(i+2);
        listing[i+1] := #9'jeq ' + GetARG(i+2);
@@ -919,10 +1115,14 @@ begin
      end;
 
 
-    if (SKIP(i-1) = false) and
+    if lab_a(i+2) and										//@			; 2
+
        bcs_a(i) and										// bcs @+		; 0
-       jmp_l(i+1) and										// jmp l_		; 1
-       lab_a(i+2) then										//@			; 2
+
+       (SKIP(i-1) = false) and
+//       bcs_a(i) and										// bcs @+		; 0
+       jmp_l(i+1) then										// jmp l_		; 1
+//       lab_a(i+2) then									//@			; 2
      begin
        listing[i]   := #9'jcc ' + GetARG(i+1);
        listing[i+1] := '';
@@ -932,10 +1132,14 @@ begin
      end;
 
 
-    if (SKIP(i-1) = false) and
+    if lab_a(i+2) and										//@			; 2
+
        bcc_a(i) and										// bcc @+		; 0
-       jmp_l(i+1) and										// jmp l_		; 1
-       lab_a(i+2) then										//@			; 2
+
+       (SKIP(i-1) = false) and
+//       bcc_a(i) and										// bcc @+		; 0
+       jmp_l(i+1) then										// jmp l_		; 1
+//       lab_a(i+2) then									//@			; 2
      begin
        listing[i]   := #9'jcs ' + GetARG(i+1);
        listing[i+1] := '';
@@ -945,10 +1149,14 @@ begin
      end;
 
 
-    if (SKIP(i-1) = false) and
+    if lab_a(i+2) and										//@			; 2
+
        beq(i) and										// beq @+		; 0
-       jmp_l(i+1) and										// jmp l_		; 1
-       lab_a(i+2) then										//@			; 2
+
+       (SKIP(i-1) = false) and
+//       beq(i) and										// beq @+		; 0
+       jmp_l(i+1) then										// jmp l_		; 1
+//       lab_a(i+2) then									//@			; 2
      begin
        listing[i]   := #9'jne ' + GetARG(i+1);
        listing[i+1] := '';
@@ -958,9 +1166,13 @@ begin
      end;
 
 
-    if (SKIP(i-1) = false) and
+    if jmp_l(i+1) and										// jmp l_		; 1
+
        (listing[i] = #9'bne *+5') and								// bne *+5		; 0
-       jmp_l(i+1) then										// jmp l_		; 1
+
+       (SKIP(i-1) = false) then
+//       (listing[i] = #9'bne *+5') and								// bne *+5		; 0
+//       jmp_l(i+1) then									// jmp l_		; 1
      begin
        listing[i]   := '';
        listing[i+1] := #9'jeq ' + GetARG(i+1);
@@ -969,9 +1181,13 @@ begin
      end;
 
 
-    if (SKIP(i-1) = false) and
+    if jmp_l(i+1) and										// jmp l_		; 1
+
        (listing[i] = #9'beq *+5') and								// beq *+5		; 0
-       jmp_l(i+1) then										// jmp l_		; 1
+
+       (SKIP(i-1) = false) then
+//       (listing[i] = #9'beq *+5') and								// beq *+5		; 0
+//       jmp_l(i+1) then									// jmp l_		; 1
      begin
        listing[i]   := '';
        listing[i+1] := #9'jne ' + GetARG(i+1);
@@ -980,9 +1196,13 @@ begin
      end;
 
 
-    if (SKIP(i-1) = false) and
-       (listing[i] = #9'bcs *+5') and								// bcs *+5		; 0
-       jmp_l(i+1) then										// jmp l_		; 1
+    if jmp_l(i+1) and										// jmp l_		; 1
+
+       (listing[i] = #9'bcs *+5') and								// bcs *+5		; 0    
+
+       (SKIP(i-1) = false) then									//
+//       (listing[i] = #9'bcs *+5') and								// bcs *+5		; 0
+//       jmp_l(i+1) then									// jmp l_		; 1
      begin
        listing[i]   := '';
        listing[i+1] := #9'jcc ' + GetARG(i+1);
@@ -991,9 +1211,13 @@ begin
      end;
 
 
-    if (SKIP(i-1) = false) and									//
+    if jmp_l(i+1) and										// jmp l_		; 1    
+
        seq(i) and										// seq			; 0
-       jmp_l(i+1) then										// jmp l_		; 1
+
+       (SKIP(i-1) = false) then									//
+//       seq(i) then										// seq			; 0
+//       jmp_l(i+1) then									// jmp l_		; 1
       begin
        listing[i] := #9'jne ' + GetARG(i+1);
        listing[i+1] := '';
@@ -1011,8 +1235,10 @@ begin
       end;
 
 
-    if lda_im_0(i) and										// lda #$00		; 0
-       jeq(i+1) then										// jeq			; 1
+    if jeq(i+1) and										// jeq			; 1  
+
+       lda_im_0(i) then										// lda #$00		; 0
+//       jeq(i+1) then										// jeq			; 1
       begin
        listing[i] := '';
        listing[i+1] := #9'jmp ' + GetARG(i+1);
@@ -1021,8 +1247,10 @@ begin
       end;
 
 
-    if (lda_im(i) and (lda_im_0(i) = false)) and						// lda #		; 0
-       jne(i+1) then										// jne			; 1
+    if jne(i+1) and										// jne			; 1
+
+      (lda_im(i) and (lda_im_0(i) = false)) then						// lda #		; 0
+//       jne(i+1) then										// jne			; 1
       begin
        listing[i] := '';
        listing[i+1] := #9'jmp ' + GetARG(i+1);
@@ -1031,8 +1259,10 @@ begin
       end;
 
 
-    if lda(i) and (lda_im(i) = false) and							// lda TMP		; 0
-       cmp(i+1) and (cmp_im(i+1) = false) and							// cmp TMP		; 1
+    if cmp(i+1) and (cmp_im(i+1) = false) and							// cmp TMP		; 1
+
+       lda(i) and (lda_im(i) = false) and							// lda TMP		; 0
+//       cmp(i+1) and (cmp_im(i+1) = false) and							// cmp TMP		; 1
        (jne(i+2) or bne(i+2)) and								// jne|bne		; 2
        (SKIP(i+3) = false) then
      if argMatch(i, i+1) then
@@ -1045,8 +1275,10 @@ begin
       end;
 
 
-    if lda(i) and										// lda TMP		; 0
-       cmp(i+1) and										// cmp TMP		; 1
+    if cmp(i+1) and										// cmp TMP		; 1 
+
+       lda(i) and										// lda TMP		; 0
+//       cmp(i+1) and										// cmp TMP		; 1
        (jeq(i+2) or jcs(i+2)) and								// jeq|jcs		; 2
        (SKIP(i+3) = false) then
      if argMatch(i, i+1) then
@@ -1059,10 +1291,14 @@ begin
       end;
 
 
-    if lda(i) and										// lda A		; 0
-       cmp(i+1) and										// cmp A		; 1
+    if jeq(i+3) and										// jeq			; 3    
+
        jcc(i+2) and										// jcc			; 2
-       jeq(i+3) then										// jeq			; 3
+
+       lda(i) and										// lda A		; 0
+       cmp(i+1) then										// cmp A		; 1
+//       jcc(i+2) and										// jcc			; 2
+//       jeq(i+3) then										// jeq			; 3
     if argMatch(i, i+1) then
      begin
 
@@ -1075,9 +1311,11 @@ begin
      end;
 
 
-    if ldy_1(i) and										// ldy #1		; 0
+    if tya(i+2) and										// tya			; 2
+
+       ldy_1(i) and										// ldy #1		; 0
        dey(i+1) and										// dey			; 1
-       tya(i+2) and										// tya			; 2
+//       tya(i+2) and										// tya			; 2
        (jne(i+3) or bne(i+3)) then								// jne|bne		; 3
       begin
 	listing[i]   := '';
