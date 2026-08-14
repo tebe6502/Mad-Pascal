@@ -44,6 +44,8 @@ ParamStr
 Pause
 Peek		; optimization build in compiler
 Poke		; optimization build in compiler
+PopX
+PushX
 Random
 ReadConfig
 ReadSector
@@ -681,7 +683,7 @@ begin
     while( b > 0 ) do begin
 
         t := q + b;
-        if( r >= t ) then begin
+        if ( r >= t ) then begin
 
             r := r - t;
             q := t + b;
@@ -690,7 +692,7 @@ begin
         b := b shr 1;
     end;
 
-    if( r > q ) then inc(q);
+    if ( q < r ) then inc(q);
 
     q:=q shr 8;
 

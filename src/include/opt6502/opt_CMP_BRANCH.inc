@@ -9,8 +9,10 @@ begin
 // ===				      BRANCH.
 // -----------------------------------------------------------------------------
 
-    if lda(i) and										// lda			; 0	>= 128
-       (listing[i+1] = #9'cmp #$80') and							// cmp #$80		; 1
+    if (listing[i+1] = #9'cmp #$80') and							// cmp #$80		; 1
+
+       lda(i) and										// lda			; 0	>= 128
+//       (listing[i+1] = #9'cmp #$80') and							// cmp #$80		; 1
        bcs_a(i+2) and										// bcs @+		; 2
        dey(i+3) then										// dey			; 3
      begin
@@ -21,8 +23,10 @@ begin
      end;
 
 
-    if lda(i) and										// lda			; 0	< 128
-       (listing[i+1] = #9'cmp #$80') and							// cmp #$80		; 1
+    if (listing[i+1] = #9'cmp #$80') and							// cmp #$80		; 1
+
+       lda(i) and										// lda			; 0	< 128
+//       (listing[i+1] = #9'cmp #$80') and							// cmp #$80		; 1
        bcc_a(i+2) and										// bcc @+		; 2
        dey(i+3) then										// dey			; 3
      begin
@@ -33,8 +37,10 @@ begin
      end;
 
 
-    if lda(i) and										// lda			; 0	> 127
-       (listing[i+1] = #9'cmp #$7F') and							// cmp #$7F		; 1
+    if (listing[i+1] = #9'cmp #$7F') and							// cmp #$7F		; 1
+
+       lda(i) and										// lda			; 0	> 127
+//       (listing[i+1] = #9'cmp #$7F') and							// cmp #$7F		; 1
        seq(i+2) and										// seq			; 2
        bcs_a(i+3) and										// bcs @+		; 3
        dey(i+4) then										// dey			; 4
@@ -47,8 +53,10 @@ begin
      end;
 
 
-    if lda(i) and										// lda			; 0	<= 127
-       (listing[i+1] = #9'cmp #$7F') and							// cmp #$7F		; 1
+    if (listing[i+1] = #9'cmp #$7F') and							// cmp #$7F		; 1
+
+       lda(i) and										// lda			; 0	<= 127
+//       (listing[i+1] = #9'cmp #$7F') and							// cmp #$7F		; 1
        bcc_a(i+2) and										// bcc @+		; 2
        beq(i+3) and										// beq @+		; 3
        dey(i+4) then										// dey			; 4
@@ -61,8 +69,10 @@ begin
      end;
 
 
-    if lda(i) and										// lda			; 0	<= 127	FOR
-       (listing[i+1] = #9'cmp #$7F') and							// cmp #$7F		; 1
+    if (listing[i+1] = #9'cmp #$7F') and							// cmp #$7F		; 1
+
+       lda(i) and										// lda			; 0	<= 127	FOR
+//       (listing[i+1] = #9'cmp #$7F') and							// cmp #$7F		; 1
        (listing[i+2] = #9'bcc *+7') and								// bcc *+7		; 2
        (listing[i+3] = #9'beq *+5') then							// beq *+5		; 3
      begin
@@ -139,7 +149,7 @@ begin
      end;
 
 
-    if lab_a(i+4) and										// @			; 4    
+    if lab_a(i+4) and										// @			; 4
 
        lda_im_0(i+3) and									// lda #$00		; 3
 
@@ -177,6 +187,144 @@ begin
 
     if lab_a(i+6) and										//@			; 6
 
+       (listing[i+3] = #9'cmp #$01') and							// cmp #$01		; 3
+
+       lda_val(i) and (lda_im(i) = false) and (iy(i) = false) and				// lda			; 0	~:STACKORIGIN
+       ldy_1(i+1) and										// ldy #1		; 1
+       (listing[i+2] = #9'and #$01') and							// and #$01		; 2
+//       (listing[i+3] = #9'cmp #$01') and							// cmp #$01		; 3
+       beq(i+4) and										// beq @+		; 4
+       dey(i+5) then										// dey			; 5
+//       lab_a(i+6) then									//@			; 6
+     begin
+	listing[i+2] := #9'lda #$01';
+
+	listing[i+3] := #9'bit ' + GetARG(i);
+	listing[i+4] := #9'bne @+';
+
+        listing[i] := '';
+
+	exit(false);
+     end;
+
+
+    if lab_a(i+6) and										//@			; 6
+
+       (listing[i+3] = #9'cmp #$02') and							// cmp #$02		; 3
+
+       lda_val(i) and (lda_im(i) = false) and (iy(i) = false) and				// lda			; 0	~:STACKORIGIN
+       ldy_1(i+1) and										// ldy #1		; 1
+       (listing[i+2] = #9'and #$02') and							// and #$02		; 2
+//       (listing[i+3] = #9'cmp #$02') and							// cmp #$02		; 3
+       beq(i+4) and										// beq @+		; 4
+       dey(i+5) then										// dey			; 5
+//       lab_a(i+6) then									//@			; 6
+     begin
+	listing[i+2] := #9'lda #$02';
+
+	listing[i+3] := #9'bit ' + GetARG(i);
+	listing[i+4] := #9'bne @+';
+
+        listing[i] := '';
+
+	exit(false);
+     end;
+
+
+    if lab_a(i+6) and										//@			; 6
+
+       (listing[i+3] = #9'cmp #$04') and							// cmp #$04		; 3
+
+       lda_val(i) and (lda_im(i) = false) and (iy(i) = false) and				// lda			; 0	~:STACKORIGIN
+       ldy_1(i+1) and										// ldy #1		; 1
+       (listing[i+2] = #9'and #$04') and							// and #$04		; 2
+//       (listing[i+3] = #9'cmp #$04') and							// cmp #$04		; 3
+       beq(i+4) and										// beq @+		; 4
+       dey(i+5) then										// dey			; 5
+//       lab_a(i+6) then									//@			; 6
+     begin
+	listing[i+2] := #9'lda #$04';
+
+	listing[i+3] := #9'bit ' + GetARG(i);
+	listing[i+4] := #9'bne @+';
+
+        listing[i] := '';
+
+	exit(false);
+     end;
+
+
+    if lab_a(i+6) and										//@			; 6
+
+       (listing[i+3] = #9'cmp #$08') and							// cmp #$08		; 3
+
+       lda_val(i) and (lda_im(i) = false) and (iy(i) = false) and				// lda			; 0	~:STACKORIGIN
+       ldy_1(i+1) and										// ldy #1		; 1
+       (listing[i+2] = #9'and #$08') and							// and #$08		; 2
+//       (listing[i+3] = #9'cmp #$08') and							// cmp #$08		; 3
+       beq(i+4) and										// beq @+		; 4
+       dey(i+5) then										// dey			; 5
+//       lab_a(i+6) then									//@			; 6
+     begin
+	listing[i+2] := #9'lda #$08';
+
+	listing[i+3] := #9'bit ' + GetARG(i);
+	listing[i+4] := #9'bne @+';
+
+        listing[i] := '';
+
+	exit(false);
+     end;
+
+
+    if lab_a(i+6) and										//@			; 6
+
+       (listing[i+3] = #9'cmp #$10') and							// cmp #$10		; 3
+
+       lda_val(i) and (lda_im(i) = false) and (iy(i) = false) and				// lda			; 0	~:STACKORIGIN
+       ldy_1(i+1) and										// ldy #1		; 1
+       (listing[i+2] = #9'and #$10') and							// and #$10		; 2
+//       (listing[i+3] = #9'cmp #$10') and							// cmp #$10		; 3
+       beq(i+4) and										// beq @+		; 4
+       dey(i+5) then										// dey			; 5
+//       lab_a(i+6) then									//@			; 6
+     begin
+	listing[i+2] := #9'lda #$10';
+
+	listing[i+3] := #9'bit ' + GetARG(i);
+	listing[i+4] := #9'bne @+';
+
+        listing[i] := '';
+
+	exit(false);
+     end;
+
+
+    if lab_a(i+6) and										//@			; 6
+
+       (listing[i+3] = #9'cmp #$20') and							// cmp #$20		; 3
+
+       lda_val(i) and (lda_im(i) = false) and (iy(i) = false) and				// lda			; 0	~:STACKORIGIN
+       ldy_1(i+1) and										// ldy #1		; 1
+       (listing[i+2] = #9'and #$20') and							// and #$20		; 2
+//       (listing[i+3] = #9'cmp #$20') and							// cmp #$20		; 3
+       beq(i+4) and										// beq @+		; 4
+       dey(i+5) then										// dey			; 5
+//       lab_a(i+6) then									//@			; 6
+     begin
+	listing[i+2] := #9'lda #$20';
+
+	listing[i+3] := #9'bit ' + GetARG(i);
+	listing[i+4] := #9'bne @+';
+
+        listing[i] := '';
+
+	exit(false);
+     end;
+
+
+    if lab_a(i+6) and										//@			; 6
+
        (listing[i+3] = #9'cmp #$40') and							// cmp #$40		; 3
 
        lda_val(i) and (lda_im(i) = false) and (iy(i) = false) and				// lda			; 0	~:STACKORIGIN
@@ -191,6 +339,8 @@ begin
 
 	listing[i+3] := #9'bit ' + GetARG(i);
 	listing[i+4] := #9'bne @+';
+
+        listing[i] := '';
 
 	exit(false);
      end;
@@ -341,7 +491,7 @@ begin
 
 // -------------------------------------------------------------------------------------------
 
-    if lab_a(i+3) and										//@			; 3 
+    if lab_a(i+3) and										//@			; 3
 
        (ENDL(i-1) = false) and
        smi(i) and										// smi			; 0
@@ -409,7 +559,7 @@ begin
       end;
 
 
-    if lab_a(i+3) and										//@			; 3  
+    if lab_a(i+3) and										//@			; 3
 
        jeq(i+5) and										// jeq			; 5
 
@@ -457,7 +607,7 @@ begin
       end;
 
 
-    if lab_a(i+7) and										//@			; 7  
+    if lab_a(i+7) and										//@			; 7
 
        jeq(i+9) and										// jeq			; 9
 
@@ -609,7 +759,7 @@ begin
       end;
 
 
-    if lab_a(i+3) and										//@			; 3   
+    if lab_a(i+3) and										//@			; 3
 
        bne(i+1) and										// bne @+		; 1
 
@@ -658,7 +808,7 @@ begin
       end;
 
 
-    if lab_a(i+4) and										//@			; 4  
+    if lab_a(i+4) and										//@			; 4
 
        jeq(i+6) and										// jeq l_		; 6
 
@@ -755,7 +905,7 @@ begin
       end;
 
 
-    if lab_a(i+3) and										//@			; 3    
+    if lab_a(i+3) and										//@			; 3
 
        jeq(i+5) and										// jeq l_		; 5
 
@@ -807,7 +957,7 @@ begin
      end;
 
 
-    if lab_a(i+2) and										//@			; 2    
+    if lab_a(i+2) and										//@			; 2
 
        jne(i+4) and										// jne l_		; 4
 
@@ -831,7 +981,7 @@ begin
      end;
 
 
-    if lab_a(i+2) and										//@			; 2    
+    if lab_a(i+2) and										//@			; 2
 
        jeq(i+4) and										// jeq l_		; 4
 
@@ -903,7 +1053,7 @@ begin
      end;
 
 
-    if lab_a(i+3) and										//@			; 3   
+    if lab_a(i+3) and										//@			; 3
 
        jne(i+5) and 										// jne l_		; 5
 
@@ -930,7 +1080,7 @@ begin
      end;
 
 
-    if lab_a(i+3) and										//@			; 3    
+    if lab_a(i+3) and										//@			; 3
 
        jeq(i+5) and 										// jeq l_		; 5
 
@@ -1047,7 +1197,7 @@ begin
       end;
 
 
-    if lab_a(i+3) and										//@			; 3   
+    if lab_a(i+3) and										//@			; 3
 
        bmi_a(i+1) and										// bmi @+		; 1
 
@@ -1198,7 +1348,7 @@ begin
 
     if jmp_l(i+1) and										// jmp l_		; 1
 
-       (listing[i] = #9'bcs *+5') and								// bcs *+5		; 0    
+       (listing[i] = #9'bcs *+5') and								// bcs *+5		; 0
 
        (SKIP(i-1) = false) then									//
 //       (listing[i] = #9'bcs *+5') and								// bcs *+5		; 0
@@ -1211,7 +1361,7 @@ begin
      end;
 
 
-    if jmp_l(i+1) and										// jmp l_		; 1    
+    if jmp_l(i+1) and										// jmp l_		; 1
 
        seq(i) and										// seq			; 0
 
@@ -1235,7 +1385,7 @@ begin
       end;
 
 
-    if jeq(i+1) and										// jeq			; 1  
+    if jeq(i+1) and										// jeq			; 1
 
        lda_im_0(i) then										// lda #$00		; 0
 //       jeq(i+1) then										// jeq			; 1
@@ -1275,7 +1425,7 @@ begin
       end;
 
 
-    if cmp(i+1) and										// cmp TMP		; 1 
+    if cmp(i+1) and										// cmp TMP		; 1
 
        lda(i) and										// lda TMP		; 0
 //       cmp(i+1) and										// cmp TMP		; 1
@@ -1291,7 +1441,7 @@ begin
       end;
 
 
-    if jeq(i+3) and										// jeq			; 3    
+    if jeq(i+3) and										// jeq			; 3
 
        jcc(i+2) and										// jcc			; 2
 

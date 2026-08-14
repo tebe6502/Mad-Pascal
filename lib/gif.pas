@@ -390,7 +390,7 @@ begin
 				dec(BytesLeft);                       { decrement the bytes left counter }
 		  end;
 
-		  ret := CurrByte shr (8 - BitsLeft);       { shift off any previosly used bits}
+		  ret := CurrByte shr byte(8 - BitsLeft);   { shift off any previosly used bits}
 
 		  while CurrCodeSize > BitsLeft do          { need more bits ? }
 		  begin
