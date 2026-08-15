@@ -46,6 +46,42 @@ begin
      end;
 
 
+    if (listing[i+7] = #9'ora #$01') and							// ora #$01				; 7
+
+       lda_val(i) and (iy(i) = false) and							// lda A				; 0	~:STACKORIGN
+       sta_stack(i+1) and									// sta :STACKORIGIN			; 1
+       lda_val(i+2) and (iy(i+2) = false) and							// lda A+1				; 2	~:STACKORIGN
+       sta_stack(i+3) and									// sta :STACKORIGIN+STACKWIDTH		; 3
+       asl_stack(i+4) and									// asl :STACKORIGIN			; 4
+       rol_stack(i+5) and									// rol :STACKORIGIN+STACKWIDTH		; 5
+       lda_stack(i+6) and									// lda :STACKORIGIN			; 6
+//       (listing[i+7] = #9'ora #$01') and							// ora #$01				; 7
+       sta_a(i+8) and										// sta A			`	; 8	~:STACKORIGN
+       lda_stack(i+9) and									// lda :STACKORIGIN+STACKWIDTH		; 9
+       sta_a(i+10) then										// sta A+1				; 10	~:STACKORIGN
+     if argMatch(i, i+8) and
+        argMatch(i+2, i+10) and
+        argMatch(i+1, i+6) and
+	argMatch(i+3, i+9) then
+      begin
+	listing[i+1] := #9'rol ' + GetARG(i);
+	listing[i+2] := #9'rol ' + GetARG(i+2);
+
+        listing[i]   := #9'sec';
+
+	listing[i+3] := '';
+	listing[i+4] := '';
+	listing[i+5] := '';
+	listing[i+6] := '';
+	listing[i+7] := '';
+	listing[i+8] := '';
+	listing[i+9] := '';
+	listing[i+10]:= '';
+
+	exit(false);
+      end;
+
+
     if rol_a(i) and										// rol @				; 0
        lda_a(i+1) and										// lda					; 1
        (sta_a(i+2) or lsr_a(i+2) or asl_a(i+2)) then						// sta|lsr @|asl @			; 2
@@ -157,13 +193,15 @@ begin
 
     if rol_a(i+14) and										// rol @				; 14
 
+       lda_im_0(i+6) and									// lda #$00				; 6
+
        lda_a(i) and										// lda					; 0
        add_sub(i+1) and										// add|sub				; 1
        sta_stack(i+2) and									// sta :STACKORIGIN			; 2
        lda_a(i+3) and										// lda					; 3
        adc_sbc(i+4) and										// adc|sbc				; 4
        sta_stack(i+5) and									// sta :STACKORIGIN+STACKWIDTH		; 5
-       lda_im_0(i+6) and									// lda #$00				; 6
+//       lda_im_0(i+6) and									// lda #$00				; 6
        adc_sbc(i+7) and										// adc|sbc				; 7
        sta_stack(i+8) and									// sta :STACKORIGIN+STACKWIDTH*2	; 8
        lda_im_0(i+9) and									// lda #$00				; 9
@@ -653,6 +691,8 @@ begin
 
     if adc_sbc(i+16) and									// adc|sbc				; 16
 
+       asl_a(i+10) and										// asl @				; 10
+
        lda(i) and										// lda					; 0
        add_sub(i+1) and										// add|sub				; 1
        sta_stack(i+2) and									// sta :STACKORIGIN+9			; 2
@@ -663,7 +703,7 @@ begin
        adc_sbc(i+7) and										// adc|sbc #$00				; 7
        sta_stack(i+8) and									// sta :STACKORIGIN+STACKWIDTH*2+9	; 8	redundant
        lda(i+9) and										// lda I				; 9
-       asl_a(i+10) and										// asl @				; 10
+//       asl_a(i+10) and									// asl @				; 10
        tay(i+11) and										// tay					; 11
        lda_stack(i+12) and									// lda :STACKORIGIN+9			; 12
        add_sub(i+13) and									// add|sub				; 13
@@ -1432,11 +1472,13 @@ begin
 
     if adc_sbc_val(i+10) and									// adc|sbc				; 10
 
+       asl_stack(i+4) and									// asl :STACKORIGIN			; 4
+
        lda_val(i) and										// lda					; 0	~:STACKORIGIN
        sta_stack(i+1) and									// sta :STACKORIGIN			; 1
        lda_val(i+2) and										// lda					; 2	~:STACKORIGIN
        sta_stack(i+3) and									// sta :STACKORIGIN+STACKWIDTH		; 3
-       asl_stack(i+4) and									// asl :STACKORIGIN			; 4
+//       asl_stack(i+4) and									// asl :STACKORIGIN			; 4
        rol_stack(i+5) and									// rol :STACKORIGIN+STACKWIDTH		; 5
        lda_stack(i+6) and									// lda :STACKORIGIN			; 6
        add_sub_val(i+7) and									// add|sub				; 7
@@ -1464,10 +1506,12 @@ begin
 
     if adc_im_0(i+8) and									// adc #$00				; 8
 
+       asl_a(i+3) and										// asl @				; 3
+
        lda_val(i) and										// lda TT+1 				; 0	~:STACKORIGIN
        sta(i+1) and										// sta :STACKORIGIN			; 1
        lda_val(i+2) and										// lda TT				; 2	~:STACKORIGIN
-       asl_a(i+3) and										// asl @				; 3
+//       asl_a(i+3) and										// asl @				; 3
        rol(i+4) and										// rol :STACKORIGIN			; 4
        add(i+5) and										// add					; 5
        sta(i+6) and (sta_eax(i+6) = false) and							// sta PRIME				; 6	~sta :eax
@@ -1688,10 +1732,12 @@ begin
 
     if dey(i+8) and										// dey					; 8
 
+       ldy(i+3) and										// ldy 					; 3
+
        lda(i) and (iy(i) = false) and								// lda B+1				; 0
        sta_stack(i+1) and									// sta :STACKORIGIN+STACKWIDTH		; 1
        lda(i+2) and										// lda B				; 2
-       ldy(i+3) and										// ldy 					; 3
+//       ldy(i+3) and										// ldy 					; 3
        beq(i+4) and										// beq					; 4
        lab_l(i+5) and										//l_					; 5
        asl_a(i+6) and										// asl @				; 6
@@ -1721,6 +1767,8 @@ begin
 
     if adc_im_0(i+15) and									// adc #$00				; 15
 
+       dey(i+7) and										// dey					; 7
+
        ldy(i) and										// ldy 					; 0
        beq(i+1) and										// beq					; 1
        lab_l(i+2) and										//l_					; 2
@@ -1728,7 +1776,7 @@ begin
        rol_stack(i+4) and									// rol :STACKORIGIN+STACKWIDTH		; 4
        rol_stack(i+5) and									// rol :STACKORIGIN+STACKWIDTH*2	; 5
        rol_stack(i+6) and									// rol :STACKORIGIN+STACKWIDTH*3	; 6
-       dey(i+7) and										// dey					; 7
+//       dey(i+7) and										// dey					; 7
        bne(i+8) and										// bne l_				; 8
        lab_l(i+9) and										//l_					; 9
        sta_stack(i+10) and									// sta :STACKORIGIN			; 10
@@ -1751,6 +1799,8 @@ begin
 
     if dey(i+14) and										// dey					; 14
 
+       ldy(i+7) and										// ldy 					; 7
+
        lda(i) and										// lda B+3				; 0
        sta_stack(i+1) and									// sta :STACKORIGIN+STACKWIDTH*3	; 1
        lda(i+2) and										// lda B+2				; 2
@@ -1758,7 +1808,7 @@ begin
        lda(i+4) and										// lda B+1				; 4
        sta_stack(i+5) and									// sta :STACKORIGIN+STACKWIDTH		; 5
        lda(i+6) and										// lda B				; 6
-       ldy(i+7) and										// ldy 					; 7
+//       ldy(i+7) and										// ldy 					; 7
        beq(i+8) and										// beq					; 8
        lab_l(i+9) and										//l_					; 9
        asl_a(i+10) and										// asl @				; 10
@@ -1810,6 +1860,8 @@ begin
 
     if mwy_bp2(i+21) and									// mwy ... bp2				; 21
 
+       ldy(i+7) and										// ldy 					; 7
+
        lda_im_0(i) and										// lda #$00				; 0
        sta_stack(i+1) and									// sta :STACKORIGIN+STACKWIDTH*3	; 1
        lda_im_0(i+2) and									// lda #$00				; 2
@@ -1817,7 +1869,7 @@ begin
        lda_im_0(i+4) and									// lda #$00				; 4
        sta_stack(i+5) and									// sta :STACKORIGIN+STACKWIDTH		; 5
        lda(i+6) and										// lda B				; 6
-       ldy(i+7) and										// ldy 					; 7
+//       ldy(i+7) and										// ldy 					; 7
        beq(i+8) and										// beq					; 8
        lab_l(i+9) and										//l_					; 9
        asl_a(i+10) and										// asl @				; 10
@@ -1857,6 +1909,8 @@ begin
 
     if mwy_bp2(i+24) and									// mwy ... bp2				; 24
 
+       ldy(i+7) and										// ldy 					; 7
+
        lda_im_0(i) and										// lda #$00				; 0
        sta_stack(i+1) and									// sta :STACKORIGIN+STACKWIDTH*3	; 1
        lda_im_0(i+2) and									// lda #$00				; 2
@@ -1864,7 +1918,7 @@ begin
        lda_im_0(i+4) and									// lda #$00				; 4
        sta_stack(i+5) and									// sta :STACKORIGIN+STACKWIDTH		; 5
        lda(i+6) and										// lda B				; 6
-       ldy(i+7) and										// ldy 					; 7
+//       ldy(i+7) and										// ldy 					; 7
        beq(i+8) and										// beq					; 8
        lab_l(i+9) and										//l_					; 9
        asl_a(i+10) and										// asl @				; 10
@@ -1903,11 +1957,15 @@ begin
      end;
 
 
-    if asl_a(i) and										// asl @				; 0
+    if ora_stack(i+12) and									// ora :STACKORIGIN+STACKWIDTH+9	; 12
+
+       dey(i+4) and										// dey					; 4
+
+       asl_a(i) and										// asl @				; 0
        rol_stack(i+1) and									// rol :STACKORIGIN+STACKWIDTH+9	; 1
        rol_stack(i+2) and									// rol :STACKORIGIN+STACKWIDTH*2+9	; 2
        rol_stack(i+3) and									// rol :STACKORIGIN+STACKWIDTH*3+9	; 3
-       dey(i+4) and										// dey					; 4
+//       dey(i+4) and										// dey					; 4
        bne(i+5) and										// bne l_				; 5
        lab_l(i+6) and										//l_					; 6
        sta_stack(i+7) and									// sta :STACKORIGIN+9			; 7
@@ -1915,7 +1973,7 @@ begin
        ora_stack(i+9) and									// ora :STACKORIGIN+9			; 9
        sta_stack(i+10) and									// sta :STACKORIGIN+10			; 10
        lda_val(i+11) and									// lda A+1				; 11	~:STACKORIGIN
-       ora_stack(i+12) and									// ora :STACKORIGIN+STACKWIDTH+9	; 12
+//       ora_stack(i+12) and									// ora :STACKORIGIN+STACKWIDTH+9	; 12
        sta_stack(i+13) and									// sta :STACKORIGIN+STACKWIDTH+10	; 13
        lda_stack(i+14) and									// lda :STACKORIGIN+10			; 14
        sta_val(i+15) and									// sta B				; 15
@@ -1981,9 +2039,11 @@ begin
 
     if (sta_a(i+5) or tay(i+5)) and								// sta|tay				; 5
 
+       asl_a(i+2) and										// asl @				; 2
+
        lda(i) and (lda_stack(i) = false) and							// lda					; 0	~:STACKORIGIN ~lda adr.
        sta_stack(i+1) and									// sta :STACKORIGIN			; 1
-       asl_a(i+2) and										// asl @				; 2
+//       asl_a(i+2) and										// asl @				; 2
        asl_a(i+3) and										// asl @				; 3
        add_sub_stack(i+4) then									// add|sub :STACKORIGIN			; 4
 //       (sta_a(i+5) or tay(i+5)) then								// sta|tay				; 5
@@ -2002,9 +2062,11 @@ begin
 
     if (sta_a(i+6) or tay(i+6)) and								// sta|tay				; 6
 
+       asl_a(i+2) and										// asl @				; 2
+
        lda(i) and (lda_stack(i) = false) and							// lda					; 0	~:STACKORIGIN ~lda adr.
        sta_stack(i+1) and									// sta :STACKORIGIN			; 1
-       asl_a(i+2) and										// asl @				; 2
+//       asl_a(i+2) and										// asl @				; 2
        add_sub_stack(i+3) and									// add|sub :STACKORIGIN			; 3
        add_sub_val(i+4) and									// add|sub				; 4
        and_ora_eor_val(i+5) then								// and|ora|eor				; 5	~:STACKORIGIN
@@ -2025,9 +2087,11 @@ begin
 
     if (sta_a(i+7) or tay(i+7)) and								// sta|tay				; 7
 
+       asl_a(i+2) and										// asl @				; 2
+
        lda(i) and (lda_stack(i) = false) and							// lda					; 0	~:STACKORIGIN ~lda adr.
        sta_stack(i+1) and									// sta :STACKORIGIN			; 1
-       asl_a(i+2) and										// asl @				; 2
+//       asl_a(i+2) and										// asl @				; 2
        asl_a(i+3) and										// asl @				; 3
        add_sub_stack(i+4) and									// add|sub :STACKORIGIN			; 4
        add_sub_val(i+5) and									// add|sub				; 5
@@ -2049,9 +2113,11 @@ begin
 
     if (sta_a(i+7) or tay(i+7)) and								// sta|tay				; 7
 
+       asl_a(i+2) and										// asl @				; 2
+
        lda(i) and (lda_stack(i) = false) and							// lda					; 0	~:STACKORIGIN ~lda adr.
        sta_stack(i+1) and									// sta :STACKORIGIN			; 1
-       asl_a(i+2) and										// asl @				; 2
+//       asl_a(i+2) and										// asl @				; 2
        asl_a(i+3) and										// asl @				; 3
        add_sub_stack(i+4) and									// add|sub :STACKORIGIN			; 4
        asl_a(i+5) and										// asl @				; 5
@@ -2073,9 +2139,11 @@ begin
 
     if (sta_a(i+7) or tay(i+7)) and								// sta|tay				; 7
 
+       asl_a(i+2) and										// asl @				; 2
+
        lda(i) and (lda_stack(i) = false) and							// lda					; 0	~:STACKORIGIN ~lda adr.
        sta_stack(i+1) and									// sta :STACKORIGIN			; 1
-       asl_a(i+2) and										// asl @				; 2
+//       asl_a(i+2) and										// asl @				; 2
        asl_a(i+3) and										// asl @				; 3
        add_sub_val(i+4) and 									// add|sub				; 4
        asl_a(i+5) and										// asl @				; 5

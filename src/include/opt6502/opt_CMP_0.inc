@@ -33,8 +33,8 @@ begin
      end;
 
 
-    if lda_im(i) and 										// lda #$			; 0
-       add_im(i+1) and										// add #$			; 1
+    if lda_im(i) and 										// lda #			; 0
+       add_im(i+1) and										// add #			; 1
        sta(i+2) and										// sta				; 2
 												//				; 3
        (adc(i+4) = false) then									//~adc				; 4
@@ -49,8 +49,8 @@ begin
      end;
 
 
-    if lda_im(i) and 										// lda #$			; 0
-       sub_im(i+1) and										// sub #$			; 1
+    if lda_im(i) and 										// lda #			; 0
+       sub_im(i+1) and										// sub #			; 1
        sta(i+2) and										// sta				; 2
 												//				; 3
        (sbc(i+4) = false) then									//~sbc				; 4

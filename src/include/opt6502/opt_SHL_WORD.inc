@@ -14,10 +14,8 @@ begin
         if k < 0 then begin
 
 	 listing[l]   := #9'lda #$00';
-	 s[x-1][3]    := '';
 	 listing[l+1] := #9'sta ' + GetARG(3, x-1);
 	 listing[l+2] := #9'lda #$00';
-	 s[x-1][2]    := '';
 	 listing[l+3] := #9'sta ' + GetARG(2, x-1);
 
 	 inc(l, 4);
@@ -241,32 +239,72 @@ begin
 
 	end else begin
 
-	if (k > 7) {or (k < 0)} then exit(true);
+	if k > 8 then begin
 
-	listing[l]   := #9'lda ' + GetARG(0, x-1);
-	listing[l+1] := #9'sta ' + GetARG(0, x-1);
-	listing[l+2] := #9'lda ' + GetARG(1, x-1);
-	listing[l+3] := #9'sta ' + GetARG(1, x-1);
-	listing[l+4] := #9'lda #$00';
+	 exit(true);
+{
+	 listing[l]   := #9'lda ' + GetARG(0, x-1);
+ 	 s[x-1][0]    := '';
+	 listing[l+1] := #9'sta ' + GetARG(0, x-1);
+	 listing[l+2] := #9'lda ' + GetARG(1, x-1);
+	 s[x-1][1]    := '';
+	 listing[l+3] := #9'sta ' + GetARG(1, x-1);
+	 listing[l+4] := #9'lda #$00';
+	 listing[l+5] := #9'sta ' + GetARG(2, x-1);
+	 listing[l+6] := #9'lda #$00';
+	 listing[l+7] := #9'sta ' + GetARG(3, x-1);
 
-	inc(l, 5);
+	 inc(l, 8);
 
-       for m := 0 to k - 1 do begin
+         for m := 0 to k - 1 do begin
 
-	listing[l]   := #9'asl ' + GetARG(0, x-1);
-	listing[l+1] := #9'rol ' + GetARG(1, x-1);
-	listing[l+2] := #9'rol @';
+	  listing[l]   := #9'asl ' + GetARG(0, x-1);
+	  listing[l+1] := #9'rol ' + GetARG(1, x-1);
+	  listing[l+2] := #9'rol ' + GetARG(2, x-1);
+	  listing[l+3] := #9'rol ' + GetARG(3, x-1);
 
-	inc(l, 3);
-       end;
+	  inc(l, 4);
+         end;
 
-       listing[l]   := #9'sta ' + GetARG(2, x-1);
-       listing[l+1] := #9'lda ' + GetARG(0, x-1);
-       listing[l+2] := #9'sta ' + GetARG(0, x-1);
-       listing[l+3] := #9'lda ' + GetARG(1, x-1);
-       listing[l+4] := #9'sta ' + GetARG(1, x-1);
+         listing[l]   := #9'lda ' + GetARG(0, x-1);
+         listing[l+1] := #9'sta ' + GetARG(0, x-1);
+         listing[l+2] := #9'lda ' + GetARG(1, x-1);
+         listing[l+3] := #9'sta ' + GetARG(1, x-1);
+         listing[l+4] := #9'lda ' + GetARG(2, x-1);
+         listing[l+5] := #9'sta ' + GetARG(2, x-1);
+         listing[l+6] := #9'lda ' + GetARG(3, x-1);
+         listing[l+7] := #9'sta ' + GetARG(3, x-1);
 
-       inc(l, 5);
+         inc(l, 8);
+}
+	end else begin
+
+	 listing[l]   := #9'lda ' + GetARG(0, x-1);
+	 listing[l+1] := #9'sta ' + GetARG(0, x-1);
+	 listing[l+2] := #9'lda ' + GetARG(1, x-1);
+	 listing[l+3] := #9'sta ' + GetARG(1, x-1);
+	 listing[l+4] := #9'lda #$00';
+
+	 inc(l, 5);
+
+         for m := 0 to k - 1 do begin
+
+	  listing[l]   := #9'asl ' + GetARG(0, x-1);
+	  listing[l+1] := #9'rol ' + GetARG(1, x-1);
+	  listing[l+2] := #9'rol @';
+
+	  inc(l, 3);
+         end;
+
+         listing[l]   := #9'sta ' + GetARG(2, x-1);
+         listing[l+1] := #9'lda ' + GetARG(0, x-1);
+         listing[l+2] := #9'sta ' + GetARG(0, x-1);
+         listing[l+3] := #9'lda ' + GetARG(1, x-1);
+         listing[l+4] := #9'sta ' + GetARG(1, x-1);
+
+         inc(l, 5);
+
+	end;
 
        end;
 

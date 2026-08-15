@@ -385,9 +385,11 @@ begin
 
     if tay(i+10) and 										// tay					; 10
 
+       asl_a(i+2) and										// asl @				; 2
+
        lda_val(i) and										// lda I				; 0	~:STACKORIGIN
        sta_stack(i+1) and									// sta :STACKORIGIN+9			; 1
-       asl_a(i+2) and										// asl @				; 2
+//       asl_a(i+2) and										// asl @				; 2
        tay(i+3) and										// tay					; 3
        lda_val(i+4) and										// lda					; 4	~:STACKORIGIN
        sta_a(i+5) and										// sta					; 5
@@ -406,13 +408,15 @@ begin
       end;
 
 
-    if ldy_im(i+5) and (DATA(i+5) = false) and							// ldy #				; 5
+    if inc_bp2_1(i+4) and									// inc :bp2+1				; 4
+
+       ldy_im(i+5) and (DATA(i+5) = false) and							// ldy #				; 5
 
        lda_bp2(i) and										// lda :bp2				; 0
        add_im(i+1) and DATA(i+1) and								// add #CONTEXT.STATE-DATAORIGIN	; 1
        sta_bp2(i+2) and										// sta :bp2				; 2
-       scc(i+3) and										// scc					; 3
-       inc_bp2_1(i+4) then									// inc :bp2+1				; 4
+       scc(i+3) then										// scc					; 3
+//       inc_bp2_1(i+4) and									// inc :bp2+1				; 4
 //       ldy_im(i+5) then									// ldy #				; 5
       begin
 
@@ -433,13 +437,15 @@ begin
 
     if ldy_im(i+12) and										// ldy #				; 12
 
+       lda_bp2(i+6) and										// lda :bp2				; 6
+
        lda_bp2(i) and										// lda :bp2				; 0
        add_im(i+1) and DATA(i+1) and								// add #CONTEXT.STATE-DATAORIGIN	; 1
        sta_bp2(i+2) and										// sta :bp2				; 2
        lda_bp2_1(i+3) and									// lda :bp2+1				; 3
        adc_im_0(i+4) and									// adc #$00				; 4
        sta_bp2_1(i+5) and									// sta :bp2+1				; 5
-       lda_bp2(i+6) and										// lda :bp2				; 6
+//       lda_bp2(i+6) and									// lda :bp2				; 6
        add_im(i+7) and										// add #				; 7
        sta_bp2(i+8) and										// sta :bp2				; 8
        lda_bp2_1(i+9) and									// lda :bp2+1				; 9
@@ -758,6 +764,8 @@ begin
 
     if rol_a(i+10) and										// rol @				; 10
 
+       rol_a(i+8) and										// rol @				; 8
+
        ldy(i) and (listing[i] = listing[i+3]) and						// ldy I				; 0
        lda_adr(i+1) and										// lda adr.				; 1
        sta_stack(i+2) and									// sta :STACKORIGIN+9			; 2
@@ -766,7 +774,7 @@ begin
        sta_stack(i+5) and									// sta :STACKORIGIN+10			; 5
        lda_im_0(i+6) and									// lda #$00				; 6
        asl_stack(i+7) and									// asl :STACKORIGIN+10			; 7
-       rol_a(i+8) and										// rol @				; 8
+//       rol_a(i+8) and										// rol @				; 8
        asl_stack(i+9) and									// asl :STACKORIGIN+10			; 9
 //       rol_a(i+10) and									// rol @				; 10
        sta_stack(i+11) and									// sta :STACKORIGIN+:STACKWIDTH+10	; 11
@@ -788,6 +796,8 @@ begin
 
     if rol_a(i+10) and										// rol @				; 10
 
+       rol_a(i+8) and										// rol @				; 8
+
        ldy(i) and (listing[i] = listing[i+3]) and						// ldy I				; 0
        lda_adr(i+1) and										// lda adr.				; 1
        sta_stack(i+2) and									// sta :STACKORIGIN+STACKWIDTH+9	; 2
@@ -796,7 +806,7 @@ begin
        sta_stack(i+5) and									// sta :STACKORIGIN+10			; 5
        lda_im_0(i+6) and									// lda #$00				; 6
        asl_stack(i+7) and									// asl :STACKORIGIN+10			; 7
-       rol_a(i+8) and										// rol @				; 8
+//       rol_a(i+8) and										// rol @				; 8
        asl_stack(i+9) and									// asl :STACKORIGIN+10			; 9
 //       rol_a(i+10) and									// rol @				; 10
        sta_stack(i+11) and									// sta :STACKORIGIN+:STACKWIDTH+10	; 11

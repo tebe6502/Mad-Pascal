@@ -58,8 +58,10 @@ begin
 // -----------------------------------------------------------------------------
 
 
-    if lda_im_0(i) and										// lda #$00				; 0
-       and_(i+1) and										// and					; 1
+    if and_(i+1) and										// and					; 1
+
+       lda_im_0(i) and										// lda #$00				; 0
+//       and_(i+1) and										// and					; 1
        sta_a(i+2) then										// sta 					; 2
      begin
 	listing[i+1] := '';
@@ -148,9 +150,11 @@ begin
      end;
 
 
-    if sta_stack(i) and										// sta :STACKORIGIN			; 0
-       lda_a(i+1) and										// lda					; 1
-       and_stack(i+2) then									// and :STACKORIGIN			; 2
+    if and_stack(i+2) and									// and :STACKORIGIN			; 2
+
+       sta_stack(i) and										// sta :STACKORIGIN			; 0
+       lda_a(i+1) then										// lda					; 1
+//       and_stack(i+2) then									// and :STACKORIGIN			; 2
      if argMatch(i, i+2) then
      begin
 	listing[i]   := '';
@@ -162,6 +166,8 @@ begin
 
 
     if and_im(i+14) and										// and #				; 14
+
+       eor_stack(i+26) and 									// eor :STACKORIGIN+STACKWIDTH*3	; 26
 
        //ldy_im_0(i) and									// ldy #$00				; 0
        lda_bp2_y(i+1) and									// lda (:bp2),y				; 1
@@ -189,7 +195,7 @@ begin
        eor_stack(i+23) and 									// eor :STACKORIGIN+STACKWIDTH*2	; 23
        sta_a(i+24) and 										// sta					; 24
        lda_a(i+25) and 										// lda					; 25
-       eor_stack(i+26) and 									// eor :STACKORIGIN+STACKWIDTH*3	; 26
+//       eor_stack(i+26) and 									// eor :STACKORIGIN+STACKWIDTH*3	; 26
        sta_a(i+27) then										// sta					; 27
      if argMatch(i+3, i+17) and
         argMatch(i+7, i+20) and

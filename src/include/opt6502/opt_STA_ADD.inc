@@ -21,7 +21,9 @@ begin
      end;
 
 
-    if lda(i) and									// lda DX 				; 0
+    if adc(i+10) and									// adc DX+3				; 10
+
+       lda(i) and									// lda DX 				; 0
        add(i+1) and									// add DX				; 1
        sta(i+2) and									// sta DX				; 2
        lda(i+3) and									// lda DX+1				; 3
@@ -31,7 +33,7 @@ begin
        adc(i+7) and									// adc DX+2				; 7
        sta(i+8) and									// sta DX+2				; 8
        lda(i+9) and									// lda DX+3				; 9
-       adc(i+10) and									// adc DX+3				; 10
+//       adc(i+10) and									// adc DX+3				; 10
        sta(i+11) then									// sta DX+3				; 11
       if argMatch(i, i+1) and
 	 argMatch(i+1, i+2) and
@@ -160,7 +162,9 @@ begin
 
 // add !!!
 
-    if (lda_a(i) = false) and								//~lda					; 0
+    if adc_sbc_im_0(i+10) and								// adc|sbc #$00				; 10
+
+       (lda_a(i) = false) and								//~lda					; 0
        add_sub(i+1) and									// add|sub				; 1
        sta_stack(i+2) and								// sta :STACKORIGIN			; 2
        lda_a(i+3) and									// lda					; 3
@@ -170,7 +174,7 @@ begin
        add_sub(i+7) and									// add|sub				; 7
        sta(i+8) and 									// sta D				; 8
        lda_stack(i+9) and								// lda :STACKORIGIN+STACKWIDTH		; 9
-       adc_sbc_im_0(i+10) and								// adc|sbc #$00				; 10
+//       adc_sbc_im_0(i+10) and								// adc|sbc #$00				; 10
        sta(i+11) then									// sta D+1				; 11
      if argMatch(i+2, i+6) and
 	argMatch(i+5, i+9) then
@@ -193,7 +197,9 @@ begin
        end;
 
 
-    if lda_im_0(i) and									// lda #$00				; 0
+    if adc_im_0(i+10) and								// adc #$00				; 10
+
+       lda_im_0(i) and									// lda #$00				; 0
        add(i+1) and (add_im_0(i+1) = false) and	(iy(i+1) = false) and			// add D				; 1
        sta_stack(i+2) and								// sta :STACKORIGIN			; 2
        lda(i+3) and									// lda					; 3
@@ -203,7 +209,7 @@ begin
        add(i+7) and									// add					; 7
        sta(i+8) and 									// sta D				; 8
        lda_stack(i+9) and								// lda :STACKORIGIN+STACKWIDTH		; 9
-       adc_im_0(i+10) and								// adc #$00				; 10
+//       adc_im_0(i+10) and								// adc #$00				; 10
        sta(i+11) then									// sta D+1				; 11
      if argMatch(i+2, i+6) and
 	argMatch(i+5, i+9) then
@@ -224,7 +230,9 @@ begin
        end;
 
 
-    if lda(i) and (lda_im_0(i) = false) and (iy(i) = false) and				// lda					; 0
+    if adc_sbc_im_0(i+10) and								// adc|sbc #$00				; 10
+
+       lda(i) and (lda_im_0(i) = false) and (iy(i) = false) and				// lda					; 0
        add_sub(i+1) and (iy(i+1) = false) and
        (add_im_0(i+1) = false) and (sub_im_0(i+1) = false) and				// add|sub				; 1
        sta_stack(i+2) and								// sta :STACKORIGIN+9			; 2
@@ -235,7 +243,7 @@ begin
        add_sub(i+7) and									// add|sub				; 7
        sta_val(i+8) and (iy(i+8) = false) and						// sta T				; 8
        lda_stack(i+9) and								// lda :STACKORIGIN+STACKWIDTH		; 9
-       adc_sbc_im_0(i+10) and								// adc|sbc #$00				; 10
+//       adc_sbc_im_0(i+10) and								// adc|sbc #$00				; 10
        sta(i+11) and									// sta T+1				; 11
 											//					; 12
        (adc_sbc(i+13) = false) then							//~adc|sbc				; 13
@@ -273,7 +281,9 @@ begin
        end;
 
 
-    if ((i > 0) and lda_im_0(i-1) = false) and
+    if adc_im_0(i+9) and								// adc #$00				; 9
+
+       ((i > 0) and lda_im_0(i-1) = false) and
        add_sub(i) and (add_im_0(i) = false) and (sub_im_0(i) = false) and		// add|sub				; 0
        sta_stack(i+1) and								// sta :STACKORIGIN			; 1
        lda(i+2) and									// lda					; 2
@@ -283,7 +293,7 @@ begin
        add(i+6) and									// add					; 6
        sta_val(i+7) and									// sta					; 7
        lda_stack(i+8) and								// lda :STACKORIGIN+STACKWIDTH		; 8
-       adc_im_0(i+9) and								// adc #$00				; 9
+//       adc_im_0(i+9) and								// adc #$00				; 9
        sta_val(i+10) and (iy(i+10) = false) and						// sta					; 10
 											//					; 11
        (adc(i+12) = false) then								//~adc					; 12
@@ -319,7 +329,9 @@ begin
        end;
 
 
-    if ((i > 0) and lda_im_0(i-1) = false) and						//~lda #$00				;-1
+    if sbc_im_0(i+9) and								// sbc #$00				; 9
+
+       ((i > 0) and lda_im_0(i-1) = false) and						//~lda #$00				;-1
        add_sub(i) and (add_im_0(i) = false) and (sub_im_0(i) = false) and		// add|sub				; 0
        sta_stack(i+1) and								// sta :STACKORIGIN			; 1
        lda(i+2) and									// lda					; 2
@@ -329,7 +341,7 @@ begin
        sub(i+6) and									// sub					; 6
        sta_val(i+7) and									// sta					; 7
        lda_stack(i+8) and								// lda :STACKORIGIN+STACKWIDTH		; 8
-       sbc_im_0(i+9) and								// sbc #$00				; 9
+//       sbc_im_0(i+9) and								// sbc #$00				; 9
        sta_val(i+10) and (iy(i+10) = false) and						// sta					; 10
 											//					; 11
        (sbc(i+12) = false) then								//~sbc					; 12
@@ -457,7 +469,9 @@ begin
 
 // add !!!
 
-    if lda_stack(i) and									// lda :STACKORIGIN+10			; 0
+    if add_stack(i+15) and								// add :STACKORIGIN+STACKWIDTH+10	; 15
+
+       lda_stack(i) and									// lda :STACKORIGIN+10			; 0
        add(i+1) and									// add					; 1
        sta_stack(i+2) and								// sta :STACKORIGIN+10			; 2
        lda_stack(i+3) and								// lda :STACKORIGIN+STACKWIDTH+10	; 3
@@ -471,8 +485,8 @@ begin
        sta_stack(i+11) and								// sta :STACKORIGIN+STACKWIDTH*3+10	; 11
        lda_stack(i+12) and								// lda :STACKORIGIN+10			; 12
        sta(i+13) and									// sta ADDR				; 13
-       lda_val(i+14) and								// lda #$A0				; 14
-       add_stack(i+15) and								// add :STACKORIGIN+STACKWIDTH+10	; 15
+       lda_val(i+14) and								// lda					; 14	~:STACKORIGIN
+//       add_stack(i+15) and								// add :STACKORIGIN+STACKWIDTH+10	; 15
        sta(i+16) and									// sta ADDR+1				; 16
 											//					; 17
        (adc(i+18) = false) then								//~adc					; 18
@@ -518,13 +532,15 @@ begin
        end;
 
 
-    if lda(i) and									// lda 					; 0
+    if asl_stack(i+6) and								// asl :STACKORIGIN+10			; 6
+
+       lda(i) and									// lda 					; 0
        add_sub(i+1) and									// add|sub				; 1
        sta_stack(i+2) and								// sta :STACKORIGIN+10			; 2
        lda(i+3) and									// lda					; 3
        adc_sbc(i+4) and									// adc|sbc				; 4
        sta_stack(i+5) and								// sta :STACKORIGIN+STACKWIDTH+10	; 5
-       asl_stack(i+6) and								// asl :STACKORIGIN+10			; 6
+//       asl_stack(i+6) and								// asl :STACKORIGIN+10			; 6
        lda(i+7) and									// lda					; 7
        add_sub_stack(i+8) and								// add|sub :STACKORIGIN+10		; 8
        sta(i+9) and									// sta					; 9
@@ -541,15 +557,19 @@ begin
        end;
 
 
-    if asl_stack(i) and									// asl :STACKORIGIN+9 			; 0
+    if adc_sbc(i+8) and									// adc|sbc				; 8
+
+       add_sub(i+5) and									// add|sub 				; 5
+
+       asl_stack(i) and									// asl :STACKORIGIN+9 			; 0
        rol_stack(i+1) and								// rol :STACKORIGIN+STACKWIDTH+9	; 1
        rol_stack(i+2) and								// rol :STACKORIGIN+STACKWIDTH*2+9	; 2
        rol_stack(i+3) and								// rol :STACKORIGIN+STACKWIDTH*3+9	; 3
        lda_stack(i+4) and								// lda :STACKORIGIN+9 			; 4
-       add_sub(i+5) and									// add|sub 				; 5
+//       add_sub(i+5) and								// add|sub 				; 5
        sta(i+6) and									// sta					; 6
        lda_stack(i+7) and								// lda :STACKORIGIN+STACKWIDTH+9	; 7
-       adc_sbc(i+8) and									// adc|sbc				; 8
+//       adc_sbc(i+8) and								// adc|sbc				; 8
        sta(i+9) and									// sta					; 9
 											//					; 10
        (adc_sbc(i+11) = false) then							//~adc|sbc			 	; 11

@@ -317,9 +317,9 @@ begin
        asl_a(i+7) and										// asl @				; 7
 //       tay(i+8) and										// tay					; 8
        lda_stack(i+9) and									// lda :STACKORIGIN+9			; 9
-       sta_val(i+10) and									// sta ~:STACKORIGIN			; 10
+       sta_val(i+10) and									// sta					; 10	~:STACKORIGIN
        lda_stack(i+11) and									// lda :STACKORIGIN+STACKWIDTH+9	; 11
-       sta_val(i+12) then									// sta ~:STACKORIGIN			; 12
+       sta_val(i+12) then									// sta					; 12	~:STACKORIGIN
      if	argMatch(i+2, i+9) and
 	argMatch(i+5, i+11) then
       begin
@@ -349,6 +349,8 @@ begin
 
     if tay(i+11) and										// tay					; 11
 
+       asl_a(i+9) and										// asl @				; 9
+
        lda_a(i) and (iy(i) = false) and (EAX(i) = false) and					// lda					; 0
        sta_stack(i+1) and									// sta :STACKORIGIN			; 1
        lda_a(i+2) and (iy(i+2) = false) and							// lda					; 2
@@ -358,7 +360,7 @@ begin
        lda_a(i+6) and (iy(i+6) = false) and							// lda					; 6
        sta_stack(i+7) and									// sta :STACKORIGIN+STACKWIDTH*3	; 7
        lda_a(i+8) and										// lda					; 8
-       asl_a(i+9) and										// asl @				; 9
+//       asl_a(i+9) and										// asl @				; 9
        asl_a(i+10) and										// asl @				; 10
 //       tay(i+11) and										// tay					; 11
        lda_stack(i+12) and									// lda :STACKORIGIN			; 12
@@ -394,11 +396,13 @@ begin
 
     if tay(i+7) and										// tay					; 7
 
+       lda_a(i+4) and										// lda					; 4
+
        lda_a(i) and (iy(i) = false) and (EAX(i) = false) and					// lda					; 0
        sta_stack(i+1) and									// sta :STACKORIGIN+STACKWIDTH		; 1
        sta_stack(i+2) and									// sta :STACKORIGIN+STACKWIDTH*2	; 2
        sta_stack(i+3) and									// sta :STACKORIGIN+STACKWIDTH*3	; 3
-       lda_a(i+4) and										// lda					; 4
+//       lda_a(i+4) and										// lda					; 4
        asl_a(i+5) and										// asl @				; 5
        asl_a(i+6) and										// asl @				; 6
 //       tay(i+7) and										// tay					; 7
@@ -418,9 +422,11 @@ begin
 
     if tay(i+7) and										// tay					; 7
 
+       lsr_a(i+2) and										// lsr @				; 2
+
        lda_a(i) and (listing[i] = listing[i+4])	and						// lda I				; 0
        lsr_a(i+1) and										// lsr @				; 1
-       lsr_a(i+2) and										// lsr @				; 2
+//       lsr_a(i+2) and										// lsr @				; 2
        sta_stack(i+3) and									// sta :STACKORIGIN			; 3
 //       lda_a(i+4) and										// lda I				; 4
        lsr_a(i+5) and										// lsr @				; 5
@@ -441,10 +447,12 @@ begin
 
     if tay(i+9) and										// tay					; 9
 
+       lsr_a(i+3) and										// lsr @				; 3
+
        lda_a(i) and (listing[i] = listing[i+5])	and						// lda I				; 0
        lsr_a(i+1) and										// lsr @				; 1
        lsr_a(i+2) and										// lsr @				; 2
-       lsr_a(i+3) and										// lsr @				; 3
+//       lsr_a(i+3) and										// lsr @				; 3
        sta_stack(i+4) and									// sta :STACKORIGIN			; 4
 //       lda_a(i+5) and										// lda I				; 5
        lsr_a(i+6) and										// lsr @				; 6
@@ -510,7 +518,6 @@ begin
        asl_a(i+7) and										// asl @				; 7
 
        lda_a(i) and (listing[i] = listing[i+5]) and						// lda I				; 0
-
        add_im(i+1) and (listing[i+1] = listing[i+6]) and					// add #AB				; 1
        asl_a(i+2) and 										// asl @				; 2
        asl_a(i+3) and										// asl @				; 3
@@ -837,11 +844,13 @@ begin
 
     if tay(i+16) and										// tay					; 16
 
+       tay(i+4) and										// tay					; 4
+
        lda_val(i) and (listing[i] = listing[i+13]) and						// lda A				; 0
        sta_stack(i+1) and 									// sta :STACKORIGIN			; 1
        asl_a(i+2) and										// asl @				; 2
        asl_a(i+3) and										// asl @				; 3
-       tay(i+4) and										// tay					; 4
+//       tay(i+4) and										// tay					; 4
        lda_a(i+5) and										// lda					; 5
        sta_a(i+6) and										// sta					; 6
        lda_a(i+7) and										// lda					; 7

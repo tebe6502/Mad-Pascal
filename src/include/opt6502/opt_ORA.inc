@@ -18,7 +18,10 @@ begin
        sta_stack(i+7) then								// sta :STACKORIGIN+STACKWIDTH*3+10	; 7
     begin
 
+
      if
+       ora_stack(i+18) and								// ora :STACKORIGIN+STACKWIDTH*3+10	; 18
+
        lda_a(i+8) and									// lda ERROR				; 8
        ora_stack(i+9) and								// ora :STACKORIGIN+10			; 9
        sta_a(i+10) and									// sta ERROR				; 10
@@ -29,7 +32,7 @@ begin
        ora_stack(i+15) and								// ora :STACKORIGIN+STACKWIDTH*2+10	; 15
        sta_a(i+16) and									// sta ERROR+2				; 16
        lda_a(i+17) and									// lda ERROR+3				; 17
-       ora_stack(i+18) and								// ora :STACKORIGIN+STACKWIDTH*3+10	; 18
+//       ora_stack(i+18) and								// ora :STACKORIGIN+STACKWIDTH*3+10	; 18
        sta_a(i+19) then									// sta ERROR+3				; 19
      if argMatch(i+1, i+9) and
 	argMatch(i+3, i+12) and
@@ -55,6 +58,8 @@ begin
 
 
      if
+       and_ora_eor(i+18) and								// and|ora|eor				; 18
+
        lda_stack(i+8) and								// lda :STACKORIGIN+10			; 8
        and_ora_eor(i+9) and								// and|ora|eor				; 9
        sta_a(i+10) and									// sta					; 10
@@ -65,7 +70,7 @@ begin
        and_ora_eor(i+15) and								// and|ora|eor				; 15
        sta_a(i+16) and									// sta					; 16
        lda_stack(i+17) and								// lda :STACKORIGIN+STACKWIDTH*3+10	; 17
-       and_ora_eor(i+18) and								// and|ora|eor				; 18
+//       and_ora_eor(i+18) and								// and|ora|eor				; 18
        sta_a(i+19) then									// sta					; 19
      if argMatch(i+1, i+8) and
 	argMatch(i+3, i+11) and
@@ -89,10 +94,16 @@ begin
 	exit(false);
        end;
 
+
     end;
 
 
-    if lda_a(i) and									// lda					; 0
+// -----------------------------------------------------------------------------
+
+
+    if and_ora_eor(i+16) and								// and|ora|eor				; 16
+
+       lda_a(i) and									// lda					; 0
        sta_stack(i+1) and								// sta :STACKORIGIN+10			; 1
        lda_a(i+2) and									// lda					; 2
        sta_stack(i+3) and								// sta :STACKORIGIN+STACKWIDTH+10	; 3
@@ -108,7 +119,7 @@ begin
        and_ora_eor(i+13) and								// and|ora|eor				; 13
        sta_a(i+14) and									// sta					; 14
        lda_stack(i+15) and								// lda :STACKORIGIN+STACKWIDTH*2+10	; 15
-       and_ora_eor(i+16) and								// and|ora|eor				; 16
+//       and_ora_eor(i+16) and								// and|ora|eor				; 16
        sta_a(i+17) then									// sta					; 17
      if argMatch(i+1, i+9) and
 	argMatch(i+3, i+12) and
@@ -211,10 +222,12 @@ begin
        end;
 
 
-    if sta_stack(i) and 								// sta :STACKORIGIN	; 0
+    if ora_stack(i+3) and								// ora :STACKORIGIN	; 3
+
+       sta_stack(i) and 								// sta :STACKORIGIN	; 0
        ldy_val(i+1) and									// ldy			; 1	~:STACKORIGIN
-       lda_a(i+2) and 									// lda 			; 2	~:STACKORIGIN
-       ora_stack(i+3) then								// ora :STACKORIGIN	; 3
+       lda_a(i+2) then 									// lda 			; 2	~:STACKORIGIN
+//       ora_stack(i+3) then								// ora :STACKORIGIN	; 3
      if argMatch(i, i+3) then
        begin
 	listing[i] := '';
@@ -226,14 +239,16 @@ begin
        end;
 
 
-    if lda_a(i) and									// lda					; 0
+    if ora(i+7) and 									// ora					; 7
+
+       lda_a(i) and									// lda					; 0
        sta_stack(i+1) and								// sta :STACKORIGIN+9			; 1
        sta_stack(i+2) and								// sta :STACKORIGIN+STACKWIDTH+9	; 2
        lda_stack(i+3) and								// lda :STACKORIGIN+9			; 3
        and_ora_eor(i+4) and 								// and|ora|eor				; 4
        sta_a(i+5) and									// sta					; 5
-       lda_stack(i+6) and								// lda :STACKORIGIN+STACKWIDTH+9	; 6
-       ora(i+7) then 									// ora					; 7
+       lda_stack(i+6) then								// lda :STACKORIGIN+STACKWIDTH+9	; 6
+//       ora(i+7) then 									// ora					; 7
      if argMatch(i+1, i+3) and
 	argMatch(i+2, i+6) then
        begin
@@ -273,7 +288,9 @@ begin
        end;
 
 
-    if lda(i) and									// lda					; 0
+    if ora_stack(i+10) and								// ora :STACKORIGIN+STACKWIDTH		; 10
+
+       lda(i) and									// lda					; 0
        and_ora_eor(i+1) and								// and|ora|eor				; 1
        sta_stack(i+2) and								// sta :STACKORIGIN			; 2
        lda(i+3) and									// lda					; 3
@@ -283,7 +300,7 @@ begin
        ora_stack(i+7) and								// ora :STACKORIGIN			; 7
        sta(i+8) and									// sta 					; 8
        lda(i+9) and									// lda					; 9
-       ora_stack(i+10) and								// ora :STACKORIGIN+STACKWIDTH		; 10
+//       ora_stack(i+10) and								// ora :STACKORIGIN+STACKWIDTH		; 10
        sta(i+11) then									// sta					; 11
      if argMatch(i+2, i+7) and
 	argMatch(i+5, i+10) then
@@ -309,7 +326,9 @@ begin
        end;
 
 
-    if ldy(i) and									// ldy #$00				; 0
+    if ora_stack(i+10) and								// ora :STACKORIGIN+STACKWIDTH+10	; 10
+
+       ldy(i) and									// ldy #$00				; 0
        LDA_BP2_Y(i+1) and								// lda (:bp2),y				; 1
        sta_stack(i+2) and								// sta :STACKORIGIN+10			; 2
        iny(i+3) and									// iny					; 3
@@ -319,7 +338,7 @@ begin
        ora_stack(i+7) and								// ora :STACKORIGIN+10			; 7
        sta(i+8) and									// sta C				; 8
        lda(i+9) and									// lda :STACKORIGIN+STACKWIDTH+9	; 9
-       ora_stack(i+10) and								// ora :STACKORIGIN+STACKWIDTH+10	; 10
+//       ora_stack(i+10) and								// ora :STACKORIGIN+STACKWIDTH+10	; 10
        sta(i+11) then									// sta C+1				; 11
      if argMatch(i+2, i+7) and
 	argMatch(i+5, i+10) and
@@ -344,7 +363,9 @@ begin
 	end;
 
 
-    if lda_a(i) and									// lda					; 0
+    if ora_val(i+10) and								// ora S+1				; 10	~:STACKORIGIN
+
+       lda_a(i) and									// lda					; 0
        add_sub(i+1) and									// add|sub				; 1
        sta_stack(i+2) and								// sta :STACKORIGIN			; 2
        lda_a(i+3) and									// lda					; 3
@@ -354,7 +375,7 @@ begin
        ora_val(i+7) and									// ora S				; 7	~:STACKORIGIN
        sta(i+8) and									// sta C				; 8
        lda_stack(i+9) and								// lda :STACKORIGIN+STACKWIDTH		; 9
-       ora_val(i+10) and								// ora S+1				; 10	~:STACKORIGIN
+//       ora_val(i+10) and								// ora S+1				; 10	~:STACKORIGIN
        sta(i+11) then									// sta C+1				; 11
      if argMatch(i+2, i+6) and
 	argMatch(i+5, i+9) then

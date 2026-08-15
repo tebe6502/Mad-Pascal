@@ -1,5 +1,13 @@
+unit rdc;
+(*
+ @type: unit
+ @author: Ed Ross, Tomasz Biela
+ @name: RDC unit
+ @version: 1.1
 
-(***************************************************
+ @description:
+
+ ***************************************************
  * RDC Unit                                        *
  *                                                 *
  * This is a Pascal port of C code from an article *
@@ -8,8 +16,8 @@
  *                                                 *
  * The compression is not quite as good as PKZIP   *
  * but it decompresses about 5 times faster.       *
- ***************************************************)
-Unit rdc;
+ ***************************************************
+*)
 
 Interface
 
@@ -166,7 +174,7 @@ Begin
           in sliding dictionary }
 
         hash := ((((in_idxa[0] And 15) Shl 8) Or in_idxa[1]) Xor
-                 ((in_idxa[0] Shr 4) Or (in_idxa[2] Shl 4)))
+                 ((in_idxa[0] Shr 4) Or byte(in_idxa[2] Shl 4)))
                  And hashlen;
 
         pat_idx := in_idx;

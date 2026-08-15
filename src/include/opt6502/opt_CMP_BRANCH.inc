@@ -185,190 +185,6 @@ begin
      end;
 
 
-    if lab_a(i+6) and										//@			; 6
-
-       (listing[i+3] = #9'cmp #$01') and							// cmp #$01		; 3
-
-       lda_val(i) and (lda_im(i) = false) and (iy(i) = false) and				// lda			; 0	~:STACKORIGIN
-       ldy_1(i+1) and										// ldy #1		; 1
-       (listing[i+2] = #9'and #$01') and							// and #$01		; 2
-//       (listing[i+3] = #9'cmp #$01') and							// cmp #$01		; 3
-       beq(i+4) and										// beq @+		; 4
-       dey(i+5) then										// dey			; 5
-//       lab_a(i+6) then									//@			; 6
-     begin
-	listing[i+2] := #9'lda #$01';
-
-	listing[i+3] := #9'bit ' + GetARG(i);
-	listing[i+4] := #9'bne @+';
-
-        listing[i] := '';
-
-	exit(false);
-     end;
-
-
-    if lab_a(i+6) and										//@			; 6
-
-       (listing[i+3] = #9'cmp #$02') and							// cmp #$02		; 3
-
-       lda_val(i) and (lda_im(i) = false) and (iy(i) = false) and				// lda			; 0	~:STACKORIGIN
-       ldy_1(i+1) and										// ldy #1		; 1
-       (listing[i+2] = #9'and #$02') and							// and #$02		; 2
-//       (listing[i+3] = #9'cmp #$02') and							// cmp #$02		; 3
-       beq(i+4) and										// beq @+		; 4
-       dey(i+5) then										// dey			; 5
-//       lab_a(i+6) then									//@			; 6
-     begin
-	listing[i+2] := #9'lda #$02';
-
-	listing[i+3] := #9'bit ' + GetARG(i);
-	listing[i+4] := #9'bne @+';
-
-        listing[i] := '';
-
-	exit(false);
-     end;
-
-
-    if lab_a(i+6) and										//@			; 6
-
-       (listing[i+3] = #9'cmp #$04') and							// cmp #$04		; 3
-
-       lda_val(i) and (lda_im(i) = false) and (iy(i) = false) and				// lda			; 0	~:STACKORIGIN
-       ldy_1(i+1) and										// ldy #1		; 1
-       (listing[i+2] = #9'and #$04') and							// and #$04		; 2
-//       (listing[i+3] = #9'cmp #$04') and							// cmp #$04		; 3
-       beq(i+4) and										// beq @+		; 4
-       dey(i+5) then										// dey			; 5
-//       lab_a(i+6) then									//@			; 6
-     begin
-	listing[i+2] := #9'lda #$04';
-
-	listing[i+3] := #9'bit ' + GetARG(i);
-	listing[i+4] := #9'bne @+';
-
-        listing[i] := '';
-
-	exit(false);
-     end;
-
-
-    if lab_a(i+6) and										//@			; 6
-
-       (listing[i+3] = #9'cmp #$08') and							// cmp #$08		; 3
-
-       lda_val(i) and (lda_im(i) = false) and (iy(i) = false) and				// lda			; 0	~:STACKORIGIN
-       ldy_1(i+1) and										// ldy #1		; 1
-       (listing[i+2] = #9'and #$08') and							// and #$08		; 2
-//       (listing[i+3] = #9'cmp #$08') and							// cmp #$08		; 3
-       beq(i+4) and										// beq @+		; 4
-       dey(i+5) then										// dey			; 5
-//       lab_a(i+6) then									//@			; 6
-     begin
-	listing[i+2] := #9'lda #$08';
-
-	listing[i+3] := #9'bit ' + GetARG(i);
-	listing[i+4] := #9'bne @+';
-
-        listing[i] := '';
-
-	exit(false);
-     end;
-
-
-    if lab_a(i+6) and										//@			; 6
-
-       (listing[i+3] = #9'cmp #$10') and							// cmp #$10		; 3
-
-       lda_val(i) and (lda_im(i) = false) and (iy(i) = false) and				// lda			; 0	~:STACKORIGIN
-       ldy_1(i+1) and										// ldy #1		; 1
-       (listing[i+2] = #9'and #$10') and							// and #$10		; 2
-//       (listing[i+3] = #9'cmp #$10') and							// cmp #$10		; 3
-       beq(i+4) and										// beq @+		; 4
-       dey(i+5) then										// dey			; 5
-//       lab_a(i+6) then									//@			; 6
-     begin
-	listing[i+2] := #9'lda #$10';
-
-	listing[i+3] := #9'bit ' + GetARG(i);
-	listing[i+4] := #9'bne @+';
-
-        listing[i] := '';
-
-	exit(false);
-     end;
-
-
-    if lab_a(i+6) and										//@			; 6
-
-       (listing[i+3] = #9'cmp #$20') and							// cmp #$20		; 3
-
-       lda_val(i) and (lda_im(i) = false) and (iy(i) = false) and				// lda			; 0	~:STACKORIGIN
-       ldy_1(i+1) and										// ldy #1		; 1
-       (listing[i+2] = #9'and #$20') and							// and #$20		; 2
-//       (listing[i+3] = #9'cmp #$20') and							// cmp #$20		; 3
-       beq(i+4) and										// beq @+		; 4
-       dey(i+5) then										// dey			; 5
-//       lab_a(i+6) then									//@			; 6
-     begin
-	listing[i+2] := #9'lda #$20';
-
-	listing[i+3] := #9'bit ' + GetARG(i);
-	listing[i+4] := #9'bne @+';
-
-        listing[i] := '';
-
-	exit(false);
-     end;
-
-
-    if lab_a(i+6) and										//@			; 6
-
-       (listing[i+3] = #9'cmp #$40') and							// cmp #$40		; 3
-
-       lda_val(i) and (lda_im(i) = false) and (iy(i) = false) and				// lda			; 0	~:STACKORIGIN
-       ldy_1(i+1) and										// ldy #1		; 1
-       (listing[i+2] = #9'and #$40') and							// and #$40		; 2
-//       (listing[i+3] = #9'cmp #$40') and							// cmp #$40		; 3
-       beq(i+4) and										// beq @+		; 4
-       dey(i+5) then										// dey			; 5
-//       lab_a(i+6) then									//@			; 6
-     begin
-	listing[i+2] := #9'lda #$40';
-
-	listing[i+3] := #9'bit ' + GetARG(i);
-	listing[i+4] := #9'bne @+';
-
-        listing[i] := '';
-
-	exit(false);
-     end;
-
-
-    if lab_a(i+6) and										//@			; 6
-
-       (listing[i+3] = #9'cmp #$80') and							// cmp #$80		; 3
-
-       lda_a(i) and (iy(i) = false) and								// lda			; 0
-       ldy_1(i+1) and										// ldy #1		; 1
-       (listing[i+2] = #9'and #$80') and							// and #$80		; 2
-//       (listing[i+3] = #9'cmp #$80') and							// cmp #$80		; 3
-       beq(i+4) and										// beq @+		; 4
-       dey(i+5) then										// dey			; 5
-//       lab_a(i+6) then									//@			; 6
-     begin
-	listing[i+2] := listing[i];
-
-	listing[i] := '';
-
-	listing[i+3] := '';
-	listing[i+4] := #9'bmi @+';
-
-	exit(false);
-     end;
-
-
     if jeq(i+7) and										// jeq			; 7
 
        ora_im_0(i+3) and									// ora #$00		; 3
@@ -491,15 +307,206 @@ begin
 
 // -------------------------------------------------------------------------------------------
 
+
+  if lab_a(i+6) and										//@			; 6
+
+     cmp_im(i+3) and										// cmp #		; 3
+
+     and_im(i+2) and										// and #		; 2
+
+     ldy_1(i+1) and										// ldy #1		; 1
+
+     beq(i+4) and										// beq @+		; 4
+     dey(i+5) then										// dey			; 5
+
+   begin
+
+
+    if (listing[i+3] = #9'cmp #$01') and							// cmp #$01		; 3
+
+       lda_val(i) and (lda_im(i) = false) and (iy(i) = false) and				// lda			; 0	~:STACKORIGIN
+//       ldy_1(i+1) and										// ldy #1		; 1
+       (listing[i+2] = #9'and #$01') then							// and #$01		; 2
+//       (listing[i+3] = #9'cmp #$01') and							// cmp #$01		; 3
+//       beq(i+4) and										// beq @+		; 4
+//       dey(i+5) and										// dey			; 5
+//       lab_a(i+6) then									//@			; 6
+     begin
+	listing[i+2] := #9'lda #$01';
+
+	listing[i+3] := #9'bit ' + GetARG(i);
+	listing[i+4] := #9'bne @+';
+
+        listing[i] := '';
+
+	exit(false);
+     end;
+
+
+    if (listing[i+3] = #9'cmp #$02') and							// cmp #$02		; 3
+
+       lda_val(i) and (lda_im(i) = false) and (iy(i) = false) and				// lda			; 0	~:STACKORIGIN
+//       ldy_1(i+1) and										// ldy #1		; 1
+       (listing[i+2] = #9'and #$02') then							// and #$02		; 2
+//       (listing[i+3] = #9'cmp #$02') and							// cmp #$02		; 3
+//       beq(i+4) and										// beq @+		; 4
+//       dey(i+5) and										// dey			; 5
+//       lab_a(i+6) then									//@			; 6
+     begin
+	listing[i+2] := #9'lda #$02';
+
+	listing[i+3] := #9'bit ' + GetARG(i);
+	listing[i+4] := #9'bne @+';
+
+        listing[i] := '';
+
+	exit(false);
+     end;
+
+
+    if (listing[i+3] = #9'cmp #$04') and							// cmp #$04		; 3
+
+       lda_val(i) and (lda_im(i) = false) and (iy(i) = false) and				// lda			; 0	~:STACKORIGIN
+//       ldy_1(i+1) and										// ldy #1		; 1
+       (listing[i+2] = #9'and #$04') then							// and #$04		; 2
+//       (listing[i+3] = #9'cmp #$04') and							// cmp #$04		; 3
+//       beq(i+4) and										// beq @+		; 4
+//       dey(i+5) and										// dey			; 5
+//       lab_a(i+6) then									//@			; 6
+     begin
+	listing[i+2] := #9'lda #$04';
+
+	listing[i+3] := #9'bit ' + GetARG(i);
+	listing[i+4] := #9'bne @+';
+
+        listing[i] := '';
+
+	exit(false);
+     end;
+
+
+    if (listing[i+3] = #9'cmp #$08') and							// cmp #$08		; 3
+
+       lda_val(i) and (lda_im(i) = false) and (iy(i) = false) and				// lda			; 0	~:STACKORIGIN
+//       ldy_1(i+1) and										// ldy #1		; 1
+       (listing[i+2] = #9'and #$08') then							// and #$08		; 2
+//       (listing[i+3] = #9'cmp #$08') and							// cmp #$08		; 3
+//       beq(i+4) and										// beq @+		; 4
+//       dey(i+5) and										// dey			; 5
+//       lab_a(i+6) then									//@			; 6
+     begin
+	listing[i+2] := #9'lda #$08';
+
+	listing[i+3] := #9'bit ' + GetARG(i);
+	listing[i+4] := #9'bne @+';
+
+        listing[i] := '';
+
+	exit(false);
+     end;
+
+
+    if (listing[i+3] = #9'cmp #$10') and							// cmp #$10		; 3
+
+       lda_val(i) and (lda_im(i) = false) and (iy(i) = false) and				// lda			; 0	~:STACKORIGIN
+//       ldy_1(i+1) and										// ldy #1		; 1
+       (listing[i+2] = #9'and #$10') then							// and #$10		; 2
+//       (listing[i+3] = #9'cmp #$10') and							// cmp #$10		; 3
+//       beq(i+4) and										// beq @+		; 4
+//       dey(i+5) and										// dey			; 5
+//       lab_a(i+6) then									//@			; 6
+     begin
+	listing[i+2] := #9'lda #$10';
+
+	listing[i+3] := #9'bit ' + GetARG(i);
+	listing[i+4] := #9'bne @+';
+
+        listing[i] := '';
+
+	exit(false);
+     end;
+
+
+    if (listing[i+3] = #9'cmp #$20') and							// cmp #$20		; 3
+
+       lda_val(i) and (lda_im(i) = false) and (iy(i) = false) and				// lda			; 0	~:STACKORIGIN
+//       ldy_1(i+1) and										// ldy #1		; 1
+       (listing[i+2] = #9'and #$20') then							// and #$20		; 2
+//       (listing[i+3] = #9'cmp #$20') and							// cmp #$20		; 3
+//       beq(i+4) and										// beq @+		; 4
+//       dey(i+5) and										// dey			; 5
+//       lab_a(i+6) then									//@			; 6
+     begin
+	listing[i+2] := #9'lda #$20';
+
+	listing[i+3] := #9'bit ' + GetARG(i);
+	listing[i+4] := #9'bne @+';
+
+        listing[i] := '';
+
+	exit(false);
+     end;
+
+
+    if (listing[i+3] = #9'cmp #$40') and							// cmp #$40		; 3
+
+       lda_val(i) and (lda_im(i) = false) and (iy(i) = false) and				// lda			; 0	~:STACKORIGIN
+//       ldy_1(i+1) and										// ldy #1		; 1
+       (listing[i+2] = #9'and #$40') then							// and #$40		; 2
+//       (listing[i+3] = #9'cmp #$40') and							// cmp #$40		; 3
+//       beq(i+4) and										// beq @+		; 4
+//       dey(i+5) and										// dey			; 5
+//       lab_a(i+6) then									//@			; 6
+     begin
+	listing[i+2] := #9'lda #$40';
+
+	listing[i+3] := #9'bit ' + GetARG(i);
+	listing[i+4] := #9'bne @+';
+
+        listing[i] := '';
+
+	exit(false);
+     end;
+
+
+    if (listing[i+3] = #9'cmp #$80') and							// cmp #$80		; 3
+
+       lda_a(i) and (iy(i) = false) and								// lda			; 0
+//       ldy_1(i+1) and										// ldy #1		; 1
+       (listing[i+2] = #9'and #$80') then							// and #$80		; 2
+//       (listing[i+3] = #9'cmp #$80') and							// cmp #$80		; 3
+//       beq(i+4) and										// beq @+		; 4
+//       dey(i+5) and										// dey			; 5
+//       lab_a(i+6) then									//@			; 6
+     begin
+	listing[i+2] := listing[i];
+
+	listing[i] := '';
+
+	listing[i+3] := '';
+	listing[i+4] := #9'bmi @+';
+
+	exit(false);
+     end;
+
+
+   end;
+
+
+// -------------------------------------------------------------------------------------------
+
+
     if lab_a(i+3) and										//@			; 3
+
+       jeq(i+5) and										// jeq			; 5
 
        (ENDL(i-1) = false) and
        smi(i) and										// smi			; 0
        bne_a(i+1) and										// bne @+		; 1
        dey(i+2) and										// dey			; 2
 //       lab_a(i+3) and										//@			; 3
-       tya(i+4) and										// tya			; 4
-       jeq(i+5) then										// jeq			; 5
+       tya(i+4) then										// tya			; 4
+//       jeq(i+5) then										// jeq			; 5
       begin
        listing[i]   := #9'jmi ' + GetARG(i+5);
        listing[i+1] := #9'jeq ' + GetARG(i+5);
@@ -515,38 +522,20 @@ begin
       end;
 
 
-    if (ENDL(i-1) = false) and
+    if lab_a(i+3) and										//@			; 3
+
+       jeq(i+5) and										// jeq			; 5
+
+       (ENDL(i-1) = false) and
        seq(i) and										// seq			; 0
        bpl_a(i+1) and										// bpl @+		; 1
        dey(i+2) and										// dey			; 2
-       lab_a(i+3) and										//@			; 3
-       tya(i+4) and										// tya			; 4
-       jeq(i+5) then										// jeq			; 5
+//       lab_a(i+3) and										//@			; 3
+       tya(i+4) then										// tya			; 4
+//       jeq(i+5) then										// jeq			; 5
       begin
        listing[i]   := #9'jmi ' + GetARG(i+5);
        listing[i+1] := #9'jeq ' + GetARG(i+5);
-       listing[i+2] := '';
-       listing[i+3] := '';
-       listing[i+4] := '';
-       listing[i+5] := '';
-
-	for p:=i-1 downto 0 do
-	 if ldy_1(p) then begin listing[p]:=''; Break end;
-
-       exit(false);
-      end;
-
-
-    if (ENDL(i-1) = false) and
-       seq(i) and										// seq			; 0
-       bpl_a(i+1) and										// bpl @+		; 1
-       dey(i+2) and										// dey			; 2
-       lab_a(i+3) and										//@			; 3
-       tya(i+4) and										// tya			; 4
-       jne(i+5) then										// jne			; 5
-      begin
-       listing[i  ] := #9'smi';
-       listing[i+1] := #9'jne ' + GetARG(i+5);
        listing[i+2] := '';
        listing[i+3] := '';
        listing[i+4] := '';
@@ -595,6 +584,32 @@ begin
 //       jeq(i+5) then										// jeq			; 5
       begin
        listing[i+1] := #9'jpl ' + GetARG(i+5);
+       listing[i+2] := '';
+       listing[i+3] := '';
+       listing[i+4] := '';
+       listing[i+5] := '';
+
+	for p:=i-1 downto 0 do
+	 if ldy_1(p) then begin listing[p]:=''; Break end;
+
+       exit(false);
+      end;
+
+
+    if lab_a(i+3) and										//@			; 3
+
+       jne(i+5) and										// jne			; 5
+
+       (ENDL(i-1) = false) and
+       seq(i) and										// seq			; 0
+       bpl_a(i+1) and										// bpl @+		; 1
+       dey(i+2) and										// dey			; 2
+//       lab_a(i+3) and										//@			; 3
+       tya(i+4) then										// tya			; 4
+//       jne(i+5) then										// jne			; 5
+      begin
+       listing[i  ] := #9'smi';
+       listing[i+1] := #9'jne ' + GetARG(i+5);
        listing[i+2] := '';
        listing[i+3] := '';
        listing[i+4] := '';
