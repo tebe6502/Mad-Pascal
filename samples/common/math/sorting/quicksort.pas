@@ -71,15 +71,7 @@ end;
 
 begin
 
- for i:=0 to size-1 do begin 
-  numbers[i] := //random(255);
-                size-i-1;
-  
-  write(numbers[i],',');
- end; 
- 
- writeln;
- writeln;
+ for i:=0 to size-1 do numbers[i] := size-i-1;
 
  write('Quick sort, ',size,' elements');
 
@@ -88,9 +80,6 @@ begin
  QuickSort(0, size-1);
 
  writeln(', ',GetTickCount-s,' ticks');
-
- writeln;
- for i:=0 to size-1 do write(numbers[i],',');
 
  repeat until keypressed;
 

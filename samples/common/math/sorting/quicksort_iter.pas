@@ -106,31 +106,17 @@ end;
 
 begin
 
- for i:=0 to size-1 do begin 
-  arr[i] := //random(255);
-                size-i-1;
-  
-  //write(numbers[i],',');
- end; 
- 
- writeln;
- writeln;
+ for i:=0 to size-1 do arr[i] := size-i-1;
 
  write('Quick sort, ',size,' elements');
 
  s:=GetTickCount;
 
-        // Function calling 
-        quickSortIterative(0, size - 1); 
+ quickSortIterative(0, size - 1); 
 
  writeln(', ',GetTickCount-s,' ticks');
 
- writeln;
-
- for i:=0 to size-1 do write(arr[i],',');
-
-
-	repeat until keypressed;
+ repeat until keypressed;
 
 end.
 
