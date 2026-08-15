@@ -318,7 +318,7 @@ begin
 	listing[i+10] := '';
 	listing[i+11] := '';
        end else begin
-	listing[i] := listing[i+1];
+	listing[i]   := listing[i+1];
 	listing[i+1] := #9'cmp ' + GetARG(i+2);
 	listing[i+2] := #9'bne @+';
 	listing[i+3] := #9'lda ' + GetARG(i+4);
@@ -328,8 +328,8 @@ begin
 	listing[i+7] := #9'cmp ' + GetARG(i+8);
 	listing[i+8] := #9'bne @+';
 	listing[i+9] := #9'lda ' + GetARG(i+10);
-	listing[i+10] := #9'cmp ' + GetARG(i+11);
-	listing[i+11] := '@';
+	listing[i+10]:= #9'cmp ' + GetARG(i+11);
+	listing[i+11]:= '@'
        end;
 
 	listing[i+12] := '';

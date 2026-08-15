@@ -359,4 +359,40 @@ begin
     end;
 
 
+{
+    if bne_a(0) and									// bne @+		; 0
+       lda(1) and									// lda			; 1
+       cmp(2) and									// cmp			; 2
+       lab_a(3) and									//@			; 3
+       beq_a(4) and									// beq @+		; 4
+       dey(5) and									// dey			; 5
+       lab_a(6) and									//@			; 6
+       (tya(7) or sty(7)) then								// tya|sty		; 7
+      begin
+
+       TemporaryBuf[3] := #9'seq';
+       TemporaryBuf[4] := '@';
+
+       TemporaryBuf[6] := '~';
+
+      end;
+
+
+    if bne_a(0) and									// bne @+		; 0
+       lda(1) and									// lda			; 1
+       cmp(2) and									// cmp			; 2
+       lab_a(3) and									//@			; 3
+       bne_a(4) and									// bne @+		; 4
+       dey(5) and									// dey			; 5
+       lab_a(6) and									//@			; 6
+       (tya(7) or sty(7)) then								// tya|sty		; 7
+      begin
+
+       TemporaryBuf[3] := #9'sne';
+       TemporaryBuf[4] := '~';
+
+      end;      
+}
+
+
 end;	// procedure
