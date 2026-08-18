@@ -8,9 +8,13 @@ var p: integer;
 begin
 
 
-    if ldy_1(2) and										// ldy #1		; 2
-       lda(3) and										// lda			; 3
+    if lab_a(14) and										//@			; 14
+
        cmp_im_0(4) and										// cmp #$00		; 4
+
+       ldy_1(2) and										// ldy #1		; 2
+       lda(3) and										// lda			; 3
+//       cmp_im_0(4) and									// cmp #$00		; 4
        beq_a(5) and										// beq @+		; 5
        dey(6) and										// dey			; 6
        lab_a(7) and										//@			; 7
@@ -20,7 +24,7 @@ begin
        cmp_im_0(11) and										// cmp #$00		; 11
        beq_a(12) and										// beq @+		; 12
        dey(13) and										// dey			; 13
-       lab_a(14) and										//@			; 14
+//       lab_a(14) and										//@			; 14
        tya(15) and										// tya			; 15
        and_stack(16) then									// and :STACKORIGIN	; 16
      if argMatch(8, 16) then
@@ -104,16 +108,20 @@ begin
       end;
 
 
-   if ldy_1(2) and										// ldy #1		; 2
-      lda(3) and										// lda 			; 3
+   if lab_a(11) and										//@			; 11
+
       cmp_im_0(4) and										// cmp #$00		; 4
+
+      ldy_1(2) and										// ldy #1		; 2
+      lda(3) and										// lda 			; 3
+//      cmp_im_0(4) and										// cmp #$00		; 4
       bne_a(5) and										// bne			; 5
       lda(6) and										// lda 			; 6
       cmp_im_0(7) and										// cmp #$00		; 7
       lab_a(8) and										//@			; 8
       (beq_a(9) or bne_a(9)) and								// beq|bne		; 9
       dey(10) and										// dey			; 10
-      lab_a(11) and										//@			; 11
+//      lab_a(11) and										//@			; 11
       (tya(12) or sty(12)) then									// tya|sty		; 12
       begin
 	TemporaryBuf[4] := #9'ora ' + GetARG(6);
@@ -135,100 +143,15 @@ begin
     end;
 
 
-   if lda_bp2_y(2) and										// lda (:bp2),y		; 2
-      cmp_im_0(3) and										// cmp #$00		; 3
-      bne_a(4) and										// bne @+		; 4
-      dey(5) and										// dey			; 5
-      lda_bp2_y(6) and										// lda (:bp2),y		; 6
-      cmp(7) and										// cmp			; 7
-      bne_a(8) and										// bne @+		; 8
-      dey(9) and										// dey			; 9
-      lda_bp2_y(10) and										// lda (:bp2),y		; 10
-      cmp(11) and										// cmp			; 11
-      bne_a(12) and										// bne @+		; 12
-      dey(13) and										// dey			; 13
-      lda_bp2_y(14) and										// lda (:bp2),y		; 14
-      cmp(15) and										// cmp			; 15
-      lab_a(16) and										//@			; 16
-      (jeq(17) or jne(17)) and									// jeq|jne		; 17
-      (SKIP(18) = false) then									//~SKIP			; 18
-    begin
-     TemporaryBuf[3] := '~';
-    end;
+   if lab_a(16) and										//@			; 16
 
-
-   if lda_bp2_y(2) and										// lda (:bp2),y		; 2
-      cmp_im_0(3) and										// cmp #$00		; 3
-      bne_a(4) and										// bne @+		; 4
-      dey(5) and										// dey			; 5
-      lda_bp2_y(6) and										// lda (:bp2),y		; 6
-      cmp(7) and										// cmp			; 7
-      bne_a(8) and										// bne @+		; 8
-      dey(9) and										// dey			; 9
-      lda_bp2_y(10) and										// lda (:bp2),y		; 10
-      cmp(11) and										// cmp			; 11
-      lab_a(12) and										//@			; 12
-      (jeq(13) or jne(13)) and									// jeq|jne		; 13
-      (SKIP(14) = false) then									//~SKIP			; 14
-    begin
-     TemporaryBuf[3] := '~';
-    end;
-
-
-   if lda_bp2_y(2) and										// lda (:bp2),y		; 2
-      cmp_im_0(3) and										// cmp #$00		; 3
-      bne_a(4) and										// bne @+		; 4
-      dey(5) and										// dey			; 5
-      lda_bp2_y(6) and										// lda (:bp2),y		; 6
-      cmp(7) and										// cmp			; 7
-      lab_a(8) and										//@			; 8
-      (jeq(9) or jne(9)) and									// jeq|jne		; 9
-      (SKIP(10) = false) then									//~SKIP			; 10
-    begin
-     TemporaryBuf[3] := '~';
-    end;
-
-
-   if lda(2) and										// lda W		; 2
-      cmp_im_0(3) and										// cmp #$00		; 3
-      bne_a(4) and										// bne @+		; 4
-      lda(5) and										// lda W		; 5
-      cmp(6) and										// cmp 			; 6
-      bne_a(7) and										// bne @+		; 7
-      lda(8) and										// lda W		; 8
-      cmp(9) and										// cmp 			; 9
-      bne_a(10) and										// bne @+		; 10
-      lda(11) and										// lda W		; 11
-      cmp(12) and										// cmp 			; 12
-      lab_a(13) and										//@			; 13
-      (jeq(14) or jne(14)) and									// jeq|jne		; 14
-      (SKIP(15) = false) then									//~SKIP			; 15
-    begin
-     TemporaryBuf[3] := '~';
-
-     if cmp_im_0(6) and
-        cmp_im_0(9) and
-        cmp_im_0(12) then
-       begin
-	TemporaryBuf[6] := '~';
-	TemporaryBuf[9] := '~';
-	TemporaryBuf[12] := '~';
-
-	if jeq(14) then begin
-	 TemporaryBuf[13] := TemporaryBuf[14];
-	 TemporaryBuf[14] := '@';
-	end;
-
-       end;
-
-    end;
-
-
-   if lda(2) and										// lda W		; 2
-      cmp_im_0(3) and										// cmp #$00		; 3
-      bne_a(4) and										// bne @+		; 4
-      lda(5) and										// lda W		; 5
       cmp_im_0(6) and										// cmp #$00		; 6
+
+      lda(2) and										// lda W		; 2
+      cmp_im_0(3) and										// cmp #$00		; 3
+      bne_a(4) and										// bne @+		; 4
+      lda(5) and										// lda W		; 5
+//      cmp_im_0(6) and										// cmp #$00		; 6
       bne_a(7) and										// bne @+		; 7
       lda(8) and										// lda W		; 8
       cmp_im_0(9) and										// cmp #$00		; 9
@@ -238,7 +161,7 @@ begin
       lab_a(13) and										//@			; 13
       (beq_a(14) or bne_a(14)) and								// beq @+|bne @+	; 14
       dey(15) and										// dey			; 15
-      lab_a(16) and										//@			; 16
+//      lab_a(16) and										//@			; 16
       (tya(17) or sty(17)) then									// tya|sty		; 17
     begin
      TemporaryBuf[3] := '~';
@@ -251,16 +174,20 @@ begin
     end;
 
 
-    if ldy_1(0) and										// ldy #1		; 0
-       lda(1) and										// lda W+1		; 1
+    if lab_a(9) and										//@			; 9
+
        cmp_im_0(2) and										// cmp #$00		; 2
+
+       ldy_1(0) and										// ldy #1		; 0
+       lda(1) and										// lda W+1		; 1
+//       cmp_im_0(2) and									// cmp #$00		; 2
        bne_a(3) and										// bne @+		; 3
        lda(4) and										// lda W		; 4
        cmp(5) and										// cmp			; 5
        lab_a(6) and										//@			; 6
        bcs_a(7) and										// bcs @+		; 7
        dey(8) and										// dey			; 8
-       lab_a(9) and										//@			; 9
+//       lab_a(9) and										//@			; 9
        (tya(10) or sty(10)) then								// tya|sty		; 10
       begin
        TemporaryBuf[2] := '~';
@@ -269,15 +196,144 @@ begin
       end;
 
 
-   if lda(2) and										// lda W		; 2
+// -----------------------------------------------------------------------------
+
+
+   if lab_a(16) and										//@			; 16
+
       cmp_im_0(3) and										// cmp #$00		; 3
+
+      lda_bp2_y(2) and										// lda (:bp2),y		; 2
+//      cmp_im_0(3) and										// cmp #$00		; 3
+      bne_a(4) and										// bne @+		; 4
+      dey(5) and										// dey			; 5
+      lda_bp2_y(6) and										// lda (:bp2),y		; 6
+      cmp(7) and										// cmp			; 7
+      bne_a(8) and										// bne @+		; 8
+      dey(9) and										// dey			; 9
+      lda_bp2_y(10) and										// lda (:bp2),y		; 10
+      cmp(11) and										// cmp			; 11
+      bne_a(12) and										// bne @+		; 12
+      dey(13) and										// dey			; 13
+      lda_bp2_y(14) and										// lda (:bp2),y		; 14
+      cmp(15) and										// cmp			; 15
+//      lab_a(16) and										//@			; 16
+      (jeq(17) or jne(17)) and									// jeq|jne		; 17
+      (SKIP(18) = false) then									//~SKIP			; 18
+    begin
+     TemporaryBuf[3] := '~';
+
+     if cmp_im_0(7) then TemporaryBuf[7] := '~';
+     if cmp_im_0(11) then TemporaryBuf[11] := '~';
+     if cmp_im_0(15) then TemporaryBuf[15] := '~';
+
+     if jeq(17) then begin
+      TemporaryBuf[16] := TemporaryBuf[17];
+      TemporaryBuf[17] := '@';
+     end;
+
+    end;
+
+
+   if lab_a(12) and										//@			; 12
+
+      cmp_im_0(3) and										// cmp #$00		; 3
+
+      lda_bp2_y(2) and										// lda (:bp2),y		; 2
+//      cmp_im_0(3) and										// cmp #$00		; 3
+      bne_a(4) and										// bne @+		; 4
+      dey(5) and										// dey			; 5
+      lda_bp2_y(6) and										// lda (:bp2),y		; 6
+      cmp(7) and										// cmp			; 7
+      bne_a(8) and										// bne @+		; 8
+      dey(9) and										// dey			; 9
+      lda_bp2_y(10) and										// lda (:bp2),y		; 10
+      cmp(11) and										// cmp			; 11
+//      lab_a(12) and										//@			; 12
+      (jeq(13) or jne(13)) and									// jeq|jne		; 13
+      (SKIP(14) = false) then									//~SKIP			; 14
+    begin
+     TemporaryBuf[3] := '~';
+    end;
+
+
+   if lab_a(8) and										//@			; 8
+
+      cmp_im_0(3) and										// cmp #$00		; 3
+
+      lda_bp2_y(2) and										// lda (:bp2),y		; 2
+//      cmp_im_0(3) and										// cmp #$00		; 3
+      bne_a(4) and										// bne @+		; 4
+      dey(5) and										// dey			; 5
+      lda_bp2_y(6) and										// lda (:bp2),y		; 6
+      cmp(7) and										// cmp			; 7
+//      lab_a(8) and										//@			; 8
+      (jeq(9) or jne(9)) and									// jeq|jne		; 9
+      (SKIP(10) = false) then									//~SKIP			; 10
+    begin
+     TemporaryBuf[3] := '~';
+    end;
+
+
+   if lda_bp2_y(2) and										// lda (:bp2),y		; 2
+      cmp_im_0(3) and										// cmp #$00		; 3
+      lab_a(4) and										//@			; 4
+      (jeq(5) or jne(5)) and									// jeq|jne		; 5
+      (SKIP(6) = false) then									//~SKIP			; 6
+    begin
+     TemporaryBuf[3] := '~';
+    end;
+
+
+// -----------------------------------------------------------------------------
+
+
+   if lab_a(13) and										//@			; 13
+
+      cmp_im_0(3) and										// cmp #$00		; 3
+
+      lda(2) and										// lda W		; 2
+//      cmp_im_0(3) and										// cmp #$00		; 3
       bne_a(4) and										// bne @+		; 4
       lda(5) and										// lda W		; 5
       cmp(6) and										// cmp 			; 6
       bne_a(7) and										// bne @+		; 7
       lda(8) and										// lda W		; 8
       cmp(9) and										// cmp 			; 9
-      lab_a(10) and										//@			; 10
+      bne_a(10) and										// bne @+		; 10
+      lda(11) and										// lda W		; 11
+      cmp(12) and										// cmp 			; 12
+//      lab_a(13) and										//@			; 13
+      (jeq(14) or jne(14)) and									// jeq|jne		; 14
+      (SKIP(15) = false) then									//~SKIP			; 15
+    begin
+     TemporaryBuf[3] := '~';
+
+     if cmp_im_0(6) then TemporaryBuf[6] := '~';
+     if cmp_im_0(9) then TemporaryBuf[9] := '~';
+     if cmp_im_0(12) then TemporaryBuf[12] := '~';
+
+     if jeq(14) then begin
+      TemporaryBuf[13] := TemporaryBuf[14];
+      TemporaryBuf[14] := '@';
+     end;
+
+    end;
+
+
+   if lab_a(10) and										//@			; 10
+
+      cmp_im_0(3) and										// cmp #$00		; 3
+
+      lda(2) and										// lda W		; 2
+//      cmp_im_0(3) and										// cmp #$00		; 3
+      bne_a(4) and										// bne @+		; 4
+      lda(5) and										// lda W		; 5
+      cmp(6) and										// cmp 			; 6
+      bne_a(7) and										// bne @+		; 7
+      lda(8) and										// lda W		; 8
+      cmp(9) and										// cmp 			; 9
+//      lab_a(10) and										//@			; 10
       (jeq(11) or jne(11)) and									// jeq|jne		; 11
       (SKIP(12) = false) then									//~SKIP			; 12
     begin
@@ -285,12 +341,16 @@ begin
     end;
 
 
-   if lda(2) and										// lda W		; 2
+   if lab_a(7) and										//@			; 7
+
       cmp_im_0(3) and										// cmp #$00		; 3
+
+      lda(2) and										// lda W		; 2
+//      cmp_im_0(3) and										// cmp #$00		; 3
       bne_a(4) and										// bne @+		; 4
       lda(5) and										// lda W		; 5
       cmp(6) and										// cmp 			; 6
-      lab_a(7) and										//@			; 7
+//      lab_a(7) and										//@			; 7
       (jeq(8) or jne(8)) and									// jeq|jne		; 8
       (SKIP(9) = false) then									//~SKIP			; 9
     begin
