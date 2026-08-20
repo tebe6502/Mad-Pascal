@@ -2050,6 +2050,25 @@
   if (l = i + 10) then begin
 
 
+    if UNUSED_A(i) and									// UNUSED_A				; 0
+       mwy_bp2(i+1) and									// mwy					; 1
+       ldy_im(i+2) and									// ldy #				; 2
+       lda_bp2_y(i+3) and								// lda (:bp2),y				; 3
+       (add_sub_stack(i+4) or and_ora_eor_stack(i+4)) and				// add|sub|and|ora|eor :STACKORIGIN	; 4
+       sta_bp2_y(i+5) and								// sta (:bp2),y				; 5
+       (iny(i+6) or dey(i+6)) and							// iny|dey				; 6
+       lda_bp2_y(i+7) and								// lda (:bp2),y				; 7
+       (adc_sbc_stack(i+8) or and_ora_eor_stack(i+8)) and				// adc|sbc|and|ora|eor :STACKORIGIN	; 8
+       sta_bp2_y(i+9) then								// sta (:bp2),y				; 9
+     if (argMatch(i, i+4) = false) and
+	(argMatch(i, i+8) = false) then
+      begin
+	listing[i] := '';
+
+	Result:=false; Break;
+      end;
+
+
     if rol_stack(i) and									// rol :STACKORIGIN			; 0
        asl_a(i+1) and									// asl @				; 1
        asl_a(i+2) and									// asl @				; 2
