@@ -69,6 +69,10 @@ uses SysUtils, Debugger, Messages, Utilities;
 function Elements(IdentIndex: Integer): Cardinal;
 begin
 
+  if (IdentifierAt(IdentIndex).DataType = TDataType.POINTERTOK) and (IdentifierAt(IdentIndex).AllocElementType = TDataType.FORWARDTYPE) then
+    Result := 1
+  else
+
   if (IdentifierAt(IdentIndex).DataType = TDataType.FORWARDTYPE) then
     Result := 1
   else
@@ -1763,7 +1767,7 @@ begin
       identifier.isInit := True;
     end;
 
-    NumAllocElements_ := NumAllocElements shr 16;    // , yy]
+    NumAllocElements_ := NumAllocElements shr 16;      // , yy]
     NumAllocElements := NumAllocElements and $FFFF;    // [xx,
 
 
@@ -1799,10 +1803,12 @@ begin
           IncVarDataSize(tokenIndex, GetDataSize(DataType));
         end;
 
+
         identifier.NumAllocElements := NumAllocElements;  // Number of array elements (0 for single variable)
         identifier.NumAllocElements_ := NumAllocElements_;
 
         identifier.AllocElementType := AllocElementType;
+
 
         if not OutputDisabled then
         begin
@@ -1836,7 +1842,6 @@ begin
                       IncVarDataSize(tokenIndex, Integer(Elements(NumIdent) * GetDataSize(AllocElementType)));
 
                 end;
-
 
           if NumAllocElements > 0 then IncVarDataSize(tokenIndex, -GetDataSize(DataType));
 
