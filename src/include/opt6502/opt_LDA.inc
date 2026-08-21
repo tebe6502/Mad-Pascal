@@ -20,6 +20,19 @@ begin
       end;
 
 
+    if lda_im(i) and										// lda #				; 0
+       ldy(i+1) and										// ldy					; 1
+       add_sub(i+2) then									// add|sub				; 2
+      begin
+        listing_tmp[0] := listing[i+1];
+        listing_tmp[1] := listing[i];
+
+	listing[i]  := listing_tmp[0];
+	listing[i+1]:= listing_tmp[1];
+//	exit(false);
+      end;
+
+
     if ldy(i) and 										// ldy I				; 0
        lda_a(i+1) and										// lda I				; 1
        sta_a(i+2) and										// sta					; 2
