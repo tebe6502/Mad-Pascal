@@ -249,7 +249,7 @@ var
 
   function UNUSED_A(const i: TListingIndex): Boolean;
   begin
-    Result := lda_im(i) or lda_stack(i) or sta_stack(i) or  sty_stack(i) or
+    Result := lda_im(i) or lda_stack(i) or sta_stack(i) or sty_stack(i) or
       {!!! (pos(#9'lda :eax', listing[i]) = 1) or (pos(#9'sta :eax', listing[i]) = 1) or}
       rol_stack(i) or ror_stack(i) or adc_sbc(i);
   end;
@@ -387,12 +387,12 @@ var
 
   procedure LDA_STA_ADR_0(const i: TListingIndex; q: Integer; op: Char);
 
-   procedure update(const i: TListingIndex);
-   begin
+    procedure update(const i: TListingIndex);
+    begin
       //Delete(listing[i], pos(',y', listing[i]), 2);
       SetLength(listing[i], length(listing[i])-2);
       if q <> 0 then listing[i] := listing[i] + op + Hex(q, 2);
-   end;
+    end;
 
   begin
 
@@ -1159,7 +1159,7 @@ end;
 
 
 {
-if (pos('lda (:bp2),y', listing[i]) > 0) then begin
+if (pos('fmulu_8', listing[i]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');
@@ -1275,7 +1275,7 @@ end;
 
 
 {
-if (pos('and #$40', listing[i]) > 0) then begin
+if (pos('sta (:bp),y', listing[i]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');
@@ -1776,7 +1776,7 @@ begin        // OptimizeASM
 
 
 	if lda_im(l) and					// #const
-	   (listing[l+1] = #9'sta :ecx') and
+	   sta_ecx(l+1) and
 	   lda_im(l+2) and	   				// #const
 	   sta_eax(l+3) then
 	begin
@@ -1870,14 +1870,14 @@ begin        // OptimizeASM
 	end;
 
 
-        if lda_im(l) and
-	   (listing[l+1] = #9'sta :ecx') and
-	   lda_im(l+2) and
-	   (listing[l+3] = #9'sta :ecx+1') and
-	   lda_im(l+4) and
-	   sta_eax(l+5) and
-	   lda_im(l+6) and
-	   sta_eax_1(l+7) then
+        if lda_im(l) and		// lda #		; 0
+	   sta_ecx(l+1) and		// sta :ecx		; 1
+	   lda_im(l+2) and		// lda #		; 2
+	   sta_ecx_1(l+3) and		// sta :ecx+1		; 3
+	   lda_im(l+4) and		// lda #		; 4
+	   sta_eax(l+5) and		// sta :eax		; 5
+	   lda_im(l+6) and		// lda #		; 6
+	   sta_eax_1(l+7) then		// sta :eax+1		; 7
 	begin
 
 	 k := GetWORD(l, l+2) * GetWORD(l+4, l+6);
@@ -1946,9 +1946,9 @@ begin        // OptimizeASM
 
 
     if //lda_a(m) and {(lda_stack(m) = false) and}					// lda					; 0
-       (listing[m+1] = #9'sta :ecx') and 						// sta :ecx				; 1
+       sta_ecx(m+1) and			 						// sta :ecx				; 1
        lda_im_0(m+2) and								// lda #$00				; 2
-       (listing[m+3] = #9'sta :ecx+1') and 						// sta :ecx+1				; 3
+       sta_ecx_1(m+3) and 								// sta :ecx+1				; 3
        lda_a(m+4) and {(lda_stack(m+4) = false) and}					// lda 					; 4
        sta_eax(m+5) and									// sta :eax				; 5
        lda_im_0(m+6) and								// lda #$00				; 6
@@ -1966,7 +1966,7 @@ begin        // OptimizeASM
       listing[m+7] := #9'imulCL';
       listing[m+8] := listing[m+12];
 
-      l:=m+9;
+      l := m + 9;
 
       imulCL_opt;
      end;
