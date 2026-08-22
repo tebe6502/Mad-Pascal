@@ -2,7 +2,7 @@
 ; REAL	fixed-point Q24.8, 32bit
 ; https://en.wikipedia.org/wiki/Q_(number_format)
 ;
-; changes: 2024-10-01
+; changes: 2024-10-01 ; 2026-08-21
 ;
 
 /*
@@ -154,7 +154,7 @@ B	= :ECX
 
 	lda A+3
 	eor B+3
-	sta sign
+	pha
 
 	bit A+3		; dividend sign
 	spl
@@ -223,7 +223,7 @@ UDIV321
 
 	JMP UDIV321
 stop
-	lda sign: #0
+	pla
 	spl	
 	jmp @negEAX	;jmp @negA
 

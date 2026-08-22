@@ -16616,8 +16616,7 @@ begin
                         //  writeln(IdentifierAt(IdentIndex).Name,' | ',Elements(IdentIndex),'/',IdentifierAt(IdentIndex).IdType,'/',IdentifierAt(IdentIndex).PassMethod ,' | ', IdentifierAt(IdentIndex).DataType,',',IdentifierAt(IdentIndex).AllocElementType,',',IdentifierAt(IdentIndex).NumAllocElements,',',IdentifierAt(IdentIndex).IdType);
 
                         if (IdentifierAt(IdentIndex).NumAllocElements_ > 0) and not
-                          (IdentifierAt(IdentIndex).AllocElementType in [TDataType.RECORDTOK,
-                          TDataType.OBJECTTOK]) then
+                          (IdentifierAt(IdentIndex).AllocElementType in [TDataType.RECORDTOK, TDataType.OBJECTTOK]) then
                           asm65('adr.' + IdentifierAt(IdentIndex).Name + Value(True, True) +
                             ' .array [' + IntToStr(IdentifierAt(IdentIndex).NumAllocElements) +
                             '] [' + IntToStr(IdentifierAt(IdentIndex).NumAllocElements_) + ']' + mads_data_size)
@@ -16654,7 +16653,7 @@ begin
                       if (IdentifierAt(IdentIndex).Name = 'RESULT') and
                         (IdentifierAt(BlockIdentIndex).Kind = TTokenKind.FUNCTIONTOK) then
 
-                        // zliczaj RESULT aby rekurencja zadzialala w przypadku kiedy RESULT nie jest na koĹ„cu bloku alokacji zmiennych
+                        // zliczaj RESULT aby rekurencja zadzialala w przypadku kiedy RESULT nie jest na koncu bloku alokacji zmiennych
 {
 FIELD  = DATAORIGIN+$0178
 FIELD.GENERATED  = DATAORIGIN+$0000

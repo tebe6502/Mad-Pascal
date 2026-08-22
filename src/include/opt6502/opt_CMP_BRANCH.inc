@@ -1124,6 +1124,32 @@ begin
 
 // -------------------------------------------------------------------------------------------
 
+{
+    if lab_a(i+3) and										//@			; 3
+
+       sta_a(i+5) and										// sta			; 5
+
+       ENDL(i) and										//.ENDL			; 0
+       bmi_a(i+1) and										// bmi @+		; 1
+       dey(i+2) and										// dey			; 2
+//       lab_a(i+3) and										//@			; 3
+       tya(i+4) then										// tya			; 4
+//       sta_a(i+5) then									// sta			; 5
+      begin
+       listing[i+1] := #9'asl @';
+       listing[i+2] := #9'lda #$00';
+       listing[i+3] := #9'rol @';
+       listing[i+4] := '';
+
+	for p:=i-1 downto 0 do
+	 if ldy_1(p) then begin listing[p]:=''; Break end;
+
+       exit(false);
+      end;
+}
+
+// -------------------------------------------------------------------------------------------
+
 
     if lab_a(i+3) and										// @			; 3
 

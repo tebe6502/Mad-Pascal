@@ -259,6 +259,26 @@ begin
        end;
 
 
+    if spl(i+2) and										// spl					; 2
+
+       ldy_im_0(i) and										// ldy #$00				; 0
+       lda_val(i+1) and										// lda 					; 1	~:STACKORIGIN
+//       spl(i+2) and										// spl					; 2
+       dey(i+3) and										// dey 					; 3
+       sty_stack(i+4) and									// sty :STACKORIGIN+STACKWIDTH		; 4
+       sta_stack(i+5) and									// sta :STACKORIGIN			; 5
+       lda_a(i+6) and										// lda					; 6
+       (sub_stack(i+7) or and_ora_eor(i+7)) then						// sub|and|ora|eor :STACKORIGIN		; 7	!!! ~add
+     if argMatch(i+5, i+7) then
+       begin
+	listing[i+5] := '';
+
+	listing[i+7] := GetCMD(i+7) + GetARG(i+1);
+
+	exit(false);
+       end;
+
+
     if spl(i+3) and										// spl					; 3
 
        sta_stack(i) and										// sta :STACKORIGIN+STACKWIDTH		; 0
