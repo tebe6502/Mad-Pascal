@@ -651,7 +651,7 @@ var
         Inc(k);
       end;
 
-    listing[k] := '';
+    listing[k    ] := '';
     listing[k + 1] := '';
     listing[k + 2] := '';
     listing[k + 3] := '';
@@ -1165,7 +1165,7 @@ end;
 
 
 {
-if (pos('and #$03', listing[i]) > 0) then begin
+if (pos('lda I', listing[i]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');

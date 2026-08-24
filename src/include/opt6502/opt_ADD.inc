@@ -2625,9 +2625,9 @@ begin
 
     if add_stack(i+3) and								// add :STACKORIGIN			; 3
 
-       (lda_a(i) = false) and								//~lda	 				; 0
+       (lda_a(i) = false) and								//~lda					; 0
        sta_stack(i+1) and								// sta :STACKORIGIN			; 1
-       lda(i+2) and									// lda 					; 2		~lda adr.
+       lda(i+2) and (lda_stack(i+2) = false) and					// lda 					; 2		~lda adr.	~:STACKORIGIN
 //       add_stack(i+3) and								// add :STACKORIGIN			; 3
        sta_a(i+4) then									// sta					; 4
      if argMatch(i+1, i+3) then
