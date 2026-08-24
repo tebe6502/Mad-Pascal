@@ -20,9 +20,9 @@ begin
 
 
    if jcc_l(10) and									// jcc			; 10	branch if C=0
-      (TemporaryBuf[11] = '') and							//			; 11
+      											//			; 11
       opti(12) and									//; optimize 		; 12
-      (TemporaryBuf[13] = '') and							//			; 13	C=1
+      											//			; 13	C=1
       sub(14) then									// sub			; 14
     begin
 	TemporaryBuf[14] := #9'sbc ' + GetARG(14);
@@ -30,9 +30,9 @@ begin
 
 
    if jcc_l(10) and									// jcc			; 10	branch if C=0
-      (TemporaryBuf[11] = '') and							//			; 11
+      											//			; 11
       opti(12) and									//; optimize 		; 12
-      (TemporaryBuf[13] = '') and							//			; 13	C=1
+      											//			; 13	C=1
       lda(14) and									// lda			; 14
       sub(15) then									// sub			; 15
     begin
@@ -41,9 +41,9 @@ begin
 
 
    if jcc_l(10) and									// jcc			; 10	branch if C=0
-      (TemporaryBuf[11] = '') and							//			; 11
+      											//			; 11
       opti(12) and									//; optimize 		; 12
-      (TemporaryBuf[13] = '') and							//			; 13	C=1
+      											//			; 13	C=1
       ldy(14) and									// ldy			; 14
       lda(15) and									// lda			; 15
       sub(16) then									// sub			; 16
@@ -53,9 +53,9 @@ begin
 
 
    if jcs_l(10) and									// jcs			; 10	branch if C=1
-      (TemporaryBuf[11] = '') and							//			; 11
+      											//			; 11
       opti(12) and									//; optimize 		; 12
-      (TemporaryBuf[13] = '') and							//			; 13	C=0
+      											//			; 13	C=0
       add(14) then									// add			; 14
     begin
 	TemporaryBuf[14] := #9'adc ' + GetARG(14);
@@ -63,9 +63,9 @@ begin
 
 
    if jcs_l(10) and									// jcs			; 10	branch if C=1
-      (TemporaryBuf[11] = '') and							//			; 11
+      											//			; 11
       opti(12) and									//; optimize 		; 12
-      (TemporaryBuf[13] = '') and							//			; 13	C=0
+      											//			; 13	C=0
       lda(14) and									// lda			; 14
       add(15) then									// add			; 15
     begin
@@ -74,9 +74,9 @@ begin
 
 
    if jcs_l(10) and									// jcs			; 10	branch if C=1
-      (TemporaryBuf[11] = '') and							//			; 11
+     											//			; 11
       opti(12) and									//; optimize 		; 12
-      (TemporaryBuf[13] = '') and							//			; 13	C=0
+      											//			; 13	C=0
       ldy(14) and									// ldy			; 14
       lda(15) and									// lda			; 15
       add(16) then									// add			; 16
@@ -88,9 +88,9 @@ begin
 { !!!
 
    if (pos('jcs l_', TemporaryBuf[10]) > 0) and						// jcs			; 10	branch if C=1
-      (TemporaryBuf[11] = '') and							//			; 11
+      											//			; 11
       opti(12) and									//; optimize 		; 12
-      (TemporaryBuf[13] = '') and							//			; 13	C=0
+      											//			; 13	C=0
       asl_a(14) and									// asl @		; 14
       (pos('add ', TemporaryBuf[15]) > 0) then						// add			; 15
     begin
@@ -99,9 +99,9 @@ begin
 
 
    if (pos('jcs l_', TemporaryBuf[10]) > 0) and						// jcs			; 10	branch if C=1
-      (TemporaryBuf[11] = '') and							//			; 11
+      											//			; 11
       opti(12) and									//; optimize 		; 12
-      (TemporaryBuf[13] = '') and							//			; 13	C=0
+      											//			; 13	C=0
       asl_a(14) and									// asl @		; 14
       asl_a(15) and									// asl @		; 15
       (pos('add ', TemporaryBuf[16]) > 0) then						// add			; 16
@@ -113,9 +113,9 @@ begin
 
    if scc(10) and									// scc			; 10	branch if C=0
       inc_(11) and									// inc			; 11
-      (TemporaryBuf[12] = '') and							//			; 12
+      											//			; 12
       opti(13) and									//; optimize 		; 13
-      (TemporaryBuf[14] = '') and							//			; 14	C=0
+     											//			; 14	C=0
       add(15) then									// add			; 15
     begin
 	TemporaryBuf[10] := #9'bcc @+';
@@ -129,9 +129,9 @@ begin
 
    if scs(10) and									// scs			; 10	branch if C=1
       dec_(11) and									// dec			; 11
-      (TemporaryBuf[12] = '') and							//			; 12
+      											//			; 12
       opti(13)and									//; optimize 		; 13
-      (TemporaryBuf[14] = '') and							//			; 14	C=1
+      											//			; 14	C=1
       sub(15) then									// sub			; 15
     begin
 	TemporaryBuf[10] := #9'bcs @+';
@@ -148,9 +148,9 @@ begin
 
    if lda(0) and									// lda			; 0
       sta(1) and									// sta I+1		; 1
-      (TemporaryBuf[2] = '') and							//			; 2
+      											//			; 2
       opti(3) and									//; optimize 		; 3
-      (TemporaryBuf[4] = '') and							//			; 4
+     											//			; 4
       inc_(5) and									// inc I		; 5
       sne(6) and									// sne			; 6
       inc_(7) then									// inc I+1		; 7
@@ -175,9 +175,9 @@ begin
       sta_bp_1(3) and									// sta :bp+1		; 3
       lda(4) and									// lda			; 4
       sta_bp_y(5) and									// sta (:bp),y		; 5
-      (TemporaryBuf[6] = '') and							//			; 6
+      											//			; 6
       opti(7) and									//; optimize 		; 7
-      (TemporaryBuf[8] = '') and							//			; 8
+      											//			; 8
       lda(9) then									// lda I		; 9
     if argMatch(0, 9) then
     begin
@@ -187,9 +187,9 @@ begin
 
    if ldy(0) and									// ldy I		; 0
       sta(1) and									// sta			; 1
-      (TemporaryBuf[2] = '') and							//			; 2
+      											//			; 2
       opti(3) and									//; optimize 		; 3
-      (TemporaryBuf[4] = '') and							//			; 4
+      											//			; 4
       lda(5) then									// lda I		; 5
     if argMatch(0, 5) then
     begin
@@ -200,9 +200,9 @@ begin
    if ldy(0) and									// ldy I		; 0
       lda(1) and									// lda			; 1
       sta(2) and									// sta			; 2
-      (TemporaryBuf[3] = '') and							//			; 3
+     											//			; 3
       opti(4) and									//; optimize 		; 4
-      (TemporaryBuf[5] = '') and							//			; 5
+     											//			; 5
       lda(6) then									// lda I		; 6
     if argMatch(0, 6) then
     begin
@@ -238,9 +238,9 @@ begin
 
 
    if lsr(0) and									// lsr I		; 0
-      (TemporaryBuf[1] = '') and							//			; 1
+      											//			; 1
       opti(2) and									//; optimize 		; 2
-      (TemporaryBuf[3] = '') and							//			; 3
+      											//			; 3
       lda(4) and									// lda I		; 4
       (jne(5) or jeq(5)) then								// jne|jeq		; 5
     if argMatch(0, 4) then
@@ -252,9 +252,9 @@ begin
    if ldy(0) and									// ldy I		; 0
       sta(1) and									// sta			; 1
       inc_(2) and									// inc I		; 2
-      (TemporaryBuf[3] = '') and							//			; 3
+     											//			; 3
       opti(4) and									//; optimize 		; 4
-      (TemporaryBuf[5] = '') and							//			; 5
+      											//			; 5
       lda(6) and									// lda I		; 6
       cmp(7) and									// cmp			; 7
       SKIP(8) then									// jne|jeq|... l_	; 8
@@ -516,9 +516,9 @@ begin
 
    if lda(0) and									// lda N		; 0
       SKIP(1) and									// SKIP			; 1
-      (TemporaryBuf[2] = '') and							//			; 2
+      											//			; 2
       opti(3) and									//; optimize 		; 3
-      (TemporaryBuf[4] = '') and							//			; 4
+      											//			; 4
       lda_im_0(5) and									// lda #$00		; 5
       sub(6) and									// sub N		; 6
       sta(7) then									// sta N		; 7
@@ -536,9 +536,9 @@ begin
 
    if lda(0) and									// lda N		; 0
       SKIP(1) and									// SKIP			; 1
-      (TemporaryBuf[2] = '') and							//			; 2
+      											//			; 2
       opti(3) and									//; optimize 		; 3
-      (TemporaryBuf[4] = '') and							//			; 4
+      											//			; 4
       (TemporaryBuf[5] = TemporaryBuf[0]) then						// lda N		; 5
     begin
      TemporaryBuf[5] := '~';
@@ -546,9 +546,9 @@ begin
 
 
    if sty(0) and									// sty N		; 0
-      (TemporaryBuf[1] = '') and							//			; 1
+      											//			; 1
       opti(2) and									//; optimize 		; 2
-      (TemporaryBuf[3] = '') and							//			; 3
+      											//			; 3
       lda(4) and									// lda 			; 4
       sta(5) then									// sta N		; 5
     if argMatch(0, 5) then
@@ -559,9 +559,9 @@ begin
 
    if lda(0) and									// lda N		; 0
       sta(1) and									// sta			; 1
-      (TemporaryBuf[2] = '') and							//			; 2
+      											//			; 2
       opti(3) and									//; optimize 		; 3
-      (TemporaryBuf[4] = '') and							//			; 4
+      											//			; 4
       ldy(5) then									// ldy N		; 5
     if argMatch(0, 5) then
     begin
@@ -573,9 +573,9 @@ begin
       sta(1) and									// sta			; 1
       lda_im(2) and (TemporaryBuf[2] = TemporaryBuf[9]) and				// lda #YY 		; 2
       sta(3) and									// sta			; 3
-      (TemporaryBuf[4] = '') and							//			; 4
+      											//			; 4
       opti(5) and									//; optimize		; 5
-      (TemporaryBuf[6] = '') and							//			; 6
+      											//			; 6
 //      lda_im(7) and									// lda #XX		; 7
       sta(8) and									// sta			; 8
 //      lda_im(9) and									// lda #YY 		; 9
@@ -600,9 +600,9 @@ begin
       sta(1) and									// sta			; 1
       lda_im(2) and (TemporaryBuf[2] = TemporaryBuf[9]) and				// lda #YY 		; 2
       sta(3) and									// sta			; 3
-      (TemporaryBuf[4] = '') and							//			; 4
+      											//			; 4
       opti(5) and									//; optimize		; 5
-      (TemporaryBuf[6] = '') and							//			; 6
+      											//			; 6
       lda_im(7) and (TemporaryBuf[7] <> TemporaryBuf[2]) and				// lda #BB		; 7
       sta(8) and									// sta			; 8
 //      lda_im(9) and									// lda #YY 		; 9
@@ -662,9 +662,9 @@ begin
 
    if mva(0) and									// mva RNDNUMBER N	; 0
       mva(1) and									// mva RNDNUMBER N+1	; 1
-      (TemporaryBuf[2] = '') and							//			; 2
+      											//			; 2
       opti(3) and									//; optimize 		; 3
-      (TemporaryBuf[4] = '') and							//			; 4
+      											//			; 4
       lda(5) then									// lda N		; 5
     if pos(copy(TemporaryBuf[5], 5, 256), TemporaryBuf[0]) > 6 then
     begin
@@ -687,9 +687,9 @@ begin
 
 
    if mva(0) and									// mva RNDNUMBER N	; 0
-      (TemporaryBuf[1] = '') and							//			; 1
+      											//			; 1
       opti(2) and									//; optimize 		; 2
-      (TemporaryBuf[3] = '') and							//			; 3
+      											//			; 3
       lda(4) then									// lda N		; 4
     if pos(copy(TemporaryBuf[4], 5, 256), TemporaryBuf[0]) > 6 then
     begin
@@ -718,9 +718,9 @@ begin
    if sta(0) and									// sta PRIME		; 0
       scc(1) and									// scc			; 1
       inc_(2) and									// inc PRIME+1		; 2
-      (TemporaryBuf[3] = '') and							//			; 3
+      											//			; 3
       opti(4) and									//; optimize 		; 4
-      (TemporaryBuf[5] = '') and							//			; 5
+      											//			; 5
       lda(6) and									// lda PRIME		; 6
       (SKIP(7) = false) then								//~SKIP			; 7
     if argMatch(0, 6) then
@@ -730,9 +730,9 @@ begin
 
 
    if sta(0) and									// sta PRIME		; 0
-      (TemporaryBuf[1] = '') and							//			; 1
+      											//			; 1
       opti(2) and									//; optimize 		; 2
-      (TemporaryBuf[3] = '') and							//			; 3
+     											//			; 3
       lda(4) then									// lda PRIME		; 4
     if argMatch(0, 4) then
     begin
@@ -750,9 +750,9 @@ begin
 
    if sta(0) and									// sta PRIME		; 0
       dex(1) and									// dex			; 1
-      (TemporaryBuf[2] = '') and							//			; 2
+      											//			; 2
       opti(3) and									//; optimize 		; 3
-      (TemporaryBuf[4] = '') and							//			; 4
+      											//			; 4
       lda(5) and									// lda PRIME		; 5
       (SKIP(6) = false) then								//~SKIP			; 6
     if argMatch(0, 5) then
@@ -762,9 +762,9 @@ begin
 
 
    if sta(0) and									// sta K		; 0
-      (TemporaryBuf[1] = '') and							//			; 1
+      											//			; 1
       opti(2) and									//; optimize 		; 2
-      (TemporaryBuf[3] = '') and							//			; 3
+      											//			; 3
       ldy(4) then									// ldy K		; 4
     if argMatch(0, 4) then
     begin
@@ -779,9 +779,9 @@ begin
 
 
    if inc_(0) and									// inc I		; 0
-      (TemporaryBuf[1] = '') and							//			; 1
+      											//			; 1
       opti(2) and									//; optimize 		; 2
-      (TemporaryBuf[3] = '') and							//			; 3
+      											//			; 3
       lda(4) and									// lda I		; 4
       (jeq(5) or jne(5)) then								// jeq|jne		; 5
     if argMatch(0, 4) then
@@ -791,9 +791,9 @@ begin
 
 
    if dec_(0) and									// dec I		; 0
-      (TemporaryBuf[1] = '') and							//			; 1
+      											//			; 1
       opti(2) and									//; optimize 		; 2
-      (TemporaryBuf[3] = '') and							//			; 3
+      											//			; 3
       lda(4) and									// lda I		; 4
       jne(5) then									// jne			; 5
     if argMatch(0, 4) then
@@ -810,9 +810,9 @@ begin
       sta_bp_1(5) and									// sta :bp+1		; 5
       lda(6) and (iy(6) = false) and							// lda			; 6
       sta_bp_y(7) and									// sta (:bp),y		; 7
-      (TemporaryBuf[8] = '') and							//			; 8
+      											//			; 8
       opti(9) and									//; optimize 		; 9
-      (TemporaryBuf[10] = '') and							//			; 10
+      											//			; 10
 //      lda(11) and									// lda A		; 11
 //      add(12) and									// add B		; 12
       sta_bp2(13) and									// sta :bp2 		; 13
@@ -850,9 +850,9 @@ begin
       sta_bp_1(5) and									// sta :bp+1		; 5
       lda_bp_y(6) and									// lda (:bp),y		; 6
       sta(7) and (iy(7) = false) and							// sta			; 7
-      (TemporaryBuf[8] = '') and							//			; 8
+      											//			; 8
       opti(9) and									//; optimize 		; 9
-      (TemporaryBuf[10] = '') and							//			; 10
+      											//			; 10
 //      lda(11) and									// lda A		; 11
 //      add(12) and									// add B		; 12
       sta_bp2(13) and									// sta :bp2 		; 13
@@ -885,9 +885,9 @@ begin
    if sta(0) and									// sta W		; 0
       lda(1) and									// lda			; 1
       sta(2) and									// sta W+1		; 2
-      (TemporaryBuf[3] = '') and							//			; 3
+      											//			; 3
       opti(4) and									//; optimize 		; 4
-      (TemporaryBuf[5] = '') and							//			; 5
+      											//			; 5
       mwy(6) and (pos(' :bp2', TemporaryBuf[6]) > 0) then				// mwy W :bp2		; 6
     if (pos(TemporaryBuf[0], TemporaryBuf[2]) > 0) and
        (#9'mwy ' + GetARG(0) + ' :bp2' = TemporaryBuf[6]) then
@@ -910,9 +910,9 @@ begin
       sta(3) and									// sta Y		; 3
       lda_eax_1(4) and									// lda :eax+1		; 4
       sta(5) and									// sta Y+1		; 5
-      (TemporaryBuf[6] = '') and							//			; 6
-      opti(7) and									//; optimize 		; 7
-      (TemporaryBuf[8] = '') then							//			; 8
+      											//			; 6
+      opti(7) then									//; optimize 		; 7
+      											//			; 8
     begin
      TemporaryBuf[4] := TemporaryBuf[2];
 
@@ -933,14 +933,14 @@ begin
 
 
    if lab_l(0) and									//l_00FB		; 0
-      (TemporaryBuf[1] = '') and							//			; 1
+      											//			; 1
       opti(2) and									//; optimize 		; 2
-      (TemporaryBuf[3] = '') and							//			; 3
+      											//			; 3
       lda(4) and (TemporaryBuf[4] = TemporaryBuf[12]) and				// lda K+1		; 4
       SKIP(5) and									// SKIP			; 5
-      (TemporaryBuf[6] = '') and							//			; 6
+      											//			; 6
       opti(7) and									//; optimize 		; 7
-      (TemporaryBuf[8] = '') and							// 			; 8
+      											// 			; 8
       lda(9) and									// lda K		; 9
       add_sub(10) and									// add|sub		; 10
       sta(11) then									// sta			; 11
@@ -954,9 +954,9 @@ begin
 
    if lda(0) and									// lda K+1		; 0
       SKIP(1) and									// SKIP			; 1
-      (TemporaryBuf[2] = '') and							//			; 2
+      											//			; 2
       opti(3) and									//; optimize 		; 3
-      (TemporaryBuf[4] = '') and							// 			; 4
+      											// 			; 4
       lda(5) and									// lda 			; 5
       ldy(6) then									// ldy K+1		; 6
     if argMatch(0, 6) then
@@ -1016,9 +1016,9 @@ begin
        sta(5) and									// sta A+2		; 5
        lda(6) and									// lda			; 6
        sta(7) and									// sta A+3		; 7
-       (TemporaryBuf[8] = '') and							//			; 8
+       											//			; 8
        opti(9) and									//; optimize 		; 9
-       (TemporaryBuf[10] = '') and							//			; 10
+       											//			; 10
        lda(11) and									// lda A		; 11
        sta(12) and									// sta			; 12
        lda(13) and									// lda A+1		; 13
@@ -1063,9 +1063,9 @@ begin
        sta(1) and									// sta A		; 1
        lda(2) and									// lda			; 2
        sta(3) and									// sta A+1		; 3
-       (TemporaryBuf[4] = '') and							//			; 4
+       											//			; 4
        opti(5) and									//; optimize 		; 5
-       (TemporaryBuf[6] = '') and							//			; 6
+      											//			; 6
        lda(7) and									// lda A		; 7
        sta(8) and									// sta			; 8
        lda(9) and									// lda A+1		; 9
@@ -1095,9 +1095,9 @@ begin
        sta(1) and									// sta A		; 1
        lda(2) and									// lda			; 2
        sta(3) and									// sta A+1		; 3
-       (TemporaryBuf[4] = '') and							//			; 4
+      											//			; 4
        opti(5) and									//; optimize 		; 5
-       (TemporaryBuf[6] = '') and							//			; 6
+       											//			; 6
        lda(7) and									// lda			; 7
        add(8) then									// add A		; 8
       if argMatch(1, 8) then

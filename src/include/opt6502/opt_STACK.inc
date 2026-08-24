@@ -496,7 +496,9 @@ begin
      end;
 
 
-    if //inx(i) and										// inx					; 0
+    if dex(i+9) and										// dex					; 9
+
+//       inx(i) and										// inx					; 0
        mva(i+1) and 										// mva ... :STACKORIGIN			; 1
        mva(i+2) and 										// mva ... :STACKORIGIN+STACKWIDTH	; 2
        lda_a(i+3) and										// lda					; 3
@@ -504,8 +506,8 @@ begin
        sta_a(i+5) and										// sta					; 5
        lda_a(i+6) and										// lda					; 6
        and_ora_eor_stack(i+7) and								// and|ora|eor :STACKORIGIN+STACKWIDTH	; 7
-       sta_a(i+8) and										// sta					; 8
-       dex(i+9) then										// dex					; 9
+       sta_a(i+8) then										// sta					; 8
+//       dex(i+9) then										// dex					; 9
      if stack_0x(i+1) and
         stack_0x(i+4) and
         stack_1x(i+2) and
@@ -522,7 +524,9 @@ begin
      end;
 
 
-    if //inx(i) and										// inx					; 0
+    if dex(i+9) and										// dex					; 9
+
+//       inx(i) and										// inx					; 0
        mva(i+1) and 										// mva ... :STACKORIGIN			; 1
        mva(i+2) and 										// mva ... :STACKORIGIN+STACKWIDTH	; 2
        lda_stack(i+3) and									// lda :STACKORIGIN			; 3
@@ -530,8 +534,8 @@ begin
        sta_a(i+5) and										// sta					; 5
        lda_stack(i+6) and									// lda :STACKORIGIN+STACKWIDTH		; 6
        and_ora_eor(i+7) and									// and|ora|eor				; 7
-       sta_a(i+8) and										// sta					; 8
-       dex(i+9) then										// dex					; 9
+       sta_a(i+8) then										// sta					; 8
+//       dex(i+9) then										// dex					; 9
      if stack_0x(i+1) and
         stack_0x(i+3) and
         stack_1x(i+2) and
@@ -548,7 +552,9 @@ begin
      end;
 
 
-    if //inx(i) and										// inx					; 0
+    if dex(i+13) and										// dex					; 13
+
+       inx(i) and										// inx					; 0
        mva(i+1) and 										// mva ... :STACKORIGIN			; 1
        mva(i+2) and 										// mva ... :STACKORIGIN+STACKWIDTH	; 2
        lda_val(i+3) and										// lda					; 3	~:STACKORIGIN
@@ -560,8 +566,8 @@ begin
        lda_stack(i+9) and									// lda :STACKORIGIN			; 9
        sta_a(i+10) and										// sta					; 10
        lda_stack(i+11) and									// lda :STACKORIGIN+STACKWIDTH		; 11
-       sta_a(i+12) and										// sta					; 12
-       dex(i+13) then										// dex					; 13
+       sta_a(i+12) then										// sta					; 12
+//       dex(i+13) then										// dex					; 13
      if stack_0x(i+1) and
         stack_0x(i+9) and
         stack_1x(i+2) and

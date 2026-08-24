@@ -650,6 +650,7 @@ begin
     begin
       CheckTok(i + 1, TTokenKind.OPARTOK);
 
+
       if TokenAt(i + 2).Kind = IDENTTOK then
       begin
 

@@ -1,7 +1,7 @@
 
 function opt_CMP_GT(i: integer): Boolean;
-var p: integer;
-    c: cardinal;
+var c: Int64;
+    p: integer;
     tmp: string;
 begin
 
@@ -49,16 +49,16 @@ begin
        jeq(i+13) and										// jeq l_		; 13
 
        lda_val(i) and										// lda W+3		; 0	opt_092 | CARDINAL > 0
-       cmp_im(i+1) and										// cmp #$00		; 1
+       cmp_im(i+1) and										// cmp #		; 1
        bne(i+2) and										// bne @+		; 2
        lda_a(i+3) and										// lda W+2		; 3
-       cmp_im(i+4) and										// cmp #$00		; 4
+       cmp_im(i+4) and										// cmp #		; 4
        bne(i+5) and										// bne @+		; 5
        lda_a(i+6) and										// lda W+1		; 6
-       cmp_im(i+7) and										// cmp #$00		; 7
+       cmp_im(i+7) and										// cmp #		; 7
        bne(i+8) and										// bne @+		; 8
        lda_a(i+9) and										// lda W		; 9
-       cmp_im(i+10) then									// cmp #$00		; 10
+       cmp_im(i+10) then									// cmp #		; 10
       begin
        c := GetDWORD(i+10, i+7, i+4, i+1);
 
@@ -121,31 +121,6 @@ begin
 // 				     WORD
 // -----------------------------------------------------------------------------
 
-{ !!! nie usuwaj 'CMP #$00' !!!
-
-    if ldy_1(i) and										// ldy #1		; 0	BOOL := WORD >
-       lda_val(i+1) and										// lda W+1		; 1
-       cmp_im_0(i+2) and									// cmp #$00		; 2
-       bne_a(i+3) and										// bne @+		; 3
-       lda_a(i+4) and										// lda W		; 4
-       cmp(i+5) and (cmp_im_0(i+5) = false) and							// cmp			; 5
-       lab_a(i+6) and										//@			; 6
-       bcs_a(i+7) and										// bcs @+		; 7
-       dey(i+8) and										// dey			; 8
-       lab_a(i+9) and										//@			; 9
-       tya(i+10) and										// tya			; 10
-       (sta(i+11) or and_ora_eor(i+11)) and							// sta|and|ora|eor	; 11
-												//			; 12
-       (dex(i+13) = false) then									//~dex			; 13
-      begin
-       listing[i+2] := '';
-
-       listing[i+6] := '';
-
-       exit(false);
-      end;
-}
-
     if (SKIP(i-1) = false) and
        lda_bp2_y(i) and										// lda (:bp2),y		; 0	:BP2 > 0
        bne(i+1) and										// bne @+		; 1
@@ -179,7 +154,7 @@ begin
        jeq(i+7) then										// jeq l_		; 7
       begin
 
-	c:=GetWord(i+4, i+1);
+	c:=GetWORD(i+4, i+1);
 
 	if c = 0 then begin
 	 listing[i+1] := '';
@@ -229,7 +204,7 @@ begin
        lab_a(i+8) then										//@			; 8
       begin
 
-	c:=GetWord(i+4, i+1);
+	c:=GetWORD(i+4, i+1);
 
 	if c = 0 then begin
 	 listing[i+1] := '';
@@ -306,7 +281,7 @@ begin
        lab_a(i+9) then										//@			; 9
       begin
 
-	c:=GetWord(i+4, i+1);
+	c:=GetWORD(i+4, i+1);
 
 	if c = 0 then begin
 	 listing[i+1] := '';
@@ -377,7 +352,7 @@ begin
 
 	exit(false);
        end else begin
-	c:=GetByte(i+1);
+	c:=GetBYTE(i+1);
 
 	if c < 255 then begin
 	 listing[i+1] := #9'cmp #' + Hex(byte(c+1), 2);
@@ -415,7 +390,7 @@ begin
 
 	exit(false);
        end else begin
-	c:=GetByte(i+1);
+	c:=GetBYTE(i+1);
 
 	if c < 255 then begin
 	 listing[i+1] := #9'cmp #' + Hex(byte(c+1), 2);
@@ -724,9 +699,9 @@ begin
        (listing[i+20] = #9'ora #$01') and							// ora #$01		; 20
        (listing[i+21] = 'L5') then								//L5			; 21
       begin
-        p := GetBYTE(i+11) + GetBYTE(i+8) shl 8 + GetBYTE(i+5) shl 16 + GetBYTE(i+2) shl 24;
+        c := GetDWORD(i+11, i+8, i+5, i+2);
 
-	if p = 0 then begin
+	if c = 0 then begin
 
 	 if lda_im_0(i+1) then begin
  	  listing[i+16] := '';
@@ -768,7 +743,7 @@ begin
 
 	 exit(false);
 	end else
-	if p < $7FFFFFFF then begin
+	if c < $7FFFFFFF then begin
 
 	 if (i > 0) and ldy_1(i-1) and
 	    tya(i+27) and

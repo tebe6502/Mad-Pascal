@@ -10,9 +10,9 @@ begin
    if lda(0) and									// lda I		; 0
       cmp(1) and									// cmp			; 1
       SKIP(2) and									// SKIP			; 2
-      (TemporaryBuf[3] = '') and							//			; 3
+     											//			; 3
       opti(4) and									//; optimize 		; 4
-      (TemporaryBuf[5] = '') and							//			; 5
+     											//			; 5
       (TemporaryBuf[6] = TemporaryBuf[0]) and						// lda I		; 6
       (SKIP(7) = false) then
     begin
@@ -69,9 +69,9 @@ begin
    if lda(0) and									// lda W		; 0
       cmp(1) and									// cmp			; 1
       SKIP(2) and									// SKIP			; 2
-      (TemporaryBuf[3] = '') and							//			; 3
+      											//			; 3
       opti(4) and									//; optimize 		; 4
-      (TemporaryBuf[5] = '') and							//			; 5
+      											//			; 5
       ldy(6) and									// ldy W		; 6
       lda(7) then									// lda 			; 7
     if argMatch(0, 6) then
@@ -391,7 +391,7 @@ begin
        TemporaryBuf[3] := #9'sne';
        TemporaryBuf[4] := '~';
 
-      end;      
+      end;
 }
 
 

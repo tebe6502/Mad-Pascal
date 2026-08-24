@@ -10,9 +10,9 @@ begin
       (TemporaryBuf[1] = '') and							//			; 1
       jmp_l(2) and									// jmp l_xxxx		; 2
       lab_l(3) and									//l_xxxx		; 3
-      (TemporaryBuf[4] = '') and							//			; 4
+      											//			; 4
       opti(5) and									//; optimize 		; 5
-      (TemporaryBuf[6] = '') and							//			; 6
+      											//			; 6
       lda(7) then									// lda A		; 7
     if (TemporaryBuf[3] = GetARG(2)) and
        argMatch(0, 7) then

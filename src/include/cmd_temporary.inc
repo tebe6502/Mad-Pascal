@@ -50,9 +50,16 @@ end;
     Result := pos(',y', TemporaryBuf[i]) > 0
   end;
 
+  function OPTI_(const i: Integer): Boolean;
+  begin
+    Result := (pos('; optimize ', TemporaryBuf[i]) > 0)
+  end;
+
   function OPTI(const i: Integer): Boolean;
   begin
-    Result := pos('; optimize ', TemporaryBuf[i]) > 0
+    Result := (pos('; optimize ', TemporaryBuf[i]) > 0) and
+              (TemporaryBuf[i-1] = '') and
+              (TemporaryBuf[i+1] = '');
   end;
 
   function mINLINE(const i: Integer): Boolean;

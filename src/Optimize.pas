@@ -218,27 +218,33 @@ var
   var i: TListingIndex;
   begin
     Result:='';
-    for i:=0 to l-1 do Result:=Result+listing[i]+'/';
+    for i := 0 to l - 1 do Result := Result + listing[i] + '/';
   end;
 
   function GetBYTE(const i: TListingIndex): Integer;
   begin
-    Result := GetVAL(copy(listing[i], 6, 4));
+    Result := Byte(GetVAL(copy(listing[i], 6, 4)));
   end;
 
   function GetWORD(const i, j: TListingIndex): Integer;
   begin
-    Result := GetVAL(copy(listing[i], 6, 4)) + GetVAL(copy(listing[j], 6, 4)) shl 8;
+    Result := Byte(GetVAL(copy(listing[i], 6, 4))) +
+              Byte(GetVAL(copy(listing[j], 6, 4))) shl 8;
   end;
 
   function GetTRIPLE(const i, j, k: TListingIndex): Integer;
   begin
-    Result := GetVAL(copy(listing[i], 6, 4)) + GetVAL(copy(listing[j], 6, 4)) shl 8 + GetVAL(copy(listing[k], 6, 4)) shl 16;
+    Result := Byte(GetVAL(copy(listing[i], 6, 4))) +
+              Byte(GetVAL(copy(listing[j], 6, 4))) shl 8 +
+	      Byte(GetVAL(copy(listing[k], 6, 4))) shl 16;
   end;
 
-  function GetDWORD(const i, j, k, l: TListingIndex): Integer;
+  function GetDWORD(const i, j, k, l: TListingIndex): Int64;
   begin
-    Result := GetVAL(copy(listing[i], 6, 4)) + GetVAL(copy(listing[j], 6, 4)) shl 8 + GetVAL(copy(listing[k], 6, 4)) shl 16 + GetVAL(copy(listing[l], 6, 4)) shl 24;
+    Result := Byte(GetVAL(copy(listing[i], 6, 4))) +
+              Byte(GetVAL(copy(listing[j], 6, 4))) shl 8 +
+	      Byte(GetVAL(copy(listing[k], 6, 4))) shl 16 +
+	      Byte(GetVAL(copy(listing[l], 6, 4))) shl 24;
   end;
 
 
@@ -1159,7 +1165,7 @@ end;
 
 
 {
-if (pos('fmulu_8', listing[i]) > 0) then begin
+if (pos('and #$03', listing[i]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');

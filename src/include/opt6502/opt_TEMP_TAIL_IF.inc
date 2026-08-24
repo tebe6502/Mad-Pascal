@@ -63,7 +63,7 @@ begin
         for k:=0 to ofs+19 do
          if (TemporaryBuf[i-k] = TemporaryBuf[p-k-1]) or
 	    (lab_l(i-k) and lab_l(p-k-1)) or
-	    (opti(i-k) and opti(p-k-1)) then
+	    (opti_(i-k) and opti_(p-k-1)) then
 	 begin
 
 	  if lab_a(i-k) then

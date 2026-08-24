@@ -228,6 +228,69 @@ begin
 // -----------------------------------------------------------------------------
 
 
+    if spl(i+6) and										// spl					; 6
+
+       ldy_im_0(i+4) and									// ldy #$00				; 4
+
+       sta_stack(i) and										// sta :STACKORIGIN+STACKWIDTH+10	; 0
+       lda_a(i+1) and										// lda 					; 1
+       sta_stack(i+2) and									// sta :STACKORIGIN+STACKWIDTH*2+10	; 2
+       sta_stack(i+3) and									// sta :STACKORIGIN+STACKWIDTH*3+10	; 3
+//       ldy_im_0(i+4) and									// ldy #$00				; 4
+       lda_stack(i+5) and									// lda :STACKORIGIN+STACKWIDTH+10	; 5
+//       spl(i+6) and										// spl					; 6
+       dey(i+7) and										// dey					; 7
+       sta_stack(i+8) and									// sta :STACKORIGIN+STACKWIDTH+10	; 8
+       sty_stack(i+9) and									// sty :STACKORIGIN+STACKWIDTH*2+10	; 9
+       sty_stack(i+10) then									// sty :STACKORIGIN+STACKWIDTH*3+10	; 10
+     if argMatch(i, i+5) and
+	argMatch(i+5, i+8) and
+	argMatch(i+2, i+9) and
+	argMatch(i+3, i+10) then
+       begin
+	listing[i+1]  := '';
+	listing[i+2]  := '';
+	listing[i+3]  := '';
+
+	exit(false);
+       end;
+
+
+    if spl(i+2) and										// spl					; 2
+
+       adc_sbc(i+12) and									// adc|sbc				; 12
+
+       ldy_im_0(i) and										// ldy #$00				; 0
+       lda_a(i+1) and										// lda 					; 1
+//       spl(i+2) and										// spl					; 2
+       dey(i+3) and										// dey 					; 3
+       sta_stack(i+4) and									// sta :STACKORIGIN			; 4
+       sty_stack(i+5) and									// sty :STACKORIGIN+STACKWIDTH		; 5
+       sty_stack(i+6) and									// sty :STACKORIGIN+STACKWIDTH*2	; 6
+       sty_stack(i+7) and									// sty :STACKORIGIN+STACKWIDTH*3	; 7
+       lda_stack(i+8) and									// lda :STACKORIGIN			; 8
+       add_sub(i+9) and										// add|sub 				; 9
+       sta_a(i+10) and										// sta 					; 10
+       lda_stack(i+11) and									// lda :STACKORIGIN+STACKWIDTH		; 11
+//       adc_sbc(i+12) and									// adc|sbc				; 12
+       sta_a(i+13) and										// sta					; 13
+												//					; 14
+       (adc_sbc(i+15) = false) then								//~adc|sbc				; 15
+     if argMatch(i+4, i+8) and
+	argMatch(i+5, i+11) then
+       begin
+	listing[i+4] := '';
+	listing[i+5] := '';
+	listing[i+6] := '';
+	listing[i+7] := '';
+	listing[i+8] := '';
+
+	listing[i+11] := #9'tya';
+
+	exit(false);
+       end;
+
+
     if spl(i+10) and										// spl					; 10
 
        spl(i+2) and										// spl					; 2
@@ -352,9 +415,9 @@ begin
        dey(i+5) and										// dey 					; 5
        sta_stack(i+6) and									// sta :STACKORIGIN+STACKWIDTH+9	; 6
        sty_stack(i+7) and									// sty :STACKORIGIN+STACKWIDTH*2+9	; 7
-       lda(i+8) and										// lda					; 8
-       sta(i+9) and										// sta					; 9
-       lda(i+10) and										// lda					; 10
+       lda_a(i+8) and										// lda					; 8
+       sta_a(i+9) and										// sta					; 9
+       lda_a(i+10) and										// lda					; 10
        add_sub_stack(i+11) then									// add|sub :STACKORIGIN+9		; 11
      if argMatch(i+1, i+11) then
        begin

@@ -1,6 +1,7 @@
 
 function opt_ADD(i: integer): Boolean;
-var p, q: integer;
+var c: Int64;
+    p: integer;
     tmp: string;
 begin
 
@@ -1255,15 +1256,12 @@ begin
 //       adc_im(i+10) and								// adc #				; 10
        sta_a(i+11) then									// sta :STACKORIGIN+STACKWIDTH*3+10	; 11
       begin
-	p := GetDWORD(i, i+3, i+6, i+9);
-	q := GetDWORD(i+1, i+4, i+7, i+10);
+	c := GetDWORD(i, i+3, i+6, i+9) + GetDWORD(i+1, i+4, i+7, i+10);
 
-	p := p + q;
-
-	listing[i]   := #9'lda #' + HexByte(byte(p));
-	listing[i+3] := #9'lda #' + HexByte(byte(p shr 8));
-	listing[i+6] := #9'lda #' + HexByte(byte(p shr 16));
-	listing[i+9] := #9'lda #' + HexByte(byte(p shr 24));
+	listing[i]   := #9'lda #' + HexByte(byte(c));
+	listing[i+3] := #9'lda #' + HexByte(byte(c shr 8));
+	listing[i+6] := #9'lda #' + HexByte(byte(c shr 16));
+	listing[i+9] := #9'lda #' + HexByte(byte(c shr 24));
 
 	listing[i+1] := '';
 	listing[i+4] := '';
@@ -1405,16 +1403,13 @@ begin
 											//					; 9
        (adc(i+10) = false) then								//~adc					; 10
      begin
-      p := GetTRIPLE(i, i+3, i+6);
-      q := GetTRIPLE(i+1, i+4, i+7);
+      c := GetTRIPLE(i, i+3, i+6) + GetTRIPLE(i+1, i+4, i+7);
 
-      p := p + q;
-
-      listing[i]   := #9'lda #' + HexByte(byte(p));
+      listing[i]   := #9'lda #' + HexByte(byte(c));
       listing[i+1] := '';
-      listing[i+3] := #9'lda #' + HexByte(byte(p shr 8));
+      listing[i+3] := #9'lda #' + HexByte(byte(c shr 8));
       listing[i+4] := '';
-      listing[i+6] := #9'lda #' + HexByte(byte(p shr 16));
+      listing[i+6] := #9'lda #' + HexByte(byte(c shr 16));
       listing[i+7] := '';
 
       exit(false);
@@ -1730,16 +1725,13 @@ begin
 	 argMatch(i+8, i+18) and
 	 argMatch(i+11, i+21) then
      begin
-      p := GetDWORD(i+1, i+4, i+7, i+10);
-      q := GetDWORD(i+13, i+16, i+19, i+22);
+      c := GetDWORD(i+1, i+4, i+7, i+10) + GetDWORD(i+13, i+16, i+19, i+22);
 
-      p := p + q;
+      listing[i+1] := #9'add #' + HexByte(byte(c));
+      listing[i+4] := #9'adc #' + HexByte(byte(c shr 8));
 
-      listing[i+1] := #9'add #' + HexByte(byte(p));
-      listing[i+4] := #9'adc #' + HexByte(byte(p shr 8));
-
-      listing[i+7] := #9'adc #' + HexByte(byte(p shr 16));
-      listing[i+10] := #9'adc #' + HexByte(byte(p shr 24));
+      listing[i+7] := #9'adc #' + HexByte(byte(c shr 16));
+      listing[i+10] := #9'adc #' + HexByte(byte(c shr 24));
 
       listing[i+2] := listing[i+14];
       listing[i+5] := listing[i+17];
@@ -1796,16 +1788,13 @@ begin
 	 argMatch(i+8, i+18) and
 	 argMatch(i+11, i+21) then
      begin
-      p := GetDWORD(i, i+3, i+6, i+9);
-      q := GetDWORD(i+13, i+16, i+19, i+22);
+      c := GetDWORD(i, i+3, i+6, i+9) + GetDWORD(i+13, i+16, i+19, i+22);
 
-      p := p + q;
+      listing[i]   := #9'lda #' + HexByte(byte(c));
+      listing[i+3] := #9'lda #' + HexByte(byte(c shr 8));
 
-      listing[i]   := #9'lda #' + HexByte(byte(p));
-      listing[i+3] := #9'lda #' + HexByte(byte(p shr 8));
-
-      listing[i+6] := #9'lda #' + HexByte(byte(p shr 16));
-      listing[i+9] := #9'lda #' + HexByte(byte(p shr 24));
+      listing[i+6] := #9'lda #' + HexByte(byte(c shr 16));
+      listing[i+9] := #9'lda #' + HexByte(byte(c shr 24));
 
       listing[i+2] := listing[i+14];
       listing[i+5] := listing[i+17];
@@ -1862,16 +1851,13 @@ begin
 	 argMatch(i+8, i+18) and
 	 argMatch(i+11, i+21) then
      begin
-      p := GetDWORD(i+1, i+4, i+7, i+10);
-      q := GetDWORD(i+13, i+16, i+19, i+22);
+      c := -GetDWORD(i+1, i+4, i+7, i+10) + GetDWORD(i+13, i+16, i+19, i+22);
 
-      p := -p + q;
+      listing[i+1] := #9'add #' + HexByte(byte(c));
+      listing[i+4] := #9'adc #' + HexByte(byte(c shr 8));
 
-      listing[i+1] := #9'add #' + HexByte(byte(p));
-      listing[i+4] := #9'adc #' + HexByte(byte(p shr 8));
-
-      listing[i+7] := #9'adc #' + HexByte(byte(p shr 16));
-      listing[i+10] := #9'adc #' + HexByte(byte(p shr 24));
+      listing[i+7] := #9'adc #' + HexByte(byte(c shr 16));
+      listing[i+10] := #9'adc #' + HexByte(byte(c shr 24));
 
       listing[i+2] := listing[i+14];
       listing[i+5] := listing[i+17];

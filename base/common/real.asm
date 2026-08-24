@@ -22,7 +22,7 @@ B	= :ECX
 	eor B+3
 	pha
 
-	bit A+3
+	lda A+3
 	spl
 	jsr @negEAX	;jsr @negA
 
@@ -156,7 +156,7 @@ B	= :ECX
 	eor B+3
 	pha
 
-	bit A+3		; dividend sign
+	lda A+3		; dividend sign
 	spl
 	jsr @negEAX	;jsr @negA
 

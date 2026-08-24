@@ -17,7 +17,7 @@ B	= :ECX
 	eor B+1
 	pha
 
-	bit A+1
+	lda A+1
 	bpl @+
 
 	lda #$00

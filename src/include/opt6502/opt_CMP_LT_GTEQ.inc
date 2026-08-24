@@ -152,7 +152,7 @@ begin
        cmp_im_0(i+1) and									// cmp #$00		; 1
        bne(i+2) and										// bne @+		; 2
        lda(i+3) and										// lda W		; 3
-       cmp_im_0(i+4) and									// cmp 			; 4
+       cmp_im_0(i+4) and									// cmp #$00		; 4
        lab_a(i+5) and										//@			; 5
        bcs(i+6) and										// bcs @+		; 6
        dey(i+7) and										// dey			; 7
@@ -171,6 +171,33 @@ begin
 	listing[i+6]  := '';
 	listing[i+7]  := '';
 	listing[i+8]  := '';
+
+	exit(false);
+      end;
+
+
+    if lda_a(i) and iy(i) and									// lda  ,y		; 0	BOOL := WORD >= 0
+       sta_stack(i+1) and									// sta :STACKORIGIN	; 1
+       ldy_1(i+2) and										// ldy #1		; 2
+       lda_stack(i+3) and									// lda :STACKORIGIN	; 3
+       cmp(i+4) and										// cmp			; 4
+       bne(i+5) and										// bne @+		; 5
+       lda_a(i+6) and										// lda			; 6
+       cmp(i+7) and										// cmp			; 7
+       lab_a(i+8) and										//@			; 8
+       bcs(i+9) and										// bcs @+		; 9
+       dey(i+10) and										// dey			; 10
+       lab_a(i+11) and										//@			; 11
+       tya(i+12) and										// tya			; 12
+       (sta(i+13) or and_ora_eor(i+13)) then							// sta|and|ora|eor	; 13
+     if argMatch(i+1, i+3) then
+      begin
+	listing[i+2] := '';
+
+	listing[i+9] := #9'lda #$00';
+	listing[i+10]:= #9'rol @';
+	listing[i+11]:= '';
+	listing[i+12]:= '';
 
 	exit(false);
       end;

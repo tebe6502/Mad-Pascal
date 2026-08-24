@@ -11,9 +11,11 @@ begin
 
     if sta_bp_y(i+8) and								// sta (:bp),y				; 8
 
+       sta_stack(i+2) and								// sta :STACKORIGIN+10			; 2
+
        lda(i) and									// lda					; 0
        add_sub(i+1) and									// add|sub				; 1
-       sta_stack(i+2) and								// sta :STACKORIGIN+10			; 2
+//       sta_stack(i+2) and								// sta :STACKORIGIN+10			; 2
        lda(i+3) and									// lda					; 3
        adc_sbc(i+4) and									// adc|sbc				; 4
        sta_stack(i+5) and								// sta :STACKORIGIN+STACKWIDTH+10	; 5
@@ -33,12 +35,14 @@ begin
 
     if sta_bp_y(i+10) and								// sta (:bp),y				; 10
 
+       sta_stack(i+5) and								// sta :STACKORIGIN+STACKWIDTH+10	; 5
+
        lda(i) and									// lda					; 0
        add_sub(i+1) and									// add|sub				; 1
        sta_stack(i+2) and								// sta :STACKORIGIN+10			; 2
        lda(i+3) and									// lda					; 3
        adc_sbc(i+4) and									// adc|sbc				; 4
-       sta_stack(i+5) and								// sta :STACKORIGIN+STACKWIDTH+10	; 5
+//       sta_stack(i+5) and								// sta :STACKORIGIN+STACKWIDTH+10	; 5
        ldy_stack(i+6) and								// ldy :STACKORIGIN+STACKWIDTH+9	; 6
        sty_bp_1(i+7) and								// sty :bp+1				; 7
        ldy_stack(i+8) and								// ldy :STACKORIGIN+9			; 8
@@ -57,12 +61,14 @@ begin
 
     if ldy_stack(i+13) and								// ldy :STACKORIGIN+9			; 13
 
+       sta_bp_1(i+5) and								// sta :bp+1				; 5
+
        lda(i) and									// lda					; 0
        add_sub(i+1) and									// add|sub				; 1
        sta_stack(i+2) and								// sta :STACKORIGIN+9			; 2
        lda(i+3) and									// lda					; 3
        adc_sbc(i+4) and									// adc|sbc				; 4
-       sta_bp_1(i+5) and								// sta :bp+1				; 5
+//       sta_bp_1(i+5) and								// sta :bp+1				; 5
        lda_stack(i+6) and								// lda :STACKORIGIN+9			; 6
        add(i+7) and									// add					; 7
        sta_stack(i+8) and								// sta :STACKORIGIN+9			; 8
@@ -86,10 +92,12 @@ begin
        end;
 
 
-    if mvy_im(i) and bp_1(i) and							// mvy #   :bp+1			; 0
+    if sta_bp_y(i+3) and 								// sta (:bp),y				; 3
+
+       mvy_im(i) and bp_1(i) and							// mvy #   :bp+1			; 0
        ldy_im(i+1) and 									// ldy #				; 1
-       lda_a(i+2) and									// lda					; 2
-       sta_bp_y(i+3) then 								// sta (:bp),y				; 3
+       lda_a(i+2) then									// lda					; 2
+//       sta_bp_y(i+3) then 								// sta (:bp),y				; 3
       begin
 	p := GetWORD(i+1, i);
 
@@ -102,10 +110,12 @@ begin
       end;
 
 
-    if mvy_im(i) and bp_1(i) and							// mvy #   :bp+1			; 0
+    if sta_bp_y(i+3) and 								// sta (:bp),y				; 3
+
+       mvy_im(i) and bp_1(i) and							// mvy #   :bp+1			; 0
        ldy(i+1) and (ldy_im(i+1) = false) and						// ldy					; 1
-       lda_a(i+2) and									// lda					; 2
-       sta_bp_y(i+3) then 								// sta (:bp),y				; 3
+       lda_a(i+2) then									// lda					; 2
+//       sta_bp_y(i+3) then 								// sta (:bp),y				; 3
       begin
         p:=GetBYTE(i);
 
@@ -117,11 +127,13 @@ begin
       end;
 
 
-    if ldy_im(i) and									// ldy #				; 0
+    if sta_bp_y(i+4) and 								// sta (:bp),y				; 4
+
+       ldy_im(i) and									// ldy #				; 0
        sty_bp_1(i+1) and								// sty :bp+1				; 1
        ldy_im(i+2) and 									// ldy #				; 2
-       lda_a(i+3) and									// lda					; 3
-       sta_bp_y(i+4) then 								// sta (:bp),y				; 4
+       lda_a(i+3) then									// lda					; 3
+//       sta_bp_y(i+4) then 								// sta (:bp),y				; 4
       begin
 	p := GetWORD(i+2, i);
 
@@ -135,10 +147,12 @@ begin
       end;
 
 
-    if ldy_im(i) and									// ldy #				; 0
+    if sta_bp_y(i+3) and 								// sta (:bp),y				; 3
+
+       ldy_im(i) and									// ldy #				; 0
        sty_bp_1(i+1) and								// sty :bp+1				; 1
-       ldy_im(i+2) and 									// ldy #				; 2
-       sta_bp_y(i+3) then 								// sta (:bp),y				; 3
+       ldy_im(i+2) then 								// ldy #				; 2
+//       sta_bp_y(i+3) then 								// sta (:bp),y				; 3
       begin
 	p := GetWORD(i+2, i);
 
@@ -152,11 +166,13 @@ begin
       end;
 
 
-    if ldy_im(i) and									// ldy #				; 0
+    if sta_bp_y(i+4) and 								// sta (:bp),y				; 4
+
+       ldy_im(i) and									// ldy #				; 0
        sty_bp_1(i+1) and								// sty :bp+1				; 1
        ldy(i+2) and (ldy_im(i+2) = false) and						// ldy 					; 2
-       lda_a(i+3) and									// lda					; 3
-       sta_bp_y(i+4) then 								// sta (:bp),y				; 4
+       lda_a(i+3) then									// lda					; 3
+//       sta_bp_y(i+4) then 								// sta (:bp),y				; 4
       begin
         p:=GetBYTE(i);
 
@@ -174,10 +190,12 @@ begin
       end;
 
 
-    if ldy_im(i) and									// ldy #				; 0
+    if sta_bp_y(i+3) and 								// sta (:bp),y				; 3
+
+       ldy_im(i) and									// ldy #				; 0
        sty_bp_1(i+1) and								// sty :bp+1				; 1
-       ldy(i+2) and (ldy_im(i+2) = false) and						// ldy					; 2
-       sta_bp_y(i+3) then 								// sta (:bp),y				; 3
+       ldy(i+2) and (ldy_im(i+2) = false) then						// ldy					; 2
+//       sta_bp_y(i+3) then 								// sta (:bp),y				; 3
       begin
         p:=GetBYTE(i);
 

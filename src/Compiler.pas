@@ -10648,8 +10648,11 @@ begin
                             if ValType in [TDataType.RECORDTOK, TDataType.OBJECTTOK] then
                               ValType := TDataType.POINTERTOK;
 
+{
                             if VarType <> TDataType.UNTYPETOK then
+			     if (VarType in IntegerTypes) and (ValType in IntegerTypes) then
                               if GetDataSize(ValType) > GetDataSize(VarType) then ValType := VarType;
+}
 
                             Push(IdentifierAt(IdentIndex).Value, IndirectionLevel, GetDataSize(ValType), IdentIndex, IdentTemp and $ff);  // !! $FF !!
 
@@ -11354,6 +11357,7 @@ begin
 
 end;  //CompileFactor
 
+
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 
@@ -11366,8 +11370,6 @@ begin
     ValType := Succ(ValType);
 
 end;
-
-
 
 
 // ----------------------------------------------------------------------------
@@ -11635,6 +11637,7 @@ end;  //CompileSimpleExpression
 
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
+
 
 function CompileExpression(i: TTokenIndex; out ValType: TDataType; VarType: TDataType = TDataType.INTEGERTOK): TTokenIndex;
 var

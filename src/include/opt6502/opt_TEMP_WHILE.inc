@@ -73,9 +73,9 @@ begin
 	if (SKIP(p-2) = false) and						//~SKIP			; p-2
 	   (TemporaryBuf[p-1] = #9'dec ' + GetARG(1)) and			// dec K		; p-1
 										//			; p
-	   (TemporaryBuf[p+1] = '') and						//			; p+1
+	   									//			; p+1
            opti(p+2) and							//; optimize 		; p+2
-	   (TemporaryBuf[p+3] = '') and						//			; p+3
+	   									//			; p+3
 	   (TemporaryBuf[p+4] = #9'lda ' + GetARG(p-1)) and			// lda K		; p+4
 	   (TemporaryBuf[p+5] = #9'cmp #$FF') and				// cmp #$FF		; p+5
 	   jne(p+6) then 							// jne			; p+6
@@ -95,9 +95,9 @@ begin
       (TemporaryBuf[1] = '') and							//			; 1
       jmp_l(3) and									// jmp l_00FA		; 3
       lab_l(4) and									//l_00FB		; 4
-      (TemporaryBuf[5] = '') and							//			; 5
+      											//			; 5
       opti(6) and									//; optimize 		; 6
-      (TemporaryBuf[7] = '') and							//			; 7
+      											//			; 7
       ldy_im(8) then									// ldy #		; 8
     begin
       yes:=true;
@@ -131,9 +131,9 @@ begin
       (TemporaryBuf[1] = '') and							//			; 1
       jmp_l(3) and									// jmp l_00FA		; 3
       lab_l(4) and									//l_00FB		; 4
-      (TemporaryBuf[5] = '') and							//			; 5
+      											//			; 5
       opti(6) and									//; optimize 		; 6
-      (TemporaryBuf[7] = '') and							//			; 7
+      											//			; 7
       (ldy_im(8) = false) then								//~ldy #		; 8
     begin
       yes:=true;
@@ -143,9 +143,9 @@ begin
       for p:=8 to High(TemporaryBuf)-5 do
        if (TemporaryBuf[p-1] = #9'dec ' + GetARG(p+4)) and
           (TemporaryBuf[p] = tmp) and						//l_00FA		; +0
-          (TemporaryBuf[p+1] = '') and						//			; +1
+          									//			; +1
           opti(p+2) and								//; optimize 		; +2
-          (TemporaryBuf[p+3] = '') and						//			; +3
+          									//			; +3
           lda(p+4) and								// lda X		; +4
           (TemporaryBuf[p+5] = #9'jne ' + TemporaryBuf[4]) then			// jne l_		; +5
 	 begin

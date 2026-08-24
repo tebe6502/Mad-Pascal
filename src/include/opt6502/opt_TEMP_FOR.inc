@@ -309,9 +309,9 @@ begin
       lda(4) and									// lda C		; 4
       cmp(5) and									// cmp 			; 5
       SKIP(6) and									// SKIP			; 6
-      (TemporaryBuf[7] = '') and							//			; 7
+     											//			; 7
       opti(8) and									//; optimize 		; 8
-      (TemporaryBuf[9] = '') and							//			; 9
+      											//			; 9
       lda(10) then									// lda			; 10
     if argMatch(0, 4) then
      begin
@@ -349,9 +349,9 @@ begin
       lda(4) and									// lda C		; 4
       cmp(5) and									// cmp 			; 5
       SKIP(6) and									// SKIP			; 6
-      (TemporaryBuf[7] = '') and							//			; 7
+      											//			; 7
       opti(8) and									//; optimize 		; 8
-      (TemporaryBuf[9] = '') and							//			; 9
+     											//			; 9
       (TemporaryBuf[10] = #9'ldy ' + GetARG(4)) then					// ldy C		; 10
     if argMatch(0, 4) then
      begin
@@ -466,9 +466,9 @@ begin
 	     ((TemporaryBuf[p-6] = #9'scc') or (TemporaryBuf[p-6] = #9'scs')) and
 	     sta(p-7) and
 
-	     (TemporaryBuf[p+2] = '') and
+
 	     opti(p+3) and
-	     (TemporaryBuf[p+4] = '') and
+
 	     lda(p+5) and
 	     add_sub(p+6) and
 
@@ -501,9 +501,9 @@ begin
       lda(2) and (iy(2) = false) and							// lda C		; 2
       (TemporaryBuf[3] = #9'cmp #$40') and						// cmp #$40		; 3
       jcs_l(4) and									// jcs l_		; 4
-      (TemporaryBuf[5] ='') and								//			; 5
+      											//			; 5
       opti(6) and									//; optimize		; 6
-      (TemporaryBuf[7] ='') and								//			; 7
+    											//			; 7
       lda(8) then									// lda			; 8
      begin
       TemporaryBuf[2] := #9'bit ' + GetARG(2);
@@ -523,9 +523,9 @@ begin
       bcc_a(8) and									// bcc @+		; 8
       jne_l(9) and									// jne l_		; 9
       lab_a(10) and									//@			; 10
-      (TemporaryBuf[11] ='') and							//			; 11
+     											//			; 11
       opti(12) and									//; optimize		; 12
-      (TemporaryBuf[13] ='') and							//			; 13
+     											//			; 13
       lda(14) and									// lda			; 14
       add(15) then									// add			; 15
      begin
