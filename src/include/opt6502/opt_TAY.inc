@@ -1122,7 +1122,7 @@ begin
        rol_a(i) and										// rol @				; 0
        sta_stack(i+1) and									// sta :STACKORIGIN+STACKWIDTH		; 1
        lda_val(i+2) and										// lda A				; 2	~:STACKORIGIN
-       and_ora_eor_val(i+3) and									// and|ora|eor				; 3	~:STACKORIGIN
+       (and_ora_eor_val(i+3) or asl_a(i+3)) and							// and|ora|eor|asl @			; 3	~:STACKORIGIN
        add_sub_stack(i+4) then									// add|sub :STACKORIGIN			; 4
      if (argMatch(i+1, i+4) = false) then
        begin
@@ -1218,7 +1218,7 @@ begin
        add_sub_val(i+1) and									// add|sub				; 1
        sta_stack(i+2) and									// sta :STACKORIGIN			; 2
        lda_val(i+3) and										// lda I				; 3	~:STACKORIGIN
-       and_ora_eor_val(i+4) and									// and|ora|eor				; 4	~:STACKORIGIN
+       (and_ora_eor_val(i+4) or asl_a(i+4)) and							// and|ora|eor|asl @			; 4	~:STACKORIGIN
        add_sub_stack(i+5) then									// add|sub :STACKORIGIN			; 5
      if argMatch(i+2, i+5) then
       begin
@@ -1297,7 +1297,7 @@ begin
        add_sub_val(i+2) and									// add|sub				; 2
        sta_stack(i+3) and									// sta :STACKORIGIN			; 3
        lda_val(i+4) and										// lda I				; 4	~:STACKORIGIN
-       and_ora_eor_val(i+5) and									// and|ora|eor				; 5	~:STACKORIGIN
+       (and_ora_eor_val(i+5) or asl_a(i+5)) and							// and|ora|eor				; 5	~:STACKORIGIN
        add_sub_stack(i+6) then									// add|sub :STACKORIGIN			; 6
      if argMatch(i+3, i+6) then
       begin
@@ -1317,7 +1317,7 @@ begin
        asl_a(i+3) and										// asl @				; 3
        sta_stack(i+4) and									// sta :STACKORIGIN			; 4
        lda_val(i+5) and										// lda					; 5	~:STACKORIGIN
-       and_ora_eor(i+6) and									// and|ora|eor				; 6
+       (and_ora_eor(i+6) or asl_a(i+6)) and							// and|ora|eor|asl @			; 6
        add_sub_stack(i+7) then									// add|sub :STACKORIGIN			; 7
      if (argMatch(i+1, i+2) = false) and
         argMatch(i+2, i+4) and
@@ -1437,7 +1437,7 @@ begin
        asl_a(i+4) and										// asl @				; 4
        sta_stack(i+5) and									// sta :STACKORIGIN			; 5
        lda_val(i+6) and										// lda					; 6	~:STACKORIGIN
-       and_ora_eor(i+7) and									// and|ora|eor				; 7
+       (and_ora_eor(i+7) or asl_a(i+7)) and							// and|ora|eor|asl @			; 7
        add_sub_stack(i+8) then									// add|sub :STACKORIGIN			; 8
      if (argMatch(i+1, i+3) = false) and
         argMatch(i+3, i+5) and
@@ -1457,7 +1457,7 @@ begin
 	exit(false);
        end;
 
-
+// xxxxxxxxxxxxxxxxxxxxxxxxxxx
     if tay(i+6) and										// tay					; 6
        (lda_adr_y(i+7) or sta_adr_y(i+8)) and							// lda adr.|				; 7
      												//         | sta adr.			; 8
@@ -1466,7 +1466,7 @@ begin
        rol_stack(i+1) and									// rol :STACKORIGIN+STACKWIDTH		; 1
        sta_stack(i+2) and									// sta :STACKORIGIN			; 2
        lda_val(i+3) and										// lda					; 3	~:STACKORIGIN
-       asl_a(i+4) and										// asl @				; 4
+       (and_ora_eor(i+4) or asl_a(i+4)) and							// and|ora|eor|asl @			; 4
        add_sub_stack(i+5) then									// add|sub :STACKORIGIN			; 5
      if argMatch(i+2, i+5) then
       begin
@@ -1483,6 +1483,19 @@ begin
 
 	exit(false);
       end;
+
+{
+// xxxxxxxxxxxxxxxxxxxxxxx
+	asl @
+	rol :STACKORIGIN+STACKWIDTH+9
+	sta :STACKORIGIN+9
+	lda I
+	asl @
+	add :STACKORIGIN+9
+	tay
+	lda adr.TETROMINO,y
+
+}
 
 
     if tay(i+7) and										// tay					; 7

@@ -2248,6 +2248,8 @@ begin
 
     if ldy_im(i+13) and (listing[i+13] = listing[i]) and					// ldy #				; 13
 
+       iny(i+25) and										// iny					; 25
+
        mwy_bp2(i+12) and									// mwy ... :bp2				; 12
        ldy_im(i+13) and										// ldy #				; 13
        lda_stack(i+14) and									// lda :STACKORIGIN+9			; 14
@@ -2261,7 +2263,7 @@ begin
        lda_stack(i+22) and									// lda :STACKORIGIN+STACKWIDTH*2+9	; 22
        (and_ora_eor_bp2_y(i+23) or adc_sbc_bp2_y(i+23)) and					// and|ora|eor|adc|sbc (:bp2),y		; 23
        sta_a(i+24) and										// sta					; 24
-       iny(i+25) and										// iny					; 25
+//       iny(i+25) and										// iny					; 25
        lda_stack(i+26) and									// lda :STACKORIGIN+STACKWIDTH*3+9	; 26
        (and_ora_eor_bp2_y(i+27) or adc_sbc_bp2_y(i+27)) and					// and|ora|eor|adc|sbc (:bp2),y		; 27
        sta_a(i+28) then										// sta					; 28
