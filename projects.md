@@ -1103,3 +1103,23 @@ Krzysztof Piotrowski
 <br clear="left"/>
 
 ---
+
+## 66. Dither-Lab
+
+> _LinuguaXE is the first program for 8-bit Atari computer which is able to translate texts between different languages. It uses FujiNet device to communicate with the Internet and engine from Google to perfom translation._
+
+<a href="images/67.png">
+  <img align="left" src="images/67.png" width="320" height="240" alt="LinguaXE">
+</a>
+
+[https://gitlab.com/amarok8bit/linguaxe](https://gitlab.com/amarok8bit/linguaxe)
+
+**Platform**  
+Atari 8-bit
+
+**Author**  
+Krzysztof Piotrowski
+
+<br clear="left"/>
+
+---
