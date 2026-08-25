@@ -1,6 +1,17 @@
 
 function opt_CMP_BRANCH(i: integer): Boolean;
-var p: integer;
+
+
+  procedure rm_ldy_1;
+  var p: integer;
+  begin
+
+	for p:=i-1 downto 0 do
+	  if ldy_1(p) then begin listing[p]:=''; Break end;
+
+  end;
+
+
 begin
 
     Result := true;
@@ -515,8 +526,7 @@ begin
        listing[i+4] := '';
        listing[i+5] := '';
 
-	for p:=i-1 downto 0 do
-	 if ldy_1(p) then begin listing[p]:=''; Break end;
+       rm_ldy_1;
 
        exit(false);
       end;
@@ -541,8 +551,7 @@ begin
        listing[i+4] := '';
        listing[i+5] := '';
 
-	for p:=i-1 downto 0 do
-	 if ldy_1(p) then begin listing[p]:=''; Break end;
+       rm_ldy_1;
 
        exit(false);
       end;
@@ -565,8 +574,7 @@ begin
        listing[i+4] := '';
        listing[i+5] := '';
 
-	for p:=i-1 downto 0 do
-	 if ldy_1(p) then begin listing[p]:=''; Break end;
+       rm_ldy_1;
 
        exit(false);
       end;
@@ -589,8 +597,7 @@ begin
        listing[i+4] := '';
        listing[i+5] := '';
 
-	for p:=i-1 downto 0 do
-	 if ldy_1(p) then begin listing[p]:=''; Break end;
+       rm_ldy_1;
 
        exit(false);
       end;
@@ -615,8 +622,7 @@ begin
        listing[i+4] := '';
        listing[i+5] := '';
 
-	for p:=i-1 downto 0 do
-	 if ldy_1(p) then begin listing[p]:=''; Break end;
+       rm_ldy_1;
 
        exit(false);
       end;
@@ -638,15 +644,14 @@ begin
 //       jeq(i+9) and										// jeq			; 9
        (SKIP(i+10) = false) then								//~SKIP			; 10
       begin
-       	listing[i+5] := #9'jne ' + GetARG(i+9);
+       listing[i+5] := #9'jne ' + GetARG(i+9);
 
-       	listing[i+6] := '';
+       listing[i+6] := '';
 
-       	listing[i+8] := '';
-       	listing[i+9] := '';
+       listing[i+8] := '';
+       listing[i+9] := '';
 
-	for p:=i-1 downto 0 do
-	 if ldy_1(p) then begin listing[p]:=''; Break end;
+       rm_ldy_1;
 
        exit(false);
       end;
@@ -669,15 +674,14 @@ begin
        jne(i+10) and										// jne			; 10
        (SKIP(i+11) = false) then								//~SKIP			; 11
       begin
-       	listing[i+5] := listing[i+10];
+       listing[i+5] := listing[i+10];
 
-       	listing[i+7] := '';
-       	listing[i+8] := '';
-       	listing[i+9] := '';
-       	listing[i+10] := '';
+       listing[i+7] := '';
+       listing[i+8] := '';
+       listing[i+9] := '';
+       listing[i+10] := '';
 
-	for p:=i-1 downto 0 do
-	 if ldy_1(p) then begin listing[p]:=''; Break end;
+       rm_ldy_1;
 
        exit(false);
       end;
@@ -700,18 +704,17 @@ begin
        jeq(i+10) and										// jeq			; 10
        (SKIP(i+11) = false) then								//~SKIP			; 11
       begin
-       	listing[i+1] := #9'jmi ' + GetARG(i+10);
+       listing[i+1] := #9'jmi ' + GetARG(i+10);
 
-       	listing[i+5] := listing[i+10];
+       listing[i+5] := listing[i+10];
 
-       	listing[i+6] := '';
-       	listing[i+7] := '';
-       	listing[i+8] := '';
-       	listing[i+9] := '';
-       	listing[i+10] := '';
+       listing[i+6] := '';
+       listing[i+7] := '';
+       listing[i+8] := '';
+       listing[i+9] := '';
+       listing[i+10] := '';
 
-	for p:=i-1 downto 0 do
-	 if ldy_1(p) then begin listing[p]:=''; Break end;
+       rm_ldy_1;
 
        exit(false);
       end;
@@ -731,15 +734,14 @@ begin
 //       jeq(i+7) and										// jeq			; 7
        (SKIP(i+8) = false) then									//~SKIP			; 8
       begin
-       	listing[i+3] := #9'jne ' + GetARG(i+7);
+       listing[i+3] := #9'jne ' + GetARG(i+7);
 
-       	listing[i+4] := '';
+       listing[i+4] := '';
 
-       	listing[i+6] := '';
-       	listing[i+7] := '';
+       listing[i+6] := '';
+       listing[i+7] := '';
 
-	for p:=i-1 downto 0 do
-	 if ldy_1(p) then begin listing[p]:=''; Break end;
+       rm_ldy_1;
 
        exit(false);
       end;
@@ -767,8 +769,7 @@ begin
        listing[i+4] := '';
        listing[i+5] := '';
 
-	for p:=i-1 downto 0 do
-	 if ldy_1(p) then begin listing[p]:=''; Break end;
+       rm_ldy_1;
 
        exit(false);
       end;
@@ -790,8 +791,7 @@ begin
        listing[i+3] := '';
        listing[i+4] := '';
 
-       for p:=i-1 downto 0 do
-	 if ldy_1(p) then begin listing[p]:=''; Break end;
+       rm_ldy_1;
 
        exit(false);
       end;
@@ -816,8 +816,7 @@ begin
        listing[i+5] := '';
        listing[i+6] := '';
 
-       for p:=i-1 downto 0 do
-	 if ldy_1(p) then begin listing[p]:=''; Break end;
+       rm_ldy_1;
 
        exit(false);
       end;
@@ -841,8 +840,7 @@ begin
        listing[i+5] := '';
        listing[i+6] := '';
 
-       for p:=i-1 downto 0 do
-	 if ldy_1(p) then begin listing[p]:=''; Break end;
+       rm_ldy_1;
 
        exit(false);
       end;
@@ -865,8 +863,7 @@ begin
        listing[i+4] := '';
        listing[i+5] := '';
 
-       for p:=i-1 downto 0 do
-	 if ldy_1(p) then begin listing[p]:=''; Break end;
+       rm_ldy_1;
 
        exit(false);
       end;
@@ -889,8 +886,7 @@ begin
        listing[i+4] := '';
        listing[i+5] := '';
 
-       for p:=i-1 downto 0 do
-	 if ldy_1(p) then begin listing[p]:=''; Break end;
+       rm_ldy_1;
 
        exit(false);
       end;
@@ -913,8 +909,7 @@ begin
        listing[i+4] := '';
        listing[i+5] := '';
 
-       for p:=i-1 downto 0 do
-	 if ldy_1(p) then begin listing[p]:=''; Break end;
+       rm_ldy_1;
 
        exit(false);
       end;
@@ -939,8 +934,7 @@ begin
        listing[i+4] := '';
        listing[i+5] := '';
 
-	for p:=i-1 downto 0 do
-	 if ldy_1(p) then begin listing[p]:=''; Break end;
+       rm_ldy_1;
 
        exit(false);
      end;
@@ -965,8 +959,7 @@ begin
        listing[i+4] := '';
        listing[i+5] := '';
 
-	for p:=i-1 downto 0 do
-	 if ldy_1(p) then begin listing[p]:=''; Break end;
+       rm_ldy_1;
 
        exit(false);
      end;
@@ -989,8 +982,7 @@ begin
        listing[i+3] := '';
        listing[i+4] := '';
 
-	for p:=i-1 downto 0 do
-	 if ldy_1(p) then begin listing[p]:=''; Break end;
+       rm_ldy_1;
 
        exit(false);
      end;
@@ -1013,8 +1005,7 @@ begin
        listing[i+3] := '';
        listing[i+4] := '';
 
-	for p:=i-1 downto 0 do
-	 if ldy_1(p) then begin listing[p]:=''; Break end;
+       rm_ldy_1;
 
        exit(false);
      end;
@@ -1037,8 +1028,7 @@ begin
        listing[i+3] := '';
        listing[i+4] := '';
 
-	for p:=i-1 downto 0 do
-	 if ldy_1(p) then begin listing[p]:=''; Break end;
+       rm_ldy_1;
 
        exit(false);
      end;
@@ -1061,8 +1051,7 @@ begin
       listing[i+3] := '';
       listing[i+4] := '';
 
-      for p:=i-1 downto 0 do
-	if ldy_1(p) then begin listing[p]:=''; Break end;
+       rm_ldy_1;
 
       exit(false);
      end;
@@ -1088,8 +1077,7 @@ begin
       listing[i+4] := '';
       listing[i+5] := '';
 
-      for p:=i-1 downto 0 do
-	if ldy_1(p) then begin listing[p]:=''; Break end;
+       rm_ldy_1;
 
       exit(false);
      end;
@@ -1115,8 +1103,7 @@ begin
       listing[i+4] := '';
       listing[i+5] := '';
 
-      for p:=i-1 downto 0 do
-	if ldy_1(p) then begin listing[p]:=''; Break end;
+       rm_ldy_1;
 
       exit(false);
      end;
@@ -1141,8 +1128,7 @@ begin
        listing[i+3] := #9'rol @';
        listing[i+4] := '';
 
-	for p:=i-1 downto 0 do
-	 if ldy_1(p) then begin listing[p]:=''; Break end;
+       rm_ldy_1;
 
        exit(false);
       end;
