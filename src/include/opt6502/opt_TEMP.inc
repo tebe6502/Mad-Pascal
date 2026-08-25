@@ -1119,4 +1119,43 @@ begin
       end;
 
 
+// -----------------------------------------------------------------------------
+
+
+    if sta_stack(0) and									// sta :STACKORIGIN	; 0
+       ldy_im_0(1) and									// ldy #$00		; 1
+       lda_stack(2) and									// lda :STACKORIGIN	; 2
+       spl(3) and									// spl			; 3
+       dey(4) and									// dey			; 4
+       sty_stack(5) and									// sty :STACKORIGIN+	; 5
+       add_sub(6) and									// add|sub		; 6
+       sta(7) and									// sta			; 7
+       lda_stack(8) then								// lda :STACKORIGIN+	; 8
+      if argMatch(0, 2) and
+         argMatch(5,8) then
+      begin
+	TemporaryBuf[0] := '~';
+
+	TemporaryBuf[2] := #9'cmp #$00';
+
+	TemporaryBuf[5] := '~';
+
+	TemporaryBuf[8] := #9'tya';
+      end;
+
+
+    if sta_stack(0) and									// sta :STACKORIGIN	; 0
+       ldy_im_0(1) and									// ldy #$00		; 1
+       lda_stack(2) and									// lda :STACKORIGIN	; 2
+       spl(3) and									// spl			; 3
+       dey(4) and									// dey			; 4
+       sta(5) then									// sta			; 5
+      if argMatch(0, 2) then
+      begin
+	TemporaryBuf[0] := '~';
+
+	TemporaryBuf[2] := #9'cmp #$00';
+      end;
+
+
 end;	// procedure
