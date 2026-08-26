@@ -1116,6 +1116,37 @@ begin
 // ===			imulCX (16x16) -> imulCX_AL (16x8)		  === //
 // -----------------------------------------------------------------------------
 
+
+  if (listing[i+11] = #9'imulCX') and							// imulCX				; 11
+
+     lda_a(i) and (lda_eax(i) = false) and						// lda					; 0
+     sta_ecx(i+1) and									// sta :ecx				; 1
+     lda_im_0(i+2) and									// lda #$00				; 2
+     sta_ecx_1(i+3) and									// sta :ecx+1				; 3
+     (lda_im(i+4) = false) and								// lda 					; 4
+     sta_eax(i+5) and						 			// sta :eax				; 5
+     (lda_im(i+6) = false) and								// lda					; 6
+     sta_eax_1(i+7) and							 		// sta :eax+1				; 7
+     IFDEF_MUL16(i+8) then								// .ifdef fmulinit			; 8
+      											// fmulu_16				; 9
+       											// els					; 10
+      											// imulCX				; 11
+       											// eif					; 12
+   begin
+    listing[i+1] := #9'sta :eax';
+
+    listing[i+3] := #9'sta :eax+1';
+
+    listing[i+5] := #9'sta :ecx';
+
+    listing[i+7] := #9'sta :ecx+1';
+
+    listing[i+11] := #9'imulCX_AL';
+
+    exit(false);
+   end;
+
+
   if (listing[i+11] = #9'imulCX') and							// imulCX				; 11
 
      (lda_im(i) = false) and								//~lda #				; 0
