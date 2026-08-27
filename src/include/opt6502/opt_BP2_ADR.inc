@@ -6,6 +6,48 @@ begin
 
     Result := true;
 
+
+    if sta_bp2_1(i+11) and 								// sta :bp2+1				; 11
+
+       adc_im_0(i+4) and								// adc #$00				; 4
+
+       lda_val(i) and									// lda					; 0		#+BYTE
+       add_im(i+1) and									// add #				; 1
+       sta_stack(i+2) and								// sta :STACKORIGIN			; 2
+       lda_val(i+3) and									// lda 					; 3
+//       adc_im_0(i+4) and								// adc #$00				; 4
+       sta_stack(i+5) and								// sta :STACKORIGIN+STACKWIDTH		; 5
+       lda_val(i+6) and (lda_eax(i+6) = false) and					// lda TB				; 6	~:STACKORIGIN
+       add_stack(i+7) and								// add :STACKORIGIN			; 7
+       sta_bp2(i+8) and									// sta :bp2				; 8
+       lda_val(i+9) and									// lda TB+1				; 9	~:STACKORIGIN
+       adc_stack(i+10) and								// adc :STACKORIGIN+STACKWIDTH		; 10
+//       sta_bp2_1(i+11) and 								// sta :bp2+1				; 11
+       ldy_im_0(i+12) then								// ldy #$00				; 12
+    begin
+     q:=GetBYTE(i+1);
+
+     if (q >= 0) and (q <= 252) then begin
+
+       listing[i+7] := #9'add ' + GetARG(i);
+
+       listing[i+10]:= #9'adc ' + GetARG(i+3);
+
+       listing[i+12]:= #9'ldy ' + GetARG(i+1);
+
+       listing[i]   := '';
+       listing[i+1] := '';
+       listing[i+2] := '';
+       listing[i+3] := '';
+       listing[i+4] := '';
+       listing[i+5] := '';
+
+       exit(false);
+     end;
+
+    end;
+
+
 // -----------------------------------------------------------------------------
 // ===				    BP2 -> ADR.
 // -----------------------------------------------------------------------------
@@ -246,12 +288,13 @@ begin
        Break;
       end else	// for p:=
         if onBreak(p) {or (listing[p] = #9'asl ' + GetARG(i))} then Break;
-*)
 
+     if Result = false then exit(false);
+
+*)
 
 // -----------------------------------------------------------------------------
 
-     if Result = false then exit(false);
     end;
 
 
