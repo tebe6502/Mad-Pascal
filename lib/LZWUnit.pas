@@ -1,14 +1,17 @@
 
 UNIT LZWUnit;
+(*
+@type: unit
+@name: LZW encode/decode
+@author: Ryan Lanctot
+
+@description:
+
+*)
 
 { Ryan Lanctot							      }
 { LZWUnit - Defines the LZWObj object to compress and uncompress      }
 {           files using the LZW compression algorithm                 }
-{ If you would like to create a file with a copy of the string        }
-{ table LZWUnit used to compress the input file just define the       }
-{ Debugging value in the next line                                    }
-
-// {Define Debugging}
 
 { ========================= } INTERFACE { =========================== }
 
@@ -165,7 +168,6 @@ PROCEDURE LZWObj.CompressFile(InFile,OutFile : PathStr); {------------}
 {---------------------------------------------------------------------}
 
 VAR
-  Ctr : integer;           {Counter for onscreen display              }
   FoundCode : smallint;    {Used to manage results from ManageTbl code}
 BEGIN
 
@@ -174,17 +176,9 @@ BEGIN
   Assign(OutF,OutFile);    {Open output file as a 2 byte/record file  }
   Rewrite(OutF,1);         {  because we write out smallints          }
 
-  Ctr := 0;
-
   PrefixCandidate := LZWObj.InputUnCompValue;
 
   REPEAT
-
-    Inc(Ctr);                          {Manage counter display}
-    IF (Ctr AND 127) = 127 THEN BEGIN
-      GotoXY(10,10);
-      Write(Ctr);
-      END;
 
     SuffixCandidate := LZWObj.InputUnCompValue;
 
@@ -307,6 +301,5 @@ BEGIN
   Close(InF);
   Close(OutF)
   END;
-
 
 END.
