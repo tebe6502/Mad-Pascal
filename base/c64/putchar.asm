@@ -11,22 +11,25 @@
   subroutines.
   (Other way could be doing it on compiler level - write strings in proper
   encoding in compiled code).
+
 */
 
-.proc	@putchar (.byte a) .reg
+; https://github.com/tebe6502/Mad-Pascal/issues/280
 
-chrout	= $ffd2			;kernel character output sub
+.proc   @putchar (.byte a) .reg
 
-	cmp #64
-	bcc putcharend
-	cmp #122
-	bcs putcharend
+chrout  = $ffd2		;kernel character output sub
+
+	cmp #64+1
+	bcc putcharend	; below 'A'
+	cmp #122+1
+	bcs putcharend	; above 'z'
 	cmp #91
-	bcc putchareor
+	bcc putchareor	; 'A'..'Z'
 	cmp #96
-	bcc putcharend
+	bcc putcharend	; between 'Z' and 'a'
 putchareor
 	eor #%00100000
 putcharend
-	jmp chrout
+        jmp chrout
 .endp
