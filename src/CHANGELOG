@@ -1,3 +1,6 @@
+29.08.2026
+- issue #280 fixed, C64;C4P base\@putchar.asm
+
 27.08.2026
 - unit LWZUnit
 - bugfixes and optimizations
