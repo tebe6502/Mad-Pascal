@@ -85,6 +85,23 @@ begin
     end;
 
 
+   if jcs_l(10) and									// jcs			; 10	branch if C=1     											//			; 13	C=0
+      ldy(11) and									// ldy			; 11	C=0
+      lda(12) and									// lda			; 12
+      add(13) then									// add			; 13
+    begin
+	TemporaryBuf[13] := #9'adc ' + GetARG(13);
+    end;
+
+
+   if jcs_l(10) and									// jcs			; 10	branch if C=1     											//			; 13	C=0
+      lda(11) and									// lda			; 11	C=0
+      add(12) then									// add			; 12
+    begin
+	TemporaryBuf[12] := #9'adc ' + GetARG(12);
+    end;
+
+
 { !!!
 
    if (pos('jcs l_', TemporaryBuf[10]) > 0) and						// jcs			; 10	branch if C=1

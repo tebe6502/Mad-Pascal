@@ -8,7 +8,7 @@ uses Classes, SysUtils, CommonTypes, CompilerTypes, DataTypes, FileIO, Memory, S
   Targets, Tokens;
 
 const
-  title = '1.7.8';
+  title = '1.7.9';
 
 
 
