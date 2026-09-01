@@ -18,7 +18,7 @@ const
   IntegerTypes = UnsignedOrdinalTypes + SignedOrdinalTypes;
   OrdinalTypes = IntegerTypes + [TDataType.CHARTOK, TDataType.BOOLEANTOK, TDataType.ENUMTOK];
 
-  Pointers = [TDataType.POINTERTOK, TDataType.PROCVARTOK, TDataType.STRINGPOINTERTOK, TDataType.PCHARTOK];
+  Pointers = [TDataType.POINTERTOK, TDataType.PROCVARTOK, TDataType.STRINGPOINTERTOK, TDataType.PCHARTOK, TDataType.ARRAYRECORD];
 
   AllTypes = OrdinalTypes + RealTypes + Pointers;
 
@@ -57,6 +57,7 @@ const
     2,  // Size = 2 HALFSINGLE / FLOAT16
     2,  // Size = 2 PCHAR
     4,  // Size = 4 ENUM
+    2,  // Size = 2 ARRAYRECORD
     2,  // Size = 2 PROCVAR
     2,  // Size = 2 TEXTFILE
     0,  // Size = 0 SUBRANGE

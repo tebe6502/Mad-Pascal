@@ -3312,10 +3312,19 @@ begin
 
                               //    if NestedDataType = RECORDTOK then
                               //    else
-                              if NestedDataType in [TDataType.RECORDTOK, TDataType.OBJECTTOK] then
-                                Error(i, TMessage.Create(TErrorCode.OnlyArrayOfTypeSupported,
-                                  'Only Array [0..{0}] of ^{1} supported', IntToStr(NumAllocElements - 1), InfoAboutDataType(NestedDataType)))
-                              else
+                              if NestedDataType in [TDataType.RECORDTOK, TDataType.OBJECTTOK] then begin
+
+
+                              //writeln(NestedDataType,',', NumAllocElements,',', NestedNumAllocElements,',',GetTypeAtIndex(NestedNumAllocElements).Field[0].Name);
+
+			      DataType := TDataType.ARRAYRECORD;
+
+// xxxxxxxxxxxxxxxxxxx
+
+//                                Error(i, TMessage.Create(TErrorCode.OnlyArrayOfTypeSupported,
+//                                  'Only Array [0..{0}] of ^{1} supported', IntToStr(NumAllocElements - 1), InfoAboutDataType(NestedDataType)));
+
+                              end else
                                 Error(i, TMessage.Create(TErrorCode.ArrayOfTypeNotSupported,
                                   'Arrays of type {0} are not supported.', InfoAboutDataType(NestedDataType)));
 

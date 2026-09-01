@@ -17744,19 +17744,17 @@ begin
         begin
 
           if (GetTypeAtIndex(IdentifierAt(BlockIdentIndex).ObjectIndex).Field[ParamIndex].DataType =
-            TDataType.POINTERTOK) and (GetTypeAtIndex(IdentifierAt(BlockIdentIndex).ObjectIndex).Field[
-            ParamIndex].NumAllocElements > 0) then
+            TDataType.POINTERTOK) and (GetTypeAtIndex(IdentifierAt(BlockIdentIndex).ObjectIndex).Field[ParamIndex].NumAllocElements > 0) then
           begin
 
-            NumAllocElements := GetTypeAtIndex(IdentifierAt(BlockIdentIndex).ObjectIndex).Field[
-              ParamIndex].NumAllocElements and $ffff;
+            NumAllocElements := GetTypeAtIndex(IdentifierAt(BlockIdentIndex).ObjectIndex).Field[ParamIndex].NumAllocElements and $ffff;
 
             if GetTypeAtIndex(IdentifierAt(BlockIdentIndex).ObjectIndex).Field[ParamIndex].NumAllocElements shr 16 > 0 then
               NumAllocElements := (NumAllocElements *
                 (GetTypeAtIndex(IdentifierAt(BlockIdentIndex).ObjectIndex).Field[ParamIndex].NumAllocElements shr 16));
 
-            NumAllocElements := NumAllocElements * GetDataSize(
-              GetTypeAtIndex(IdentifierAt(BlockIdentIndex).ObjectIndex).Field[ParamIndex].AllocElementType);
+            NumAllocElements := NumAllocElements *
+	    GetDataSize(GetTypeAtIndex(IdentifierAt(BlockIdentIndex).ObjectIndex).Field[ParamIndex].AllocElementType);
 
           end
           else
@@ -17768,8 +17766,7 @@ begin
                   GetTypeAtIndex(IdentifierAt(BlockIdentIndex).ObjectIndex).Field[ParamIndex].NumAllocElements;
 
               TDataType.RECORDTOK: NumAllocElements :=
-                  ObjectRecordSize(GetTypeAtIndex(IdentifierAt(BlockIdentIndex).ObjectIndex).Field
-                  [ParamIndex].NumAllocElements);
+                  ObjectRecordSize(GetTypeAtIndex(IdentifierAt(BlockIdentIndex).ObjectIndex).Field[ParamIndex].NumAllocElements);
 
               else
                 NumAllocElements :=
@@ -19316,8 +19313,7 @@ begin
             Inc(i);
 
 
-            if (VarType = TDataType.POINTERTOK) and (AllocElementType in
-              [TDataType.RECORDTOK, TDataType.OBJECTTOK]) then
+            if (VarType = TDataType.POINTERTOK) and (AllocElementType in [TDataType.RECORDTOK, TDataType.OBJECTTOK]) then
 
             else
               idx := IdentifierAt(NumIdent).Value - DATAORIGIN;
