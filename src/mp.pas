@@ -193,6 +193,8 @@ Contributors:
 # VAR ^RECORD              | POINTERTOK         | RECORDTOK           | RecType            | 0                  |
 # ARRAY [0..X] OF ^RECORD  | POINTERTOK         | RECORDTOK           | RecType            | X Array Size       |
 # ARRAY [0..X] OF ^OBJECT  | POINTERTOK         | OBJECTTOK           | RecType            | X Array Size       |
+# ARRAY [0..X] OF RECORD   | ARRAYRECORD        | RECORDTOK           | RecType            | X Array Size       |
+# ARRAY [0..X] OF OBJECT   | ARRAYRECORD        | OBJECTTOK           | RecType            | X Array Size       |
 # ---------------------------------------------------------------------------------------------------------------
 
 *)

@@ -17454,7 +17454,8 @@ var
   tmpVarDataSize_, ParamIndex: Integer;
 begin
 
-  //  writeln(iDtype,',',VarOfSameType[VarOfSameTypeIndex].Name,' / ',NumAllocElements,' , ',VarType,',',GetTypeAtIndex(NumAllocElements).Block,' | ', AllocElementType);
+//   writeln(VarOfSameType[VarOfSameTypeIndex].Name,' / ',NumAllocElements,' , ',VarType,' | ', AllocElementType);
+
 
   if ((VarType in Pointers) and (AllocElementType = TDataType.RECORDTOK)) then
   begin
@@ -17487,8 +17488,8 @@ begin
     //writeln(NumAllocElements);
     //!@!@
     for ParamIndex := 1 to GetTypeAtIndex(NumAllocElements).NumFields do                  // label: ^record
-      if (GetTypeAtIndex(NumAllocElements).BlockIndex = 1) or (GetTypeAtIndex(NumAllocElements).BlockIndex =
-        BlockStackTopBlockIndex) then
+      if (GetTypeAtIndex(NumAllocElements).BlockIndex = 1) or
+         (GetTypeAtIndex(NumAllocElements).BlockIndex = BlockStackTopBlockIndex) then
       begin
 
         //      writeln('a ',',',VarOfSameType[VarOfSameTypeIndex].Name + '.' + GetTypeAtIndex(NumAllocElements).Field[ParamIndex].Name,',',GetTypeAtIndex(NumAllocElements).Field[ParamIndex].DataType,',',GetTypeAtIndex(NumAllocElements).Field[ParamIndex].AllocElementType,',',GetTypeAtIndex(NumAllocElements).Field[ParamIndex].NumAllocElements);
@@ -17510,7 +17511,7 @@ begin
 
   end
   else
-
+// xxxxxxxxxxxxxxxxxxxxxxxxx
     if (VarType in [TDataType.RECORDTOK, TDataType.OBJECTTOK]) then                      // label: record
     begin
 
@@ -17530,7 +17531,7 @@ begin
 
       for ParamIndex := 1 to GetTypeAtIndex(NumAllocElements).NumFields do
         if (GetTypeAtIndex(NumAllocElements).BlockIndex = 1) or
-          (GetTypeAtIndex(NumAllocElements).BlockIndex = BlockStackTopBlockIndex) then
+	   (GetTypeAtIndex(NumAllocElements).BlockIndex = BlockStackTopBlockIndex) then
         begin
 
           //      writeln('b ',',',VarOfSameType[VarOfSameTypeIndex].Name + '.' + GetTypeAtIndex(NumAllocElements).Field[ParamIndex].Name,',',GetTypeAtIndex(NumAllocElements).Field[ParamIndex].DataType,',',GetTypeAtIndex(NumAllocElements).Field[ParamIndex].AllocElementType,',',GetTypeAtIndex(NumAllocElements).Field[ParamIndex].NumAllocElements,' | ',IdentifierAt(NumIdent).Value);

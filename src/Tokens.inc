@@ -152,12 +152,13 @@
    FILETOK,           // Size = 2/12 FILE
    RECORDTOK,         // Size = 2/???
    OBJECTTOK,         // Size = 2/???
-   SHORTREALTOK,      // Size = 2 SHORTREAL      Fixed-Point Q8.8
-   REALTOK,           // Size = 4 REAL      Fixed-Point Q24.8
-   SINGLETOK,         // Size = 4 SINGLE / FLOAT    IEEE-754 32-bit
-   HALFSINGLETOK,     // Size = 2 HALFSINGLE / FLOAT16  IEEE-754 16-bit
+   SHORTREALTOK,      // Size = 2 SHORTREAL	Fixed-Point Q8.8
+   REALTOK,           // Size = 4 REAL		Fixed-Point Q24.8
+   SINGLETOK,         // Size = 4 SINGLE / FLOAT	IEEE-754 32-bit
+   HALFSINGLETOK,     // Size = 2 HALFSINGLE / FLOAT16	IEEE-754 16-bit
    PCHARTOK,          // Size = 2 POINTER TO ARRAY OF CHAR
    ENUMTOK,           // Size = AllocElementType (4)
+   ARRAYRECORD,       // Size = 2 POINTER TO ARRAY OF RECORD
    PROCVARTOK,        // Size = 2
    TEXTFILETOK,       // Size = 2/12 TEXTFILE
    SUBRANGETYPE,      // Size = 0
@@ -169,7 +170,6 @@
    FLOAT16TOK,        // We change into HALFSINGLETOK
    TEXTTOK,           // We change into TEXTFILETOK
 
-   RESERVED_155,
    RESERVED_156,
    RESERVED_157,
    RESERVED_158,

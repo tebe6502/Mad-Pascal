@@ -69,6 +69,11 @@ uses SysUtils, Debugger, Messages, Utilities;
 function Elements(IdentIndex: Integer): Cardinal;
 begin
 
+
+  if (IdentifierAt(IdentIndex).DataType = TDataType.ARRAYRECORD) then
+    Result := IdentifierAt(IdentIndex).NumAllocElements_
+  else
+
   if (IdentifierAt(IdentIndex).DataType = TDataType.POINTERTOK) and (IdentifierAt(IdentIndex).AllocElementType = TDataType.FORWARDTYPE) then
     Result := 1
   else
@@ -493,6 +498,9 @@ begin
   IdentIndex := GetIdentIndex(TokenAt(i + 2).Name);
 
   case ValType of
+
+    TDataType.ARRAYRECORD:
+      Result := IdentifierAt(IdentIndex).NumAllocElements_ * ObjectRecordSize(IdentifierAt(IdentIndex).NumAllocElements);
 
     TDataType.ENUMTOK:
       Result := GetDataSize(IdentifierAt(IdentIndex).AllocElementType);
@@ -1837,6 +1845,18 @@ begin
                   // Empty array [0..0] ; [0..0, 0..0] foes not require spaces
                   else
 
+//xxxxxxxxxxxxxx
+                    if IdentifierAt(NumIdent).DataType = TDataType.ARRAYRECORD then begin
+                     // IncVarDataSize(tokenIndex, Integer( IdentifierAt(NumIdent).NumAllocElements_ * ObjectRecordSize(IdentifierAt(NumIdent).NumAllocElements) ) );
+
+			IncVarDataSize(tokenIndex, 18*2);// Integer(GetDataSize(DataType)) );
+
+			//writeln(GetDataSize(DataType));
+
+//    Result := IdentifierAt(IdentIndex).NumAllocElements_ * ObjectRecordSize(IdentifierAt(IdentIndex).NumAllocElements)
+
+
+                    end else
                     if IdentifierAt(NumIdent).DataType = TDataType.DEREFERENCEARRAYTOK then
                       IncVarDataSize(tokenIndex, GetDataSize(TDataType.POINTERTOK))
                     else
@@ -3333,7 +3353,12 @@ begin
                               //    NestedDataType := POINTERTOK;
 
                               //    NestedDataType := NestedAllocElementType;
-                              NumAllocElements := NumAllocElements or (NestedNumAllocElements shl 16);
+
+
+			      if DataType = TDataType.ARRAYRECORD then
+			        NumAllocElements := NestedNumAllocElements or (NumAllocElements shl 16)
+			      else
+                                NumAllocElements := NumAllocElements or (NestedNumAllocElements shl 16);
 
                             end
                             else
