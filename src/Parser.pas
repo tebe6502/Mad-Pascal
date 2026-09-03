@@ -1857,7 +1857,7 @@ begin
 
 
                     end else
-                    if IdentifierAt(NumIdent).DataType = TDataType.DEREFERENCEARRAYTOK then
+                    if IdentifierAt(NumIdent).DataType = TDataType.DEREFERENCEARRAY then
                       IncVarDataSize(tokenIndex, GetDataSize(TDataType.POINTERTOK))
                     else
                       IncVarDataSize(tokenIndex, Integer(Elements(NumIdent) * GetDataSize(AllocElementType)));
@@ -2462,7 +2462,7 @@ var
       Error(i, TMessage.Create(TErrorCode.OutOfResources, 'Out of resources, MAXFIELDS'));
 
 
-    if FieldType = TDataType.DEREFERENCEARRAYTOK then
+    if FieldType = TDataType.DEREFERENCEARRAY then
     begin
       FieldType := TDataType.POINTERTOK;
       AllocElementType := TDataType.UNTYPETOK;
@@ -2601,7 +2601,7 @@ begin
                 begin
                   NumAllocElements := IdentifierAt(IdentIndex).NumAllocElements or (IdentifierAt(IdentIndex).NumAllocElements_ shl 16);
                   AllocElementType := IdentifierAt(IdentIndex).AllocElementType;
-                  DataType := TDataType.DEREFERENCEARRAYTOK;
+                  DataType := TDataType.DEREFERENCEARRAY;
                 end;
 
               end

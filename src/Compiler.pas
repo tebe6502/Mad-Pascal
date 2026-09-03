@@ -2943,6 +2943,28 @@ begin
         IdentTemp := GetIdentIndex(ExtractName(IdentIndex, svar));
 
         NumAllocElements := Elements(IdentTemp);
+
+//writeln(IdentifierAt(IdentTemp).name,',',IdentifierAt(IdentTemp).DataType,',',NumAllocElements);
+
+
+	if IdentifierAt(IdentTemp).DataType = TDataType.ARRAYRECORD then begin
+
+            asm65(#9'lda :STACKORIGIN-1,x');
+            asm65(#9'add #$00');
+            asm65(#9'sta :STACKORIGIN-1,x');
+            asm65(#9'lda :STACKORIGIN-1+STACKWIDTH,x');
+            asm65(#9'adc #$00');
+            asm65(#9'sta :STACKORIGIN-1+STACKWIDTH,x');
+
+            asm65(#9'lda ' + GetLocalName(IdentTemp));
+            asm65(#9'add :STACKORIGIN-1,x');
+            asm65(#9'sta :bp2');
+            asm65(#9'lda ' + GetLocalName(IdentTemp) + '+1');
+            asm65(#9'adc :STACKORIGIN-1+STACKWIDTH,x');
+            asm65(#9'sta :bp2+1');
+	
+	end else
+
 {
           if (IdentTemp > 0) and (IdentifierAt(IdentTemp).DataType = TDataType.POINTERTOK) and
             (IdentifierAt(IdentTemp).AllocElementType = TDataType.RECORDTOK) and
@@ -6759,13 +6781,12 @@ begin
   else
     Size := GetDataSize(IdentifierAt(IdentIndex).AllocElementType);
 
-
   ShortArrayIndex := False;
 
   VarType := IdentifierAt(IdentIndex).AllocElementType;
 
 
-  if ((IdentifierAt(IdentIndex).DataType = TDataType.POINTERTOK) and (IdentifierAt(IdentIndex).IdType = TDataType.DEREFERENCEARRAYTOK)) then
+  if ((IdentifierAt(IdentIndex).DataType = TDataType.POINTERTOK) and (IdentifierAt(IdentIndex).IdType = TDataType.DEREFERENCEARRAY)) then
   begin
     NumAllocElements := IdentifierAt(IdentIndex).NestedNumAllocElements and $FFFF;
     NumAllocElements_ := IdentifierAt(IdentIndex).NestedNumAllocElements shr 16;
@@ -6791,6 +6812,10 @@ begin
 
 
   ActualParamType := TDataType.WORDTOK;    // !!! aby dzialaly optymalizacje dla ADR.
+
+
+
+//  writeln(IdentifierAt(IdentIndex).name,',',IdentifierAt(IdentIndex).DataType,',',NumAllocElements,'/',NumAllocElements_);
 
 
   j := i + 2;
@@ -7024,7 +7049,7 @@ begin
 
           if (TokenAt(i + 2).Kind = TTokenKind.DEREFERENCETOK) and
             (TokenAt(i + 3).Kind = TTokenKind.OBRACKETTOK) and
-            (IdentifierAt(IdentIndex).DataType in [TDataType.POINTERTOK, TDataType.DEREFERENCEARRAYTOK]) then Inc(i);
+            (IdentifierAt(IdentIndex).DataType in [TDataType.POINTERTOK, TDataType.DEREFERENCEARRAY]) then Inc(i);
 
 
           if IdentifierAt(IdentIndex).Kind in
@@ -7046,7 +7071,7 @@ begin
           else
 
             if (TokenAt(i + 2).Kind = TTokenKind.OBRACKETTOK) and
-              (IdentifierAt(IdentIndex).DataType in Pointers + [TDataType.DEREFERENCEARRAYTOK]) and
+              (IdentifierAt(IdentIndex).DataType in Pointers + [TDataType.DEREFERENCEARRAY]) and
               ((IdentifierAt(IdentIndex).NumAllocElements > 0) or
               ((IdentifierAt(IdentIndex).NumAllocElements = 0) and (IdentifierAt(IdentIndex).AllocElementType <> TDataType.UNTYPETOK))) then
             begin                  // array index
@@ -7303,7 +7328,7 @@ begin
 
                           end
                           else
-                            if IdentifierAt(IdentIndex).IdType <> TDataType.DEREFERENCEARRAYTOK then
+                            if IdentifierAt(IdentIndex).IdType <> TDataType.DEREFERENCEARRAY then
                               Error(i + 4, TErrorCode.IllegalQualifier);  // array
 
                         end;
@@ -8021,7 +8046,7 @@ begin
             //  writeln(' - ',TokenAt(i).Name,',',ActualParamType,',',AllocElementType, ',', IdentifierAt(IdentTemp).NumAllocElements );
             //  writeln(IdentifierAt(IdentTemp).Kind,',',IdentifierAt(IdentTemp).DataType,',',IdentifierAt(IdentIndex).Param[NumActualParams].DataType);
 
-            if IdentifierAt(IdentTemp).DataType in Pointers + [TDataType.DEREFERENCEARRAYTOK] then
+            if IdentifierAt(IdentTemp).DataType in Pointers + [TDataType.DEREFERENCEARRAY] then
               if not (IdentifierAt(IdentIndex).Param[NumActualParams].DataType in FileTypes) then
               begin
 
@@ -8071,7 +8096,7 @@ begin
 
             end
             else
-              if IdentifierAt(IdentIndex).Param[NumActualParams].DataType in Pointers + [TDataType.DEREFERENCEARRAYTOK] then
+              if IdentifierAt(IdentIndex).Param[NumActualParams].DataType in Pointers + [TDataType.DEREFERENCEARRAY] then
               begin
 
                 //     CheckCommonType(i, IdentifierAt(IdentIndex).Param[NumActualParams].AllocElementType, IdentifierAt(IdentTemp).AllocElementType);
@@ -8282,8 +8307,8 @@ begin
                       (IdentifierAt(IdentIndex).Param[NumActualParams].DataType <> IdentifierAt(IdentTemp).DataType) and
                       (IdentifierAt(IdentIndex).Param[NumActualParams].NumAllocElements > 0) then
 
-                      if (IdentifierAt(IdentIndex).Param[NumActualParams].DataType in [TDataType.POINTERTOK, TDataType.DEREFERENCEARRAYTOK]) and
-                        (IdentifierAt(IdentTemp).DataType in [TDataType.POINTERTOK, TDataType.DEREFERENCEARRAYTOK]) then
+                      if (IdentifierAt(IdentIndex).Param[NumActualParams].DataType in [TDataType.POINTERTOK, TDataType.DEREFERENCEARRAY]) and
+                        (IdentifierAt(IdentTemp).DataType in [TDataType.POINTERTOK, TDataType.DEREFERENCEARRAY]) then
 
                       else
                         ErrorIncompatibleTypes(i, AllocElementType, IdentifierAt(IdentIndex).Param[NumActualParams].AllocElementType);
@@ -10364,7 +10389,7 @@ begin
                 // -----------------------------------------------------------------------------
 
                 if (TokenAt(i + 1).Kind = TTokenKind.DEREFERENCETOK) then
-                  if (IdentifierAt(IdentIndex).Kind <> TTokenKind.VARTOK) or not (IdentifierAt(IdentIndex).DataType in Pointers + [TDataType.DEREFERENCEARRAYTOK]) then
+                  if (IdentifierAt(IdentIndex).Kind <> TTokenKind.VARTOK) or not (IdentifierAt(IdentIndex).DataType in Pointers + [TDataType.DEREFERENCEARRAY]) then
                     ErrorForIdentifier(i, TErrorCode.IncompatibleTypeOf, IdentIndex)
                   else
                   begin
@@ -10376,7 +10401,7 @@ begin
 
                     //  writeln(IdentifierAt(IdentIndex).Name,',',TokenAt(i + 3).Name,' | ',IdentifierAt(IdentIndex).DataType,',',IdentifierAt(IdentIndex).AllocElementType,',',IdentifierAt(IdentIndex).NumAllocElements);
 
-                    if (IdentifierAt(IdentIndex).DataType in [TDataType.POINTERTOK, TDataType.DEREFERENCEARRAYTOK]) and
+                    if (IdentifierAt(IdentIndex).DataType in [TDataType.POINTERTOK, TDataType.DEREFERENCEARRAY]) and
                       (TokenAt(i + 2).Kind = TTokenKind.OBRACKETTOK) then
                     begin
 
@@ -10464,7 +10489,7 @@ begin
                 // -----------------------------------------------------------------------------
 
                   if TokenAt(i + 1).Kind = TTokenKind.OBRACKETTOK then      // Array element access
-                    if not (IdentifierAt(IdentIndex).DataType in Pointers + [TDataType.DEREFERENCEARRAYTOK])
+                    if not (IdentifierAt(IdentIndex).DataType in Pointers + [TDataType.DEREFERENCEARRAY])
                     {or ((IdentifierAt(IdentIndex).NumAllocElements = 0) and (IdentifierAt(IdentIndex).idType <> TTokenKind.PCHARTOK))} then
                       // PByte, PWord
                       ErrorForIdentifier(i, TErrorCode.IncompatibleTypeOf, IdentIndex)
@@ -12411,7 +12436,7 @@ begin
 
                   Dereference := True;
 
-                  if not (IdentifierAt(IdentIndex).DataType in Pointers + [TDataType.DEREFERENCEARRAYTOK]) then
+                  if not (IdentifierAt(IdentIndex).DataType in Pointers + [TDataType.DEREFERENCEARRAY]) then
                     ErrorForIdentifier(i + 1, TErrorCode.IncompatibleTypeOf, IdentIndex);
 
                   IndirectionLevel := ASPOINTERTOPOINTER;
@@ -12435,7 +12460,7 @@ begin
 
                     Inc(i);
 
-                    if not (IdentifierAt(IdentIndex).DataType in Pointers + [TDataType.DEREFERENCEARRAYTOK]) then
+                    if not (IdentifierAt(IdentIndex).DataType in Pointers + [TDataType.DEREFERENCEARRAY]) then
                       ErrorForIdentifier(i + 1, TErrorCode.IncompatibleTypeOf, IdentIndex);
 
                     IndirectionLevel := ASPOINTERTOARRAYORIGIN2;
@@ -15758,7 +15783,7 @@ begin
 
         i := j;
 
-        if ExpressionType = TDataType.DEREFERENCEARRAYTOK then ExpressionType := TDataType.WORDTOK;
+        if ExpressionType = TDataType.DEREFERENCEARRAY then ExpressionType := TDataType.WORDTOK;
 
 
         CheckCommonType(i, ExpressionType, ActualParamType);
@@ -17423,7 +17448,7 @@ begin
         if (IdentifierAt(TypeIndex).DataType = TDataType.POINTERTOK) and
           (IdentifierAt(TypeIndex).AllocElementType = TDataType.POINTERTOK) then
         begin
-          IdentifierAt(TypeIndex).DataType := TDataType.DEREFERENCEARRAYTOK;
+          IdentifierAt(TypeIndex).DataType := TDataType.DEREFERENCEARRAY;
           IdentifierAt(TypeIndex).AllocElementType := IdentifierAt(IdentIndex).AllocElementType;
         end;
       end;
@@ -19171,14 +19196,14 @@ begin
           //  writeln(VarType,',',NumAllocElements and $FFFF,',',NumAllocElements shr 16,',',AllocElementType, ',',idType,',',varPassMethod,',',isAbsolute);
 
 
-          if VarType = TDataType.DEREFERENCEARRAYTOK then
+          if VarType = TDataType.DEREFERENCEARRAY then
           begin
 
             VarType := TDataType.POINTERTOK;
 
             NestedNumAllocElements := NumAllocElements;
 
-            IdType := TDataType.DEREFERENCEARRAYTOK;
+            IdType := TDataType.DEREFERENCEARRAY;
 
             if AllocElementType in [TDataType.RECORDTOK, TDataType.OBJECTTOK] then
               NumAllocElements := NumAllocElements and $FFFF
