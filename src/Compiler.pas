@@ -6868,7 +6868,15 @@ begin
 
     end
     else
-      if IdentifierAt(IdentIndex).isStriped = False then GenerateIndexShift(IdentifierAt(IdentIndex).AllocElementType);
+      if IdentifierAt(IdentIndex).isStriped = False then 
+       if IdentifierAt(IdentIndex).DataType = TDataType.ARRAYRECORD then begin
+
+         Push(ObjectRecordSize(NumAllocElements), ASVALUE, 2);
+
+         GenerateBinaryOperation(TTokenKind.MULTOK, ArrayIndexType);
+
+       end else
+         GenerateIndexShift(IdentifierAt(IdentIndex).AllocElementType);
 
   end;
 

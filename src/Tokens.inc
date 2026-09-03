@@ -162,7 +162,7 @@
    PROCVARTOK,        // Size = 2
    TEXTFILETOK,       // Size = 2/12 TEXTFILE
    SUBRANGETYPE,      // Size = 0
-   DEREFERENCEARRAYTOK, // For ARRAY pointers
+   DEREFERENCEARRAY,  // For ARRAY pointers
    FORWARDTYPE,       // Size = 2
 
    SHORTSTRINGTOK,    // We change into STRINGTOK
