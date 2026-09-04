@@ -1123,3 +1123,23 @@ Krzysztof Piotrowski
 <br clear="left"/>
 
 ---
+
+## 68. Agents Alpha
+
+> _A puzzle game for 8-bit Atari XL/XE computers inspired by "The Crow's Path" by brokellusiongames._
+
+<a href="images/68.png">
+  <img align="left" src="images/68.png" width="320" height="240" alt="AgentsAlpha">
+</a>
+
+[https://forums.atariage.com/topic/392607-agents-alpha-a-new-little-puzzle-game/]
+
+**Platform**  
+Atari 8-bit
+
+**Author**  
+Wojciech Bociański
+
+<br clear="left"/>
+
+---
