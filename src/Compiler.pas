@@ -1764,6 +1764,25 @@ begin
 
       asm65(#9'lda' + StackVariable0);
 
+      if IdentifierAt(IdentIndex).DataType = TDataType.ARRAYRECORD then begin
+
+// xxxxxxxxxxxxxxxxxxxxxxxxx
+
+        asm65(#9'add #$00');
+        asm65(#9'sta' + StackVariable0);
+        asm65(#9'lda' + StackVariable1);
+        asm65(#9'adc #$00');
+        asm65(#9'sta' + StackVariable1);
+
+        asm65(#9'lda ' + svar);
+        asm65(#9'add' + StackVariable0);
+        asm65(#9'sta :bp2');
+        asm65(#9'lda ' +  svar + '+1');
+        asm65(#9'adc' + StackVariable1);
+        asm65(#9'sta :bp2+1');
+
+      end else
+
       if TestName(IdentIndex, svar) then
       begin
         asm65(#9'add ' + ExtractName(IdentIndex, svar));
@@ -2943,7 +2962,7 @@ begin
         IdentTemp := GetIdentIndex(ExtractName(IdentIndex, svar));
 
         NumAllocElements := Elements(IdentTemp);
-
+// xxxxxxxxxxxxxxxxxxxxxxxxx
 //writeln(IdentifierAt(IdentTemp).name,',',IdentifierAt(IdentTemp).DataType,',',NumAllocElements);
 
 
@@ -6829,6 +6848,12 @@ begin
     ArrayIndexType := TDataType.WORDTOK;
     ShortArrayIndex := False;
 
+
+    if IdentifierAt(IdentIndex).DataType = TDataType.ARRAYRECORD then  
+
+      Push(ConstVal * ObjectRecordSize(NumAllocElements), ASVALUE, 2)
+
+    else
     if NumAllocElements_ > 0 then
       Push(ConstVal * NumAllocElements_ * Size, ASVALUE, GetDataSize(ArrayIndexType))
     else
