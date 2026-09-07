@@ -343,9 +343,9 @@ end;
  end;
 
 
- asm65('.ifdef psptr');
+ asm65(#9'.ifdef psptr');
  asm65(#9'mwa #PROGRAMSTACK psptr');
- asm65('.fi');
+ asm65(#9'.fi');
  asm65;
 
 

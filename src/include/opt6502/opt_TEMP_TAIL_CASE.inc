@@ -52,6 +52,8 @@ begin
 	    (opti_(i-k) and opti_(p-k)) then
 	 begin
 
+	  if eif(i-k) then exit;
+
 	  if lab_a(i-k) then
 	   if (TemporaryBuf[i-k-1] <> TemporaryBuf[p-k-1]) or (TemporaryBuf[i-k-2] <> TemporaryBuf[p-k-2]) then exit;
 

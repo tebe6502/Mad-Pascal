@@ -1428,6 +1428,20 @@ begin
 
       Gen;
 
+// swag0
+
+      if IdentifierAt(IdentIndex).DataType = TDataType.ARRAYRECORD then begin
+
+
+            asm65(#9'lda ' + svar);
+            asm65(#9'add' + StackVariable0);
+            asm65(#9'sta :bp2');
+            asm65(#9'lda ' + svar + '+1');
+            asm65(#9'adc' + StackVariable1);
+            asm65(#9'sta :bp2+1');
+
+      end else
+
       case Size of
         1: begin                    // PUSH BYTE
 
@@ -10537,25 +10551,6 @@ begin
 
                       IdentTemp := 0;
 
-//                         writeln(valType,' / ',IdentifierAt(IdentIndex).name,',',IdentifierAt(IdentIndex).DataType,',',IdentifierAt(IdentIndex).AllocElementType,',',IdentifierAt(IdentIndex).NumAllocElements,',',IdentifierAt(IdentIndex).NumAllocElements_);
-
-
-	              if (ValType in [TDataType.RECORDTOK, TDataType.OBJECTTOK]) and (IdentifierAt(IdentIndex).DataType = TDataType.ARRAYRECORD) then begin
-
-
-// SWAG0
-                        IndirectionLevel := ASPOINTER;
-
-                      //  ValType := TDataType.POINTERTOK;
-{
-                        asm65(#9'lda :STACKORIGIN,x');
-                        asm65(#9'add #$00');
-                        asm65(#9'sta :STACKORIGIN-1,x');
-                        asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
-                        asm65(#9'adc #$00');
-                        asm65(#9'sta :STACKORIGIN-1+STACKWIDTH,x');
-}
-		      end else
                       if (TokenAt(i + 2).Kind = TTokenKind.DEREFERENCETOK) and (ValType in [TDataType.RECORDTOK, TDataType.OBJECTTOK]) then
                       begin                // array[ ]^
 
@@ -13286,19 +13281,20 @@ begin
                     ResetOpty;
 }
 
+
 		    if (IdentifierAt(IdentIndex).DataType = TDataType.RECORDTOK) and	// record := arrayrecord[i]
 		       (IdentifierAt(IdentTemp).DataType = TDataType.ARRAYRECORD) then
 		    begin
 
 // SWAG0
+		      if IdentifierAt(IdentIndex).NumAllocElements <> IdentifierAt(IdentTemp).NumAllocElements then
+                          Error(i, 'Incompatible types: got "' +
+                            GetTypeAtIndex(IdentifierAt(IdentTemp).NumAllocElements).Field[0].Name +
+                            '" expected "' +
+                            GetTypeAtIndex(IdentifierAt(IdentIndex).NumAllocElements).Field[0].Name +
+                            '"');
 
-		      asm65(#9'lda :STACKORIGIN+1,x');
-                      asm65(#9'add #$00');
-                      asm65(#9'sta :bp2');
-                      asm65(#9'lda :STACKORIGIN+1+STACKWIDTH,x');
-                      asm65(#9'adc #$00');
-                      asm65(#9'sta :bp2+1');
-
+		      asm65(#9'@move ":bp2" ' + GetLocalName(IdentIndex) + ' #' + IntToStr(RecordSize(IdentIndex)));
 
 		    end else
 

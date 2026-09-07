@@ -922,7 +922,7 @@ begin
 
 
    if (TemporaryBuf[0] = #9'imulCL') and						// imulCL		; 0
-      (TemporaryBuf[1] = #9'eif') and							// eif			; 1
+      eif(1) and									// eif			; 1
       lda_eax(2) and									// lda :eax		; 2
       sta(3) and									// sta Y		; 3
       lda_eax_1(4) and									// lda :eax+1		; 4
