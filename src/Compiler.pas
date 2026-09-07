@@ -2022,6 +2022,11 @@ begin
     ASARRAYORIGINOFPOINTERTORECORDARRAYORIGIN:              // record_array[index].array[i]
     begin
 
+      {$IFDEF USEOPTFILE}
+      asm65('; as Array Origin of Pointer to Record^ Array Origin');
+      asm65;
+      {$ENDIF}
+
       if (NumAllocElements * 2 > 256) or (NumAllocElements in [0, 1]) then
       begin
 
@@ -2981,7 +2986,7 @@ begin
             asm65(#9'lda ' + GetLocalName(IdentTemp) + '+1');
             asm65(#9'adc :STACKORIGIN-1+STACKWIDTH,x');
             asm65(#9'sta :bp2+1');
-	
+
 	end else
 
 {
@@ -6833,7 +6838,6 @@ begin
   ActualParamType := TDataType.WORDTOK;    // !!! aby dzialaly optymalizacje dla ADR.
 
 
-
 //  writeln(IdentifierAt(IdentIndex).name,',',IdentifierAt(IdentIndex).DataType,',',NumAllocElements,'/',NumAllocElements_);
 
 
@@ -6849,7 +6853,7 @@ begin
     ShortArrayIndex := False;
 
 
-    if IdentifierAt(IdentIndex).DataType = TDataType.ARRAYRECORD then  
+    if IdentifierAt(IdentIndex).DataType = TDataType.ARRAYRECORD then
 
       Push(ConstVal * ObjectRecordSize(NumAllocElements), ASVALUE, 2)
 
@@ -6893,7 +6897,7 @@ begin
 
     end
     else
-      if IdentifierAt(IdentIndex).isStriped = False then 
+      if IdentifierAt(IdentIndex).isStriped = False then
        if IdentifierAt(IdentIndex).DataType = TDataType.ARRAYRECORD then begin
 
          Push(ObjectRecordSize(NumAllocElements), ASVALUE, 2);
@@ -10533,7 +10537,25 @@ begin
 
                       IdentTemp := 0;
 
+//                         writeln(valType,' / ',IdentifierAt(IdentIndex).name,',',IdentifierAt(IdentIndex).DataType,',',IdentifierAt(IdentIndex).AllocElementType,',',IdentifierAt(IdentIndex).NumAllocElements,',',IdentifierAt(IdentIndex).NumAllocElements_);
 
+
+	              if (ValType in [TDataType.RECORDTOK, TDataType.OBJECTTOK]) and (IdentifierAt(IdentIndex).DataType = TDataType.ARRAYRECORD) then begin
+
+
+// SWAG0
+                        IndirectionLevel := ASPOINTER;
+
+                      //  ValType := TDataType.POINTERTOK;
+{
+                        asm65(#9'lda :STACKORIGIN,x');
+                        asm65(#9'add #$00');
+                        asm65(#9'sta :STACKORIGIN-1,x');
+                        asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
+                        asm65(#9'adc #$00');
+                        asm65(#9'sta :STACKORIGIN-1+STACKWIDTH,x');
+}
+		      end else
                       if (TokenAt(i + 2).Kind = TTokenKind.DEREFERENCETOK) and (ValType in [TDataType.RECORDTOK, TDataType.OBJECTTOK]) then
                       begin                // array[ ]^
 
@@ -13127,16 +13149,24 @@ begin
 
                       ASPOINTER:
                         if (TokenAt(k + 1).Kind <> TTokenKind.DEREFERENCETOK) and
-                          (IdentifierAt(IdentIndex).AllocElementType <> IdentifierAt(IdentTemp).AllocElementType) and not (IdentifierAt(IdentTemp).DataType in [TDataType.RECORDTOK, TDataType.OBJECTTOK]) then
+                           (IdentifierAt(IdentIndex).AllocElementType <> IdentifierAt(IdentTemp).AllocElementType) and
+			   not (IdentifierAt(IdentTemp).DataType in [TDataType.RECORDTOK, TDataType.OBJECTTOK])
+			then
 
                           if (IdentifierAt(IdentTemp).NumAllocElements_ > 0) and
-                            (TokenAt(Result).Kind = TTokenKind.DEREFERENCETOK) and
-                            (IdentifierAt(IdentIndex).DataType = TDataType.RECORDTOK) and
-                            ((IdentifierAt(IdentTemp).DataType = TDataType.POINTERTOK) and
-                            (IdentifierAt(IdentTemp).AllocElementType = TDataType.RECORDTOK)) and
-                            (IdentifierAt(IdentTemp).NumAllocElements = IdentifierAt(IdentIndex).NumAllocElements) then
-
+                             (TokenAt(Result).Kind = TTokenKind.DEREFERENCETOK) and
+                             (IdentifierAt(IdentIndex).DataType = TDataType.RECORDTOK) and
+                             ((IdentifierAt(IdentTemp).DataType = TDataType.POINTERTOK) and
+                             (IdentifierAt(IdentTemp).AllocElementType = TDataType.RECORDTOK)) and
+                             (IdentifierAt(IdentTemp).NumAllocElements = IdentifierAt(IdentIndex).NumAllocElements) then
+			  // accept this case
                           else
+			  if (IdentifierAt(IdentIndex).DataType = TDataType.RECORDTOK) and
+                             (IdentifierAt(IdentTemp).DataType = TDataType.ARRAYRECORD) and
+                             (IdentifierAt(IdentTemp).NumAllocElements = IdentifierAt(IdentIndex).NumAllocElements) then
+			  // accept this case
+			  else
+
                             Error(k, 'Incompatible types: got "^' +
                               GetTypeAtIndex(IdentifierAt(IdentTemp).NumAllocElements).Field[0].Name +
                               '" expected "' +
@@ -13255,6 +13285,22 @@ begin
                     StopOptimization;
                     ResetOpty;
 }
+
+		    if (IdentifierAt(IdentIndex).DataType = TDataType.RECORDTOK) and	// record := arrayrecord[i]
+		       (IdentifierAt(IdentTemp).DataType = TDataType.ARRAYRECORD) then
+		    begin
+
+// SWAG0
+
+		      asm65(#9'lda :STACKORIGIN+1,x');
+                      asm65(#9'add #$00');
+                      asm65(#9'sta :bp2');
+                      asm65(#9'lda :STACKORIGIN+1+STACKWIDTH,x');
+                      asm65(#9'adc #$00');
+                      asm65(#9'sta :bp2+1');
+
+
+		    end else
 
                     if (IdentifierAt(IdentIndex).DataType = TDataType.RECORDTOK) and
                       (IdentifierAt(IdentTemp).DataType = TDataType.RECORDTOK) and
@@ -17529,7 +17575,10 @@ begin
       IdentifierAt(NumIdent).NumAllocElements := NumAllocElements and $FFFF;
       IdentifierAt(NumIdent).NumAllocElements_ := NumAllocElements shr 16;
 
-      SetVarDataSize(i, tmpVarDataSize + (NumAllocElements shr 16) * GetDataSize(TDataType.POINTERTOK));
+      if VarType = TDataType.ARRAYRECORD then
+        SetVarDataSize(i, tmpVarDataSize + (NumAllocElements shr 16) * ObjectRecordSize(NumAllocElements and $FFFF))
+      else
+        SetVarDataSize(i, tmpVarDataSize + (NumAllocElements shr 16) * GetDataSize(TDataType.POINTERTOK));
 
       tmpVarDataSize := GetVarDataSize;
 
@@ -17544,7 +17593,7 @@ begin
     idx := IdentifierAt(NumIdent).Value - DATAORIGIN;
 
     //writeln(NumAllocElements);
-    //!@!@
+
     for ParamIndex := 1 to GetTypeAtIndex(NumAllocElements).NumFields do                  // label: ^record
       if (GetTypeAtIndex(NumAllocElements).BlockIndex = 1) or
          (GetTypeAtIndex(NumAllocElements).BlockIndex = BlockStackTopBlockIndex) then
@@ -17569,7 +17618,7 @@ begin
 
   end
   else
-// xxxxxxxxxxxxxxxxxxxxxxxxx
+
     if (VarType in [TDataType.RECORDTOK, TDataType.OBJECTTOK]) then                      // label: record
     begin
 

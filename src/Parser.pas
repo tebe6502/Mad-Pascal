@@ -1845,16 +1845,9 @@ begin
                   // Empty array [0..0] ; [0..0, 0..0] foes not require spaces
                   else
 
-//xxxxxxxxxxxxxx
                     if IdentifierAt(NumIdent).DataType = TDataType.ARRAYRECORD then begin
-                     // IncVarDataSize(tokenIndex, Integer( IdentifierAt(NumIdent).NumAllocElements_ * ObjectRecordSize(IdentifierAt(NumIdent).NumAllocElements) ) );
 
-			IncVarDataSize(tokenIndex, 18*2);// Integer(GetDataSize(DataType)) );
-
-			//writeln(GetDataSize(DataType));
-
-//    Result := IdentifierAt(IdentIndex).NumAllocElements_ * ObjectRecordSize(IdentifierAt(IdentIndex).NumAllocElements)
-
+			IncVarDataSize(tokenIndex, NumAllocElements_ * ObjectRecordSize(NumAllocElements));
 
                     end else
                     if IdentifierAt(NumIdent).DataType = TDataType.DEREFERENCEARRAY then
