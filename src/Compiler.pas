@@ -1799,6 +1799,7 @@ begin
 
       if TestName(IdentIndex, svar) then
       begin
+
         asm65(#9'add ' + ExtractName(IdentIndex, svar));
         asm65(#9'sta :TMP');
         asm65(#9'lda' + StackVariable1);
@@ -12885,9 +12886,9 @@ begin
                 {and not (IdentifierAt(IdentIndex).AllocElementType in [PROCEDURETOK, FUNC])} then
                 begin
 
-                  //  writeln(ExpressionType,' | ',IdentifierAt(IdentIndex).idtype,',', IdentifierAt(IdentIndex).DataType,',',IdentifierAt(IdentIndex).AllocElementType,',',IdentifierAt(IdentIndex).Name,',',IndirectionLevel);
-                  //  writeln(IdentifierAt(GetIdentIndex(IdentifierAt(IdentIndex).Name)].AllocElementType);
-
+                   // writeln(ExpressionType,' | ',IdentifierAt(IdentIndex).idtype,',', IdentifierAt(IdentIndex).DataType,',',IdentifierAt(IdentIndex).AllocElementType,',',IdentifierAt(IdentIndex).Name,',',IndirectionLevel);
+// swag0
+// xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
                   if (ExpressionType = TDataType.CHARTOK) and
                     (IdentifierAt(IdentIndex).DataType = TDataType.POINTERTOK) and
@@ -12923,12 +12924,7 @@ begin
                       if (IdentTemp > 0) and (IdentifierAt(IdentTemp).Kind = TTokenKind.FUNCTIONTOK) then
                         IdentTemp := GetIdentResult(IdentifierAt(IdentTemp).ProcAsBlockIndex);
 
-        {if (TokenAt(i + 3).Kind <> TTokenKind.OBRACKETTOK) and ((Elements(IdentTemp) <> Elements(IdentIndex)) or (IdentifierAt(IdentTemp).AllocElementType <> IdentifierAt(IdentIndex).AllocElementType)) then
-         Error(k, IncompatibleTypesArray, GetIdentIndex(TokenAt(k).Name), ExpressionType )
-        else
-         if (Elements(IdentTemp) > 0) and (TokenAt(i + 3).Kind <> TTokenKind.OBRACKETTOK) then
-          Error(k, IncompatibleTypesArray, IdentTemp, ExpressionType )
-        else}
+                        //      writeln(IdentifierAt(IdentIndex).Name,',',IdentifierAt(IdentIndex).DataType,':',IdentifierAt(IdentIndex).AllocElementType,':',IdentifierAt(IdentIndex).NumAllocElements,' | ',IdentifierAt(IdentTemp).Name,',',IdentifierAt(IdentTemp).DataType,':',IdentifierAt(IdentTemp).AllocElementType,':',IdentifierAt(IdentTemp).NumAllocElements);
 
                       if IdentifierAt(IdentTemp).AllocElementType = TDataType.RECORDTOK then
                       // CheckCommonType(i + 1, VarType, TTokenKind.RECORDTOK)
@@ -13274,7 +13270,9 @@ begin
                             GetTypeAtIndex(IdentifierAt(IdentIndex).NumAllocElements).Field[0].Name +
                             '"');
 
+
                     a65(TCode65.subBX);
+
 
 {
                     StopOptimization;
@@ -13282,8 +13280,11 @@ begin
 }
 
 
-		    if (IdentifierAt(IdentIndex).DataType = TDataType.RECORDTOK) and	// record := arrayrecord[i]
-		       (IdentifierAt(IdentTemp).DataType = TDataType.ARRAYRECORD) then
+		    if ((IdentifierAt(IdentIndex).DataType = TDataType.RECORDTOK) and	// record := arrayrecord[i]
+		        (IdentifierAt(IdentTemp).DataType = TDataType.ARRAYRECORD)) then
+
+//		       ((IdentifierAt(IdentIndex).DataType = TDataType.ARRAYRECORD) and	// arrayrecord[i] := record
+//		        (IdentifierAt(IdentTemp).DataType = TDataType.RECORDTOK)) then
 		    begin
 
 // SWAG0
