@@ -3532,7 +3532,7 @@ begin
     begin
 
       {$IFDEF USEOPTFILE}
-      asm65('; as StringPointer to Array Origin');
+      asm65('; as StringPointer to Array Origin (1)');
       {$ENDIF}
 
       case Size of
@@ -3726,6 +3726,10 @@ begin
     ASPOINTERTOARRAYRECORDTOSTRING:                  // array_of_pointer_to_record[index].string
     begin
 
+      {$IFDEF USEOPTFILE}
+      asm65('; as Pointer to Array Record^ to String');
+      {$ENDIF}
+
       Gen;
 
       asm65(#9'lda :STACKORIGIN-1,x');
@@ -3854,6 +3858,10 @@ begin
 
     ASARRAYORIGINOFPOINTERTORECORDARRAYORIGIN:        // record_array[index].array[i]
     begin
+
+      {$IFDEF USEOPTFILE}
+      asm65('; as Array Origin of Pointer to Record Array Origin');
+      {$ENDIF}
 
       a65(TCode65.subBX);  // maksymalnie mozemy uzyc :STACKORIGIN-1 lub :STACKORIGIN+1, pomagamy przez DEX/INX
 
@@ -10567,7 +10575,7 @@ begin
 
                       end;
 
-                      // SWAG
+
                       if ValType = TDataType.ARRAYTOK then
                       begin
 
@@ -10839,7 +10847,7 @@ begin
      Push(ConstVal, ASVALUE, GetDataSize(ValType), IdentIndex)
     else}
                           Push(ConstVal, Ord(IdentifierAt(IdentIndex).Kind = TTokenKind.VARTOK), GetDataSize(ValType), IdentIndex);
-
+// swag0
 
                       if (BlockStackTopIndex = 1) then
                         if not (IdentifierAt(IdentIndex).isInit or IdentifierAt(IdentIndex).isInitialized or IdentifierAt(IdentIndex).IsLoopVariable) then
