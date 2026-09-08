@@ -2985,7 +2985,6 @@ begin
 // xxxxxxxxxxxxxxxxxxxxxxxxx
 //writeln(IdentifierAt(IdentTemp).name,',',IdentifierAt(IdentTemp).DataType,',',NumAllocElements);
 
-
 	if IdentifierAt(IdentTemp).DataType = TDataType.ARRAYRECORD then begin
 
             asm65(#9'lda :STACKORIGIN-1,x');
@@ -12886,7 +12885,7 @@ begin
                 {and not (IdentifierAt(IdentIndex).AllocElementType in [PROCEDURETOK, FUNC])} then
                 begin
 
-                   // writeln(ExpressionType,' | ',IdentifierAt(IdentIndex).idtype,',', IdentifierAt(IdentIndex).DataType,',',IdentifierAt(IdentIndex).AllocElementType,',',IdentifierAt(IdentIndex).Name,',',IndirectionLevel);
+                  //  writeln(ExpressionType,' | ',IdentifierAt(IdentIndex).idtype,',', IdentifierAt(IdentIndex).DataType,',',IdentifierAt(IdentIndex).AllocElementType,',',IdentifierAt(IdentIndex).Name,',',IndirectionLevel);
 // swag0
 // xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
@@ -12900,7 +12899,7 @@ begin
                     if IdentifierAt(IdentIndex).AllocElementType in [TDataType.RECORDTOK, TDataType.OBJECTTOK] then
                     begin
 
-                      if (IdentifierAt(IdentIndex).DataType = TDataType.POINTERTOK) and
+                      if (IdentifierAt(IdentIndex).DataType in [TDataType.POINTERTOK, TDataType.ARRAYRECORD]) and
                         (ExpressionType in [TDataType.RECORDTOK, TDataType.OBJECTTOK]) then
 
                       else
@@ -13134,6 +13133,13 @@ begin
 
                   IdentTemp := GetIdentIndex(TokenAt(k).Name);
 
+// swag0
+		  if ((IdentifierAt(IdentIndex).DataType = TDataType.RECORDTOK) and
+                      (IdentifierAt(IdentTemp).DataType = TDataType.ARRAYRECORD)) or
+		     ((IdentifierAt(IdentIndex).DataType = TDataType.ARRAYRECORD) and
+                      (IdentifierAt(IdentTemp).DataType = TDataType.RECORDTOK)) then 
+                  // accept this case
+		  else
 
                   if IdentifierAt(IdentIndex).PassMethod = IdentifierAt(IdentTemp).PassMethod then
                     case IndirectionLevel of
@@ -13149,11 +13155,6 @@ begin
                              (IdentifierAt(IdentIndex).DataType = TDataType.RECORDTOK) and
                              ((IdentifierAt(IdentTemp).DataType = TDataType.POINTERTOK) and
                              (IdentifierAt(IdentTemp).AllocElementType = TDataType.RECORDTOK)) and
-                             (IdentifierAt(IdentTemp).NumAllocElements = IdentifierAt(IdentIndex).NumAllocElements) then
-			  // accept this case
-                          else
-			  if (IdentifierAt(IdentIndex).DataType = TDataType.RECORDTOK) and
-                             (IdentifierAt(IdentTemp).DataType = TDataType.ARRAYRECORD) and
                              (IdentifierAt(IdentTemp).NumAllocElements = IdentifierAt(IdentIndex).NumAllocElements) then
 			  // accept this case
 			  else
@@ -13281,10 +13282,9 @@ begin
 
 
 		    if ((IdentifierAt(IdentIndex).DataType = TDataType.RECORDTOK) and	// record := arrayrecord[i]
-		        (IdentifierAt(IdentTemp).DataType = TDataType.ARRAYRECORD)) then
-
-//		       ((IdentifierAt(IdentIndex).DataType = TDataType.ARRAYRECORD) and	// arrayrecord[i] := record
-//		        (IdentifierAt(IdentTemp).DataType = TDataType.RECORDTOK)) then
+		        (IdentifierAt(IdentTemp).DataType = TDataType.ARRAYRECORD)) or
+		       ((IdentifierAt(IdentIndex).DataType = TDataType.ARRAYRECORD) and	// arrayrecord[i] := record
+		        (IdentifierAt(IdentTemp).DataType = TDataType.RECORDTOK)) then
 		    begin
 
 // SWAG0
