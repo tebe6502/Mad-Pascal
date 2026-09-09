@@ -12633,6 +12633,22 @@ begin
                     end;
 
 
+{
+                    if IdentifierAt(IdentIndex).DataType =  TDataType.ARRAYRECORD then
+                    begin
+// swag2
+
+                      asm65(#9'lda :STACKORIGIN-1,x');
+                      asm65(#9'add #$00');
+                      asm65(#9'sta :bp2');
+                      asm65(#9'lda :STACKORIGIN-1+STACKWIDTH,x');
+                      asm65(#9'adc #$00');
+                      asm65(#9'sta :bp2+1');
+
+                      a65(TCode65.subBX);
+
+                    end else
+}
                     // SWAG-
                     if VarType = TDataType.ARRAYTOK then
                     begin
@@ -13288,14 +13304,10 @@ begin
                     ResetOpty;
 }
 
-
-		    if ((IdentifierAt(IdentIndex).DataType = TDataType.RECORDTOK) and	// record := arrayrecord[i]
-		        (IdentifierAt(IdentTemp).DataType = TDataType.ARRAYRECORD)) or
-		       ((IdentifierAt(IdentIndex).DataType = TDataType.ARRAYRECORD) and	// arrayrecord[i] := record
+		    if ((IdentifierAt(IdentIndex).DataType = TDataType.ARRAYRECORD) and	// arrayrecord[i] := record
 		        (IdentifierAt(IdentTemp).DataType = TDataType.RECORDTOK)) then
 		    begin
 
-// SWAG0
 		      if IdentifierAt(IdentIndex).NumAllocElements <> IdentifierAt(IdentTemp).NumAllocElements then
                           Error(i, 'Incompatible types: got "' +
                             GetTypeAtIndex(IdentifierAt(IdentTemp).NumAllocElements).Field[0].Name +
@@ -13303,6 +13315,43 @@ begin
                             GetTypeAtIndex(IdentifierAt(IdentIndex).NumAllocElements).Field[0].Name +
                             '"');
 
+
+                      asm65(#9'lda :STACKORIGIN,x');
+                      asm65(#9'add ' + GetLocalName(IdentIndex));
+                      asm65(#9'sta :bp2');
+                      asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
+                      asm65(#9'adc ' + GetLocalName(IdentIndex) + '+1');
+                      asm65(#9'sta :bp2+1');
+
+                      asm65(#9'lda :STACKORIGIN+1,x');
+                      asm65(#9'sta :TMP');
+                      asm65(#9'lda :STACKORIGIN+1+STACKWIDTH,x');
+                      asm65(#9'sta :TMP+1');
+
+                      a65(TCode65.subBX);
+
+		      asm65(#9'@move ":TMP" ":bp2" #' + IntToStr(RecordSize(IdentIndex)));
+
+		    end else
+
+		    if ((IdentifierAt(IdentIndex).DataType = TDataType.RECORDTOK) and	// record := arrayrecord[i]
+		        (IdentifierAt(IdentTemp).DataType = TDataType.ARRAYRECORD)) then
+		    begin
+
+// SWAG2
+		      if IdentifierAt(IdentIndex).NumAllocElements <> IdentifierAt(IdentTemp).NumAllocElements then
+                          Error(i, 'Incompatible types: got "' +
+                            GetTypeAtIndex(IdentifierAt(IdentTemp).NumAllocElements).Field[0].Name +
+                            '" expected "' +
+                            GetTypeAtIndex(IdentifierAt(IdentIndex).NumAllocElements).Field[0].Name +
+                            '"');
+
+{
+                      asm65(#9'lda :STACKORIGIN+1,x');
+                      asm65(#9'sta :TMP');
+                      asm65(#9'lda :STACKORIGIN+1+STACKWIDTH,x');
+                      asm65(#9'sta :TMP+1');
+	}
 		      asm65(#9'@move ":bp2" ' + GetLocalName(IdentIndex) + ' #' + IntToStr(RecordSize(IdentIndex)));
 
 		    end else
