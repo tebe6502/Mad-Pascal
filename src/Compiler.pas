@@ -12633,22 +12633,6 @@ begin
                     end;
 
 
-{
-                    if IdentifierAt(IdentIndex).DataType =  TDataType.ARRAYRECORD then
-                    begin
-// swag2
-
-                      asm65(#9'lda :STACKORIGIN-1,x');
-                      asm65(#9'add #$00');
-                      asm65(#9'sta :bp2');
-                      asm65(#9'lda :STACKORIGIN-1+STACKWIDTH,x');
-                      asm65(#9'adc #$00');
-                      asm65(#9'sta :bp2+1');
-
-                      a65(TCode65.subBX);
-
-                    end else
-}
                     // SWAG-
                     if VarType = TDataType.ARRAYTOK then
                     begin
@@ -12910,8 +12894,6 @@ begin
                 begin
 
                   //  writeln(ExpressionType,' | ',IdentifierAt(IdentIndex).idtype,',', IdentifierAt(IdentIndex).DataType,',',IdentifierAt(IdentIndex).AllocElementType,',',IdentifierAt(IdentIndex).Name,',',IndirectionLevel);
-// swag0
-// xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
                   if (ExpressionType = TDataType.CHARTOK) and
                     (IdentifierAt(IdentIndex).DataType = TDataType.POINTERTOK) and
@@ -13161,7 +13143,7 @@ begin
 		  if ((IdentifierAt(IdentIndex).DataType = TDataType.RECORDTOK) and
                       (IdentifierAt(IdentTemp).DataType = TDataType.ARRAYRECORD)) or
 		     ((IdentifierAt(IdentIndex).DataType = TDataType.ARRAYRECORD) and
-                      (IdentifierAt(IdentTemp).DataType = TDataType.RECORDTOK)) then 
+                      (IdentifierAt(IdentTemp).DataType = TDataType.RECORDTOK)) then
                   // accept this case
 		  else
 
@@ -13304,6 +13286,7 @@ begin
                     ResetOpty;
 }
 
+
 		    if ((IdentifierAt(IdentIndex).DataType = TDataType.ARRAYRECORD) and	// arrayrecord[i] := record
 		        (IdentifierAt(IdentTemp).DataType = TDataType.RECORDTOK)) then
 		    begin
@@ -13323,14 +13306,16 @@ begin
                       asm65(#9'adc ' + GetLocalName(IdentIndex) + '+1');
                       asm65(#9'sta :bp2+1');
 
-                      asm65(#9'lda :STACKORIGIN+1,x');
-                      asm65(#9'sta :TMP');
-                      asm65(#9'lda :STACKORIGIN+1+STACKWIDTH,x');
-                      asm65(#9'sta :TMP+1');
+                      //asm65(#9'lda :STACKORIGIN+1,x');
+                      //asm65(#9'sta :TMP');
+                      //asm65(#9'lda :STACKORIGIN+1+STACKWIDTH,x');
+                      //asm65(#9'sta :TMP+1');
 
                       a65(TCode65.subBX);
 
-		      asm65(#9'@move ":TMP" ":bp2" #' + IntToStr(RecordSize(IdentIndex)));
+		      //asm65(#9'@move ":TMP" ":bp2" #' + IntToStr(RecordSize(IdentIndex)));
+
+		      asm65(#9'@move ' + GetLocalName(IdentTemp) + ' ":bp2" #' + IntToStr(RecordSize(IdentIndex)));
 
 		    end else
 
@@ -13346,12 +13331,6 @@ begin
                             GetTypeAtIndex(IdentifierAt(IdentIndex).NumAllocElements).Field[0].Name +
                             '"');
 
-{
-                      asm65(#9'lda :STACKORIGIN+1,x');
-                      asm65(#9'sta :TMP');
-                      asm65(#9'lda :STACKORIGIN+1+STACKWIDTH,x');
-                      asm65(#9'sta :TMP+1');
-	}
 		      asm65(#9'@move ":bp2" ' + GetLocalName(IdentIndex) + ' #' + IntToStr(RecordSize(IdentIndex)));
 
 		    end else

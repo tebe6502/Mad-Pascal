@@ -263,7 +263,8 @@ end;
 function ObjectRecordSize(i: Cardinal): Integer;
 var
   j: Integer;
-  FieldType: TDataType;
+  FieldType, AllocElementType: TDataType;
+  NumAllocElements, NumAllocElements_: Cardinal;
 begin
 
   Result := 0;
@@ -275,6 +276,21 @@ begin
     begin
 
       FieldType := GetTypeAtIndex(i).Field[j].DataType;
+
+      NumAllocElements := GetTypeAtIndex(i).Field[j].NumAllocElements and $FFFF;
+      NumAllocElements_ := GetTypeAtIndex(i).Field[j].NumAllocElements shr 16;
+      AllocElementType :=  GetTypeAtIndex(i).Field[j].AllocElementType;
+
+      if FieldType = TDataType.ENUMTOK then FieldType := AllocElementType;
+
+      if FieldType in Pointers then begin
+
+        if NumAllocElements_ > 0 then
+          Inc(Result, NumAllocElements * NumAllocElements_ * GetDataSize(AllocElementType))
+        else
+          Inc(Result, NumAllocElements * GetDataSize(AllocElementType));
+
+      end else
 
       if FieldType <> TDataType.RECORDTOK then
         Inc(Result, GetDataSize(FieldType));
@@ -371,7 +387,7 @@ begin
         begin
 
           FieldType := GetTypeAtIndex(IdentifierAt(IdentIndex).NumAllocElements).Field[i].DataType;
-          NumAllocElements := GetTypeAtIndex(IdentifierAt(IdentIndex).NumAllocElements).Field[i].NumAllocElements and $ffff;
+          NumAllocElements := GetTypeAtIndex(IdentifierAt(IdentIndex).NumAllocElements).Field[i].NumAllocElements and $FFFF;
           NumAllocElements_ := GetTypeAtIndex(IdentifierAt(IdentIndex).NumAllocElements).Field[i].NumAllocElements shr 16;
           AllocElementType := GetTypeAtIndex(IdentifierAt(IdentIndex).NumAllocElements).Field[i].AllocElementType;
 
