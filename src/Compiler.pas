@@ -214,7 +214,7 @@ begin
   if (lab <> a) and (pos(IdentifierAt(IdentIndex).SourceFile.Name + '.', a) = 1) then
   begin
 
-    lab := IdentifierAt(IdentIndex).Name;
+//    lab := IdentifierAt(IdentIndex).Name;
     if lab.IndexOf('.') > 0 then lab := copy(lab, 1, lab.LastIndexOf('.'));
 
     if (pos(IdentifierAt(IdentIndex).SourceFile.Name + '.adr.', a) = 1) then
@@ -1073,7 +1073,6 @@ begin
   if (pos('.', svar) > 0) then
   begin
 
-    //  lab:=copy(svar,1,pos('.', svar)-1);
     lab := ExtractName(IdentIndex, svar);
 
     if IdentifierAt(GetIdentIndex(lab)).AllocElementType = TDataType.RECORDTOK then
@@ -1921,22 +1920,39 @@ begin
         asm65(#9'sta :bp2+1');
       end;
 
-      asm65(#9'ldy #$00');
-      asm65(#9'lda (:bp2),y');
+      if IdentifierAt(IdentIndex).DataType = TDataType.ARRAYRECORD then begin
 
-      if TestName(IdentIndex, svar) then
-      begin
-        asm65(#9'add #' + svar + '-DATAORIGIN');
-      end
-      else
-        asm65(#9'add #' + HexByte(par));
+        asm65(#9'lda :bp2');
 
-      asm65(#9'sta' + StackVariable0);
+        if TestName(IdentIndex, svar) then
+          asm65(#9'add #' + svar + '-DATAORIGIN')
+        else
+          asm65(#9'add #' + HexByte(par));
 
-      asm65(#9'iny');
-      asm65(#9'lda (:bp2),y');
-      asm65(#9'adc #$00');
-      asm65(#9'sta' + StackVariable1);
+        asm65(#9'sta' + StackVariable0);
+
+        asm65(#9'lda :bp2+1');
+        asm65(#9'adc #$00');
+        asm65(#9'sta' + StackVariable1);
+
+      end else begin
+
+        asm65(#9'ldy #$00');
+        asm65(#9'lda (:bp2),y');
+
+        if TestName(IdentIndex, svar) then
+          asm65(#9'add #' + svar + '-DATAORIGIN')
+        else
+          asm65(#9'add #' + HexByte(par));
+
+        asm65(#9'sta' + StackVariable0);
+
+        asm65(#9'iny');
+        asm65(#9'lda (:bp2),y');
+        asm65(#9'adc #$00');
+        asm65(#9'sta' + StackVariable1);
+
+      end;
 
     end;
 
@@ -2903,7 +2919,8 @@ var
       if pos('.', IdentifierAt(IdentIndex).Name) > 0 then
       begin
 
-        if (IdentifierAt(IdentIndex).DataType = TDataType.POINTERTOK) and not (IdentifierAt(IdentIndex).AllocElementType in [TDataType.UNTYPETOK, TDataType.PROCVARTOK]) then
+        if (IdentifierAt(IdentIndex).DataType = TDataType.POINTERTOK) and
+	   not (IdentifierAt(IdentIndex).AllocElementType in [TDataType.UNTYPETOK, TDataType.PROCVARTOK]) then
 
           asm65(#9'ldy #$00')
         else
@@ -3751,20 +3768,43 @@ begin
         asm65(#9'sta :bp2+1');
       end;
 
-      asm65(#9'ldy #$00');
-      asm65(#9'lda (:bp2),y');
+// yyyyyyyyyyyyyyyyyyyyyyyyyyyyyy
 
-      if TestName(IdentIndex, svar) then
-        asm65(#9'add #' + svar + '-DATAORIGIN')
-      else
-        asm65(#9'add #' + ParamY);
+      if (IdentifierAt(IdentIndex).DataType = TDataType.ARRAYRECORD) or
+         (TestName(IdentIndex, svar) and (IdentifierAt(GetIdentIndex(ExtractName(IdentIndex, svar))).DataType = TDataType.ARRAYRECORD)) then
+      begin
 
-      asm65(#9'sta @move.dst');
+        asm65(#9'lda :bp2');
 
-      asm65(#9'iny');
-      asm65(#9'lda (:bp2),y');
-      asm65(#9'adc #$00');
-      asm65(#9'sta @move.dst+1');
+        if TestName(IdentIndex, svar) then
+          asm65(#9'add #' + svar + '-DATAORIGIN')
+        else
+          asm65(#9'add #' + ParamY);
+
+        asm65(#9'sta @move.dst');
+
+        asm65(#9'lda :bp2+1');
+        asm65(#9'adc #$00');
+        asm65(#9'sta @move.dst+1');
+
+      end else begin
+
+        asm65(#9'ldy #$00');
+        asm65(#9'lda (:bp2),y');
+
+        if TestName(IdentIndex, svar) then
+          asm65(#9'add #' + svar + '-DATAORIGIN')
+        else
+          asm65(#9'add #' + ParamY);
+
+        asm65(#9'sta @move.dst');
+
+        asm65(#9'iny');
+        asm65(#9'lda (:bp2),y');
+        asm65(#9'adc #$00');
+        asm65(#9'sta @move.dst+1');
+
+      end;
 
       asm65(#9'lda' + StackVariable0);
       asm65(#9'sta @move.src');
@@ -3966,7 +4006,8 @@ begin
       if TestName(IdentIndex, svar) then
       begin
 
-        if (IdentifierAt(IdentIndex).DataType = TDataType.POINTERTOK) and not (IdentifierAt(IdentIndex).AllocElementType in [TDataType.UNTYPETOK, TDataType.PROCVARTOK, TDataType.RECORDTOK, TDataType.OBJECTTOK]) then
+        if (IdentifierAt(IdentIndex).DataType = TDataType.POINTERTOK) and
+	   not (IdentifierAt(IdentIndex).AllocElementType in [TDataType.UNTYPETOK, TDataType.PROCVARTOK, TDataType.RECORDTOK, TDataType.OBJECTTOK]) then
 
           asm65(#9'mwy ' + svar + ' :bp2')
         else
