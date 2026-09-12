@@ -398,29 +398,6 @@ begin
 end;
 
 
-(*
-procedure FloodFill(x1, y1: Smallint; color: byte); assembler;
-asm
-{	txa:pha
-
-	mva color fildat
-
-	mwa x1 colcrs
-	mva y1 rowcrs
-
-	inw colcrs
-	inc y1
-
-	lda #@IDfill
-
-	jsr @COMMAND
-
-	pla:tax
-};
-end;
-*)
-
-
 {$i graph.inc}
 
 

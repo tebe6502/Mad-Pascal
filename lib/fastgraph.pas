@@ -64,6 +64,7 @@ var	WIN_LEFT: smallint = 0;
 	procedure Bar(x1, y1, x2, y2: Smallint);
 	procedure Bar3D(x1, y1, x2, y2 : smallint;depth : word;top : boolean);
 	procedure Circle(x, y, r: word);
+	procedure ClearDevice;
 	procedure ClipLine(x1, y1, x2, y2: smallint);
 	procedure DrawPoly(amount: byte; var vertices);
 	procedure FillCircle(x0, y0, radius: word);
@@ -133,6 +134,8 @@ implementation
 var
 	color_bits: array [0..$3ff] of byte;
 	lineLo, lineHi, div4: array [0..255] of byte;
+	
+	SCANLINE_WIDTH: byte;
 
 	CurrentX, CurrentY: smallint;
 
@@ -1422,7 +1425,7 @@ shift	asl @
 	bne shift
 
 	sta width
-;	sta SCANLINE_WIDTH
+	sta SCANLINE_WIDTH
 
 	.ifdef fLine
 ;	lda width
@@ -1641,6 +1644,14 @@ begin
   inc(x, 8);
 
  end;
+
+end;
+
+
+procedure ClearDevice;
+begin
+
+ fillByte(VideoRam, ScreenHeight*SCANLINE_WIDTH, 0);
 
 end;
 

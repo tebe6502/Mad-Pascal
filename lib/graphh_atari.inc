@@ -5,6 +5,8 @@ var	WIN_LEFT: smallint = 0;
 	WIN_BOTTOM: smallint = 23;
 
 
+	procedure ClearDevice;
+
 	procedure SetColorMapEntry; overload; assembler;
 	procedure SetColorMapEntry(a,b,c: byte); overload; register; assembler;
 	procedure SetColorMapDimensions(w,h: byte); register; assembler;

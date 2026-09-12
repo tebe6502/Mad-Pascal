@@ -427,5 +427,13 @@ begin
 end;
 
 
+procedure ClearDevice;
+begin
+
+ fillByte(VideoRam, ScreenHeight*SCANLINE_WIDTH, 0);
+
+end;
+
+
 {$i vbxe.inc}
 
