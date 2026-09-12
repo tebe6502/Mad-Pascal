@@ -11690,6 +11690,11 @@ begin
   while TokenAt(j + 1).Kind in [TTokenKind.PLUSTOK, TTokenKind.MINUSTOK, TTokenKind.ORTOK, TTokenKind.XORTOK] do
   begin
 
+    if ValType in StringTypes then
+      Error(i, TMessage.Create(TErrorCode.OperatorNotOverloaded, 'Operator is not overloaded: ' +
+       '"' + InfoAboutDataType(ValType) + '" ' + InfoAboutToken(TokenAt(j + 1).Kind ) + ' "' + InfoAboutDataType(VarType) + '"'));
+
+
     if ValType in RealTypes then VarType := ValType;
 
     k := CompileTerm(j + 2, RightValType, VarType);
@@ -11713,6 +11718,7 @@ begin
       ExpandParam(TDataType.WORDTOK, RightValType);
       RightValType := TDataType.POINTERTOK;
     end;
+
     if (RightValType = TDataType.POINTERTOK) and (ValType in IntegerTypes) then
     begin
       ExpandParam_m1(TDataType.WORDTOK, ValType);
@@ -13339,7 +13345,6 @@ begin
                             GetTypeAtIndex(IdentifierAt(IdentIndex).NumAllocElements).Field[0].Name +
                             '"');
 
-
                       asm65(#9'lda :STACKORIGIN,x');
                       asm65(#9'add ' + GetLocalName(IdentIndex));
                       asm65(#9'sta :bp2');
@@ -13347,14 +13352,7 @@ begin
                       asm65(#9'adc ' + GetLocalName(IdentIndex) + '+1');
                       asm65(#9'sta :bp2+1');
 
-                      //asm65(#9'lda :STACKORIGIN+1,x');
-                      //asm65(#9'sta :TMP');
-                      //asm65(#9'lda :STACKORIGIN+1+STACKWIDTH,x');
-                      //asm65(#9'sta :TMP+1');
-
                       a65(TCode65.subBX);
-
-		      //asm65(#9'@move ":TMP" ":bp2" #' + IntToStr(RecordSize(IdentIndex)));
 
 		      asm65(#9'@move ' + GetLocalName(IdentTemp) + ' ":bp2" #' + IntToStr(RecordSize(IdentIndex)));
 

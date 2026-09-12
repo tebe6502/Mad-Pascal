@@ -450,7 +450,7 @@ begin
   else
   begin
 
-    // In the partser, the result of DIVTOK is always a real.
+    // In the parser, the result of DIVTOK is always a real.
     // For integer division there is IDIVTOK.
     // Therefore this ELSE was missing in earlier version.
     Result := a div b;

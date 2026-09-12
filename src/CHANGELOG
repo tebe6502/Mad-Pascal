@@ -1,3 +1,6 @@
+11.09.2026
+- initial support for record arrays, type ARRAYRECORD
+
 29.08.2026
 - issue #280 fixed, C64;C4P base\@putchar.asm
 

@@ -1622,10 +1622,10 @@ begin
 
 
     case TokenAt(j + 1).Kind of
-      TTokenKind.PLUSTOK: ConstVal := Add(ConstValType, ConstVal, RightConstVal);
+       TTokenKind.PLUSTOK: ConstVal := Add(ConstValType, ConstVal, RightConstVal);
       TTokenKind.MINUSTOK: ConstVal := Subtract(ConstValType, ConstVal, RightConstVal);
-      TTokenKind.ORTOK: ConstVal := ConstVal or RightConstVal;
-      TTokenKind.XORTOK: ConstVal := ConstVal xor RightConstVal;
+         TTokenKind.ORTOK: ConstVal := ConstVal or RightConstVal;
+        TTokenKind.XORTOK: ConstVal := ConstVal xor RightConstVal;
     end;
 
     ConstValType := GetCommonType(j + 1, ConstValType, RightConstValType);
