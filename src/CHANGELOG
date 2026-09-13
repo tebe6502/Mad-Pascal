@@ -1,3 +1,6 @@
+12.09.2026
+- string literal concatenation released by compilator
+
 11.09.2026
 - initial support for record arrays, type ARRAYRECORD
 

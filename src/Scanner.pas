@@ -1098,8 +1098,8 @@ var
 
       while ch in AllowWhiteSpaces do SafeReadChar(ch);
 
-      if not (ch in ['''', '#']) then Error(NumTok, TMessage.Create(TErrorCode.SyntaxError,
-          'Syntax error, ''string'' expected but ''' + ch + ''' found'));
+      //if not (ch in ['''', '#']) then Error(NumTok, TMessage.Create(TErrorCode.SyntaxError,
+      //    'Syntax error, ''string'' expected but ''' + ch + ''' found'));
     end;
 
     function ReadFractionalPart(var ch: Char): String; overload;
@@ -1182,8 +1182,10 @@ var
 
     end;
 
+
   var
     token: TToken;
+
   begin
 
     _inFile := TFileSystem.CreateBinaryFile(SCANNER_CACHED);
@@ -1526,6 +1528,7 @@ var
 
                 until ch = '''';
 
+
                 Inc(Spaces);
 
                 SafeReadChar(ch);
@@ -1581,12 +1584,27 @@ var
 
                 if ch = '+' then
                 begin
-                  yes := True;
-                  Inc(Spaces);
+		  Err := _InFile.FilePos();
+
                   SkipWhiteSpace;
+
+		  if not (ch in ['''', '#']) then begin
+		    _InFile.Seek2(Err - 1);
+
+		    AddToken(GetStandardToken('+'), ActiveSourceFile, Line, 1 + Spaces);
+        	    Spaces := 0;
+
+		    Break;
+
+		  end else begin
+                   yes := True;
+                   Inc(Spaces);
+		  end;
+
                 end;
 
               end;
+
 
               '#': begin
                 SafeReadChar(ch);
@@ -1623,6 +1641,7 @@ var
 
           until not (ch in ['#', '''']);
 
+
           case ch of
             '*': // Inverse
             begin
@@ -1635,6 +1654,7 @@ var
               SafeReadChar(ch);
             end;
           end;
+
 
           if TextBuffer.Length() = 1 then
           begin

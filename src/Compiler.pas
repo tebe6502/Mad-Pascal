@@ -2152,12 +2152,8 @@ procedure SaveToSystemStack(cnt: Integer);
 var
   i: Integer;
 begin
-  // asm65;
-  // asm65('; Save conditional expression');    //at expression stack top onto the system :STACK');
 
   Gen;
-  Gen;
-  Gen;            // push dword ptr [bx]
 
   if Pass = TPass.CODE_GENERATION then
     for i in IFTmpPosStack do
@@ -2180,12 +2176,8 @@ procedure RestoreFromSystemStack(cnt: Integer);
 var
   i: Integer;
 begin
-  //asm65;
-  //asm65('; Restore conditional expression');
 
   Gen;
-  Gen;
-  Gen;            // add bx, 4
 
   asm65(#9'lda IFTMP_' + IntToHex(cnt, 4));
 
@@ -2211,7 +2203,6 @@ procedure RemoveFromSystemStack;
 begin
 
   Gen;
-  Gen;            // pop :eax
 
 end;
 
@@ -2977,9 +2968,6 @@ begin
   {$ENDIF}
 
   Gen;
-  Gen;
-  Gen;          // mov :eax, [bx]
-
 
   case IndirectionLevel of
 
@@ -4172,6 +4160,7 @@ procedure GenerateReturn(IsFunction, isInt, isInl, isOvr: Boolean);
 var
   yes: Boolean;
 begin
+
   Gen;            // ret
 
   yes := True;
@@ -4219,12 +4208,8 @@ end;
 
 procedure GenerateIfThenCondition;
 begin
-  //asm65;
-  //asm65('; If Then Condition');
 
   Gen;
-  Gen;
-  Gen;                // mov :eax, [bx]
 
   a65(TCode65.subBX);
 
@@ -4240,12 +4225,8 @@ end;
 
 procedure GenerateElseCondition;
 begin
-  //asm65;
-  //asm65('; else condition');
 
   Gen;
-  Gen;
-  Gen;                // mov :eax, [bx]
 
   asm65(#9'beq *+5');
 
@@ -4287,27 +4268,25 @@ end;
 procedure GenerateRelationOperation(relation: TTokenKind; ValType: TDataType);
 begin
 
+  Gen;
+
   case relation of
     TTokenKind.EQTOK:
-    begin
-      Gen;
-      Gen;                // je +3   =
+    begin		// je +3   =
 
       asm65(#9'beq @+');
+
     end;
 
     TTokenKind.NETOK, TTokenKind.UNTYPETOK:
-    begin
-      Gen;
-      Gen;                // jne +3  <>
+    begin		// jne +3  <>
 
       asm65(#9'bne @+');
+
     end;
 
     TTokenKind.GTTOK:
-    begin
-      Gen;
-      Gen;                // jg +3   >
+    begin		// jg +3   >
 
       asm65(#9'seq');
 
@@ -4319,9 +4298,7 @@ begin
     end;
 
     TTokenKind.GETOK:
-    begin
-      Gen;
-      Gen;                // jge +3  >=
+    begin		// jge +3  >=
 
       if ValType in (RealTypes + SignedOrdinalTypes) then
         asm65(#9'bpl @+')
@@ -4331,9 +4308,7 @@ begin
     end;
 
     TTokenKind.LTTOK:
-    begin
-      Gen;
-      Gen;                // jl +3   <
+    begin		// jl +3   <
 
       if ValType in (RealTypes + SignedOrdinalTypes) then
         asm65(#9'bmi @+')
@@ -4343,9 +4318,7 @@ begin
     end;
 
     TTokenKind.LETOK:
-    begin
-      Gen;
-      Gen;                // jle +3  <=
+    begin		// jle +3  <=
 
       if ValType in (RealTypes + SignedOrdinalTypes) then
       begin
@@ -4383,8 +4356,6 @@ begin
   {$ENDIF}
 
   Gen;
-  Gen;
-  Gen;            // mov :ecx, [bx]
 
   a65(TCode65.subBX);
 
@@ -4503,8 +4474,6 @@ begin
 
 
   Gen;
-  Gen;
-  Gen;              // cmp :eax, :ecx
 
   if Down then
   begin
@@ -4557,7 +4526,7 @@ end;
 
 procedure GenerateCaseEqualityCheck(Value: Int64; SelectorType: TDataType; Join: Boolean; CaseLocalCnt: Integer);
 begin
-  Gen;
+
   Gen;              // cmp :ecx, Value
 
   case GetDataSize(SelectorType) of
@@ -4587,7 +4556,6 @@ end;
 procedure GenerateCaseRangeCheck(Value1, Value2: Int64; SelectorType: TDataType; Join: Boolean; CaseLocalCnt: Integer);
 begin
 
-  Gen;
   Gen;              // cmp :ecx, Value1
 
   if (SelectorType in [TDataType.BYTETOK, TDataType.CHARTOK, TDataType.ENUMTOK]) and
@@ -4719,9 +4687,7 @@ begin
 
   StoredCodeSize := CodeSize;
 
-  Gen;                // nop   ; jump to the CASE block end will be inserted here
-  // Gen;                // nop
-  // Gen;                // nop
+  Gen;                   // nop   ; jump to the CASE block end will be inserted here
 
   asm65('l_' + IntToHex(CodePosStack[CodePosStackTop] + 3, 4));
 
@@ -4740,9 +4706,6 @@ procedure GenerateCaseEpilog(NumCaseStatements: Integer; cnt: Integer);
 begin
 
   ResetOpty;
-
-  //asm65;
-  //asm65('; GenerateCaseEpilog');
 
   Dec(CodePosStackTop, NumCaseStatements);
 
@@ -4792,8 +4755,6 @@ begin
 
   ResetOpty;
 
-  // asm65(#13#10'; IfThenEpilog');
-
   CodePos := CodePosStack[CodePosStackTop];
   Dec(CodePosStackTop);
 
@@ -4818,7 +4779,6 @@ procedure GenerateWhileDoEpilog;
 var
   CodePos, ReturnPos: Word;
 begin
-  //asm65(#13#10'; WhileDoEpilog');
 
   CodePos := CodePosStack[CodePosStackTop];
   Dec(CodePosStackTop);
@@ -4904,7 +4864,6 @@ begin
       Gen;            // ... word ptr ...
     end;
     4: begin
-      Gen;
       Gen;            // ... dword ptr ...
     end;
   end;
@@ -4973,7 +4932,6 @@ begin
 
   end;
 
-  Gen;
   Gen;            // ... [CounterAddress]
 
   if Epilog then
@@ -5081,7 +5039,6 @@ end;
 procedure GenerateProgramEpilog(ExitCode: Byte);
 begin
 
-  Gen;
   Gen;              // mov ah, 4Ch
 
   asm65(#9'lda #' + HexByte(ExitCode));
@@ -5126,7 +5083,6 @@ end;
 
 procedure GenerateRead;//(Value: Int64);
 begin
-  // Gen; Gen;              // mov bp, [bx]
 
   asm65(#9'@getline');
 
@@ -5139,7 +5095,6 @@ end;  // GenerateRead
 
 procedure GenerateWriteString(Address: Int64; IndirectionLevel: Byte; ValueType: TDataType = TDataType.INTEGERTOK);
 begin
-  //Gen; Gen;              // mov ah, 09h
 
   asm65;
 
@@ -5202,7 +5157,6 @@ begin
 
       asm65(#9'jsr @F16_F2A');
     end;
-
 
     ASVALUE:
     begin
@@ -5275,6 +5229,8 @@ end;  //GenerateWriteString
 procedure GenerateUnaryOperation(op: TTokenKind; ValType: TDataType = TDataType.UNTYPETOK);
 begin
 
+  Gen;
+
   case op of
 
     TTokenKind.PLUSTOK:
@@ -5283,9 +5239,6 @@ begin
 
     TTokenKind.MINUSTOK:
     begin
-      Gen;
-      Gen;
-      Gen;            // neg dword ptr [bx]
 
       if ValType = TDataType.HALFSINGLETOK then
       begin
@@ -5374,9 +5327,6 @@ begin
 
     TTokenKind.NOTTOK:
     begin
-      Gen;
-      Gen;
-      Gen;            // not dword ptr [bx]
 
       if ValType = TDataType.BOOLEANTOK then
       begin
@@ -5427,12 +5377,7 @@ end;
 procedure GenerateBinaryOperation(op: TTokenKind; ResultType: TDataType);
 begin
 
-  // asm65;
-  // asm65('; Generate Binary Operation for ' + InfoAboutToken(ResultType));
-
   Gen;
-  Gen;
-  Gen;              // mov :ecx, [bx]      :STACKORIGIN,x
 
   case op of
 
@@ -5463,7 +5408,7 @@ begin
       else
         if ResultType = TDataType.SINGLETOK then
         begin
-          //       asm65(#9'jsr @FADD')
+          //asm65(#9'jsr @FADD')
 
           asm65(#9'lda' + StackVariable0);
           asm65(#9'sta :FP2MAN0');
@@ -5494,7 +5439,15 @@ begin
           asm65(#9'lda :FPMAN3');
           asm65(#9'sta :STACKORIGIN-1+STACKWIDTH*3,x');
 
+      end
+      else
+        if ResultType in StringTypes then
+        begin
+
+	  asm65(#9'jsr @concatSTRING')
+
         end
+
         else
 
           case GetDataSize(ResultType) of
@@ -5532,7 +5485,7 @@ begin
       else
         if ResultType = TDataType.SINGLETOK then
         begin
-          //      asm65(#9'jsr @FSUB')
+          //asm65(#9'jsr @FSUB')
 
           asm65(#9'lda' + StackVariable0);
           asm65(#9'sta :FP2MAN0');
@@ -5706,7 +5659,7 @@ begin
           case ResultType of
             TDataType.SHORTINTTOK: asm65(#9'jsr mulSHORTINT');
             TDataType.SMALLINTTOK: asm65(#9'jsr mulSMALLINT');
-            TDataType.INTEGERTOK: asm65(#9'jsr mulINTEGER');
+             TDataType.INTEGERTOK: asm65(#9'jsr mulINTEGER');
           end;
 
         end
@@ -6415,14 +6368,9 @@ end;  //GenerateBinaryOperation
 procedure GenerateRelationString(relation: TTokenKind; LeftValType, RightValType: TDataType);
 begin
 
-  // asm65;
-  // asm65('; relation STRING');
-
   Gen;
 
   asm65(#9'ldy #1');
-
-  Gen;
 
 {
  if (LeftValType = POINTERTOK) and (RightValType = POINTERTOK) then begin
@@ -6542,8 +6490,6 @@ end;
 
 procedure GenerateRelation(relation: TTokenKind; ValType: TDataType);
 begin
-  // asm65;
-  // asm65('; relation');
 
   Gen;
 
@@ -11475,8 +11421,15 @@ begin
 
     end;
 
-    else
+    else begin
+
+    writeln(TokenAt(i).Kind );
+
       Error(i, TErrorCode.IdNumExpExpected);
+
+    end;
+
+
   end;// case
 
 end;  //CompileFactor
@@ -11512,6 +11465,10 @@ begin
   OldPass := Pass;
   OldCodeSize := CodeSize;
   Pass := TPass.CALL_DETERMINATION;
+
+
+  if TokenAt(i).Kind = TTokenKind.PLUSTOK then inc(i);
+
 
   j := CompileFactor(i, isZero, ValType, VarType);
 
@@ -11690,11 +11647,6 @@ begin
   while TokenAt(j + 1).Kind in [TTokenKind.PLUSTOK, TTokenKind.MINUSTOK, TTokenKind.ORTOK, TTokenKind.XORTOK] do
   begin
 
-    if ValType in StringTypes then
-      Error(i, TMessage.Create(TErrorCode.OperatorNotOverloaded, 'Operator is not overloaded: ' +
-       '"' + InfoAboutDataType(ValType) + '" ' + InfoAboutToken(TokenAt(j + 1).Kind ) + ' "' + InfoAboutDataType(VarType) + '"'));
-
-
     if ValType in RealTypes then VarType := ValType;
 
     k := CompileTerm(j + 2, RightValType, VarType);
@@ -11702,6 +11654,25 @@ begin
     if ((ValType in [TDataType.HALFSINGLETOK, TDataType.SINGLETOK]) and (RightValType in [TDataType.SHORTREALTOK, TDataType.REALTOK])) or
       ((ValType in [TDataType.SHORTREALTOK, TDataType.REALTOK]) and (RightValType in [TDataType.HALFSINGLETOK, TDataType.SINGLETOK])) then
       Error(j + 2, 'Illegal type conversion: "' + InfoAboutDataType(ValType) + '" to "' + InfoAboutDataType(RightValType) + '"');
+
+
+    if (ValType in StringTypes) and (TokenAt(j + 1).Kind <> TTokenKind.PLUSTOK)  then
+      Error(i, TMessage.Create(TErrorCode.OperatorNotOverloaded, 'Operator is not overloaded: ' +
+       '"' + InfoAboutDataType(ValType) + '" ' + InfoAboutToken(TokenAt(j + 1).Kind ) + ' "' + InfoAboutDataType(RightValType) + '"'));
+
+    if (ValType in StringTypes) and (RightValType = TDataType.CHARTOK) then begin
+
+      ExpandParam(TDataType.WORDTOK, TDataType.BYTETOK);	// -> hi(address) = 0 -> CHAR -> STRING
+
+      RightValType := ValType;
+    end;
+
+    if (ValType = TDataType.CHARTOK) and (RightValType in StringTypes) then begin
+
+      ExpandParam_m1(TDataType.WORDTOK, TDataType.BYTETOK);	// -> hi(address) = 0 -> CHAR -> STRING
+
+      ValType := RightValType;
+    end;
 
 
     if VarType in RealTypes then
@@ -14447,8 +14418,7 @@ begin
 
       asm65('; --- WhileDoCondition');
 
-      Gen;
-      Gen;
+
       Gen;                // mov :eax, [bx]
 
       a65(TCode65.subBX);
@@ -15381,6 +15351,7 @@ begin
               Error(i + 2, TErrorCode.UnknownIdentifier);
         end;
 
+
     TTokenKind.WRITETOK, TTokenKind.WRITELNTOK:
     begin
 
@@ -15392,7 +15363,7 @@ begin
       if (TokenAt(i + 1).Kind = TTokenKind.OPARTOK) and (TokenAt(i + 2).Kind = TTokenKind.CPARTOK) then Inc(i, 2);
 
 
-      if TokenAt(i + 1).Kind = TTokenKind.SEMICOLONTOK then
+      if TokenAt(i + 1).Kind in [TTokenKind.SEMICOLONTOK, TTokenKind.ENDTOK] then
       begin
 
       end
@@ -15628,18 +15599,21 @@ begin
                             GenerateWriteString(TokenAt(i).Value, ASHALFSINGLE)  // Half Single argument
                           else
                             if ExpressionType = TDataType.SINGLETOK then
-                              GenerateWriteString(TokenAt(i).Value, ASSINGLE)  // Single argument
+                              GenerateWriteString(TokenAt(i).Value, ASSINGLE)     // Single argument
                             else
-                              if ExpressionType in Pointers then
-                              begin
+                              if (ExpressionType = TDataType.STRINGPOINTERTOK) then
+                                GenerateWriteString(TokenAt(i).Value, ASPOINTERTOPOINTER, TDataType.POINTERTOK)
+			      else
+                                if ExpressionType in Pointers then
+                                begin
 
-                                if TokenAt(j).Kind = TTokenKind.ADDRESSTOK then
-                                  IdentIndex := GetIdentIndex(TokenAt(j + 1).Name)
-                                else
-                                  if TokenAt(j).Kind = TTokenKind.IDENTTOK then
-                                    IdentIndex := GetIdentIndex(TokenAt(j).Name)
+                                  if TokenAt(j).Kind = TTokenKind.ADDRESSTOK then
+                                    IdentIndex := GetIdentIndex(TokenAt(j + 1).Name)
                                   else
-                                    Error(i, TErrorCode.CantReadWrite);
+                                    if TokenAt(j).Kind = TTokenKind.IDENTTOK then
+                                      IdentIndex := GetIdentIndex(TokenAt(j).Name)
+                                    else
+                                      Error(i, TErrorCode.CantReadWrite);
 
 
                                 //  writeln(IdentifierAt(IdentIndex).Name,',',ExpressionType,' | ',IdentifierAt(IdentIndex).DataType,',',IdentifierAt(IdentIndex).AllocElementType,',',IdentifierAt(IdentIndex).NumAllocElements_,',',IdentifierAt(IdentIndex).Kind);
@@ -16116,7 +16090,6 @@ begin
       if BreakPosStackTop = 0 then
         Error(i, 'BREAK not allowed');
 
-      //     asm65;
       asm65(#9'jmp b_' + IntToHex(BreakPosStack[BreakPosStackTop].ptr, 4));
 
       BreakPosStack[BreakPosStackTop].brk := True;
@@ -16132,7 +16105,6 @@ begin
       if BreakPosStackTop = 0 then
         Error(i, 'CONTINUE not allowed');
 
-      //     asm65;
       asm65(#9'jmp c_' + IntToHex(BreakPosStack[BreakPosStackTop].ptr, 4));
 
       BreakPosStack[BreakPosStackTop].cnt := True;
@@ -20114,6 +20086,7 @@ var
   i: Integer;
   Tmp: String;
 begin
+
   asm65;
   asm65('.macro'#9'STATICDATA');
 
@@ -20167,6 +20140,7 @@ var
   j: Integer;
   Tmp: String;
 begin
+
   asm65;
   asm65('DATAORIGIN');
 
@@ -20301,7 +20275,6 @@ begin
 
   StopOptimization;
 
-  //asm65;
   asm65('@exit');
   asm65;
   asm65('@halt'#9'ldx #$00');

@@ -5267,7 +5267,7 @@ begin
        add_im_0(i+1) and 									// add #$00				; 1
        tay(i+2) and										// tay					; 2
        lda_val(i+3) and										// lda					; 3
-       adc(i+4) and (adc_stack(i+4) = false) then						// adc					; 4	~:STACKORIGIN
+       adc(i+4) and (adc_im_0(i+4) = false) and (adc_stack(i+4) = false) then			// adc					; 4	~:STACKORIGIN
 //       sta_bp_1(i+5) then									// sta :bp+1				; 5
       begin
 	listing[i]   := #9'ldy ' + GetARG(i);

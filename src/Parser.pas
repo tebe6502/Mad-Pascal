@@ -1465,12 +1465,13 @@ var
 begin
 
   ConstVal := 0;
-  ConstValType := TDataType.UNTILTOK;
+  ConstValType := TDataType.UNTYPETOK;
   Result := i;
 
   j := CompileConstFactor(i, ConstVal, ConstValType);
 
   if isError then Exit;
+
 
   while TokenAt(j + 1).Kind in [TTokenKind.MULTOK, TTokenKind.DIVTOK, TTokenKind.MODTOK, TTokenKind.IDIVTOK, TTokenKind.SHLTOK, TTokenKind.SHRTOK, TTokenKind.ANDTOK] do
   begin
@@ -1536,7 +1537,7 @@ begin
       end;
 
       TTokenKind.MODTOK: ConstVal := ConstVal mod RightConstVal;
-      TTokenKind.IDIVTOK: ConstVal := ConstVal div RightConstVal;
+      TTokenKind.IDIVTOK: ConstVal:= ConstVal div RightConstVal;
       TTokenKind.SHLTOK: ConstVal := ConstVal shl RightConstVal;
       TTokenKind.SHRTOK: ConstVal := ConstVal shr RightConstVal;
       TTokenKind.ANDTOK: ConstVal := ConstVal and RightConstVal;
