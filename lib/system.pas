@@ -319,8 +319,9 @@ var
 	function UpCase(a: char): char; overload;
 	function UpCase(a: string): string; overload;
 	procedure Val(s: PString; var v: integer; var code: byte); assembler; overload;
-	procedure Val(s: PString; var v: real; var code: byte); overload; //register;
-	procedure Val(s: PString; var v: single; var code: byte); overload; //register;
+	procedure Val(s: PString; var v: integer; var code: integer); assembler; overload;
+	procedure Val(s: PString; var v: real; var code: byte); overload;
+	procedure Val(s: PString; var v: single; var code: byte); overload;
 	function Swap(a: word): word; overload;
 	function Swap(a: cardinal): cardinal; overload;
 
@@ -1364,7 +1365,7 @@ Calculate numerical value of a string
 
 @param: s - string
 @param: v - pointer to integer - result
-@param: code - pointer to integer - error code
+@param: code - pointer to byte - error code
 *)
 asm
 	@StrToInt s
@@ -1378,6 +1379,44 @@ asm
 	pla
 	sta (:bp2),y
 
+	mwa v :bp2
+
+	mva :edx (:bp2),y+
+	mva :edx+1 (:bp2),y+
+	mva :edx+2 (:bp2),y+
+	mva :edx+3 (:bp2),y
+end;
+
+
+procedure Val(s: PString; var v: integer; var code: integer); assembler; overload;
+(*
+@description:
+Calculate numerical value of a string
+
+@param: s - string
+@param: v - pointer to integer - result
+@param: code - pointer to integer - error code
+*)
+asm
+	@StrToInt s
+
+	tya
+	pha
+
+	mwa code :bp2
+	ldy #0
+
+	pla
+	sta (:bp2),y
+	tya
+	iny
+	sta (:bp2),y
+	iny
+	sta (:bp2),y
+	iny
+	sta (:bp2),y
+
+	ldy #0
 	mwa v :bp2
 
 	mva :edx (:bp2),y+

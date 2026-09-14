@@ -1,5 +1,11 @@
+14.09.2026
+- SYSTEM: procedure Val(s: PString; var v: integer; var code: integer);
+- fix VAR TEXT
+
 12.09.2026
+- GRAPH, FASTGRAPH: ClearDevice
 - string literal concatenation released by compilator
+- bugfixes and optimizations
 
 11.09.2026
 - initial support for record arrays, type ARRAYRECORD

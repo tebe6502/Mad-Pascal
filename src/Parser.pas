@@ -2755,7 +2755,7 @@ begin
         if TokenAt(i).Kind = TTokenKind.TEXTFILETOK then
         begin											// TextFile
 
-          AllocElementType := TDataType.BYTETOK;
+          AllocElementType := TDataType.UNTYPETOK;
           NumAllocElements := 1;
 
           DataType := TDataType.TEXTFILETOK;
@@ -2775,7 +2775,7 @@ begin
               i := CompileType(i + 2, DataType, NumAllocElements, AllocElementType)
             else
             begin
-              AllocElementType := TDataType.UNTYPETOK;//BYTETOK?
+              AllocElementType := TDataType.UNTYPETOK;
               NumAllocElements := 128;
             end;
 

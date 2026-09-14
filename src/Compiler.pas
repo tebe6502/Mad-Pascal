@@ -14879,8 +14879,7 @@ begin
 
           //  asm65('; AssignFile');
 
-          if not ((IdentifierAt(IdentIndex).DataType in [TDataType.FILETOK, TDataType.TEXTFILETOK]) or
-            (IdentifierAt(IdentIndex).AllocElementType in [TDataType.FILETOK, TDataType.TEXTFILETOK])) then
+          if not ((IdentifierAt(IdentIndex).DataType in FileTypes) or (IdentifierAt(IdentIndex).AllocElementType in FileTypes)) then
             ErrorForIdentifier(i + 2, TErrorCode.IncompatibleTypeOf, IdentIndex);
 
           CheckTok(i + 3, TTokenKind.COMMATOK);
@@ -14933,8 +14932,7 @@ begin
 
           //  asm65('; Reset');
 
-          if not ((IdentifierAt(IdentIndex).DataType in [TDataType.FILETOK, TDataType.TEXTFILETOK]) or
-            (IdentifierAt(IdentIndex).AllocElementType in [TDataType.FILETOK, TDataType.TEXTFILETOK])) then
+          if not ((IdentifierAt(IdentIndex).DataType in FileTypes) or (IdentifierAt(IdentIndex).AllocElementType in FileTypes)) then
             ErrorForIdentifier(i + 2, TErrorCode.IncompatibleTypeOf, IdentIndex);
 
           StartOptimization(i + 3);
@@ -14990,8 +14988,7 @@ begin
 
           //  asm65('; Rewrite');
 
-          if not ((IdentifierAt(IdentIndex).DataType in [TDataType.FILETOK, TDataType.TEXTFILETOK]) or
-            (IdentifierAt(IdentIndex).AllocElementType in [TDataType.FILETOK, TDataType.TEXTFILETOK])) then
+          if not ((IdentifierAt(IdentIndex).DataType in FileTypes) or (IdentifierAt(IdentIndex).AllocElementType in FileTypes)) then
             ErrorForIdentifier(i + 2, TErrorCode.IncompatibleTypeOf, IdentIndex);
 
           StartOptimization(i + 3);
@@ -15232,8 +15229,7 @@ begin
 
           //  asm65('; CloseFile');
 
-          if not ((IdentifierAt(IdentIndex).DataType in [TDataType.FILETOK, TDataType.TEXTFILETOK]) or
-            (IdentifierAt(IdentIndex).AllocElementType in [TDataType.FILETOK, TDataType.TEXTFILETOK])) then
+          if not ((IdentifierAt(IdentIndex).DataType in FileTypes) or (IdentifierAt(IdentIndex).AllocElementType in FileTypes)) then
             ErrorForIdentifier(i + 2, TErrorCode.IncompatibleTypeOf, IdentIndex);
 
           CheckTok(i + 3, TTokenKind.CPARTOK);
@@ -15265,7 +15261,9 @@ begin
         begin
           IdentIndex := GetIdentIndex(TokenAt(i + 2).Name);
 
-          if (IdentIndex > 0) and (IdentifierAt(IdentIndex).DataType = TDataType.TEXTFILETOK) then
+          if (IdentIndex > 0) and 
+	     (IdentifierAt(IdentIndex).DataType = TDataType.TEXTFILETOK) or 
+	     (IdentifierAt(IdentIndex).AllocElementType = TDataType.TEXTFILETOK) then
           begin
 
             asm65(#9'lda #eol');
@@ -17412,7 +17410,7 @@ begin
 
           i := CompileType(i + 1, VarType, NumAllocElements, AllocElementType);
 
-          if (VarType = TDataType.FILETOK) and (ListPassMethod <> TParameterPassingMethod.VARPASSING) then
+          if (VarType in FileTypes) and (ListPassMethod <> TParameterPassingMethod.VARPASSING) then
             Error(i, 'File types must be var parameters');
 
         end;
@@ -17912,7 +17910,7 @@ begin
           else
             case GetTypeAtIndex(IdentifierAt(BlockIdentIndex).ObjectIndex).Field[ParamIndex].DataType of
 
-              TDataType.FILETOK: NumAllocElements := 12;
+              TDataType.FILETOK, TDataType.TEXTFILETOK: NumAllocElements := 12;
 
               TDataType.STRINGPOINTERTOK: NumAllocElements :=
                   GetTypeAtIndex(IdentifierAt(BlockIdentIndex).ObjectIndex).Field[ParamIndex].NumAllocElements;
