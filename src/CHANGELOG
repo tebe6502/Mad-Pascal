@@ -1,3 +1,6 @@
+15.09.2026
+- SYSTEM: SINCOS optimizations (REAL, SINGLE)
+
 14.09.2026
 - SYSTEM: procedure Val(s: PString; var v: integer; var code: integer);
 - fix VAR TEXT

@@ -1809,11 +1809,11 @@ begin
 
  //while x > M_PI_2 do x := x - M_PI_2;
  while 1608 < c   do x := x - M_PI_2;
- 
+
     { Normalize argument, divide by (pi/2) }
     //x := x * 0,63661977236758134308;	// * 1 / (pi/2)
     //c:=(c*169) shr 8;
- 
+
     // c*169 -> c shl 7 + c shl 5 + c shl 3 + c
     t0:=c shl 3;
     t1:=t0 shl 2;
@@ -1831,8 +1831,6 @@ begin
     { And finally get's fractional part }
     //x := x - integer(i);
     c:=c and $ff;
-    
-    //x:=real(cardinal(x) and $ff);
 
     { If we need cosine, adds pi/2 }
     if sc then inc(i);
@@ -1944,7 +1942,6 @@ begin
 end;
 
 
-
 function fsincos(x: single; sc: boolean): single;
 //----------------------------------------------------------------------------------------------
 // https://atariage.com/forums/topic/240919-mad-pascal/?do=findComment&comment=3818764
@@ -1965,26 +1962,6 @@ begin
 //    i := trunc(x);
 
 
-    exponent := (fBits shr 23);//- 127;
-    
-    if exponent < 127 then
-
-     i := 0
-
-    else begin
-
-     mantissa := (fBits and $007FFFFF) or $00800000;
-  
-     case exponent of
-      127: i := mantissa shr 23;
-      128: i := mantissa shr 22;
-      129: i := mantissa shr 21;
-     end;
-  
-    end;
-
-
-
     { Fixes negative part, needed to calculate "fractional" part }
     //if integer(x) < 0 then dec(i); { this is shorter than "x < 0" }
 
@@ -1992,30 +1969,34 @@ begin
 //    x := x - integer(i);
 
 
+    exponent := (fBits shr 23);//- 127;		// calculate INT, FRAC
+
     if exponent < 127 then
-  
+
+     i := 0
 
     else begin
 
+     mantissa := (fBits and $007FFFFF) or $00800000;
+
      case exponent of
-      127: fBits := (1 shl 23)-1;
-      128: fBits := (1 shl 22)-1;
-      129: fBits := (1 shl 21)-1;
+      127: begin i := mantissa shr 23; fBits := (1 shl 23)-1 end;
+      128: begin i := mantissa shr 22; fBits := (1 shl 22)-1 end;
+      129: begin i := mantissa shr 21; fBits := (1 shl 21)-1 end;
      end;
 
      mantissa := mantissa and fBits;
-  
+
      while ((mantissa and (1 shl 23)) = 0) do begin
         mantissa := mantissa shl 1;
         dec(exponent);
      end;
 
      mantissa := mantissa and $007FFFFF;
-    
+
      fbits := ((exponent shl 24) shr 1) or mantissa;
 
     end;
-
 
 
     { If we need cosine, adds pi/2 }

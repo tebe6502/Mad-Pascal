@@ -132,6 +132,28 @@ begin
 // -----------------------------------------------------------------------------
 
 
+    if lda_im_0(i) and									// lda #$00				; 0
+       sta_stack(i+1) and								// sta :STACKORIGIN			; 1
+       lsr_stack(i+2) and								// lsr :STACKORIGIN+STACKWIDTH*3	; 2
+       ror_stack(i+3) and								// ror :STACKORIGIN+STACKWIDTH*2	; 3
+       ror_stack(i+4) and								// ror :STACKORIGIN+STACKWIDTH*1	; 4
+       ror_stack(i+5) and								// ror :STACKORIGIN			; 5
+       lda_stack(i+6) then								// lda :STACKORIGIN			; 6
+     if argMatch(i+1, i+5) and
+        argMatch(i+5, i+6) then
+       begin
+        listing[i+1] := '';
+
+	listing[i+5] := #9'lsr @';
+	listing[i+6] := '';
+
+	exit(false);
+       end;
+
+
+// -----------------------------------------------------------------------------
+
+
     if lsr_stack(i) and									// lsr :STACKORIGIN+STACKWIDTH*3	; 0
        ror_stack(i+1) and								// ror :STACKORIGIN+STACKWIDTH*2	; 1
        ror_stack(i+2) and								// ror :STACKORIGIN+STACKWIDTH		; 2
@@ -351,5 +373,6 @@ begin
        end;
 
     end;	// if
+
 
 end;		// function
