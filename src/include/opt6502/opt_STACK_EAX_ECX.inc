@@ -242,7 +242,7 @@ begin
     if ADD_SUB_EAX_ECX(i+6) and									// jsr addEAX_ECX|subEAX_ECX		; 6
 
        (mva(i) = false) and									// ~mva					; 0
-       inx(i+1) and										// inx					; 1
+       (inx(i+1) or dex(i+1)) and								// inx|dex				; 1
        mva(i+2) and 										// mva  :STACKORIGIN,x			; 2
        mva(i+3) and 										// mva  :STACKORIGIN+STACKWIDTH,x	; 3
        mva(i+4) and										// mva  :STACKORIGIN+STACKWIDTH*2,x	; 4
@@ -291,21 +291,20 @@ begin
 	 listing_tmp[11] := listing[i+15];
 	end;
 
-	listing[i+1] := listing_tmp[0];
-	listing[i+2] := listing_tmp[1];
-	listing[i+3] := listing_tmp[2];
-	listing[i+4] := listing_tmp[3];
-	listing[i+5] := listing_tmp[4];
-	listing[i+6] := listing_tmp[5];
-	listing[i+7] := listing_tmp[6];
-	listing[i+8] := listing_tmp[7];
-	listing[i+9] := listing_tmp[8];
-	listing[i+10] := listing_tmp[9];
-	listing[i+11] := listing_tmp[10];
-	listing[i+12] := listing_tmp[11];
+        listing[i+2] := #9'dex';
+	listing[i+3] := listing_tmp[0];
+	listing[i+4] := listing_tmp[1];
+	listing[i+5] := listing_tmp[2];
+	listing[i+6] := listing_tmp[3];
+	listing[i+7] := listing_tmp[4];
+	listing[i+8] := listing_tmp[5];
+	listing[i+9] := listing_tmp[6];
+	listing[i+10] := listing_tmp[7];
+	listing[i+11] := listing_tmp[8];
+	listing[i+12] := listing_tmp[9];
+	listing[i+13] := listing_tmp[10];
+	listing[i+14] := listing_tmp[11];
 
-	listing[i+13] := '';
-	listing[i+14] := '';
 	listing[i+15] := '';
 
        exit(false);
@@ -492,30 +491,30 @@ begin
 
 	if (listing[i+9] = #9'jsr addEAX_ECX') then begin
 	 listing_tmp[0] := #9'lda :STACKORIGIN-1,x';
-	 listing_tmp[1] := #9'add ' + GetString(i+1);
-	 listing_tmp[2] := #9'sta ' + GetString(i+12);
+	 listing_tmp[1] := #9'add ' + GetARG(i+1);
+	 listing_tmp[2] := #9'sta ' + GetARG(i+12);
 	 listing_tmp[3] := #9'lda :STACKORIGIN-1+STACKWIDTH,x';
-	 listing_tmp[4] := #9'adc ' + GetString(i+3);
-	 listing_tmp[5] := #9'sta ' + GetString(i+14);
+	 listing_tmp[4] := #9'adc ' + GetARG(i+3);
+	 listing_tmp[5] := #9'sta ' + GetARG(i+14);
 	 listing_tmp[6] := #9'lda :STACKORIGIN-1+STACKWIDTH*2,x';
-	 listing_tmp[7] := #9'adc ' + GetString(i+5);
-	 listing_tmp[8] := #9'sta ' + GetString(i+16);
+	 listing_tmp[7] := #9'adc ' + GetARG(i+5);
+	 listing_tmp[8] := #9'sta ' + GetARG(i+16);
 	 listing_tmp[9] := #9'lda :STACKORIGIN-1+STACKWIDTH*3,x';
-	 listing_tmp[10] := #9'adc ' + GetString(i+7);
-	 listing_tmp[11] := #9'sta ' + GetString(i+18);
+	 listing_tmp[10] := #9'adc ' + GetARG(i+7);
+	 listing_tmp[11] := #9'sta ' + GetARG(i+18);
 	end else begin
 	 listing_tmp[0] := #9'lda :STACKORIGIN-1,x';
-	 listing_tmp[1] := #9'sub ' + GetString(i+1);
-	 listing_tmp[2] := #9'sta ' + GetString(i+12);
+	 listing_tmp[1] := #9'sub ' + GetARG(i+1);
+	 listing_tmp[2] := #9'sta ' + GetARG(i+12);
 	 listing_tmp[3] := #9'lda :STACKORIGIN-1+STACKWIDTH,x';
-	 listing_tmp[4] := #9'sbc ' + GetString(i+3);
-	 listing_tmp[5] := #9'sta ' + GetString(i+14);
+	 listing_tmp[4] := #9'sbc ' + GetARG(i+3);
+	 listing_tmp[5] := #9'sta ' + GetARG(i+14);
 	 listing_tmp[6] := #9'lda :STACKORIGIN-1+STACKWIDTH*2,x';
-	 listing_tmp[7] := #9'sbc ' + GetString(i+5);
-	 listing_tmp[8] := #9'sta ' + GetString(i+16);
+	 listing_tmp[7] := #9'sbc ' + GetARG(i+5);
+	 listing_tmp[8] := #9'sta ' + GetARG(i+16);
 	 listing_tmp[9] := #9'lda :STACKORIGIN-1+STACKWIDTH*3,x';
-	 listing_tmp[10] := #9'sbc ' + GetString(i+7);
-	 listing_tmp[11] := #9'sta ' + GetString(i+18);
+	 listing_tmp[10] := #9'sbc ' + GetARG(i+7);
+	 listing_tmp[11] := #9'sta ' + GetARG(i+18);
 	end;
 
 	listing[i+1] := listing_tmp[0];
