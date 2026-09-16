@@ -2046,7 +2046,8 @@ function fsincos16(x: float16; sc: boolean): float16;
 //----------------------------------------------------------------------------------------------
 // https://atariage.com/forums/topic/240919-mad-pascal/?do=findComment&comment=3818764
 //----------------------------------------------------------------------------------------------
-var i: byte;
+var i, exponent: byte;
+    a: array [0..1] of byte absolute x;
 begin
 
     while smallint(x) < 0 do x := x + M_PI_2;
@@ -2056,7 +2057,19 @@ begin
     x := x * 0.63661977236758134308;	// * 1 / (pi/2)
 
     { Get's integer part, should be }
-    i := trunc(x);
+    //i := trunc(x);
+
+    exponent := (a[1] shr 2) and $1f;
+
+    if exponent < 15 then 
+      i := 0
+    else 
+     case exponent of
+      15: i := 1;
+      16: i := 2 + ((a[1] shr 1) and 1);
+      17: i := 4;
+     end;
+
 
     { Fixes negative part, needed to calculate "fractional" part }
     //if smallint(x) < 0 then dec(i); { this is shorter than "x < 0" }
