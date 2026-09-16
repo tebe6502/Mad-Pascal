@@ -1798,22 +1798,41 @@ function rsincos(x: real; sc: boolean): real;
 // http://atariage.com/forums/topic/240919-mad-pascal/page-10#entry3818764
 //----------------------------------------------------------------------------------------------
 var i: byte;
+    c: cardinal absolute x;
+
+    t0: word register;		// shl 3	-> 2*pi (1608) shl 3 = 12864	WORD
+    t1: word register;		// shl 5	-> 2*pi (1608) shl 5 = 51456	WORD
+    t2: cardinal register;	// shl 7	-> 2*pi (1608) shl 7 = 205824	CARDINAL
 begin
 
- while x > M_PI_2 do x := x - M_PI_2;
  while x < 0.0    do x := x + M_PI_2;
 
+ //while x > M_PI_2 do x := x - M_PI_2;
+ while 1608 < c   do x := x - M_PI_2;
+ 
     { Normalize argument, divide by (pi/2) }
-    x := x * 0.63661977236758134308;
+    //x := x * 0,63661977236758134308;	// * 1 / (pi/2)
+    //c:=(c*169) shr 8;
+ 
+    // c*169 -> c shl 7 + c shl 5 + c shl 3 + c
+    t0:=c shl 3;
+    t1:=t0 shl 2;
+    t2:=t1 shl 2;
+
+    c := (t2 + t1 + t0 + c) shr 8;
 
     { Get's integer part, should be }
-    i := trunc(x);
+    //i := trunc(x);
+    i := c shr 8;
 
     { Fixes negative part, needed to calculate "fractional" part }
     //if x < 0 then dec(i);
 
     { And finally get's fractional part }
-    x := x - integer(i);
+    //x := x - integer(i);
+    c:=c and $ff;
+    
+    //x:=real(cardinal(x) and $ff);
 
     { If we need cosine, adds pi/2 }
     if sc then inc(i);
@@ -1823,7 +1842,7 @@ begin
 
     { Calculate cosine(x) with optimal polynomial approximation }
     x := x * x;
-    Result := ((0.019940292 * x - 0.23369547) * x + 1) * (1-x);
+    Result := ((0.019940292 * x - 0.23369547) * x + 1) * (1 - x);
 
     { Test quadrant to return negative values }
     if (i and 2) = 2 then Result := -Result;
@@ -1870,7 +1889,7 @@ begin
  while x < 0.0    do x := x + M_PI_2;
 
     { Normalize argument, divide by (pi/2) }
-    x := x * 0.63661977236758134308;
+    x := x * 0.63661977236758134308;	// * 1 / (pi/2)
 
     { Get's integer part, should be }
     i := trunc(x);
@@ -1931,22 +1950,73 @@ function fsincos(x: single; sc: boolean): single;
 // https://atariage.com/forums/topic/240919-mad-pascal/?do=findComment&comment=3818764
 //----------------------------------------------------------------------------------------------
 var i: byte;
+    fBits: cardinal absolute x;
+    exponent: byte;
+    mantissa: cardinal register;
 begin
 
-    while x > single(M_PI_2) do x := x - M_PI_2;
     while integer(x) < 0 do x := x + M_PI_2;
+    while x > single(M_PI_2) do x := x - M_PI_2;
 
     { Normalize argument, divide by (pi/2) }
-    x := x * 0.63661977236758134308;
+    x := x * 0.63661977236758134308;	// * 1 / (pi/2)
 
     { Get's integer part, should be }
-    i := trunc(x);
+//    i := trunc(x);
+
+
+    exponent := (fBits shr 23);//- 127;
+    
+    if exponent < 127 then
+
+     i := 0
+
+    else begin
+
+     mantissa := (fBits and $007FFFFF) or $00800000;
+  
+     case exponent of
+      127: i := mantissa shr 23;
+      128: i := mantissa shr 22;
+      129: i := mantissa shr 21;
+     end;
+  
+    end;
+
+
 
     { Fixes negative part, needed to calculate "fractional" part }
     //if integer(x) < 0 then dec(i); { this is shorter than "x < 0" }
 
     { And finally get's fractional part }
-    x := x - integer(i);
+//    x := x - integer(i);
+
+
+    if exponent < 127 then
+  
+
+    else begin
+
+     case exponent of
+      127: fBits := (1 shl 23)-1;
+      128: fBits := (1 shl 22)-1;
+      129: fBits := (1 shl 21)-1;
+     end;
+
+     mantissa := mantissa and fBits;
+  
+     while ((mantissa and (1 shl 23)) = 0) do begin
+        mantissa := mantissa shl 1;
+        dec(exponent);
+     end;
+
+     mantissa := mantissa and $007FFFFF;
+    
+     fbits := ((exponent shl 24) shr 1) or mantissa;
+
+    end;
+
+
 
     { If we need cosine, adds pi/2 }
     if sc then inc(i);
@@ -1998,11 +2068,11 @@ function fsincos16(x: float16; sc: boolean): float16;
 var i: byte;
 begin
 
-    while x > M_PI_2 do x := x - M_PI_2;
     while smallint(x) < 0 do x := x + M_PI_2;
+    while x > M_PI_2 do x := x - M_PI_2;
 
     { Normalize argument, divide by (pi/2) }
-    x := x * 0.63661977236758134308;
+    x := x * 0.63661977236758134308;	// * 1 / (pi/2)
 
     { Get's integer part, should be }
     i := trunc(x);
