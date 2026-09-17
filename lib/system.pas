@@ -4,7 +4,7 @@ unit system;
  @author: Tomasz Biela (Tebe)
  @name: Standard supported functions of Mad Pascal
 
- @version: 1.2
+ @version: 1.3
 
  @description:
  <http://www.freepascal.org/docs-html/rtl/system/index-5.html>
@@ -1947,8 +1947,9 @@ function fsincos(x: single; sc: boolean): single;
 //----------------------------------------------------------------------------------------------
 // https://atariage.com/forums/topic/240919-mad-pascal/?do=findComment&comment=3818764
 //----------------------------------------------------------------------------------------------
-var i, exponent: byte;
+var i: byte;
     fBits: cardinal absolute x;
+    exponent: byte register;
     mantissa: cardinal register;
 begin
 
@@ -2046,8 +2047,8 @@ function fsincos16(x: float16; sc: boolean): float16;
 //----------------------------------------------------------------------------------------------
 // https://atariage.com/forums/topic/240919-mad-pascal/?do=findComment&comment=3818764
 //----------------------------------------------------------------------------------------------
-var i, exponent: byte;
-    a: array [0..1] of byte absolute x;
+var i: byte;
+    a: word absolute x;
 begin
 
     while smallint(x) < 0 do x := x + M_PI_2;
@@ -2057,19 +2058,16 @@ begin
     x := x * 0.63661977236758134308;	// * 1 / (pi/2)
 
     { Get's integer part, should be }
-    //i := trunc(x);
-
-    exponent := (a[1] shr 2) and $1f;
-
-    if exponent < 15 then 
-      i := 0
-    else 
-     case exponent of
+    i := trunc(x);
+{
+    case byte((a shr 10) and $1f) of
       15: i := 1;
-      16: i := 2 + ((a[1] shr 1) and 1);
+      16: i := 2 + ((a shr 9) and 1);
       17: i := 4;
+     else
+      i := 0
      end;
-
+}
 
     { Fixes negative part, needed to calculate "fractional" part }
     //if smallint(x) < 0 then dec(i); { this is shorter than "x < 0" }
