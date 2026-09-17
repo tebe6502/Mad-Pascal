@@ -2845,36 +2845,41 @@ begin
       end;
 
 
-
-{
-
-
-     if (listing[i+4] = #9'jsr @expandToREAL1') and						// jsr @expandToREAL1			; 4
+     if (listing[i+8] = #9'jsr @expandToREAL1') and						// jsr @expandToREAL1			; 8
 
         mva(i) and										// mva ... :STACKORIGIN,x		; 0
         mva(i+1) and										// mva ... :STACKORIGIN+STACKWIDTH,x	; 1
 	mva(i+2) and										// mva ... :STACKORIGIN+STACKWIDTH*2,x	; 2
-	mva(i+3) then										// mva ... :STACKORIGIN+STACKWIDTH*3,x	; 3
-//	(listing[i+4] = #9'jsr @expandToREAL1') then						// jsr @expandToREAL1			; 4
-     if stack_0x(i) and
-        stack_1x(i+1) and
-        stack_2x(i+2) and
-        stack_3x(i+3) then
+	mva(i+3) and										// mva ... :STACKORIGIN+STACKWIDTH*3,x	; 3
+        mva(i+4) and										// mva ... :STACKORIGIN,x		; 4
+        mva(i+5) and										// mva ... :STACKORIGIN+STACKWIDTH,x	; 5
+	mva(i+6) and										// mva ... :STACKORIGIN+STACKWIDTH*2,x	; 6
+	mva(i+7) then										// mva ... :STACKORIGIN+STACKWIDTH*3,x	; 7
+
+//	(listing[i+8] = #9'jsr @expandToREAL1') then						// jsr @expandToREAL1			; 8
+     if stack_prev_0x(i) and
+        stack_prev_1x(i+1) and
+        stack_prev_2x(i+2) and
+        stack_prev_3x(i+3) and
+        stack_0x(i+4) and
+        stack_1x(i+5) and
+        stack_2x(i+6) and
+        stack_3x(i+7) then
       begin
-       listing_tmp[0] := #9'mva ' + GetSTRING(i+2) + ' :STACKORIGIN+STACKWIDTH*3,x';
-       listing_tmp[1] := #9'mva ' + GetSTRING(i+1) + ' :STACKORIGIN+STACKWIDTH*2,x';
-       listing_tmp[2] := #9'mva ' + GetSTRING(i) + ' :STACKORIGIN+STACKWIDTH,x';
-       listing_tmp[3] := #9'mva #$00 :STACKORIGIN,x';
+       listing_tmp[0] := #9'mva ' + GetSTRING(i+2) + ' :STACKORIGIN-1+STACKWIDTH*3,x';
+       listing_tmp[1] := #9'mva ' + GetSTRING(i+1) + ' :STACKORIGIN-1+STACKWIDTH*2,x';
+       listing_tmp[2] := #9'mva ' + GetSTRING(i) + ' :STACKORIGIN-1+STACKWIDTH,x';
+       listing_tmp[3] := #9'mva #$00 :STACKORIGIN-1,x';
 
        listing[i]  := listing_tmp[3];
        listing[i+1]:= listing_tmp[2];
        listing[i+2]:= listing_tmp[1];
        listing[i+3]:= listing_tmp[0];
-       listing[i+4]:= '';
+
+       listing[i+8]:= '';
 
        exit(false);
       end;
-}
 
 
 end;		// function
