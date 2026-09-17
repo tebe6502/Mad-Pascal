@@ -1,8 +1,8 @@
 // archimedes spiral
 
-// 16529	single		4925 bytes
-// 10361	float16		5090 bytes
-// 11881	real		4176 bytes
+// 15165	single		5096 bytes
+// 10312	float16		5050 bytes
+// 5922		real		3910 bytes
 
 
 program fedora_hat;
@@ -51,8 +51,8 @@ InitGraph(gd,gm,'');
 
 tim:=GetTickCount;
 
-c1:=2.2*sy;
-c2:=1.6*sy;
+c1 := sy * 2.2;
+c2 := sy * 1.6;
 
 for i:=cx-1 downto 0 do rr[i] := cy;
 
@@ -61,10 +61,10 @@ scy:=cy * 0.46875;
 fx:=sx / 64;
 fz:=sz / 64;
 
-zt:=fx*64;
-ifz:=fz*64;
+zt := fx * 64;
+ifz := fz * 64;
 
-xf:=4.71238905/sx;
+xf := 4.71238905 / sx;
 
 for zi:=127 downto 0 do begin		// -64 .. 64
 
@@ -76,9 +76,9 @@ for zi:=127 downto 0 do begin		// -64 .. 64
 
  for xi:=xl downto 0 do begin
 
-  a:=sin(sqrt(xi*xi+zs)*xf);
+  a:=sin(xf*sqrt(xi*xi+zs));
 
-  y1:=trunc(zy-a*(c1-c2*a*a));
+  y1:=trunc(zy-a*(c1-a*a*c2));
 
   x1:=trunc(xi+zx);
   if rr[x1] > y1 then begin rr[x1]:=y1; PutPixel(x1,y1, 15) end;
