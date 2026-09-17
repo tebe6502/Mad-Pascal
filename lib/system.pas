@@ -670,8 +670,10 @@ Sqrt returns the square root of its argument X, which must be positive
 
 @returns: Real (Q24.8)
 *)
-var r, t, q: cardinal;
-    b: integer;
+var r: cardinal register;
+    t: cardinal register;
+    q: cardinal register;
+    b: integer register;
 begin
 
     if (x <= 0.0) then exit(0.0);
@@ -712,7 +714,7 @@ https://suraj.sh/fast-square-root-approximation
 
 @returns: Single
 *)
-var c: cardinal;
+var c: cardinal register;
 begin
 	if integer(x) <= 0 then exit(single(0.0));
 
@@ -742,7 +744,6 @@ begin
 end;
 
 
-
 function Sqrt(x: float16): float16; overload;
 (*
 @description
@@ -754,7 +755,7 @@ https://suraj.sh/fast-square-root-approximation
 
 @returns: float16
 *)
-var c: word;
+var c: word register;
 begin
 	if smallint(x) <= 0 then exit(float16(0.0));
 
@@ -1946,9 +1947,8 @@ function fsincos(x: single; sc: boolean): single;
 //----------------------------------------------------------------------------------------------
 // https://atariage.com/forums/topic/240919-mad-pascal/?do=findComment&comment=3818764
 //----------------------------------------------------------------------------------------------
-var i: byte;
+var i, exponent: byte;
     fBits: cardinal absolute x;
-    exponent: byte;
     mantissa: cardinal register;
 begin
 
