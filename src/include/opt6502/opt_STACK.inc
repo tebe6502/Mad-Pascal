@@ -2513,6 +2513,49 @@ begin
       end;
 
 
+    if mva(i) and										// mva .. :STACKORIGIN,x		; 0
+       inx(i+1) and										// inx					; 1
+       mva(i+2) and 										// mva .. :STACKORIGIN,x		; 2
+       mva(i+3) and 										// mva .. :STACKORIGIN+STACKWIDTH	; 3
+       mva(i+4) and 										// mva .. :STACKORIGIN+STACKWIDTH*2	; 4
+       mva(i+5) and										// mva .. :STACKORIGIN+STACKWIDTH*3	; 5
+       mva(i+6) and 										// mva .. :STACKORIGIN-1+STACKWIDTH	; 6
+       mva(i+7) and 										// mva .. :STACKORIGIN-1+STACKWIDTH*2	; 7
+       mva(i+8) then										// mva .. :STACKORIGIN-1+STACKWIDTH*3	; 8
+     if stack_0x(i) and
+	stack_0x(i+2) and
+	stack_1x(i+3) and
+	stack_2x(i+4) and
+	stack_3x(i+5) and
+	stack_prev_1x(i+6) and
+	stack_prev_2x(i+7) and
+	stack_prev_3x(i+8) then
+      begin
+
+	listing_tmp[0] := listing[i];
+	listing_tmp[1] := #9'mva ' + GetString(i+6) + ' :STACKORIGIN+STACKWIDTH,x';
+	listing_tmp[2] := #9'mva ' + GetString(i+7) + ' :STACKORIGIN+STACKWIDTH*2,x';
+	listing_tmp[3] := #9'mva ' + GetString(i+8) + ' :STACKORIGIN+STACKWIDTH*3,x';
+	listing_tmp[4] := #9'inx';
+	listing_tmp[5] := listing[i+2];
+	listing_tmp[6] := listing[i+3];
+	listing_tmp[7] := listing[i+4];
+	listing_tmp[8] := listing[i+5];
+
+	listing[i]   := listing_tmp[0];
+	listing[i+1] := listing_tmp[1];
+	listing[i+2] := listing_tmp[2];
+	listing[i+3] := listing_tmp[3];
+	listing[i+4] := listing_tmp[4];
+	listing[i+5] := listing_tmp[5];
+	listing[i+6] := listing_tmp[6];
+	listing[i+7] := listing_tmp[7];
+	listing[i+8] := listing_tmp[8];
+
+	exit(false);
+      end;
+
+
 // -----------------------------------------------------------------------------
 
 
@@ -2774,7 +2817,7 @@ begin
 
        exit(false);
       end;
-	
+
 
      if (listing[i+4] = #9'jsr @expandToREAL') and						// jsr @expandToREAL			; 4
 
@@ -2798,6 +2841,43 @@ begin
        listing[i+2]:= listing_tmp[1];
        listing[i+3]:= listing_tmp[0];
        listing[i+4]:= '';
+
+       exit(false);
+      end;
+
+
+     if (listing[i+9] = #9'jsr @expandToREAL1') and						// jsr @expandToREAL1			; 9
+
+        mva(i) and										// mva .. :STACKORIGIN,x		; 0
+        mva(i+1) and										// mva .. :STACKORIGIN+STACKWIDTH,x	; 1
+	mva(i+2) and										// mva .. :STACKORIGIN+STACKWIDTH*2,x	; 2
+	mva(i+3) and										// mva .. :STACKORIGIN+STACKWIDTH*3,x	; 3
+	inx(i+4) and										// inx					; 4
+        mva(i+5) and										// mva .. :STACKORIGIN,x		; 5
+        mva(i+6) and										// mva .. :STACKORIGIN+STACKWIDTH,x	; 6
+	mva(i+7) and										// mva .. :STACKORIGIN+STACKWIDTH*2,x	; 7
+	mva(i+8) then										// mva .. :STACKORIGIN+STACKWIDTH*3,x	; 8
+//	(listing[i+9] = #9'jsr @expandToREAL1') then						// jsr @expandToREAL1			; 9
+     if stack_0x(i) and
+        stack_1x(i+1) and
+        stack_2x(i+2) and
+        stack_3x(i+3) and
+        stack_0x(i+5) and
+        stack_1x(i+6) and
+        stack_2x(i+7) and
+        stack_3x(i+8) then
+      begin
+       listing_tmp[0] := #9'mva ' + GetSTRING(i+2) + ' :STACKORIGIN+STACKWIDTH*3,x';
+       listing_tmp[1] := #9'mva ' + GetSTRING(i+1) + ' :STACKORIGIN+STACKWIDTH*2,x';
+       listing_tmp[2] := #9'mva ' + GetSTRING(i) + ' :STACKORIGIN+STACKWIDTH,x';
+       listing_tmp[3] := #9'mva #$00 :STACKORIGIN,x';
+
+       listing[i]  := listing_tmp[3];
+       listing[i+1]:= listing_tmp[2];
+       listing[i+2]:= listing_tmp[1];
+       listing[i+3]:= listing_tmp[0];
+
+       listing[i+9]:= '';
 
        exit(false);
       end;

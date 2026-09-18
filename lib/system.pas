@@ -160,6 +160,12 @@ type	PInteger = ^integer;
 
 	*)
 
+type	PShortReal = ^ShortReal;
+	(*
+	@description:
+
+	*)
+
 type	PReal = ^real;
 	(*
 	@description:
@@ -1887,22 +1893,38 @@ function srsincos(x: ShortReal; sc: boolean): ShortReal;
 // http://atariage.com/forums/topic/240919-mad-pascal/page-10#entry3818764
 //----------------------------------------------------------------------------------------------
 var i: byte;
+    w: word absolute x;
+
+    t0: word register;		// shl 3	-> 2*pi (1608) shl 3 = 12864	WORD
+    t1: word register;		// shl 5	-> 2*pi (1608) shl 5 = 51456	WORD
+    t2: cardinal register;	// shl 7	-> 2*pi (1608) shl 7 = 205824	CARDINAL
 begin
 
- while x > M_PI_2 do x := x - M_PI_2;
  while x < 0.0    do x := x + M_PI_2;
 
+ //while x > M_PI_2 do x := x - M_PI_2;
+ while 1608 < w   do x := x - M_PI_2;
+
     { Normalize argument, divide by (pi/2) }
-    x := x * 0.63661977236758134308;	// * 1 / (pi/2)
+    //x := x * 0.63661977236758134308;	// * 1 / (pi/2)
+    //w:=(w*169) shr 8;
+
+    t0:=w shl 3;
+    t1:=t0 shl 2;
+    t2:=t1 shl 2;
+
+    w := (t2 + t1 + t0 + w) shr 8;
 
     { Get's integer part, should be }
-    i := trunc(x);
+    //i := trunc(x);
+    i := w shr 8;
 
     { Fixes negative part, needed to calculate "fractional" part }
     //if x < 0 then dec(i);
 
     { And finally get's fractional part }
-    x := x - shortint(i);
+    //x := x - shortint(i);
+    w := w and $00FF;
 
     { If we need cosine, adds pi/2 }
     if sc then inc(i);
@@ -1912,7 +1934,12 @@ begin
 
     { Calculate cosine(x) with optimal polynomial approximation }
     x := x * x;
-    Result := ((0.019940292 * x - 0.23369547) * x + 1) * (1-x);
+
+    {0.019940292 * 256 = 5}
+    t1 := (w shl 2 + w) shr 8;
+
+    //Result := ((0.019940292 * x - 0.23369547) * x + 1) * (1-x);
+    Result := ((PShortReal(@t1)^ - 0.23369547) * x + 1) * (1-x);
 
     { Test quadrant to return negative values }
     if (i and 2) = 2 then Result := -Result;
