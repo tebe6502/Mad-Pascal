@@ -1241,7 +1241,7 @@ begin
        lda_stack(2) and									// lda :STACKORIGIN	; 2
        spl(3) and									// spl			; 3
        dey(4) and									// dey			; 4
-       sta(5) then									// sta			; 5
+       (sta(5) or add_sub(5)) then							// sta|add|sub		; 5
       if argMatch(0, 2) then
       begin
 	TemporaryBuf[0] := '~';
