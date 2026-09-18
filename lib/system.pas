@@ -4,7 +4,7 @@ unit system;
  @author: Tomasz Biela (Tebe)
  @name: Standard supported functions of Mad Pascal
 
- @version: 1.3
+ @version: 1.4
 
  @description:
  <http://www.freepascal.org/docs-html/rtl/system/index-5.html>
@@ -1841,7 +1841,12 @@ begin
 
     { Calculate cosine(x) with optimal polynomial approximation }
     x := x * x;
-    Result := ((0.019940292 * x - 0.23369547) * x + 1) * (1 - x);
+
+    {0.019940292 * 256 = 5}
+    t2 := (c shl 2 + c) shr 8;
+
+    //Result := ((0.019940292 *x - 0.23369547) * x + 1) * (1 - x);
+    Result := ((PReal(@t2)^ - 0.23369547) * x + 1) * (1 - x);
 
     { Test quadrant to return negative values }
     if (i and 2) = 2 then Result := -Result;
@@ -2048,7 +2053,7 @@ function fsincos16(x: float16; sc: boolean): float16;
 // https://atariage.com/forums/topic/240919-mad-pascal/?do=findComment&comment=3818764
 //----------------------------------------------------------------------------------------------
 var i: byte;
-    a: word absolute x;
+    //a: word absolute x;
 begin
 
     while smallint(x) < 0 do x := x + M_PI_2;

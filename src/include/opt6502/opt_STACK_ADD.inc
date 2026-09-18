@@ -200,28 +200,80 @@ begin
      end;
 
 
-    if //inx(i) and										// inx					; 0
-       mva(i+1) and										// mva ... :STACKORIGIN,x		; 1
-       mva(i+2) and										// mva ... :STACKORIGIN+STACKWIDTH,x	; 2
-       lda(i+3) and										// lda					; 3
-       add_stack(i+4) and									// add :STACKORIGIN,x			; 4
-       sta(i+5) and										// sta					; 5
-       lda(i+6) and										// lda					; 6
-       adc_stack(i+7) and									// adc :STACKORIGIN+STACKWIDTH,x	; 7
-       sta(i+8) then										// sta					; 8
-     if stack_0x(i+1) and
-	stack_0x(i+4) and
-	stack_1x(i+2) and
-	stack_1x(i+7) then
+    if mva(i) and										// mva .. :STACKORIGIN,x		; 0
+       mva(i+1) and 										// mva .. :STACKORIGIN+STACKWIDTH,x	; 1
+       mva(i+2) and										// mva .. :STACKORIGIN+STACKWIDTH*2,x	; 2
+       mva(i+3) and 										// mva .. :STACKORIGIN+STACKWIDTH*3,x	; 3
+       lda_val(i+4) and										// lda					; 4
+       add_sub_stack(i+5) and									// add|sub				; 5
+       sta_a(i+6) and										// sta					; 6
+       lda_val(i+7) and										// lda					; 7
+       adc_sbc_stack(i+8) and 									// adc|sbc				; 8
+       sta_a(i+9) and										// sta					; 9
+       lda_val(i+10) and									// lda					; 10
+       adc_sbc_stack(i+11) and 									// adc|sbc				; 11
+       sta_a(i+12) and										// sta					; 12
+       lda_val(i+13) and									// lda					; 13
+       adc_sbc_stack(i+14) and 									// adc|sbc				; 14
+       sta_a(i+15) then										// sta					; 15
+     if stack_0x(i) and
+	stack_1x(i+1) and
+	stack_2x(i+2) and
+	stack_3x(i+3) and
+        stack_0x(i+5) and
+	stack_1x(i+8) and
+	stack_2x(i+11) and
+	stack_3x(i+14) then
      begin
-       listing[i+4]  := #9'add ' + GetString(i+1);
-       listing[i+7]  := #9'adc ' + GetString(i+2);
 
-       listing[i+1] := '';
-       listing[i+2] := '';
+        if add(i+5) then begin
+          listing[i+5] := #9'add ' +  GetString(i);
+          listing[i+8] := #9'adc ' +  GetString(i+1);
+          listing[i+11]:= #9'adc ' +  GetString(i+2);
+          listing[i+14]:= #9'adc ' +  GetString(i+3);
+	end else begin
+          listing[i+5] := #9'sub ' +  GetString(i);
+          listing[i+8] := #9'sbc ' +  GetString(i+1);
+          listing[i+11]:= #9'sbc ' +  GetString(i+2);
+          listing[i+14]:= #9'sbc ' +  GetString(i+3);
+	end;
+
+	listing[i]   := '';
+	listing[i+1] := '';
+	listing[i+2] := '';
+	listing[i+3] := '';
 
        exit(false);
      end;
+
+
+    if mva(i) and										// mva .. :STACKORIGIN,x		; 0
+       mva(i+1) and										// mva .. :STACKORIGIN+STACKWIDTH,x	; 1
+       lda_val(i+2) and										// lda					; 2	~:STACKORIGIN
+       add_sub_stack(i+3) and 									// add|sub :STACKORIGIN,x		; 3
+       sta_a(i+4) and										// sta					; 4
+       lda_val(i+5) and										// lda					; 5	~:STACKORIGIN
+       adc_sbc_stack(i+6) and 									// adc|sbc :STACKORIGIN+STACKWIDTH,x	; 6
+       sta_a(i+7) then										// sta					; 7
+     if stack_0x(i) and
+        stack_1x(i+1) and
+        stack_0x(i+3) and
+        stack_1x(i+6) then
+      begin
+
+       if add(i+3) then begin
+        listing[i+3] := #9'add ' + GetSTRING(i);
+        listing[i+6] := #9'adc ' + GetSTRING(i+1);
+       end else begin
+        listing[i+3] := #9'sub ' + GetSTRING(i);
+        listing[i+6] := #9'sbc ' + GetSTRING(i+1);
+       end;
+
+       listing[i]  := '';
+       listing[i+1]:= '';
+
+       exit(false);
+      end;
 
 
     if ldy_stack(i+7) and 									// ldy :STACKORIGIN,x			; 7
