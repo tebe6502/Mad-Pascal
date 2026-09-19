@@ -565,12 +565,12 @@ begin
           '] Of Array[0..' + IntToStr(arrayIdentifier.NumAllocElements_ - 1) + '] Of ' +
           InfoAboutDataType(identifier.AllocElementType) + '"'
       else
-        if arrayIdentifier.AllocElementType in [TDataType.RECORDTOK, TDataType.OBJECTTOK] then
+        if arrayIdentifier.AllocElementType in StructuredTypes then
           msg := msg + '"^' + GetTypeAtIndex(arrayIdentifier.NumAllocElements).Field[0].Name + '"'
         else
         begin
 
-          if arrayIdentifier.dataType in [TDataType.RECORDTOK, TDataType.OBJECTTOK] then
+          if arrayIdentifier.dataType in StructuredTypes then
             msg := msg + '"' + GetTypeAtIndex(arrayIdentifier.NumAllocElements).Field[0].Name + '"'
           else
             msg := msg + '"Array[0..' + IntToStr(arrayIdentifier.NumAllocElements - 1) +

@@ -86,7 +86,7 @@ begin
     Result := 0
   else
 
-    if IdentifierAt(IdentIndex).AllocElementType in [TDataType.RECORDTOK, TDataType.OBJECTTOK] then
+    if IdentifierAt(IdentIndex).AllocElementType in StructuredTypes then
       Result := IdentifierAt(IdentIndex).NumAllocElements_
     else
       if (IdentifierAt(IdentIndex).NumAllocElements_ = 0) or
@@ -716,7 +716,7 @@ begin
         begin
           IdentIndex := GetIdentIndex(TokenAt(i).Name);
 
-          if IdentifierAt(IdentIndex).AllocElementType in [TDataType.RECORDTOK, TDataType.OBJECTTOK] then
+          if IdentifierAt(IdentIndex).AllocElementType in StructuredTypes then
             ConstVal := IdentifierAt(IdentIndex).NumAllocElements_ - 1
           else
             if IdentifierAt(IdentIndex).NumAllocElements > 0 then
@@ -771,7 +771,7 @@ begin
               //  writeln(IdentifierAt(IdentIndex).name,',',IdentifierAt(IdentIndex).DataType,',',IdentifierAt(IdentIndex).NumAllocElements,'/',IdentifierAt(IdentIndex).NumAllocElements_,',',IdentifierAt(IdentIndex).AllocElementType );
 
               if (IdentifierAt(IdentIndex).DataType = TDataType.POINTERTOK) and
-                 (IdentifierAt(IdentIndex).AllocElementType in [TDataType.RECORDTOK, TDataType.OBJECTTOK]) then
+                 (IdentifierAt(IdentIndex).AllocElementType in StructuredTypes) then
                 ConstVal := IdentifierAt(IdentIndex).NumAllocElements_
               else
                 ConstVal := IdentifierAt(IdentIndex).NumAllocElements;
@@ -1839,7 +1839,7 @@ begin
         if not OutputDisabled then
         begin
 
-          if (DataType = TDataType.POINTERTOK) and (AllocElementType in [TDataType.RECORDTOK, TDataType.OBJECTTOK]) and (NumAllocElements_ = 0) then
+          if (DataType = TDataType.POINTERTOK) and (AllocElementType in StructuredTypes) and (NumAllocElements_ = 0) then
           begin
 
             if NumAllocElements > 0 then IncVarDataSize(tokenIndex, GetDataSize(TDataType.POINTERTOK));		// ^record -> NumAllocElements > 0
@@ -1850,7 +1850,7 @@ begin
             if DataType in [TDataType.ENUMTOK] then
               IncVarDataSize(tokenIndex, 1)
             else
-              if (DataType in [TDataType.RECORDTOK, TDataType.OBJECTTOK]) and (NumAllocElements > 0) then
+              if (DataType in StructuredTypes) and (NumAllocElements > 0) then
                 IncVarDataSize(tokenIndex, 0)
               else
                 if (DataType in FileTypes) and (NumAllocElements > 0) then
@@ -2494,7 +2494,7 @@ var
     if FieldType = TDataType.ENUMTOK then FieldType := AllocElementType;
 
 
-    if not (FieldType in [TDataType.RECORDTOK, TDataType.OBJECTTOK]) then
+    if not (FieldType in StructuredTypes) then
     begin
 
       if FieldType in Pointers then
@@ -2582,7 +2582,7 @@ begin
           end
           else
 
-            if (IdentIndex > 0) and (IdentifierAt(IdentIndex).DataType in [TDataType.RECORDTOK, TDataType.OBJECTTOK] + Pointers) then
+            if (IdentIndex > 0) and (IdentifierAt(IdentIndex).DataType in StructuredTypes + Pointers) then
             begin
               NumAllocElements := IdentifierAt(IdentIndex).NumAllocElements;
 
@@ -2897,7 +2897,7 @@ begin
                     begin              // issue #92 fixed
                       DeclareField(FieldInListName[FieldInListIndex].Name, DataType, NumAllocElements, AllocElementType);
 
-                      if DataType in [TDataType.RECORDTOK, TDataType.OBJECTTOK] then
+                      if DataType in StructuredTypes then
                         //      for FieldInListIndex := 1 to NumFieldsInList do                //
                         for k := 1 to GetTypeAtIndex(NumAllocElements).NumFields do
                         begin
@@ -3294,7 +3294,7 @@ begin
                           CheckTok(i + 2, TTokenKind.OFTOK);
 
 
-                          if TokenAt(i + 3).GetDataType in [TDataType.RECORDTOK, TDataType.OBJECTTOK] then
+                          if TokenAt(i + 3).GetDataType in StructuredTypes then
                             Error(i, TMessage.Create(TErrorCode.InvalidArrayOfPointers, 'Only arrays of ^{0} are supported.', InfoAboutToken(TokenAt(i + 3).Kind)));
 
 
@@ -3333,7 +3333,7 @@ begin
 
                           if NestedNumAllocElements > 0 then
                             //    Error(i, 'Multidimensional arrays are not supported');
-                            if NestedDataType in [TDataType.RECORDTOK, TDataType.OBJECTTOK, TDataType.ENUMTOK] then
+                            if NestedDataType in StructuredTypes + [TDataType.ENUMTOK] then
                             begin // !!! dla RECORD, OBJECT tablice nie zadzialaja !!!
 
                               if NumAllocElements shr 16 > 0 then
@@ -3342,7 +3342,7 @@ begin
 
                               //    if NestedDataType = RECORDTOK then
                               //    else
-                              if NestedDataType in [TDataType.RECORDTOK, TDataType.OBJECTTOK] then begin
+                              if NestedDataType in StructuredTypes then begin
 
 
                               //writeln(NestedDataType,',', NumAllocElements,',', NestedNumAllocElements,',',GetTypeAtIndex(NestedNumAllocElements).Field[0].Name);
@@ -3372,11 +3372,11 @@ begin
 
                             end
                             else
-                              if not (NestedDataType in [TDataType.STRINGPOINTERTOK, TDataType.RECORDTOK, TDataType.OBJECTTOK{, TDataType.PCHARTOK}]) and
+                              if not (NestedDataType in StructuredTypes + [TDataType.STRINGPOINTERTOK]) and
                                 (TokenAt(i).Kind <> TTokenKind.PCHARTOK) then
                               begin
 
-                                if (NestedAllocElementType in [TDataType.RECORDTOK, TDataType.OBJECTTOK, TDataType.PROCVARTOK]) and (NumAllocElements shr 16 > 0) then
+                                if (NestedAllocElementType in StructuredTypes + [TDataType.PROCVARTOK]) and (NumAllocElements shr 16 > 0) then
                                   Error(i, TMessage.Create(TErrorCode.MultiDimensionalArrayOfTypeNotSupported,
                                     'Multidimensional arrays of element type {0} are not supported.', InfoAboutDataType(NestedAllocElementType)));
 
@@ -3385,7 +3385,7 @@ begin
                                 if NestedAllocElementType = TDataType.PROCVARTOK then
                                   NumAllocElements := NumAllocElements or NestedNumAllocElements
                                 else
-                                  if NestedAllocElementType in [TDataType.RECORDTOK, TDataType.OBJECTTOK] then
+                                  if NestedAllocElementType in StructuredTypes then
                                     NumAllocElements := NestedNumAllocElements or (NumAllocElements shl 16)		// array [..] of ^record|^object
                                   else
                                     NumAllocElements := NumAllocElements or (NestedNumAllocElements shl 16);

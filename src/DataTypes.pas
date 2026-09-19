@@ -24,6 +24,8 @@ const
 
   StringTypes = [TDataType.STRINGPOINTERTOK, TDataType.STRINGLITERALTOK, TDataType.PCHARTOK];
 
+  StructuredTypes = [TDataType.RECORDTOK, TDataType.OBJECTTOK];
+
   FileTypes = [TDataType.FILETOK, TDataType.TEXTFILETOK];
 
 function GetDataTypeName(const DataType: TDataType): String;
