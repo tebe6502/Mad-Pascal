@@ -1132,6 +1132,7 @@ begin
     (IdentifierAt(IdentIndex).isAbsolute) and
     (IdentifierAt(IdentIndex).IdType = TDataType.ARRAYTOK) and
     (IdentifierAt(IdentIndex).Value >= 0);
+
 end;
 
 
@@ -8076,10 +8077,7 @@ begin
           end;
 
 
-          if AllocElementType = TDataType.ARRAYTOK then
-          begin
-            AllocElementType := TDataType.POINTERTOK;
-          end;
+          if AllocElementType = TDataType.ARRAYTOK then AllocElementType := TDataType.POINTERTOK;
 
 
           if TokenAt(i).Kind = TTokenKind.IDENTTOK then
@@ -12526,14 +12524,6 @@ begin
 
                     i := CompileArrayIndex(i, IdentIndex, VarType);
 
-{
-      if VarType = TDataType.ARRAYTOK then begin
-
-        writeln('c');
-
-      end;
-}
-
                     if IdentifierAt(IdentIndex).AllocElementType in StructuredTypes then VarType := TDataType.POINTERTOK;
 
                     CheckTok(i + 1, TTokenKind.CBRACKETTOK);
@@ -12562,14 +12552,6 @@ begin
                         IndirectionLevel := ASPOINTERTORECORDARRAYORIGIN;
 
                         i := CompileArrayIndex(i + 3, GetIdentIndex(IdentifierAt(IdentIndex).Name + '.' + TokenAt(i + 3).Name), VarType);
-
-{
-      if VarType = TDataType.ARRAYTOK then begin
-
-        writeln('d');
-
-      end;
-}
 
                         CheckTok(i + 1, TTokenKind.CBRACKETTOK);
 
