@@ -598,7 +598,7 @@ begin
     for index := NumIdent downto 1 do
     begin
       Identifier := IdentifierList.GetIdentifierAtIndex(index);
-      if (Identifier.Kind in [TTokenKind.PROCEDURETOK, TTokenKind.FUNCTIONTOK, TTokenKind.CONSTRUCTORTOK, TTokenKind.DESTRUCTORTOK]) and 
+      if (Identifier.Kind in [TTokenKind.PROCEDURETOK, TTokenKind.FUNCTIONTOK, TTokenKind.CONSTRUCTORTOK, TTokenKind.DESTRUCTORTOK]) and
          (S = Identifier.Name) and (Block.BlockIndex = Identifier.BlockIndex) then
       begin
 
@@ -7016,11 +7016,10 @@ begin
 
   if ShortArrayIndex then
   begin
-
     asm65(#9'lda #$00');
     asm65(#9'sta' + StackVariable1);
-
   end;
+
 
   //  writeln(IdentifierAt(IdentIndex).Name,',',Elements(IdentIndex),',',VarType,',',TokenAt(i+1).Kind);
 
@@ -7426,7 +7425,7 @@ begin
                         ((IdentifierAt(IdentIndex).DataType in Pointers) and
                         (IdentifierAt(IdentIndex).IdType = TDataType.DATAORIGINOFFSET)) or
 
-                        ((IdentifierAt(IdentIndex).DataType in Pointers) and 
+                        ((IdentifierAt(IdentIndex).DataType in Pointers) and
 			  not (IdentifierAt(IdentIndex).AllocElementType in StructuredTypes + [TDataType.UNTYPETOK, TDataType.PROCVARTOK]) and
                         (IdentifierAt(IdentIndex).NumAllocElements > 0)) or
 
@@ -8223,7 +8222,7 @@ begin
         begin
 
           if (IdentifierAt(IdentIndex).Param[NumActualParams].DataType = TDataType.POINTERTOK) and
-            (IdentifierAt(IdentIndex).Param[NumActualParams].NumAllocElements > 0) and 
+            (IdentifierAt(IdentIndex).Param[NumActualParams].NumAllocElements > 0) and
 	    not (IdentifierAt(IdentIndex).Param[NumActualParams].AllocElementType in StructuredTypes) then
             i := CompileAddress(i + 1, ActualParamType, AllocElementType)
           else
@@ -10090,7 +10089,7 @@ begin
             Error(i, TErrorCode.TypeMismatch);
 
 
-          if (ValType = TDataType.POINTERTOK) and 
+          if (ValType = TDataType.POINTERTOK) and
 	     not (IdentifierAt(IdentIndex).DataType in StructuredTypes + [TDataType.POINTERTOK]) then
           begin
             ValType := IdentifierAt(IdentIndex).DataType;
@@ -10558,7 +10557,7 @@ begin
 
                       end;
 
-
+// swag---
                       if (ValType = TDataType.ARRAYTOK) or
                          (ValType = TDataTYpe.RECORDTOK) and (IdentifierAt(IdentIndex).DataType = TDataType.ARRAYRECORD) then
                       begin
@@ -15225,8 +15224,8 @@ begin
         begin
           IdentIndex := GetIdentIndex(TokenAt(i + 2).Name);
 
-          if (IdentIndex > 0) and 
-	     (IdentifierAt(IdentIndex).DataType = TDataType.TEXTFILETOK) or 
+          if (IdentIndex > 0) and
+	     (IdentifierAt(IdentIndex).DataType = TDataType.TEXTFILETOK) or
 	     (IdentifierAt(IdentIndex).AllocElementType = TDataType.TEXTFILETOK) then
           begin
 

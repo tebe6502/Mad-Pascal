@@ -1021,6 +1021,25 @@ begin
       end;
 
 
+    if tay(i+4) and										// tay					; 4
+       (lda_adr(i+5) or sta_adr(i+6)) and							// lda adr.|				; 5
+												//         |sta adr.			; 6
+
+       sta_stack(i) and										// sta :STACKORIGIN			; 0
+       lda_val(i+1) and (lda_im(i+1) = false) and						// lda					; 1	~:STACKORIGIN
+       add_sub_val(i+2) and (add_sub_im(i+2) = false) and					// add|sub				; 2	~:STACKORIGIN
+       add_sub_stack(i+3) then									// add|sub :STACKORIGIN			; 3
+    if argMatch(i, i+3) then
+      begin
+	listing[i+1] := GetCMD(i+3) + GetARG(i+1);
+
+	listing[i]   := '';
+	listing[i+3] := '';
+
+	exit(false);
+      end;
+
+
     if tay(i+5) and										// tay					; 5
        (lda_adr(i+6) or sta_adr(i+7)) and							// lda adr.|				; 6
 												//         |sta adr.			; 7
@@ -1415,6 +1434,25 @@ begin
      if argMatch(i+2, i+5) then
       begin
         //listing[i+1] := '';
+
+	rm_rol_stack;
+
+	exit(false);
+      end;
+
+
+    if tay(i+6) and										// tay					; 6
+       (lda_adr_y(i+7) or sta_adr_y(i+8)) and							// lda adr.|				; 7
+     												//         | sta adr.			; 8
+
+       asl_a(i) and										// asl @				; 0
+       rol_stack(i+1) and									// rol :STACKORIGIN+STACKWIDTH		; 1
+       add_sub_val(i+2) and									// add|sub				; 2	~:STACKORIGIN
+       asl_a(i+3) and										// asl @				; 3
+       add_sub_val(i+4) and									// add|sub				; 4	~:STACKORIGIN
+       add_sub_val(i+5) then									// add|sub				; 5	~:STACKORIGIN
+      begin
+	//listing[i+1] := '';
 
 	rm_rol_stack;
 

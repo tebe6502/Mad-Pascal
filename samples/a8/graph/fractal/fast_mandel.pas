@@ -57,7 +57,12 @@ end;
 Function GetMandel (SX,SY : byte) : shortint;
 
 var
+{$IFDEF ATARI}
+  XY,XX,YY,A,B,X,Y : shortreal;
+{$ELSE} 
   XY,XX,YY,A,B,X,Y : real;
+{$ENDIF}
+  
   Count : byte;
 
 begin
@@ -85,7 +90,7 @@ begin
     X := XX - YY + A;
     Y := XY+XY + B;
     Inc (Count);
-  Until (XX+YY > 4.0) or (Count > MaxCount);
+  Until (4.0 < XX+YY) or (Count > MaxCount);
   
   If Count > MaxCount then
     GetMandel := 7
@@ -212,3 +217,5 @@ begin
   repeat until keypressed;
 
 end.
+
+// 4532

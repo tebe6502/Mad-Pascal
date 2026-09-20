@@ -1470,6 +1470,41 @@ begin
       end;
 
 
+    if sta_stack(i+3) and (listing[i+3] = listing[i+8]) and					// sta :STACKORIGIN+STACKWIDTH		; 3
+
+       lda_val(i) and										// lda					; 0	~:STACKORIGIN
+       sta_stack(i+1) and									// sta :STACKORIGIN			; 1
+       lda_im_0(i+2) and									// lda #$00				; 2
+//       sta_stack(i+3) and (listing[i+3] = listing[i+8]) and					// sta :STACKORIGIN+STACKWIDTH		; 3
+       asl_stack(i+4) and 									// asl :STACKORIGIN			; 4
+       rol_a(i+5) and										// rol @				; 5
+       asl_stack(i+6) and									// asl :STACKORIGIN			; 6
+       rol_a(i+7) and										// rol @				; 7
+//       sta_stack(i+8) and									// sta :STACKORIGIN+STACKWIDTH		; 8
+       lda_val(i+9) and										// lda					; 9	~:STACKORIGIN
+       add_sub_stack(i+10) then									// add|sub :STACKORIGIN			; 10
+     if argMatch(i+1, i+4) and
+        argMatch(i+4, i+6) and
+        argMatch(i+6, i+10) then
+      begin
+	listing[i+3] := listing[i];
+
+	listing[i]   := #9'lda #$00';
+	listing[i+1] := listing[i+8];
+	listing[i+2] := '';
+
+	listing[i+4] := #9'asl @';
+	listing[i+5] := #9'rol ' + GetARG(i+8);
+	listing[i+6] := #9'asl @';
+	listing[i+7] := #9'rol ' + GetARG(i+8);
+        listing[i+8] := '';
+	listing[i+9] := GetCMD(i+10) + GetARG(i+9);
+	listing[i+10]:= '';
+
+	exit(false);
+      end;
+
+
     if adc_sbc_val(i+10) and									// adc|sbc				; 10
 
        asl_stack(i+4) and									// asl :STACKORIGIN			; 4

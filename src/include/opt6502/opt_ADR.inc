@@ -1749,6 +1749,14 @@ begin
        end;
 
 
+
+
+
+
+
+
+
+
     if (lda_adr(i+12) or sta_adr(i+13)) and						// lda adr.|				; 12
 											//         |sta adr.			; 13
 
@@ -1871,6 +1879,106 @@ begin
        end;
 
 
+    if (lda_adr_y(i+18) or sta_adr_y(i+19)) and						// lda adr.|				; 18
+											//         |sta adr.			; 19
+
+       lda_im(i) and									// lda #				; 0
+       add(i+1) and (add_stack(i+1) = false) and (add_im(i+1) = false) and		// add					; 1
+       sta_stack(i+2) and								// sta :STACKORIGIN+10			; 2
+       lda_im(i+3) and									// lda #				; 3
+       adc(i+4) and (adc_stack(i+1) = false) and					// adc					; 4
+       sta_stack(i+5) and								// sta :STACKORIGIN+STACKWIDTH+10	; 5
+
+       lda_stack(i+6) and								// lda :STACKORIGIN+9			; 6
+       add_stack(i+7) and								// add :STACKORIGIN+10			; 7
+       sta_stack(i+8) and								// sta :STACKORIGIN+9			; 8
+       lda_stack(i+9) and								// lda :STACKORIGIN+STACKWIDTH+9	; 9
+       adc_stack(i+10) and								// adc :STACKORIGIN+STACKWIDTH+10	; 10
+       sta_stack(i+11) and								// sta :STACKORIGIN+STACKWIDTH+9	; 11
+
+       lda_stack(i+12) and								// lda :STACKORIGIN+9			; 12
+       add_im_0(i+13) and								// add #$00				; 13
+       tay(i+14) and									// tay					; 14
+       lda_stack(i+15) and								// lda :STACKORIGIN+STACKWIDTH+9	; 15
+       adc_im_0(i+16) and								// adc #$00				; 16
+       sta_stack(i+17) then								// sta :STACKORIGIN+STACKWIDTH+9	; 17
+
+     if argMatch(i+2, i+7) and
+        argMatch(i+5, i+10) and
+        argMatch(i+6, i+8) and
+	argMatch(i+8, i+12) and
+	argMatch(i+9, i+11) and
+	argMatch(i+11, i+15) then
+       begin
+	q:=GetWORD(i, i+3);
+
+        	LDA_STA_ADR(i+12, q, '+');
+
+	listing[i+7]  := #9'add ' + GetARG(i+1);
+
+	listing[i+10] := #9'adc ' + GetARG(i+4);
+
+	listing[i]   := '';
+	listing[i+1] := '';
+	listing[i+2] := '';
+	listing[i+3] := '';
+	listing[i+4] := '';
+	listing[i+5] := '';
+
+	exit(false);
+       end;
+
+
+    if (lda_adr_y(i+18) or sta_adr_y(i+19)) and						// lda adr.|				; 18
+											//         |sta adr.			; 19
+
+       lda_val(i) and (lda_im(i) = false) and						// lda					; 0
+       add(i+1) and (add_stack(i+1) = false) and (add_im(i+1) = false) and		// add					; 1
+       sta_stack(i+2) and								// sta :STACKORIGIN+10			; 2
+       lda_im(i+3) and									// lda #				; 3
+       adc(i+4) and (adc_stack(i+1) = false) and					// adc					; 4
+       sta_stack(i+5) and								// sta :STACKORIGIN+STACKWIDTH+10	; 5
+
+       lda_stack(i+6) and								// lda :STACKORIGIN+9			; 6
+       add_stack(i+7) and								// add :STACKORIGIN+10			; 7
+       sta_stack(i+8) and								// sta :STACKORIGIN+9			; 8
+       lda_stack(i+9) and								// lda :STACKORIGIN+STACKWIDTH+9	; 9
+       adc_stack(i+10) and								// adc :STACKORIGIN+STACKWIDTH+10	; 10
+       sta_stack(i+11) and								// sta :STACKORIGIN+STACKWIDTH+9	; 11
+
+       lda_stack(i+12) and								// lda :STACKORIGIN+9			; 12
+       add_im_0(i+13) and								// add #$00				; 13
+       tay(i+14) and									// tay					; 14
+       lda_stack(i+15) and								// lda :STACKORIGIN+STACKWIDTH+9	; 15
+       adc_im_0(i+16) and								// adc #$00				; 16
+       sta_stack(i+17) then								// sta :STACKORIGIN+STACKWIDTH+9	; 17
+
+     if argMatch(i+2, i+7) and
+        argMatch(i+5, i+10) and
+        argMatch(i+6, i+8) and
+	argMatch(i+8, i+12) and
+	argMatch(i+9, i+11) and
+	argMatch(i+11, i+15) then
+       begin
+
+	if (i > 0) and sta_stack(i-1) and argMatch(i-1, i+9) then listing[i-1] := '';
+
+	listing[i+3] := '';
+	listing[i+4] := '';
+	listing[i+5] := '';
+
+	listing[i+9]  := '';
+	listing[i+10] := '';
+	listing[i+11] := '';
+
+	listing[i+15] := '';
+	listing[i+16] := '';
+	listing[i+17] := '';
+
+	exit(false);
+       end;
+
+
     if (lda_adr_y(i+12) or sta_adr_y(i+13)) and						// lda adr.|				; 12
        											//         |sta adr.			; 13
 
@@ -1935,56 +2043,6 @@ begin
 
 	listing[i+3] := '';
 	listing[i+4] := #9'lda ' + GetARG(i+4);
-
-	exit(false);
-       end;
-
-
-    if (lda_adr_y(i+18) or sta_adr_y(i+19)) and						// lda adr.|				; 18
-											//         |sta adr.			; 19
-
-       lda_im(i) and									// lda #				; 0
-       add(i+1) and (add_stack(i+1) = false) and (add_im(i+1) = false) and		// add					; 1
-       sta_stack(i+2) and								// sta :STACKORIGIN+10			; 2
-       lda_im(i+3) and									// lda #				; 3
-       adc(i+4) and (adc_stack(i+1) = false) and					// adc					; 4
-       sta_stack(i+5) and								// sta :STACKORIGIN+STACKWIDTH+10	; 5
-
-       lda_stack(i+6) and								// lda :STACKORIGIN+9			; 6
-       add_stack(i+7) and								// add :STACKORIGIN+10			; 7
-       sta_stack(i+8) and								// sta :STACKORIGIN+9			; 8
-       lda_stack(i+9) and								// lda :STACKORIGIN+STACKWIDTH+9	; 9
-       adc_stack(i+10) and								// adc :STACKORIGIN+STACKWIDTH+10	; 10
-       sta_stack(i+11) and								// sta :STACKORIGIN+STACKWIDTH+9	; 11
-
-       lda_stack(i+12) and								// lda :STACKORIGIN+9			; 12
-       add_im_0(i+13) and								// add #$00				; 13
-       tay(i+14) and									// tay					; 14
-       lda_stack(i+15) and								// lda :STACKORIGIN+STACKWIDTH+9	; 15
-       adc_im_0(i+16) and								// adc #$00				; 16
-       sta_stack(i+17) then								// sta :STACKORIGIN+STACKWIDTH+9	; 17
-
-     if argMatch(i+2, i+7) and
-        argMatch(i+5, i+10) and
-        argMatch(i+6, i+8) and
-	argMatch(i+8, i+12) and
-	argMatch(i+9, i+11) and
-	argMatch(i+11, i+15) then
-       begin
-	q:=GetWORD(i, i+3);
-
-        	LDA_STA_ADR(i+12, q, '+');
-
-	listing[i+7]  := #9'add ' + GetARG(i+1);
-
-	listing[i+10] := #9'adc ' + GetARG(i+4);
-
-	listing[i]   := '';
-	listing[i+1] := '';
-	listing[i+2] := '';
-	listing[i+3] := '';
-	listing[i+4] := '';
-	listing[i+5] := '';
 
 	exit(false);
        end;
@@ -2219,7 +2277,6 @@ begin
 
      exit(false);
     end;
-
 
 
 end;		// function
