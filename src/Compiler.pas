@@ -6913,10 +6913,7 @@ begin
 
       Push(Integer(NumAllocElements_ * Size), ASVALUE, GetDataSize(ArrayIndexType));
 
-     { if ShortArrayIndex then
-        GenerateBinaryOperation(TTokenKind.MULTOK, TDataType.BYTETOK)
-      else}
-        GenerateBinaryOperation(TTokenKind.MULTOK, ArrayIndexType);
+      GenerateBinaryOperation(TTokenKind.MULTOK, ArrayIndexType);
 
     end
     else
@@ -6925,10 +6922,7 @@ begin
 
          Push(ObjectRecordSize(NumAllocElements), ASVALUE, 2);
 
-         {if ShortArrayIndex then
-           GenerateBinaryOperation(TTokenKind.MULTOK, TDataType.BYTETOK)
-         else}
-           GenerateBinaryOperation(TTokenKind.MULTOK, ArrayIndexType);
+         GenerateBinaryOperation(TTokenKind.MULTOK, ArrayIndexType);
 
        end else
          GenerateIndexShift(IdentifierAt(IdentIndex).AllocElementType);
