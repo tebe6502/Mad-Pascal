@@ -1749,14 +1749,6 @@ begin
        end;
 
 
-
-
-
-
-
-
-
-
     if (lda_adr(i+12) or sta_adr(i+13)) and						// lda adr.|				; 12
 											//         |sta adr.			; 13
 

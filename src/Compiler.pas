@@ -6837,8 +6837,8 @@ begin
 
     if NumAllocElements_ > 0 then
     begin
-      if (NumAllocElements * NumAllocElements_ > 1) and (NumAllocElements * NumAllocElements_ * Size < 256) then
-        ShortArrayIndex := True;
+      if (NumAllocElements * NumAllocElements_ > 1) and
+         (NumAllocElements * NumAllocElements_ * Size < 256) then ShortArrayIndex := True;
     end
     else
       if (NumAllocElements > 1) and (NumAllocElements * Size < 256) then ShortArrayIndex := True;
@@ -6913,7 +6913,10 @@ begin
 
       Push(Integer(NumAllocElements_ * Size), ASVALUE, GetDataSize(ArrayIndexType));
 
-      GenerateBinaryOperation(TTokenKind.MULTOK, ArrayIndexType);
+     { if ShortArrayIndex then
+        GenerateBinaryOperation(TTokenKind.MULTOK, TDataType.BYTETOK)
+      else}
+        GenerateBinaryOperation(TTokenKind.MULTOK, ArrayIndexType);
 
     end
     else
@@ -6922,7 +6925,10 @@ begin
 
          Push(ObjectRecordSize(NumAllocElements), ASVALUE, 2);
 
-         GenerateBinaryOperation(TTokenKind.MULTOK, ArrayIndexType);
+         {if ShortArrayIndex then
+           GenerateBinaryOperation(TTokenKind.MULTOK, TDataType.BYTETOK)
+         else}
+           GenerateBinaryOperation(TTokenKind.MULTOK, ArrayIndexType);
 
        end else
          GenerateIndexShift(IdentifierAt(IdentIndex).AllocElementType);
