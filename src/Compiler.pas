@@ -703,12 +703,13 @@ begin
 
 end;
 
+
 procedure asm65separator(a: Boolean = True);
 begin
 
   if a then asm65;
 
-  asm65('; ' + StringOfChar('-', 60));
+  asm65('; ---------------------------------------------------------------');
 
 end;
 

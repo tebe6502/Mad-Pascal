@@ -128,7 +128,7 @@ begin
        asl_stack(i+3) and									// asl :STACKORIGIN			; 3
        rol_stack(i+4) and									// rol :STACKORIGIN+STACKWIDTH		; 4
        ldy(i+5) and										// ldy					; 5
-       lda_stack(i+6) then									// lda:STACKORIGIN+STACKWIDTH		; 6
+       lda_stack(i+6) then									// lda :STACKORIGIN+STACKWIDTH		; 6
 //       spl(i+7) then										// spl					; 7
      if argMatch(i, i+2) and
         argMatch(i+2, i+6) then
@@ -140,6 +140,48 @@ begin
 	listing[i+4] := #9'rol @';
 
 	listing[i+6] := #9'cmp #$00';
+
+	exit(false);
+      end;
+
+
+    if add_stack(i+9) and									// add :STACKORIGIN			; 9
+
+       asl_stack(i+4) and									// asl :STACKORIGIN			; 4
+
+       lda_val(i) and										// lda A				; 0
+       sta_stack(i+1) and									// sta :STACKORIGIN			; 1
+       lda_val(i+2) and										// lda A+1				; 2
+       sta_stack(i+3) and									// sta :STACKORIGIN+STACKWIDTH		; 3
+//       asl_stack(i+4) and									// asl :STACKORIGIN			; 4
+       rol_stack(i+5) and									// rol :STACKORIGIN+STACKWIDTH		; 5
+       asl_stack(i+6) and									// asl :STACKORIGIN			; 6
+       rol_stack(i+7) and									// rol :STACKORIGIN+STACKWIDTH		; 7
+       lda_a(i+8) and										// lda X				; 8
+//       add_stack(i+9) and									// add :STACKORIGIN			; 9
+       sta_a(i+10) and										// sta					; 10
+       lda_a(i+11) and										// lda X+1				; 11
+       adc_stack(i+12) and									// adc :STACKORIGIN+STACKWIDTH		; 12
+       sta_a(i+13) then										// sta					; 13
+     if argMatch(i+1, i+4) and
+        argMatch(i+3, i+5) and
+        argMatch(i+6, i+9) and
+        argMatch(i+7, i+12) then
+      begin
+	listing_tmp[0] := listing[i+2];
+	listing_tmp[1] := listing[i+3];
+	listing_tmp[2] := listing[i];
+
+	listing[i]   := listing_tmp[0];
+	listing[i+1] := listing_tmp[1];
+	listing[i+2] := listing_tmp[2];
+	listing[i+3] := '';
+	listing[i+4] := #9'asl @';
+
+	listing[i+6] := #9'asl @';
+
+	listing[i+8] := #9'add ' + GetARG(i+8);
+	listing[i+9] := '';
 
 	exit(false);
       end;
