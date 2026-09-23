@@ -18,7 +18,7 @@ const
 
   MaxCount = 15;
   BlockSize = 9;	// 9; 33
-  
+
   MaxX = 80;
   MaxY = 192;
 
@@ -40,11 +40,11 @@ end;
 Procedure PutABox (A1,B1,A2,B2,C: byte);
 
 begin
-  
+
 {$IFDEF ATARI}
   SetColor(C);
-{$ELSE} 
-  SetFillStyle (SolidFill,C);  
+{$ELSE}
+  SetFillStyle (SolidFill,C);
 {$ENDIF}
 
   Bar (A1,B1,A2,B2);
@@ -59,10 +59,10 @@ Function GetMandel (SX,SY : byte) : shortint;
 var
 {$IFDEF ATARI}
   XY,XX,YY,A,B,X,Y : shortreal;
-{$ELSE} 
+{$ELSE}
   XY,XX,YY,A,B,X,Y : real;
 {$ENDIF}
-  
+
   Count : byte;
 
 begin
@@ -91,7 +91,7 @@ begin
     Y := XY+XY + B;
     Inc (Count);
   Until (4.0 < XX+YY) or (Count > MaxCount);
-  
+
   If Count > MaxCount then
     GetMandel := 7
   else
@@ -121,7 +121,7 @@ begin
     end;
 
   Color := -1;
-  
+
   For X := AX to AX+Size do
     begin
       If A[X,AY]=-1 then A[X,AY] := GetMandel(SX+X-1,SY+AY-1);
@@ -148,7 +148,7 @@ begin
       DoSmallBlock (SX,SY,AX,AY,Size);
       DoSmallBlock (SX,SY,AX+Size,AY,Size);
       DoSmallBlock (SX,SY,AX,AY+Size,Size);
-      DoSmallBlock (SX,SY,AX+Size,AY+Size,Size); 
+      DoSmallBlock (SX,SY,AX+Size,AY+Size,Size);
     end;
 
 end;
@@ -174,12 +174,12 @@ var
   D, X,Y : byte;
 
 begin
-  D := 1;
-  If IsMandel and (Y1+Y2=0) then D := 2;
-  If Not IsMandel and (X1+X2=0) and (Y1+Y2=0) then D := 2;
+  D := MaxY div BlockSize;	// D = 1 -> MaxY div 1 div BlockSize
+  If IsMandel and (Y1+Y2=0) then D := MaxY div 2 div BlockSize;	// D=2 -> MaxY div 2 div BlockSize
+  If Not IsMandel and (X1+X2=0) and (Y1+Y2=0) then D := MaxY div 2 div BlockSize; // D=2 -> MaxY div 2 div BlockSize
 
   For X := 0 to MaxX div BlockSize do
-    For Y := 0 to MaxY div D div BlockSize do
+    For Y := 0 to D do		// MaxY div D div BlockSize
       begin
         DoBlock(X,Y);
         If Keypressed then Halt;
@@ -198,7 +198,7 @@ begin
  Palette[5] := $74;	// 709
  Palette[6] := $3c;	// 710
  Palette[7] := $0c;	// 711
- Palette[8] := $f6;	// 712  
+ Palette[8] := $f6;	// 712
 {$ELSE}
   GraphDriver := Detect;
   InitGraph (GraphDriver, GraphMode, '..');
@@ -218,4 +218,4 @@ begin
 
 end.
 
-// 4532
+// 4520
