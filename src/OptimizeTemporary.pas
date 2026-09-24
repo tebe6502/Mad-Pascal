@@ -109,20 +109,20 @@ var
   function IFDEF_MUL8(const i: TTemporaryBufIndex): Boolean;
   begin
       Result :=	//(TemporaryBuf[i+4] = #9'eif') and
-      		//(TemporaryBuf[i+3] = #9'imulCL') and
+      		(TemporaryBuf[i+3] = #9'@imulCL') and
       		//(TemporaryBuf[i+2] = #9'els') and
-		(TemporaryBuf[i+1] = #9'fmulu_8') and
-		(TemporaryBuf[i]   = #9'.ifdef fmulinit');
+		//(TemporaryBuf[i+1] = #9'@fmulu_8') and
+		(TemporaryBuf[i]   = #9'.ifdef @fmulinit');
   end;
 
 
   function IFDEF_MUL16(const i: TTemporaryBufIndex): Boolean;
   begin
       Result :=	//(TemporaryBuf[i+4] = #9'eif') and
-      		//(TemporaryBuf[i+3] = #9'imulCX') and
+      		(TemporaryBuf[i+3] = #9'@imulCX') and
       		//(TemporaryBuf[i+2] = #9'els') and
-		(TemporaryBuf[i+1] = #9'fmulu_16') and
-		(TemporaryBuf[i]   = #9'.ifdef fmulinit');
+		//(TemporaryBuf[i+1] = #9'@fmulu_16') and
+		(TemporaryBuf[i]   = #9'.ifdef @fmulinit');
   end;
 
 

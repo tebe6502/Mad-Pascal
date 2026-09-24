@@ -365,18 +365,20 @@ var
   begin
     Result :=
       //(listing[i+4] = #9'eif') and
-      //(listing[i+3] = #9'imulCL') and
+      (listing[i+3] = #9'@imulCL') and
       //(listing[i+2] = #9'els') and
-      (listing[i + 1] = #9'fmulu_8') and (listing[i] = #9'.ifdef fmulinit');
+      //(listing[i + 1] = #9'@fmulu_8') and
+      (listing[i] = #9'.ifdef @fmulinit');
   end;
 
   function IFDEF_MUL16(const i: TListingIndex): Boolean;
   begin
     Result :=
       //(listing[i+4] = #9'eif') and
-      //(listing[i+3] = #9'imulCX') and
+      (listing[i+3] = #9'@imulCX') and
       //(listing[i+2] = #9'els') and
-      (listing[i + 1] = #9'fmulu_16') and (listing[i] = #9'.ifdef fmulinit');
+      //(listing[i + 1] = #9'@fmulu_16') and
+      (listing[i] = #9'.ifdef @fmulinit');
   end;
 
 
@@ -385,6 +387,28 @@ var
 
     Result := (lda_bp_y(i) and sta_a(i + 1)) or (lda_a(i) and sta_bp_y(i + 1));
 
+  end;
+
+
+  // -----------------------------------------------------------------------------
+
+
+  procedure MUL8(const i: TListingIndex);
+  begin
+	listing[i]   := #9'.ifdef @fmulinit';
+	listing[i+1] := #9'@fmulu_8';
+	listing[i+2] := #9'els';
+	listing[i+3] := #9'@imulCL';
+	listing[i+4] := #9'eif';
+  end;
+
+  procedure MUL16(const i: TListingIndex);
+  begin
+	listing[i]   := #9'.ifdef @fmulinit';
+	listing[i+1] := #9'@fmulu_16';
+	listing[i+2] := #9'els';
+	listing[i+3] := #9'@imulCX';
+	listing[i+4] := #9'eif';
   end;
 
 
@@ -462,7 +486,7 @@ var
 
   procedure Expand(const i, e: TListingIndex);
   var
-    k: Integer;
+    k: TListingIndex;
   begin
 
     for k := l - 1 downto i do
@@ -866,7 +890,7 @@ var
   sta :ecx
   lda #$00
   sta :ecx+1
-  jsr idivEAX_CX
+  jsr idivjsr idivEAX_CX
   ldy :STACKORIGIN+9
   lda :eax
   sta adr.TB,y
@@ -1774,12 +1798,7 @@ begin        // OptimizeASM
 	 Inc(l);
 	end;
 
-	listing[l+4] := #9'.ifdef fmulinit';
-	listing[l+5] := #9'fmulu_8';
-	listing[l+6] := #9'els';
-	listing[l+7] := #9'imulCL';
-	listing[l+8] := #9'eif';
-
+        MUL8(l+4);
 
 	if lda_im(l) and					// #const
 	   sta_ecx(l+1) and
@@ -1902,15 +1921,8 @@ begin        // OptimizeASM
          listing[l+11]:= '';
          listing[l+12]:= '';
 
-	end else begin
-
-	 listing[l+8]  := #9'.ifdef fmulinit';
-	 listing[l+9]  := #9'fmulu_16';
-	 listing[l+10] := #9'els';
-	 listing[l+11] := #9'imulCX';
-	 listing[l+12] := #9'eif';
-
-	end;
+	end else
+	 MUL16(l+8);
 
 	Inc(l, 13);
 
@@ -1960,17 +1972,13 @@ begin        // OptimizeASM
        lda_im_0(m+6) and								// lda #$00				; 6
        sta_eax_1(m+7) and								// sta :eax+1				; 7
 
-       IFDEF_MUL16(m+8) then								// .ifdef fmulinit			; 8
-       											// fmulu_16				; 9
+       IFDEF_MUL16(m+8) then								// .ifdef @fmulinit			; 8
+       											// @fmulu_16				; 9
      begin
       listing[m+2] := listing[m+4];
       listing[m+3] := listing[m+5];
 
-      listing[m+4] := listing[m+8];
-      listing[m+5] := #9'fmulu_8';
-      listing[m+6] := listing[m+10];
-      listing[m+7] := #9'imulCL';
-      listing[m+8] := listing[m+12];
+      MUL8(m+4);
 
       l := m + 9;
 
@@ -2025,7 +2033,7 @@ begin        // OptimizeASM
 
         end;
 
-	listing[l+16] := #9'jsr imulECX';
+	listing[l+16] := #9'jsr @imulECX';
 
 	Inc(l, 17);
 

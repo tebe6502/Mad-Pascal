@@ -747,7 +747,7 @@ begin
     TCode65.subAX_CX: asm65(#9'jsr subAX_CX');
     TCode65.subEAX_ECX: asm65(#9'jsr subEAX_ECX');
 
-    TCode65.imulECX: asm65(#9'jsr imulECX');
+    TCode65.imulECX: asm65(#9'jsr @imulECX');
 
     TCode65.movaBX_Value: begin
 
@@ -20456,7 +20456,7 @@ end;
     asm65(#9'icl ''common\fmul.asm''', '; fast multiplication');
 
     asm65;
-    asm65(#9'.print ''FMUL_INIT: '',fmulinit,''..'',*-1');
+    asm65(#9'.print ''FMUL_INIT: '',@fmulinit,''..'',*-1');
 
     asm65;
     asm65(#9'org ' + HexByte(FastMul) + '00');

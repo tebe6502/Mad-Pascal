@@ -29,7 +29,7 @@ begin
       end;
 
 
-    if (listing[i+12] = #9'jsr imulECX') and						// jsr imulECX		; 12
+    if (listing[i+12] = #9'jsr @imulECX') and						// jsr @imulECX		; 12
 
        lda_im_0(i+8) and								// lda #$00		; 8
 
@@ -45,18 +45,20 @@ begin
        sta_ecx_2(i+9) and								// sta :ecx+2		; 9
        lda_im_0(i+10) and								// lda #$00		; 10
        sta_ecx_3(i+11) then								// sta :ecx+3		; 11
-//       (listing[i+12] = #9'jsr imulECX') then						// jsr imulECX		; 12
+//       (listing[i+12] = #9'jsr @imulECX') then					// jsr @imulECX		; 12
       begin
 	listing[i]   := listing[i+4];
 	listing[i+1] := listing[i+5];
 	listing[i+2] := listing[i+6];
 	listing[i+3] := listing[i+7];
 
-	listing[i+4] := #9'.ifdef fmulinit';
-	listing[i+5] := #9'fmulu_16';
-	listing[i+6] := #9'els';
-	listing[i+7] := #9'imulCX';
-	listing[i+8] := #9'eif';
+	MUL16(i+4);
+
+//	listing[i+4] := #9'.ifdef @fmulinit';
+//	listing[i+5] := #9'@fmulu_16';
+//	listing[i+6] := #9'els';
+//	listing[i+7] := #9'@imulCX';
+//	listing[i+8] := #9'eif';
 
 	listing[i+9] := '';
 	listing[i+10]:= '';
@@ -67,7 +69,7 @@ begin
       end;
 
 
-    if (listing[i+12] = #9'jsr imulECX') and						// jsr imulECX		; 12
+    if (listing[i+12] = #9'jsr @imulECX') and						// jsr @imulECX		; 12
 
        lda_im_0(i+8) and								// lda #$00		; 8
 
@@ -83,18 +85,20 @@ begin
        sta_eax_2(i+9) and								// sta :eax+2		; 9
        lda_im_0(i+10) and								// lda #$00		; 10
        sta_eax_3(i+11) then								// sta :eax+3		; 11
-//       (listing[i+12] = #9'jsr imulECX') then						// jsr imulECX		; 12
+//       (listing[i+12] = #9'jsr @imulECX') then					// jsr @imulECX		; 12
       begin
 	listing[i]   := listing[i+4];
 	listing[i+1] := listing[i+5];
 	listing[i+2] := listing[i+6];
 	listing[i+3] := listing[i+7];
 
-	listing[i+4] := #9'.ifdef fmulinit';
-	listing[i+5] := #9'fmulu_16';
-	listing[i+6] := #9'els';
-	listing[i+7] := #9'imulCX';
-	listing[i+8] := #9'eif';
+	MUL16(i+4);
+
+//	listing[i+4] := #9'.ifdef @fmulinit';
+//	listing[i+5] := #9'@fmulu_16';
+//	listing[i+6] := #9'els';
+//	listing[i+7] := #9'@imulCX';
+//	listing[i+8] := #9'eif';
 
 	listing[i+9] := '';
 	listing[i+10]:= '';

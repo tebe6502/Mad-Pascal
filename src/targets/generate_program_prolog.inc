@@ -315,7 +315,7 @@ end;
  end;
 
 
- if FastMul > 0 then begin asm65(#9'fmulinit'); asm65; end;
+ if FastMul > 0 then begin asm65(#9'@fmulinit'); asm65; end;
 
 
  if (LIBRARY_USE = FALSE) then begin

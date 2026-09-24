@@ -156,7 +156,7 @@ asm
   sta :ecx
   sty :eax
 
-  jsr imulCL
+  jsr @imulCL
   tay
 
 stop  sty Result

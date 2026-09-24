@@ -1,5 +1,5 @@
 
-.proc	fmulinit
+.proc	@fmulinit
 
 	.ifdef MAIN.@DEFINES.ATARI
 	bit VCOUNT

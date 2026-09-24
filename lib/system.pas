@@ -1214,7 +1214,7 @@ asm
 	mva a+2 :ecx+2
 	mva a+3 :ecx+3
 
-	jsr imulECX
+	jsr @imulECX
 
 	mva :eax icax3,x
 	mva :eax+1 icax4,x

@@ -1,11 +1,11 @@
 
 /*
-	imulECX
-	imulEAX_CX
+	@imulECX
+	@imulEAX_CX
 	imulCARD
-	idivCARD
-	idivEAX_ECX
-	idivEAX_CX
+	@idivCARD
+	@idivEAX_ECX
+	@idivEAX_CX
 */
 
 ;
@@ -18,23 +18,23 @@
 
 	jsr @iniEAX_ECX_CARD
 
-	jmp imulECX
+	jmp @imulECX
 .endp
 
 
-.proc	idivCARD
+.proc	@idivCARD
 
 MOD
 	jsr @iniEAX_ECX_CARD
 
-	jmp idivEAX_ECX.CARD
+	jmp @idivEAX_ECX.CARD
 .endp
 
 
 ;---------------------------------------------------------------------------
 ; *** MUL32: 32-bit multiply
 ; EAX * ECX -> ZTMP8-ZTMP11
-.proc	imulECX
+.proc	@imulECX
 
 	lda #0
 	sta :ZTMP10
@@ -76,7 +76,7 @@ MUL321	dey
 ; *** MUL32: 32-bit multiply
 ; EAX * CX -> ZTMP8-ZTMP11
 
-.proc	imulEAX_CX
+.proc	@imulEAX_CX
 
 	lda #0
 	sta :TMP
@@ -192,7 +192,7 @@ stop
 
 
 /*
-.proc	idivEAX_ECX
+.proc	@idivEAX_ECX
 
 REAL	mva :STACKORIGIN-1+STACKWIDTH*2,x :STACKORIGIN-1+STACKWIDTH*3,x
 	mva :STACKORIGIN-1+STACKWIDTH,x :STACKORIGIN-1+STACKWIDTH*2,x
@@ -264,7 +264,7 @@ UDIV321	DEY
 ;   ptr1:ptr2   ptr3          ax          ptr1              sreg
 ;
 
-.proc	idivEAX_CX
+.proc	@idivEAX_CX
 
 MOD
 

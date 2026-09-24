@@ -22,10 +22,10 @@ function imulCL_opt: Boolean;
    Result:=true;					// value TRUE, optimization has not been performed
 							// value FALSE, optimization has been performed
 
-   if IFDEF_MUL8(m+4) then								// .ifdef fmulinit			; 4
-       											// fmulu_8				; 5
+   if IFDEF_MUL8(m+4) then								// .ifdef @fmulinit			; 4
+       											// @fmulu_8				; 5
        											// els					; 6
-       						 					// imulCL				; 7
+       						 					// @imulCL				; 7
        											// eif					; 8
    begin
 

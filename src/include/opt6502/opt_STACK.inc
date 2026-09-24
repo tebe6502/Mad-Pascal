@@ -2769,23 +2769,6 @@ begin
       end;
 
 
-     if (listing[i+4] = #9'jsr imulBYTE') and							// jsr imulBYTE				; 4
-
-        mva(i) and										// mva .. :STACKORIGIN,x		; 0
-        mva(i+1) and										// mva .. :STACKORIGIN+STACKWIDTH,x	; 1
-        inx(i+2) and										// inx					; 2
-	mva(i+3) then										// mva .. :STACKORIGIN,x		; 3
-//	(listing[i+4] = #9'jsr imulBYTE') then							// jsr imulBYTE				; 4
-     if stack_0x(i) and
-        stack_1x(i+1) and
-        stack_0x(i+3) then
-      begin
-       listing[i+1] := '';
-
-       exit(false);
-      end;
-
-
      if (listing[i+8] = #9'jsr @expandToREAL') and						// jsr @expandToREAL			; 8
 
         sta_stack_3x(i+7) and									// sta :STACKORIGIN+STACKWIDTH*3,x	; 7
@@ -2958,6 +2941,53 @@ begin
        listing[i+7]:= '';
 
        listing[i+13]:= '';
+
+       exit(false);
+      end;
+
+
+// -----------------------------------------------------------------------------
+
+
+     if (listing[i+4] = #9'jsr imulBYTE') and							// jsr imulBYTE				; 4
+
+        inx(i+2) and										// inx					; 2
+
+        mva(i) and										// mva .. :STACKORIGIN,x		; 0
+        mva(i+1) and										// mva .. :STACKORIGIN+STACKWIDTH,x	; 1
+//        inx(i+2) and										// inx					; 2
+	mva(i+3) then										// mva .. :STACKORIGIN,x		; 3
+//	(listing[i+4] = #9'jsr imulBYTE') then							// jsr imulBYTE				; 4
+     if stack_0x(i) and
+        stack_1x(i+1) and
+        stack_0x(i+3) then
+      begin
+       listing[i+1] := '';
+
+       exit(false);
+      end;
+
+
+     if (listing[i+3] = #9'jsr imulBYTE') and							// jsr imulBYTE				; 3
+
+        inx(i+1) and										// inx					; 1
+
+        mva(i) and										// mva .. :STACKORIGIN,x		; 0
+//        inx(i+1) and										// inx					; 1
+	mva(i+2) and										// mva .. :STACKORIGIN,x		; 2
+//	(listing[i+3] = #9'jsr imulBYTE') and							// jsr imulBYTE				; 3
+	dex(i+4) then										// dex					; 4
+     if stack_0x(i) and
+        stack_0x(i+2) then
+      begin
+       Expand(i+3, 4);
+
+       listing[i]   := #9'lda ' + GetString(i);
+       listing[i+1] := #9'sta :ecx';
+       listing[i+2] := #9'lda ' + GetString(i+2);
+       listing[i+3] := #9'sta :eax';
+
+       MUL8(i+4);
 
        exit(false);
       end;

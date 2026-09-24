@@ -38,10 +38,10 @@ B	= :ECX
 	sta B+1
 @
 
-	.ifdef fmulinit
-	jsr fmulu_16
+	.ifdef @fmulinit
+	jsr @fmulu_16
 	els
-	jsr imulCX
+	jsr @imulCX
 	eif
 
 	pla

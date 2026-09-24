@@ -1,10 +1,10 @@
 
 /*
-	fmulu_16
-	imulCX
-	imulCX_AL
+	@fmulu_16
+	@imulCX
+	@imulCX_AL
 	imulWORD
-	idivWORD
+	@idivWORD
 	@WORD.DIV
 	@WORD.MOD
 
@@ -49,11 +49,11 @@
 ;
 ;		 Setup T1 if changed
 
-	.ifdef fmulinit
+	.ifdef @fmulinit
 	.align
 	eif
 
-.proc	fmulu_16
+.proc	@fmulu_16
 
 t1	= :eax
 t2	= :ecx
@@ -239,15 +239,15 @@ _dd:		lda #0
 	mva :STACKORIGIN-1,x :eax
 	mva :STACKORIGIN-1+STACKWIDTH,x :eax+1
 
-	.ifdef fmulinit
-	jmp fmulu_16
+	.ifdef @fmulinit
+	jmp @fmulu_16
 	els
-	jmp imulCX
+	jmp @imulCX
 	eif
 .endp
 
 
-.proc	idivWORD
+.proc	@idivWORD
 
 MOD
 	mva :STACKORIGIN,x :ecx
@@ -267,7 +267,7 @@ MOD
 ; CC65 runtime: 16x16 => 32 unsigned multiplication
 ;
 
-.proc	imulCX
+.proc	@imulCX
 
 ptr1 = :EAX
 sreg = :EAX+2
@@ -278,7 +278,7 @@ ptr3 = :ECX
 	beq	umul8x8r16
 
 	lda	ptr1+1
-	beq	imulCX_AL
+	beq	@imulCX_AL
 
 	lda	ptr3
 	sta	ptr3_l
@@ -345,7 +345,7 @@ ptr3 = :ECX
 ; CC65 runtime: 8x16 => 24 unsigned multiplication
 ;
 
-.proc	imulCX_AL
+.proc	@imulCX_AL
 
 ptr1 = :EAX
 sreg = :EAX+2
@@ -477,7 +477,7 @@ RESULT	= :ZTMP
 	sta :eax+2
 	sta :eax+3
 
-     .ifdef fmulinit
+     .ifdef @fmulinit
 
 	.REPT 16,#
 	ASL :ax

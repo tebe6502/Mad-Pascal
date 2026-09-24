@@ -1,9 +1,9 @@
 
 /*
-	fmulu_8
-	imulCL
+	@fmulu_8
+	@imulCL
 	imulBYTE
-	idivBYTE
+	@idivBYTE
 	@BYTE.MOD
 	@BYTE.DIV
 */
@@ -30,7 +30,7 @@
 ;		    square1_hi = >((I*I)/4)
 ;		    square2_lo = <(((I-255)*(I-255))/4)
 ;		    square2_hi = >(((I-255)*(I-255))/4)
-.proc fmulu_8
+.proc @fmulu_8
 
 t1	= :eax
 t2	= :ecx
@@ -71,16 +71,16 @@ sm4:		sbc square2_hi,y
 	sta :eax+2
 	sta :eax+3
 
-	.ifdef fmulinit
-	jmp fmulu_8
+	.ifdef @fmulinit
+	jmp @fmulu_8
 	els
-	jmp imulCL
+	jmp @imulCL
 	eif
 
 .endp
 
 
-.proc	idivBYTE
+.proc	@idivBYTE
 
 MOD
 	mva :STACKORIGIN,x :ecx
@@ -97,7 +97,7 @@ MOD
 ; CC65 runtime: 8x8 => 16 unsigned multiplication
 ;
 
-.proc	imulCL
+.proc	@imulCL
 
 ptr1 = :ECX
 ptr4 = :EAX

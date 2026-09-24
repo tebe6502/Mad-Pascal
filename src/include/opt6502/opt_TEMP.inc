@@ -921,7 +921,7 @@ begin
     end;
 
 
-   if (TemporaryBuf[0] = #9'imulCL') and						// imulCL		; 0
+   if (TemporaryBuf[0] = #9'@imulCL') and						// @imulCL		; 0
       eif(1) and									// eif			; 1
       lda_eax(2) and									// lda :eax		; 2
       sta(3) and									// sta Y		; 3

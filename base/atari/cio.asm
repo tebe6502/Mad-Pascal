@@ -1,7 +1,7 @@
 
 //	@buf		(rtl6502_a8.asm)
 //	@WORD.DIV	(common\word.asm)
-//	imulCX		(common\word.asm)
+//	@imulCX		(common\word.asm)
 //	printSTRING	(common\printstr.asm)
 //	printVALUE	(common\printint.asm)
 
@@ -210,7 +210,7 @@ ok_open	ldy	#s@file.record
 	ldy	#s@file.nrecord
 	mwa	(bp2),y	eax
 
-	jsr	imulCX			; record * nrecord = file length to load
+	jsr	@imulCX			; record * nrecord = file length to load
 
 	lda	eax
 	ora	eax+1

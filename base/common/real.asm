@@ -36,10 +36,10 @@ B	= :ECX
 	ora B+2
 	bne m32
 
-	.ifdef fmulinit
-	jsr fmulu_16
+	.ifdef @fmulinit
+	jsr @fmulu_16
 	els
-	jsr imulCX
+	jsr @imulCX
 	eif
 
 	pla

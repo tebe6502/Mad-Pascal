@@ -135,16 +135,16 @@ Generate random number
 @returns: byte
 *)
 asm
-		phx
-		jsr entropy_get
-		lda range
-		beq stop
-		sta :ecx
-		sty :eax
-		jsr imulCL
-		tay
+	phx
+	jsr entropy_get
+	lda range
+	beq stop
+	sta :ecx
+	sty :eax
+	jsr @imulCL
+	tay
 stop	sty Result
-		plx
+	plx
 end;
 
 
