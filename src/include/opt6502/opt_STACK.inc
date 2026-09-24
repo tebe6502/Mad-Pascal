@@ -2949,6 +2949,26 @@ begin
 // -----------------------------------------------------------------------------
 
 
+     if (listing[i] = #9'jsr imulBYTE') and							// jsr imulBYTE				; 0
+
+	dex(i+5) and										// dex					; 5
+
+        lda_val(i+1) and									// lda					; 1
+        sta_stack_prev_0x(i+2) and								// sta :STACKORIGIN-1,x			; 2
+        lda_val(i+3) and									// lda					; 3
+        sta_stack_prev_1x(i+4) then								// sta :STACKORIGIN-1+STACKWIDTH,x	; 4
+//	dex(i+5) then										// dex					; 5
+      begin
+       listing[i+5] := #9'sta :STACKORIGIN+STACKWIDTH,x';
+       listing[i+4] := listing[i+3];
+       listing[i+3] := #9'sta :STACKORIGIN,x';
+       listing[i+2] := listing[i+1];
+       listing[i+1] := #9'dex';
+
+       exit(false);
+      end;
+
+
      if (listing[i+4] = #9'jsr imulBYTE') and							// jsr imulBYTE				; 4
 
         inx(i+2) and										// inx					; 2
@@ -2988,6 +3008,94 @@ begin
        listing[i+3] := #9'sta :eax';
 
        MUL8(i+4);
+
+       exit(false);
+      end;
+
+
+     if (listing[i+5] = #9'jsr imulWORD') and							// jsr imulWORD				; 5
+
+        inx(i+2) and										// inx					; 2
+
+        mva(i) and										// mva .. :STACKORIGIN,x		; 0
+        mva(i+1) and										// mva .. :STACKORIGIN+STACKWIDTH,x	; 1
+//        inx(i+2) and										// inx					; 2
+	mva(i+3) and										// mva .. :STACKORIGIN,x		; 3
+        mva(i+4) and										// mva .. :STACKORIGIN+STACKWIDTH,x	; 4
+//	(listing[i+5] = #9'jsr imulWORD') and							// jsr imulWORD				; 5
+	dex(i+6) then										// dex					; 6
+     if stack_0x(i) and
+        stack_1x(i+1) and
+	stack_0x(i+3) and
+	stack_1x(i+4) then
+      begin
+       Expand(i+5, 6);
+
+       listing_tmp[0] := #9'lda ' + GetString(i);
+       listing_tmp[1] := #9'sta :ecx';
+       listing_tmp[2] := #9'lda ' + GetString(i+1);
+       listing_tmp[3] := #9'sta :ecx+1';
+       listing_tmp[4] := #9'lda ' + GetString(i+3);
+       listing_tmp[5] := #9'sta :eax';
+       listing_tmp[6] := #9'lda ' + GetString(i+4);
+       listing_tmp[7] := #9'sta :eax+1';
+
+       listing[i]   := listing_tmp[0];
+       listing[i+1] := listing_tmp[1];
+       listing[i+2] := listing_tmp[2];
+       listing[i+3] := listing_tmp[3];
+       listing[i+4] := listing_tmp[4];
+       listing[i+5] := listing_tmp[5];
+       listing[i+6] := listing_tmp[6];
+       listing[i+7] := listing_tmp[7];
+
+       MUL16(i+8);
+
+       exit(false);
+      end;
+
+
+     if (listing[i+8] = #9'jsr imulWORD') and							// jsr imulWORD				; 8
+
+        lda_val(i) and										// lda					; 0
+        add_sub_val(i+1) and									// add|sub				; 1
+	sta_stack_prev_0x(i+2) and								// sta :STACKORIGIN-1,x			; 2
+        lda_val(i+3) and									// lda					; 3
+        adc_sbc_val(i+4) and									// adc|sbc				; 4
+	sta_stack_prev_1x(i+5) and								// sta :STACKORIGIN-1+STACKWIDTH,x	; 5
+	mva(i+6) and										// mva .. :STACKORIGIN,x		; 6
+        mva(i+7) and										// mva .. :STACKORIGIN+STACKWIDTH,x	; 7
+//	(listing[i+8] = #9'jsr imulWORD') and							// jsr imulWORD				; 8
+	dex(i+9) then										// dex					; 9
+     if stack_0x(i+6) and
+        stack_1x(i+7) then
+      begin
+       Expand(i+8, 6);
+
+       listing_tmp[0] := listing[i];
+       listing_tmp[1] := listing[i+1];
+       listing_tmp[2] := #9'sta :ecx';
+       listing_tmp[3] := listing[i+3];
+       listing_tmp[4] := listing[i+4];
+       listing_tmp[5] := #9'sta :ecx+1';
+       listing_tmp[6] := #9'lda ' + GetString(i+6);
+       listing_tmp[7] := #9'sta :eax';
+       listing_tmp[8] := #9'lda ' + GetString(i+7);
+       listing_tmp[9] := #9'sta :eax+1';
+
+       listing[i]   := #9'dex';
+       listing[i+1] := listing_tmp[0];
+       listing[i+2] := listing_tmp[1];
+       listing[i+3] := listing_tmp[2];
+       listing[i+4] := listing_tmp[3];
+       listing[i+5] := listing_tmp[4];
+       listing[i+6] := listing_tmp[5];
+       listing[i+7] := listing_tmp[6];
+       listing[i+8] := listing_tmp[7];
+       listing[i+9] := listing_tmp[8];
+       listing[i+10]:= listing_tmp[9];
+
+       MUL16(i+11);
 
        exit(false);
       end;

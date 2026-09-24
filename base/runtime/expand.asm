@@ -24,19 +24,15 @@
 .proc	@expandToCARD
 
 SMALL	lda :STACKORIGIN+STACKWIDTH,x
-	bpl WORD
-
-	lda #$ff
-	bne _wo
+	ora #$7f
+	bmi _wo
 
 WORD	lda #$00
 	beq _wo
 
 SHORT	lda :STACKORIGIN,x
-	bpl BYTE
-
-	lda #$ff
-	bne _by
+	ora #$7f
+	smi
 
 BYTE	lda #$00
 
@@ -50,19 +46,15 @@ _lo	sta :STACKORIGIN+STACKWIDTH*3,x
 .proc	@expandToCARD1
 
 SMALL	lda :STACKORIGIN-1+STACKWIDTH,x
-	bpl WORD
-
-	lda #$ff
-	bne _wo
+	ora #$7f
+	bmi _wo
 
 WORD	lda #$00
 	beq _wo
 
 SHORT	lda :STACKORIGIN-1,x
-	bpl BYTE
-
-	lda #$ff
-	bne _by
+	ora #$7f
+	smi
 
 BYTE	lda #$00
 

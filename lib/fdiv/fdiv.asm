@@ -4,7 +4,7 @@
 
 .extrn	square1_lo, square1_hi, square2_lo, square2_hi	.word
 
-.extrn	fmulu_16 .word
+.extrn	@fmulu_16 .word
 
 .public fastdiv, fastdivS
 
@@ -35,7 +35,7 @@ skp
 	lda hrcp,y
 	sta ecx+1
 
-	jmp fmulu_16
+	jmp @fmulu_16
 
 _hi
 	lda lrcp+$100,y
@@ -43,7 +43,7 @@ _hi
 	lda hrcp+$100,y
 	sta ecx+1
 
-	jmp fmulu_16
+	jmp @fmulu_16
 .endp
 
 
