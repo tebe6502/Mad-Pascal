@@ -2949,21 +2949,21 @@ begin
 // -----------------------------------------------------------------------------
 
 
-     if (listing[i] = #9'jsr imulBYTE') and							// jsr imulBYTE				; 0
+     if (listing[i+10] = #9'jsr imulBYTE') and							// jsr imulBYTE				; 10
 
-	dex(i+5) and										// dex					; 5
+	dex(i+15) and										// dex					; 15
 
-        lda_val(i+1) and									// lda					; 1
-        sta_stack_prev_0x(i+2) and								// sta :STACKORIGIN-1,x			; 2
-        lda_val(i+3) and									// lda					; 3
-        sta_stack_prev_1x(i+4) then								// sta :STACKORIGIN-1+STACKWIDTH,x	; 4
-//	dex(i+5) then										// dex					; 5
+        lda_val(i+11) and									// lda					; 11
+        sta_stack_prev_0x(i+12) and								// sta :STACKORIGIN-1,x			; 12
+        lda_val(i+13) and									// lda					; 13
+        sta_stack_prev_1x(i+14) then								// sta :STACKORIGIN-1+STACKWIDTH,x	; 14
+//	dex(i+15) then										// dex					; 15
       begin
-       listing[i+5] := #9'sta :STACKORIGIN+STACKWIDTH,x';
-       listing[i+4] := listing[i+3];
-       listing[i+3] := #9'sta :STACKORIGIN,x';
-       listing[i+2] := listing[i+1];
-       listing[i+1] := #9'dex';
+       listing[i+15] := #9'sta :STACKORIGIN+STACKWIDTH,x';
+       listing[i+14] := listing[i+13];
+       listing[i+13] := #9'sta :STACKORIGIN,x';
+       listing[i+12] := listing[i+11];
+       listing[i+11] := #9'dex';
 
        exit(false);
       end;
@@ -2988,15 +2988,20 @@ begin
       end;
 
 
+// -----------------------------------------------------------------------------
+
+
      if (listing[i+3] = #9'jsr imulBYTE') and							// jsr imulBYTE				; 3
+
+	dex(i+4) and										// dex					; 4
 
         inx(i+1) and										// inx					; 1
 
         mva(i) and										// mva .. :STACKORIGIN,x		; 0
 //        inx(i+1) and										// inx					; 1
-	mva(i+2) and										// mva .. :STACKORIGIN,x		; 2
+	mva(i+2) then										// mva .. :STACKORIGIN,x		; 2
 //	(listing[i+3] = #9'jsr imulBYTE') and							// jsr imulBYTE				; 3
-	dex(i+4) then										// dex					; 4
+//	dex(i+4) then										// dex					; 4
      if stack_0x(i) and
         stack_0x(i+2) then
       begin
@@ -3015,15 +3020,17 @@ begin
 
      if (listing[i+5] = #9'jsr imulWORD') and							// jsr imulWORD				; 5
 
+	dex(i+6) and										// dex					; 6
+
         inx(i+2) and										// inx					; 2
 
         mva(i) and										// mva .. :STACKORIGIN,x		; 0
         mva(i+1) and										// mva .. :STACKORIGIN+STACKWIDTH,x	; 1
 //        inx(i+2) and										// inx					; 2
 	mva(i+3) and										// mva .. :STACKORIGIN,x		; 3
-        mva(i+4) and										// mva .. :STACKORIGIN+STACKWIDTH,x	; 4
+        mva(i+4) then										// mva .. :STACKORIGIN+STACKWIDTH,x	; 4
 //	(listing[i+5] = #9'jsr imulWORD') and							// jsr imulWORD				; 5
-	dex(i+6) then										// dex					; 6
+//	dex(i+6) then										// dex					; 6
      if stack_0x(i) and
         stack_1x(i+1) and
 	stack_0x(i+3) and
@@ -3057,6 +3064,8 @@ begin
 
      if (listing[i+8] = #9'jsr imulWORD') and							// jsr imulWORD				; 8
 
+	dex(i+9) and										// dex					; 9
+
         lda_val(i) and										// lda					; 0
         add_sub_val(i+1) and									// add|sub				; 1
 	sta_stack_prev_0x(i+2) and								// sta :STACKORIGIN-1,x			; 2
@@ -3064,9 +3073,9 @@ begin
         adc_sbc_val(i+4) and									// adc|sbc				; 4
 	sta_stack_prev_1x(i+5) and								// sta :STACKORIGIN-1+STACKWIDTH,x	; 5
 	mva(i+6) and										// mva .. :STACKORIGIN,x		; 6
-        mva(i+7) and										// mva .. :STACKORIGIN+STACKWIDTH,x	; 7
+        mva(i+7) then										// mva .. :STACKORIGIN+STACKWIDTH,x	; 7
 //	(listing[i+8] = #9'jsr imulWORD') and							// jsr imulWORD				; 8
-	dex(i+9) then										// dex					; 9
+//	dex(i+9) then										// dex					; 9
      if stack_0x(i+6) and
         stack_1x(i+7) then
       begin
