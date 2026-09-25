@@ -1,9 +1,8 @@
 // archimedes spiral
 
-// 15165	single		5096 bytes
-// 10312	float16		5050 bytes
-// 5922		real		3910 bytes
-
+// 14254	single		5028 bytes
+// 9092		float16		5082 bytes
+// 5587		real		3864 bytes
 
 program fedora_hat;
 
@@ -12,7 +11,7 @@ uses crt, graph, sysutils;
 //{$f $40}
 
 type
- TFloat = real;
+ TFloat = float16;
 
 const
  sx: TFloat = 144;
@@ -23,7 +22,6 @@ const
  cx = 320;
  cy = 192;
 
-
 var
  c1, c2, scx, scy, xf, zt, zs, fx, fy, fz, zx, zy, a, ifz: TFloat;
 
@@ -31,16 +29,15 @@ var
 
  gd, gm: smallint;
 
- x1: word;
+ x1, ml, delta: word;
  y1: byte;
 
- xi, xl: byte;
-
- zi: byte;
+ zi, xi, xl, hlp: byte;
 
  tim: cardinal;
 
  rr: array [0..cx-1] of byte;
+
 
 begin
 
@@ -48,6 +45,7 @@ gd := D8bit;
 gm := m640x480;
 
 InitGraph(gd,gm,'');
+
 
 tim:=GetTickCount;
 
@@ -73,19 +71,26 @@ for zi:=127 downto 0 do begin		// -64 .. 64
 
  zx:=ifz+scx;
  zy:=ifz+scy;
+ 
+ ml:=0;		// ml -> xi*xi
+ delta:=1;
 
- for xi:=xl downto 0 do begin
+ for xi:=0 to xl do begin
 
-  a:=sin(xf*sqrt(xi*xi+zs));
+  a:=sin(xf * sqrt(ml + zs));
 
   y1:=trunc(zy-a*(c1-a*a*c2));
 
-  x1:=trunc(xi+zx);
+  hlp:=trunc(zx);
+  
+  x1:=hlp + xi;
   if rr[x1] > y1 then begin rr[x1]:=y1; PutPixel(x1,y1, 15) end;
 
-  x1:=trunc(zx-xi);
+  x1:=hlp - xi;
   if rr[x1] > y1 then begin rr[x1]:=y1; PutPixel(x1,y1, 15) end;
 
+  ml:=ml+delta;
+  delta:=delta+2;
  end;
 
  zt:=zt-fx;

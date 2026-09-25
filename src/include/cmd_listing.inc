@@ -1056,6 +1056,11 @@ begin
   Result := (listing[i] = #9'jsr addEAX_ECX') or (listing[i] = #9'jsr subEAX_ECX');
 end;
 
+function ADD_EAX_ECX(const i: Integer): Boolean;
+begin
+  Result := (listing[i] = #9'jsr addEAX_ECX');
+end;
+
 // -----------------------------------------------------------------------------
 
 function LDA_EAX_X(const i: Integer): Boolean;

@@ -16,8 +16,8 @@ begin
 
        mva(i) and 										// mva  :STACKORIGIN,x			; 0
        mva(i+1) and										// mva  :STACKORIGIN+STACKWIDTH,x	; 1
-       mva(i+2) and (mva_im_0(i+2) = false) and							// mva  :STACKORIGIN+STACKWIDTH*2,x	; 2
-       mva(i+3) and (mva_im_0(i+3) = false) and							// mva  :STACKORIGIN+STACKWIDTH*3,x	; 3
+       mva(i+2) and {(mva_im_0(i+2) = false) and}						// mva  :STACKORIGIN+STACKWIDTH*2,x	; 2
+       mva(i+3) and {(mva_im_0(i+3) = false) and}						// mva  :STACKORIGIN+STACKWIDTH*3,x	; 3
 //       inx(i+4) and										// inx					; 4
        mva(i+5) and 										// mva  :STACKORIGIN,x			; 5
        mva(i+6) and 										// mva  :STACKORIGIN+STACKWIDTH,x	; 6
@@ -43,7 +43,7 @@ begin
 	stack_3x(i+8) then
      begin
 
-	if (listing[i+9] = #9'jsr addEAX_ECX') then begin
+	if ADD_EAX_ECX(i+9) then begin
 	 listing_tmp[0] := #9'lda ' + GetString(i);
 	 listing_tmp[1] := #9'add ' + GetString(i+5);
 	 listing_tmp[2] := listing[i+12];
@@ -128,7 +128,7 @@ begin
 	stack_3x(i+7) then
      begin
 
-	if (listing[i+8] = #9'jsr addEAX_ECX') then begin
+	if ADD_EAX_ECX(i+8) then begin
 	 listing_tmp[0] := #9'lda ' + GetString(i);
 	 listing_tmp[1] := #9'add ' + GetString(i+4);
 	 listing_tmp[2] := listing[i+11];
@@ -186,8 +186,8 @@ begin
 
        mva(i) and 										// mva  :STACKORIGIN,x			; 0
        mva(i+1) and										// mva  :STACKORIGIN+STACKWIDTH,x	; 1
-       mva(i+2) and (mva_im_0(i+2) = false) and							// mva  :STACKORIGIN+STACKWIDTH*2,x	; 2
-       mva(i+3) and (mva_im_0(i+3) = false) and							// mva  :STACKORIGIN+STACKWIDTH*3,x	; 3
+       mva(i+2) and {(mva_im_0(i+2) = false) and}						// mva  :STACKORIGIN+STACKWIDTH*2,x	; 2
+       mva(i+3) and {(mva_im_0(i+3) = false) and}						// mva  :STACKORIGIN+STACKWIDTH*3,x	; 3
 //       inx(i+4) and										// inx					; 4
        mva(i+5) and 										// mva  :STACKORIGIN,x			; 5
        mva(i+6) and 										// mva  :STACKORIGIN+STACKWIDTH,x	; 6
@@ -208,7 +208,7 @@ begin
 
 	Expand(i+11, 1);
 
-	if (listing[i+9] = #9'jsr addEAX_ECX') then begin
+	if ADD_EAX_ECX(i+9) then begin
 	 listing_tmp[0] := #9'lda ' + GetString(i);
 	 listing_tmp[1] := #9'add ' + GetString(i+5);
 	 listing_tmp[2] := #9'sta :STACKORIGIN,x';
@@ -278,7 +278,7 @@ begin
        sta_a(i+18) then										// sta A+3				; 18
      begin
 
-	if (listing[i+9] = #9'jsr addEAX_ECX') then begin
+	if ADD_EAX_ECX(i+9) then begin
 	 listing_tmp[0] := #9'lda :STACKORIGIN,x';
 	 listing_tmp[1] := #9'add ' + GetARG(i);
 	 listing_tmp[2] := listing[i+12];
@@ -357,7 +357,7 @@ begin
 	stack_3x(i+5) then
      begin
 
-	if (listing[i+6] = #9'jsr addEAX_ECX') then begin
+	if ADD_EAX_ECX(i+6) then begin
 	 listing_tmp[0] := #9'lda :STACKORIGIN,x';
 	 listing_tmp[1] := #9'add ' + GetString(i+2);
 	 listing_tmp[2] := listing[i+9];
@@ -429,7 +429,7 @@ begin
 	stack_3x(i+11) then
      begin
 
-	if (listing[i+12] = #9'jsr addEAX_ECX') then begin
+	if ADD_EAX_ECX(i+12) then begin
 	 listing_tmp[0] := listing[i];
 	 listing_tmp[1] := #9'add ' + GetString(i+8);
 	 listing_tmp[2] := #9'sta :STACKORIGIN-1,x';
@@ -508,7 +508,7 @@ begin
 	stack_3x(i+11) then
      begin
 
-	if (listing[i+12] = #9'jsr addEAX_ECX') then begin
+	if ADD_EAX_ECX(i+12) then begin
 	 listing_tmp[0] := listing[i];
 	 listing_tmp[1] := #9'add ' + GetString(i+8);
 	 listing_tmp[2] := listing[i+15];
@@ -589,7 +589,7 @@ begin
        sta(i+18) then										// sta A+3				; 18
      begin
 
-	if (listing[i+9] = #9'jsr addEAX_ECX') then begin
+	if ADD_EAX_ECX(i+9) then begin
 	 listing_tmp[0] := #9'lda :STACKORIGIN-1,x';
 	 listing_tmp[1] := #9'add ' + GetARG(i+1);
 	 listing_tmp[2] := #9'sta ' + GetARG(i+12);
@@ -641,6 +641,7 @@ begin
      end;
 
 
+{
     if ADD_SUB_EAX_ECX(i+10) and								// jsr addEAX_ECX|subEAX_ECX		; 10
 
        inx(i) and										// inx					; 0
@@ -704,5 +705,7 @@ begin
 
        exit(false);
      end;
+}
+
 
 end;		// function
