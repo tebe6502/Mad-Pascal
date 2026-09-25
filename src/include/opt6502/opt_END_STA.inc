@@ -1627,10 +1627,11 @@
     if UNUSED_A(i) and									// UNUSED_A				; 0
        lda_a(i+1) and									// lda					; 1
        sta_val(i+2) and									// sta					; 2	~:STACKORIGIN
-       lda_im(i+3) and									// lda #				; 3
+       lda_a(i+3) and									// lda					; 3	~:STACKORIGIN
        (add_sub(i+4) or and_ora_eor(i+4)) and						// add|sub|and|ora|eor			; 4
        sta_val(i+5) then								// sta					; 5	~:STACKORIGIN
      if (argMatch(i, i+1) = false) and
+        (argMatch(i, i+3) = false) and
 	(argMatch(i, i+4) = false) then
        begin
 	listing[i] := '';
@@ -1802,6 +1803,24 @@
 	(argMatch(i, i+5) = false) then
        begin
 	listing[i] := '';
+
+	Result:=false; Break;
+       end;
+
+
+    if lda_a(i) and									// lda					; 0
+       sta_stack(i+1) and								// sta :STACKORIGIN			; 1
+       lda_val(i+2) and									// lda					; 2	~:STACKORIGIN
+       sta_val(i+3) and									// sta					; 3	~:STACKORIGIN
+       lda_stack(i+4) and								// lda :STACKORIGIN			; 4
+       (add_sub_val(i+5) or and_ora_eor_val(i+5)) and					// adc|sbc|and|ora|eor			; 5	~:STACKORIGIN
+       sta_val(i+6) then								// sta					; 6	~:STACKORIGIN
+     if argMatch(i+1, i+4) then
+       begin
+	listing[i+4] := listing[i];
+	
+	listing[i]  := '';
+	listing[i+1]:= '';
 
 	Result:=false; Break;
        end;

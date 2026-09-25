@@ -761,17 +761,45 @@ https://suraj.sh/fast-square-root-approximation
 
 @returns: float16
 *)
-var c: word register;
+var c: word absolute Result;
+    exponent: word register;
+    fraction: word register;
+    
 begin
 	if smallint(x) <= 0 then exit(float16(0.0));
 
 	// Solved equation for square roots
 	c := (word(x) shr 1) + $1e00;
 
-	Result := PFloat16(@c)^;
+	//Result := PFloat16(@c)^;
 
 	// Newton-Rapson iteration
-	Result := 0.5 * (Result + x / Result);
+//	Result := 0.5 * (Result + x / Result);
+	
+	Result := (Result + x / Result);
+
+	// Result := Result * 0.5
+
+	//c:=word(Result);
+	exponent  := (c shr 10) and $1F;
+	fraction := c and $03FF;
+
+	if exponent = $1F then
+
+	else
+	if exponent > 0 then
+	begin
+	// normalna liczba -> zmniejsz cechę o 1
+	  exponent := exponent - 1;
+	  c := (exponent shl 10) or fraction;
+	end
+	else
+	begin
+	// denormalne -> przesunięcie mantysy w prawo
+	  c := fraction shr 1;
+	end;
+
+	//Result:=PFloat16(@c)^;
 end;
 
 
