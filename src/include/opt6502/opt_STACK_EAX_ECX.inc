@@ -662,7 +662,7 @@ begin
 	stack_1x(i+7) then
      begin
 
-	if (listing[i+10] = #9'jsr addEAX_ECX') then begin
+	if ADD_EAX_ECX(i+10) then begin
 	 listing_tmp[0] := #9'inx';
 	 listing_tmp[1] := #9'ldy #$00';
 	 listing_tmp[2] := #9'sty :STACKORIGIN+STACKWIDTH*3,x';

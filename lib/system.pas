@@ -764,7 +764,7 @@ https://suraj.sh/fast-square-root-approximation
 var c: word absolute Result;
     exponent: word register;
     fraction: word register;
-    
+
 begin
 	if smallint(x) <= 0 then exit(float16(0.0));
 
@@ -775,7 +775,7 @@ begin
 
 	// Newton-Rapson iteration
 //	Result := 0.5 * (Result + x / Result);
-	
+
 	Result := (Result + x / Result);
 
 	// Result := Result * 0.5
@@ -1844,7 +1844,7 @@ begin
 
  //while x > M_PI_2 do x := x - M_PI_2;
  while 1608 < c   do x := x - M_PI_2;
-
+ 
     { Normalize argument, divide by (pi/2) }
     //x := x * 0,63661977236758134308;	// * 1 / (pi/2)
     //c:=(c*169) shr 8;
@@ -1854,33 +1854,32 @@ begin
     t1:=t0 shl 2;
     t2:=t1 shl 2;
 
-    c := (t2 + t1 + t0 + c) shr 8;
+    t1 := (t2 + t1 + t0 + c) shr 8;
 
     { Get's integer part, should be }
     //i := trunc(x);
-    i := c shr 8;
+    i := t1 shr 8;
 
     { Fixes negative part, needed to calculate "fractional" part }
     //if x < 0 then dec(i);
 
     { And finally get's fractional part }
     //x := x - integer(i);
-    c:=c and $ff;
+    c := t1 and $FF;
 
     { If we need cosine, adds pi/2 }
     if sc then inc(i);
 
     { Test quadrant, odd values are reflected }
-    if (i and 1) = 0 then x := 1 - x;
+    if (i and 1) = 0 then //x := 1 - x;
+     c := byte(255-c);
 
     { Calculate cosine(x) with optimal polynomial approximation }
-    x := x * x;
+    //x := x * x;
+    
+    c := (byte(c) * byte(c)) shr 8;
 
-    {0.019940292 * 256 = 5}
-    t2 := (c shl 2 + c) shr 8;
-
-    //Result := ((0.019940292 *x - 0.23369547) * x + 1) * (1 - x);
-    Result := ((PReal(@t2)^ - 0.23369547) * x + 1) * (1 - x);
+    Result := ((-0.23369547) * x + 1) * (1 - x);
 
     { Test quadrant to return negative values }
     if (i and 2) = 2 then Result := -Result;
@@ -1952,22 +1951,25 @@ begin
 
     { And finally get's fractional part }
     //x := x - shortint(i);
-    w := w and $00FF;
+    w := w and $FF;
 
     { If we need cosine, adds pi/2 }
     if sc then inc(i);
 
     { Test quadrant, odd values are reflected }
-    if (i and 1) = 0 then x := 1 - x;
+    if (i and 1) = 0 then //x := 1 - x;
+     w := byte(255 - w);
 
     { Calculate cosine(x) with optimal polynomial approximation }
-    x := x * x;
+    //x := x * x;
+    
+    w := (byte(w) * byte(w)) shr 8;
 
     {0.019940292 * 256 = 5}
-    t1 := (w shl 2 + w) shr 8;
+    //t1 := (w shl 2 + w) shr 8;
 
     //Result := ((0.019940292 * x - 0.23369547) * x + 1) * (1-x);
-    Result := ((PShortReal(@t1)^ - 0.23369547) * x + 1) * (1-x);
+    Result := (({PShortReal(@t1)^} - 0.23369547) * x + 1) * (1-x);
 
     { Test quadrant to return negative values }
     if (i and 2) = 2 then Result := -Result;
