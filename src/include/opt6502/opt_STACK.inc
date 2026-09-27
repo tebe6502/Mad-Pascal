@@ -2612,6 +2612,20 @@ begin
       end;
 
 
+    if mva(i) and 										// mva .. :STACKORIGIN,x		; 0
+       mva(i+1) and 										// mva .. :STACKORIGIN+STACKWIDTH	; 1
+       dex(i+2) and										// dex					; 2
+       (pos(#9':+', listing[i+3]) = 1) then							// :+N mva				; 3
+     if stack_0x(i) and
+	stack_1x(i+1) then
+      begin
+	listing[i]   := '';
+	listing[i+1] := '';
+
+	exit(false);
+      end;
+
+
 // -----------------------------------------------------------------------------
 
 

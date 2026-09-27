@@ -4,7 +4,7 @@ unit system;
  @author: Tomasz Biela (Tebe)
  @name: Standard supported functions of Mad Pascal
 
- @version: 1.4
+ @version: 1.5
 
  @description:
  <http://www.freepascal.org/docs-html/rtl/system/index-5.html>
@@ -1872,7 +1872,7 @@ begin
 
     { Test quadrant, odd values are reflected }
     if (i and 1) = 0 then //x := 1 - x;
-     c := byte(255-c);
+     c := byte(255 - c);
 
     { Calculate cosine(x) with optimal polynomial approximation }
     //x := x * x;

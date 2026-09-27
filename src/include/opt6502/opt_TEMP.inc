@@ -984,6 +984,28 @@ begin
       end;
 
 
+   if (lda(0) = false) and								// rol @		; 0
+      sta(1) and									// sta I+1		; 1
+      											//			; 2
+      opti(3) and									//; optimize 		; 3
+      											// 			; 4
+      lda(5) and									// lda I 		; 5
+      sta(6) and									// sta			; 6
+      lda(7) and									// lda I+1 		; 7
+      sta(8) and									// sta			; 8
+      lda(9) then									// lda			; 9
+    if argMatch(1, 7) and
+       (argMatch(1, 5) = false) and
+       (argMatch(1, 6) = false) then
+      begin
+	TemporaryBuf[7] := TemporaryBuf[6];
+	TemporaryBuf[6] := TemporaryBuf[5];
+	TemporaryBuf[5] := TemporaryBuf[8];
+
+	TemporaryBuf[8] := '~';
+      end;
+
+
     if lda(0) and									// lda N+1		; 0
        sta_stack(1) and									// sta :STACKORIGIN+9	; 1
        lda(2) and									// lda N		; 2
@@ -1022,6 +1044,50 @@ begin
 	TemporaryBuf[2] := TemporaryBuf[0];
 	TemporaryBuf[1] := '~';
 	TemporaryBuf[0] := '~';
+      end;
+
+
+    if lda_eax(0) and									// lda :eax		; 0
+       sta(1) and									// sta A		; 1
+       lda_eax_1(2) and									// lda :eax+1		; 2
+       sta(3) and									// sta A+1		; 3
+       lda_eax_2(4) and									// lda :eax+2		; 4
+       sta(5) and									// sta A+2		; 5
+       lda_eax_3(6) and									// lda :eax+3		; 6
+       sta(7) and									// sta A+3		; 7
+       											//			; 8
+       opti(9) and									//; optimize 		; 9
+       											//			; 10
+       lda(11) and									// lda			; 11
+       add_sub(12) and									// add|sub A		; 12
+       sta(13) and									// sta			; 13
+       lda(14) and									// lda			; 14
+       adc_sbc(15) and									// adc|sbc A+1		; 15
+       sta(16) and									// sta			; 16
+       lda(17) and									// lda			; 17
+       adc_sbc(18) and									// adc|sbc A+2		; 18
+       sta(19) and									// sta			; 19
+       lda(20) and									// lda			; 20
+       adc_sbc(21) and									// adc|sbc A+3		; 21
+       sta(22) then									// sta			; 22
+      if argMatch(1, 12) and
+         argMatch(3, 15) and
+         argMatch(5, 18) and
+         argMatch(7, 21) then
+      begin
+
+        if add(12) then begin
+	  TemporaryBuf[12] := #9'add :eax';
+	  TemporaryBuf[15] := #9'adc :eax+1';
+	  TemporaryBuf[18] := #9'adc :eax+2';
+	  TemporaryBuf[21] := #9'adc :eax+3';
+	end else begin
+	  TemporaryBuf[12] := #9'sub :eax';
+	  TemporaryBuf[15] := #9'sbc :eax+1';
+	  TemporaryBuf[18] := #9'sbc :eax+2';
+	  TemporaryBuf[21] := #9'sbc :eax+3';
+	end;
+
       end;
 
 

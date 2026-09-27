@@ -983,6 +983,29 @@ begin
      end;
 
 
+    if sta_eax(i) and									// sta :eax				; 0
+       lda_a(i+1) and									// lda					; 1
+       adc_sbc(i+2) and									// adc|sbc				; 2
+       sta_eax_1(i+3) and								// sta :eax+1				; 3
+       (listing[i+4] = #9'lda #$40') and						// lda #$40				; 4	* 320
+       sta_ecx(i+5) and									// sta :ecx				; 5
+       (listing[i+6] = #9'lda #$01') and						// lda #$01				; 6
+       sta_ecx_1(i+7) then								// sta :ecx+1				; 7
+     begin
+      listing[i+4] := '';
+      listing[i+5] := '';
+      listing[i+6] := '';
+      listing[i+7] := '';
+      listing[i+8] := #9'jsr @mul320';
+      listing[i+9] := '';
+      listing[i+10]:= '';
+      listing[i+11]:= '';
+      listing[i+12]:= '';
+
+      exit(false);
+     end;
+
+
  end;//if IFDEF_MUL16(i+8) then
 
 

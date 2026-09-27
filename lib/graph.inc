@@ -568,7 +568,7 @@ begin
 
 		while (word(x) < word(ScreenWidth)) and (GetPixel(x,y) = oldColor) do begin
 
-			if (byte(y) < byte(ScreenHeight-1)) then begin
+			if byte(ScreenHeight) > byte(y) then begin
 
 				belowColor := GetPixel(x, y+1);
 

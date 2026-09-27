@@ -828,36 +828,6 @@ begin
        adc_sbc(i+3) and									// adc|sbc				; 3
 
        add_sub(i) and									// add|sub				; 0
-       sta_val(i+1) and									// sta S				; 1	~:STACKORIGN
-       lda_a(i+2) and									// lda 					; 2
-//       adc_sbc(i+3) and								// adc|sbc				; 3
-       sta_stack(i+4) and								// sta :STACKORIGIN+STACKWIDTH		; 4
-       lda_a(i+5) and									// lda					; 5
-       adc_sbc(i+6) and									// adc|sbc				; 6
-       sta_stack(i+7) and								// sta :STACKORIGIN+STACKWIDTH*2	; 7
-       lda_a(i+8) and									// lda 					; 8
-//       adc_sbc(i+9) and								// adc|sbc				; 9
-       sta_stack(i+10) then								// sta :STACKORIGIN+STACKWIDTH*3	; 10
-      begin
-	listing[i+2]  := '';
-	listing[i+3]  := '';
-	listing[i+4]  := '';
-	listing[i+5]  := '';
-	listing[i+6]  := '';
-	listing[i+7]  := '';
-	listing[i+8]  := '';
-	listing[i+9]  := '';
-	listing[i+10] := '';
-
-	exit(false);
-      end;
-
-
-    if adc_sbc(i+9) and									// adc|sbc				; 9
-
-       adc_sbc(i+3) and									// adc|sbc				; 3
-
-       add_sub(i) and									// add|sub				; 0
        sta_stack(i+1) and								// sta :STACKORIGIN			; 1
        lda_a(i+2) and									// lda 					; 2
 //       adc_sbc(i+3) and								// adc|sbc				; 3

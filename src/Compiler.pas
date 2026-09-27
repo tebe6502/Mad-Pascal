@@ -7050,6 +7050,7 @@ begin
 
   Address := False;
 
+  ValType := TDataType.UNTYPETOK;
   AllocElementType := TDataType.UNTYPETOK;
 
 
@@ -11450,6 +11451,7 @@ begin
   OldCodeSize := CodeSize;
   Pass := TPass.CALL_DETERMINATION;
 
+  ValType := TDataType.UNTYPETOK;
 
   if TokenAt(i).Kind = TTokenKind.PLUSTOK then inc(i);
 
@@ -11568,6 +11570,12 @@ var
   ConstVal: Int64;
   RightValType: TDataType;
 begin
+
+  Result := i;
+
+  ConstVal := 0;
+  ValType := TDataType.UNTYPETOK;
+  RightValType := TDataType.UNTYPETOK;
 
   if TokenAt(i).Kind in [TTokenKind.PLUSTOK, TTokenKind.MINUSTOK] then
     j := i + 1
@@ -11733,9 +11741,14 @@ var
   ConstVal, ConstValRight: Int64;
 begin
 
+  Result := i;
+
   ValType := TDataType.UNTYPETOK;
+  RightValType := TDataType.UNTYPETOK;
+  ConstValType := TDataType.UNTYPETOK;
 
   ConstVal := 0;
+  ConstValRight := 0;
 
   isZero := TDataType.INTEGERTOK;
 
@@ -13371,7 +13384,7 @@ begin
                           if RecordSize(IdentIndex) = 1 then
                             asm65(#9' mva ' + Name + ' ' + GetLocalName(IdentIndex, 'adr.'))
                           else
-                            asm65(#9':' + IntToStr(RecordSize(IdentIndex)) + ' mva ' + Name + '+# ' + GetLocalName(IdentIndex, 'adr.') + '+#');
+                            asm65(#9':+' + IntToStr(RecordSize(IdentIndex)) + ' mva ' + Name + '+# ' + GetLocalName(IdentIndex, 'adr.') + '+#');
 
                       end
                       else
@@ -13787,7 +13800,7 @@ begin
                             ResetOpty;
 
                             if (j <= 4) and (IdentifierAt(IdentTemp).AllocElementType <> TDataType.RECORDTOK) then
-                              asm65(#9':' + IntToStr(j) + ' mva ' + Name + '+# ' + GetLocalName(IdentIndex, 'adr.') + '+#')
+                              asm65(#9':+' + IntToStr(j) + ' mva ' + Name + '+# ' + GetLocalName(IdentIndex, 'adr.') + '+#')
                             else
                               asm65(#9'@move ' + svar + ' ' + GetLocalName(IdentIndex) + ' #' + IntToStr(j));
 

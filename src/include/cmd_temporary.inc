@@ -267,6 +267,16 @@ end;
     Result := TemporaryBuf[i] = #9'lda :eax+1'
   end;
 
+  function LDA_EAX_2(const i: Integer): Boolean;
+  begin
+    Result := TemporaryBuf[i] = #9'lda :eax+2'
+  end;
+
+  function LDA_EAX_3(const i: Integer): Boolean;
+  begin
+    Result := TemporaryBuf[i] = #9'lda :eax+3'
+  end;
+
   function STA_EAX(const i: Integer): Boolean;
   begin
     Result := TemporaryBuf[i] = #9'sta :eax'

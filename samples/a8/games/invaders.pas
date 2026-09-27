@@ -37,6 +37,8 @@ begin
  InitGraph(24);			// Cleans the upper 8K of RAM memory.
  InitGraph(0);			// Sets the playfield area: 1K in the TOP of RAM.
 
+ randomize;
+ 
  q:=dpeek($230) + 8;		// Replaces the beginning of the display list with new data, setting up the first 4 lines of it
 
  move(k[21], pointer(q-5), 8);

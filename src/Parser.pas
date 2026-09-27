@@ -605,9 +605,10 @@ var
 
 begin
 
+  Result := i;
+
   ConstVal := 0;
   ConstValType := TDataType.UNTYPETOK;
-  Result := i;
 
   j := 0;
 
@@ -1464,9 +1465,12 @@ var
   RightConstValType: TDataType;
 begin
 
-  ConstVal := 0;
-  ConstValType := TDataType.UNTYPETOK;
   Result := i;
+
+  ConstVal := 0;
+  RightConstVal := 0;
+  ConstValType := TDataType.UNTYPETOK;
+  RightConstValType := TDataType.UNTYPETOK;
 
   j := CompileConstFactor(i, ConstVal, ConstValType);
 
@@ -1568,9 +1572,12 @@ var
   RightConstValType: TDataType;
 begin
 
-  ConstVal := 0;
-  ConstValType := TDataType.UNTYPETOK;
   Result := i;
+
+  ConstVal := 0;
+  RightConstVal := 0;
+  ConstValType := TDataType.UNTYPETOK;
+  RightConstValType := TDataType.UNTYPETOK;
 
   if TokenAt(i).Kind in [TTokenKind.PLUSTOK, TTokenKind.MINUSTOK] then
     j := i + 1
@@ -1656,9 +1663,12 @@ var
   Yes: Boolean;
 begin
 
-  ConstVal := 0;
-  ConstValType := TDataType.UNTYPETOK;
   Result := i;
+
+  ConstVal := 0;
+  RightConstVal := 0;
+  ConstValType := TDataType.UNTYPETOK;
+  RightConstValType := TDataType.UNTYPETOK;
 
   i := CompileSimpleConstExpression(i, ConstVal, ConstValType);
 
