@@ -59,29 +59,29 @@ var
 // Reset temporary variables for FOR optimizations.
 procedure ResetForTmp;
 begin
-   optyFOR0:='';
-   optyFOR1:='';
-   optyFOR2:='';
-   optyFOR3:='';
+   optyFOR0 := '';
+   optyFOR1 := '';
+   optyFOR2 := '';
+   optyFOR3 := '';
 end;
 
 // ----------------------------------------------------------------------------
 
 procedure SetOptyA(const value: TString);
 begin
-  optyA:= value;
+  optyA := value;
   DebugCall( 'SetOptyA', value);
 end;
 
 procedure SetOptyY(const value: TString);
 begin
-  optyY:= value;
+  optyY := value;
   DebugCall( 'SetOptyY', value);
 end;
 
 function GetOptyBP2(): TString;
 begin
-  result:=optyBP2;
+  Result := optyBP2;
 end;
 
 procedure SetOptyBP2(const Value: TString);
@@ -109,8 +109,6 @@ begin
   OptimizeTemporary := anOptimizeTemporary;
   OptFile := anOptFile;
   OptimizerStepList := TOptimizerStepList.Create;
-
-
 
   SetLength(OptimizeBuf, 1);
 

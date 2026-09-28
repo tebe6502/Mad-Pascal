@@ -227,6 +227,21 @@ begin
     end;
 
 
+   if sta(0) and									// sta A		; 0
+      lda_im_0(1) and									// lda #$00		; 1
+      adc_im_0(2) and									// adc #$00		; 2
+      sta(3) and (TemporaryBuf[3] = TemporaryBuf[0] + '+1') and				// sta A+1		; 3
+     											//			; 4
+      opti(5) then									//; optimize 		; 5
+     											//			; 6
+    begin
+	TemporaryBuf[1] := TemporaryBuf[0];
+	TemporaryBuf[2] := #9'scc';
+	TemporaryBuf[3] := #9'inc ' + GetARG(3);
+	TemporaryBuf[0] := '~';
+    end;
+
+
    if ldy(0) and									// ldy I		; 0
       lda(1) and									// lda			; 1
       sta(2) and									// sta			; 2
@@ -263,6 +278,21 @@ begin
     if argMatch(0, 4) then
     begin
 	TemporaryBuf[4] := '~';
+    end;
+
+
+   if sta(0) and									// sta I		; 0
+      scc(1) and									// scc			; 1
+      inc_(2) and									// inc I+1		; 2
+     											//			; 3
+      opti(4) and									//; optimize 		; 4
+      											//			; 5
+      lda(6) and									// lda			; 6
+      add(7) then									// add I		; 7
+    if argMatch(0, 7) then
+    begin
+     TemporaryBuf[6] := #9'add ' + GetARG(6);
+     TemporaryBuf[7] := '~';
     end;
 
 
