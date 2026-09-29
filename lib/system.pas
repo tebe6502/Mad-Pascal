@@ -4,7 +4,7 @@ unit system;
  @author: Tomasz Biela (Tebe)
  @name: Standard supported functions of Mad Pascal
 
- @version: 1.5
+ @version: 1.6
 
  @description:
  <http://www.freepascal.org/docs-html/rtl/system/index-5.html>
@@ -689,7 +689,7 @@ begin
     b := $40000000;
     q := 0;
 
-    while( b > 0 ) do begin
+    while( b and $40 = 0 ) do begin
 
         t := q + b;
         if ( t <= r ) then begin
