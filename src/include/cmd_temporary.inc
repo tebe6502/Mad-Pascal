@@ -324,6 +324,11 @@ end;
     Result := TemporaryBuf[i] = #9'lda #$00'
   end;
 
+  function ADC_IM_0(const i: Integer): Boolean;
+  begin
+    Result := TemporaryBuf[i] = #9'adc #$00'
+  end;
+
   function LDY_IM_0(const i: Integer): Boolean;
   begin
     Result := TemporaryBuf[i] = #9'ldy #$00'
