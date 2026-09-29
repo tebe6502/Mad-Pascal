@@ -392,6 +392,16 @@ begin
       end;
 
 
+    if lda_im_0(i) and										// lda #$00				; 0
+       jne(i+1) and										// jne l_				; 1
+       lda_a(i+2) then										// lda					; 2
+      begin
+       listing[i]   := '';
+       listing[i+1] := '';
+       exit(false);
+      end;
+
+
     if bne(i) and										// bne @+				; 0
        lda_im_0(i+1) and									// lda #$00				; 1
        lab_a(i+2) and 										//@					; 2
