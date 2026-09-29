@@ -24,20 +24,32 @@ begin
     end;
 
 
-    if jne_l(0) and									// jne l_xxxx		; 0
-       (TemporaryBuf[1] = #9'jmp @exit') and						// jmp @exit		; 1
-       (pos(TemporaryBuf[2], TemporaryBuf[0]) > 0) and					//l_xxxx		; 2
-       (IFTMP(3) = false) then								//~lda IFTMP_		; 3
+    if (SKIP(0) = FALSE) and								//~SKIP			; 0
+       jne_l(1) and									// jne l_xxxx		; 1
+       (jmp_b(2) or jmp_e(2)) and							// jmp b_|@exit		; 2
+       (TemporaryBuf[3] = GetARG(1)) and						//l_xxxx		; 3
+       (IFTMP(4) = false) then								//~lda IFTMP_		; 4
      begin
-      TemporaryBuf[0] := #9'jeq @exit';
-      TemporaryBuf[1] := '~';
+      TemporaryBuf[1] := #9'jeq ' + GetARG(2);
+      TemporaryBuf[2] := '~';
+     end;
+
+
+    if (SKIP(0) = FALSE) and								//~SKIP			; 0
+       jcs_l(1) and									// jcs l_xxxx		; 1
+       (jmp_b(2) or jmp_e(2)) and							// jmp b_|@exit		; 2
+       (TemporaryBuf[3] = GetARG(1)) and						//l_xxxx		; 3
+       (IFTMP(4) = false) then								//~lda IFTMP_		; 4
+     begin
+      TemporaryBuf[1] := #9'jcc ' + GetARG(2);
+      TemporaryBuf[2] := '~';
      end;
 
 
     if (pos('lda #$', TemporaryBuf[0]) > 0) and (lda_im_0(0) = false) and		// lda #$01		; 0
        jeq_l(1) and									// jeq l_xxxx		; 1
        jmp_l(2) and									// jmp l_yyyy		; 2
-       (pos(TemporaryBuf[3], TemporaryBuf[1]) > 0) then					//l_xxxx		; 3
+       (TemporaryBuf[3] = GetARG(1)) then						//l_xxxx		; 3
      begin
       TemporaryBuf[0] := '~';
       TemporaryBuf[1] := '~';
@@ -45,14 +57,14 @@ begin
      end;
 
 
-    if (TemporaryBuf[0] = #9'jmp @exit') and						// jmp @exit		; 0
+    if jmp_e(0) and									// jmp @exit		; 0
        (TemporaryBuf[1] = '@exit') then							//@exit			; 1
      begin
       TemporaryBuf[0] := '~';
      end;
 
 
-    if (TemporaryBuf[0] = #9'jmp @exit') and						// jmp @exit		; 0
+    if jmp_e(0) and									// jmp @exit		; 0
        (pos('jmp a_', TemporaryBuf[1]) > 0) then					// jmp a_		; 1
       begin
 	TemporaryBuf[1] := '~';

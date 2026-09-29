@@ -136,7 +136,7 @@ begin
       sta(3) and										// sta			; 3
       cmp_im_0(4) and										// cmp #$00		; 4
       (beq_a(5) or bne_a(5)) and								// beq|bne		; 5
-      jmp_l(6) and										// sta			; 6
+      jmp_l(6) and										// jmp l_		; 6
       lab_a(7) then										//@			; 7
     begin
      TemporaryBuf[4] := '~';

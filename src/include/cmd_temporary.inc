@@ -86,6 +86,16 @@ end;
   begin
     Result := pos1(#9'jmp @+', i)
   end;
+
+  function JMP_B(const i: Integer): Boolean;
+  begin
+    Result := pos1(#9'jmp b_', i)
+  end;
+
+  function JMP_E(const i: Integer): Boolean;
+  begin
+    Result := TemporaryBuf[i] = #9'jmp @exit'
+  end;
   
   function _IF(const i: Integer): Boolean;
   begin

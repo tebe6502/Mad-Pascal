@@ -4,7 +4,7 @@ unit lzjb;
  @author: Viacheslav Komenda
  @name: LZJB compression/decompression unit
 
- @version: 1.2
+ @version: 1.3
 
  @description:
  <https://en.wikipedia.org/wiki/LZJB>
@@ -38,12 +38,12 @@ SOFTWARE.
 INTERFACE
 
 { return 0, if could not compress }
-FUNCTION lzjb_compress_mem(src : PCHAR; src_len : WORD; dst : PCHAR) : WORD;
+FUNCTION lzjb_compress_mem(src : PBYTE; src_len : WORD; dst : PBYTE) : WORD;
 (*
 @description:
 *)
 
-FUNCTION lzjb_decompress_mem(src : PCHAR; src_len : WORD; dst : PCHAR) : WORD;
+FUNCTION lzjb_decompress_mem(src : PBYTE; src_len : WORD; dst : PBYTE) : WORD;
 (*
 @description:
 *)
@@ -59,12 +59,13 @@ OFFSET_MASK  = (1 SHL (16 - MATCH_BITS)) - 1;
 LEMPEL_SIZE  = $400; { 1024 }
 
 
-FUNCTION lzjb_compress_mem(src : PCHAR; src_len : WORD; dst : PCHAR) : WORD;
+FUNCTION lzjb_compress_mem(src : PBYTE; src_len : WORD; dst : PBYTE) : WORD;
 VAR     mlen                 : BYTE register;
 	copymask             : WORD;
-        offset, copymap, cpy : WORD;
+        offset, copymap      : WORD;
 	dst_len              : WORD;
-        dst_pos, src_pos     : WORD;
+        dst_pos              : WORD absolute Result;
+	src_pos              : WORD;
         hashlo               : WORD register;
 	hashhi               : WORD register;
         lempel               : ARRAY [0..LEMPEL_SIZE - 1] OF WORD;
@@ -77,7 +78,7 @@ BEGIN
 
         copymap := 0;
         copymask := 1 SHL (BITS_IN_BYTE - 1);
-	
+
 	dst_len := src_len;
 
         WHILE src_pos < src_len DO BEGIN
@@ -89,7 +90,7 @@ BEGIN
                         END;
                         copymask := 1;
                         copymap := dst_pos;
-                        dst[dst_pos] := #0;
+                        dst[dst_pos] := 0;
                         Inc(dst_pos);
                 END;
                 IF src_pos > WORD(src_len - MATCH_MAX) THEN BEGIN
@@ -109,41 +110,50 @@ BEGIN
 
                 offset := (src_pos - lempel[hashlo]) AND OFFSET_MASK;
                 lempel[hashlo] := src_pos;
-                cpy := src_pos - offset;
+		//cpy := src_pos - offset;
 
-		psrc := @src[cpy];
+		psrc := pointer(pdst - offset);// @src[src_pos - offset];
 
                 IF (src_pos >= offset)
                         AND (offset <> 0)
                         AND (pdst[0] = psrc[0])
                         AND (pdst[1] = psrc[1])
                         AND (pdst[2] = psrc[2]) THEN BEGIN
-                        dst[copymap] := CHR(ORD(dst[copymap]) OR copymask);
+                        dst[copymap] := dst[copymap] OR copymask;
+
                         mlen := MATCH_MIN;
-                        WHILE (mlen < MATCH_MAX) AND (src[src_pos + mlen] = src[cpy + mlen]) DO Inc(mlen);
-                        dst[dst_pos] := Chr(
+			//WHILE (mlen < MATCH_MAX) AND (src[src_pos + mlen] = src[cpy + mlen]) DO Inc(mlen);
+                        WHILE (mlen < MATCH_MAX) AND (pdst[mlen] = psrc[mlen]) DO Inc(mlen);
+
+                        dst[dst_pos] := 
                                 (BYTE(mlen - MATCH_MIN) SHL (BITS_IN_BYTE - MATCH_BITS))
-                                OR (offset SHR BITS_IN_BYTE));
+                                OR (offset SHR BITS_IN_BYTE);
+
+                        dst[dst_pos+1] := offset;
+
                         Inc(dst_pos);
-                        dst[dst_pos] := Chr(offset);
-                        Inc(dst_pos);
-                        Inc(src_pos, mlen);
+                        //Inc(dst_pos);
+			//Inc(src_pos, mlen);
                 END ELSE BEGIN
-                        dst[dst_pos] := src[src_pos];
-                        Inc(dst_pos);
-                        Inc(src_pos);
+                        //dst[dst_pos] := src[src_pos];
+                        dst[dst_pos] := pdst[0];
+                        //Inc(dst_pos);
+			//Inc(src_pos);
+                        mlen := 1;
                 END;
+                Inc(dst_pos);
+                Inc(src_pos, mlen);
         END;
-        lzjb_compress_mem := dst_pos;
+        //lzjb_compress_mem := dst_pos;
 END;
 
 
-FUNCTION lzjb_decompress_mem(src : PCHAR; src_len : WORD; dst : PCHAR) : WORD;
+FUNCTION lzjb_decompress_mem(src : PBYTE; src_len : WORD; dst : PBYTE) : WORD;
 VAR     copymap                       : BYTE;
         mlen                          : BYTE;
-        offset, cpy                   : WORD;
+        offset                        : WORD;
 	src_pos                       : WORD;
-	dst_pos                       : WORD;
+	dst_pos                       : WORD absolute Result;
         copymask                      : WORD;
 	psrc: PByte register;
 	pdst: PByte register;
@@ -154,25 +164,36 @@ BEGIN
         copymask := 1 SHL (BITS_IN_BYTE - 1);
 
         WHILE src_pos < src_len DO BEGIN
+
                 copymask := copymask SHL 1;
+
                 IF copymask = (1 SHL BITS_IN_BYTE) THEN BEGIN
                         copymask := 1;
-                        copymap := Ord(src[src_pos]);
+                        copymap := src[src_pos];
                         Inc(src_pos)
                 END;
+
+		pdst := @dst[dst_pos];
+		psrc := @src[src_pos];
+
                 IF (copymap AND copymask) <> 0 THEN BEGIN
 
-			psrc := @src[src_pos];
+			//psrc := @src[src_pos];
 
-                        mlen := (psrc[0] SHR (BITS_IN_BYTE - MATCH_BITS)) + MATCH_MIN;
                         offset := ((WORD(psrc[0]) SHL BITS_IN_BYTE) OR WORD(psrc[1])) AND OFFSET_MASK;
-                        Inc(src_pos, 2);
 
                         IF dst_pos < offset THEN BREAK;
-                        cpy := dst_pos - offset;
 
-			psrc := @dst[cpy];
-			pdst := @dst[dst_pos];
+                        mlen := (psrc[0] SHR (BITS_IN_BYTE - MATCH_BITS)) + MATCH_MIN;
+
+                        //cpy := dst_pos - offset;
+
+			//pdst := @dst[dst_pos];
+			//psrc := @dst[cpy];
+			psrc := pointer(pdst - offset);// @dst[dst_pos - offset];
+
+                        //Inc(src_pos, 2);
+                        Inc(src_pos);
 
 			inc(dst_pos, mlen);
 
@@ -187,12 +208,14 @@ BEGIN
                         END;
 
                 END ELSE BEGIN
-                        dst[dst_pos] := src[src_pos];
+                        //dst[dst_pos] := src[src_pos];
+			pdst[0] := psrc[0];
                         Inc(dst_pos);
-                        Inc(src_pos);
+                        //Inc(src_pos);
                 END;
+		Inc(src_pos);
         END;
-        lzjb_decompress_mem := dst_pos;
+        //lzjb_decompress_mem := dst_pos;
 END;
 
 END.

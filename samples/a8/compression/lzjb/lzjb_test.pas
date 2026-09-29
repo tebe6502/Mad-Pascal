@@ -1,7 +1,7 @@
 {
 
-84
-32
+71
+30
 
 4085 KORONIS.MIC
 
@@ -44,7 +44,6 @@ begin
 
  repeat until keypressed;
 
-
 end.
 
-// 12171
+// 11931

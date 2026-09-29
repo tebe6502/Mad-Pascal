@@ -30,6 +30,19 @@ begin
 
        or
 
+       ( sta_bp_1(i+5) and						// sta :bp+1				; 5
+
+	 lda_a(i) and							// lda TEXT_BUF				; 0
+         add(i+1) and (add_stack(i+1) = false) and			// add R				; 1
+	 tay(i+2) and							// tay					; 2
+	 (listing[i+3] = listing[i] + '+1') and				// lda TEXT_BUF+1			; 3
+	 adc(i+4) and							// adc R+1				; 4
+//	 sta_bp_1(i+5) and						// sta :bp+1				; 5
+	 (lda_bp_y(i+6) = false) and					//~lda (:bp),y				; 6
+	 (cmp_bp_y(i+7) or sta_bp_y(i+7)) )				// cmp (:bp),y|sta (:bp),y		; 7
+
+       or
+
        ( sta_bp2_1(i+9) and						// sta :bp2+1				; 9			// %
 
 	 lda_val(i) and							// lda P+1				; 0	~:STACKORIGIN
@@ -177,6 +190,9 @@ begin
       then begin
 
 
+	if cmp_bp_y(i+7) or sta_bp_y(i+7) then begin
+
+	end else
 	if lda_adr(i) and sta_tmp_1(i+11) and asl_stack(i+3) and rol_a(i+4) then begin
 	 arg0:='!;'+GetARG(i)+';'+GetARG(i+2)+';'+GetARG(i+7)+';'+GetARG(i+10)+';';
 	 k:=18;
@@ -213,6 +229,36 @@ begin
 	 k:=1;
 	end;
 
+
+	if cmp_bp_y(i+7) or sta_bp_y(i+7) then begin
+     
+	 arg0:='+;'+GetARG(i)+';'+GetARG(i+1)+';'+GetARG(i+3)+';'+GetARG(i+4)+';';
+
+	 if cmp_bp_y(i+7) then listing[i+7] := #9'cmp (:bp2),y';
+	 if sta_bp_y(i+7) then listing[i+7] := #9'sta (:bp2),y';
+
+	 if arg0 = optyBP2 then begin
+	  listing[i]   := '';
+	  listing[i+1] := '';
+	  listing[i+2] := '';
+	  listing[i+3] := '';
+	  listing[i+4] := '';
+	  listing[i+5] := #9'ldy #$00';
+
+	  k:=8;
+	 end else begin
+	  listing[i+2] := #9'sta :bp2';
+
+	  listing[i+5] := #9'sta :bp2+1';
+
+	  Expand(i+6, 1);
+
+	  listing[i+6] := #9'ldy #$00';
+
+	  k:=9;
+	 end;
+
+	end else
 
 	if arg0 = optyBP2 then begin
 

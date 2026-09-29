@@ -123,6 +123,7 @@ BEGIN
   Z := 1;
   Bit := 0;
   Command := 0;
+
   WHILE (X < SourceSize) AND (Y <= SourceSize) DO BEGIN
     IF (Bit > 15) THEN BEGIN
       Dest^[Z] := HI(Command);
@@ -131,11 +132,13 @@ BEGIN
       Bit := 0;
       INC(Y,2)
     END;
+
     Size := 1;
     WHILE ((Source^[X] = Source^[X+Size]) AND (Size < $FFF)
                          AND (word(X+Size) < SourceSize)) DO begin
               INC(Size);
     end;
+
     IF (Size >= 16) THEN BEGIN
       Dest^[Y] := 0;
       Dest^[Y+1] := HI(Size-16);
@@ -146,6 +149,7 @@ BEGIN
       Command := (Command SHL 1) + 1;
     END
     ELSE begin { not size >= 16 }
+
       IF (GetMatch(Source,X,SourceSize,Hash,Size,Pos)) THEN BEGIN
         Key := (Size-3) + ((X-Pos) SHL 4);
         Dest^[Y] := HI(Key);
@@ -160,9 +164,12 @@ BEGIN
         INC(X);
         Command := Command SHL 1
       END;
+
     END; { size <= 16 }
     INC(Bit);
+
   END; { while x < sourcesize ... }
+
   Command := Command SHL (16-Bit);
   Dest^[Z] := HI(Command);
   Dest^[Z+1] := LO(Command);

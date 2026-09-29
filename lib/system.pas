@@ -692,7 +692,7 @@ begin
     while( b > 0 ) do begin
 
         t := q + b;
-        if ( r >= t ) then begin
+        if ( t <= r ) then begin
 
             r := r - t;
             q := t + b;
@@ -1838,6 +1838,7 @@ var i: byte;
     t0: word register;		// shl 3	-> 2*pi (1608) shl 3 = 12864	WORD
     t1: word register;		// shl 5	-> 2*pi (1608) shl 5 = 51456	WORD
     t2: cardinal register;	// shl 7	-> 2*pi (1608) shl 7 = 205824	CARDINAL
+
 begin
 
  while x < 0.0    do x := x + M_PI_2;
