@@ -981,6 +981,21 @@ begin
        rol_stack(i) and										// rol :STACKORIGIN+STACKWIDTH		; 0
        asl_a(i+1) and										// asl @				; 1
        asl_a(i+2) and										// asl @				; 2
+       asl_a(i+3) then										// asl @				; 3
+      begin
+	listing[i] := '';
+
+	exit(false);
+      end;
+
+
+    if tay(i+4) and										// tay					; 4
+       (lda_adr(i+5) or sta_adr(i+6)) and							// lda adr.|				; 5
+												//         |sta adr.			; 6
+
+       rol_stack(i) and										// rol :STACKORIGIN+STACKWIDTH		; 0
+       asl_a(i+1) and										// asl @				; 1
+       asl_a(i+2) and										// asl @				; 2
        add_sub_val(i+3) then									// add|sub				; 3	~:STACKORIGIN
       begin
 	listing[i] := '';
@@ -1035,6 +1050,22 @@ begin
 
 	listing[i]   := '';
 	listing[i+3] := '';
+
+	exit(false);
+      end;
+
+
+    if tay(i+5) and										// tay					; 5
+       (lda_adr(i+6) or sta_adr(i+7)) and							// lda adr.|				; 6
+												//         |sta adr.			; 7
+
+       rol_stack(i) and										// rol :STACKORIGIN+STACKWIDTH		; 0
+       asl_a(i+1) and										// asl @				; 1
+       asl_a(i+2) and										// asl @				; 2
+       asl_a(i+3) and										// asl @				; 3
+       asl_a(i+4) then										// asl @				; 4
+      begin
+	listing[i] := '';
 
 	exit(false);
       end;
