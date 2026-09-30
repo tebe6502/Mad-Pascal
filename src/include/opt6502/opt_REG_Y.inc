@@ -74,21 +74,34 @@ begin
      if tay(i) then begin
 
       if (i>1) and
+
          ( (add_sub_val(i-1) and (adc_sbc(i+2) = false) and lda_val(i-2) and (iy(i-2) = false)) or
+
            (asl_a(i-1) and lda_val(i-2) and (iy(i-2) = false)) or
 
            ((i > 2) and asl_a(i-1) and asl_a(i-2) and lda_val(i-3) and (iy(i-3) = false)) or
-           ((i > 3) and asl_a(i-1) and asl_a(i-2) and asl_a(i-3) and lda_val(i-4) and (iy(i-4) = false)) or
 
            ((i > 2) and add(i-1) and asl_a(i-2) and lda_val(i-3) and argMatch(i-1, i-3) and (iy(i-3) = false)) or
+
+           ((i > 3) and asl_a(i-1) and asl_a(i-2) and asl_a(i-3) and lda_val(i-4) and (iy(i-4) = false)) or
+
+           ((i > 4) and asl_a(i-1) and add(i-2) and asl_a(i-3) and asl_a(i-4) and lda_val(i-5) and argMatch(i-2, i-5) and (iy(i-5) = false)) or
+
+           ((i > 4) and asl_a(i-1) and asl_a(i-2) and asl_a(i-3) and asl_a(i-4) and lda_val(i-5) and (iy(i-5) = false)) or
+
+           ((i > 5) and add(i-1) and asl_a(i-2) and asl_a(i-3) and asl_a(i-4) and asl_a(i-5) and lda_val(i-6) and (iy(i-6) = false)) or
 
            ((i > 5) and add(i-1) and asl_a(i-2) and add(i-3) and asl_a(i-4) and asl_a(i-5) and lda_val(i-6) and argMatch(i-3, i-6) and (iy(i-6) = false)) )
 
       then begin
 
-       if add_im(i-1) and lda_a(i-2) then arg0 := '+' + GetARG(i-1) + GetString(i-2);					// +#$00Label
-       if sub_im(i-1) and lda_a(i-2) then arg0 := '-' + GetARG(i-1) + GetString(i-2);					// -#$00Label
+       if add_im(i-1) and lda_a(i-2) then										// +#$00Label
+	arg0 := '+' + GetARG(i-1) + GetString(i-2);									// lda		; -2
+															// add #	; -1
 
+       if sub_im(i-1) and lda_a(i-2) then										// -#$00Label
+	arg0 := '-' + GetARG(i-1) + GetString(i-2);									// lda		; -2
+															// sub #	; -1
 
        if add(i-1) and (add_im(i-1) = false) and lda_a(i-2) then							// *+$01Label|Label
         if GetString(i-1) >= GetString(i-2) then
@@ -103,20 +116,59 @@ begin
          arg0 := '*-$01' + GetString(i-2) + '|' + GetString(i-1);
 
 
-       if asl_a(i-1) and lda_a(i-2) then arg0 := '*#$02' + GetString(i-2);						// *#$02Label
+       if asl_a(i-1) and lda_a(i-2) then										// *#$02Label
+	arg0 := '*#$02' + GetString(i-2);										// lda		; -2
+															// asl @	; -1
 
-       if (i > 2) and asl_a(i-1) and asl_a(i-2) and lda_a(i-3) then arg0 := '*#$04' + GetString(i-3);			// *#$04Label
-       if (i > 3) and asl_a(i-1) and asl_a(i-2) and asl_a(i-3) and lda_a(i-4) then arg0 := '*#$08' + GetString(i-4);	// *#$08Label
+       if (i > 2) and add(i-1) and asl_a(i-2) and lda_a(i-3) then							// *#$03Label
+	arg0 := '*#$03' + GetString(i-3);										// lda		; -3
+															// asl @	; -2
+															// add		; -1
 
-       if (i > 2) and add(i-1) and asl_a(i-2) and lda_a(i-3) then arg0 := '*#$03' + GetString(i-3);			// *#$03Label
+       if (i > 2) and asl_a(i-1) and asl_a(i-2) and lda_a(i-3) then							// *#$04Label
+	arg0 := '*#$04' + GetString(i-3);										// lda		; -3
+															// asl @	; -2
+															// asl @	; -1
 
-       if (i > 5) and add(i-1) and asl_a(i-2) and add(i-3) and 
-          asl_a(i-4) and asl_a(i-5) and lda_a(i-6) then arg0 := '*#$0A' + GetString(i-6)+'+'+GetString(i-1);		// *#$0ALabel1+Label2
+       if (i > 3) and asl_a(i-1) and asl_a(i-2) and asl_a(i-3) and lda_a(i-4) then					// *#$08Label
+	arg0 := '*#$08' + GetString(i-4);										// lda		; -4
+															// asl @	; -3
+															// asl @	; -2
+															// asl @	; -1
 
+       if (i > 4) and asl_a(i-1) and add(i-2) and asl_a(i-3) and asl_a(i-4) and lda_a(i-5) then				// *#$0ALabel
+	arg0 := '*#$0A' + GetString(i-5);										// lda		; -5
+															// asl @	; -4
+															// asl @	; -3
+															// add		; -2
+															// asl @	; -1
+
+       if (i > 4) and asl_a(i-1) and asl_a(i-2) and asl_a(i-3) and asl_a(i-4) and lda_a(i-5) then			// *#$10Label
+        arg0 := '*#$10' + GetString(i-5);										// lda		; -5
+															// asl @	; -4
+															// asl @	; -3
+															// asl @	; -2
+															// asl @	; -1
+
+       if (i > 5) and add(i-1) and asl_a(i-2) and add(i-3) and asl_a(i-4) and asl_a(i-5) and lda_a(i-6)	then		// *+$0ALabel1|Label2
+	arg0 := '*+$0A' + GetString(i-6)+'|'+GetString(i-1);								// lda		; -6
+															// asl @	; -5
+															// asl @	; -4
+															// add		; -3
+															// asl @	; -2
+															// add		; -1
+
+       if (i > 5) and add(i-1) and asl_a(i-2) and asl_a(i-3) and asl_a(i-4) and asl_a(i-5) and lda_a(i-6) then		// *+$10Label1|Label2
+        arg0 := '*+$10' + GetString(i-6)+'|'+GetString(i-1);								// lda		; -6
+															// asl @	; -5
+															// asl @	; -4
+															// asl @	; -3
+															// asl @	; -2
+															// add		; -1
 
        if arg0 = optyY then begin
 
-        if (i > 5) and add(i-1) and asl_a(i-2) and add(i-3) and asl_a(i-4) and asl_a(i-5) and lda_a(i-6) then begin
+        if (i > 5) and add(i-1) and asl_a(i-2) and add(i-3) and asl_a(i-4) and asl_a(i-5) and lda_a(i-6) then begin	// *+$0ALabel1|Label2
          listing[i-6] := '';
          listing[i-5] := '';
          listing[i-4] := '';
@@ -125,26 +177,51 @@ begin
          listing[i-1] := '';
          listing[i]   := '';
 	end else
-        if (i > 3) and asl_a(i-1) and asl_a(i-2) and asl_a(i-3) and lda_a(i-4) then begin
+        if (i > 5) and add(i-1) and asl_a(i-2) and asl_a(i-3) and asl_a(i-4) and asl_a(i-5) and lda_a(i-6) then begin	// *+$10Label1|Label2
+         listing[i-6] := '';
+         listing[i-5] := '';
          listing[i-4] := '';
          listing[i-3] := '';
          listing[i-2] := '';
          listing[i-1] := '';
          listing[i]   := '';
 	end else
-        if (i > 2) and add(i-1) and asl_a(i-2) and lda_a(i-3) then begin
+        if (i > 4) and asl_a(i-1) and add(i-2) and asl_a(i-3) and asl_a(i-4) and lda_a(i-5) then begin			// *#$0ALabel
+         listing[i-5] := '';
+         listing[i-4] := '';
          listing[i-3] := '';
          listing[i-2] := '';
          listing[i-1] := '';
          listing[i]   := '';
 	end else
-        if (i > 2) and asl_a(i-1) and asl_a(i-2) and lda_a(i-3) then begin
+        if (i > 4) and asl_a(i-1) and asl_a(i-2) and asl_a(i-3) and asl_a(i-4) and lda_a(i-5) then begin		// *#$10Label
+         listing[i-5] := '';
+         listing[i-4] := '';
+         listing[i-3] := '';
+         listing[i-2] := '';
+         listing[i-1] := '';
+         listing[i]   := '';
+	end else
+        if (i > 3) and asl_a(i-1) and asl_a(i-2) and asl_a(i-3) and lda_a(i-4) then begin				// *#$08Label
+         listing[i-4] := '';
+         listing[i-3] := '';
+         listing[i-2] := '';
+         listing[i-1] := '';
+         listing[i]   := '';
+	end else
+        if (i > 2) and add(i-1) and asl_a(i-2) and lda_a(i-3) then begin						// *#$03Label
+         listing[i-3] := '';
+         listing[i-2] := '';
+         listing[i-1] := '';
+         listing[i]   := '';
+	end else
+        if (i > 2) and asl_a(i-1) and asl_a(i-2) and lda_a(i-3) then begin						// *#$04Label
          listing[i-3] := '';
          listing[i-2] := '';
          listing[i-1] := '';
          listing[i]   := '';
 	end else begin
-         listing[i-2] := '';
+         listing[i-2] := '';												// *#$02Label
          listing[i-1] := '';
          listing[i]   := '';
 	end;
@@ -224,7 +301,7 @@ begin
      if LabelIsUsed(i) or
         ((optyA <> '') and (optyA = optyY)) or
         iny(i) or dey(i) or tay(i) or ldy_stack(i) or mvy(i) or mwy(i) or jsr(i) or
-        lab_l(i) or lab_b(i) or lab_c(i) or _for(i) or _if(i) or 
+        lab_l(i) or lab_b(i) or lab_c(i) or _for(i) or _if(i) or
 	(pos(',y-', listing[i]) > 0) or (pos(',y+', listing[i]) > 0) then begin arg0 := ''; SetOptyY('') end;
 
 end;		// procedure

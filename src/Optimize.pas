@@ -318,6 +318,11 @@ var
  *#$03Label
  *#$04Label
  *#$08Label
+ *#$0ALabel
+ *#$10Label
+
+ *+$0ALabel|Label
+ *+$10Label|Label
 
  *+$01Label|Label
  *-$01Label|Label
@@ -334,8 +339,8 @@ var
 
         '*':
 	if optyY[2] in ['+', '-'] then
-	  Result := (listing[i] = mne + copy(optyY,6,pos('|',optyY) - 6)) or
-	            (listing[i] = mne + copy(optyY,pos('|',optyY) + 1,256))
+	  Result := (listing[i] = mne + copy(optyY,6,pos('|', optyY) - 6)) or
+	            (listing[i] = mne + copy(optyY,pos('|', optyY) + 1,256))
         else
           Result := (listing[i] = mne + copy(optyY, 6, 256));
 
@@ -445,7 +450,7 @@ var
   end;  //LDA_STA_ADR_0
 
 
-  procedure LDA_STA_ADR(const i: TListingIndex; q: Integer; op: Char);
+  procedure LDA_STA_ADR(const i: TListingIndex; q: Integer; op: Char); overload;
 
    procedure update(const i: TListingIndex);
    begin
@@ -477,6 +482,14 @@ var
     if sta_adr_y(i + 13) then update(i+13);
 
   end;  //LDA_STA_ADR
+
+
+  function LDA_STA_ADR(const i: TListingIndex): Boolean; overload;
+  begin
+
+    Result := lda_adr_y(i) or sta_adr_y(i+1);
+
+  end;
 
 
   // -----------------------------------------------------------------------------

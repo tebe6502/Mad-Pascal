@@ -140,7 +140,7 @@ begin
         lda_im_0(i) and										// lda #$00		; 0	!!! tylko dla <>0
 //        cmp_im_0(i+1) and									// cmp #$00		; 1
 //	  bne(i+2) and										// bne			; 2	!!! to oznacza krotki test !!!
-	(listing[i+2] <> #9'bne L1') and (listing[i+5] <> #9'bne L1') then
+	(bne_L1(i+2) = false) and (bne_L1(i+5) = false) then
      begin
 	listing[i]   := '';
 	listing[i+1] := '';

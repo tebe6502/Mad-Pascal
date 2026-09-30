@@ -43,6 +43,21 @@ begin
 
 end;
 
+function BNE_L1(const i: Integer): Boolean;
+begin
+  Result := (listing[i] = #9'bne L1')
+end;
+
+function BNE_L4(const i: Integer): Boolean;
+begin
+  Result := (listing[i] = #9'bne L4')
+end;
+
+function BNE_L5(const i: Integer): Boolean;
+begin
+  Result := (listing[i] = #9'bne L5')
+end;
+
 function _FOR(const i: Integer): Boolean;
 begin
   Result := (listing[i] = #9'#for')

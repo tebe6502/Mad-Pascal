@@ -8,7 +8,9 @@ begin
 // ===				      LOCAL.
 // -----------------------------------------------------------------------------
 
-    if (listing[i+12] = #9'bne L1') and								// bne L1				; 12
+    if bne_L1(i+12) and										// bne L1				; 12
+
+       LOCAL(i+6) and										// .LOCAL				; 6
 
        lda_im(i) and 										// lda #				; 0
        sta_stack(i+1) and									// sta :STACKORIGIN+STACKWIDTH		; 1
@@ -16,13 +18,13 @@ begin
        and_ora_eor_val(i+3) and									// and|ora|eor				; 3	~:STACKORIGIN
        sta_a(i+4) and										// sta					; 4
        ldy_1(i+5) and										// ldy #1				; 5
-       LOCAL(i+6) and										// .LOCAL				; 6
+//       LOCAL(i+6) and										// .LOCAL				; 6
        lda_a(i+7) and										// lda					; 7
        sub(i+8) and										// sub					; 8
-       (listing[i+9] = #9'bne L4') and								// bne L4				; 9
+       bne_L4(i+9) and										// bne L4				; 9
        lda_a(i+10) and										// lda					; 10
        cmp(i+11) and										// cmp					; 11
-//       (listing[i+12] = #9'bne L1') and							// bne L1				; 12
+//       bne_L1(i+12) and									// bne L1				; 12
        lda_stack(i+13) then									// lda :STACKORIGIN+STACKWIDTH		; 13
      if argMatch(i+1, i+13) then
      begin
@@ -35,7 +37,9 @@ begin
      end;
 
 
-    if (listing[i+15] = #9'bne L1') and								// bne L1				; 15
+    if bne_L1(i+15) and										// bne L1				; 15
+
+       LOCAL(i+6) and										// .LOCAL				; 6
 
        lda_im(i) and 										// lda #				; 0
        sta_stack(i+1) and									// sta :STACKORIGIN			; 1
@@ -43,16 +47,16 @@ begin
        and_ora_eor_val(i+3) and									// and|ora|eor				; 3	~:STACKORIGIN
        sta_stack(i+4) and									// sta :STACKORIGIN+STACKWIDTH*2	; 4
        ldy_1(i+5) and										// ldy #1				; 5
-       LOCAL(i+6) and										// .LOCAL				; 6
+//       LOCAL(i+6) and										// .LOCAL				; 6
        lda_a(i+7) and										// lda					; 7
        sub(i+8) and										// sub					; 8
-       (listing[i+9] = #9'bne L4') and								// bne L4				; 9
+       bne_L4(i+9) and										// bne L4				; 9
        lda_a(i+10) and										// lda					; 10
        cmp(i+11) and										// cmp					; 11
-       (listing[i+12] = #9'bne L1') and								// bne L1				; 12
+       bne_L1(i+12) and										// bne L1				; 12
        lda_a(i+13) and										// lda					; 13
        cmp(i+14) and										// cmp					; 14
-//       (listing[i+15] = #9'bne L1') then							// bne L1				; 15
+//       bne_L1(i+15) then									// bne L1				; 15
        lda_stack(i+16) then									// lda :STACKORIGIN			; 16
      if argMatch(i+1, i+16) then
      begin
@@ -65,7 +69,9 @@ begin
      end;
 
 
-    if (listing[i+16] = #9'bne L1') and								// bne L1				; 16
+    if bne_L1(i+16) and										// bne L1				; 16
+
+       LOCAL(i+7) and										// .LOCAL				; 7
 
        ldy_im(i) and										// ldy #				; 0
        lda_im(i+1) and										// lda #				; 1
@@ -74,16 +80,16 @@ begin
        sty_stack(i+4) and									// sty :STACKORIGIN+STACKWIDTH*2	; 4
        sty_stack(i+5) and									// sty :STACKORIGIN+STACKWIDTH*3	; 5
        ldy_1(i+6) and										// ldy #1				; 6
-       LOCAL(i+7) and										// .LOCAL				; 7
+//       LOCAL(i+7) and										// .LOCAL				; 7
        lda_a(i+8) and										// lda					; 8
        sub_stack(i+9) and									// sub :STACKORIGIN+STACKWIDTH*3	; 9
-       (listing[i+10] = #9'bne L4') and								// bne L4				; 10
+       bne_L4(i+10) and										// bne L4				; 10
        lda_a(i+11) and										// lda					; 11
        cmp_stack(i+12) and									// cmp :STACKORIGIN+STACKWIDTH*2	; 12
-       (listing[i+13] = #9'bne L1') and								// bne L1				; 13
+       bne_L1(i+13) and										// bne L1				; 13
        lda_a(i+14) and										// lda					; 14
        cmp_stack(i+15) and									// cmp :STACKORIGIN+STACKWIDTH		; 15
-//       (listing[i+16] = #9'bne L1') and							// bne L1				; 16
+//       bne_L1(i+16) and									// bne L1				; 16
        lda_a(i+17) and										// lda					; 17
        cmp_stack(i+18) then									// cmp :STACKORIGIN			; 18
      if argMatch(i+2, i+18) and
@@ -110,8 +116,10 @@ begin
      end;
 
 
-    if adc_sbc(i) and										// adc|sbc				; 0
-       LOCAL(i+1) and										// .LOCAL				; 1
+    if LOCAL(i+1) and										// .LOCAL				; 1
+
+       adc_sbc(i) and										// adc|sbc				; 0
+//       LOCAL(i+1) and										// .LOCAL				; 1
        lda_a(i+2) then										// lda					; 2
      begin
 
@@ -123,8 +131,10 @@ begin
      end;
 
 
-    if lda_a(i) and 										// lda 					; 0
-       LOCAL(i+1) and										// .LOCAL				; 1
+    if LOCAL(i+1) and										// .LOCAL				; 1
+
+       lda_a(i) and 										// lda 					; 0
+//       LOCAL(i+1) and										// .LOCAL				; 1
        sub(i+2) then										// sub					; 2
      begin
       listing[i+1] := listing[i];
@@ -134,18 +144,10 @@ begin
      end;
 
 
-    if lda_a(i) and										// lda					; 0
-       ldy(i+1) and										// ldy #1				; 1
-       LOCAL(i+2) and										// .LOCAL				; 2
-       lda_a(i+3) then										// lda					; 3
-      begin
-	listing[i] := '';
-	exit(false);
-      end;
+    if LOCAL(i+1) and										// .LOCAL				; 1
 
-
-    if lda_a(i) and 										// lda 					; 0
-       LOCAL(i+1) and		 								// .LOCAL				; 1
+       lda_a(i) and 										// lda 					; 0
+//       LOCAL(i+1) and		 								// .LOCAL				; 1
        lda_a(i+2) then 										// lda 					; 2
       begin
 	listing[i]   := '';
@@ -154,9 +156,23 @@ begin
      end;
 
 
-    if lda_a(i) and 										// lda 					; 0
+    if LOCAL(i+2) and										// .LOCAL				; 2
+
+       lda_a(i) and										// lda					; 0
+       ldy(i+1) and										// ldy #1				; 1
+//       LOCAL(i+2) and										// .LOCAL				; 2
+       lda_a(i+3) then										// lda					; 3
+      begin
+	listing[i] := '';
+	exit(false);
+      end;
+
+
+    if LOCAL(i+2) and										// .LOCAL				; 2
+
+       lda_a(i) and 										// lda 					; 0
        sta_stack(i+1) and									// sta STACKORIGIN			; 1
-       LOCAL(i+2) and		 								// .LOCAL				; 2
+//       LOCAL(i+2) and		 								// .LOCAL				; 2
        lda_stack(i+3) then 									// lda STACKORIGIN			; 3
      if argMatch(i+1, i+3) then
      begin
@@ -169,14 +185,16 @@ begin
      end;
 
 
-    if (listing[i+5] = #9'bne L4') and								// bne L4				; 5
+    if bne_L4(i+5) and										// bne L4				; 5
+
+       LOCAL(i+2) and										// .LOCAL				; 2
 
        lda_a(i) and										// lda 					; 0
        sta_stack(i+1) and									// sta :STACKORIGIN			; 1
-       LOCAL(i+2) and										// .LOCAL				; 2
+//       LOCAL(i+2) and										// .LOCAL				; 2
        lda_a(i+3) and										// lda					; 3
        sub(i+4) and										// sub 					; 4
-//       (listing[i+5] = #9'bne L4') and							// bne L4				; 5
+//       bne_L4(i+5) and									// bne L4				; 5
        lda_a(i+6) and										// lda 					; 6
        cmp_stack(i+7) then									// cmp :STACKORIGIN			; 7
      if argMatch(i+1, i+7) then
@@ -190,14 +208,16 @@ begin
      end;
 
 
-    if (listing[i+5] = #9'bne L4') and								// bne L4				; 5
+    if bne_L4(i+5) and										// bne L4				; 5
+
+       LOCAL(i+2) and										// .LOCAL				; 2
 
        lda_a(i) and										// lda 					; 0
        sta_stack(i+1) and									// sta :STACKORIGIN			; 1
-       LOCAL(i+2) and										// .LOCAL				; 2
+//       LOCAL(i+2) and										// .LOCAL				; 2
        lda_a(i+3) and										// lda					; 3
        sub(i+4) and										// sub 					; 4
-//       (listing[i+5] = #9'bne L4') and							// bne L4				; 5
+//       bne_L4(i+5) and									// bne L4				; 5
        lda_stack(i+6) and									// lda :STACKORIGIN			; 6
        cmp(i+7) then										// cmp 					; 7
      if argMatch(i+1, i+6) then
@@ -211,14 +231,16 @@ begin
      end;
 
 
-    if (listing[i+5] = #9'bne L4') and								// bne L4				; 5
+    if bne_L4(i+5) and										// bne L4				; 5
+
+       LOCAL(i+2) and										// .LOCAL				; 2
 
        lda_a(i) and										// lda 					; 0
        sta_stack(i+1) and									// sta :STACKORIGIN			; 1
-       LOCAL(i+2) and										// .LOCAL				; 2
+//       LOCAL(i+2) and										// .LOCAL				; 2
        lda_a(i+3) and										// lda					; 3
        sub_stack(i+4) then									// sub :STACKORIGIN			; 4
-//       (listing[i+5] = #9'bne L4') then							// bne L4				; 5
+//       bne_L4(i+5) then									// bne L4				; 5
      if argMatch(i+1, i+4) then
      begin
        listing[i+4]  := #9'sub ' + GetARG(i);
@@ -230,17 +252,19 @@ begin
      end;
 
 
-    if (listing[i+8] = #9'bne L1') and								// bne L1				; 8
+    if bne_L1(i+8) and										// bne L1				; 8
+
+       LOCAL(i+2) and										// .LOCAL				; 2
 
        lda_a(i) and										// lda 					; 0
        sta_stack(i+1) and									// sta :STACKORIGIN			; 1
-       LOCAL(i+2) and										// .LOCAL				; 2
+//       LOCAL(i+2) and										// .LOCAL				; 2
        lda_a(i+3) and										// lda					; 3
        sub(i+4) and										// sub					; 4
-       (listing[i+5] = #9'bne L4') and								// bne L4				; 5
+       bne_L4(i+5) and										// bne L4				; 5
        lda_a(i+6) and										// lda					; 6
        cmp(i+7) and										// cmp					; 7
-       (listing[i+8] = #9'bne L1') and								// bne L1				; 8
+//       bne_L1(i+8) and									// bne L1				; 8
        lda_a(i+9) and										// lda					; 9
        cmp_stack(i+10) then									// cmp :STACKORIGIN			; 10
      if argMatch(i+1, i+10) then
@@ -254,17 +278,19 @@ begin
      end;
 
 
-    if (listing[i+8] = #9'bne L1') and								// bne L1				; 8
+    if bne_L1(i+8) and										// bne L1				; 8
+
+       LOCAL(i+2) and										// .LOCAL				; 2
 
        lda_a(i) and										// lda 					; 0
        sta_stack(i+1) and									// sta :STACKORIGIN			; 1
-       LOCAL(i+2) and										// .LOCAL				; 2
+//       LOCAL(i+2) and										// .LOCAL				; 2
        lda_a(i+3) and										// lda					; 3
        sub(i+4) and										// sub					; 4
-       (listing[i+5] = #9'bne L4') and								// bne L4				; 5
+       bne_L4(i+5) and										// bne L4				; 5
        lda_a(i+6) and										// lda					; 6
        cmp(i+7) and										// cmp					; 7
-//       (listing[i+8] = #9'bne L1') and							// bne L1				; 8
+//       bne_L1(i+8) and									// bne L1				; 8
        lda_stack(i+9) then									// lda :STACKORIGIN			; 9
      if argMatch(i+1, i+9) then
      begin
@@ -277,20 +303,22 @@ begin
      end;
 
 
-    if (listing[i+11] = #9'bne L1') and								// bne L1				; 11
+    if bne_L1(i+11) and										// bne L1				; 11
+
+       LOCAL(i+2) and										// .LOCAL				; 2
 
        lda_a(i) and										// lda 					; 0
        sta_stack(i+1) and									// sta :STACKORIGIN			; 1
-       LOCAL(i+2) and										// .LOCAL				; 2
+//       LOCAL(i+2) and										// .LOCAL				; 2
        lda_a(i+3) and										// lda					; 3
        sub(i+4) and										// sub					; 4
-       (listing[i+5] = #9'bne L4') and								// bne L4				; 5
+       bne_L4(i+5) and										// bne L4				; 5
        lda_a(i+6) and										// lda					; 6
        cmp(i+7) and										// cmp					; 7
-       (listing[i+8] = #9'bne L1') and								// bne L1				; 8
+       bne_L1(i+8) and										// bne L1				; 8
        lda_a(i+9) and										// lda					; 9
        cmp(i+10) and										// cmp					; 10
-//       (listing[i+11] = #9'bne L1') and							// bne L1				; 11
+//       bne_L1(i+11) and									// bne L1				; 11
        lda_a(i+12) and										// lda					; 12
        cmp_stack(i+13) then									// cmp :STACKORIGIN			; 13
      if argMatch(i+1, i+13) then
@@ -304,20 +332,22 @@ begin
      end;
 
 
-    if (listing[i+11] = #9'bne L1') and								// bne L1				; 11
+    if bne_L1(i+11) and										// bne L1				; 11
+
+       LOCAL(i+2) and										// .LOCAL				; 2
 
        lda_a(i) and										// lda 					; 0
        sta_stack(i+1) and									// sta :STACKORIGIN			; 1
-       LOCAL(i+2) and										// .LOCAL				; 2
+//       LOCAL(i+2) and										// .LOCAL				; 2
        lda_a(i+3) and										// lda					; 3
        sub(i+4) and										// sub					; 4
-       (listing[i+5] = #9'bne L4') and								// bne L4				; 5
+       bne_L4(i+5) and										// bne L4				; 5
        lda_a(i+6) and										// lda					; 6
        cmp(i+7) and										// cmp					; 7
-       (listing[i+8] = #9'bne L1') and								// bne L1				; 8
+       bne_L1(i+8) and										// bne L1				; 8
        lda_a(i+9) and										// lda					; 9
        cmp(i+10) and										// cmp					; 10
-//       (listing[i+11] = #9'bne L1') and							// bne L1				; 11
+//       bne_L1(i+11) and									// bne L1				; 11
        lda_stack(i+12) then									// lda :STACKORIGIN			; 12
      if argMatch(i+1, i+12) then
      begin
@@ -330,16 +360,18 @@ begin
      end;
 
 
-    if (listing[i+7] = #9'bne L4') and								// bne L4				; 7
+    if bne_L4(i+7) and										// bne L4				; 7
+
+       LOCAL(i+4) and										// .LOCAL				; 4
 
        ldy(i) and										// ldy 					; 0
        lda_a(i+1) and										// lda 					; 1
        sty_stack(i+2) and									// sty :STACKORIGIN+STACKWIDTH+10	; 2
        sta_stack(i+3) and									// sta :STACKORIGIN+10			; 3
-       LOCAL(i+4) and										// .LOCAL				; 4
+//       LOCAL(i+4) and										// .LOCAL				; 4
        lda_a(i+5) and										// lda					; 5
        sub_stack(i+6) and									// sub :STACKORIGIN+STACKWIDTH+10	; 6
-//       (listing[i+7] = #9'bne L4') and							// bne L4				; 7
+//       bne_L4(i+7) and									// bne L4				; 7
        lda_a(i+8) and										// lda					; 8
        cmp_stack(i+9) then									// cmp :STACKORIGIN+10			; 9
      if argMatch(i+2, i+6) and
@@ -357,23 +389,25 @@ begin
      end;
 
 
-    if (listing[i+14] = #9'bne L1') and								// bne L1				; 14
+    if bne_L1(i+14) and										// bne L1				; 14
+
+       LOCAL(i+5) and										// .LOCAL				; 5
 
        lda_a(i) and										// lda 					; 0
        sta_stack(i+1) and									// sta :STACKORIGIN+9			; 1
        sta_stack(i+2) and									// sta :STACKORIGIN+STACKWIDTH+9	; 2
        sta_stack(i+3) and									// sta :STACKORIGIN+STACKWIDTH*2+9	; 3
        sta_stack(i+4) and									// sta :STACKORIGIN+STACKWIDTH*3+9	; 4
-       LOCAL(i+5) and										// .LOCAL				; 5
+//       LOCAL(i+5) and										// .LOCAL				; 5
        lda_a(i+6) and										// lda 					; 6
        sub_stack(i+7) and									// sub :STACKORIGIN+STACKWIDTH*3+9	; 7
-       (listing[i+8] = #9'bne L4') and								// bne L4				; 8
+       bne_L4(i+8) and										// bne L4				; 8
        lda_a(i+9) and										// lda					; 9
        cmp_stack(i+10) and									// cmp :STACKORIGIN+STACKWIDTH*2+9	; 10
-       (listing[i+11] = #9'bne L1') and								// bne L1				; 11
+       bne_L1(i+11) and										// bne L1				; 11
        lda_a(i+12) and										// lda					; 12
        cmp_stack(i+13) and									// cmp :STACKORIGIN+STACKWIDTH+9	; 13
-//       (listing[i+14] = #9'bne L1') and							// bne L1				; 14
+//       bne_L1(i+14) and									// bne L1				; 14
        lda_a(i+15) and										// lda					; 15
        cmp_stack(i+16) then									// cmp :STACKORIGIN+9			; 16
      if argMatch(i+1, i+16) and
@@ -396,22 +430,24 @@ begin
      end;
 
 
-    if (listing[i+13] = #9'bne L1') and								// bne L1				; 13
+    if bne_L1(i+13) and										// bne L1				; 13
+
+       LOCAL(i+4) and										// .LOCAL				; 4
 
        lda_a(i) and										// lda 					; 0
        sta_stack(i+1) and									// sta :STACKORIGIN+STACKWIDTH*2	; 1
        sta_stack(i+2) and									// sta :STACKORIGIN+STACKWIDTH		; 2
        sta_stack(i+3) and									// sta :STACKORIGIN			; 3
-       LOCAL(i+4) and										// .LOCAL				; 4
+//       LOCAL(i+4) and										// .LOCAL				; 4
        lda_a(i+5) and										// lda 					; 5
        sub_im_0(i+6) and									// sub #$00				; 6
-       (listing[i+7] = #9'bne L4') and								// bne L4				; 7
+       bne_L4(i+7) and										// bne L4				; 7
        lda_a(i+8) and										// lda					; 8
        cmp_stack(i+9) and									// cmp :STACKORIGIN+STACKWIDTH*2	; 9
-       (listing[i+10] = #9'bne L1') and								// bne L1				; 10
+       bne_L1(i+10) and										// bne L1				; 10
        lda_a(i+11) and										// lda					; 11
        cmp_stack(i+12) and									// cmp :STACKORIGIN+STACKWIDTH		; 12
-//       (listing[i+13] = #9'bne L1') and							// bne L1				; 13
+//       bne_L1(i+13) and									// bne L1				; 13
        lda_a(i+14) and										// lda					; 14
        cmp_stack(i+15) then									// cmp :STACKORIGIN			; 15
      if argMatch(i+1, i+9) and
@@ -431,16 +467,18 @@ begin
      end;
 
 
-    if (listing[i+7] = #9'bne L4') and								// bne L4				; 7
+    if bne_L4(i+7) and										// bne L4				; 7
+
+       LOCAL(i+4) and										// .LOCAL				; 4
 
        lda_a(i) and										// lda					; 0
        sta_stack(i+1) and									// sta :STACKORIGIN+STACKWIDTH+9	; 1
        sta_stack(i+2) and									// sta :STACKORIGIN+STACKWIDTH*2+9	; 2
        sta_stack(i+3) and									// sta :STACKORIGIN+STACKWIDTH*3+9	; 3
-       LOCAL(i+4) and										// .LOCAL				; 4
+//       LOCAL(i+4) and										// .LOCAL				; 4
        lda_stack(i+5) and									// lda :STACKORIGIN+STACKWIDTH*3+9	; 5
 												// sub #$00				; 6
-//       (listing[i+7] = #9'bne L4') and							// bne L4				; 7
+//       bne_L4(i+7) and									// bne L4				; 7
        lda_stack(i+8) and									// lda :STACKORIGIN+STACKWIDTH*2+9	; 8
        cmp(i+9) and										// cmp					; 9
 												// bne L1				; 10
@@ -462,15 +500,17 @@ begin
      end;
 
 
-    if (listing[i+6] = #9'bne L4') and								// bne L4				; 6
+    if bne_L4(i+6) and										// bne L4				; 6
+
+       LOCAL(i+3) and										// .LOCAL				; 3
 
        lda_a(i) and										// lda 					; 0
        sta_stack(i+1) and									// sta :STACKORIGIN+STACKWIDTH+10	; 1
        sta_stack(i+2) and									// sta :STACKORIGIN+10			; 2
-       LOCAL(i+3) and										// .LOCAL				; 3
+//       LOCAL(i+3) and										// .LOCAL				; 3
        lda_a(i+4) and										// lda					; 4
        sub_stack(i+5) and									// sub :STACKORIGIN+STACKWIDTH+10	; 5
-//       (listing[i+6] = #9'bne L4') and							// bne L4				; 6
+//       bne_L4(i+6) and									// bne L4				; 6
        lda_a(i+7) and										// lda					; 7
        cmp_stack(i+8) then									// cmp :STACKORIGIN+10			; 8
      if argMatch(i+1, i+5) and
@@ -490,15 +530,17 @@ begin
 // -----------------------------------------------------------------------------
 
 
-    if (listing[i+6] = #9'bne L4') and								// bne L4				; 6
+    if bne_L4(i+6) and										// bne L4				; 6
+
+       LOCAL(i+3) and										// .LOCAL				; 3
 
        lda_a(i) and (iy(i) = false) and								// lda 					; 0
        sta_stack(i+1) and									// sta :STACKORIGIN			; 1
        ldy(i+2) and										// ldy #1				; 2
-       LOCAL(i+3) and										// .LOCAL				; 3
+//       LOCAL(i+3) and										// .LOCAL				; 3
        lda_a(i+4) and										// lda					; 4
        sub(i+5) and										// sub 					; 5
-
+//       bne_L4(i+6) and									// bne L4				; 6
        lda_stack(i+7) and									// lda :STACKORIGIN			; 7
        cmp(i+8) then										// cmp 					; 8
      if argMatch(i+1, i+7) then
@@ -512,15 +554,17 @@ begin
      end;
 
 
-    if (listing[i+6] = #9'bne L4') and								// bne L4				; 6
+    if bne_L4(i+6) and										// bne L4				; 6
+
+       LOCAL(i+3) and										// .LOCAL				; 3
 
        lda_a(i) and (iy(i) = false) and								// lda 					; 0
        sta_stack(i+1) and									// sta :STACKORIGIN			; 1
        ldy(i+2) and										// ldy #1				; 2
-       LOCAL(i+3) and										// .LOCAL				; 3
+//       LOCAL(i+3) and										// .LOCAL				; 3
        lda_a(i+4) and										// lda					; 4
        sub(i+5) and										// sub 					; 5
-
+//       bne_L4(i+6) and									// bne L4				; 6
        lda_a(i+7) and										// lda 					; 7
        cmp_stack(i+8) then									// cmp :STACKORIGIN			; 8
      if argMatch(i+1, i+8) then
@@ -534,12 +578,14 @@ begin
      end;
 
 
-    if(listing[i+6] = #9'bne L4') and								// bne L4				; 6
+    if bne_L4(i+6) and										// bne L4				; 6
+
+       LOCAL(i+3) and										// .LOCAL				; 3
 
        lda_a(i) and (iy(i) = false) and								// lda 					; 0
        sta_stack(i+1) and									// sta :STACKORIGIN			; 1
        ldy(i+2) and										// ldy #1				; 2
-       LOCAL(i+3) and										// .LOCAL				; 3
+//       LOCAL(i+3) and										// .LOCAL				; 3
        lda(i+4) and										// lda					; 4
        sub_stack(i+5) then									// sub :STACKORIGIN			; 5
 
@@ -554,21 +600,23 @@ begin
      end;
 
 
-    if (listing[i+6] = #9'bne L4') and								// bne L4				; 6
+    if bne_L4(i+6) and										// bne L4				; 6
+
+       LOCAL(i+3) and										// .LOCAL				; 3
 
        lda_a(i) and (iy(i) = false) and								// lda 					; 0
        sta_stack(i+1) and									// sta :STACKORIGIN			; 1
        ldy(i+2) and										// ldy #1				; 2
-       LOCAL(i+3) and										// .LOCAL				; 3
+//       LOCAL(i+3) and										// .LOCAL				; 3
        lda_a(i+4) and										// lda 					; 4
        sub_stack(i+5) and									// sub :STACKORIGIN+STACKWIDTH*3	; 5
-
+//       bne_L4(i+6) and									// bne L4				; 6
        lda_a(i+7) and										// lda					; 7
        cmp_stack(i+8) and									// cmp :STACKORIGIN+STACKWIDTH*2	; 8
-       (listing[i+9] = #9'bne L1') and								// bne L1				; 9
+       bne_L1(i+9) and										// bne L1				; 9
        lda_a(i+10) and										// lda					; 10
        cmp_stack(i+11) and									// cmp :STACKORIGIN+STACKWIDTH		; 11
-       (listing[i+12] = #9'bne L1') and								// bne L1				; 12
+       bne_L1(i+12) and										// bne L1				; 12
        lda_a(i+13) and										// lda					; 13
        cmp_stack(i+14) then									// cmp :STACKORIGIN+9			; 14
      if argMatch(i+1, i+14) then
@@ -582,18 +630,20 @@ begin
      end;
 
 
-    if (listing[i+6] = #9'bne L4') and								// bne L4				; 6
+    if bne_L4(i+6) and										// bne L4				; 6
+
+       LOCAL(i+3) and										// .LOCAL				; 3
 
        lda_a(i) and (iy(i) = false) and								// lda 					; 0
        sta_stack(i+1) and									// sta :STACKORIGIN+STACKWIDTH		; 1
        ldy(i+2) and										// ldy #1				; 2
-       LOCAL(i+3) and										// .LOCAL				; 3
+//       LOCAL(i+3) and										// .LOCAL				; 3
        lda_a(i+4) and										// lda 					; 4
        sub_stack(i+5) and									// sub :STACKORIGIN+STACKWIDTH*3	; 5
-
+//       bne_L4(i+6) and									// bne L4				; 6
        lda_a(i+7) and										// lda					; 7
        cmp_stack(i+8) and									// cmp :STACKORIGIN+STACKWIDTH*2	; 8
-       (listing[i+9] = #9'bne L1') and								// bne L1				; 9
+       bne_L1(i+9) and										// bne L1				; 9
        lda_a(i+10) and										// lda					; 10
        cmp_stack(i+11) then									// cmp :STACKORIGIN+STACKWIDTH		; 11
      if argMatch(i+1, i+11) then
@@ -607,15 +657,17 @@ begin
      end;
 
 
-    if (listing[i+6] = #9'bne L4') and								// bne L4				; 6
+    if bne_L4(i+6) and										// bne L4				; 6
+
+       LOCAL(i+3) and										// .LOCAL				; 3
 
        lda_a(i) and (iy(i) = false) and								// lda 					; 0
        sta_stack(i+1) and									// sta :STACKORIGIN+STACKWIDTH*2	; 1
        ldy(i+2) and										// ldy #1				; 2
-       LOCAL(i+3) and										// .LOCAL				; 3
+//       LOCAL(i+3) and										// .LOCAL				; 3
        lda_a(i+4) and										// lda					; 4
        sub_stack(i+5) and									// sub :STACKORIGIN+STACKWIDTH*3	; 5
-
+//       bne_L4(i+6) and									// bne L4				; 6
        lda_a(i+7) and										// lda					; 7
        cmp_stack(i+8) then									// cmp :STACKORIGIN+STACKWIDTH*2	; 8
      if argMatch(i+1, i+8) then
@@ -629,16 +681,18 @@ begin
      end;
 
 
-    if (listing[i+7] = #9'bne L4') and								// bne L4				; 7
+    if bne_L4(i+7) and										// bne L4				; 7
+
+       LOCAL(i+4) and										// .LOCAL				; 4
 
        lda_a(i) and (iy(i) = false) and								// lda 					; 0
        sta_stack(i+1) and									// sta :STACKORIGIN+10			; 1
        sta_stack(i+2) and									// sta :STACKORIGIN+STACKWIDTH+10	; 2
        ldy(i+3) and										// ldy #1				; 3
-       LOCAL(i+4) and										// .LOCAL				; 4
+//       LOCAL(i+4) and										// .LOCAL				; 4
        lda_a(i+5) and										// lda					; 5
        sub_stack(i+6) and									// sub :STACKORIGIN+STACKWIDTH+10	; 6
-
+//       bne_L4(i+7) and									// bne L4				; 7
        lda_a(i+8) and										// lda					; 8
        cmp_stack(i+9) then									// cmp :STACKORIGIN+10			; 9
      if argMatch(i+1, i+9) and
@@ -655,16 +709,18 @@ begin
      end;
 
 
-    if (listing[i+7] = #9'bne L4') and								// bne L4				; 7
+    if bne_L4(i+7) and										// bne L4				; 7
+
+       LOCAL(i+4) and										// .LOCAL				; 4
 
        lda_a(i) and (iy(i) = false) and								// lda 					; 0
        sta_stack(i+1) and									// sta :STACKORIGIN+STACKWIDTH+10	; 1
        sta_stack(i+2) and									// sta :STACKORIGIN+10			; 2
        ldy(i+3) and										// ldy #1				; 3
-       LOCAL(i+4) and										// .LOCAL				; 4
+//       LOCAL(i+4) and										// .LOCAL				; 4
        lda_a(i+5) and										// lda					; 5
        sub_stack(i+6) and									// sub :STACKORIGIN+STACKWIDTH+10	; 6
-
+//       bne_L4(i+7) and									// bne L4				; 7
        lda_a(i+8) and										// lda					; 8
        cmp_stack(i+9) then									// cmp :STACKORIGIN+10			; 9
      if argMatch(i+1, i+6) and
@@ -681,20 +737,22 @@ begin
      end;
 
 
-    if (listing[i+8] = #9'bne L4') and								// bne L4				; 8
+    if bne_L4(i+8) and										// bne L4				; 8
+
+       LOCAL(i+5) and										// .LOCAL				; 5
 
        lda_a(i) and (iy(i) = false) and								// lda 					; 0
        sta_stack(i+1) and									// sta :STACKORIGIN+STACKWIDTH		; 1
        sta_stack(i+2) and									// sta :STACKORIGIN+STACKWIDTH*2	; 2
        sta_stack(i+3) and									// sta :STACKORIGIN+STACKWIDTH*3	; 3
        ldy(i+4) and										// ldy #1				; 4
-       LOCAL(i+5) and										// .LOCAL				; 5
+//       LOCAL(i+5) and										// .LOCAL				; 5
        lda(i+6) and										// lda :STACKORIGIN+STACKWIDTH*3	; 6
        sub_im_0(i+7) and									// sub #$00				; 7
-
+//       bne_L4(i+8) and									// bne L4				; 8
        lda(i+9) and										// lda :STACKORIGIN+STACKWIDTH*2	; 9
        cmp(i+10) and										// cmp					; 10
-       (listing[i+11] = #9'bne L1') and								// bne L1				; 11
+       bne_L1(i+11) and										// bne L1				; 11
        lda(i+12) then										// lda :STACKORIGIN+STACKWIDTH		; 12
      if argMatch(i+1, i+12) and
 	argMatch(i+2, i+9) and
@@ -713,23 +771,25 @@ begin
      end;
 
 
-    if (listing[i+8] = #9'bne L4') and								// bne L4				; 8
+    if bne_L4(i+8) and										// bne L4				; 8
+
+       LOCAL(i+5) and										// .LOCAL				; 5
 
        lda_a(i) and (iy(i) = false) and								// lda 					; 0
        sta_stack(i+1) and									// sta :STACKORIGIN+STACKWIDTH*2	; 1
        sta_stack(i+2) and									// sta :STACKORIGIN+STACKWIDTH		; 2
        sta_stack(i+3) and									// sta :STACKORIGIN			; 3
        ldy(i+4) and										// ldy #1				; 4
-       LOCAL(i+5) and										// .LOCAL				; 5
+//       LOCAL(i+5) and										// .LOCAL				; 5
        lda_a(i+6) and										// lda 					; 6
        sub_im_0(i+7) and									// sub #$00				; 7
-
+//       bne_L4(i+8) and									// bne L4				; 8
        lda_a(i+9) and										// lda					; 9
        cmp_stack(i+10) and									// cmp :STACKORIGIN+STACKWIDTH*2	; 10
-       (listing[i+11] = #9'bne L1') and								// bne L1				; 11
+       bne_L1(i+11) and										// bne L1				; 11
        lda_a(i+12) and										// lda					; 12
        cmp_stack(i+13) and									// cmp :STACKORIGIN+STACKWIDTH		; 13
-       (listing[i+14] = #9'bne L1') and								// bne L1				; 14
+       bne_L1(i+14) and										// bne L1				; 14
        lda_a(i+15) and										// lda					; 15
        cmp_stack(i+16) then									// cmp :STACKORIGIN			; 16
      if argMatch(i+1, i+10) and
@@ -749,7 +809,9 @@ begin
      end;
 
 
-    if (listing[i+9] = #9'bne L4') and								// bne L4				; 9
+    if bne_L4(i+9) and										// bne L4				; 9
+
+       LOCAL(i+6) and										// .LOCAL				; 6
 
        lda_a(i) and (iy(i) = false) and								// lda 					; 0
        sta_stack(i+1) and									// sta :STACKORIGIN+STACKWIDTH*3	; 1
@@ -757,16 +819,16 @@ begin
        sta_stack(i+3) and									// sta :STACKORIGIN+STACKWIDTH		; 3
        sta_stack(i+4) and									// sta :STACKORIGIN			; 4
        ldy(i+5) and										// ldy #1				; 5
-       LOCAL(i+6) and										// .LOCAL				; 6
+//       LOCAL(i+6) and										// .LOCAL				; 6
        lda_a(i+7) and										// lda 					; 7
        sub_stack(i+8) and									// sub :STACKORIGIN+STACKWIDTH*3	; 8
-
+//       bne_L4(i+9) and									// bne L4				; 9
        lda_a(i+10) and										// lda					; 10
        cmp_stack(i+11) and									// cmp :STACKORIGIN+STACKWIDTH*2	; 11
-       (listing[i+12] = #9'bne L1') and								// bne L1				; 12
+       bne_L1(i+12) and										// bne L1				; 12
        lda_a(i+13) and										// lda					; 13
        cmp_stack(i+14) and									// cmp :STACKORIGIN+STACKWIDTH		; 14
-       (listing[i+15] = #9'bne L1') and								// bne L1				; 15
+       bne_L1(i+15) and										// bne L1				; 15
        lda_a(i+16) and										// lda					; 16
        cmp_stack(i+17) then									// cmp :STACKORIGIN			; 17
      if argMatch(i+1, i+8) and
@@ -792,9 +854,11 @@ begin
 // -----------------------------------------------------------------------------
 
 
-    if (listing[i+13] = #9'bne L4') and								// bne L4				; 13
+    if bne_L4(i+13) and										// bne L4				; 13
 
-       (listing[i+16] = #9'bne L1') and								// bne L1				; 16
+       bne_L1(i+16) and										// bne L1				; 16
+
+       LOCAL(i+10) and										// .LOCAL				; 10
 
        lda_stack(i) and										// lda :STACKORIGIN+STACKWIDTH		; 0
        adc_sbc_im_0(i+1) and									// adc|sbc #$00				; 1
@@ -806,7 +870,7 @@ begin
        adc_sbc_im_0(i+7) and									// adc|sbc #$00				; 7
        sta_stack(i+8) and									// sta :STACKORIGIN+STACKWIDTH*3	; 8
        ldy(i+9) and										// ldy #1				; 9
-       LOCAL(i+10) and										// .LOCAL				; 10
+//       LOCAL(i+10) and									// .LOCAL				; 10
        lda_im_0(i+11) and									// lda #$00				; 11
        sub_stack(i+12) and									// sub :STACKORIGIN+STACKWIDTH*3	; 12
 
@@ -834,9 +898,11 @@ begin
      end;
 
 
-    if (listing[i+13] = #9'bne L4') and								// bne L4				; 13
+    if bne_L4(i+13) and										// bne L4				; 13
 
-       (listing[i+16] = #9'bne L1') and								// bne L1				; 16
+       bne_L1(i+16) and										// bne L1				; 16
+
+       LOCAL(i+10) and										// .LOCAL				; 10
 
        lda_im_0(i) and										// lda #$00				; 0
        (adc_sbc_im_0(i+1) or adc_sbc_stack(i+1)) and						// adc|sbc #$00				; 1
@@ -848,7 +914,7 @@ begin
        adc_sbc_im_0(i+7) and									// adc|sbc #$00				; 7
        sta_stack(i+8) and									// sta :STACKORIGIN+STACKWIDTH*3	; 8
        ldy(i+9) and										// ldy #1				; 9
-       LOCAL(i+10) and										// .LOCAL				; 10
+//       LOCAL(i+10) and									// .LOCAL				; 10
        lda_im_0(i+11) and									// lda #$00				; 11
        sub_stack(i+12) and									// sub :STACKORIGIN+STACKWIDTH*3	; 12
 
@@ -876,9 +942,11 @@ begin
      end;
 
 
-    if (listing[i+13] = #9'bne L4') and								// bne L4				; 13
+    if bne_L4(i+13) and										// bne L4				; 13
 
-       (listing[i+16] = #9'bne L1') and								// bne L1				; 16
+       bne_L1(i+16) and										// bne L1				; 16
+
+       LOCAL(i+10) and										// .LOCAL				; 10
 
        lda_stack(i) and										// lda :STACKORIGIN+STACKWIDTH		; 0
        adc_sbc_im_0(i+1) and									// adc|sbc #$00				; 1
@@ -890,7 +958,7 @@ begin
        adc_sbc_im_0(i+7) and									// adc|sbc #$00				; 7
        sta_stack(i+8) and									// sta :STACKORIGIN+STACKWIDTH*3	; 8
        ldy(i+9) and										// ldy #1				; 9
-       LOCAL(i+10) and										// .LOCAL				; 10
+//       LOCAL(i+10) and									// .LOCAL				; 10
        lda_stack(i+11) and									// lda :STACKORIGIN+STACKWIDTH*3	; 11
        sub_im_0(i+12) and									// sub #$00				; 12
 
@@ -917,9 +985,11 @@ begin
      end;
 
 
-    if (listing[i+13] = #9'bne L4') and								// bne L4				; 13
+    if bne_L4(i+13) and										// bne L4				; 13
 
-       (listing[i+16] = #9'bne L1') and								// bne L1				; 16
+       bne_L1(i+16) and										// bne L1				; 16
+
+       LOCAL(i+10) and										// .LOCAL				; 10
 
        lda_im_0(i) and										// lda #$00				; 0
        adc_sbc_stack(i+1) and									// adc|sbc :STACK			; 1
@@ -931,7 +1001,7 @@ begin
        adc_sbc_stack(i+7) and									// adc|sbc :STACK			; 7
        sta_stack(i+8) and									// sta :STACKORIGIN+STACKWIDTH*3	; 8
        ldy(i+9) and										// ldy #1				; 9
-       LOCAL(i+10) and										// .LOCAL				; 10
+//       LOCAL(i+10) and									// .LOCAL				; 10
        lda_stack(i+11) and									// lda :STACKORIGIN+STACKWIDTH*3	; 11
        sub_im_0(i+12) and									// sub #$00				; 12
 
@@ -961,9 +1031,11 @@ begin
 // -----------------------------------------------------------------------------
 
 
-    if (listing[i+15] = #9'bne L4') and								// bne L4				; 15
+    if bne_L4(i+15) and										// bne L4				; 15
 
-       (listing[i+18] = #9'bne L1') and								// bne L1				; 18
+       bne_L1(i+18) and										// bne L1				; 18
+
+       LOCAL(i+12) and										// .LOCAL				; 12
 
        lda_stack(i) and										// lda :STACKORIGIN+STACKWIDTH		; 0
        adc_sbc_im_0(i+1) and									// adc|sbc #$00				; 1
@@ -977,7 +1049,7 @@ begin
        lda_val(i+9) and										// lda					; 9	~:STACKORIGIN
        asl_a(i+10) and										// asl @				; 10
        tay(i+11) and										// tay					; 11
-       LOCAL(i+12) and										// .LOCAL				; 12
+//       LOCAL(i+12) and									// .LOCAL				; 12
        lda_stack(i+13) and									// lda :STACKORIGIN+STACKWIDTH*3	; 13
        sub_im_0(i+14) and									// sub #$00				; 14
 
@@ -1005,9 +1077,11 @@ begin
 
 
 
-    if (listing[i+15] = #9'bne L4') and								// bne L4				; 15
+    if bne_L4(i+15) and										// bne L4				; 15
 
-       (listing[i+18] = #9'bne L1') and								// bne L1				; 18
+       bne_L1(i+18) and										// bne L1				; 18
+
+       LOCAL(i+12) and										// .LOCAL				; 12
 
        lda_im_0(i) and										// lda #$00				; 0
        adc_sbc_stack(i+1) and									// adc|sbc :STACK			; 1
@@ -1021,7 +1095,7 @@ begin
        lda_val(i+9) and										// lda					; 9	~:STACKORIGIN
        asl_a(i+10) and										// asl @				; 10
        tay(i+11) and										// tay					; 11
-       LOCAL(i+12) and										// .LOCAL				; 12
+//       LOCAL(i+12) and									// .LOCAL				; 12
        lda_Stack(i+13) and									// lda :STACKORIGIN+STACKWIDTH*3	; 13
        sub_im_0(i+14) and									// sub #$00				; 14
 
@@ -1053,6 +1127,10 @@ begin
 
     if ENDL(i+22) and										// .ENDL				; 22	smallint -> shortint
 
+       bne_L4(i+10) and										// bne L4				; 10
+
+       LOCAL(i+7) and										// .LOCAL				; 7
+
        ldy_im_0(i) and										// ldy #$00				; 0
        lda_val(i+1) and										// lda					; 1	~:STACKORIGIN
        spl(i+2) and										// spl					; 2
@@ -1060,17 +1138,17 @@ begin
        sty_stack(i+4) and									// sty :STACKORIGIN+STACKWIDTH		; 4
        sta_stack(i+5) and									// sta :STACKORIGIN			; 5
        ldy(i+6) and 										// ldy #1				; 6
-       LOCAL(i+7) and										// .LOCAL				; 7
+//       LOCAL(i+7) and										// .LOCAL				; 7
        lda_stack(i+8) and									// lda :STACKORIGIN+STACKWIDTH		; 8
        sub_im_0(i+9) and									// sub #$00				; 9
-       (listing[i+10] = #9'bne L4') and								// bne L4				; 10
+//       bne_L4(i+10) and									// bne L4				; 10
        lda_stack(i+11) and									// lda :STACKORIGIN			; 11
        cmp_im(i+12) and										// cmp #0..127				; 12
        (listing[i+13] = #9'beq L5') and								// beq L5				; 13
-       (listing[i+14] = #9'lda #$00') and							// lda #$00				; 14
+       lda_im_0(i+14) and									// lda #$00				; 14
        (listing[i+15] = #9'adc #$FF') and							// adc #$FF				; 15
        (listing[i+16] = #9'ora #$01') and							// ora #$01				; 16
-       (listing[i+17] = #9'bne L5') and								// bne L5				; 17
+       bne_L5(i+17) and										// bne L5				; 17
        (listing[i+18] = 'L4'#9'bvc L5') and							//L4 bvc L5				; 18
        (listing[i+19] = #9'eor #$FF') and							// eor #$FF				; 19
        (listing[i+20] = #9'ora #$01') and							// ora #$01				; 20
@@ -1105,26 +1183,28 @@ begin
       end;
 
 
-    if ENDL(i+22) and										// .ENDL				; 22
+    if ENDL(i+22) and										// .ENDL				; 22	integer -> smallint
 
-       LOCAL(i) and										// .LOCAL				; 0	integer -> smallint
+       bne_L1(i+9) and										// bne L1				; 9
+
+       LOCAL(i) and										// .LOCAL				; 0
        lda_im_0(i+1) and									// lda #$00				; 1
        sub_im_0(i+2) and									// sub #$00				; 2
-       (listing[i+3] = #9'bne L4') and								// bne L4				; 3
+       bne_L4(i+3) and										// bne L4				; 3
        lda_im_0(i+4) and									// lda #$00				; 4
        cmp_im_0(i+5) and									// cmp #$00				; 5
-       (listing[i+6] = #9'bne L1') and								// bne L1				; 6
+       bne_L1(i+6) and										// bne L1				; 6
        lda_a(i+7) and										// lda					; 7
        cmp(i+8) and										// cmp					; 8
-       (listing[i+9] = #9'bne L1') and								// bne L1				; 9
+//       bne_L1(i+9) and									// bne L1				; 9
        lda_a(i+10) and										// lda					; 10
        cmp(i+11) and										// cmp 					; 11
        (listing[i+12] = 'L1'#9'beq L5') and							//L1 beq L5				; 12
        (listing[i+13] = #9'bcs L3') and								// bcs L3				; 13
        (listing[i+14] = #9'lda #$FF') and							// lda #$FF				; 14
-       (listing[i+15] = #9'bne L5') and								// bne L5				; 15
+       bne_L5(i+15) and										// bne L5				; 15
        (listing[i+16] = 'L3'#9'lda #$01') and							//L3 lda #$01				; 16
-       (listing[i+17] = #9'bne L5') and								// bne L5				; 17
+       bne_L5(i+17) and										// bne L5				; 17
        (listing[i+18] = 'L4'#9'bvc L5') and							//L4 bvc L5				; 18
        (listing[i+19] = #9'eor #$FF') and							// eor #$FF				; 19
        (listing[i+20] = #9'ora #$01') and							// ora #$01				; 20
