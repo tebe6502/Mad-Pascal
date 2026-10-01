@@ -12,18 +12,20 @@ begin
 
     if lab_a(i+11) and										//@			; 11
 
+       cmp_im_0(i+4) and									// cmp #$00		; 4
+
        lda_a(i) and {(lda_stack(i) = false) and}						// lda W+3		; 0	opt_080 | CARDINAL < 0 ; >= 0
        cmp_im_0(i+1) and									// cmp #$00		; 1
        bne(i+2) and										// bne @+		; 2
        lda_a(i+3) and										// lda W+2		; 3
-       cmp_im_0(i+4) and									// cmp #$00		; 4
+//       cmp_im_0(i+4) and									// cmp #$00		; 4
        bne(i+5) and										// bne @+		; 5
        lda_a(i+6) and										// lda W+1		; 6
        cmp_im_0(i+7) and									// cmp #$00		; 7
        bne(i+8) and										// bne @+		; 8
        lda_a(i+9) and										// lda W		; 9
        cmp(i+10) and										// cmp			; 10
-
+//       lab_a(i+11) and									//@			; 11
        (jcs(i+12) or jcc(i+12)) and								// jcc|jcs l_		; 12
        (SKIP(i+13) = false) then								//~SKIP			; 13
       begin
@@ -72,13 +74,17 @@ begin
       end;
 
 
-    if (SKIP(i-1) = false) and
-       lda_a(i) and										// lda W+1		; 0	WHILE WORD <
+    if lab_a(i+5) and										//@			; 5
+
        cmp_im(i+1) and										// cmp #		; 1
+
+       (SKIP(i-1) = false) and
+       lda_a(i) and										// lda W+1		; 0	WHILE WORD <
+//       cmp_im(i+1) and									// cmp #		; 1
        bne(i+2) and										// bne @+		; 2
        lda_a(i+3) and										// lda W		; 3
        cmp_im_0(i+4) and									// cmp #$00		; 4
-       lab_a(i+5) and										//@			; 5
+//       lab_a(i+5) and										//@			; 5
        jcc(i+6) and										// jcc l_		; 6
        (SKIP(i+7) = false) then									//~SKIP			; 7
       begin
@@ -108,13 +114,17 @@ begin
       end;
 
 
-    if (SKIP(i-1) = false) and
-       lda_val(i) and										// lda W+1		; 0	opt_081 | WORD < 0 ; >= 0
+    if lab_a(i+5) and										//@			; 5
+
        cmp_im_0(i+1) and									// cmp #$00		; 1
+
+       (SKIP(i-1) = false) and
+       lda_val(i) and										// lda W+1		; 0	opt_081 | WORD < 0 ; >= 0
+//       cmp_im_0(i+1) and									// cmp #$00		; 1
        bne(i+2) and										// bne @+		; 2
        lda_a(i+3) and										// lda W		; 3
        cmp(i+4) and										// cmp 			; 4
-       lab_a(i+5) and										//@			; 5
+//       lab_a(i+5) and										//@			; 5
        (jcs(i+6) or jcc(i+6)) and								// jcc|jcs l_		; 6
        (SKIP(i+7) = false) then									//~SKIP			; 7
       begin
@@ -147,16 +157,20 @@ begin
       end;
 
 
-    if (SKIP(i-1) = false) and
+    if lab_a(i+8) and										//@			; 8
+
+       cmp_im_0(i+4) and									// cmp #$00		; 4
+
+       (SKIP(i-1) = false) and
        lda(i) and										// lda W+1		; 0	BOOL := WORD >= 0
        cmp_im_0(i+1) and									// cmp #$00		; 1
        bne(i+2) and										// bne @+		; 2
        lda(i+3) and										// lda W		; 3
-       cmp_im_0(i+4) and									// cmp #$00		; 4
+//       cmp_im_0(i+4) and									// cmp #$00		; 4
        lab_a(i+5) and										//@			; 5
        bcs(i+6) and										// bcs @+		; 6
        dey(i+7) and										// dey			; 7
-       lab_a(i+8) and										//@			; 8
+//       lab_a(i+8) and										//@			; 8
        tya(i+9) and										// tya			; 9
        (sta(i+10) or and_ora_eor(i+10)) and							// sta|and|ora|eor	; 10
 												//			; 11
@@ -176,18 +190,22 @@ begin
       end;
 
 
-    if lda_a(i) and iy(i) and									// lda  ,y		; 0	BOOL := WORD >= 0
+    if lab_a(i+11) and										//@			; 11
+
+       bne(i+5) and										// bne @+		; 5
+
+       lda_a(i) and iy(i) and									// lda  ,y		; 0	BOOL := WORD >= 0
        sta_stack(i+1) and									// sta :STACKORIGIN	; 1
        ldy_1(i+2) and										// ldy #1		; 2
        lda_stack(i+3) and									// lda :STACKORIGIN	; 3
        cmp(i+4) and										// cmp			; 4
-       bne(i+5) and										// bne @+		; 5
+//       bne(i+5) and										// bne @+		; 5
        lda_a(i+6) and										// lda			; 6
        cmp(i+7) and										// cmp			; 7
        lab_a(i+8) and										//@			; 8
        bcs(i+9) and										// bcs @+		; 9
        dey(i+10) and										// dey			; 10
-       lab_a(i+11) and										//@			; 11
+//       lab_a(i+11) and									//@			; 11
        tya(i+12) and										// tya			; 12
        (sta(i+13) or and_ora_eor(i+13)) then							// sta|and|ora|eor	; 13
      if argMatch(i+1, i+3) then
@@ -203,9 +221,11 @@ begin
       end;
 
 
-    if (SKIP(i-1) = false) and
+    if cmp_im_0(i+1) and									// cmp #$00		; 1
+
+       (SKIP(i-1) = false) and
        lda_a(i) and										// lda			; 0	opt_082	| BYTE < 0 ; >= 0
-       cmp_im_0(i+1) and									// cmp #$00		; 1
+//       cmp_im_0(i+1) and									// cmp #$00		; 1
        (jcs(i+2) or jcc(i+2)) and								// jcc|jcs l_		; 2
        (SKIP(i+3) = false) then									//~SKIP			; 3
       begin
@@ -324,14 +344,14 @@ begin
        LOCAL(i) and										// .LOCAL		; 0	SMALLINT < #		BMI
        lda_a(i+1) and										// lda E+1		; 1
        sub_im(i+2) and										// sub #		; 2
-       (listing[i+3] = #9'bne L4') and								// bne L4		; 3
+       bne_L4(i+3) and										// bne L4		; 3
        lda_a(i+4) and										// lda E		; 4
        cmp_im(i+5) and										// cmp #		; 5
        (listing[i+6] = #9'beq L5') and								// beq L5		; 6
        lda_im_0(i+7) and									// lda #$00		; 7
        (listing[i+8] = #9'adc #$FF') and							// adc #$FF		; 8
        (listing[i+9] = #9'ora #$01') and							// ora #$01		; 9
-       (listing[i+10] = #9'bne L5') and								// bne L5		; 10
+       bne_L5(i+10) and										// bne L5		; 10
        (listing[i+11] = 'L4'#9'bvc L5') and							//L4 bvc L5		; 11
        (listing[i+12] = #9'eor #$FF') and							// eor #$FF		; 12
        (listing[i+13] = #9'ora #$01') and							// ora #$01		; 13
@@ -388,14 +408,14 @@ begin
        LOCAL(i) and										// .LOCAL		; 0	SMALLINT >= #		BPL
        lda_a(i+1) and										// lda E+1		; 1
        sub_im(i+2) and										// sub #		; 2
-       (listing[i+3] = #9'bne L4') and								// bne L4		; 3
+       bne_L4(i+3) and										// bne L4		; 3
        lda_a(i+4) and										// lda E		; 4
        cmp_im(i+5) and										// cmp #		; 5
        (listing[i+6] = #9'beq L5') and								// beq L5		; 6
        lda_im_0(i+7) and									// lda #$00		; 7
        (listing[i+8] = #9'adc #$FF') and							// adc #$FF		; 8
        (listing[i+9] = #9'ora #$01') and							// ora #$01		; 9
-       (listing[i+10] = #9'bne L5') and								// bne L5		; 10
+       bne_L5(i+10) and										// bne L5		; 10
        (listing[i+11] = 'L4'#9'bvc L5') and							//L4 bvc L5		; 11
        (listing[i+12] = #9'eor #$FF') and							// eor #$FF		; 12
        (listing[i+13] = #9'ora #$01') and							// ora #$01		; 13
@@ -443,14 +463,14 @@ begin
        LOCAL(i) and										// .LOCAL		; 0	SMALLINT < SMALLINT	BMI
        lda_a(i+1) and										// lda E+1		; 1	SMALLINT >= SMALLINT	BPL
        sub(i+2) and										// sub 			; 2
-       (listing[i+3] = #9'bne L4') and								// bne L4		; 3
+       bne_L4(i+3) and										// bne L4		; 3
        lda_a(i+4) and										// lda E		; 4
        cmp(i+5) and (cmp_im(i+5) = false) and							// cmp			; 5
        (listing[i+6] = #9'beq L5') and								// beq L5		; 6
        lda_im_0(i+7) and									// lda #$00		; 7
        (listing[i+8] = #9'adc #$FF') and							// adc #$FF		; 8
        (listing[i+9] = #9'ora #$01') and							// ora #$01		; 9
-       (listing[i+10] = #9'bne L5') and								// bne L5		; 10
+       bne_L5(i+10) and										// bne L5		; 10
        (listing[i+11] = 'L4'#9'bvc L5') and							//L4 bvc L5		; 11
        (listing[i+12] = #9'eor #$FF') and							// eor #$FF		; 12
        (listing[i+13] = #9'ora #$01') and							// ora #$01		; 13
@@ -491,21 +511,21 @@ begin
        LOCAL(i) and										// .LOCAL		; 0	INTEGER < XXYYXXYY	BMI
        lda_a(i+1) and										// lda E+3		; 1	INTEGER >= XXYYXXYY	BPL
        sub_im(i+2) and										// sub #		; 2
-       (listing[i+3] = #9'bne L4') and								// bne L4		; 3
+       bne_L4(i+3) and										// bne L4		; 3
        lda_a(i+4) and										// lda E+2		; 4
        cmp_im(i+5) and										// cmp #		; 5
-       (listing[i+6] = #9'bne L1') and								// bne L1		; 6
+       bne_L1(i+6) and										// bne L1		; 6
        lda_a(i+7) and										// lda E+1		; 7
        cmp_im(i+8) and										// cmp #		; 8
-       (listing[i+9] = #9'bne L1') and								// bne L1		; 9
+       bne_L1(i+9) and										// bne L1		; 9
        lda_a(i+10) and										// lda E		; 10
        cmp_im(i+11) and										// cmp #		; 11
        (listing[i+12] = 'L1'#9'beq L5') and							//L1 beq L5		; 12
        (listing[i+13] = #9'bcs L3') and								// bcs L3		; 13
        (listing[i+14] = #9'lda #$FF') and							// lda #$FF		; 14
-       (listing[i+15] = #9'bne L5') and								// bne L5		; 15
+       bne_L5(i+15) and										// bne L5		; 15
        (listing[i+16] = 'L3'#9'lda #$01') and							//L3 lda #$01		; 16
-       (listing[i+17] = #9'bne L5') and								// bne L5		; 17
+       bne_L5(i+17) and										// bne L5		; 17
        (listing[i+18] = 'L4'#9'bvc L5') and							//L4 bvc L5		; 18
        (listing[i+19] = #9'eor #$FF') and							// eor #$FF		; 19
        (listing[i+20] = #9'ora #$01') and							// ora #$01		; 20
@@ -615,21 +635,21 @@ begin
        LOCAL(i) and										// .LOCAL		; 0	INTEGER < 		BMI
        lda_a(i+1) and										// lda E+3		; 1	INTEGER >= 		BPL
        sub(i+2) and {(sub_im(i+2) = false) and}							// sub			; 2
-       (listing[i+3] = #9'bne L4') and								// bne L4		; 3
+       bne_L4(i+3) and										// bne L4		; 3
        lda_a(i+4) and										// lda E+2		; 4
        cmp(i+5) and {(cmp_im(i+5) = false) and}							// cmp			; 5
-       (listing[i+6] = #9'bne L1') and								// bne L1		; 6
+       bne_L1(i+6) and										// bne L1		; 6
        lda_a(i+7) and										// lda E+1		; 7
        cmp(i+8) and {(cmp_im(i+8) = false) and}							// cmp			; 8
-       (listing[i+9] = #9'bne L1') and								// bne L1		; 9
+       bne_L1(i+9) and										// bne L1		; 9
        lda_a(i+10) and										// lda E		; 10
        cmp(i+11) and (cmp_im(i+11) = false) and							// cmp			; 11
        (listing[i+12] = 'L1'#9'beq L5') and							//L1 beq L5		; 12
        (listing[i+13] = #9'bcs L3') and								// bcs L3		; 13
        (listing[i+14] = #9'lda #$FF') and							// lda #$FF		; 14
-       (listing[i+15] = #9'bne L5') and								// bne L5		; 15
+       bne_L5(i+15) and										// bne L5		; 15
        (listing[i+16] = 'L3'#9'lda #$01') and							//L3 lda #$01		; 16
-       (listing[i+17] = #9'bne L5') and								// bne L5		; 17
+       bne_L5(i+17) and										// bne L5		; 17
        (listing[i+18] = 'L4'#9'bvc L5') and							//L4 bvc L5		; 18
        (listing[i+19] = #9'eor #$FF') and							// eor #$FF		; 19
        (listing[i+20] = #9'ora #$01') and							// ora #$01		; 20

@@ -14,10 +14,12 @@ begin
 // ~cmp adr.label
 //
 
-    if ldy_1(i) and										// ldy #1				; 0
+    if lab_a(i+3) and										//@					; 3
+
+       ldy_1(i) and										// ldy #1				; 0
        beq(i+1) and										// beq					; 1
        dey(i+2) and 										// dey					; 2
-       lab_a(i+3) and										//@					; 3
+//       lab_a(i+3) and										//@					; 3
        tya(i+4) and										// tya					; 4
        sta(i+5) then										// sta					; 5
       begin
@@ -156,6 +158,8 @@ begin
 
     if cmp_im_0(i+10) and									// cmp #$00				; 10
 
+       bne(i+8) and										// bne					; 8
+
        lda_a(i) and										// lda					; 0
        and_im(i+1) and (listing[i+1] = listing[i+4]) and					// and #				; 1
        sta_stack(i+2) and									// sta :STACKORIGIN			; 2
@@ -190,6 +194,8 @@ begin
 
     if cmp(i+8) and										// cmp					; 8
 
+       bne(i+11) and										// bne @+				; 11
+
        lda_a(i) and (iy(i) = false) and								// lda ~,y				; 0
        sta_stack(i+1) and									// sta :STACKORIGIN			; 1
        sta_stack(i+2) and									// sta :STACKORIGIN+STACKWIDTH		; 2
@@ -222,14 +228,18 @@ begin
       end;
 
 
-    if lda_a(i) and (iy(i) = false) and								// lda ~,y				; 0
+    if bne(i+7) and										// bne					; 7
+
+       bne(i+5) and										// bne					; 5
+
+       lda_a(i) and (iy(i) = false) and								// lda ~,y				; 0
        sta_stack(i+1) and									// sta :STACKORIGIN			; 1
        sta_stack(i+2) and									// sta :STACKORIGIN+STACKWIDTH		; 2
        lda(i+3) and 										// lda X+2				; 3
        and_ora_eor(i+4) and									// and|ora|eor				; 4
 //       bne(i+5) and										// bne					; 5
        lda_stack(i+6) and									// lda :STACKORIGIN+STACKWIDTH		; 6
-//       bne(i+7) and										// bne @+				; 7
+//       bne(i+7) and										// bne 					; 7
        lda_stack(i+8) then									// lda :STACKORIGIN			; 8
      if argMatch(i+1, i+8) and
         argMatch(i+2, i+6) then
@@ -247,6 +257,8 @@ begin
 
 
     if cmp(i+10) and										// cmp					; 10
+
+       bne(i+13) and										// bne @+				; 13
 
        lda_a(i) and (iy(i) = false) and								// lda ~,y				; 0
        sta_stack(i+1) and									// sta :STACKORIGIN			; 1
@@ -280,12 +292,14 @@ begin
 
     if cmp_stack(i+13) and									// cmp :STACKORIGIN+STACKWIDTH+Y	; 13
 
+       sta_stack(i+5) and									// sta :STACKORIGIN+STACKWIDTH+X	; 5
+
        lda(i) and (iy(i) = false) and								// lda ~,y				; 0
        add_sub(i+1) and										// add|sub				; 1
        sta_stack(i+2) and									// sta :STACKORIGIN+X			; 2
        lda(i+3) and (iy(i) = false) and								// lda ~,y				; 3
        adc_sbc(i+4) and 									// adc|sbc				; 4
-       sta_stack(i+5) and									// lda :STACKORIGIN+STACKWIDTH+X	; 5
+//       sta_stack(i+5) and									// sta :STACKORIGIN+STACKWIDTH+X	; 5
        lda(i+6) and (iy(i) = false) and								// lda ~,y				; 6
        add_sub(i+7) and										// add|sub				; 7
        sta_stack(i+8) and									// sta :STACKORIGIN+Y			; 8
@@ -361,9 +375,11 @@ begin
 
     if cmp(i+6) and										// cmp					; 6
 
+       cmp(i+2) and										// cmp					; 2
+
        lda_a(i) and (listing[i] = listing[i+4]) and						// lda A				; 0
        and_ora_eor(i+1) and (listing[i+1] = listing[i+5]) and					// and|ora|eor				; 1
-       cmp(i+2) and										// cmp					; 2
+//       cmp(i+2) and										// cmp					; 2
        SKIP(i+3) then										// SKIP					; 3
 //       lda_a(i+4) and										// lda A				; 4
 //       and_ora_eor(i+5) and									// and|ora|eor				; 5
@@ -544,10 +560,12 @@ begin
 
     if cmp(i+8) and										// cmp					; 8
 
+       ldy_1(i+3) and										// ldy #1				; 3
+
        lda_val(i) and (iy(i) = false) and							// lda					; 0
        sta_stack(i+1) and									// sta :STACKORIGIN			; 1
        lda_a(i+2) and										// lda					; 2
-       ldy_1(i+3) and										// ldy #1				; 3
+//       ldy_1(i+3) and										// ldy #1				; 3
        and_ora_eor(i+4) and									// and|ora|eor				; 4
        cmp(i+5) and										// cmp					; 5
        bne_a(i+6) and										// bne @				; 6
@@ -567,9 +585,11 @@ begin
 
     if cmp(i+4) and										// cmp					; 4
 
+       ldy_1(i+2) and										// ldy #1				; 2
+
        and_ora_eor(i) and									// and|ora|eor				; 0
        sta_stack(i+1) and									// sta :STACKORIGIN			; 1
-       ldy_1(i+2) and										// ldy #1				; 2
+//       ldy_1(i+2) and										// ldy #1				; 2
        lda_stack(i+3) then									// lda :STACKORIGIN			; 3
 //       cmp(i+4) then										// cmp					; 4
      if argMatch(i+1, i+3) then
@@ -783,13 +803,15 @@ begin
 
     if lab_a(i+4) and										//@					; 4
 
+       lda_im_0(i+6) and									// lda #$00				; 6
+
        ldy_1(i) and										// ldy #1				; 0
        cmp(i+1) and										// cmp					; 1
 //       bne(i+2) and										// bne @+				; 2
        dey(i+3) and										// dey					; 3
 //       lab_a(i+4) and										//@					; 4
        sty(i+5) and										// sty :STACKORIGIN+9			; 5
-       lda_im_0(i+6) and									// lda #$00				; 6
+//       lda_im_0(i+6) and									// lda #$00				; 6
        sub(i+7) then										// sub :STACKORIGIN+9			; 7
      if argMatch(i+5, i+7) then begin
        listing[i]   := #9'ldy #$00';
@@ -1448,10 +1470,12 @@ begin
 
     if bne(i+5) and										// bne					; 5
 
+       cmp(i+3) and										// cmp					; 3
+
        lda_a(i) and										// lda					; 0
        sta_stack(i+1) and									// sta :STACKORIGIN			; 1
        lda_a(i+2) and										// lda					; 2
-       cmp(i+3) and										// cmp					; 3
+//       cmp(i+3) and										// cmp					; 3
        SKIP(i+4) and										// SKIP					; 4
 //       bne(i+5) and										// bne					; 5
        lda_stack(i+6) then									// lda :STACKORIGIN			; 6
@@ -1535,6 +1559,8 @@ begin
 
     if bne(i+13) and										// bne @+				; 13
 
+       bne(i+9) and										// bne @+				; 9
+
        lda_a(i) and										// lda					; 0
        sta_stack(i+1) and									// sta :STACKORIGIN			; 1
        lda_a(i+2) and										// lda					; 2
@@ -1544,7 +1570,7 @@ begin
        lda_a(i+6) and										// lda					; 6
        sta_stack(i+7) and									// sta :STACKORIGIN+STACKWIDTH*3	; 7
        lda_stack(i+8) and									// lda :STACKORIGIN+STACKWIDTH*3	; 8
-       bne(i+9) and										// bne @+				; 9
+//       bne(i+9) and										// bne @+				; 9
        lda_stack(i+10) and									// lda :STACKORIGIN+STACKWIDTH*2	; 10
        bne(i+11) and										// bne @+				; 11
        lda_stack(i+12) and									// lda :STACKORIGIN+STACKWIDTH		; 12

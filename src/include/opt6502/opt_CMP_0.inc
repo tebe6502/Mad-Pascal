@@ -220,7 +220,7 @@ begin
 
     if ldy_1(i+2) and										// ldy #1			; 2
 
-       (and_ora_eor(i) or asl_a(i) or rol_a(i) or lsr_a(i) or ror_a(i)) and (iy(i) = false) and	// and|ora|eor			; 0
+       (and_ora_eor(i) or asl_a(i) or rol_a(i) or lsr_a(i) or ror_a(i)) and (iy(i) = false) and	// and|ora|eor|asl|rol|lsr|ror	; 0
        sta_stack(i+1) and									// sta :STACKORIGIN+N		; 1
 //       ldy_1(i+2) and										// ldy #1			; 2
        lda_stack(i+3) and 									// lda :STACKORIGIN+N		; 3

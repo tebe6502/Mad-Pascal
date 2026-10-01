@@ -121,13 +121,17 @@ begin
 // 				     WORD
 // -----------------------------------------------------------------------------
 
-    if (SKIP(i-1) = false) and
+    if lab_a(i+5) and										//@			; 5
+
+       lda_bp2_y(i+3) and									// lda (:bp2),y		; 3
+
+       (SKIP(i-1) = false) and
        lda_bp2_y(i) and										// lda (:bp2),y		; 0	:BP2 > 0
        bne(i+1) and										// bne @+		; 1
        dey(i+2) and										// dey			; 2
-       lda_bp2_y(i+3) and									// lda (:bp2),y		; 3
+//       lda_bp2_y(i+3) and									// lda (:bp2),y		; 3
        cmp_im_0(i+4) and									// cmp #$00		; 4
-       lab_a(i+5) and										//@			; 5
+//       lab_a(i+5) and										//@			; 5
        jcc(i+6) and										// jcc l_		; 6
        jeq(i+7) then										// jeq l_		; 7
       begin
@@ -143,13 +147,17 @@ begin
       end;
 
 
-    if (SKIP(i-1) = false) and
-       lda_a(i) and										// lda W+1		; 0	opt_093 | WORD > 0
+    if lab_a(i+5) and										//@			; 5
+
        cmp_im(i+1) and										// cmp #$00		; 1
+
+       (SKIP(i-1) = false) and
+       lda_a(i) and										// lda W+1		; 0	opt_093 | WORD > 0
+//       cmp_im(i+1) and									// cmp #$00		; 1
        bne(i+2) and										// bne @+		; 2
        lda_a(i+3) and										// lda W		; 3
        cmp_im(i+4) and										// cmp #$00		; 4
-       lab_a(i+5) and										//@			; 5
+//       lab_a(i+5) and										//@			; 5
        jcc(i+6) and										// jcc l_		; 6
        jeq(i+7) then										// jeq l_		; 7
       begin
@@ -192,16 +200,20 @@ begin
       end;
 
 
-    if (SKIP(i-1) = false) and
-       lda_a(i) and										// lda W+1		; 0	opt_091 | WORD > 0
+    if lab_a(i+8) and										//@			; 8
+
        cmp_im(i+1) and										// cmp #		; 1
+
+       (SKIP(i-1) = false) and
+       lda_a(i) and										// lda W+1		; 0	opt_091 | WORD > 0
+//       cmp_im(i+1) and									// cmp #		; 1
        bne(i+2) and										// bne @+		; 2
        lda_a(i+3) and										// lda W		; 3
        cmp_im(i+4) and										// cmp #		; 4
        lab_a(i+5) and										//@			; 5
        beq(i+6) and										// beq @+		; 6
-       jcs(i+7) and										// jcs l_		; 7
-       lab_a(i+8) then										//@			; 8
+       jcs(i+7) then										// jcs l_		; 7
+//       lab_a(i+8) then									//@			; 8
       begin
 
 	c:=GetWORD(i+4, i+1);
@@ -231,19 +243,23 @@ begin
       end;
 
 
-    if (SKIP(i-1) = false) and
+    if lab_a(i+11) and										//@				; 11
+
+       adc_im_0(i+4) and									// adc #$00			; 4
+
+       (SKIP(i-1) = false) and
        lda_a(i) and										// lda W+1			; 0	BYTE > BYTE + 255
        (listing[i+1] = #9'add #$FF') and							// add #$FF			; 1
        sta_stack(i+2) and									// sta :STACKORIGIN		; 2
        lda_im_0(i+3) and									// lda #$00			; 3
-       adc_im_0(i+4) and									// adc #$00			; 4
+//       adc_im_0(i+4) and									// adc #$00			; 4
        sta_stack(i+5) and									// sta :STACKORIGIN+STACKWIDTH	; 5
        lda_stack(i+6) and									// lda :STACKORIGIN+STACKWIDTH	; 6
        cmp_im_0(i+7) and									// cmp #$00			; 7
        bne(i+8) and										// bne @+			; 8
        lda_stack(i+9) and									// lda :STACKORIGIN		; 9
        cmp(i+10) and										// cmp				; 10
-       lab_a(i+11) and										//@				; 11
+//       lab_a(i+11) and									//@				; 11
        jcs(i+12) and										// jcs l_			; 12
        (SKIP(i+13) = false) then								//				; 13
      if argMatch(i+2, i+9) and
@@ -268,17 +284,21 @@ begin
       end;
 
 
-    if (SKIP(i-1) = false) and
-       lda_a(i) and										// lda W+1		; 0	BOOL := WORD > WORD
+    if lab_a(i+9) and										//@			; 9
+
        cmp_im(i+1) and										// cmp #		; 1
+
+       (SKIP(i-1) = false) and
+       lda_a(i) and										// lda W+1		; 0	BOOL := WORD > WORD
+//       cmp_im(i+1) and									// cmp #		; 1
        bne(i+2) and										// bne @+		; 2
        lda_a(i+3) and										// lda W		; 3
        cmp_im(i+4) and										// cmp #		; 4
        lab_a(i+5) and										//@			; 5
        seq(i+6) and										// seq			; 6
        bcs(i+7) and										// bcs @+		; 7
-       dey(i+8) and										// dey			; 8
-       lab_a(i+9) then										//@			; 9
+       dey(i+8) then										// dey			; 8
+//       lab_a(i+9) then									//@			; 9
       begin
 
 	c:=GetWORD(i+4, i+1);
@@ -307,13 +327,17 @@ begin
       end;
 
 
-    if (SKIP(i-1) = false) and
+    if lab_a(i+5) and										//@			; 5
+
+       bne(i+2) and										// bne @+		; 2
+
+       (SKIP(i-1) = false) and
        lda_a(i) and										// lda W+1		; 0	WORD_1 > WORD_2 => WORD_2 < WORD_1
        cmp(i+1) and (cmp_im(i+1) = false) and 							// cmp 			; 1
-       bne(i+2) and										// bne @+		; 2
+//       bne(i+2) and										// bne @+		; 2
        lda_a(i+3) and										// lda W		; 3
        cmp(i+4) and (cmp_im(i+4) = false) and							// cmp			; 4
-       lab_a(i+5) and										//@			; 5
+//       lab_a(i+5) and										//@			; 5
        seq(i+6) and										// seq			; 6
        bcs(i+7) and										// bcs @+		; 7
        dey(i+8) then										// dey			; 8
@@ -339,10 +363,12 @@ begin
 // 				     BYTE
 // -----------------------------------------------------------------------------
 
-    if (SKIP(i-1) = false) and
+    if jcc(i+2) and										// jcc l_		; 2
+  
+       (SKIP(i-1) = false) and
        lda_a(i) and										// lda			; 0	opt_094	| BYTE > 0
        cmp_im(i+1) and										// cmp #		; 1
-       jcc(i+2) and										// jcc l_		; 2
+//       jcc(i+2) and										// jcc l_		; 2
        jeq(i+3) then										// jeq l_		; 3
       begin
 
@@ -376,11 +402,15 @@ begin
       end;
 
 
-    if (SKIP(i-1) = false) and
-       lda_a(i) and										// lda			; 0	BYTE > 0
+    if bcs_a(i+3) and										// bcs @+		; 3
+
        cmp_im(i+1) and										// cmp #		; 1
-       seq(i+2) and										// seq			; 2
-       bcs_a(i+3) then										// bcs @+		; 3
+
+       (SKIP(i-1) = false) and
+       lda_a(i) and										// lda			; 0	BYTE > 0
+//       cmp_im(i+1) and									// cmp #		; 1
+       seq(i+2) then										// seq			; 2
+//       bcs_a(i+3) then									// bcs @+		; 3
       begin
 
        if cmp_im_0(i+1) then begin
@@ -405,11 +435,13 @@ begin
       end;
 
 
-    if (SKIP(i-1) = false) and
+    if bcs_a(i+3) and										// bcs @+		; 3
+
+       (SKIP(i-1) = false) and
        lda_a(i) and										// lda			; 0	BYTE_1 > BYTE_2 => BYTE_2 < BYTE_1
        cmp(i+1) and (cmp_im(i+1) = false) and							// cmp			; 1
-       seq(i+2) and										// seq			; 2
-       bcs_a(i+3) then										// bcs @+		; 3
+       seq(i+2) then										// seq			; 2
+//       bcs_a(i+3) then									// bcs @+		; 3
       begin
 	tmp := GetARG(i);
 
@@ -422,12 +454,16 @@ begin
       end;
 
 
-    if (SKIP(i) = false) and									//
+    if jmp_l(i+5) and										// jmp l_		; 5
+
+       sne(i+3) and										// sne			; 3
+
+       (SKIP(i) = false) and									//
        bmi_a(i+1) and										// bmi @+		; 1	> 0
        ora(i+2) and										// ora 			; 2
-       sne(i+3) and										// sne			; 3
-       lab_a(i+4) and										//@			; 4
-       jmp_l(i+5) then										// jmp l_		; 5
+//       sne(i+3) and										// sne			; 3
+       lab_a(i+4) then										//@			; 4
+//       jmp_l(i+5) then									// jmp l_		; 5
       begin
 	listing[i+1] := #9'jmi ' + GetARG(i+5);
 
@@ -439,13 +475,17 @@ begin
       end;
 
 
-    if (SKIP(i) = false) and									//
+    if lab_a(i+6) and										//@			; 6
+
+       sne(i+3) and										// sne			; 3
+
+       (SKIP(i) = false) and									//
        bmi_a(i+1) and										// bmi @+		; 1	> 0
        ora(i+2) and										// ora 			; 2
-       sne(i+3) and										// sne			; 3
+//       sne(i+3) and										// sne			; 3
        lab_a(i+4) and										//@			; 4
        dey(i+5) and										// dey			; 5
-       lab_a(i+6) and										//@			; 6
+//       lab_a(i+6) and										//@			; 6
        tya(i+7) and										// tya			; 7
        jeq(i+8) then										// jeq			; 8
       begin

@@ -1156,13 +1156,13 @@ begin
        LOCAL(i+11) and										// .LOCAL				; 11
        lda_stack_prev_3x(i+12) and 								// lda :STACKORIGIN-1+STACKWIDTH*3,x	; 12
        (listing[i+13] = #9'sub :STACKORIGIN+STACKWIDTH*3,x') and				// sub :STACKORIGIN+STACKWIDTH*3,x	; 13
-       (listing[i+14] = #9'bne L4') and								// bne L4				; 14
+       bne_L4(i+14) and										// bne L4				; 14
        lda_stack_prev_2x(i+15) and								// lda :STACKORIGIN-1+STACKWIDTH*2,x	; 15
        cmp_stack_2x(i+16) and									// cmp :STACKORIGIN+STACKWIDTH*2,x	; 16
-       (listing[i+17] = #9'bne L1') and								// bne L1				; 17
+       bne_L1(i+17) and										// bne L1				; 17
        lda_stack_prev_1x(i+18) and								// lda :STACKORIGIN-1+STACKWIDTH,x	; 18
        cmp_stack_1x(i+19) and									// cmp :STACKORIGIN+STACKWIDTH,x	; 19
-       (listing[i+20] = #9'bne L1') and								// bne L1				; 20
+       bne_L1(i+20) and										// bne L1				; 20
        lda_stack_prev_0x(i+21) and								// lda :STACKORIGIN-1,x			; 21
        cmp_stack_0x(i+22) then									// cmp :STACKORIGIN,x			; 22
      if stack_0x(i+1) and
@@ -1208,21 +1208,21 @@ begin
        LOCAL(i+1) and										// .LOCAL		; 1
        lda_val(i+2) and										// lda E+3		; 2
        sub(i+3) and (sub_stack(i+3) = false) and						// sub			; 3
-       (listing[i+4] = #9'bne L4') and								// bne L4		; 4
+       bne_L4(i+4) and										// bne L4		; 4
        lda_val(i+5) and										// lda E+2		; 5
        cmp_val(i+6) and										// cmp			; 6	~:STACKORIGIN
-       (listing[i+7] = #9'bne L1') and								// bne L1		; 7
+       bne_L1(i+7) and										// bne L1		; 7
        lda_val(i+8) and										// lda E+1		; 8
        cmp_val(i+9) and										// cmp			; 9	~:STACKORIGIN
-       (listing[i+10] = #9'bne L1') and								// bne L1		; 10
+       bne_L1(i+10) and										// bne L1		; 10
        lda_val(i+11) and									// lda E		; 11
        cmp_val(i+12) and 									// cmp			; 12	~:STACKORIGIN
        (listing[i+13] = 'L1'#9'beq L5') and							//L1 beq L5		; 13
        (listing[i+14] = #9'bcs L3') and								// bcs L3		; 14
        (listing[i+15] = #9'lda #$FF') and							// lda #$FF		; 15
-       (listing[i+16] = #9'bne L5') and								// bne L5		; 16
+       bne_L5(i+16) and										// bne L5		; 16
        (listing[i+17] = 'L3'#9'lda #$01') and							//L3 lda #$01		; 17
-       (listing[i+18] = #9'bne L5') and								// bne L5		; 18
+       bne_L5(i+18) and										// bne L5		; 18
        (listing[i+19] = 'L4'#9'bvc L5') and							//L4 bvc L5		; 19
        (listing[i+20] = #9'eor #$FF') and							// eor #$FF		; 20
        (listing[i+21] = #9'ora #$01') and							// ora #$01		; 21
@@ -1325,7 +1325,7 @@ begin
        LOCAL(i+7) and										// .LOCAL				; 7
        lda_stack_prev_1x(i+8) and 								// lda :STACKORIGIN-1+STACKWIDTH,x	; 8
        (listing[i+9] = #9'sub :STACKORIGIN+STACKWIDTH,x') and					// sub :STACKORIGIN+STACKWIDTH,x	; 9
-       (listing[i+10] = #9'bne L4') and								// bne L4				; 10
+       bne_L4(i+10) and										// bne L4				; 10
        lda_stack_prev_0x(i+11) and 								// lda :STACKORIGIN-1,x			; 11
        cmp_stack_0x(i+12) then									// cmp :STACKORIGIN,x			; 12
      if stack_0x(i+1) and
@@ -1387,14 +1387,14 @@ begin
        LOCAL(i+1) and										// .LOCAL				; 1
        lda_val(i+2) and										// lda E+1				; 2
        sub(i+3) and (sub_stack(i+3) = false) and						// sub					; 3
-       (listing[i+4] = #9'bne L4') and								// bne L4				; 4
+       bne_L4(i+4) and										// bne L4				; 4
        lda_val(i+5) and										// lda E				; 5
        cmp_val(i+6) and										// cmp					; 6	~:STACKORIGIN
        (listing[i+7] = #9'beq L5') and								// beq L5				; 7
        (listing[i+8] = #9'lda #$00') and							// lda #$00				; 8
        (listing[i+9] = #9'adc #$FF') and							// adc #$FF				; 9
        (listing[i+10] = #9'ora #$01') and							// ora #$01				; 10
-       (listing[i+11] = #9'bne L5') and								// bne L5				; 11
+       bne_L5(i+11) and										// bne L5				; 11
        (listing[i+12] = 'L4'#9'bvc L5') and							//L4 bvc L5				; 12
        (listing[i+13] = #9'eor #$FF') and							// eor #$FF				; 13
        (listing[i+14] = #9'ora #$01') and							// ora #$01				; 14
