@@ -9,10 +9,10 @@ begin
 // ===				 STACK ADR.
 // -----------------------------------------------------------------------------
 
- if (lda_adr(i+16) or										// lda     |lda adr.			; 16
-    sta_adr(i+17) or										// sta adr.|sta				; 17
-    lda_adr(i+18) or										// lda     |lda adr.			; 18
-    sta_adr(i+19)) and  									// sta adr.|sta				; 19
+ if (LDA_STA_ADR(i+16) or									// lda     |lda adr.			; 16
+    												// sta adr.|sta				; 17
+     LDA_STA_ADR(i+18)) and									// lda     |lda adr.			; 18
+   												// sta adr.|sta				; 19
 
     lda_stack_1x(i+6) and									// lda :STACKORIGIN+STACKWIDTH,x	; 6
     asl_stack_0x(i+7) and									// asl :STACKORIGIN,x			; 7
@@ -151,14 +151,14 @@ begin
 // -----------------------------------------------------------------------------
 
 
- if (lda_adr(i+18) or										// lda     |lda adr.			; 18
-    sta_adr(i+19) or										// sta adr.|sta				; 19
-    lda_adr(i+20) or										// lda     |lda adr.			; 20
-    sta_adr(i+21) or										// sta adr.|sta				; 21
-    lda_adr(i+22) or										// lda     |lda adr.			; 22
-    sta_adr(i+23) or										// sta adr.|sta				; 23
-    lda_adr(i+24) or										// lda     |lda adr.			; 24
-    sta_adr(i+25)) and										// sta adr.|sta				; 25
+ if (LDA_STA_ADR(i+18) or									// lda     |lda adr.			; 18
+    												// sta adr.|sta				; 19
+     LDA_STA_ADR(i+20) or									// lda     |lda adr.			; 20
+    												// sta adr.|sta				; 21
+     LDA_STA_ADR(i+22) or									// lda     |lda adr.			; 22
+    												// sta adr.|sta				; 23
+     LDA_STA_ADR(i+24)) and									// lda     |lda adr.			; 24
+    												// sta adr.|sta				; 25
 
     lda_stack_1x(i+6) and									// lda :STACKORIGIN+STACKWIDTH,x	; 6
     asl_stack_0x(i+7) and									// asl :STACKORIGIN,x			; 7
@@ -343,7 +343,7 @@ begin
 // -----------------------------------------------------------------------------
 
 
-    if (lda_adr(i+10) or sta_adr(i+11)) and							// lda adr.|				; 10		WORD
+    if LDA_STA_ADR(i+10) and									// lda adr.|				; 10		WORD
        												//         |sta adr.			; 11
 
        lda_val(i) and										// lda ~:STACKORIGIN			; 0
@@ -372,7 +372,7 @@ begin
      end;
 
 
-    if (lda_adr(i+12) or sta_adr(i+13)) and							// lda adr.|				; 12		CARDINAL
+    if LDA_STA_ADR(i+12) and									// lda adr.|				; 12		CARDINAL
        												//         |sta adr.			; 13
 
        lda_val(i) and										// lda ~:STACKORIGIN			; 0
@@ -405,7 +405,7 @@ begin
      end;
 
 
-    if (lda_adr(i+8) or	sta_adr(i+9)) and							// lda adr.|				; 8
+    if LDA_STA_ADR(i+8) and									// lda adr.|				; 8
        												// 	   |sta adr.			; 9
 
        mva_im(i) and stack_0x(i) and								// mva #$   :STACKORIGIN,x		; 0
@@ -489,7 +489,7 @@ begin
 
 
 
-    if (lda_adr(i+13) or sta_adr(i+14)) and							// lda adr.|				; 13
+    if LDA_STA_ADR(i+13) and									// lda adr.|				; 13
        												//         |sta adr.			; 14
 
        lda_a(i) and										// lda					; 0
@@ -526,7 +526,7 @@ begin
      end;
 
 
-    if (lda_adr(i+6) or sta_adr(i+7)) and							// lda adr.|				; 6
+    if LDA_STA_ADR(i+6) and									// lda adr.|				; 6
        												//         |sta adr.			; 7
 
        lda_a(i) and (lda_im(i) = false) and (iy(i) = false) and					// lda					; 0

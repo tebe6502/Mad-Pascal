@@ -894,7 +894,7 @@ begin
 
 
     if tay(i+1) and										// tay					; 1
-       (lda_adr(i+2) or sta_adr(i+3)) and							// lda adr.|				; 2
+       LDA_STA_ADR(i+2) and									// lda adr.|				; 2
 												//         |sta adr.			; 3
 
        rol_stack(i) then									// rol :STACKORIGIN+STACKWIDTH		; 0
@@ -906,7 +906,7 @@ begin
 
 
     if tay(i+2) and										// tay					; 2
-       (lda_adr(i+3) or sta_adr(i+4)) and							// lda adr.|				; 3
+       LDA_STA_ADR(i+3) and									// lda adr.|				; 3
 												//         |sta adr.			; 4
 
        rol_stack(i) and										// rol :STACKORIGIN+STACKWIDTH		; 0
@@ -919,7 +919,7 @@ begin
 
 
     if tay(i+3) and										// tay					; 3
-       (lda_adr(i+4) or sta_adr(i+5)) and							// lda adr.|				; 4
+       LDA_STA_ADR(i+4) and									// lda adr.|				; 4
 												//         |sta adr.			; 5
 
        rol_stack(i) and										// rol :STACKORIGIN+STACKWIDTH		; 0
@@ -933,7 +933,7 @@ begin
 
 
     if tay(i+3) and										// tay					; 3
-       (lda_adr(i+4) or sta_adr(i+5)) and							// lda adr.|				; 4
+       LDA_STA_ADR(i+4) and									// lda adr.|				; 4
 												//         |sta adr.			; 5
 
        rol_stack(i) and										// rol :STACKORIGIN+STACKWIDTH		; 0
@@ -947,7 +947,7 @@ begin
 
 
     if tay(i+3) and										// tay					; 3
-       (lda_adr(i+4) or sta_adr(i+5)) and							// lda adr.|				; 4
+       LDA_STA_ADR(i+4) and									// lda adr.|				; 4
 												//         |sta adr.			; 5
 
        rol_a(i) and										// rol @				; 0
@@ -961,7 +961,7 @@ begin
 
 
     if tay(i+3) and										// tay					; 3
-       (lda_adr(i+4) or sta_adr(i+5)) and							// lda adr.|				; 4
+       LDA_STA_ADR(i+4) and									// lda adr.|				; 4
 												//         |sta adr.			; 5
 
        rol_stack(i) and										// rol :STACKORIGIN+STACKWIDTH		; 0
@@ -975,7 +975,7 @@ begin
 
 
     if tay(i+4) and										// tay					; 4
-       (lda_adr(i+5) or sta_adr(i+6)) and							// lda adr.|				; 5
+       LDA_STA_ADR(i+5) and									// lda adr.|				; 5
 												//         |sta adr.			; 6
 
        rol_stack(i) and										// rol :STACKORIGIN+STACKWIDTH		; 0
@@ -990,7 +990,7 @@ begin
 
 
     if tay(i+4) and										// tay					; 4
-       (lda_adr(i+5) or sta_adr(i+6)) and							// lda adr.|				; 5
+       LDA_STA_ADR(i+5) and									// lda adr.|				; 5
 												//         |sta adr.			; 6
 
        rol_stack(i) and										// rol :STACKORIGIN+STACKWIDTH		; 0
@@ -1005,7 +1005,7 @@ begin
 
 
     if tay(i+4) and										// tay					; 4
-       (lda_adr(i+5) or sta_adr(i+6)) and							// lda adr.|				; 5
+       LDA_STA_ADR(i+5) and									// lda adr.|				; 5
 												//         |sta adr.			; 6
 
        rol_a(i) and										// rol @				; 0
@@ -1022,7 +1022,7 @@ begin
 
 
     if tay(i+4) and										// tay					; 4
-       (lda_adr(i+5) or sta_adr(i+6)) and							// lda adr.|				; 5
+       LDA_STA_ADR(i+5) and									// lda adr.|				; 5
 												//         |sta adr.			; 6
 
        rol_stack(i) and										// rol :STACKORIGIN+STACKWIDTH		; 0
@@ -1037,7 +1037,7 @@ begin
 
 
     if tay(i+4) and										// tay					; 4
-       (lda_adr(i+5) or sta_adr(i+6)) and							// lda adr.|				; 5
+       LDA_STA_ADR(i+5) and									// lda adr.|				; 5
 												//         |sta adr.			; 6
 
        sta_stack(i) and										// sta :STACKORIGIN			; 0
@@ -1056,7 +1056,7 @@ begin
 
 
     if tay(i+5) and										// tay					; 5
-       (lda_adr(i+6) or sta_adr(i+7)) and							// lda adr.|				; 6
+       LDA_STA_ADR(i+6) and									// lda adr.|				; 6
 												//         |sta adr.			; 7
 
        rol_stack(i) and										// rol :STACKORIGIN+STACKWIDTH		; 0
@@ -1072,7 +1072,7 @@ begin
 
 
     if tay(i+5) and										// tay					; 5
-       (lda_adr(i+6) or sta_adr(i+7)) and							// lda adr.|				; 6
+       LDA_STA_ADR(i+6) and									// lda adr.|				; 6
 												//         |sta adr.			; 7
 
        rol_stack(i) and										// rol :STACKORIGIN+STACKWIDTH		; 0
@@ -1088,7 +1088,7 @@ begin
 
 
     if tay(i+5) and										// tay					; 5
-       (lda_adr(i+6) or sta_adr(i+7)) and							// lda adr.|				; 6
+       LDA_STA_ADR(i+6) and									// lda adr.|				; 6
 												//         |sta adr.			; 7
 
        asl_stack(i) and										// asl :STACKORIGIN			; 0
@@ -1107,7 +1107,7 @@ begin
 
 
     if tay(i+5) and										// tay					; 5
-       (lda_adr(i+6) or sta_adr(i+7)) and							// lda adr.|				; 6
+       LDA_STA_ADR(i+6) and									// lda adr.|				; 6
 												//         |sta adr.			; 7
 
        rol_a(i) and										// rol @				; 0
@@ -1125,7 +1125,7 @@ begin
 
 
     if tay(i+5) and										// tay					; 5
-       (lda_adr(i+6) or sta_adr(i+7)) and							// lda adr.|				; 6
+       LDA_STA_ADR(i+6) and									// lda adr.|				; 6
 												//         |sta adr.			; 7
 
        rol_stack(i) and										// rol :STACKORIGIN+STACKWIDTH		; 0
@@ -1141,7 +1141,7 @@ begin
 
 
     if tay(i+6) and										// tay					; 6
-       (lda_adr(i+7) or sta_adr(i+8)) and							// lda adr.|				; 7
+       LDA_STA_ADR(i+7) and									// lda adr.|				; 7
 												//         |sta adr.			; 8
 
        rol_stack(i) and										// rol :STACKORIGIN+STACKWIDTH		; 0
@@ -1158,7 +1158,7 @@ begin
 
 
     if tay(i+6) and										// tay					; 6
-       (lda_adr(i+7) or sta_adr(i+8)) and							// lda adr.|				; 7
+       LDA_STA_ADR(i+7) and									// lda adr.|				; 7
 												//         |sta adr.			; 8
 
        rol_stack(i) and										// rol :STACKORIGIN+STACKWIDTH		; 0
@@ -1175,7 +1175,7 @@ begin
 
 
     if tay(i+6) and										// tay					; 6
-       (lda_adr(i+7) or sta_adr(i+8)) and							// lda adr.|				; 7
+       LDA_STA_ADR(i+7) and									// lda adr.|				; 7
 												//         |sta adr.			; 8
 
        rol_stack(i) and										// rol :STACKORIGIN+STACKWIDTH		; 0
@@ -1193,7 +1193,7 @@ begin
 
 
     if tay(i+7) and										// tay					; 7
-       (lda_adr(i+8) or sta_adr(i+9)) and							// lda adr.|				; 8
+       LDA_STA_ADR(i+8) and									// lda adr.|				; 8
 												//         |sta adr.			; 9
 
        rol_stack(i) and										// rol :STACKORIGIN+STACKWIDTH		; 0
@@ -1211,7 +1211,7 @@ begin
 
 
     if tay(i+7) and										// tay					; 7
-       (lda_adr(i+8) or sta_adr(i+9)) and							// lda adr.|				; 8
+       LDA_STA_ADR(i+8) and									// lda adr.|				; 8
 												//         |sta adr.			; 9
 
        add_sub(i) and										// add|sub				; 0
@@ -1232,7 +1232,7 @@ begin
 
 
     if tay(i+7) and										// tay					; 7
-       (lda_adr(i+8) or sta_adr(i+9)) and							// lda adr.|				; 8
+       LDA_STA_ADR(i+8) and									// lda adr.|				; 8
 												//         |sta adr.			; 9
 
        lda_val(i) and										// lda A				; 0	~:STACKORIGIN
@@ -1253,7 +1253,7 @@ begin
 
 
     if tay(i+7) and										// tay					; 7
-       (lda_adr(i+8) or sta_adr(i+9)) and							// lda adr.|				; 8
+       LDA_STA_ADR(i+8) and									// lda adr.|				; 8
 												//         |sta adr.			; 9
 
        rol_stack(i) and										// rol :STACKORIGIN+STACKWIDTH		; 0
@@ -1272,7 +1272,7 @@ begin
 
 
     if tay(i+8) and										// tay					; 8
-       (lda_adr(i+9) or sta_adr(i+10)) and							// lda adr.|				; 9
+       LDA_STA_ADR(i+9) and									// lda adr.|				; 9
 												//         |sta adr.			; 10
 
        add_sub(i) and										// add|sub A				; 0
@@ -1294,7 +1294,7 @@ begin
 
 
     if tay(i+8) and										// tay					; 8
-       (lda_adr(i+9) or sta_adr(i+10)) and							// lda adr.|				; 9
+       LDA_STA_ADR(i+9) and									// lda adr.|				; 9
 												//         |sta adr.			; 10
 
        rol_stack(i) and										// rol :STACKORIGIN+STACKWIDTH		; 0
@@ -1314,7 +1314,7 @@ begin
 
 
     if tay(i+8) and										// tay					; 8
-       (lda_adr(i+9) or sta_adr(i+10)) and							// lda adr.|				; 9
+       LDA_STA_ADR(i+9) and									// lda adr.|				; 9
 												//         |sta adr.			; 10
 
        add_sub(i) and										// add|sub				; 0
@@ -1337,7 +1337,7 @@ begin
 
 
     if tay(i+8) and										// tay					; 8
-       (lda_adr(i+9) or sta_adr(i+10)) and							// lda adr.|				; 9
+       LDA_STA_ADR(i+9) and									// lda adr.|				; 9
 												//         |sta adr.			; 10
 
        add_sub(i) and										// add|sub				; 0
@@ -1363,7 +1363,7 @@ begin
 
 
     if tay(i+9) and										// tay					; 9
-       (lda_adr(i+10) or sta_adr(i+11)) and							// lda adr.|				; 10
+       LDA_STA_ADR(i+10) and									// lda adr.|				; 10
 												//         |sta adr.			; 11
 
        asl_a(i) and										// asl @				; 0
@@ -1388,7 +1388,7 @@ begin
 
 
     if tay(i+8) and										// tay					; 8
-       (lda_adr(i+9) or sta_adr(i+10)) and							// lda adr.|				; 9
+       LDA_STA_ADR(i+9) and									// lda adr.|				; 9
 												//         |sta adr.			; 10
 
        asl_a(i) and										// asl @				; 0
@@ -1412,7 +1412,7 @@ begin
 
 
     if tay(i+7) and										// tay					; 7
-       (lda_adr_y(i+8) or sta_adr_y(i+9)) and							// lda adr.|				; 8
+       LDA_STA_ADR(i+8) and									// lda adr.|				; 8
 												//         |sta adr.			; 9
 
        asl_a(i) and										// asl @				; 0
@@ -1433,7 +1433,7 @@ begin
 
 
     if tay(i+6) and										// tay					; 6
-       (lda_adr(i+7) or sta_adr(i+8)) and							// lda adr.|				; 7
+       LDA_STA_ADR(i+7) and									// lda adr.|				; 7
 												//         |sta adr.			; 8
 
        asl_a(i) and										// asl @				; 0
@@ -1453,7 +1453,7 @@ begin
 
 
     if tay(i+6) and										// tay					; 6
-       (lda_adr_y(i+7) or sta_adr_y(i+8)) and							// lda adr.|				; 7
+       LDA_STA_ADR(i+7) and									// lda adr.|				; 7
      												//         | sta adr.			; 8
 
        asl_a(i) and										// asl @				; 0
@@ -1473,7 +1473,7 @@ begin
 
 
     if tay(i+6) and										// tay					; 6
-       (lda_adr_y(i+7) or sta_adr_y(i+8)) and							// lda adr.|				; 7
+       LDA_STA_ADR(i+7) and									// lda adr.|				; 7
      												//         | sta adr.			; 8
 
        asl_a(i) and										// asl @				; 0
@@ -1492,7 +1492,7 @@ begin
 
 
     if tay(i+5) and										// tay					; 5
-       (lda_adr(i+6) or sta_adr(i+7)) and							// lda adr.|				; 6
+       LDA_STA_ADR(i+6) and									// lda adr.|				; 6
 												//         |sta adr.			; 7
 
        asl_a(i) and										// asl @				; 0
@@ -1511,7 +1511,7 @@ begin
 
 
     if tay(i+4) and										// tay					; 4
-       (lda_adr(i+5) or sta_adr(i+6)) and							// lda adr.|				; 5
+       LDA_STA_ADR(i+5) and									// lda adr.|				; 5
 												//         |sta adr.			; 6
 
        asl_stack(i) and										// asl :STACKORIGIN			; 0
@@ -1529,7 +1529,7 @@ begin
 
 
     if tay(i+4) and										// tay					; 4
-       (lda_adr(i+5) or sta_adr(i+6)) and							// lda adr.|				; 5
+       LDA_STA_ADR(i+5) and									// lda adr.|				; 5
 												//         |sta adr.			; 6
 
        asl_stack(i) and										// asl :STACKORIGIN			; 0

@@ -31,6 +31,7 @@ begin
        or
 
        ( sta_bp_1(i+5) and						// sta :bp+1				; 5
+	 (lda_bp_y(i+6) = false) and					//~lda (:bp),y				; 6
 
 	 lda_a(i) and							// lda TEXT_BUF				; 0
          add(i+1) and (add_stack(i+1) = false) and			// add R				; 1
@@ -38,8 +39,22 @@ begin
 	 (listing[i+3] = listing[i] + '+1') and				// lda TEXT_BUF+1			; 3
 	 adc(i+4) and							// adc R+1				; 4
 //	 sta_bp_1(i+5) and						// sta :bp+1				; 5
-	 (lda_bp_y(i+6) = false) and					//~lda (:bp),y				; 6
+//	 (lda_bp_y(i+6) = false) and					//~lda (:bp),y				; 6
 	 (cmp_bp_y(i+7) or sta_bp_y(i+7)) )				// cmp (:bp),y|sta (:bp),y		; 7
+
+       or
+
+       ( sta_bp_1(i+5) and						// sta :bp+1				; 5
+	 lda_bp_y(i+6) and						// lda (:bp),y				; 6
+
+	 lda_a(i) and							// lda TEXT_BUF				; 0
+         add(i+1) and (add_stack(i+1) = false) and			// add R				; 1
+	 tay(i+2) and							// tay					; 2
+	 (listing[i+3] = listing[i] + '+1') and				// lda TEXT_BUF+1			; 3
+	 adc(i+4) and							// adc R+1				; 4
+//	 sta_bp_1(i+5) and						// sta :bp+1				; 5
+//	 lda_bp_y(i+6) and						// lda (:bp),y				; 6
+	 sta_a(i+7) and (iy(i+7) = false) )				// sta					; 7
 
        or
 
@@ -190,7 +205,7 @@ begin
       then begin
 
 
-	if cmp_bp_y(i+7) or sta_bp_y(i+7) then begin
+	if lda_bp_y(i+6) or cmp_bp_y(i+7) or sta_bp_y(i+7) then begin
 
 	end else
 	if lda_adr(i) and sta_tmp_1(i+11) and asl_stack(i+3) and rol_a(i+4) then begin
@@ -230,6 +245,27 @@ begin
 	end;
 
 
+	if lda_bp_y(i+6) then begin
+     
+	 arg0:='+;'+GetARG(i)+';'+GetARG(i+1)+';'+GetARG(i+3)+';'+GetARG(i+4)+';';
+
+	 if arg0 = optyBP2 then begin
+	  listing[i]   := '';
+	  listing[i+1] := '';
+	  listing[i+2] := '';
+	  listing[i+3] := '';
+	  listing[i+4] := '';
+	  listing[i+5] := #9'ldy #$00';
+	  listing[i+6] := #9'lda (:bp2),y';
+
+	  k:=7;
+	 end else begin
+	  arg0 := optyBP2;
+
+	  k:=1;
+	 end; 
+
+	end else
 	if cmp_bp_y(i+7) or sta_bp_y(i+7) then begin
      
 	 arg0:='+;'+GetARG(i)+';'+GetARG(i+1)+';'+GetARG(i+3)+';'+GetARG(i+4)+';';
@@ -259,7 +295,6 @@ begin
 	 end;
 
 	end else
-
 	if arg0 = optyBP2 then begin
 
 	 if arg0[1] in ['A', 'S'] then begin
