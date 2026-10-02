@@ -691,7 +691,7 @@ begin
 
     while( b and $40 = 0 ) do begin
 
-        t := q + b;
+        t := q or b;
         if ( t <= r ) then begin
 
             r := r - t;

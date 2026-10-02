@@ -227,9 +227,11 @@ begin
     end;
 
 
-   if lda(0) and									// lda A		; 0
+   if adc_im_0(10) and									// adc #$00		; 10
+
+      lda(0) and									// lda A		; 0
       add(1) and									// add			; 1
-      sta(2) and									// sta A		; 2      
+      sta(2) and									// sta A		; 2
       lda(3) and									// lda A+1		; 3
       adc(4) and									// adc |#$00		; 4
       sta(5) and									// sta A+1		; 5
@@ -237,15 +239,15 @@ begin
       adc_im_0(7) and									// adc #$00		; 7
       sta(8) and									// sta A+2		; 8
       lda(9) and									// lda A+3		; 9
-      adc_im_0(10) and									// adc #$00		; 10
-      sta(11) then									// sta A+3		; 11     
+//      adc_im_0(10) and								// adc #$00		; 10
+      sta(11) then									// sta A+3		; 11
     if argMatch(0, 2) and
        argMatch(3, 5) and
        argMatch(6, 8) and
        argMatch(9, 11) then
-    begin  
+    begin
 
-     if adc_im_0(4) then begin  
+     if adc_im_0(4) then begin
        TemporaryBuf[3] := #9'bcc @+';
        TemporaryBuf[4] := #9'inc ' + GetARG(5);
        TemporaryBuf[5] := #9'bne @+';
@@ -264,6 +266,40 @@ begin
        TemporaryBuf[11]:= '~';
      end;
 
+    end;
+
+
+   if adc_im_0(3) and									// adc #$00		; 3
+
+      add(0) and									// add			; 0
+      sta(1) and									// sta			; 1
+      lda(2) and									// sta A+2		; 2
+//      adc_im_0(3) and									// adc #$00		; 3
+      sta(4) and									// sta A+2		; 4
+											//			; 5
+      (adc(6) = false) then								//~adc			; 6
+    if argMatch(2, 4) then
+    begin
+     TemporaryBuf[2] := #9'scc';
+     TemporaryBuf[3] := #9'inc ' + GetARG(4);
+     TemporaryBuf[4] := '~';
+    end;
+
+
+   if sbc_im_0(3) and									// sbc #$00		; 3
+
+      sub(0) and									// sub			; 0
+      sta(1) and									// sta			; 1
+      lda(2) and									// sta A+2		; 2
+//      sbc_im_0(3) and									// sbc #$00		; 3
+      sta(4) and									// sta A+2		; 4
+											//			; 5
+      (sbc(6) = false) then								//~sbc			; 6
+    if argMatch(2, 4) then
+    begin
+     TemporaryBuf[2] := #9'scs';
+     TemporaryBuf[3] := #9'dec ' + GetARG(4);
+     TemporaryBuf[4] := '~';
     end;
 
 

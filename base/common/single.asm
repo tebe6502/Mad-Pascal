@@ -4,6 +4,7 @@
 ; https://sourceforge.net/projects/vm02/
 ; http://vm02.cvs.sourceforge.net/viewvc/vm02/vm02/src/
 ; changes: 2024-04-06 ; 2026-08-02 ; 2026-08-22
+;          2026-10-02 (Claude AI)
 
 /*
 
@@ -231,7 +232,7 @@ ENTER	ROL
 	STA	FPEXP
 	SEC
 	SBC	FP2EXP
-	BEQ	@FADDMAN
+	JEQ	@FADDMAN
 	BCS	@+
 	EOR	#$FF
 	TAY
@@ -253,6 +254,37 @@ ENTER	ROL
 	JMP	EXIT
 
 FP1SHFT_
+	CPY	#8
+	BCC	FP1BITS
+FP1BYTE
+	LDA	FP1MAN1		; przesunięcie o 8 bitów
+	STA	FP1MAN0
+	LDA	FP1MAN2
+	STA	FP1MAN1
+	LDA	FP1MAN3		; $00 / $FF
+	STA	FP1MAN2
+	TYA
+	SBC	#8		; C=1 po CPY / BCS
+	TAY
+	CPY	#8
+	BCS	FP1BYTE
+FP1BITS
+	TYA
+	BEQ	FP1END		; WAŻNE: Y=0 dałoby 256 obrotów
+	LDA	FP1MAN3		; $00 / $FF
+FP1SHFT
+	CMP	#$80		; C = znak
+	ROR	FP1MAN2
+	ROR	FP1MAN1
+	ROR	FP1MAN0
+	DEY
+	BNE	FP1SHFT
+FP1END
+	JMP	@FADDMAN
+
+/*
+
+FP1SHFT_
 	LDA	FP1MAN3
 
 FP1SHFT:
@@ -265,6 +297,9 @@ FP1SHFT:
 	BNE	FP1SHFT
 	STA	FP1MAN3
 	JMP	@FADDMAN
+
+*/
+
 
 @	TAY
 ;	LDA	FP2MAN3
@@ -281,6 +316,37 @@ FP1SHFT:
 	JMP	EXIT
 
 FP2SHFT_
+	CPY	#8
+	BCC	FP2BITS
+FP2BYTE
+	LDA	FP2MAN1		; przesunięcie o 8 bitów
+	STA	FP2MAN0
+	LDA	FP2MAN2
+	STA	FP2MAN1
+	LDA	FP2MAN3		; $00 / $FF
+	STA	FP2MAN2
+	TYA
+	SBC	#8		; C=1 po CPY / BCS
+	TAY
+	CPY	#8
+	BCS	FP2BYTE
+FP2BITS
+	TYA
+	BEQ	FP2END		; WAŻNE: Y=0 dałoby 256 obrotów
+	LDA	FP2MAN3		; $00 / $FF
+FP2SHFT
+	CMP	#$80		; C = znak
+	ROR	FP2MAN2
+	ROR	FP2MAN1
+	ROR	FP2MAN0
+	DEY
+	BNE	FP2SHFT
+FP2END
+
+
+/*
+
+FP2SHFT_
 	LDA	FP2MAN3
 
 FP2SHFT:
@@ -292,6 +358,9 @@ FP2SHFT:
 	DEY
 	BNE	FP2SHFT
 	STA	FP2MAN3
+
+*/
+
 
 @FADDMAN:
 	LDA	FP1MAN0
@@ -335,6 +404,36 @@ FPNORMRIGHT:
 	ROR	FPMAN1
 	LDA	FPMAN0
 	ROR
+	STA	FPMAN0		; STA nie zmienia C
+	BCC	CHECK		; brak bitu zaokrąglenia -> pomiń propagację
+
+	INC	FPMAN0		; C=1 -> zaokrąglenie w górę
+	BNE	CHECK
+	INC	FPMAN1
+	BNE	CHECK
+	INC	FPMAN2
+	BNE	CHECK
+	INC	FPMAN3
+
+CHECK:
+	LDA	FPMAN3		; A = FPMAN3 (jak w oryginale przy wejściu w pętlę)
+	BNE	FPNORMRIGHT
+
+	ASL	FPMAN2
+
+	JMP	EXIT
+
+
+/*
+
+FPNORMRIGHT:
+	INC	FPEXP
+	LSR
+	STA	FPMAN3
+	ROR	FPMAN2
+	ROR	FPMAN1
+	LDA	FPMAN0
+	ROR
 	ADC	#$00
 	STA	FPMAN0
 	LDA	FPMAN1
@@ -349,6 +448,9 @@ FPNORMRIGHT:
 	ASL	FPMAN2
 
 	JMP	EXIT
+
+*/
+
 
 FPNORMLEFT:
 	LDA	FPMAN2
@@ -473,7 +575,7 @@ ZERO:	STA	FPMAN0
 	STA	FPMAN0
 	STA	FPMAN1
 	STA	FPMAN2
-	STA	FPMAN3
+	;STA	FPMAN3
 
 	ROR
 	EOR	FPSGN
@@ -484,6 +586,9 @@ ZERO:	STA	FPMAN0
 	SEC			; SUBTRACT BIAS
 	SBC	#$7F
 	STA	FPEXP
+
+
+/*
 
 	LDX	#-3
 	STX	:TMP
@@ -527,9 +632,13 @@ FMULTSTBITS:
 	LDA	FP2MAN2
 	ADC	FPMAN2
 	STA	FPMAN2
-	LDA	#$00
-	ADC	FPMAN3
-	STA	FPMAN3
+	SCC
+	INC	FPMAN3
+
+;	LDA	#$00
+;	ADC	FPMAN3
+;	STA	FPMAN3
+
 	TYA
 
 FMULNEXTTST:
@@ -543,6 +652,59 @@ FMULNEXTTST:
 
 	LDA	FPMAN3
 	JMP	@FPNORM
+
+*/
+
+	LDX	#-3
+	STX	:TMP
+	CLC			; C = bit 25 akumulatora = 0 na starcie
+
+FMULNEXTBYTE:
+	LDX	:TMP
+	LDA	FP1MAN0+3,X	; zp,X: X=$FD..$FF zawija się w zp -> 4 cykle (było abs,X z przekroczeniem strony = 5)
+	BNE	@+
+
+	; bajt zerowy: akumulator >> 8, bit 25 (C) wchodzi do FPMAN2
+	LDX	FPMAN1
+	STX	FPMAN0
+	LDX	FPMAN2
+	STX	FPMAN1
+	ROL			; A=$00 -> A=C, C=0
+	STA	FPMAN2
+	INC	:TMP
+	BNE	FMULNEXTBYTE
+	JMP	MULEND		; Z=1, zawsze
+
+@	.rept 8
+	ROR	FPMAN2		; C z poprzedniego dodawania wchodzi jako bit 23
+	ROR	FPMAN1
+	ROR	FPMAN0
+	LSR			; C = bit mnożnika (bez EOR #$FF)
+	BCC	@+		; C=0 -> następny obrót dostaje 0
+	TAY
+	CLC
+	LDA	FP2MAN0
+	ADC	FPMAN0
+	STA	FPMAN0
+	LDA	FP2MAN1
+	ADC	FPMAN1
+	STA	FPMAN1
+	LDA	FP2MAN2
+	ADC	FPMAN2
+	STA	FPMAN2		; C = nowy bit 25
+	TYA			; TYA nie rusza C
+@
+	.endr
+
+	INC	:TMP		; INC nie rusza C
+	JNE	FMULNEXTBYTE
+
+MULEND:
+	LDA	#$00
+	ROL			; bit 25 -> FPMAN3 (0/1)
+	STA	FPMAN3		; A = FPMAN3 jak w oryginale
+	JMP	@FPNORM
+
 .endp
 
 
@@ -722,6 +884,61 @@ ZERO:	LDA	#$00		; RETURN ZERO
 	STA	FPMAN3
 	RTS
 
+@	CMP	#23		; A = E; C=0 jeśli E<23
+	BCS	F2ISHL
+	CMP	#15
+	BCS	F2I1		; E=15..22, C=1
+	CMP	#7
+	BCS	F2I2		; E=7..14,  C=1
+
+; E=0..6 (C=0): s=17..23 -> MAN0 = MAN2 >> (7-E)
+	EOR	#$FF
+	ADC	#8		; C=0 -> Y = 7-E (1..7)
+	TAY
+	LDA	FPMAN2
+@	LSR	@
+	DEY
+	BNE	@-
+	STA	FPMAN0
+	STY	FPMAN1		; Y=0
+	STY	FPMAN2
+	STY	FPMAN3
+	BEQ	F2ICHKNEG
+
+; E=7..14 (C=1): s=9..16 -> bajt + (15-E) bitów
+F2I2:	EOR	#$FF
+	ADC	#15		; C=1 -> Y = 15-E (1..8)
+	TAY
+	LDA	FPMAN1
+	STA	FPMAN0
+	LDA	FPMAN2
+@	LSR	@
+	ROR	FPMAN0
+	DEY
+	BNE	@-
+	STA	FPMAN1
+	STY	FPMAN2
+	STY	FPMAN3
+	BEQ	F2ICHKNEG
+
+; E=15..22 (C=1): s=1..8
+F2I1:	EOR	#$FF
+	ADC	#23		; C=1 -> Y = 23-E (1..8)
+	TAY
+	LDA	FPMAN2
+@	LSR	@
+	ROR	FPMAN1
+	ROR	FPMAN0
+	DEY
+	BNE	@-
+	STA	FPMAN2
+	STY	FPMAN3		; Y=0, dalej wpada w F2ICHKNEG
+
+F2ICHKNEG:
+
+
+/*
+
 @	CMP	#23
 	BCS	F2ISHL
 	STA	FPEXP
@@ -738,6 +955,9 @@ F2ISHR:	LSR	@
 	STA	FPMAN2
 	STY	FPMAN3
 F2ICHKNEG:
+
+*/
+
 	LDA	FPSGN
 	BPL	@+		; CHECK FOR NEGATIVE
 
@@ -785,9 +1005,10 @@ F2ISHL:	CMP	#32
 	LDA	FPMAN3
 	AND	#$80
 	STA	FPSGN
-	BPL	@+
+	SPL
 	JSR	@NEGINT
-@	LDA	#$7F+23
+
+	LDA	#$7F+23
 	STA	FPEXP
 
 	LDA	FPMAN3
