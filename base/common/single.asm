@@ -656,22 +656,20 @@ FMULNEXTTST:
 */
 
 	LDX	#-3
-	STX	:TMP
 	CLC			; C = bit 25 akumulatora = 0 na starcie
 
 FMULNEXTBYTE:
-	LDX	:TMP
 	LDA	FP1MAN0+3,X	; zp,X: X=$FD..$FF zawija się w zp -> 4 cykle (było abs,X z przekroczeniem strony = 5)
 	BNE	@+
 
 	; bajt zerowy: akumulator >> 8, bit 25 (C) wchodzi do FPMAN2
-	LDX	FPMAN1
-	STX	FPMAN0
-	LDX	FPMAN2
-	STX	FPMAN1
+	LDY	FPMAN1
+	STY	FPMAN0
+	LDY	FPMAN2
+	STY	FPMAN1
 	ROL			; A=$00 -> A=C, C=0
 	STA	FPMAN2
-	INC	:TMP
+	INX
 	BNE	FMULNEXTBYTE
 	JMP	MULEND		; Z=1, zawsze
 
@@ -681,7 +679,9 @@ FMULNEXTBYTE:
 	ROR	FPMAN0
 	LSR			; C = bit mnożnika (bez EOR #$FF)
 	BCC	@+		; C=0 -> następny obrót dostaje 0
+	ift #<>7
 	TAY
+	eif
 	CLC
 	LDA	FP2MAN0
 	ADC	FPMAN0
@@ -692,19 +692,20 @@ FMULNEXTBYTE:
 	LDA	FP2MAN2
 	ADC	FPMAN2
 	STA	FPMAN2		; C = nowy bit 25
+	ift #<>7
 	TYA			; TYA nie rusza C
+	eif
 @
 	.endr
 
-	INC	:TMP		; INC nie rusza C
+	INX			; INC nie rusza C
 	JNE	FMULNEXTBYTE
 
 MULEND:
-	LDA	#$00
+	TXA			; X = 0
 	ROL			; bit 25 -> FPMAN3 (0/1)
 	STA	FPMAN3		; A = FPMAN3 jak w oryginale
 	JMP	@FPNORM
-
 .endp
 
 
