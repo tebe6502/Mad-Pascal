@@ -227,18 +227,43 @@ begin
     end;
 
 
-   if sta(0) and									// sta A		; 0
-      lda_im_0(1) and									// lda #$00		; 1
-      adc_im_0(2) and									// adc #$00		; 2
-      sta(3) and (TemporaryBuf[3] = TemporaryBuf[0] + '+1') and				// sta A+1		; 3
-     											//			; 4
-      opti(5) then									//; optimize 		; 5
-     											//			; 6
-    begin
-	TemporaryBuf[1] := TemporaryBuf[0];
-	TemporaryBuf[2] := #9'scc';
-	TemporaryBuf[3] := #9'inc ' + GetARG(3);
-	TemporaryBuf[0] := '~';
+   if lda(0) and									// lda A		; 0
+      add(1) and									// add			; 1
+      sta(2) and									// sta A		; 2      
+      lda(3) and									// lda A+1		; 3
+      adc(4) and									// adc |#$00		; 4
+      sta(5) and									// sta A+1		; 5
+      lda(6) and									// lda A+2		; 6
+      adc_im_0(7) and									// adc #$00		; 7
+      sta(8) and									// sta A+2		; 8
+      lda(9) and									// lda A+3		; 9
+      adc_im_0(10) and									// adc #$00		; 10
+      sta(11) then									// sta A+3		; 11     
+    if argMatch(0, 2) and
+       argMatch(3, 5) and
+       argMatch(6, 8) and
+       argMatch(9, 11) then
+    begin  
+
+     if adc_im_0(4) then begin  
+       TemporaryBuf[3] := #9'bcc @+';
+       TemporaryBuf[4] := #9'inc ' + GetARG(5);
+       TemporaryBuf[5] := #9'bne @+';
+       TemporaryBuf[6] := #9'inc ' + GetARG(8);
+       TemporaryBuf[7] := #9'bne @+';
+       TemporaryBuf[8] := #9'inc ' + GetARG(11);
+       TemporaryBuf[9] := '@';
+       TemporaryBuf[10]:= '~';
+       TemporaryBuf[11]:= '~';
+     end else begin
+       TemporaryBuf[6] := #9'bcc @+';
+       TemporaryBuf[7] := #9'inc ' + GetARG(8);
+       TemporaryBuf[8] := #9'bne @+';
+       TemporaryBuf[9] := #9'inc ' + GetARG(11);
+       TemporaryBuf[10] := '@';
+       TemporaryBuf[11]:= '~';
+     end;
+
     end;
 
 
