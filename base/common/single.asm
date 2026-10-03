@@ -587,8 +587,61 @@ ZERO:	STA	FPMAN0
 	SBC	#$7F
 	STA	FPEXP
 
+	.IFDEF	MAIN.@DEFINES.SINGLE_FASTMUL
 
-/*
+	LDX	#-3
+	CLC			; C = bit 25 akumulatora = 0 na starcie
+
+FMULNEXTBYTE:
+	LDA	FP1MAN0+3,X	; zp,X: X=$FD..$FF zawija się w zp -> 4 cykle (było abs,X z przekroczeniem strony = 5)
+	BNE	@+
+
+	; bajt zerowy: akumulator >> 8, bit 25 (C) wchodzi do FPMAN2
+	LDY	FPMAN1
+	STY	FPMAN0
+	LDY	FPMAN2
+	STY	FPMAN1
+	ROL			; A=$00 -> A=C, C=0
+	STA	FPMAN2
+	INX
+	BNE	FMULNEXTBYTE
+	JMP	MULEND		; Z=1, zawsze
+
+@	.rept 8
+	ROR	FPMAN2		; C z poprzedniego dodawania wchodzi jako bit 23
+	ROR	FPMAN1
+	ROR	FPMAN0
+	LSR			; C = bit mnożnika (bez EOR #$FF)
+	BCC	@+		; C=0 -> następny obrót dostaje 0
+	ift #<>7
+	TAY
+	eif
+	CLC
+	LDA	FP2MAN0
+	ADC	FPMAN0
+	STA	FPMAN0
+	LDA	FP2MAN1
+	ADC	FPMAN1
+	STA	FPMAN1
+	LDA	FP2MAN2
+	ADC	FPMAN2
+	STA	FPMAN2		; C = nowy bit 25
+	ift #<>7
+	TYA			; TYA nie rusza C
+	eif
+@
+	.endr
+
+	INX			; INC nie rusza C
+	JNE	FMULNEXTBYTE
+
+MULEND:
+	TXA			; X = 0
+	ROL			; bit 25 -> FPMAN3 (0/1)
+	STA	FPMAN3		; A = FPMAN3 jak w oryginale
+	JMP	@FPNORM
+
+	ELS
 
 	LDX	#-3
 	STX	:TMP
@@ -652,60 +705,8 @@ FMULNEXTTST:
 
 	LDA	FPMAN3
 	JMP	@FPNORM
-
-*/
-
-	LDX	#-3
-	CLC			; C = bit 25 akumulatora = 0 na starcie
-
-FMULNEXTBYTE:
-	LDA	FP1MAN0+3,X	; zp,X: X=$FD..$FF zawija się w zp -> 4 cykle (było abs,X z przekroczeniem strony = 5)
-	BNE	@+
-
-	; bajt zerowy: akumulator >> 8, bit 25 (C) wchodzi do FPMAN2
-	LDY	FPMAN1
-	STY	FPMAN0
-	LDY	FPMAN2
-	STY	FPMAN1
-	ROL			; A=$00 -> A=C, C=0
-	STA	FPMAN2
-	INX
-	BNE	FMULNEXTBYTE
-	JMP	MULEND		; Z=1, zawsze
-
-@	.rept 8
-	ROR	FPMAN2		; C z poprzedniego dodawania wchodzi jako bit 23
-	ROR	FPMAN1
-	ROR	FPMAN0
-	LSR			; C = bit mnożnika (bez EOR #$FF)
-	BCC	@+		; C=0 -> następny obrót dostaje 0
-	ift #<>7
-	TAY
-	eif
-	CLC
-	LDA	FP2MAN0
-	ADC	FPMAN0
-	STA	FPMAN0
-	LDA	FP2MAN1
-	ADC	FPMAN1
-	STA	FPMAN1
-	LDA	FP2MAN2
-	ADC	FPMAN2
-	STA	FPMAN2		; C = nowy bit 25
-	ift #<>7
-	TYA			; TYA nie rusza C
-	eif
-@
-	.endr
-
-	INX			; INC nie rusza C
-	JNE	FMULNEXTBYTE
-
-MULEND:
-	TXA			; X = 0
-	ROL			; bit 25 -> FPMAN3 (0/1)
-	STA	FPMAN3		; A = FPMAN3 jak w oryginale
-	JMP	@FPNORM
+	
+	EIF
 .endp
 
 

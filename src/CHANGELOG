@@ -1,3 +1,7 @@
+03.10.20026
+- optimizations (SIN-REAL, SQRT-REAL-SHORTREAL, SINGLE)
+- {$define SINGLE_FASTMUL} speed up SINGLE multiplication
+
 18.09.2026
 - optimizations
 
