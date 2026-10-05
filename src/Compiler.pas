@@ -12601,7 +12601,6 @@ begin
 
                     //  writeln('> ',IdentifierAt(IdentIndex).Name,',',vartype,',',IdentifierAt(IdentIndex).DataType,',',IdentifierAt(IdentIndex).AllocElementType,',',IdentifierAt(IdentIndex).NumAllocElements,' | ', TokenAt(i + 2).Kind,',',TokenAt(i + 3).Kind);
 
-
                     if (TokenAt(i + 2).Kind = DEREFERENCETOK) and (VarType in StructuredTypes) then
                     begin
                       Inc(i);
@@ -12613,6 +12612,7 @@ begin
 
                         Push(0, ASPOINTERTORECORDARRAYORIGIN, GetDataSize(VarType), IdentIndex, 0);
 
+{
                         asm65(#9'lda :STACKORIGIN-1,x');
                         asm65(#9'add' + StackVariable0);
                         asm65(#9'sta :STACKORIGIN-1,x');
@@ -12621,6 +12621,7 @@ begin
                         asm65(#9'sta :STACKORIGIN-1+STACKWIDTH,x');
 
                         a65(TCode65.subBX);
+}
 
                       end;
 
@@ -13415,6 +13416,8 @@ begin
                               asm65(#9'lda :STACKORIGIN+1+STACKWIDTH,x');
                               asm65(#9'sta :TMP+3');
 
+                              a65(TCode65.subBX);
+
                               asm65(#9'@move ":TMP+2" ":TMP" #' + IntToStr(RecordSize(IdentIndex)));
 
                             end
@@ -13431,7 +13434,7 @@ begin
                                 asm65(#9'lda' + StackVariable1);
                                 asm65(#9'sta :TMP+1');
 
-                                //a65(TCode65.subBX);
+                                a65(TCode65.subBX);
 
                                 asm65(#9'@move ' + GetLocalName(IdentTemp) + ' ":TMP" #' + IntToStr(RecordSize(IdentIndex)));
 
@@ -13562,10 +13565,13 @@ begin
                                   asm65(#9'lda' + StackVariable1);
                                   asm65(#9'sta :TMP+1');
 
+		                  a65(TCode65.subBX);
+
                                 end
                                 else
                                   asm65(#9'mwy ' + GetLocalName(IdentIndex) + ' :TMP');
-                                // SWAG-
+
+                 // SWAG-
                                 asm65(#9'ldy #' + HexByte(Byte(RecordSize(IdentIndex) - 1)));
                                 asm65(#9'mva:rpl ' + Name + ',y (:TMP),y-');
 

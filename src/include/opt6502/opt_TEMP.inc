@@ -232,7 +232,7 @@ begin
       lda(0) and									// lda A		; 0
       add(1) and									// add			; 1
       sta(2) and									// sta A		; 2
-      lda(3) and									// lda A+1		; 3
+      lda(3) and (iy(3) = false) and							// lda A+1		; 3
       adc(4) and									// adc |#$00		; 4
       sta(5) and									// sta A+1		; 5
       lda(6) and									// lda A+2		; 6
@@ -273,7 +273,7 @@ begin
 
       add(0) and									// add			; 0
       sta(1) and									// sta			; 1
-      lda(2) and									// sta A+2		; 2
+      lda(2) and (iy(2) = false) and							// lda A+2		; 2
 //      adc_im_0(3) and									// adc #$00		; 3
       sta(4) and									// sta A+2		; 4
 											//			; 5
@@ -290,7 +290,7 @@ begin
 
       sub(0) and									// sub			; 0
       sta(1) and									// sta			; 1
-      lda(2) and									// sta A+2		; 2
+      lda(2) and (iy(2) = false	) and							// lda A+2		; 2
 //      sbc_im_0(3) and									// sbc #$00		; 3
       sta(4) and									// sta A+2		; 4
 											//			; 5
