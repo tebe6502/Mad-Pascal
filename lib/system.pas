@@ -4,7 +4,7 @@ unit system;
  @author: Tomasz Biela (Tebe)
  @name: Standard supported functions of Mad Pascal
 
- @version: 1.6
+ @version: 1.7
 
  @description:
  <http://www.freepascal.org/docs-html/rtl/system/index-5.html>
@@ -336,6 +336,30 @@ implementation
 
 var
 	RndSeed: smallint;
+
+
+{$IFDEF SINGLE_FASTSIN}
+ {$define ___fastsin}
+{$ENDIF}
+
+{$IFDEF FLOAT16_FASTSIN}
+ {$define ___fastsin}
+{$ENDIF}
+
+{$IFDEF ___fastsin}
+const
+[striped] qsin: array [0..64] of word = (
+ $0000,$0648,$0C90,$12D5,$1918,$1F56,$2590,$2BC4,
+ $31F1,$3817,$3E34,$4447,$4A50,$504D,$563E,$5C22,
+ $61F7,$67BD,$6D74,$7319,$78AD,$7E2E,$839C,$88F5,
+ $8E39,$9368,$987F,$9D7F,$A267,$A736,$ABEB,$B085,
+ $B504,$B968,$BDAE,$C1D8,$C5E3,$C9D0,$CD9E,$D14C,
+ $D4DA,$D847,$DB93,$DEBD,$E1C5,$E4A9,$E76B,$EA09,
+ $EC82,$EED8,$F108,$F313,$F4F9,$F6B9,$F853,$F9C7,
+ $FB14,$FC3A,$FD3A,$FE12,$FEC3,$FF4D,$FFB0,$FFEB,
+ $FFFF);
+{$ENDIF}
+
 
 procedure RunError(a: byte);
 (*
@@ -1835,24 +1859,24 @@ function rsincos(x: real; sc: boolean): real;
 var i: byte;
     c: cardinal absolute x;
 
-    t0: word register;		// shl 3	-> 2*pi (1608) shl 3 = 12864	WORD
+    t0: word register;		// shl 1	-> 2*pi (1608) shl 1 = 3216	WORD
     t1: word register;		// shl 5	-> 2*pi (1608) shl 5 = 51456	WORD
     t2: cardinal register;	// shl 7	-> 2*pi (1608) shl 7 = 205824	CARDINAL
 
 begin
 
- while x < 0.0    do x := x + M_PI_2;
+ while x < 0.0    do x := x + M_PI_2;	// M_PI_2 = 6,283185307179586476925286766559 * 256 = 1608
 
  //while x > M_PI_2 do x := x - M_PI_2;
  while 1608 < c   do x := x - M_PI_2;
 
     { Normalize argument, divide by (pi/2) }
-    //x := x * 0,63661977236758134308;	// * 1 / (pi/2)
-    //c:=(c*169) shr 8;
+    //x := x * 0,63661977236758134308;	// * 1 / (pi/2) -> 0,63661977236758134308 * 256 = 163
+    //c:=(c*163) shr 8;
 
-    // c*169 -> c shl 7 + c shl 5 + c shl 3 + c
-    t0:=c shl 3;
-    t1:=t0 shl 2;
+    // c*163 -> c shl 7 + c shl 5 + c shl 1 + c
+    t0:=c shl 1;
+    t1:=t0 shl 4;
     t2:=t1 shl 2;
 
     t1 := (t2 + t1 + t0 + c) shr 8;
@@ -2009,18 +2033,6 @@ end;
 {$IFDEF SINGLE_FASTSIN}
 
 function fsincos(x: single; sc: boolean): single;
-const
-[striped] qsin: array [0..64] of word = (
- $0000,$0648,$0C90,$12D5,$1918,$1F56,$2590,$2BC4,
- $31F1,$3817,$3E34,$4447,$4A50,$504D,$563E,$5C22,
- $61F7,$67BD,$6D74,$7319,$78AD,$7E2E,$839C,$88F5,
- $8E39,$9368,$987F,$9D7F,$A267,$A736,$ABEB,$B085,
- $B504,$B968,$BDAE,$C1D8,$C5E3,$C9D0,$CD9E,$D14C,
- $D4DA,$D847,$DB93,$DEBD,$E1C5,$E4A9,$E76B,$EA09,
- $EC82,$EED8,$F108,$F313,$F4F9,$F6B9,$F853,$F9C7,
- $FB14,$FC3A,$FD3A,$FE12,$FEC3,$FF4D,$FFB0,$FFEB,
- $FFFF );
-
 var
   b: cardinal absolute x;
   m: cardinal;
@@ -2160,6 +2172,64 @@ begin
 end;
 
 
+{$IFDEF FLOAT16_FASTSIN}
+
+function fsincos16(x: float16; sc: boolean): float16;
+var
+  xw: word absolute x;
+  h: float16;
+  hw: word absolute h;
+  e, i, n: byte;
+  m, ph, idx, f: word;
+  c, y: cardinal;
+begin
+  e := (xw shr 10) and $1F;
+
+  if e = 31 then begin hw := 0; Result := h; exit; end;   // Inf/NaN
+
+  // |x| < ok. 2^-9: sin(x) = x, cos(x) = 1 (błąd poniżej precyzji float16)
+  if e < 6 then begin
+    if sc then hw := $3C00 else hw := xw;
+    Result := h;
+    exit;
+  end;
+
+  // faza w obrotach (65536 = 2pi)
+  m := (xw and $3FF) or $400;
+  c := cardinal(m) * 667544;          // m * 65536/(2pi) * 64
+  c := c shr (31 - e);
+  ph := word(c);
+  if (xw and $8000) <> 0 then ph := word(0 - ph);
+
+  if sc then ph := ph + 16384;        // cos = sin(x + pi/2)
+
+  // ćwiartka: odbicie w nieparzystych
+  idx := ph and $3FFF;
+  if (ph and $4000) <> 0 then idx := $4000 - idx;
+
+  // tablica + interpolacja liniowa
+  i := idx shr 8;
+  f := idx and $FF;
+  y := qsin[i];
+  if i < 64 then y := y + ((cardinal(qsin[i+1]) - y) * f) shr 8;
+
+  // y (0..65535) -> bity float16
+  if y < 4 then begin
+    hw := 0;
+  end else begin
+    n := 0;
+    while (y and $8000) = 0 do begin y := y shl 1; inc(n); end;
+    // wykładnik 14-n, mantysa z zaokrągleniem (przeniesienie samo wejdzie do wykładnika)
+    hw := ((14 - n) shl 10) + ((y + $10) shr 5) - 1024;
+  end;
+
+  if (ph and $8000) <> 0 then hw := hw or $8000;   // znak wyniku
+
+  Result := h;
+end;
+
+{$ELSE}
+
 function fsincos16(x: float16; sc: boolean): float16;
 //----------------------------------------------------------------------------------------------
 // https://atariage.com/forums/topic/240919-mad-pascal/?do=findComment&comment=3818764
@@ -2206,6 +2276,8 @@ begin
     { Test quadrant to return negative values }
     if (i and 2) = 2 then Result := -Result;
 end;
+
+{$ENDIF}
 
 
 function Sin(x: float16): float16; overload;

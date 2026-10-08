@@ -1,5 +1,7 @@
 08.10.2026
+- unit SYSTEM optimizations
 - {$define label} will now work when it appears before USES
+- {$DEFINE FLOAT16_FASTSIN} speed up SIN(FLOAT16)
 
 03.10.20026
 - optimizations (SIN-REAL, SQRT-REAL-SHORTREAL, SINGLE)
