@@ -1,3 +1,6 @@
+08.10.2026
+- {$define label} will now work when it appears before USES
+
 03.10.20026
 - optimizations (SIN-REAL, SQRT-REAL-SHORTREAL, SINGLE)
 - {$define SINGLE_FASTMUL} speed up SINGLE multiplication

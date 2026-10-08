@@ -362,7 +362,7 @@ uses
                         Inc(i);
                         parameterValue := TEnvironment.GetParameterStringUpperCase(i);
                         AddDefine(parameterValue);
-                        AddDefines := NumDefines;
+                        //AddDefines := NumDefines;
 
                       end
                       else
@@ -370,7 +370,7 @@ uses
                         begin
                           parameterValue := copy(parameterUpperCase, 9, 255);
                           AddDefine(parameterValue);
-                          AddDefines := NumDefines;
+                          //AddDefines := NumDefines;
                         end
                         else
                           if (parameterUpperCase = '-CODE') or (parameterUpperCase = '-C') then
@@ -507,7 +507,7 @@ uses
         TCPU.CPU_65816: AddDefine('CPU_65816');
       end;
 
-      AddDefines := NumDefines;
+      //AddDefines := NumDefines;
 
     end;  //ParseParam
 

@@ -44,7 +44,7 @@ var
   _VarDataSize: Integer;
   StaticStringData: TWordMemory;
 
-  AddDefines: Integer = 1;
+//  AddDefines: Integer = 1;
   NumDefines: Integer = 1;  // NumDefines = AddDefines
   Defines: array [1..MAXDEFINES] of TDefine;
 

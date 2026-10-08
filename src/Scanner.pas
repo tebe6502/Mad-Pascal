@@ -77,7 +77,7 @@ begin
   IfdefLevel := 0;
   AsmBlockIndex := 0;
 
-  NumDefines := AddDefines;
+  //NumDefines := AddDefines;
 
   for i := 0 to High(AsmBlock) do AsmBlock[i] := '';
 
@@ -810,7 +810,7 @@ var
                                           ErrorOrdinalExpExpected(NumTok);
 
                                         AddDefine('FASTMUL');
-                                        AddDefines := NumDefines;
+                                        //AddDefines := NumDefines;
 
                                         CheckCommonConstType(NumTok, TDataType.BYTETOK, GetValueType(FastMul));
 

@@ -1845,7 +1845,7 @@ begin
 
  //while x > M_PI_2 do x := x - M_PI_2;
  while 1608 < c   do x := x - M_PI_2;
- 
+
     { Normalize argument, divide by (pi/2) }
     //x := x * 0,63661977236758134308;	// * 1 / (pi/2)
     //c:=(c*169) shr 8;
@@ -1877,7 +1877,7 @@ begin
 
     { Calculate cosine(x) with optimal polynomial approximation }
     //x := x * x;
-    
+
     c := (byte(c) * byte(c)) shr 8;
 
     Result := ((-0.23369547) * x + 1) * (1 - x);
@@ -1963,7 +1963,7 @@ begin
 
     { Calculate cosine(x) with optimal polynomial approximation }
     //x := x * x;
-    
+
     w := (byte(w) * byte(w)) shr 8;
 
     {0.019940292 * 256 = 5}
@@ -2005,6 +2005,58 @@ begin
 	Result := srsincos(x, true);
 end;
 
+
+{$IFDEF SINGLE_FASTSIN}
+
+function fsincos(x: single; sc: boolean): single;
+const
+[striped] qsin: array [0..64] of word = (
+ $0000,$0648,$0C90,$12D5,$1918,$1F56,$2590,$2BC4,
+ $31F1,$3817,$3E34,$4447,$4A50,$504D,$563E,$5C22,
+ $61F7,$67BD,$6D74,$7319,$78AD,$7E2E,$839C,$88F5,
+ $8E39,$9368,$987F,$9D7F,$A267,$A736,$ABEB,$B085,
+ $B504,$B968,$BDAE,$C1D8,$C5E3,$C9D0,$CD9E,$D14C,
+ $D4DA,$D847,$DB93,$DEBD,$E1C5,$E4A9,$E76B,$EA09,
+ $EC82,$EED8,$F108,$F313,$F4F9,$F6B9,$F853,$F9C7,
+ $FB14,$FC3A,$FD3A,$FE12,$FEC3,$FF4D,$FFB0,$FFEB,
+ $FFFF );
+
+var
+  b: cardinal absolute x;
+  m: cardinal;
+  e: byte;
+  ph, idx: word;
+  i: byte;
+  f, y: cardinal;
+begin
+  x := x * 0.15915494309189533577;      // x / 2pi
+  e := (b shr 23) and $FF;
+  m := (b and $7FFFFF) or $800000;
+
+  // ułamek |u| jako 16 bitów: m * 2^(e-134) mod 65536
+  if e < 110 then ph := 0
+  else if e >= 150 then ph := 0
+  else if e >= 134 then ph := word(m shl (e - 134))
+  else ph := m shr (134 - e);
+
+  if (b and $80000000) <> 0 then ph := word(0 - ph);   // x ujemne
+
+  if sc then ph := ph + 16384;                          // cos = sin(x + pi/2)
+
+  idx := ph and $3FFF;
+  if (ph and $4000) <> 0 then idx := $4000 - idx;       // lustro w nieparzystych ćwiartkach
+
+  i := idx shr 8;                                       // 0..64
+  f := idx and $FF;
+  y := qsin[i];
+  if i < 64 then y := y + ((cardinal(qsin[i+1]) - y) * f) shr 8;   // uwaga na znak różnicy, patrz niżej
+
+  Result := y * (1/65535);
+
+  if (ph and $8000) <> 0 then Result := -Result;
+end;
+
+{$ELSE}
 
 function fsincos(x: single; sc: boolean): single;
 //----------------------------------------------------------------------------------------------
@@ -2076,6 +2128,8 @@ begin
     { Test quadrant to return negative values }
     if (i and 2) = 2 then Result := -Result;
 end;
+
+{$ENDIF}
 
 
 function Sin(x: single): single; overload;
