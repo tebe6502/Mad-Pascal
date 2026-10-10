@@ -478,7 +478,7 @@ Paweł Banaś<br clear="left"/>
   <img align="left" src="images/29.png" width="320" height="240" alt="SFX-Tracker">
 </a>
 
-[https://github.com/delysio/heatmap](https://gitlab.com/delysio/heatmap)
+[https://github.com/delysio/heatmap](https://github.com/delysio/heatmap)
 
 **Platform**  
 Atari 8-bit
@@ -496,7 +496,7 @@ Daniel Koźmiński
   <img align="left" src="images/30.png" width="320" height="240" alt="sinus scroll 2x2">
 </a>
 
-[https://github.com/delysio/mad-pascal/-/tree/master/demoEffects/2x2%20sinus%20scroll](https://gitlab.com/delysio/mad-pascal/-/tree/master/demoEffects/2x2%20sinus%20scroll)
+[https://github.com/delysio/mad-pascal/-/tree/master/demoEffects/2x2%20sinus%20scroll](https://github.com/delysio/mad-pascal/-/tree/master/demoEffects/2x2%20sinus%20scroll)
 
 **Platform**  
 Atari 8-bit
@@ -734,7 +734,7 @@ Tomasz Biela
   <img align="left" src="images/44.png" width="320" height="240" alt="Dungeon Adventurer">
 </a>
 
-[https://github.com/delysio/dungeon-adventurer/](https://gitlab.com/delysio/dungeon-adventurer/)
+[https://github.com/delysio/dungeon-adventurer/](https://github.com/delysio/dungeon-adventurer/)
 
 **Platform**  
 Atari 8-bit
