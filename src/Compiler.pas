@@ -1444,7 +1444,6 @@ begin
 
       if IdentifierAt(IdentIndex).DataType = TDataType.ARRAYRECORD then begin
 
-
             asm65(#9'lda ' + svar);
             asm65(#9'add' + StackVariable0);
             asm65(#9'sta :bp2');
@@ -13312,7 +13311,6 @@ begin
 		        (IdentifierAt(IdentTemp).DataType = TDataType.ARRAYRECORD)) then
 		    begin
 
-// SWAG2
 		      if IdentifierAt(IdentIndex).NumAllocElements <> IdentifierAt(IdentTemp).NumAllocElements then
                           Error(i, 'Incompatible types: got "' +
                             GetTypeAtIndex(IdentifierAt(IdentTemp).NumAllocElements).Field[0].Name +
@@ -13506,7 +13504,7 @@ begin
 
                                   if RecordSize(IdentIndex) <= 128 then
                                   begin
-                                    // SWAG
+                                    // SWAG-
                                     asm65(#9'ldy #' + HexByte(Byte(RecordSize(IdentIndex) - 1)));
                                     asm65(#9'mva:rpl (:TMP),y ' + GetLocalName(IdentIndex, 'adr.') + ',y-');
 
@@ -13684,7 +13682,7 @@ begin
         ResetOpty;
 }
 
-                          // SWAG
+                          // SWAG-
                           if j <> Integer(Elements(IdentTemp) * GetDataSize(IdentifierAt(IdentTemp).AllocElementType)) then
                           begin
 
