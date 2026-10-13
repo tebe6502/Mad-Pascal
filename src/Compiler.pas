@@ -7212,7 +7212,7 @@ begin
 
                     AllocElementType := TDataType(IdentTemp shr 16);
 
-                    //    WRITELN(IdentifierAt(IdentIndex).Name,',',TokenAt(i + 3).Name,',',  TDataType(IdentTemp shr 16) ,',',IdentifierAt(IdentIndex).PassMethod);
+                    //    writeln(IdentifierAt(IdentIndex).Name,',',TokenAt(i + 3).Name,',',  TDataType(IdentTemp shr 16) ,',',IdentifierAt(IdentIndex).PassMethod);
 
                   end
                   else
@@ -10560,8 +10560,9 @@ begin
                       end;
 
 // swag---
-                      if (ValType = TDataType.ARRAYTOK) or
-                         (ValType = TDataTYpe.RECORDTOK) and (IdentifierAt(IdentIndex).DataType = TDataType.ARRAYRECORD) then
+                      if (TokenAt(i + 2).Kind <> TTokenKind.DOTTOK) and
+			 ((ValType = TDataType.ARRAYTOK) or
+                          ((ValType = TDataType.RECORDTOK) and (IdentifierAt(IdentIndex).DataType = TDataType.ARRAYRECORD))) then
                       begin
 
                         IndirectionLevel := ASPOINTER;
@@ -12396,7 +12397,7 @@ begin
 
               Inc(i);
 
-              // SWAG
+              // SWAG---
 
               asm65(#9'lda :STACKORIGIN-1,x');
               asm65(#9'add' + StackVariable0);
@@ -12611,6 +12612,7 @@ begin
                         // writeln('> ',IdentifierAt(IdentIndex).Name,',',vartype,',',IdentifierAt(IdentIndex).DataType,',',IdentifierAt(IdentIndex).AllocElementType,',',IdentifierAt(IdentIndex).NumAllocElements,',',IdentifierAt(IdentIndex).idType,' | ', TokenAt(i + 2).Kind,',',TokenAt(i + 3).Kind);
 
                         Push(0, ASPOINTERTORECORDARRAYORIGIN, GetDataSize(VarType), IdentIndex, 0);
+
 
 {
                         asm65(#9'lda :STACKORIGIN-1,x');
