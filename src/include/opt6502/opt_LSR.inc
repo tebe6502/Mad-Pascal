@@ -954,7 +954,36 @@ begin
      end;
 
 
+    if ror_a(i+7) and										// ror @				; 7
+
+       lda_im_0(i+2) and									// lda #$00				; 2
+
+       add(i) and										// add					; 0
+       sta_stack(i+1) and									// sta :STACKORIGIN			; 1
+//       lda_im_0(i+2) and									// lda #$00				; 2
+       adc_im_0(i+3) and									// adc #$00				; 3
+       sta_stack(i+4) and									// sta :STACKORIGIN+STACKWIDTH		; 4
+       lda_stack(i+5) and									// lda :STACKORIGIN			; 5
+       lsr_stack(i+6) and									// lsr :STACKORIGIN+STACKWIDTH		; 6
+//       ror_a(i+7) and										// ror @				; 7
+       sta_val(i+8) then									// sta					; 8	~:STACKORIGIN
+     if argMatch(i+1, i+5) and
+	argMatch(i+4, i+6) then
+     begin
+	listing[i+1] := '';
+	listing[i+2] := '';
+	listing[i+3] := '';
+	listing[i+4] := '';
+	listing[i+5] := '';
+	listing[i+6] := '';
+
+	exit(false);
+     end;
+
+
     if rol_a(i+12) and										// rol @				; 12
+
+       rol_a(i+10) and										// rol @				; 10
 
        sta_stack(i) and										// sta :STACKORIGIN+STACKWIDTH*2	; 0
        lda_a(i+1) and										// lda					; 1
@@ -966,7 +995,7 @@ begin
        ror_stack(i+7) and									// ror :STACKORIGIN			; 7
        lda_stack(i+8) and									// lda :STACKORIGIN+STACKWIDTH		; 8
        asl_stack(i+9) and									// asl :STACKORIGIN			; 9
-       rol_a(i+10) and										// rol @				; 10
+//       rol_a(i+10) and									// rol @				; 10
        asl_stack(i+11) and									// asl :STACKORIGIN			; 11
 //       rol_a(i+12) and									// rol @				; 12
        sta_stack(i+13) then									// sta :STACKORIGIN+STACKWIDTH		; 13
@@ -986,9 +1015,11 @@ begin
 
     if ror_stack(i+5) and									// ror :STACKORIGIN			; 5
 
+       lsr_a(i+2) and										// lsr @				; 2
+
        lda_im_0(i) and										// lda #$00				; 0
        sta_stack_2x(i+1) and									// sta :STACKORIGIN+STACKWIDTH*2	; 1
-       lsr_a(i+2) and										// lsr @				; 2
+//       lsr_a(i+2) and										// lsr @				; 2
        ror_stack_2x(i+3) and									// ror :STACKORIGIN+STACKWIDTH*2	; 3
        ror_stack(i+4) and									// ror :STACKORIGIN+STACKWIDTH		; 4
 //       ror_stack(i+5) and									// ror :STACKORIGIN			; 5
