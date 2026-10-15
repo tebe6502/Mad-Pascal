@@ -150,10 +150,10 @@ begin
     if (pos('ldy #', TemporaryBuf[1]) > 0) and						// ldy #				; 1
        sty(2) and									// sty I				; 2
        lda(3) and									// lda A				; 3
-       (pos('add ', TemporaryBuf[4]) > 0) and						// add I				; 4
+       add(4) and									// add I				; 4
        (TemporaryBuf[5] = #9'tay') and							// tay					; 5
        lda(6) and									// lda A+1				; 6
-       (pos('adc ', TemporaryBuf[7]) > 0) and						// adc I+1				; 7
+       adc(7) and									// adc I+1				; 7
        (TemporaryBuf[8] = #9'sta :bp+1') and						// sta :bp+1				; 8
        lda(9) and									// lda					; 9
        (TemporaryBuf[10] = #9'sta (:bp),y') and						// sta (:bp),y				; 10

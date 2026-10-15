@@ -83,8 +83,8 @@ var
            mwy(i) or
 	   mwy(i) or
 	   _IF(i) or
-           (pos(#9'.LOCAL ', TemporaryBuf[i]) > 0) or
-           (pos(#9'@', TemporaryBuf[i]) > 0) then Result:=true else Result:=false;
+           LOCAL(i) or
+           (pos(#9'@', TemporaryBuf[i]) > 0) {#9@print} then Result:=true else Result:=false;
   end;
 
 

@@ -72,6 +72,11 @@ end;
     Result := TemporaryBuf[i] = #9'.ENDL'
   end;
 
+  function LOCAL(const i: Integer): Boolean;
+  begin
+    Result := pos1(#9'.LOCAL ', i)
+  end;
+ 
   function IFTMP(const i: Integer): Boolean;
   begin
     Result := pos1(#9'lda IFTMP_', i)

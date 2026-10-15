@@ -62,8 +62,8 @@ begin
            jsr(p) or
 	   tya(p) or
 	   _IF(p) or
-           (pos(#9'.LOCAL ', TemporaryBuf[p]) > 0) or
-           (pos(#9'@print', TemporaryBuf[p]) > 0) then Break;
+           LOCAL(p) or
+           (pos(#9'@', TemporaryBuf[p]) > 0) then Break;
 
      end;
 
