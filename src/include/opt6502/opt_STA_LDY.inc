@@ -478,7 +478,7 @@ begin
 
 	 end else
 	  if (pos(GetARG(i), listing[p]) > 0) or lab_a(i) or eif(i) or
-	     (jsr(i) and (pos(#9'jsr @', listing[i]) = 0)) then Break;
+	     (jsr(i) and (pos1(#9'jsr @', i) = false)) then Break;
 
 	if Result = false then exit(false);
       end;

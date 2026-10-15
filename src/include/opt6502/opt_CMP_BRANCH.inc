@@ -1553,7 +1553,7 @@ begin
 
     if jmp_6(i) and										// jmp *+6			; 0
 
-       (pos('@'#9'jmp l_', listing[i+1]) = 1) and						//@ jmp l_			; 1
+       pos1('@'#9'jmp l_', i+1) and								//@ jmp l_			; 1
        jmp_l(i+2) and										// jmp l_			; 2
        lab_l(i+3) then										//l_				; 3
      if (pos(listing[i+3], listing[i+1]) > 0) then
@@ -1571,7 +1571,7 @@ begin
        bcc_a(i) and										// bcc @+			; 0
        beq_a(i+1) and										// beq @+			; 1
 //       jmp_6(i+2) and										// jmp *+6			; 2
-       (pos('@'#9'jmp l_', listing[i+3]) = 1) and						//@ jmp l_			; 3
+       pos1('@'#9'jmp l_', i+3) and								//@ jmp l_			; 3
        (jmp_l(i+4) = false) then								//~jmp l_			; 4
       begin
 	listing[i]   := #9'jcc ' + copy(listing[i+3], 7, 256);
@@ -1589,7 +1589,7 @@ begin
        (SKIP(i-1) = false) and
        (beq_a(i) or bne_a(i)) and								// beq|bne @+			; 0
 //       jmp_6(i+1) and										// jmp *+6			; 1
-       (pos('@'#9'jmp l_', listing[i+2]) = 1) and						//@ jmp l_			; 2
+       pos1('@'#9'jmp l_', i+2) and								//@ jmp l_			; 2
        (jmp_l(i+3) = false) then								//~jmp l_			; 3
       begin
 	if beq(i) then
@@ -1609,7 +1609,7 @@ begin
        (SKIP(i-1) = false) and
        (bcs_a(i) or bcc_a(i)) and								// bcs|bcc @+			; 0
 //       jmp_6(i+1) and										// jmp *+6			; 1
-       (pos('@'#9'jmp l_', listing[i+2]) = 1) and						//@ jmp l_			; 2
+       pos1('@'#9'jmp l_', i+2) and								//@ jmp l_			; 2
        (jmp_l(i+3) = false) then								//~jmp l_			; 3
       begin
         if bcs_a(i) then
@@ -1629,7 +1629,7 @@ begin
        (SKIP(i-1) = false) and
        (bpl_a(i) or bmi_a(i)) and								// bpl|bmi @+			; 0
 //       jmp_6(i+1) and										// jmp *+6			; 1
-       (pos('@'#9'jmp l_', listing[i+2]) = 1) and						//@ jmp l_			; 2
+       pos1('@'#9'jmp l_', i+2) and								//@ jmp l_			; 2
        (jmp_l(i+3) = false) then								//~jmp l_			; 3
       begin
         if bpl_a(i) then
@@ -1649,7 +1649,7 @@ begin
        (SKIP(i-1) = false) and
        (beq_a(i) or bne_a(i)) and								// beq|bne @+			; 0
 //       jmp_6(i+1) and										// jmp *+6			; 1
-       (pos('@\'#9'jmp l_', listing[i+2]) = 1) and						//@\ jmp l_			; 2
+       pos1('@\'#9'jmp l_', i+2) and								//@\ jmp l_			; 2
        (jmp_l(i+3) = false) then								//~jmp l_			; 3
       begin
 	if beq(i) then
@@ -1665,7 +1665,7 @@ begin
 
 
     if ldy_1(i) and										// ldy #1			; 0
-       (pos(#9'jne l_', listing[i+1]) = 1) then							// jne l_			; 1
+       pos1(#9'jne l_', i+1) then								// jne l_			; 1
      begin
        listing[i]   := #9'jmp ' + GetARG(i+1);
        listing[i+1] := '';

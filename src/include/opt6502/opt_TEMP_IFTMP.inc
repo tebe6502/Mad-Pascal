@@ -33,9 +33,9 @@ begin
      TemporaryBuf[1] := '~';
      TemporaryBuf[4] := '~';
 
-     if (pos(#9'jmp ', TemporaryBuf[0]) = 1) and					// jmp			; 0
+     if jmp(0) and									// jmp			; 0
         (TemporaryBuf[1] = '~') and							//~			; 1
-        (pos(#9'jmp ', TemporaryBuf[2]) = 1) then					// jmp			; 2
+        jmp(2) then									// jmp			; 2
       begin
        TemporaryBuf[2] := '~';
       end;

@@ -14,17 +14,17 @@ procedure opt_TEMP_MOVE;
 
   function LOCAL_SYSTEM_MOVE(i: byte): Boolean;
   begin
-    Result := (pos(#9'.LOCAL +MAIN.SYSTEM.MOVE.', TemporaryBuf[i]) = 1)
+    Result := pos1(#9'.LOCAL +MAIN.SYSTEM.MOVE.', i)
   end;
 
   function JSR_SYSTEM_MOVE(i: byte): Boolean;
   begin
-    Result := (pos(#9'jsr SYSTEM.MOVE.', TemporaryBuf[i]) = 1)
+    Result := pos1(#9'jsr SYSTEM.MOVE.', i)
   end;
 
   function STA_SYSTEM_MOVE(i: byte): Boolean;
   begin
-    Result := (pos(#9'sta SYSTEM.MOVE.', TemporaryBuf[i]) = 1)
+    Result := pos1(#9'sta SYSTEM.MOVE.', i)
   end;
 
   function SOURCE(i: byte): Boolean;
@@ -64,7 +64,7 @@ begin
 // -----------------------------------------------------------------------------
 
 
-    if (pos('@move ":bp2" ', TemporaryBuf[4]) > 1) and					// @move ":bp2"				; 4
+    if pos1(#9'@move ":bp2" ', 4) and							// @move ":bp2"				; 4
 
        lda(0) and									// lda A				; 0
        sta_bp2(1) and									// sta :bp2				; 1
@@ -80,7 +80,7 @@ begin
        end;
 
 
-    if (pos('mva:rpl (:bp2),y ', TemporaryBuf[5]) > 1) and				// mva:rpl (:bp2),y			; 5
+    if pos1(#9'mva:rpl (:bp2),y ', 5) and						// mva:rpl (:bp2),y			; 5
 
        lda_im(0) and									// lda #				; 0
        sta_bp2(1) and									// sta :bp2				; 1
@@ -99,7 +99,7 @@ begin
        end;
 
 
-    if (pos('mva:rne (:bp2),y ', TemporaryBuf[5]) > 1) and				// mva:rne (:bp2),y			; 5
+    if pos1(#9'mva:rne (:bp2),y ', 5) and						// mva:rne (:bp2),y			; 5
 
        lda_im(0) and									// lda #				; 0
        sta_bp2(1) and									// sta :bp2				; 1

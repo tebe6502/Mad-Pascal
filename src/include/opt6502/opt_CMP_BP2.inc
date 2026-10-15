@@ -56,7 +56,7 @@ begin
        argMatch(i+8, i+13) then
       begin
 
-	if pos(#9'ldy #$', listing[i]) = 1 then begin
+	if pos1(#9'ldy #$', i) then begin
           p:=GetBYTE(i) + 3;
 	  listing[i] := #9'ldy #' + HexByte(p);
 	end else
@@ -260,7 +260,7 @@ begin
     if argMatch(i+2, i+7) then
       begin
 
-	if pos(#9'ldy #$', listing[i]) = 1 then begin
+	if pos1(#9'ldy #$', i) then begin
           p:=GetBYTE(i) + 1;
  	  listing[i] := #9'ldy #' + HexByte(p);
 	end else
@@ -296,7 +296,7 @@ begin
     if argMatch(i+2, i+8) then
       begin
 
-	if pos(#9'ldy #$', listing[i]) = 1 then begin
+	if pos1(#9'ldy #$', i) then begin
           p:=GetBYTE(i) + 1;
  	  listing[i] := #9'ldy #' + HexByte(p);
 	end else
@@ -330,7 +330,7 @@ begin
     if argMatch(i+2, i+6) then
       begin
 
-	if pos(#9'ldy #$', listing[i]) = 1 then begin
+	if pos1(#9'ldy #$', i) then begin
           p:=GetBYTE(i) + 1;
  	  listing[i] := #9'ldy #' + HexByte(p);
 	end else

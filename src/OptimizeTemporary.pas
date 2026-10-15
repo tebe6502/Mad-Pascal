@@ -72,7 +72,7 @@ var
   function fail(i: Integer): Boolean;
   begin
 
-        if (pos('#asm:', TemporaryBuf[i]) = 1) or
+        if pos1('#asm:', i) or
 
 	   ldy(i) or
            jsr(i) or
@@ -84,7 +84,7 @@ var
 	   mwy(i) or
 	   _IF(i) or
            LOCAL(i) or
-           (pos(#9'@', TemporaryBuf[i]) > 0) {#9@print} then Result:=true else Result:=false;
+           pos1_lab(#9'@', i) {#9@print} then Result:=true else Result:=false;
   end;
 
 
@@ -100,9 +100,9 @@ var
 		jcc(i) or jcs(i) or
 		jmi(i) or jpl(i) or
 
-		(pos(#9'bne ', TemporaryBuf[i]) = 1) or (pos(#9'beq ', TemporaryBuf[i]) = 1) or
-		(pos(#9'bcc ', TemporaryBuf[i]) = 1) or (pos(#9'bcs ', TemporaryBuf[i]) = 1) or
-		(pos(#9'bmi ', TemporaryBuf[i]) = 1) or (pos(#9'bpl ', TemporaryBuf[i]) = 1);
+		pos1(#9'bne ', i) or pos1(#9'beq ', i) or
+		pos1(#9'bcc ', i) or pos1(#9'bcs ', i) or
+		pos1(#9'bmi ', i) or pos1(#9'bpl ', i);
   end;
 
 
@@ -343,8 +343,6 @@ var
 begin
 
   // Debugger.debugger.WriteOut(a);
-
-  // if (pos(#9'jsr ', a) = 1) or (a = '#asm') then ResetOpty; // TODO: Move to OptimizeASM
 
   if TemporaryBufIndex < High(TemporaryBuf) then
   begin

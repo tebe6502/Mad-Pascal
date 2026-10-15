@@ -52,12 +52,12 @@ end;
 
   function OPTI_(const i: Integer): Boolean;
   begin
-    Result := (pos('; optimize ', TemporaryBuf[i]) > 0)
+    Result := pos1('; optimize ', i)
   end;
 
   function OPTI(const i: Integer): Boolean;
   begin
-    Result := (pos('; optimize ', TemporaryBuf[i]) > 0) and
+    Result := pos1('; optimize ', i) and
               (TemporaryBuf[i-1] = '') and
               (TemporaryBuf[i+1] = '');
   end;
@@ -80,6 +80,11 @@ end;
   function IFTMP(const i: Integer): Boolean;
   begin
     Result := pos1(#9'lda IFTMP_', i)
+  end;
+
+  function JMP(const i: Integer): Boolean;
+  begin
+    Result := pos1(#9'jmp ', i)
   end;
 
   function JMP_L(const i: Integer): Boolean;
@@ -383,6 +388,11 @@ end;
   begin
     Result := TemporaryBuf[i] = #9'tay'
   end;
+  
+  function CLC(const i: Integer): Boolean;
+  begin
+    Result := TemporaryBuf[i] = #9'clc'
+  end; 
 
   function STA_BP2(const i: Integer): Boolean;
   begin

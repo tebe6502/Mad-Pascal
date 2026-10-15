@@ -9,7 +9,7 @@ var p: integer;
 
   Result := jsr(i) or
             dex(i) or
-            (pos(#9'@print', listing[i]) > 0);
+            pos1(#9'@print', i);
 
  end;
 
@@ -175,11 +175,11 @@ begin
 
 
     if inx(i) and										// inx					; 0
-       (pos(#9'@print', listing[i+1]) > 0) then							// @print				; 1
+       pos1(#9'@print', i+1) then								// @print				; 1
       begin
 
         p:=i+1;
-	while pos(#9'@print', listing[p]) > 0 do inc(p);
+	while pos1(#9'@print', p) do inc(p);
 
 	if dex(p) then begin
 	 listing[i] := '';
@@ -291,5 +291,6 @@ begin
 
 	exit(false);
       end;
+
 
 end;		// function

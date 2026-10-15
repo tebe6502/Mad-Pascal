@@ -104,24 +104,24 @@ begin
 
 { !!!
 
-   if (pos('jcs l_', TemporaryBuf[10]) > 0) and						// jcs			; 10	branch if C=1
+   if jcs_l(10) and									// jcs			; 10	branch if C=1
       											//			; 11
       opti(12) and									//; optimize 		; 12
       											//			; 13	C=0
       asl_a(14) and									// asl @		; 14
-      (pos('add ', TemporaryBuf[15]) > 0) then						// add			; 15
+      add(15) then									// add			; 15
     begin
 	TemporaryBuf[15] := #9'adc ' + GetARG(15);
     end;
 
 
-   if (pos('jcs l_', TemporaryBuf[10]) > 0) and						// jcs			; 10	branch if C=1
+   if jcs_l(10) and									// jcs			; 10	branch if C=1
       											//			; 11
       opti(12) and									//; optimize 		; 12
       											//			; 13	C=0
       asl_a(14) and									// asl @		; 14
       asl_a(15) and									// asl @		; 15
-      (pos('add ', TemporaryBuf[16]) > 0) then						// add			; 16
+      add(16) then									// add			; 16
     begin
 	TemporaryBuf[16] := #9'adc ' + GetARG(16);
     end;
@@ -575,7 +575,7 @@ begin
 
    if lab_l(0) and									//l_			; 0
       lda(1) and									// adc			; 1
-      (pos(#9'clc', TemporaryBuf[2]) = 1) and						// clc			; 2
+      clc(2) and									// clc			; 2
       adc(3) and									// adc			; 3
       adc(4) and									// adc			; 4
       bcs_a(5) and									// bcs @+		; 5
@@ -589,7 +589,7 @@ begin
 
 
    if lab_l(0) and									//l_			; 0
-      (pos(#9'clc', TemporaryBuf[1]) = 1) and						// clc			; 1
+      clc(1) and									// clc			; 1
       adc(2) and									// adc			; 2
       adc(3) and									// adc			; 3
       bcs_a(4) and									// bcs @+		; 4

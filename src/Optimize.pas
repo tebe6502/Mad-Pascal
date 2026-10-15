@@ -145,7 +145,7 @@ begin
 
   // Debugger.debugger.WriteOut(a);
 
-  if (pos(#9'jsr ', a) = 1) or (a = '#asm') then ResetOpty;
+  if (pos(#9'jsr ', a) = 1) or (pos('#asm:', a) = 1) then ResetOpty;
 
   OptimizeTemporary.WriteOut(a);
 

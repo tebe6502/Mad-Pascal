@@ -56,14 +56,14 @@ begin
 	Break;
 
        end else
-        if (pos('#asm:', TemporaryBuf[p]) = 1) or
+        if pos1('#asm:', p) or
 
 	   lab_l(p) or
            jsr(p) or
 	   tya(p) or
 	   _IF(p) or
            LOCAL(p) or
-           (pos(#9'@', TemporaryBuf[p]) > 0) then Break;
+           pos1_lab(#9'@', p) then Break;
 
      end;
 

@@ -8,7 +8,7 @@ var p: integer;
 begin
 
    if (TemporaryBuf[5] = #9'#for') and							// #for				; 5	for i:=N downto 0
-      (pos('#for:dec', TemporaryBuf[4]) > 0) and					// #for:dec I			; 4
+      pos1(#9'#for:dec', 4) and								// #for:dec I			; 4
 
       (sta(0) or sty(0) or stz(0)) and							// sta|sty|stz I		; 0
       (TemporaryBuf[1] = '') and							//				; 1
@@ -99,7 +99,7 @@ begin
 	   mwy(p) or
 	   mvy(p) or
 	   _IF(p) or
-           (pos(#9'.LOCAL ', TemporaryBuf[p]) > 0) or
+           LOCAL(p) or
            (pos(#9'@print', TemporaryBuf[p]) > 0) then yes:=false;
 }
 
@@ -144,7 +144,7 @@ begin
 	   mwy(p) or
 	   mvy(p) or
 	   _IF(p) or
-           (pos(#9'.LOCAL ', TemporaryBuf[p]) > 0) or
+           LOCAL(p) or
            (pos(#9'@print', TemporaryBuf[p]) > 0) then yes:=false;
 }
 
@@ -194,7 +194,7 @@ begin
 	   mwy(p) or
 	   mvy(p) or
 	   _IF(p) or
-           (pos(#9'.LOCAL ', TemporaryBuf[p]) > 0) or
+           LOCAL(p) or
            (pos(#9'@print', TemporaryBuf[p]) > 0) then yes:=false;
 }
     end;

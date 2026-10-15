@@ -14,17 +14,17 @@ procedure opt_TEMP_FILL;
 
   function LOCAL_SYSTEM_FILL(i: byte): Boolean;
   begin
-    Result := (pos(#9'.LOCAL +MAIN.SYSTEM.FILL', TemporaryBuf[i]) = 1)
+    Result := pos1(#9'.LOCAL +MAIN.SYSTEM.FILL', i)
   end;
 
   function JSR_SYSTEM_FILL(i: byte): Boolean;
   begin
-    Result := (pos(#9'jsr SYSTEM.FILL', TemporaryBuf[i]) = 1)
+    Result := pos1(#9'jsr SYSTEM.FILL', i)
   end;
 
   function STA_SYSTEM_FILL(i: byte): Boolean;
   begin
-    Result := (pos(#9'sta SYSTEM.FILL', TemporaryBuf[i]) = 1)
+    Result := pos1(#9'sta SYSTEM.FILL', i)
   end;
 
   function A_1(i: byte): Boolean;
