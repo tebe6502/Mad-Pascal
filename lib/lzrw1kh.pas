@@ -4,7 +4,7 @@ UNIT lzrw1kh;
  @author: Kurt Haenen
  @name: LZRW1KH compressor / decompressor
 
- @version: 1.1
+ @version: 1.2
 
  @description:
 *)
@@ -68,14 +68,25 @@ type
 VAR
   Hash                     : HashTabPtr;
 
+
+                          { compress a buffer of max. 32 KB }
+FUNCTION  Compression(Source, Dest : BufferPtr;
+                      SourceSize   : BufferSize) :BufferSize;
+VAR
+  Command,Size		   : WORD;
+  Bit			   : BYTE;
+  Key                      : WORD;
+  X,Y,Z,Pos                : BufferIndex;
+
+
                              { check if this string has already been seen }
                              { in the current 4 KB window }
-FUNCTION  GetMatch       (    Source         : BufferPtr;
+FUNCTION  GetMatch {      (   Source         : BufferPtr;
                               X              : BufferIndex;
                               SourceSize     : BufferSize;
                               Hash           : HashTabPtr;
                           VAR Size           : WORD;
-                          VAR Pos            : BufferIndex  )    : BOOLEAN;
+                          VAR Pos            : BufferIndex  ) }   : BOOLEAN;
 VAR
   HashValue      : WORD;
   TmpHash        : Int16;
@@ -95,6 +106,7 @@ BEGIN
 
   Result := FALSE;
   TmpHash := Hash^[HashValue];
+
   IF (TmpHash <> -1) and (word(X - TmpHash) < 4096) THEN BEGIN
     Pos := TmpHash;
     Size := 0;
@@ -104,25 +116,21 @@ BEGIN
     end;
     Result := (Size >= 3)
   END;
+
   Hash^[HashValue] := X
 END;
-                                    { compress a buffer of max. 32 KB }
-FUNCTION  Compression(Source, Dest : BufferPtr;
-                      SourceSize   : BufferSize) :BufferSize;
-VAR
-  Command,Size		   : WORD;
-  Bit			   : BYTE;
-  Key                      : WORD;
-  X,Y,Z,Pos                : BufferIndex;
+          
+
+
 BEGIN
   FillChar(Hash^,SizeOf(Hashtable), $FF);
 
   Dest^[0] := FLAG_Compress;
   X := 0;
-  Y := 3;
-  Z := 1;
   Bit := 0;
   Command := 0;
+  Y := 3;
+  Z := 1;
 
   WHILE (X < SourceSize) AND (Y <= SourceSize) DO BEGIN
     IF (Bit > 15) THEN BEGIN
@@ -150,7 +158,7 @@ BEGIN
     END
     ELSE begin { not size >= 16 }
 
-      IF (GetMatch(Source,X,SourceSize,Hash,Size,Pos)) THEN BEGIN
+      IF GetMatch{(Source,X,SourceSize,Hash,Size,Pos)} THEN BEGIN
         Key := (Size-3) + ((X-Pos) SHL 4);
         Dest^[Y] := HI(Key);
         Dest^[Y+1] := LO(Key);
@@ -171,13 +179,16 @@ BEGIN
   END; { while x < sourcesize ... }
 
   Command := Command SHL (16-Bit);
+
   Dest^[Z] := HI(Command);
   Dest^[Z+1] := LO(Command);
+
   IF (Y > SourceSize) THEN BEGIN
-    MOVE(Source^[0],Dest^[1],SourceSize);
+    MOVE(Source^[0], Dest^[1], SourceSize);
     Dest^[0] := FLAG_Copied;
     Y := SUCC(SourceSize)
   END;
+
   Result := Y
 END;
 
@@ -208,6 +219,7 @@ BEGIN
     X := 3;
     Command := (Source^[1] SHL 8) + Source^[2];
     Bit := 16;
+
     WHILE (X < SourceSize) DO BEGIN
       IF (Bit = 0) THEN BEGIN
         Command := (Source^[X] SHL 8) + Source^[X+1];

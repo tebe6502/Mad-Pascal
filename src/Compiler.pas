@@ -11380,7 +11380,7 @@ begin
           Error(j + 1, TErrorCode.IllegalQualifier);
 
 
-      if not (ValType in AllTypes) then
+      if not (ValType in AllTypes + [TDataType.DEREFERENCEARRAY]) then
         Error(i, TErrorCode.TypeMismatch);
 
       ExpandParam(TokenAt(i).GetDataType, ValType);
@@ -11406,14 +11406,8 @@ begin
 
     end;
 
-    else begin
-
-    writeln(TokenAt(i).Kind );
-
+    else
       Error(i, TErrorCode.IdNumExpExpected);
-
-    end;
-
 
   end;// case
 
