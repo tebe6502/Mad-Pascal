@@ -288,6 +288,49 @@ begin
 // -----------------------------------------------------------------------------
 
 
+   if lab_a(12) and										//@			; 12
+
+      cmp_im_0(4) and										// cmp #$00		; 4
+
+      lda(2) and										// lda W		; 2
+      and_ora_eor(3) and									// and|ora}eor		; 3
+//      cmp_im_0(4) and										// cmp #$00		; 4
+      bne_a(5) and										// bne @+		; 5
+      lda(6) and										// lda W		; 6
+      and_ora_eor(7) and									// and|ora|eor		; 7
+      cmp(8) and										// cmp 			; 8
+      bne_a(9) and										// bne @+		; 9
+      lda(10) and										// lda W		; 10
+      cmp(11) and										// cmp 			; 11
+//      lab_a(12) and										//@			; 12
+      (jeq(13) or jne(13)) and									// jeq|jne		; 13
+      (SKIP(14) = false) then									//~SKIP			; 14
+    begin
+     TemporaryBuf[4] := '~';
+    end;
+
+
+   if lab_a(8) and										//@			; 8
+
+      cmp_im_0(4) and										// cmp #$00		; 4
+
+      lda(2) and										// lda W		; 2
+      and_ora_eor(3) and									// and|ora|eor		; 3
+      cmp_im_0(4) and										// cmp #$00		; 4
+      bne_a(5) and										// bne @+		; 5
+      lda(6) and										// lda W		; 6
+      cmp(7) and										// cmp 			; 7
+//      lab_a(8) and										//@			; 8
+      (jeq(9) or jne(9)) and									// jeq|jne		; 9
+      (SKIP(10) = false) then									//~SKIP			; 10
+    begin
+     TemporaryBuf[4] := '~';
+    end;
+
+
+// -----------------------------------------------------------------------------
+
+
    if lab_a(13) and										//@			; 13
 
       cmp_im_0(3) and										// cmp #$00		; 3
