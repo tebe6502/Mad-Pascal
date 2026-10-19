@@ -1308,6 +1308,85 @@ begin
       end;
 
 
+    if sta(0) and									// sta A		; 0
+       lda(1) and									// lda			; 1
+       (adc_sbc(2) or and_ora_eor(2)) and						// adc|sbc		; 2
+       sta(3) and									// sta A+1		; 3
+       lda(4) and									// lda			; 4
+       (adc_sbc(5) or and_ora_eor(5)) and						// adc|sbc		; 5
+       sta(6) and									// sta A+2		; 6
+       lda(7) and									// lda			; 7
+       (adc_sbc(8) or and_ora_eor(8)) and						// adc|sbc		; 8
+       sta(9) and									// sta A+3		; 9
+       											//			; 10
+       opti(11) and									//; optimize 		; 11
+       											//			; 12
+       lda(13) and									// lda A		; 13
+       sta(14) and									// sta			; 14
+       lda(15) and									// lda A+1		; 15
+       sta(16) and									// sta			; 16
+       lda(17) and									// lda A+2		; 17
+       sta(18) and									// sta			; 18
+       lda(19) and									// lda A+3		; 19
+       sta(20) then									// sta			; 20
+      if argMatch(0, 13) and
+         argMatch(3, 15) and
+         argMatch(6, 17) and
+         argMatch(9, 19) then
+      begin
+	TemporaryBuf[13] := TemporaryBuf[12];
+	TemporaryBuf[12] := TemporaryBuf[11];
+	TemporaryBuf[11] := TemporaryBuf[10];
+	TemporaryBuf[10] := TemporaryBuf[9];
+	TemporaryBuf[9]  := TemporaryBuf[8];
+	TemporaryBuf[8]  := TemporaryBuf[7];
+	TemporaryBuf[7]  := TemporaryBuf[6];
+	TemporaryBuf[6]  := TemporaryBuf[5];
+	TemporaryBuf[5]  := TemporaryBuf[4];
+	TemporaryBuf[4]  := TemporaryBuf[3];
+	TemporaryBuf[3]  := TemporaryBuf[2];
+	TemporaryBuf[2]  := TemporaryBuf[1];
+	TemporaryBuf[1]  := TemporaryBuf[14];
+
+
+	TemporaryBuf[15] := TemporaryBuf[14];
+	TemporaryBuf[14] := TemporaryBuf[13];
+	TemporaryBuf[13] := TemporaryBuf[12];
+	TemporaryBuf[12] := TemporaryBuf[11];
+	TemporaryBuf[11] := TemporaryBuf[10];
+	TemporaryBuf[10] := TemporaryBuf[9];
+	TemporaryBuf[9]  := TemporaryBuf[8];
+	TemporaryBuf[8]  := TemporaryBuf[7];
+	TemporaryBuf[7]  := TemporaryBuf[6];
+	TemporaryBuf[6]  := TemporaryBuf[5];
+	TemporaryBuf[5]  := TemporaryBuf[16];
+
+	TemporaryBuf[17] := TemporaryBuf[16];
+	TemporaryBuf[16] := TemporaryBuf[15];
+	TemporaryBuf[15] := TemporaryBuf[14];
+	TemporaryBuf[14] := TemporaryBuf[13];
+	TemporaryBuf[13] := TemporaryBuf[12];
+	TemporaryBuf[12] := TemporaryBuf[11];
+	TemporaryBuf[11] := TemporaryBuf[10];
+	TemporaryBuf[10] := TemporaryBuf[9];
+	TemporaryBuf[9]  := TemporaryBuf[18];
+
+	TemporaryBuf[19] := TemporaryBuf[18];
+	TemporaryBuf[18] := TemporaryBuf[17];
+	TemporaryBuf[17] := TemporaryBuf[16];
+	TemporaryBuf[16] := TemporaryBuf[15];
+	TemporaryBuf[15] := TemporaryBuf[14];
+	TemporaryBuf[14] := TemporaryBuf[13];
+	TemporaryBuf[13] := TemporaryBuf[20];
+
+	TemporaryBuf[17] := '~';
+	TemporaryBuf[18] := '~';
+	TemporaryBuf[19] := '~';
+	TemporaryBuf[20] := '~';
+
+      end;
+
+
     if lda(0) and									// lda			; 0
        sta(1) and									// sta A		; 1
        lda(2) and									// lda			; 2

@@ -102,7 +102,10 @@ begin
     d := ((a and $80808080) shr 8) shl 1;	// 'shr 8) shl 1' is faster then 'shr 7'
     if a and $80 <> 0 then d:=d or 1;
 
-    a:=((a and $7F7F7F7F) shl 1) xor ($1b * d);
+    d := (d shl 1) + d;   // *3
+    d := d + (d shl 3);   // 27*tmp = 3*tmp + (3*tmp << 3)
+
+    a:=((a and $7F7F7F7F) shl 1) xor d;// ($1b * d);
 
     b:=b shr 1;
 
