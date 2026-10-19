@@ -1424,7 +1424,7 @@ begin
 
        sta_stack(i+7) and									// sta :STACKORIGIN+STACKWIDTH*3	; 7
 
-       lda_val(i) and (iy(i) = false) and							// lda 					; 0
+       lda_a(i) and										// lda 					; 0
        sta_stack(i+1) and									// sta :STACKORIGIN			; 1
        lda_a(i+2) and 										// lda 					; 2
        sta_stack(i+3) and									// sta :STACKORIGIN+STACKWIDTH		; 3
@@ -1473,13 +1473,89 @@ begin
      end;
 
 
+    if rol_stack(i+11) and									// rol :STACKORIGIN+STACKWIDTH*3	; 11
+
+       sta_stack(i+7) and									// sta :STACKORIGIN+STACKWIDTH*3	; 7
+
+       (sta_a(i+13) = false) and								//~sta					; 13
+
+       lda_a(i) and										// lda 					; 0
+       sta_stack(i+1) and									// sta :STACKORIGIN			; 1
+       lda_a(i+2) and 										// lda 					; 2
+       sta_stack(i+3) and									// sta :STACKORIGIN+STACKWIDTH		; 3
+       lda_a(i+4) and										// lda					; 4
+       sta_stack(i+5) and									// sta :STACKORIGIN+STACKWIDTH*2	; 5
+       lda_a(i+6) and										// lda 					; 6
+//       sta_stack(i+7) and									// sta :STACKORIGIN+STACKWIDTH*3	; 7
+       asl_stack(i+8) and 									// asl :STACKORIGIN			; 8
+       rol_stack(i+9) and									// rol :STACKORIGIN+STACKWIDTH		; 9
+       rol_stack(i+10) and 									// rol :STACKORIGIN+STACKWIDTH*2	; 10
+//       rol_stack(i+11) and									// rol :STACKORIGIN+STACKWIDTH*3	; 11
+       lda_stack(i+12) then									// lda :STACKORIGIN			; 12
+//       (sta_a(i+13) = false) then								//~sta					; 13
+     if argMatch(i+1, i+8) and
+	argMatch(i+8, i+12) then
+     begin
+	listing[i+11]:= listing[i+7];
+	listing[i+10]:= #9'rol @';
+	listing[i+9] := listing[i+6];
+	listing[i+8] := listing[i+5];
+	listing[i+7] := #9'rol @';
+	listing[i+6] := listing[i+4];
+	listing[i+5] := listing[i+3];
+	listing[i+4] := #9'rol @';
+	listing[i+3] := listing[i+2];
+	listing[i+2] := listing[i+1];
+	listing[i+1] := #9'asl @';
+
+      	exit(false);
+     end;
 
 
-    if sta_stack(i) and										// sta :STACKORIGIN+STACKWIDTH		; 0
+    if (listing[i+10] = #9'and #$7F') and							// and #$7F				; 10
+
+       lda_a(i) and										// lda 					; 0
+       (listing[i+1] = #9'and #$7F') and							// and #$7F				; 1
+       sta_stack(i+2) and									// sta :STACKORIGIN			; 2
+       lda_a(i+3) and 										// lda 					; 3
+       (listing[i+4] = #9'and #$7F') and							// and #$7F				; 4
+       sta_stack(i+5) and									// sta :STACKORIGIN+STACKWIDTH		; 5
+       lda_a(i+6) and										// lda					; 6
+       (listing[i+7] = #9'and #$7F') and							// and #$7F				; 7
+       sta_stack(i+8) and									// sta :STACKORIGIN+STACKWIDTH*2	; 8
+       lda_a(i+9) and										// lda 					; 9
+//       (listing[i+10] = #9'and #$7F') and							// and #$7F				; 10
+       sta_stack(i+11) and									// sta :STACKORIGIN+STACKWIDTH*3	; 11
+       asl_stack(i+12) and 									// asl :STACKORIGIN			; 12
+       rol_stack(i+13) and									// rol :STACKORIGIN+STACKWIDTH		; 13
+       rol_stack(i+14) and 									// rol :STACKORIGIN+STACKWIDTH*2	; 14
+       rol_stack(i+15) and									// rol :STACKORIGIN+STACKWIDTH*3	; 15
+       lda_stack(i+16) and									// lda :STACKORIGIN			; 16
+       (sta_a(i+17) = false) then								//~sta					; 17
+     if argMatch(i+2, i+12) and
+	argMatch(i+12, i+16) then
+     begin
+	listing[i+1] := #9'asl @';
+	listing[i+4] := #9'asl @';
+	listing[i+7] := #9'asl @';
+	listing[i+10]:= #9'asl @';
+
+	listing[i+12] := '';
+	listing[i+13] := '';
+	listing[i+14] := '';
+	listing[i+15] := '';
+
+      	exit(false);
+     end;
+
+
+    if rol_stack(i+4) and									// rol :STACKORIGIN+STACKWIDTH		; 4
+
+       sta_stack(i) and										// sta :STACKORIGIN+STACKWIDTH		; 0
        sty_stack(i+1) and									// sty :STACKORIGIN+STACKWIDTH*2	; 1
        sty_stack(i+2) and									// sty :STACKORIGIN+STACKWIDTH*3	; 2
        asl_stack(i+3) and									// asl :STACKORIGIN			; 3
-       rol_stack(i+4) and									// rol :STACKORIGIN+STACKWIDTH		; 4
+//       rol_stack(i+4) and									// rol :STACKORIGIN+STACKWIDTH		; 4
        (rol_stack(i+5) = false) then								//~rol :STACKORIGIN+STACKWIDTH*9	; 5
      if argMatch(i, i+4) then
       begin
@@ -1490,13 +1566,15 @@ begin
       end;
 
 
-    if lda_im_0(i+1) and 									// lda #$00				; 1
-    
+    if rol_stack(i+4) and									// rol :STACKORIGIN+STACKWIDTH		; 4
+
+       lda_im_0(i+1) and 									// lda #$00				; 1
+
        sta_stack(i) and										// sta :STACKORIGIN+STACKWIDTH		; 0		2023-02-05
 //       lda_im_0(i+1) and 									// lda #$00				; 1
        sta_stack(i+2) and									// sta :STACKORIGIN			; 2
        asl_stack(i+3) and									// asl :STACKORIGIN			; 3
-       rol_stack(i+4) and									// rol :STACKORIGIN+STACKWIDTH		; 4
+//       rol_stack(i+4) and									// rol :STACKORIGIN+STACKWIDTH		; 4
        lda_stack(i+5) then									// lda :STACKORIGIN			; 5
      if argMatch(i, i+4) and
         argMatch(i+2, i+3) and
