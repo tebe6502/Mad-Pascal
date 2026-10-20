@@ -4,7 +4,7 @@ unit aes;
 @author: Stijn Sanders, Tomasz 'Tebe' Biela
 @name: AES encryption unit
 
-@version: 1.3
+@version: 1.4
 
 @description:
 
@@ -103,7 +103,7 @@ begin
     if a and $80 <> 0 then d:=d or 1;
 
     d := (d shl 1) + d;   // *3
-    d := d + (d shl 3);   // 27*tmp = 3*tmp + (3*tmp << 3)
+    d := (d shl 3) + d;   // 27*tmp = 3*tmp + (3*tmp << 3)
 
     a:=((a and $7F7F7F7F) shl 1) xor d;// ($1b * d);
 
