@@ -15,6 +15,7 @@ correct order of the registers 1: ECX, 2: EAX
 
 function opt_STA_IMUL_CX(i: integer): Boolean;
 var tmp: string;
+    p: integer;
 begin
 
     Result := true;
@@ -1001,6 +1002,73 @@ begin
       listing[i+10]:= '';
       listing[i+11]:= '';
       listing[i+12]:= '';
+
+      exit(false);
+     end;
+
+
+// -----------------------------------------------------------------------------
+// ===				imulCX 512				  === //
+// -----------------------------------------------------------------------------
+
+    if (listing[i] = #9'lda #$00') and							// lda #$00				; 0	* 512
+       sta_ecx(i+1) and									// sta :ecx				; 1
+       (listing[i+2] = #9'lda #$02') and						// lda #$04				; 2
+       sta_ecx_1(i+3) and								// sta :ecx+1				; 3
+       lda(i+4) and									// lda 					; 4
+       sta_eax(i+5) and			 						// sta :eax				; 5
+       lda(i+6) and 									// lda 					; 6
+       sta_eax_1(i+7) then		 						// sta :eax+1				; 7
+     begin
+      listing[i]   := #9'lda #$00';
+      listing[i+1] := #9'sta :eax';
+      listing[i+2] := listing[i+4];
+      listing[i+3] := #9'sta :eax+1';
+      listing[i+4] := listing[i+6];
+      listing[i+5] := #9'sta :eax+2';
+      listing[i+6] := #9'lda #$00';
+
+      listing[i+7] := #9'asl :eax+1';
+      listing[i+8] := #9'rol :eax+2';
+      listing[i+9] := #9'rol @';
+      listing[i+10] := #9'sta :eax+3';
+      listing[i+11] := '';
+      listing[i+12] := '';
+
+      exit(false);
+     end;
+
+
+// -----------------------------------------------------------------------------
+// ===				imulCX 1024				  === //
+// -----------------------------------------------------------------------------
+
+    if (listing[i] = #9'lda #$00') and							// lda #$00				; 0	* 1024
+       sta_ecx(i+1) and									// sta :ecx				; 1
+       (listing[i+2] = #9'lda #$04') and						// lda #$04				; 2
+       sta_ecx_1(i+3) and								// sta :ecx+1				; 3
+       lda(i+4) and									// lda 					; 4
+       sta_eax(i+5) and			 						// sta :eax				; 5
+       lda(i+6) and 									// lda 					; 6
+       sta_eax_1(i+7) then		 						// sta :eax+1				; 7
+     begin
+      listing[i]   := #9'lda #$00';
+      listing[i+1] := #9'sta :eax';
+      listing[i+2] := listing[i+4];
+      listing[i+3] := #9'sta :eax+1';
+      listing[i+4] := listing[i+6];
+      listing[i+5] := #9'sta :eax+2';
+      listing[i+6] := #9'lda #$00';
+
+      Expand(i+12, 1);
+
+      listing[i+7] := #9'asl :eax+1';
+      listing[i+8] := #9'rol :eax+2';
+      listing[i+9] := #9'rol @';
+      listing[i+10] := #9'asl :eax+1';
+      listing[i+11] := #9'rol :eax+2';
+      listing[i+12] := #9'rol @';
+      listing[i+13] := #9'sta :eax+3';
 
       exit(false);
      end;
