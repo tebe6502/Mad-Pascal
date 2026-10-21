@@ -15,7 +15,6 @@ correct order of the registers 1: ECX, 2: EAX
 
 function opt_STA_IMUL_CX(i: integer): Boolean;
 var tmp: string;
-    p: integer;
 begin
 
     Result := true;

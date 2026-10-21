@@ -9456,9 +9456,9 @@ begin
 
       case ActualParamType of
 
-        TDataType.SHORTREALTOK: asm65(#9'jsr @INT_SHORT');
+        TDataType.SHORTREALTOK: asm65(#9'jsr @SHORTREAL_INT');
 
-        TDataType.REALTOK: asm65(#9'jsr @INT');
+        TDataType.REALTOK: asm65(#9'jsr @REAL_INT');
 
         TDataType.HALFSINGLETOK:
         begin

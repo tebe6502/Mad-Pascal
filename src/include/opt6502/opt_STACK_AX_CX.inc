@@ -11,7 +11,7 @@ begin
 // -----------------------------------------------------------------------------
 
     if add_sub_AX_CX(i+6) and									// jsr addAX_CX|subAX_CX		; 6
-    
+
 //     inx(i) and										// inx					; 0
        mva_im(i+1) and										// mva # :STACKORIGIN,x			; 1
        mva_im(i+2) and										// mva # :STACKORIGIN+STACKWIDTH,x	; 2
@@ -46,7 +46,7 @@ begin
 
 
     if add_sub_AX_CX(i+6) and									// jsr addAX_CX|subAX_CX		; 6
-    
+
        inx(i) and										// inx					; 0
        mva_im(i+1) and										// mva # :STACKORIGIN,x			; 1
        inx(i+2) and										// inx					; 2
@@ -164,7 +164,7 @@ begin
 
     if dex(i+6) and										// dex					; 6
        add_sub_AX_CX(i+5) and									// jsr addAX_CX|subAX_CX		; 5
-    
+
        (mva(i) = false) and									//~mva					; 0
        mva(i+1) and 										// mva  :STACKORIGIN+STACKWIDTH,x	; 1
        inx(i+2) and  										// inx					; 2
@@ -201,11 +201,13 @@ begin
 
     if ADD_SUB_AX_CX(i+9) and									// jsr addAX_CX|subAX_CX		; 9
 
+       inx(i+4) and										// inx					; 4
+
        mva(i) and										// mva  :STACKORIGIN,x			; 0
        mva(i+1) and 										// mva  :STACKORIGIN+STACKWIDTH,x	; 1
        mva(i+2) and 										// mva  :STACKORIGIN+STACKWIDTH*2,x	; 2
        mva(i+3) and 										// mva  :STACKORIGIN+STACKWIDTH*3,x	; 3
-       inx(i+4) and										// inx					; 4
+//       inx(i+4) and										// inx					; 4
        mva(i+5) and 										// mva  :STACKORIGIN,x			; 5
        mva(i+6) and 										// mva  :STACKORIGIN+STACKWIDTH,x	; 6
        mva(i+7) and										// mva  :STACKORIGIN+STACKWIDTH*2,x	; 7
@@ -228,7 +230,7 @@ begin
 
 
     if add_sub_AX_CX(i+6) and									// jsr addAX_CX|subAX_CX		; 6
-    
+
        inx(i) and										// inx					; 0
        mva(i+1) and										// mva  :STACKORIGIN,x			; 1
        mva(i+2) and 										// mva  :STACKORIGIN+STACKWIDTH,x	; 2
@@ -269,7 +271,7 @@ begin
 
 
     if add_sub_AX_CX(i+8) and									// jsr addAX_CX|subAX_CX		; 8
-    
+
        inx(i) and										// inx					; 0
        mwy(i+1) and										// mwy					; 1
        ldy_im(i+2) and										// ldy #				; 2
@@ -313,7 +315,7 @@ begin
      end;
 
 
-    if dex(i+7) and										// dex					; 7   
+    if dex(i+7) and										// dex					; 7
        add_sub_AX_CX(i+6) and									// jsr addAX_CX|subAX_CX		; 6
 
        lda_val(i) and										// lda					; 0	~:STACKORIGIN
@@ -350,7 +352,7 @@ begin
 // -----------------------------------------------------------------------------
 
 
-    if dex(i+3) and										// dex					; 3   
+    if dex(i+3) and										// dex					; 3
        add_sub_AX_CX(i+2) and									// jsr addAX_CX|subAX_CX		; 2
 
        mva(i) and 										// mva .. :STACKORIGIN,x		; 0
@@ -428,7 +430,7 @@ begin
      end;
 
 
-    if dex(i+6) and										// dex					; 6  
+    if dex(i+6) and										// dex					; 6
        add_sub_AX_CX(i+5) and									// jsr addAX_CX|subAX_CX		; 5
 
        jsr(i) and										// jsr					; 0
@@ -678,7 +680,7 @@ begin
 
     if dex(i+16) and										// dex					; 16
        add_sub_AX_CX(i+15) and									// jsr addAX_CX|subAX_CX		; 15
-    
+
 //     dex(i) and										// dex					; 0
        lda_a(i+1) and										// lda					; 1
        sta_stack_prev_0x(i+2) and								// sta :STACKORIGIN-1,x			; 2
@@ -709,7 +711,7 @@ begin
 
     if dex(i+12) and										// dex					; 12
        add_sub_AX_CX(i+11) and									// jsr addAX_CX|subAX_CX		; 11
-    
+
 //     dex(i) and										// dex					; 0
        lda_a(i+1) and										// lda					; 1
        sta_stack_prev_0x(i+2) and								// sta :STACKORIGIN-1,x			; 2

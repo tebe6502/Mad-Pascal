@@ -18,8 +18,6 @@ numread	.word		; pointer to variable, length of loaded data
 
 ; -----------------------------------------------------------------------
 
-	icl 'runtime\int.asm'		; @INT, @INT_SHORT
-
 	icl 'runtime\add.asm'		; addAL_CL, addAX_CX, addEAX_ECX
 	icl 'runtime\sub.asm'		; subAL_CL, subAX_CX, subEAX_ECX
 
@@ -59,11 +57,13 @@ numread	.word		; pointer to variable, length of loaded data
 	icl 'common\cardinal.asm'	; mul / div -> CARDINAL
 
 	icl 'common\shortreal.asm'	; mul / div -> SHORTREAL	Q8.8
+	icl 'common\shortreal_int.asm'	; @SHORTREAL_INT
 	icl 'common\shortreal_trunc.asm'; @SHORTREAL_TRUNC
 	icl 'common\shortreal_round.asm'; @SHORTREAL_ROUND
 	icl 'common\shortreal_frac.asm'	; @SHORTREAL_FRAC
 
 	icl 'common\real.asm'		; mul / div -> REAL		Q24.8
+	icl 'common\real_int.asm'	; @REAL_INT
 	icl 'common\real_trunc.asm'	; @REAL_TRUNC
 	icl 'common\real_round.asm'	; @REAL_ROUND
 	icl 'common\real_frac.asm'	; @REAL_FRAC
