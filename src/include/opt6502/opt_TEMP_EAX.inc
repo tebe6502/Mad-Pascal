@@ -6,8 +6,12 @@
 procedure opt_TEMP_EAX;
 begin
 
+  if sta(1) and
+     (sta(2) = false) then
+  begin
+
     if (TemporaryBuf[0] = #9'lda :eax') and						// lda :eax				; 0
-       (sta(2) = false) and
+//       (sta(2) = false) and
 
        ((TemporaryBuf[1] = #9'sta @BYTE.MOD.A') or					// sta @BYTE.MOD.A			; 1
         (TemporaryBuf[1] = #9'sta @WORD.MOD.A') or					// sta @WORD.MOD.A			; 1
@@ -41,7 +45,7 @@ begin
 
 
     if (TemporaryBuf[0] = #9'lda :eax+1') and						// lda :eax+1				; 0
-       (sta(2) = false) and
+//       (sta(2) = false) and
 
        ((TemporaryBuf[1] = #9'sta @WORD.MOD.A+1') or					// sta @WORD.MOD.A+1			; 1
         (TemporaryBuf[1] = #9'sta @CARDINAL.MOD.A+1') or				// sta @CARDINAL.MOD.A+1		; 1
@@ -71,7 +75,7 @@ begin
 
 
     if (TemporaryBuf[0] = #9'lda :eax+2') and						// lda :eax+2				; 0
-       (sta(2) = false) and
+//       (sta(2) = false) and
 
        ((TemporaryBuf[1] = #9'sta @CARDINAL.MOD.A+2') or				// sta @CARDINAL.MOD.A+2		; 1
         (TemporaryBuf[1] = #9'sta @INTEGER.MOD.A+2') or					// sta @INTEGER.MOD.A+2			; 1
@@ -93,7 +97,7 @@ begin
 
 
     if (TemporaryBuf[0] = #9'lda :eax+3') and						// lda :eax+3				; 0
-       (sta(2) = false) and
+//       (sta(2) = false) and
 
        ((TemporaryBuf[1] = #9'sta @CARDINAL.MOD.A+3') or				// sta @CARDINAL.MOD.A+3		; 1
         (TemporaryBuf[1] = #9'sta @INTEGER.MOD.A+3') or					// sta @INTEGER.MOD.A+3			; 1
@@ -113,12 +117,18 @@ begin
 	TemporaryBuf[1] := '~';
        end;
 
+  end;
+
 
 // -----------------------------------------------------------------------------
 
 
+  if sta(1) and
+     sta(2) then
+  begin
+
     if (TemporaryBuf[0] = #9'lda :eax') and						// lda :eax				; 0
-       sta(1) and									// sta					; 1
+//       sta(1) and									// sta					; 1
 
        ((TemporaryBuf[2] = #9'sta @BYTE.MOD.A') or					// sta @BYTE.MOD.A			; 2
         (TemporaryBuf[2] = #9'sta @WORD.MOD.A') or					// sta @WORD.MOD.A			; 2
@@ -151,7 +161,7 @@ begin
 
 
     if (TemporaryBuf[0] = #9'lda :eax+1') and						// lda :eax+1				; 0
-       sta(1) and									// sta					; 1
+//       sta(1) and									// sta					; 1
 
        ((TemporaryBuf[2] = #9'sta @WORD.MOD.A+1') or					// sta @WORD.MOD.A+1			; 2
         (TemporaryBuf[2] = #9'sta @CARDINAL.MOD.A+1') or				// sta @CARDINAL.MOD.A+1		; 2
@@ -180,7 +190,7 @@ begin
 
 
     if (TemporaryBuf[0] = #9'lda :eax+2') and						// lda :eax+2				; 0
-       sta(1) and									// sta					; 1
+//       sta(1) and									// sta					; 1
 
        ((TemporaryBuf[2] = #9'sta @CARDINAL.MOD.A+2') or				// sta @CARDINAL.MOD.A+2		; 2
         (TemporaryBuf[2] = #9'sta @INTEGER.MOD.A+2') or					// sta @INTEGER.MOD.A+2			; 2
@@ -201,7 +211,7 @@ begin
 
 
     if (TemporaryBuf[0] = #9'lda :eax+3') and						// lda :eax+3				; 0
-       sta(1) and									// sta					; 1
+//       sta(1) and									// sta					; 1
 
        ((TemporaryBuf[2] = #9'sta @CARDINAL.MOD.A+3') or				// sta @CARDINAL.MOD.A+3		; 2
         (TemporaryBuf[2] = #9'sta @INTEGER.MOD.A+3') or					// sta @INTEGER.MOD.A+3			; 2
@@ -219,6 +229,8 @@ begin
        begin
 	TemporaryBuf[2] := '~';
        end;
+
+  end;
 
 
 end;	// procedure

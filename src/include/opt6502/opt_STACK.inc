@@ -2192,7 +2192,7 @@ begin
 
        lda_stack_3x(i+15) and									// lda :STACKORIGIN+STACKWIDTH*3,x	; 15
 
-       lda_a(i) and										// lda A				; 0
+       lda_val(i) and										// lda A				; 0
        sta_stack_prev_0x(i+1) and								// sta :STACKORIGIN-1,x			; 1
        lda_a(i+2) and										// lda A+1				; 2
        sta_stack_prev_1x(i+3) and								// sta :STACKORIGIN-1+STACKWIDTH,x	; 3
@@ -2217,6 +2217,50 @@ begin
 	listing[i+13] := listing[i+4];
 
 	listing[i+15] := listing[i+6];
+
+	listing[i]   := '';
+	listing[i+1] := '';
+	listing[i+2] := '';
+	listing[i+3] := '';
+	listing[i+4] := '';
+	listing[i+5] := '';
+	listing[i+6] := '';
+	listing[i+7] := '';
+
+       exit(false);
+     end;
+
+
+    if dex(i+8) and										// dex					; 8
+
+       lda_stack_3x(i+16) and									// lda :STACKORIGIN+STACKWIDTH*3,x	; 16
+
+       lda_val(i) and										// lda A				; 0
+       sta_stack_prev_0x(i+1) and								// sta :STACKORIGIN-1,x			; 1
+       lda_a(i+2) and										// lda A+1				; 2
+       sta_stack_prev_1x(i+3) and								// sta :STACKORIGIN-1+STACKWIDTH,x	; 3
+       lda_a(i+4) and										// lda A+2				; 4
+       sta_stack_prev_2x(i+5) and								// sta :STACKORIGIN-1+STACKWIDTH*2,x	; 5
+       lda_a(i+6) and										// lda A+3				; 6
+       sta_stack_prev_3x(i+7) and								// sta :STACKORIGIN-1+STACKWIDTH*3,x	; 7
+//       dex(i+8) and										// dex					; 8
+       ldy(i+9) and										// ldy					; 9
+       lda_stack_0x(i+10) and									// lda :STACKORIGIN,x			; 10
+       sta_val(i+11) and									// sta B				; 11
+       lda_stack_1x(i+12) and									// lda :STACKORIGIN+STACKWIDTH,x	; 12
+       sta_val(i+13) and									// sta B+1				; 13
+       lda_stack_2x(i+14) and									// lda :STACKORIGIN+STACKWIDTH*2,x	; 14
+       sta_val(i+15) and									// sta B+2				; 15
+//       lda_stack_3x(i+16) and									// lda :STACKORIGIN+STACKWIDTH*3,x	; 16
+       sta_val(i+17) then									// sta B+3				; 17
+     begin
+	listing[i+10]  := listing[i];
+
+	listing[i+12] := listing[i+2];
+
+	listing[i+14] := listing[i+4];
+
+	listing[i+16] := listing[i+6];
 
 	listing[i]   := '';
 	listing[i+1] := '';
