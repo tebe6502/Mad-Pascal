@@ -10,19 +10,14 @@ RESULT	= :EAX
 
 A	= :EAX
 
-	ldy A+3
-	bpl @+
-
-	jsr @negEAX
-@
-	lda #$00
-	sta A+1
-	sta A+2
-	sta A+3
-
-	tya
+	ldy #0
+	lda A+3
 	spl
-	jmp @negEAX
+	dey
+
+	sty A+1
+	sty A+2
+	sty A+3
 
 	rts
 .endp

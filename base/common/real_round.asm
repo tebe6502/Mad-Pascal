@@ -11,11 +11,10 @@ RESULT	= :EAX
 A	= :EAX
 
 	ldy A+3
-	bpl @+
-
+	spl
 	jsr @negEAX
 
-@	lda A
+	lda A
 	cmp #$80
 	lda A+1
 	adc #0

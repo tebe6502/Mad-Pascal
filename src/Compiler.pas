@@ -9520,7 +9520,20 @@ begin
 
       case ActualParamType of
 
-        TDataType.SHORTREALTOK: asm65(#9'jsr @SHORTREAL_FRAC');
+        TDataType.SHORTREALTOK:
+        begin
+          asm65(#9'lda' + StackVariable0);
+          asm65(#9'sta @SHORTREAL_FRAC.A');
+          asm65(#9'lda' + StackVariable1);
+          asm65(#9'sta @SHORTREAL_FRAC.A+1');
+
+          asm65(#9'jsr @SHORTREAL_FRAC');
+
+          asm65(#9'lda :eax');
+          asm65(#9'sta' + StackVariable0);
+          asm65(#9'lda :eax+1');
+          asm65(#9'sta' + StackVariable1);
+        end;
 
         TDataType.REALTOK:
         begin

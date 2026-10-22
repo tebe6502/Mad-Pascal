@@ -30,6 +30,7 @@ begin
         (TemporaryBuf[1] = #9'sta @REAL_FRAC.A') or					// sta @REAL_FRAC.A			; 1
         (TemporaryBuf[1] = #9'sta @REAL_ROUND.A') or					// sta @REAL_ROUND.A			; 1
         (TemporaryBuf[1] = #9'sta @REAL_TRUNC.A') or					// sta @REAL_TRUNC.A			; 1
+        (TemporaryBuf[1] = #9'sta @SHORTREAL_FRAC.A') or				// sta @SHORTREAL_FRAC.A		; 1
         (TemporaryBuf[1] = #9'sta @SHORTREAL_TRUNC.A') or				// sta @SHORTREAL_TRUNC.A		; 1
 
 	(TemporaryBuf[1] = #9'sta @F16_I2F.SV')) then					// sta @F16_I2F.SV			; 1
@@ -59,6 +60,7 @@ begin
         (TemporaryBuf[1] = #9'sta @REAL_FRAC.A+1') or					// sta @REAL_FRAC.A+1			; 1
         (TemporaryBuf[1] = #9'sta @REAL_ROUND.A+1') or					// sta @REAL_ROUND.A+1			; 1
         (TemporaryBuf[1] = #9'sta @REAL_TRUNC.A+1') or					// sta @REAL_TRUNC.A+1			; 1
+        (TemporaryBuf[1] = #9'sta @SHORTREAL_FRAC.A+1') or				// sta @SHORTREAL_FRAC.A+1		; 1
         (TemporaryBuf[1] = #9'sta @SHORTREAL_TRUNC.A+1') or				// sta @SHORTREAL_TRUNC.A+1		; 1
 
 	(TemporaryBuf[1] = #9'sta @F16_I2F.SV+1')) then					// sta @F16_I2F.SV+1			; 1
@@ -139,6 +141,7 @@ begin
         (TemporaryBuf[2] = #9'sta @REAL_FRAC.A') or					// sta @REAL_FRAC.A			; 2
         (TemporaryBuf[2] = #9'sta @REAL_ROUND.A') or					// sta @REAL_ROUND.A			; 2
         (TemporaryBuf[2] = #9'sta @REAL_TRUNC.A') or					// sta @REAL_TRUNC.A			; 2
+        (TemporaryBuf[2] = #9'sta @SHORTREAL_FRAC.A') or				// sta @SHORTREAL_FRAC.A		; 2
         (TemporaryBuf[2] = #9'sta @SHORTREAL_TRUNC.A') or				// sta @SHORTREAL_TRUNC.A		; 2
 
 	(TemporaryBuf[2] = #9'sta @F16_I2F.SV')) then					// sta @F16_I2F.SV			; 2
@@ -167,6 +170,7 @@ begin
         (TemporaryBuf[2] = #9'sta @REAL_FRAC.A+1') or					// sta @REAL_FRAC.A+1			; 2
         (TemporaryBuf[2] = #9'sta @REAL_ROUND.A+1') or					// sta @REAL_ROUND.A+1			; 2
         (TemporaryBuf[2] = #9'sta @REAL_TRUNC.A+1') or					// sta @REAL_TRUNC.A+1			; 2
+        (TemporaryBuf[2] = #9'sta @SHORTREAL_FRAC.A+1') or				// sta @SHORTREAL_FRAC.A+1		; 2
         (TemporaryBuf[2] = #9'sta @SHORTREAL_TRUNC.A+1') or				// sta @SHORTREAL_TRUNC.A+1		; 2
 
 	(TemporaryBuf[2] = #9'sta @F16_I2F.SV+1')) then					// sta @F16_I2F.SV+1			; 2

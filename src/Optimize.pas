@@ -2394,6 +2394,8 @@ begin        // OptimizeASM
       else
       if elf = $0627E0C3 then		// @REAL_FRAC		accepted
       else
+      if elf = $096465B3 then		// @SHORTREAL_FRAC	accepted
+      else
 
       if elf = $0044B29C then		// @FMUL		accepted
       else

@@ -6,16 +6,16 @@
 
 .proc	@SHORTREAL_FRAC
 
-	ldy :STACKORIGIN+STACKWIDTH,x
-	spl
-	jsr @negSHORT
+RESULT	= :EAX
 
-	lda #$00
-	sta :STACKORIGIN+STACKWIDTH,x
+A	= :EAX
 
-	tya
+	ldy #0
+	lda A+1
 	spl
-	jmp @negSHORT
+	dey
+
+	sty A+1
 
 	rts
 .endp

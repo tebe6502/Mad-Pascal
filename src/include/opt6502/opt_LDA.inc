@@ -891,12 +891,14 @@ begin
 
     if lda_stack(i+18) and									// lda :STACKORIGIN+STACKWIDTH*3	; 18
 
+       sta_stack(i+5) and									// sta :STACKORIGIN+STACKWIDTH		; 5
+
        lda_a(i) and										// lda					; 0
        (add_sub(i+1) or and_ora_eor(i+1)) and							// add|sub|and|ora|eor			; 1
        sta_stack(i+2) and									// sta :STACKORIGIN			; 2
        lda_a(i+3) and										// lda 					; 3
        (adc_sbc(i+4) or and_ora_eor(i+4)) and							// adc|sbc|and|ora|eor			; 4
-       sta_stack(i+5) and									// sta :STACKORIGIN+STACKWIDTH		; 5
+//       sta_stack(i+5) and									// sta :STACKORIGIN+STACKWIDTH		; 5
        lda_a(i+6) and										// lda 					; 6
        (adc_sbc(i+7) or and_ora_eor(i+7)) and							// adc|sbc|and|ora|eor			; 7
        sta_stack(i+8) and									// sta :STACKORIGIN+STACKWIDTH*2	; 8
@@ -1333,9 +1335,11 @@ begin
 
     if sta_stack(i+7) and									// sta :STACKORIGIN+STACKWIDTH		; 7
 
+       lda_stack(i+2) and									// lda :STACKORIGIN+STACKWIDTH		; 2
+
 //       (lda_a(i) = false) and									//~lda					; 0
        sta_val(i+1) and										// sta A				; 1	~:STACKORIGN
-       lda_stack(i+2) and									// lda :STACKORIGIN+STACKWIDTH		; 2
+//       lda_stack(i+2) and									// lda :STACKORIGIN+STACKWIDTH		; 2
        sta_val(i+3) and										// sta A+1				; 3	~:STACKORIGN
        lda_val(i+4) and										// lda A				; 4	~:STACKORIGIN
        sta_stack(i+5) and									// sta :STACKORIGIN			; 5
@@ -1378,13 +1382,17 @@ begin
        end;
 
 
-    if lda_val(i) and										// lda					; 0	~:STACKORIGIN
-       sta_stack(i+1) and									// sta :STACKORIGIN+9			; 1
+    if lda_stack(i+5) and									// lda :STACKORIGIN+10			; 5
+
        sta_stack(i+2) and									// sta :STACKORIGIN+10			; 2
+
+       lda_val(i) and										// lda					; 0	~:STACKORIGIN
+       sta_stack(i+1) and									// sta :STACKORIGIN+9			; 1
+//       sta_stack(i+2) and									// sta :STACKORIGIN+10			; 2
        lda_val(i+3) and										// lda					; 3	~:STACKORIGIN
-       sta_val(i+4) and										// sta :bp2				; 4	~:STACKORIGIN
-       lda_stack(i+5) and									// lda :STACKORIGIN+10			; 5
-       sta_val(i+6) then									// sta :bp2+1				; 6	~:STACKORIGIN
+       sta_val(i+4) and										// sta					; 4	~:STACKORIGIN
+//       lda_stack(i+5) and									// lda :STACKORIGIN+10			; 5
+       sta_val(i+6) then									// sta					; 6	~:STACKORIGIN
      if argMatch(i+2, i+5) then
       begin
 	listing[i+5] := listing[i];
@@ -1484,5 +1492,6 @@ begin
 
 	exit(false);
        end;
+
 
 end;		// function

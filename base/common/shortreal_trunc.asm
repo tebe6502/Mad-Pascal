@@ -11,10 +11,9 @@ RESULT	= :EAX
 A	= :EAX
 
 	ldy A+1
-	bpl @+
-
+	spl
 	jsr @negAX
-@
+
 	sta A
 	mva #$00 A+1
 

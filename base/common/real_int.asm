@@ -3,6 +3,7 @@
 	@REAL_INT
 */
 
+
 .proc	@REAL_INT
 
 	ldy :STACKORIGIN+STACKWIDTH*3,x
