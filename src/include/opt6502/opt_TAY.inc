@@ -26,8 +26,10 @@ begin
 // ===		     		      TAY.
 // -----------------------------------------------------------------------------
 
-    if lda_a(i) and (iy(i) = false) and								// lda					; 0
-       tay(i+1) and										// tay					; 1
+    if tay(i+1) and										// tay					; 1
+
+       lda_a(i) and (iy(i) = false) and								// lda					; 0
+//       tay(i+1) and										// tay					; 1
        lda_a(i+2) then										// lda					; 2
      begin
 	listing[i]   := #9'ldy ' + GetARG(i);
@@ -37,9 +39,11 @@ begin
      end;
 
 
-    if lda(i) and (iy(i) = false) and								// lda					; 0
+    if tay(i+2) and 										// tay					; 2
+
+       lda(i) and (iy(i) = false) and								// lda					; 0
        sub_im_1(i+1) and									// sub #$01				; 1
-       tay(i+2) and 										// tay					; 2
+//       tay(i+2) and 										// tay					; 2
 												// lda					; 3
        (sbc(i+4) = false) then									//~sbc					; 4
      begin
@@ -86,9 +90,11 @@ begin
       end;
 
 
-    if lda(i) and (iy(i) = false) and								// lda					; 0
+    if tay(i+2) and										// tay					; 2
+
+       lda(i) and (iy(i) = false) and								// lda					; 0
        add_im_1(i+1) and									// add #$01				; 1
-       tay(i+2) and										// tay					; 2
+//       tay(i+2) and										// tay					; 2
        lda(i+3) and										// lda					; 3
        add(i+4) then										// add					; 4
       begin
@@ -100,8 +106,10 @@ begin
       end;
 
 
-    if add_im_0(i) and										// add #$00				; 0
-       tay(i+1) and										// tay					; 1
+    if tay(i+1) and										// tay					; 1
+
+       add_im_0(i) and										// add #$00				; 0
+//       tay(i+1) and										// tay					; 1
 												//					; 2
        (adc(i+3) = false) then									//~adc					; 3
       begin
@@ -111,8 +119,10 @@ begin
       end;
 
 
-    if sub_im_0(i) and										// sub #$00				; 0
-       tay(i+1) and										// tay					; 1
+    if tay(i+1) and										// tay					; 1
+       
+       sub_im_0(i) and										// sub #$00				; 0
+//       tay(i+1) and										// tay					; 1
 												//					; 2
        (sbc(i+3) = false) then									//~sbc					; 3
       begin
@@ -122,8 +132,10 @@ begin
       end;
 
 
-    if lda(i) and (iy(i) = false) and								// lda					; 0
-       tay(i+1) then										// tay					; 1
+    if tay(i+1) and										// tay					; 1
+
+       lda(i) and (iy(i) = false) then								// lda					; 0
+//       tay(i+1) then										// tay					; 1
       begin
 	listing[i]   := #9'ldy ' + GetARG(i);
 	listing[i+1] := '';
@@ -303,12 +315,14 @@ begin
 
     if tay(i+6) and										// tay					; 6
 
+       asl_a(i+5) and										// asl @				; 5
+
        lda_val(i) and										// lda					; 0	~:STACKORIGIN
        sta_stack(i+1) and									// sta :STACKORIGIN			; 1
        lda_val(i+2) and										// lda					; 2	~:STACKORIGIN
        sta_stack(i+3) and									// sta :STACKORIGIN+STACKWIDTH		; 3
-       lda_stack(i+4) and									// lda :STACKORIGIN			; 4
-       asl_a(i+5) then										// asl @				; 5
+       lda_stack(i+4) then									// lda :STACKORIGIN			; 4
+//       asl_a(i+5) then									// asl @				; 5
 //       tay(i+6) then										// tay					; 6
      if (argMatch(i+1, i+3) = false) and
 	argMatch(i+1, i+4) then
@@ -324,6 +338,8 @@ begin
 
     if tay(i+8) and										// tay					; 8
 
+       asl_a(i+7) and										// asl @				; 7
+
        lda_a(i) and (iy(i) = false) and								// lda					; 0
        add_sub(i+1) and (iy(i+1) = false) and							// add|sub				; 1
        sta_stack(i+2) and									// sta :STACKORIGIN+9			; 2
@@ -331,7 +347,7 @@ begin
        adc_sbc(i+4) and (iy(i+4) = false) and							// adc|sbc				; 4
        sta_stack(i+5) and									// sta :STACKORIGIN+STACKWIDTH+9	; 5
        lda_a(i+6) and										// lda					; 6
-       asl_a(i+7) and										// asl @				; 7
+//       asl_a(i+7) and										// asl @				; 7
 //       tay(i+8) and										// tay					; 8
        lda_stack(i+9) and									// lda :STACKORIGIN+9			; 9
        sta_val(i+10) and									// sta					; 10	~:STACKORIGIN
