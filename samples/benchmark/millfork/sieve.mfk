@@ -1,0 +1,52 @@
+import stdio
+
+const word size=8190;
+const word sizepl=8192;
+
+array flags[sizepl]
+
+void main()
+{
+        byte iter;
+		word i, prime, k, count;
+		word no_ticks;
+		
+		os_RTCLOK.b1 = 0;
+		os_RTCLOK.b2 = 0;
+
+        for iter,1,to,10
+        {
+			count = 0;
+			for i,0,paralleluntil,sizepl
+			{
+				 flags[i] = 1
+			}
+			for i,0,to,size
+			{
+				if (flags[i]==1)
+				{
+					prime = i*2 + 3;
+					k = i + prime;
+					while (k <= size) {
+						flags[k] = 0;
+						k += prime;
+					}
+					count+=1;
+				}
+			}
+        }
+		//no_ticks = os_RTCLOK.hiword;
+		no_ticks = os_RTCLOK.b2 + os_RTCLOK.b1*256;
+		putstrz("Primes:"z)
+		putchar(os_ATEOL)
+		putword(count)
+		putchar(os_ATEOL)
+		putstrz("Ticks:"z)
+		putchar(os_ATEOL)
+		putword(no_ticks)
+		putchar(os_ATEOL)	
+		while (true)
+		{
+			os_RTCLOK.b1 = 0;
+		}
+}

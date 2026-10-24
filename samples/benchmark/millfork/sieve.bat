@@ -1,0 +1,1 @@
+java -jar millfork.jar -t a8 sieve.mfk -o sieve-non-opt-mfk.xex

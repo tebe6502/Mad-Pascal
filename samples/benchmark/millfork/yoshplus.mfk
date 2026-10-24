@@ -1,0 +1,54 @@
+byte RTCLOK @ $14
+word SAVMSC @ $58
+word i@$e0, a@$e2, b@$e4
+pointer screen@$e6
+
+asm void pause() {
+	LDA RTCLOK
+	rt_check:
+	CMP RTCLOK
+	BEQ rt_check
+	RTS
+}
+
+void printScore() {
+	array(byte) tmp[4]
+	byte iter
+
+	screen = SAVMSC
+
+	tmp[0] = i.hi >> 4
+	tmp[1] = i.hi & %00001111
+	tmp[2] = i.lo >> 4
+	tmp[3] = i.lo & %00001111
+
+	for iter:tmp {
+		if tmp[iter] < 10 {
+			tmp[iter] += $10
+		} else {
+			tmp[iter] += $17
+		}
+		screen[iter] = tmp[iter]
+	}
+}
+
+void main() {
+	i = 0
+	a = 0
+	b = 0
+
+	pause();
+	RTCLOK = 0;
+
+	while RTCLOK < 100 {
+		a += 1
+		b = a
+		b += 1
+		a = b
+		i += 1
+	}
+
+	printScore()
+
+	while true {}
+}
