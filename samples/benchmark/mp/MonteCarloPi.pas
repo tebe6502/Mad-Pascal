@@ -1,6 +1,3 @@
-// 181
-// 174	FAST
-
 program MonteCarloPi;
 
 uses crt;

@@ -4,7 +4,7 @@
 // -----------------------------------------------------------------------------
 
 procedure opt_TEMP_WHILE;
-var p: integer;
+var i, p: integer;
     tmp: string;
 begin
 
@@ -162,5 +162,66 @@ begin
         if fail(p) then yes:=false;
 
      end;
+
+
+
+   if (TemporaryBuf[2] = '; --- WhileProlog') and					//; --- WhileProlog	; 2
+      (TemporaryBuf[1] = '') and							//			; 1
+      jmp_l(3) and									// jmp l_00FA		; 3
+      lab_l(4) and									//l_00FB		; 4
+      											//			; 5
+      opti(6) then									//; optimize 		; 6
+      											//			; 7
+    begin
+      yes:=false;
+
+      tmp:=GetARG(3);
+
+      i:=0;
+
+      for p:=8 to High(TemporaryBuf)-5 do
+       if (TemporaryBuf[p] = tmp) then						//l_00FA		; +0
+	 begin
+
+	  if p + 32 > High(TemporaryBuf)-5 then Break;
+
+	  for i := p + 32 downto p do
+	   if pos(TemporaryBuf[4], TemporaryBuf[i]) > 0 then begin
+
+	    if opti(i-4) and lda(i-2) and cmp(i-1) then yes:=true;
+
+	    Break;
+	   end;
+
+
+	  if yes then begin
+
+
+            if ldy(8) and				// ldy			; 8
+	       lda(9) and				// lda			; 9
+	       add(10) then				// add			; 10
+	      if argMatch(i-2, 10) and
+	         (argMatch(i-2, 9) = false) then
+	      begin
+
+	       if jcc(i) then
+	         TemporaryBuf[10] := #9'adc ' + getARG(9)
+	       else
+	         TemporaryBuf[10] := #9'add ' + getARG(9);
+
+               TemporaryBuf[9] := TemporaryBuf[8];
+	       TemporaryBuf[8] := '~';
+	      end;
+
+
+	  end;
+
+
+	  Break;
+	 end;
+
+     end;
+
+
 
 end;	// procedure

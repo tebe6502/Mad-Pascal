@@ -1,3 +1,6 @@
+26.10.2026
+- WHILE, FOR, IF optimizations
+
 08.10.2026
 - unit SYSTEM optimizations
 - {$define label} will now work when it appears before USES

@@ -1,5 +1,3 @@
-// 67 / 89
-
 program chessboard;
 uses crt, graph;
 

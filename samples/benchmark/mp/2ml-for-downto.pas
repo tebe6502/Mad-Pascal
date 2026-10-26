@@ -1,6 +1,5 @@
-// 591
-
 // Effectus auto-generated Mad Pascal source code listing
+
 program testPrg;
 
 uses

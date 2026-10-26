@@ -29,7 +29,11 @@ begin
     end;
 
 
+// -----------------------------------------------------------------------------
+
+
   if pos('@FORTMP_', listing[i]) = 0 then begin				// !!! @FORTMP_ bez optymalizacji !!!
+
 
     if mva_im(i) and mva_im(i+1) and 								// mva #$xx	; 0
        mva_im(i+2) and mva_im(i+3) and								// mva #$xx	; 1
@@ -115,5 +119,6 @@ begin
 
 
   end;  // @FORTMP_
+
 
 end;		// function

@@ -1,32 +1,33 @@
 // Eratosthenes Sieve benchmark
 // 1899
-//  1 iter 65 ticks
-//  1 iter 57 ticks	FAST
-// 10 iter 658 ticks
-// 10 iter 577 ticks	FAST
+//  1 iter 49 ticks
+//  1 iter 43 ticks	FAST
+// 10 iter 491 ticks
+// 10 iter 434 ticks	FAST
 
 uses crt, sysutils;
 
 {$define FAST}
 
 const
- size = 8192;
+ size = 8191;
  iter_max = 10;
 
 var
-  flags: array [0..size] of boolean;
+  flags: array [0..size] of boolean absolute $4000;	// !!! at page begining lo=$00 !!!
 
   iter: byte;
   ticks: word;
 
 {$ifdef FAST}
-  i: word absolute $e0;
-  k: word absolute $e2;
-  prime: word absolute $e4;
-  count: word absolute $e6;
+  i: word register;
+  k: word register;
+  prime: word register;
+  count: word register;
 {$else}
   i, k, prime, count: word;
 {$endif}
+
 
 begin
 

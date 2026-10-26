@@ -1,5 +1,3 @@
-// 182 / 4183
-
 // F73654DB8A587962996923D44A99D420
 
 uses crt, sysutils, md5;
@@ -48,7 +46,7 @@ $03, $D0, $B4, $AD, $0D, $D4, $8D, $35,
 $02, $AD, $0C, $D4, $8D, $34, $02, $AD,
 $31, $02, $8D, $03, $D4, $AD, $30, $02,
 $8D, $02, $D4, $AD, $2F, $02, $8D, $00,
-$D4, $AD, $6F, $02, $8D, $1B, $D0, $AD,
+$D4, $AD, $6F, $02, $8D, $1B, $D0, $AD, 
 $6C, $02, $F0, $0E, $CE, $6C, $02, $A9,
 $08, $38, $ED, $6C, $02, $29, $07, $8D,
 $05, $D4, $A2, $08, $8E, $1F, $D0, $58,
@@ -75,27 +73,22 @@ $4A, $4A, $8D, $79, $02, $8D, $7B, $02
 
 var
 
- ticks: word;
- i, cnt: byte;
+ ticks: cardinal;
+ i: byte;
  md: TMD5;
-
- txt:string;
-
 
 begin
 
  pause;
 
  ticks:=GetTickCount;
-
-// MD5File('D:BYTES512.DAT', md);
-// txt:='atari'; MD5String(txt, md);
-
+ 
  for i:=0 to 4 do MD5Buffer(test, 512, md);
 
  writeln( MD5Print(md) );
 
- ticks:=word(GetTickCount)-ticks;
+
+ ticks:=GetTickCount-ticks;
 
  writeln(ticks,' TICKS');
 

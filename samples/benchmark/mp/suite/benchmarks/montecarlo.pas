@@ -25,7 +25,7 @@ begin
     x := n * n;
     n := rnd and 127;
     y := n * n;
-    if (x + y) <= r then inc(bingo);
+    if word(x + y) <= r then inc(bingo);
   end;
   pi := 4 * bingo;
 end;

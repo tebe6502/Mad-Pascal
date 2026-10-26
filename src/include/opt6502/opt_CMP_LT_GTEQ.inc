@@ -94,21 +94,13 @@ begin
 	 listing[i]    := '';
 	 listing[i+1]  := '';
 	 listing[i+2]  := '';
-	 listing[i+3]  := '';
-	 listing[i+4]  := '';
-	 listing[i+5]  := '';
-	 listing[i+6]  := '';
-	end else begin
+	end else
+	 listing[i+2] := listing[i+6];
 
-	 listing[i+5] := listing[i+6];
-	 listing[i+6] := '@';
-
-	 listing[i+4] := listing[i+3];
-
-	 listing[i+2] := listing[i+5];
-	 listing[i+3] := #9'bne @+';
-
-	end;
+	listing[i+3]  := '';
+	listing[i+4]  := '';
+	listing[i+5]  := '';
+	listing[i+6]  := '';
 
         exit(false);
       end;

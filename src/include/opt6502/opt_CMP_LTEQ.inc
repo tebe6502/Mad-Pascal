@@ -119,15 +119,18 @@ begin
        listing[i+1] := #9'cmp #' + HexByte(byte(p shr 8));
        listing[i+2] := listing[i+6];
 
-       listing[i+7] := '@';
-
        if p and $ff <> 0 then
-        listing[i+5] := #9'cmp #' + HexByte(byte(p))
-       else
-        listing[i+5] := '';
+         listing[i+4] := #9'cmp #' + HexByte(byte(p))
+       else begin
+         listing[i+3] := '';				// cmp #$00 -> SEC -> dead code
+         listing[i+4] := '';
 
-       listing[i+4] := listing[i+3];
-       listing[i+3] := #9'bne @+';
+         listing[i+6] := '';
+       end;
+
+       listing[i+5] := '';
+
+       listing[i+7] := '';
 
        exit(false);
       end;
@@ -470,6 +473,7 @@ begin
 
 	exit(false);
       end;
+
 
 // -----------------------------------------------------------------------------
 // 				     SMALLINT

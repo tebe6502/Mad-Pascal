@@ -8,26 +8,26 @@ var p: integer;
 begin
 
 
-    if lab_a(14) and										//@			; 14
+   if lab_a(14) and										//@			; 14
 
-       cmp_im_0(4) and										// cmp #$00		; 4
+      cmp_im_0(4) and										// cmp #$00		; 4
 
-       ldy_1(2) and										// ldy #1		; 2
-       lda(3) and										// lda			; 3
-//       cmp_im_0(4) and									// cmp #$00		; 4
-       beq_a(5) and										// beq @+		; 5
-       dey(6) and										// dey			; 6
-       lab_a(7) and										//@			; 7
-       sty_stack(8) and										// sty :STACKORIGIN	; 8
-       ldy_1(9) and										// ldy #1		; 9
-       lda(10) and										// lda			; 10
-       cmp_im_0(11) and										// cmp #$00		; 11
-       beq_a(12) and										// beq @+		; 12
-       dey(13) and										// dey			; 13
-//       lab_a(14) and										//@			; 14
-       tya(15) and										// tya			; 15
-       and_stack(16) then									// and :STACKORIGIN	; 16
-     if argMatch(8, 16) then
+      ldy_1(2) and										// ldy #1		; 2
+      lda(3) and										// lda			; 3
+//      cmp_im_0(4) and										// cmp #$00		; 4
+      beq_a(5) and										// beq @+		; 5
+      dey(6) and										// dey			; 6
+      lab_a(7) and										//@			; 7
+      sty_stack(8) and										// sty :STACKORIGIN	; 8
+      ldy_1(9) and										// ldy #1		; 9
+      lda(10) and										// lda			; 10
+      cmp_im_0(11) and										// cmp #$00		; 11
+      beq_a(12) and										// beq @+		; 12
+      dey(13) and										// dey			; 13
+//      lab_a(14) and										//@			; 14
+      tya(15) and										// tya			; 15
+      and_stack(16) then									// and :STACKORIGIN	; 16
+    if argMatch(8, 16) then
      begin
       TemporaryBuf[16] := '~';
 
@@ -43,10 +43,10 @@ begin
      end;
 
 
-    if (cmp_im_0(2) or lda(2)) and (IFTMP(2) = false) and					// lda|cmp #$00		; 2	~lda IFTMP_
-       jne_l(3) and										// jne l_		; 3
-       (lab_l(4) = false) then									//~l_xxxx		; 4
-     begin
+   if (cmp_im_0(2) or lda(2)) and (IFTMP(2) = false) and					// lda|cmp #$00		; 2	~lda IFTMP_
+      jne_l(3) and										// jne l_		; 3
+      (lab_l(4) = false) then									//~l_xxxx		; 4
+    begin
 
       for p:=4 to High(TemporaryBuf) do
        if lda(p) then begin
@@ -65,16 +65,32 @@ begin
            LOCAL(p) or
            pos1_lab(#9'@', p) then Break;
 
-     end;
+    end;
 
 
-   if sta_stack(0) and										// sta :STACKORIGIN	; 0
+   if lab_a(3) and										//@			; 3
+
+      cmp_im_0(0) and										// cmp #$00		; 0	cmp #$00 -> SEC -> !!BCC!!
+      bcc_a(1) and										// bcc @+		; 1
+      jne(2) then										// jne			; 2
+//      lab_a(3) then										//@			; 3
+    begin
+      TemporaryBuf[0] := '~';
+      TemporaryBuf[1] := '~';
+    end;
+
+
+   if lab_a(6) and										//@			; 6
+
+      cmp_im_0(3) and										// cmp #$00		; 3
+
+      sta_stack(0) and										// sta :STACKORIGIN	; 0
       ldy_1(1) and										// ldy #1		; 1
       lda_stack(2) and										// lda :STACKORIGIN	; 2
-      cmp_im_0(3) and										// cmp #$00		; 3
+//      cmp_im_0(3) and										// cmp #$00		; 3
       (beq_a(4) or bne_a(4)) and								// beq|bne		; 4
       dey(5) and										// dey			; 5
-      lab_a(6) and										//@			; 6
+//      lab_a(6) and										//@			; 6
       (tya(7) or sty(7)) then									// tya|sty		; 7
      if argMatch(0, 2) then
       begin
@@ -84,28 +100,36 @@ begin
       end;
 
 
-   if ldy_1(0) and										// ldy #1		; 0
+   if lab_a(5) and										//@			; 5
+
+      cmp_im_0(2) and										// cmp #$00		; 2
+
+      ldy_1(0) and										// ldy #1		; 0
       lda(1) and (lda_stack(1) = false) and							// lda 			; 1
-      cmp_im_0(2) and										// cmp #$00		; 2
+//      cmp_im_0(2) and										// cmp #$00		; 2
       (beq_a(3) or bne_a(3)) and								// beq|bne		; 3
       dey(4) and										// dey			; 4
-      lab_a(5) and										//@			; 5
+//      lab_a(5) and										//@			; 5
       (tya(6) or sty(6)) then									// tya|sty		; 6
-      begin
-	TemporaryBuf[2] := '~';
-      end;
+     begin
+       TemporaryBuf[2] := '~';
+     end;
 
 
-   if ldy_1(0) and										// ldy #1		; 0
+   if lab_a(5) and										//@			; 5
+
+      cmp_im_0(2) and										// cmp #$00		; 2
+
+      ldy_1(0) and										// ldy #1		; 0
       and_ora_eor(1) and									// and|ora|eor		; 1
-      cmp_im_0(2) and										// cmp #$00		; 2
+//      cmp_im_0(2) and										// cmp #$00		; 2
       (beq_a(3) or bne_a(3)) and								// beq|bne		; 3
       dey(4) and										// dey			; 4
-      lab_a(5) and										//@			; 5
+//      lab_a(5) and										//@			; 5
       (tya(6) or sty(6)) then									// tya|sty		; 6
-      begin
-	TemporaryBuf[2] := '~';
-      end;
+     begin
+       TemporaryBuf[2] := '~';
+     end;
 
 
    if lab_a(11) and										//@			; 11
@@ -123,21 +147,25 @@ begin
       dey(10) and										// dey			; 10
 //      lab_a(11) and										//@			; 11
       (tya(12) or sty(12)) then									// tya|sty		; 12
-      begin
+     begin
 	TemporaryBuf[4] := #9'ora ' + GetARG(6);
 	TemporaryBuf[5] := '~';
 	TemporaryBuf[6] := '~';
 	TemporaryBuf[7] := '~';
 	TemporaryBuf[8] := '~';
-      end;
+     end;
 
 
-   if lda(2) and										// lda			; 2
-      sta(3) and										// sta			; 3
+   if lab_a(7) and										//@			; 7
+
       cmp_im_0(4) and										// cmp #$00		; 4
+
+      lda(2) and										// lda			; 2
+      sta(3) and										// sta			; 3
+//      cmp_im_0(4) and										// cmp #$00		; 4
       (beq_a(5) or bne_a(5)) and								// beq|bne		; 5
-      jmp_l(6) and										// jmp l_		; 6
-      lab_a(7) then										//@			; 7
+      jmp_l(6) then										// jmp l_		; 6
+//      lab_a(7) then										//@			; 7
     begin
      TemporaryBuf[4] := '~';
     end;
@@ -275,9 +303,11 @@ begin
     end;
 
 
-   if lda_bp2_y(2) and										// lda (:bp2),y		; 2
+   if lab_a(4) and										//@			; 4
+
+      lda_bp2_y(2) and										// lda (:bp2),y		; 2
       cmp_im_0(3) and										// cmp #$00		; 3
-      lab_a(4) and										//@			; 4
+//      lab_a(4) and										//@			; 4
       (jeq(5) or jne(5)) and									// jeq|jne		; 5
       (SKIP(6) = false) then									//~SKIP			; 6
     begin
@@ -401,13 +431,16 @@ begin
     end;
 
 
-   if lda(2) and										// lda W		; 2
+   if lab_a(4) and										//@			; 4
+
+      lda(2) and										// lda W		; 2
       cmp_im_0(3) and										// cmp #$00		; 3
-      lab_a(4) and										//@			; 4
+//      lab_a(4) and										//@			; 4
       (jeq(5) or jne(5)) and									// jeq|jne		; 5
       (SKIP(6) = false) then									//~SKIP			; 6
     begin
      TemporaryBuf[3] := '~';
     end;
+
 
 end;	// procedure

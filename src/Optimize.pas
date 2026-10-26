@@ -615,8 +615,8 @@ var
 
 
           if sta_im_0(k) and                        // lda|rol @|asl @    ; k-1
-             (lda_a(k - 1) or                       // sta #$00           ; k 
-	      rol_a(k - 1) or asl_a(k - 1)) then    
+             (lda_a(k - 1) or                       // sta #$00           ; k
+	      rol_a(k - 1) or asl_a(k - 1)) then
           begin
 
 
@@ -1152,6 +1152,7 @@ if (pos('lda adr.ROW1+$20,y', listing[i]) > 0) then begin
 end;
 }
 
+
         if opt_STA_ADD(i) = False then exit(ExitTrick('opt_STA_ADD', i, {$include %file%} ,{$include %line%} ,{$include %currentroutine%}));
         if opt_STA_LDY(i) = False then exit(ExitTrick( 'opt_STA_LDY', i, {$include %file%} ,{$include %line%} ,{$include %currentroutine%}));
         if opt_STA_BP(i) = False then exit(ExitTrick( 'opt_STA_BP', i, {$include %file%} ,{$include %line%} ,{$include %currentroutine%}));
@@ -1204,7 +1205,7 @@ end;
 
 
 {
-if (pos('lda I', listing[i]) > 0) then begin
+if (pos('add K', listing[i]) > 0) then begin
 
       for p:=0 to l-1 do writeln(listing[p]);
       writeln('-------');
@@ -1370,7 +1371,7 @@ end;
         if p = 1 then
           p := 0
         else
-          listing[i] := '';
+	  if (sty(i + 1) = false) and (tya(i + 1) = false) then listing[i] := '';
 
       end;
 

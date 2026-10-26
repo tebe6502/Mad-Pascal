@@ -192,14 +192,31 @@ begin
 	 listing[7] := '';
 	 listing[8] := '';
 	end else begin
-	 listing[5] := listing[4];
-	 listing[4] := listing[3];
-	 listing[3] := #9'jne ' + GetARG(8);
-	 listing[2] := #9'bcc @+';
 
-	 listing[6] := #9'bcc @+';
-	 listing[7] := listing[3];
-	 listing[8] := '@';
+	 if (k and $ff) = $ff then begin
+	  inc(k);
+
+	  listing[1] := #9'cmp #' + HexByte(byte(k shr 8));
+	  listing[2] := #9'jcs ' + GetARG(8);
+
+	  listing[3] := '';
+	  listing[4] := '';
+	  listing[5] := '';
+	  listing[6] := '';
+	  listing[7] := '';
+	  listing[8] := '';
+
+	 end else begin
+	  listing[5] := listing[4];
+	  listing[4] := listing[3];
+	  listing[3] := #9'jne ' + GetARG(8);
+	  listing[2] := #9'bcc @+';
+
+	  listing[6] := #9'bcc @+';
+	  listing[7] := listing[3];
+	  listing[8] := '@';
+	 end;
+
 	end;
 
         end;

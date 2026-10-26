@@ -32,7 +32,7 @@ begin
   landscape.run;
   chessboard.run;
   lipsum.run;
-  qr_2d.run;
+  qr_2d.run; 
   qr_1d.run;
   countdown_for.run;
   countdown_while.run;

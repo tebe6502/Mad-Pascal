@@ -176,6 +176,11 @@ end;
     Result := pos1(#9'lda ', i)
   end;
 
+  function CMP_IM(const i: Integer): Boolean;
+  begin
+    Result := pos1(#9'cmp #', i)
+  end;
+
   function LDA_IM(const i: Integer): Boolean;
   begin
     Result := pos1(#9'lda #', i)
@@ -184,6 +189,11 @@ end;
   function STA(const i: Integer): Boolean;
   begin
     Result := pos1(#9'sta ', i)
+  end;
+
+  function AND_(const i: Integer): Boolean;
+  begin
+    Result := pos1(#9'and ', i)
   end;
 
   function ORA(const i: Integer): Boolean;

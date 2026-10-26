@@ -623,6 +623,61 @@ begin
 
 
    if lda(0) and									// lda N		; 0
+      cmp(1) and									// cmp			; 1
+      SKIP(2) and									// SKIP			; 2
+      											//			; 3
+      opti(4) and									//; optimize 		; 4
+      											//			; 5
+      ldy(6) and									// ldy			; 6
+      lda(7) and									// lda			; 7
+      (add(8) or adc(8)) then								// adc|add N		; 8
+    if argMatch(0, 8) and
+       (argMatch(0, 7) = false) then
+    begin
+
+     if adc(8) then
+      TemporaryBuf[8] := #9'adc ' + GetARG(7)
+     else
+      TemporaryBuf[8] := #9'add ' + GetARG(7);
+
+     TemporaryBuf[7] := TemporaryBuf[6];
+     TemporaryBuf[6] := '~';
+    end;
+
+
+   if ldy(0) and									// ldy N		; 0
+      (add_sub(1) or adc_sbc(1)) and							// add|sub|adc|sbc	; 1
+      sta(2) and									// sta			; 2
+      lda(3) and									// lda			; 3
+      SKIP(4) and									// SKIP			; 4
+      											//			; 5
+      opti(6) and									//; optimize 		; 6
+      											//			; 7
+      lda(8) and									// lda			; 8
+      sta(9) and									// sta			; 9
+      lda(10) then									// lda N		; 10
+    if argMatch(0, 10) then
+    begin
+     TemporaryBuf[10] := #9'tya';
+    end;
+
+
+   if ldy(0) and									// ldy N		; 0
+      (add_sub(1) or adc_sbc(1)) and							// add|sub|adc|sbc	; 1
+      sta(2) and									// sta			; 2
+      lda(3) and									// lda			; 3
+      sta(4) and									// sta			; 4
+      											//			; 5
+      opti(6) and									//; optimize 		; 6
+      											//			; 7
+      lda(8) then									// lda			; 8
+    if argMatch(0, 8) then
+    begin
+     TemporaryBuf[8] := #9'tya';
+    end;
+
+
+   if lda(0) and									// lda N		; 0
       SKIP(1) and									// SKIP			; 1
       											//			; 2
       opti(3) and									//; optimize 		; 3
@@ -853,6 +908,17 @@ begin
     if argMatch(0, 1) then
     begin
      TemporaryBuf[1] := '~';
+    end;
+
+
+   if sta_stack(0) and									// sta :STACKORIGIN	; 0
+      (TemporaryBuf[1] = '~') and							//~			; 1
+      lda_stack(2) then									// lda :STACKORIGIN	; 2
+    if argMatch(0, 2) then
+    begin
+     TemporaryBuf[0] := '~';
+
+     TemporaryBuf[2] := '~';
     end;
 
 

@@ -162,7 +162,7 @@ begin
        jeq(i+7) then										// jeq l_		; 7
       begin
 
-	c:=GetWORD(i+4, i+1);
+	c := GetWORD(i+4, i+1);
 
 	if c = 0 then begin
 	 listing[i+1] := '';
@@ -216,7 +216,7 @@ begin
 //       lab_a(i+8) then									//@			; 8
       begin
 
-	c:=GetWORD(i+4, i+1);
+	c := GetWORD(i+4, i+1);
 
 	if c = 0 then begin
 	 listing[i+1] := '';
@@ -301,7 +301,7 @@ begin
 //       lab_a(i+9) then									//@			; 9
       begin
 
-	c:=GetWORD(i+4, i+1);
+	c := GetWORD(i+4, i+1);
 
 	if c = 0 then begin
 	 listing[i+1] := '';
@@ -364,7 +364,7 @@ begin
 // -----------------------------------------------------------------------------
 
     if jcc(i+2) and										// jcc l_		; 2
-  
+
        (SKIP(i-1) = false) and
        lda_a(i) and										// lda			; 0	opt_094	| BYTE > 0
        cmp_im(i+1) and										// cmp #		; 1
@@ -378,7 +378,7 @@ begin
 
 	exit(false);
        end else begin
-	c:=GetBYTE(i+1);
+	c := GetBYTE(i+1);
 
 	if c < 255 then begin
 	 listing[i+1] := #9'cmp #' + Hex(byte(c+1), 2);
@@ -420,7 +420,7 @@ begin
 
 	exit(false);
        end else begin
-	c:=GetBYTE(i+1);
+	c := GetBYTE(i+1);
 
 	if c < 255 then begin
 	 listing[i+1] := #9'cmp #' + Hex(byte(c+1), 2);
