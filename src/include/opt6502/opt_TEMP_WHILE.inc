@@ -175,7 +175,7 @@ begin
     begin
       yes:=false;
 
-      tmp:=GetARG(3);
+      tmp := GetARG(3);
 
       i:=0;
 
@@ -186,15 +186,60 @@ begin
 	  if p + 32 > High(TemporaryBuf)-5 then Break;
 
 	  for i := p + 32 downto p do
-	   if pos(TemporaryBuf[4], TemporaryBuf[i]) > 0 then begin
+	   if pos(TemporaryBuf[4], TemporaryBuf[i]) = 6 then begin
 
-	    if opti(i-4) and lda(i-2) and cmp(i-1) then yes:=true;
+//writeln(TemporaryBuf[4],',',TemporaryBuf[i],',',pos(TemporaryBuf[4], TemporaryBuf[i]));
+
+
+	    if opti(i-4) and					// ; optimize	; -4
+	       lda(i-2) and 					// lda		; -2	*
+	       cmp(i-1) then begin yes := true; Break end;	// cmp		; -1
+
+
+	    if opti(i-6) and					// ; optimize	; -6
+	       lda(i-4) and 					// lda		; -4
+	       jmi(i-3) and 					// jmi		; -3
+	       lda(i-2) and 					// lda		; -2	*
+	       cmp(i-1) and 					// cmp		; -1
+	       (argMatch(i-3, i) = false) then begin yes := true; Break end;
+{
+	    begin
+
+		writeln(TemporaryBuf[i-7]);
+		writeln(TemporaryBuf[i-6]);
+		writeln(TemporaryBuf[i-5]);
+		writeln(TemporaryBuf[i-4]);
+		writeln(TemporaryBuf[i-3]);
+		writeln(TemporaryBuf[i-2]);
+		writeln(TemporaryBuf[i-1]);
+		writeln(TemporaryBuf[i]);
+		writeln('----------');
+
+	    end;
+}
 
 	    Break;
 	   end;
 
 
 	  if yes then begin
+
+
+            if lda(8) and				// lda			; 8
+	       add(9) then				// add			; 9
+	      if argMatch(i-2, 9) and
+	         (argMatch(i-2, 8) = false) then
+	      begin
+
+	       if jcc(i) then
+	         TemporaryBuf[9] := #9'adc ' + getARG(8)
+	       else
+	         TemporaryBuf[9] := #9'add ' + getARG(8);
+
+	       TemporaryBuf[8] := '~';
+
+	       Break;
+	      end;
 
 
             if ldy(8) and				// ldy			; 8
@@ -211,8 +256,10 @@ begin
 
                TemporaryBuf[9] := TemporaryBuf[8];
 	       TemporaryBuf[8] := '~';
-	      end;
 
+	       Break;
+	      end;
+	      
 
 	  end;
 

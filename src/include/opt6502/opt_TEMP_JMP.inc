@@ -6,6 +6,7 @@
 procedure opt_TEMP_JMP;
 begin
 
+
    if sta(0) and									// sta A		; 0
       (TemporaryBuf[1] = '') and							//			; 1
       jmp_l(2) and									// jmp l_xxxx		; 2
@@ -25,23 +26,33 @@ begin
 
 
     if (SKIP(0) = FALSE) and								//~SKIP			; 0
-       jne_l(1) and									// jne l_xxxx		; 1
+       (jeq(1) or jne_l(1)) and								// jeq|jne l_xxxx	; 1
        (jmp_b(2) or jmp_e(2)) and							// jmp b_|@exit		; 2
        (TemporaryBuf[3] = GetARG(1)) and						//l_xxxx		; 3
        (IFTMP(4) = false) then								//~lda IFTMP_		; 4
      begin
-      TemporaryBuf[1] := #9'jeq ' + GetARG(2);
+
+      if jeq_l(1) then
+        TemporaryBuf[1] := #9'jne ' + GetARG(2)
+      else
+        TemporaryBuf[1] := #9'jeq ' + GetARG(2);
+
       TemporaryBuf[2] := '~';
      end;
 
 
     if (SKIP(0) = FALSE) and								//~SKIP			; 0
-       jcs_l(1) and									// jcs l_xxxx		; 1
+       (jcc_l(1) or jcs_l(1)) and							// jcc|jcs l_xxxx	; 1
        (jmp_b(2) or jmp_e(2)) and							// jmp b_|@exit		; 2
        (TemporaryBuf[3] = GetARG(1)) and						//l_xxxx		; 3
        (IFTMP(4) = false) then								//~lda IFTMP_		; 4
      begin
-      TemporaryBuf[1] := #9'jcc ' + GetARG(2);
+
+      if jcc_l(1) then
+        TemporaryBuf[1] := #9'jcs ' + GetARG(2)
+      else
+        TemporaryBuf[1] := #9'jcc ' + GetARG(2);	
+      
       TemporaryBuf[2] := '~';
      end;
 
