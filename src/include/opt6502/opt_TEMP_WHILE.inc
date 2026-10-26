@@ -186,7 +186,7 @@ begin
 	  if p + 32 > High(TemporaryBuf)-5 then Break;
 
 	  for i := p + 32 downto p do
-	   if pos(TemporaryBuf[4], TemporaryBuf[i]) = 6 then begin
+	   if (length(TemporaryBuf[i]) = 11) and (pos(TemporaryBuf[4], TemporaryBuf[i]) = 6) then begin
 
 //writeln(TemporaryBuf[4],',',TemporaryBuf[i],',',pos(TemporaryBuf[4], TemporaryBuf[i]));
 
@@ -198,11 +198,18 @@ begin
 
 	    if opti(i-6) and					// ; optimize	; -6
 	       lda(i-4) and 					// lda		; -4
+	       bne_a(i-3) and 					// bne @+	; -3
+	       lda(i-2) and 					// lda		; -2	*
+	       cmp(i-1) then begin yes := true; Break end; 	// cmp		; -1
+
+
+	    if opti(i-6) and					// ; optimize	; -6
+	       lda(i-4) and 					// lda		; -4
 	       jmi(i-3) and 					// jmi		; -3
 	       lda(i-2) and 					// lda		; -2	*
 	       cmp(i-1) and 					// cmp		; -1
 	       (argMatch(i-3, i) = false) then begin yes := true; Break end;
-{
+	    {else
 	    begin
 
 		writeln(TemporaryBuf[i-7]);
