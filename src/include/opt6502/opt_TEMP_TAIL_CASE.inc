@@ -32,11 +32,11 @@ begin
 	  Break;
 	end;
 
+      yes := yes and (not (lab_a(i-3) and tya(i-2) and sta(i-1)));
 
       if yes then
       if (TemporaryBuf[i-2] = TemporaryBuf[p-2]) and
          (TemporaryBuf[i-1] = TemporaryBuf[p-1]) and
-	 ((lab_a(i-3) = false) and (tya(i-2) = false) and (sta(i-1) = false)) and
 
          (sta(p-1) or jsr(p-1)) then
       begin

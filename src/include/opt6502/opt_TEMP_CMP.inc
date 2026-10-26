@@ -194,6 +194,7 @@ begin
      end;
 
 
+{
     if lab_a(5) and									//@			; 5
 
        sta_stack(0) and									// sta :STACKORIGIN	; 0	SHORTINT > 0
@@ -216,6 +217,7 @@ begin
 	TemporaryBuf[2] := '~';
 
      end;
+}
 
 
     if lab_a(5) and									//@			; 5
@@ -493,7 +495,6 @@ begin
      end;
 
 
-
     if tya(8) and									// tya			; 8
 
        ldy_1(2) and 									// ldy #1		; 2
@@ -526,6 +527,52 @@ begin
 
      end;
 
+
+    if lab_a(7) and									//@			; 7
+
+       ldy_1(2) and 									// ldy #1		; 2
+       lda(3) and									// lda			; 3
+       cmp_im_0(4) and									// cmp #$00		; 4
+       beq_a(5) and									// beq @+		; 5
+       dey(6) and									// dey			; 6
+//       lab_a(7) and									//@			; 7
+       sty(8) then									// sty			; 8
+     begin
+
+	TemporaryBuf[5] := #9'lda #$00';
+	TemporaryBuf[6] := #9'cmp ' + GetARG(3);
+	TemporaryBuf[7] := #9'rol @';
+	TemporaryBuf[8] := #9'sta ' + GetARG(8);
+
+	TemporaryBuf[2] := '~';
+	TemporaryBuf[3] := '~';
+	TemporaryBuf[4] := '~';
+
+     end;
+
+
+    if tya(8) and									// tya			; 8
+
+       ldy_1(2) and 									// ldy #1		; 2
+       lda(3) and									// lda			; 3
+       cmp_im_0(4) and									// cmp #$00		; 4
+       beq_a(5) and									// beq @+		; 5
+       dey(6) and									// dey			; 6
+       lab_a(7) and									//@			; 7
+//       tya(8) and									// tya			; 8
+       (sta(9) or and_ora_eor(9)) then							// sta|and|ora|eor	; 9
+     begin
+
+	TemporaryBuf[6] := #9'lda #$00';
+	TemporaryBuf[7] := #9'cmp ' + GetARG(3);
+	TemporaryBuf[8] := #9'rol @';
+
+	TemporaryBuf[2] := '~';
+	TemporaryBuf[3] := '~';
+	TemporaryBuf[4] := '~';
+	TemporaryBuf[5] := '~';
+
+     end;
 
 
    if sta_stack(0) and									// sta :STACKORIGIN	; 0

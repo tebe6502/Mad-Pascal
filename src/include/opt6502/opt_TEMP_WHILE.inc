@@ -188,6 +188,7 @@ begin
 	  for i := p + 32 downto p do
 	   if (length(TemporaryBuf[i]) = 11) and (pos(TemporaryBuf[4], TemporaryBuf[i]) = 6) then begin
 
+
 //writeln(TemporaryBuf[4],',',TemporaryBuf[i],',',pos(TemporaryBuf[4], TemporaryBuf[i]));
 
 
@@ -209,7 +210,8 @@ begin
 	       lda(i-2) and 					// lda		; -2	*
 	       cmp(i-1) and 					// cmp		; -1
 	       (argMatch(i-3, i) = false) then begin yes := true; Break end;
-	    {else
+{
+	    else
 	    begin
 
 		writeln(TemporaryBuf[i-7]);
@@ -266,7 +268,7 @@ begin
 
 	       Break;
 	      end;
-	      
+
 
 	  end;
 

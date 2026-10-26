@@ -620,122 +620,6 @@ begin
 end;
 
 
-{
-separate xStack, yStack -> code too long
-
-procedure FloodFill(a,b: smallint; newcolor: byte);
-//----------------------------------------------------------------------------------------------
-// Fill an area with a given color, seed fill algorithm
-//----------------------------------------------------------------------------------------------
-var ir, nf: word;
-    c: cardinal;
-    oldcolor: byte;
-    xStack, yStack: array [0..0] of smallint;
-
-
-procedure FloodFillExec;
-var i: byte;
-    xr,yr: smallint;
-    yes: Boolean;
-begin
-
- for i:=0 to 3 do begin
-
-  case i of
-
-   0: begin
-	xr:=a+1;
-	yr:=b;
-
-	yes:=(xr<smallint(ScreenWidth));
-      end;
-
-   1: begin
-	xr:=a-1;
-//	yr:=b;
-
-	yes:=(xr>=0);
-      end;
-
-   2: begin
-	xr:=a;
-	yr:=b+1;
-
-	yes:=(yr<smallint(ScreenHeight));
-      end;
-
-   3: begin
-//	xr:=a;
-	yr:=b-1;
-
-	yes:=(yr>=0);
-      end;
-
-  end;
-
-
-  if yes then
-   if GetPixel(xr,yr) = oldcolor then begin
-
-    PutPixel(xr, yr);
-
-    inc(nf);
-
-    xStack[nf] := xr;
-    yStack[nf] := yr;
-   end;
-
- end;
-
-end;
-
-
-begin
-
- xStack:=pointer(dpeek(560)-2048);
- yStack:=pointer(dpeek(560)-1024);
-
- SetColor(newcolor);
-
- oldcolor:=GetPixel(a,b);
-
- nf := 1;
- ir := 1;
- xStack[nf] := a;
- yStack[nf] := b;
-
- FloodFillExec;
-
- while nf>ir do begin
-
-  inc(ir);
-
-  a := xStack[ir];
-  b := yStack[ir];
-
-  FloodFillExec;
-
-  if (nf>500) then begin
-
-   nf := nf-ir;
-
-   if nf>500 then exit;
-
-   move(xStack[ir+1], xStack[1], nf shl 1);
-   move(yStack[ir+1], yStack[1], nf shl 1);
-
-//   for i := 1 to nf do fill[i] := fill[ir+i];
-
-   ir := 0;
-
-  end;
-
- end;
-
-end;
-}
-
-
 procedure FloodFill(a,b: smallint; newcolor: byte);
 (*
 @description:
@@ -752,47 +636,12 @@ var stackPointer: word register;
 
 
 procedure FloodFillExec;
-var i: byte;
-    xr,yr: smallint;
-    yes: Boolean;
-begin
-
- for i:=0 to 3 do begin
-
-  case i of
-
-   0: begin
-	xr:=a+1;
-	yr:=b;
-
-	yes:=(xr < ScreenWidth);
-      end;
-
-   1: begin
-	xr:=a-1;
-//	yr:=b;
-
-	yes:=(xr >= 0);
-      end;
-
-   2: begin
-	xr:=a;
-	yr:=b+1;
-
-	yes:=(yr < ScreenHeight);
-      end;
-
-   3: begin
-//	xr:=a;
-	yr:=b-1;
-
-	yes:=(yr >= 0);
-      end;
-
-  end;
+var xr,yr: smallint;
 
 
-  if yes then
+ procedure testPixel;
+ begin 
+
    if GetPixel(xr,yr) = oldcolor then begin
 
     PutPixel(xr, yr);
@@ -803,7 +652,24 @@ begin
 
    end;
 
- end;
+ end;  
+
+   
+begin
+
+ xr:=a+1;
+ yr:=b;
+ if xr < ScreenWidth then testPixel;
+
+ xr:=a-1;
+ if xr >= 0 then testPixel;
+
+ xr:=a;
+ yr:=b+1;
+ if yr < ScreenHeight then testPixel;
+ 
+ yr:=b-1;
+ if yr >= 0 then testPixel;
 
 end;
 
@@ -817,7 +683,7 @@ begin
  stackEntry := 1;
  stackPointer := 1;
 
- FloodFillStack[stackEntry] := word(a) shl 16 + word(b);
+ FloodFillStack[1] := word(a) shl 16 + word(b);
 
  FloodFillExec;
 
@@ -837,8 +703,10 @@ begin
    stackEntry := stackEntry - stackPointer;
 
    if stackEntry > FILLSTACKSIZE shr 1 then exit;
+   
+   inc(stackPointer);
 
-   move(FloodFillStack[stackPointer+1], FloodFillStack[1], stackEntry * sizeof(cardinal) );
+   move(FloodFillStack[stackPointer], FloodFillStack[1], stackEntry * sizeof(cardinal) );
 
    stackPointer := 0;
 
