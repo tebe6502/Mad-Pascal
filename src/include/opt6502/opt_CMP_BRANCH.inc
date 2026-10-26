@@ -1111,31 +1111,6 @@ begin
 
 // -------------------------------------------------------------------------------------------
 
-{
-    if lab_a(i+3) and										//@			; 3
-
-       sta_a(i+5) and										// sta			; 5
-
-       ENDL(i) and										//.ENDL			; 0
-       bmi_a(i+1) and										// bmi @+		; 1
-       dey(i+2) and										// dey			; 2
-//       lab_a(i+3) and										//@			; 3
-       tya(i+4) then										// tya			; 4
-//       sta_a(i+5) then									// sta			; 5
-      begin
-       listing[i+1] := #9'asl @';
-       listing[i+2] := #9'lda #$00';
-       listing[i+3] := #9'rol @';
-       listing[i+4] := '';
-
-       rm_ldy_1;
-
-       exit(false);
-      end;
-}
-
-// -------------------------------------------------------------------------------------------
-
 
     if lab_a(i+3) and										// @			; 3
 
@@ -1611,15 +1586,15 @@ begin
        pos1('@'#9'jmp l_', i+2) and								//@ jmp l_			; 2
 
        (SKIP(i-1) = false) and
-       (bcs_a(i) or bcc_a(i)) and								// bcs|bcc @+			; 0
+       (bcc_a(i) or bcs_a(i)) and								// bcc|bcs @+			; 0
 //       jmp_6(i+1) and										// jmp *+6			; 1
 //       pos1('@'#9'jmp l_', i+2) and								//@ jmp l_			; 2
        (jmp_l(i+3) = false) then								//~jmp l_			; 3
       begin
-        if bcs_a(i) then
-	 listing[i]   := #9'jcs ' + copy(listing[i+2], 7, 256)
+        if bcc_a(i) then
+	 listing[i]   := #9'jcc ' + copy(listing[i+2], 7, 256)
         else
-	 listing[i]   := #9'jcc ' + copy(listing[i+2], 7, 256);
+	 listing[i]   := #9'jcs ' + copy(listing[i+2], 7, 256);
 
 	listing[i+1] := '';
 	listing[i+2] := '';

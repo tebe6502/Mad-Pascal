@@ -45,7 +45,7 @@ begin
 
    if (cmp_im_0(2) or lda(2)) and (IFTMP(2) = false) and					// lda|cmp #$00		; 2	~lda IFTMP_
       jne_l(3) and										// jne l_		; 3
-      (lab_l(4) = false) then									//~l_xxxx		; 4
+      (lab_l(4) = false) and (lab_a(4) = false) then						//~l_xxxx|@		; 4
     begin
 
       for p:=4 to High(TemporaryBuf) do

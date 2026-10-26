@@ -183,12 +183,13 @@ begin
        (sta(6) or and_ora_eor(6)) then							// sta|and|ora|eor	; 6
      begin
 
-	TemporaryBuf[0] := '~';
-
-	TemporaryBuf[2] := #9'eor #$80';
-	TemporaryBuf[3] := #9'asl @';
+	TemporaryBuf[2] := #9'lda #$7F';
+	TemporaryBuf[3] := #9'cmp ' + GetARG(1);
 	TemporaryBuf[4] := #9'lda #$00';
 	TemporaryBuf[5] := #9'rol @';
+
+	TemporaryBuf[0] := '~';
+	TemporaryBuf[1] := '~';
 
      end;
 
@@ -206,13 +207,13 @@ begin
      if argMatch(0, 2) then
      begin
 
-	TemporaryBuf[0] := #9'eor #$80';
-	TemporaryBuf[1] := #9'asl @';
-	TemporaryBuf[2] := #9'lda #$00';
-	TemporaryBuf[3] := #9'rol @';
-	TemporaryBuf[4] := '~';
-	TemporaryBuf[5] := '~';
-	TemporaryBuf[6] := '~';
+	TemporaryBuf[3] := #9'lda #$7F';
+	TemporaryBuf[4] := #9'cmp ' + GetARG(2);
+	TemporaryBuf[5] := #9'lda #$00';
+	TemporaryBuf[6] := #9'rol @';
+
+	TemporaryBuf[1] := '~';
+	TemporaryBuf[2] := '~';
 
      end;
 
@@ -410,6 +411,8 @@ begin
      if argMatch(10, 11) then
      begin
 
+	if cmp_im_0(4) then TemporaryBuf[4] := '~';
+
 	TemporaryBuf[7] := #9'lda ' + GetARG(9);
 	TemporaryBuf[8] := #9'bne @+';
 	TemporaryBuf[9] := TemporaryBuf[3];
@@ -486,6 +489,40 @@ begin
 	TemporaryBuf[9] := #9'lda ' + GetARG(9);
 	TemporaryBuf[10] := '~';
 	TemporaryBuf[11] := '~';
+
+     end;
+
+
+
+    if tya(8) and									// tya			; 8
+
+       ldy_1(2) and 									// ldy #1		; 2
+       lda(3) and									// lda			; 3
+       cmp(4) and									// cmp			; 4
+       beq_a(5) and									// beq @+		; 5
+       dey(6) and									// dey			; 6
+       lab_a(7) and									//@			; 7
+//       tya(8) and									// tya			; 8
+       and_(9) and									// and			; 9
+       sta_stack(10) and								// sta :STACKORIGIN	; 10
+       lda_stack(11) and								// lda :STACKORIGIN	; 11
+       jne_l(12) and									// jne l_		; 12
+       (SKIP(13) = false) then								//~SKIP			; 13
+     if argMatch(10, 11) then
+     begin
+
+	TemporaryBuf[2] := '~';
+
+	if cmp_im_0(4) then TemporaryBuf[4] := '~';
+
+	TemporaryBuf[5] := #9'bne @+';
+	TemporaryBuf[6] := '~';
+	TemporaryBuf[7] := '~';
+	TemporaryBuf[8] := '~';
+	TemporaryBuf[9] := #9'lda ' + GetARG(9);
+	TemporaryBuf[10] := TemporaryBuf[12];
+	TemporaryBuf[11] := '@';
+	TemporaryBuf[12] := '~';
 
      end;
 
