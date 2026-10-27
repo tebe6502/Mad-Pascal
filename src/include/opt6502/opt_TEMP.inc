@@ -482,6 +482,21 @@ begin
       end;
 
 
+    if lda(0) and									// lda X		; 0
+       cmp(1) and									// cmp Y		; 1
+       (TemporaryBuf[2] = #9'bcc *+7') and						// bcc *+7		; 2
+       (TemporaryBuf[3] = #9'beq *+5') and						// beq *+5		; 3
+       jmp_l(4) then									// jmp l_		; 4
+      begin
+       TemporaryBuf[2] := #9'lda ' + GetARG(1);
+       TemporaryBuf[3] := #9'cmp ' + GetARG(0);
+       TemporaryBuf[4] := #9'jcc ' + GetARG(4);
+
+       TemporaryBuf[0] := '~';
+       TemporaryBuf[1] := '~';
+      end;
+
+
    if (SKIP(0) = false) and								// beq *+5		; 1
       (TemporaryBuf[1] = #9'beq *+5') and						// jmp l_xxxx		; 2
       jmp_l(2) then

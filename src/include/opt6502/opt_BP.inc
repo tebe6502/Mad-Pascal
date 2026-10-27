@@ -3852,6 +3852,31 @@ begin
       end;
 
 
+{
+    if sta_bp_1(i+5) and									// sta :bp+1				; 5
+
+       lda(i) and (iy(i) = false) and								// lda					; 0
+       add_im_0(i+1) and 									// add #$00				; 1
+       tay(i+2) and										// tay					; 2
+       lda_val(i+3) and										// lda					; 3
+       adc_im_0(i+4) and									// adc #$00				; 4
+//       sta_bp_1(i+5) and									// sta :bp+1				; 5
+       LDA_STA_BP(i+6) then									// lda (:bp),y|lda			; 6
+        											// sta        |sta (:bp),y		; 7								
+      begin
+	listing[i+3] := #9'ldy ' + GetARG(i+3);
+	listing[i+4] := #9'sty :bp+1';
+	listing[i+5] := #9'ldy ' + GetARG(i);
+
+	listing[i] := '';
+	listing[i+1] := '';
+	listing[i+2] := '';
+
+	exit(false);
+      end;
+}
+
+
     if sty_bp_1(i+5) and									// sty :bp+1				; 5
 
        mwy_bp2(i) and										// mwy  :bp2				; 0	!!!
