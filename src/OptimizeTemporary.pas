@@ -80,7 +80,6 @@ var
            dey(i) or
            tay(i) or
            tya(i) or
-           mwy(i) or
 	   mwy(i) or
 	   _IF(i) or
            LOCAL(i) or
