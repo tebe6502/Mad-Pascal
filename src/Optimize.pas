@@ -2688,8 +2688,9 @@ begin        // OptimizeASM
     if optyA <> '' then
       for i := 0 to l - 1 do
         if (listing[i] = #9'inc ' + optyA) or (listing[i] = #9'dec ' + optyA) or //((optyY <> '') and (optyA = optyY)) or
-          lda_a(i) or mva(i) or mwa(i) or tya(i) or
-	  lab_a(i) or jsr(i) or jmp(i) or _if(i) then
+          lda_a(i) or mva(i) or mwa(i) or tya(i) or jsr(i) or jmp(i) or
+	  lab_a(i) or lab_l(i) or lab_b(i) or lab_c(i) or
+	  _for(i) or _if(i) then
         begin
           SetOptyA('');
           Break;
@@ -2702,7 +2703,8 @@ begin        // OptimizeASM
       for i := 0 to l - 1 do
         if LabelIsUsed(i) or //((optyA <> '') and (optyA = optyY)) or
           ldy(i) or mvy(i) or mwy(i) or iny(i) or dey(i) or tay(i) or
-	  lab_a(i) or jsr(i) or jmp(i) or _if(i) then
+	  lab_a(i) or lab_l(i) or lab_b(i) or lab_c(i) or jsr(i) or jmp(i) or
+	  _for(i) or _if(i) then
         begin
           SetOptyY('');
           Break;

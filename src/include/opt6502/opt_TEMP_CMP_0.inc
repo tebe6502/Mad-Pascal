@@ -363,6 +363,66 @@ begin
 
    if lab_a(13) and										//@			; 13
 
+      cmp_im_0(4) and										// cmp #$00		; 4
+
+      lda(2) and										// lda W		; 2
+      and_ora_eor(3) and									// and|ora}eor		; 3
+//      cmp_im_0(4) and										// cmp #$00		; 4
+      bne_a(5) and										// bne @+		; 5
+      lda(6) and										// lda W		; 6
+      and_ora_eor(7) and									// and|ora|eor		; 7
+      cmp(8) and										// cmp 			; 8
+      bne_a(9) and										// bne @+		; 9
+      lda(10) and										// lda W		; 10
+      and_ora_eor(11) and									// and|ora|eor		; 11
+      cmp(12) and										// cmp 			; 12
+//      lab_a(13) and										//@			; 13
+      (jeq(14) or jne(14)) and									// jeq|jne		; 14
+      (SKIP(15) = false) then									//~SKIP			; 15
+    begin
+     TemporaryBuf[4] := '~';
+    end;
+
+
+   if lab_a(9) and										//@			; 9
+
+      cmp_im_0(4) and										// cmp #$00		; 4
+
+      lda(2) and										// lda W		; 2
+      and_ora_eor(3) and									// and|ora|eor		; 3
+//      cmp_im_0(4) and										// cmp #$00		; 4
+      bne_a(5) and										// bne @+		; 5
+      lda(6) and										// lda W		; 6
+      and_ora_eor(7) and									// and|ora|eor		; 7
+      cmp(8) and										// cmp 			; 8
+//      lab_a(9) and										//@			; 9
+      (jeq(10) or jne(10)) and									// jeq|jne		; 10
+      (SKIP(11) = false) then									//~SKIP			; 11
+    begin
+     TemporaryBuf[4] := '~';
+    end;
+
+
+
+   if lab_a(5) and										//@			; 5
+
+      cmp_im_0(4) and										// cmp #$00		; 4
+
+      lda(2) and										// lda W		; 2
+      and_ora_eor(3) and									// and|ora|eor		; 3
+//      cmp_im_0(4) and										// cmp 			; 4
+//      lab_a(5) and										//@			; 5
+      (jeq(6) or jne(6)) and									// jeq|jne		; 6
+      (SKIP(7) = false) then									//~SKIP			; 7
+    begin
+     TemporaryBuf[4] := '~';
+    end;
+
+// -----------------------------------------------------------------------------
+
+
+   if lab_a(13) and										//@			; 13
+
       cmp_im_0(3) and										// cmp #$00		; 3
 
       lda(2) and										// lda W		; 2

@@ -15311,14 +15311,19 @@ begin
 
                       case GetDataSize(IdentifierAt(IdentIndex).DataType) of
 
-                        1: asm65(#9'mva :edx ' + IdentifierAt(IdentIndex).Name);
+                        1:
+			begin
+			  asm65(#9'mva :edx ' + IdentifierAt(IdentIndex).Name);
+			end;
 
-                        2: begin
+                        2:
+			begin
                           asm65(#9'mva :edx ' + IdentifierAt(IdentIndex).Name);
                           asm65(#9'mva :edx+1 ' + IdentifierAt(IdentIndex).Name + '+1');
                         end;
 
-                        4: begin
+                        4:
+			begin
                           asm65(#9'mva :edx ' + IdentifierAt(IdentIndex).Name);
                           asm65(#9'mva :edx+1 ' + IdentifierAt(IdentIndex).Name + '+1');
                           asm65(#9'mva :edx+2 ' + IdentifierAt(IdentIndex).Name + '+2');

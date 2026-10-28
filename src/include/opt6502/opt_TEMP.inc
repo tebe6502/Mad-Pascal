@@ -497,6 +497,25 @@ begin
       end;
 
 
+    if lda(0) and									// lda X		; 0
+       sub(1) and									// sub Y		; 1
+       svc(2) and									// svc			; 2
+       (TemporaryBuf[3] = #9'eor #$80') and						// eor #$80		; 3
+       (TemporaryBuf[4] = #9'bmi *+7') and						// bmi *+7		; 4
+       (TemporaryBuf[5] = #9'beq *+5') and						// beq *+5		; 5
+       jmp_l(6) then									// jmp l_		; 6
+      begin
+       TemporaryBuf[2] := #9'lda ' + GetARG(1);
+       TemporaryBuf[3] := #9'sub ' + GetARG(0);
+       TemporaryBuf[4] := #9'svc';
+       TemporaryBuf[5] := #9'eor #$80';
+       TemporaryBuf[6] := #9'jmi ' + GetARG(6);
+
+       TemporaryBuf[0] := '~';
+       TemporaryBuf[1] := '~';
+      end;
+
+
    if (SKIP(0) = false) and								// beq *+5		; 1
       (TemporaryBuf[1] = #9'beq *+5') and						// jmp l_xxxx		; 2
       jmp_l(2) then

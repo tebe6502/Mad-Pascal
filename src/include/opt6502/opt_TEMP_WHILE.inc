@@ -235,6 +235,19 @@ begin
 
 
             if lda(8) and				// lda			; 8
+	       sub(9) then				// sub			; 9
+	      if argMatch(i-2, 8) then
+	      begin
+
+	       if jcs(i) then TemporaryBuf[9] := #9'sbc ' + getARG(9);
+
+	       TemporaryBuf[8] := '~';
+
+	       Break;
+	      end;
+
+
+            if lda(8) and				// lda			; 8
 	       add(9) then				// add			; 9
 	      if argMatch(i-2, 9) and
 	         (argMatch(i-2, 8) = false) then

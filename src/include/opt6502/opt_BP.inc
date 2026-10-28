@@ -800,11 +800,13 @@ begin
 
     if STA_BP2_Y(i+3) and  									// sta (:bp2),y				; 3
 
+       (listing[i+4] = '') and									//~
+
        (lda_a(i) or AND_ORA_EOR(i)) and								// lda|and|ora|eor			; 0
        mwy_bp2(i+1) and	(mwy_im(i+1) = false) and						// mwy P0 :bp2				; 1
-       ldy_im_0(i+2) and 									// ldy #$00				; 2
+       ldy_im_0(i+2) then 									// ldy #$00				; 2
 //       STA_BP2_Y(i+3) and  									// sta (:bp2),y				; 3
-       (listing[i+4] = '') then									//~
+//       (listing[i+4] = '') then								//~
       begin
 
         yes:=true;
@@ -826,11 +828,13 @@ begin
 
     if STA_BP2_Y(i+3) and  									// sta (:bp2),y				; 3
 
+       (listing[i+4] = '') and									//~
+
        (asl(i) or lsr(i)) and									// asl|lsr				; 0
        mwy_bp2(i+1) and (mwy_im(i+1) = false) and						// mwy P0 :bp2				; 1
-       ldy_im_0(i+2) and 									// ldy #$00				; 2
+       ldy_im_0(i+2) then 									// ldy #$00				; 2
 //       STA_BP2_Y(i+3) and  									// sta (:bp2),y				; 3
-       (listing[i+4] = '') then									//~
+//       (listing[i+4] = '') then								//~
        begin
 
         yes:=true;
@@ -848,6 +852,7 @@ begin
 	end;
 
        end;
+
 
 
     if STA_BP2_Y(i+12) and									// sta (:bp2),y				; 12
@@ -889,10 +894,12 @@ begin
 
     if STA_BP2_Y(i+7) and									// sta (:bp2),y				; 7
 
+       sta_stack(i+3) and									// sta :STACKORIGIN+STACKWIDTH+9	; 3
+
        lda_a(i) and (iy(i) = false) and								// lda					; 0
        sta_stack(i+1) and									// sta :STACKORIGIN+9			; 1
        lda_a(i+2) and (iy(i+2) = false) and							// lda 					; 2
-       sta_stack(i+3) and									// sta :STACKORIGIN+STACKWIDTH+9	; 3
+//       sta_stack(i+3) and									// sta :STACKORIGIN+STACKWIDTH+9	; 3
        mwy_bp2(i+4) and										// mwy X :bp2				; 4
        ldy(i+5) and 										// ldy					; 5
        lda_stack(i+6) and									// lda  :STACKORIGIN+9			; 6
@@ -3861,7 +3868,7 @@ begin
        adc_im_0(i+4) and									// adc #$00				; 4
 //       sta_bp_1(i+5) and									// sta :bp+1				; 5
        LDA_STA_BP(i+6) then									// lda (:bp),y|lda			; 6
-        											// sta        |sta (:bp),y		; 7								
+        											// sta        |sta (:bp),y		; 7
       begin
 	listing[i] := #9'mwy ' + GetARG(i) + ' :bp2';
 	listing[i+1] := #9'ldy #$00';

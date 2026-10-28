@@ -9,6 +9,7 @@ begin
 // ===				      CMP :BP2.
 // -----------------------------------------------------------------------------
 
+
     if lda_bp2_y(i+2) and									// lda (:bp2),y				; 2
 
        mwy_bp2(i) and										// mwy ... :bp2				; 0
@@ -16,12 +17,16 @@ begin
 //       lda_bp2_y(i+2) and									// lda (:bp2),y				; 2
        cmp(i+3) then										// cmp					; 3
      begin
-       listing[i+1] := #9'ldy ' + GetString(i);
 
-       listing[i]   := #9'mvy ' + GetString(i) + '+1 :bp+1';
-       listing[i+2] := #9'lda (:bp),y';
+      if #9'mw? ' + GetString(i) + ' :bp2' <> optyBP2 then begin
+        listing[i+1] := #9'ldy ' + GetString(i);
 
-       exit(false);
+        listing[i]   := #9'mvy ' + GetString(i) + '+1 :bp+1';
+        listing[i+2] := #9'lda (:bp),y';
+
+        exit(false);
+      end;
+
      end;
 
 

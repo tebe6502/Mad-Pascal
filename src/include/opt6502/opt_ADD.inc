@@ -3722,7 +3722,7 @@ begin
 
 
     if add_stack(i+2) and								// add :STACKORIGIN			; 2
-       
+
        sta_stack(i) and									// sta :STACKORIGIN			; 0
        lda_val(i+1) then								// lda					; 1
 //       add_stack(i+2) then								// add :STACKORIGIN			; 2
