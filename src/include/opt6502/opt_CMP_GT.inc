@@ -593,7 +593,7 @@ begin
 // 				     SMALLINT
 // -----------------------------------------------------------------------------
 
-
+{
     if ldy_1(i) and										// ldy #1		; 0	SMALLINT > 0
        lda_a(i+1) and										// lda I+1		; 1
        bmi_a(i+2) and										// bmi @+		; 2
@@ -617,7 +617,7 @@ begin
 
       exit(false);
      end;
-
+}
 
     if ENDL(i+15) and										// .ENDL		; 15
        seq(i+16) and										// seq			; 16
