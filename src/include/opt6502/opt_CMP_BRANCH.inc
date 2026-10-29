@@ -1526,12 +1526,15 @@ begin
      end;
 
 
+
+
     if jmp_6(i) and										// jmp *+6			; 0
 
        pos1('@'#9'jmp l_', i+1) and								//@ jmp l_			; 1
+
        jmp_l(i+2) and										// jmp l_			; 2
        lab_l(i+3) then										//l_				; 3
-     if (pos(listing[i+3], listing[i+1]) > 0) then
+     if (listing[i+1] = '@'#9'jmp ' + listing[i+3]) then
       begin
 	listing[i]   := listing[i+2];
 	listing[i+1] := '@';
@@ -1543,10 +1546,12 @@ begin
 
     if jmp_6(i+2) and										// jmp *+6			; 2
 
+       pos1('@'#9'jmp l_', i+3) and								//@ jmp l_			; 3
+
        bcc_a(i) and										// bcc @+			; 0
        beq_a(i+1) and										// beq @+			; 1
 //       jmp_6(i+2) and										// jmp *+6			; 2
-       pos1('@'#9'jmp l_', i+3) and								//@ jmp l_			; 3
+//       pos1('@'#9'jmp l_', i+3) and								//@ jmp l_			; 3
        (jmp_l(i+4) = false) then								//~jmp l_			; 4
       begin
 	listing[i]   := #9'jcc ' + copy(listing[i+3], 7, 256);
@@ -1625,6 +1630,10 @@ begin
       end;
 
 
+
+
+
+{
     if jmp_6(i+1) and										// jmp *+6			; 1
 
        pos1('@\'#9'jmp l_', i+2) and								//@\ jmp l_			; 2
@@ -1689,6 +1698,8 @@ begin
 
 	exit(false);
       end;
+}
+
 
 
     if ldy_1(i) and										// ldy #1			; 0

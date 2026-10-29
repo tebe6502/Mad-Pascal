@@ -314,6 +314,19 @@ begin
 
 	 exit(false);
         end else
+	if c = 127 then begin
+	 listing[i+4] := listing[i+3];
+	 listing[i+5] := #9'and #$80';
+	 listing[i+6] := #9'ora ' + GetARG(i);
+         listing[i+7] := #9'bmi @+';
+
+         listing[i] := '';
+         listing[i+1] := '';
+         listing[i+2] := '';
+         listing[i+3] := '';
+
+	 exit(false);
+	end else
 	if c < $FFFF then begin
 	 listing[i+1] := #9'cmp #' + Hex(byte((c+1) shr 8),2);
 
@@ -593,31 +606,6 @@ begin
 // 				     SMALLINT
 // -----------------------------------------------------------------------------
 
-{
-    if ldy_1(i) and										// ldy #1		; 0	SMALLINT > 0
-       lda_a(i+1) and										// lda I+1		; 1
-       bmi_a(i+2) and										// bmi @+		; 2
-       ora(i+3) and										// ora I		; 3
-       sne(i+4) and										// sne			; 4
-       lab_a(i+5) and										//@			; 5
-       dey(i+6) and										// dey			; 6
-       lab_a(i+7) and										//@			; 7
-       tya(i+8) and										// tya			; 8
-       (jeq(i+9) or jne(i+9)) then								// jeq|jne		; 9
-     begin
-
-      listing[i] := '';
-
-      listing[i+4] := listing[i+9];
-
-      listing[i+6] := '';
-      listing[i+7] := '';
-      listing[i+8] := '';
-      listing[i+9] := '';
-
-      exit(false);
-     end;
-}
 
     if ENDL(i+15) and										// .ENDL		; 15
        seq(i+16) and										// seq			; 16

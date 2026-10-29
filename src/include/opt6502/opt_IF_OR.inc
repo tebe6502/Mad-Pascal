@@ -1,3 +1,4 @@
+
 // -----------------------------------------------------------------------------
 // ===			optymalizacja IF OR.				  === //
 // -----------------------------------------------------------------------------
@@ -5,7 +6,7 @@
     if ldy_1(i) and										// ldy #1				; 0	ORA -> JEQ
        lda(i+1) and										// lda					; 1
        cmp(i+2) and										// cmp					; 2
-       SKIP(i+3) and										// SKIP					; 3
+       beq_a(i+3) and										// beq @+				; 3
        dey(i+4) and										// dey					; 4
        lab_a(i+5) and										//@					; 5
        tya(i+6) and										// tya					; 6
@@ -14,34 +15,11 @@
      begin
       listing[i] := '';
 
-      listing[i+4] := #9'jmp *+6';
-      listing[i+5] := '@'#9'jmp ' + GetARG(i+8) + 'x';
-
-      listing[i+6] := #9'lda:sne ' + GetARG(i+7);
-      listing[i+7] := #9'jmp ' + GetARG(i+8);
-      listing[i+8] := GetARG(i+8) + 'x';
-
-      Result:=false; Break;
-     end;
-
-
-    if ldy_1(i) and										// ldy #1				; 0	ORA -> JEQ
-       lda(i+1) and										// lda					; 1
-       SKIP(i+2) and										// SKIP					; 2
-       dey(i+3) and										// dey					; 3
-       lab_a(i+4) and										//@					; 4
-       tya(i+5) and										// tya					; 5
-       ora_val(i+6) and										// ora					; 6	~:STACKORIGIN
-       jeq(i+7) then										// jeq					; 7
-     begin
-      listing[i] := '';
-
-      listing[i+3] := #9'jmp *+6';
-      listing[i+4] := '@'#9'jmp ' + GetARG(i+7) + 'x';
-
-      listing[i+5] := #9'lda:sne ' + GetARG(i+6);
-      listing[i+6] := #9'jmp ' + GetARG(i+7);
-      listing[i+7] := GetARG(i+7) + 'x';
+      listing[i+4] := '';
+      listing[i+5] := '';
+      listing[i+6] := #9'lda ' + GetARG(i+7);
+      listing[i+7] := listing[i+8];
+      listing[i+8] := '@';
 
       Result:=false; Break;
      end;
@@ -65,6 +43,7 @@
 
       Result:=false; Break;
      end;
+
 
 
 // -----------------------------------------------------------------------------

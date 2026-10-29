@@ -50,7 +50,7 @@
 	then begin
 	  listing[p] := #9'jmp *+6';
 
-	  listing[p+1] := '@\'#9'jmp l_' + IntToHex(CodeSize, 4) + 's';
+	  listing[p+1] := '@'#9'jmp l_' + IntToHex(CodeSize, 4) + 's';
 	end;
 
        end;
