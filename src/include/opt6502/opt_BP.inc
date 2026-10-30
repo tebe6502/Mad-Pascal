@@ -668,20 +668,19 @@ begin
        end;
 
 
-    if ldy(i+2) and										// ldy					; 2
+    if ldy(i+2) and										// ldy 					; 2
 
-       sta_stack(i) and										// sta :STACKORIGIN+10			; 0
+       sta_stack(i) and										// sta :STACKORIGIN			; 0
        mwy_bp2(i+1) and										// mwy  :bp2				; 1
-//       ldy(i+2) and										// ldy					; 2
-       lda_stack(i+3) and									// lda :STACKORIGIN+10			; 3
-       sta(i+4) and iy(i+4) then								// sta (:bp),y				; 4
-     if argMatch(i, i+3) and
-        (argMatch(i, i+2) = false) then
-      begin
+//       ldy(i+2) and										// ldy 					; 2
+       lda_stack(i+3) then									// lda STACKORIGIN			; 3
+     if argMatch(i, i+3) then
+       begin
 	listing[i]   := '';
 	listing[i+3] := '';
+
 	exit(false);
-      end;
+       end;
 
 
     if ldy(i+3) and										// ldy 					; 3
@@ -768,21 +767,6 @@ begin
 
       exit(false);
      end;
-
-
-    if ldy(i+2) and										// ldy 					; 2
-
-       sta_stack(i) and										// sta :STACKORIGIN			; 0
-       mwy_bp2(i+1) and										// mwy   :bp2				; 1
-//       ldy(i+2) and										// ldy 					; 2
-       lda_stack(i+3) then									// lda STACKORIGIN			; 3
-     if argMatch(i, i+3) then
-       begin
-	listing[i]   := '';
-	listing[i+3] := '';
-
-	exit(false);
-       end;
 
 
     if ldy(i+2) and										// ldy 					; 2

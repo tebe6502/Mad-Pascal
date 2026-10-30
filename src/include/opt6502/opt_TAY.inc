@@ -26,6 +26,7 @@ begin
 // ===		     		      TAY.
 // -----------------------------------------------------------------------------
 
+
     if tay(i+1) and										// tay					; 1
 
        lda_a(i) and (iy(i) = false) and								// lda					; 0
@@ -120,7 +121,7 @@ begin
 
 
     if tay(i+1) and										// tay					; 1
-       
+
        sub_im_0(i) and										// sub #$00				; 0
 //       tay(i+1) and										// tay					; 1
 												//					; 2

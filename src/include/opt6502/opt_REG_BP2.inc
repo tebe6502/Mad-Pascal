@@ -1,6 +1,6 @@
 
 procedure opt_REG_BP2;
-var i, k: integer;
+var i, k,p: integer;
 begin
 
 // -------------------------------------------------------------------------- //
@@ -11,6 +11,8 @@ begin
 
   i:=0;
   k:=0;
+
+  arg0:='';
 
   while i < l do begin
 
@@ -205,7 +207,11 @@ begin
       then begin
 
 
-	if lda_bp_y(i+6) or cmp_bp_y(i+7) or sta_bp_y(i+7) then begin
+
+	if add(i+1) and lda_bp_y(i+6) then begin
+
+	end else
+	if add(i+1) and (cmp_bp_y(i+7) or sta_bp_y(i+7)) then begin
 
 	end else
 	if lda_adr(i) and sta_tmp_1(i+11) and asl_stack(i+3) and rol_a(i+4) then begin
@@ -245,8 +251,9 @@ begin
 	end;
 
 
-	if lda_bp_y(i+6) then begin
-     
+
+	if add(i+1) and lda_bp_y(i+6) then begin
+
 	 arg0:='+;'+GetARG(i)+';'+GetARG(i+1)+';'+GetARG(i+3)+';'+GetARG(i+4)+';';
 
 	 if arg0 = optyBP2 then begin
@@ -263,11 +270,11 @@ begin
 	  arg0 := optyBP2;
 
 	  k:=1;
-	 end; 
+	 end;
 
 	end else
-	if cmp_bp_y(i+7) or sta_bp_y(i+7) then begin
-     
+	if add(i+1) and (cmp_bp_y(i+7) or sta_bp_y(i+7)) then begin
+
 	 arg0:='+;'+GetARG(i)+';'+GetARG(i+1)+';'+GetARG(i+3)+';'+GetARG(i+4)+';';
 
 	 if cmp_bp_y(i+7) then listing[i+7] := #9'cmp (:bp2),y';

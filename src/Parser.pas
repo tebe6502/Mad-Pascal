@@ -355,12 +355,16 @@ begin
       if FieldType <> TDataType.RECORDTOK then
         if (FieldType in Pointers) and (NumAllocElements > 0) then
         begin
+
           if AllocElementType = TDataType.RECORDTOK then
           begin
             AllocElementType := TDataType.POINTERTOK;
             NumAllocElements := GetTypeAtIndex(i).Field[j].NumAllocElements shr 16;
             NumAllocElements_ := 0;
+
+	    if NumAllocElements = 0 then NumAllocElements := 1;
           end;
+
           if NumAllocElements_ > 0 then
             Inc(Result, NumAllocElements * NumAllocElements_ * GetDataSize(AllocElementType))
           else
