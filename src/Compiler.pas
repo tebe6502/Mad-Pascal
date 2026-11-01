@@ -19381,7 +19381,7 @@ begin
           if VarType = TDataType.ENUMTOK then
           begin
 
-            DefineIdent(i, VarOfSameType[VarOfSameTypeIndex].Name, TTokenKind.VARTOK, AllocElementType, 0, TDataType.UNTYPETOK, 0, IdType);
+            DefineIdent(i, VarOfSameType[VarOfSameTypeIndex].Name, TTokenKind.VARTOK, AllocElementType, 0, TDataType.UNTYPETOK, Ord(isAbsolute) * ConstVal , IdType);
 
             IdentifierAt(NumIdent).DataType := TDataType.ENUMTOK;
             IdentifierAt(NumIdent).AllocElementType := AllocElementType;
