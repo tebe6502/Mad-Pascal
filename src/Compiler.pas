@@ -229,7 +229,6 @@ begin
   if (lab <> a) and (pos(IdentifierAt(IdentIndex).SourceFile.Name + '.', a) = 1) then
   begin
 
-//    lab := IdentifierAt(IdentIndex).Name;
     if lab.IndexOf('.') > 0 then lab := copy(lab, 1, lab.LastIndexOf('.'));
 
     if (pos(IdentifierAt(IdentIndex).SourceFile.Name + '.adr.', a) = 1) then
@@ -251,11 +250,15 @@ end;
 function TestName(IdentIndex: Integer; a: String): Boolean;
 begin
 
-  if (IdentIndex > 0) and
-    //(IdentifierAt(IdentIndex).SourceFile.UnitIndex > 1) and
-    (pos(IdentifierAt(IdentIndex).SourceFile.Name + '.', a) = 1) then
+  if (IdentIndex > 0) and	// if the name contains the unit name
+     (pos(IdentifierAt(IdentIndex).SourceFile.Name + '.', a) = 1) then
   begin
-    a := copy(a, a.IndexOf('.') + 2, length(a));
+
+    IdentIndex := GetIdentIndex(IdentifierAt(IdentIndex).SourceFile.Name);
+
+    if (IdentIndex > 0) and (IdentifierAt(IdentIndex).Kind = TTokenKind.UNITTOK) then
+     a := copy(a, a.IndexOf('.') + 2, length(a));
+
   end;
 
   Result := pos('.', a) > 0;
@@ -7145,34 +7148,56 @@ begin
 
               svar := GetLocalName(IdentIndex);
 
-              if (pos('.', svar) > 0) then
-              begin
-                //   lab:=copy(svar, 1, svar.IndexOf('.'));
-                lab := ExtractName(IdentIndex, svar);
 
+              if TestName(IdentIndex, svar) then
+              begin
+
+                lab := ExtractName(IdentIndex, svar);
                 rec := (IdentifierAt(GetIdentIndex(lab)).AllocElementType = TDataType.RECORDTOK);
+
               end;
 
               //AllocElementType := IdentifierAt(IdentIndex).AllocElementType;
 
-              //  WriteLn(IdentifierAt(IdentIndex).name,',',IdentifierAt(IdentIndex).DataType,',',IdentifierAt(IdentIndex).AllocElementType,',',IdentifierAt(IdentIndex).NumAllocElements,',',IdentifierAt(IdentIndex).PassMethod,',',VarPass ,',',rec,',',IdentifierAt(IdentIndex).idType);
+
+              //  WriteLn(IdentifierAt(IdentIndex).name,'/',svar,':' ,ExtractName(IdentIndex, svar) ,'  /  ',      IdentifierAt(IdentIndex).DataType,',',IdentifierAt(IdentIndex).AllocElementType,',',IdentifierAt(IdentIndex).NumAllocElements,',',IdentifierAt(IdentIndex).PassMethod,',',VarPass ,',',rec,',',IdentifierAt(IdentIndex).idType);
 
               if rec then
               begin              // record.array[]
 
-                asm65(#9'lda ' + lab);
-                asm65(#9'add' + StackVariable0);
-                asm65(#9'sta' + StackVariable0);
-                asm65(#9'lda ' + lab + '+1');
-                asm65(#9'adc' + StackVariable1);
-                asm65(#9'sta' + StackVariable1);
+		if IdentifierAt(IdentIndex).AllocElementType = TDataType.RECORDTOK then begin
 
-                asm65(#9'lda' + StackVariable0);
-                asm65(#9'add #' + svar + '-DATAORIGIN');
-                asm65(#9'sta' + StackVariable0);
-                asm65(#9'lda' + StackVariable1);
-                asm65(#9'adc #$00');
-                asm65(#9'sta' + StackVariable1);
+                  asm65(#9'lda ' + svar);
+                  asm65(#9'add' + StackVariable0);
+                  asm65(#9'sta :bp2');
+                  asm65(#9'lda ' + svar + '+1');
+                  asm65(#9'adc' + StackVariable1);
+                  asm65(#9'sta :bp2+1');
+
+                  asm65(#9'ldy #$00');
+                  asm65(#9'lda (:bp2),y');
+                  asm65(#9'sta' + StackVariable0);
+                  asm65(#9'iny');
+                  asm65(#9'lda (:bp2),y');
+                  asm65(#9'sta' + StackVariable1);
+
+		end else begin
+
+                  asm65(#9'lda ' + lab);
+                  asm65(#9'add' + StackVariable0);
+                  asm65(#9'sta' + StackVariable0);
+                  asm65(#9'lda ' + lab + '+1');
+                  asm65(#9'adc' + StackVariable1);
+                  asm65(#9'sta' + StackVariable1);
+
+                  asm65(#9'lda' + StackVariable0);
+                  asm65(#9'add #' + svar + '-DATAORIGIN');
+                  asm65(#9'sta' + StackVariable0);
+                  asm65(#9'lda' + StackVariable1);
+                  asm65(#9'adc #$00');
+                  asm65(#9'sta' + StackVariable1);
+
+		end;
 
               end
               else
@@ -7211,18 +7236,40 @@ begin
 
                     AllocElementType := TDataType(IdentTemp shr 16);
 
-                    //    writeln(IdentifierAt(IdentIndex).Name,',',TokenAt(i + 3).Name,',',  TDataType(IdentTemp shr 16) ,',',IdentifierAt(IdentIndex).PassMethod);
+                    //  writeln(IdentifierAt(IdentIndex).Name,',',TokenAt(i + 3).Name,',',  TDataType(IdentTemp shr 16) ,',',IdentifierAt(IdentIndex).PassMethod);
 
                   end
                   else
                   begin
 
-                    asm65(#9'lda ' + svar);
-                    asm65(#9'add' + StackVariable0);
-                    asm65(#9'sta' + StackVariable0);
-                    asm65(#9'lda ' + svar + '+1');
-                    asm65(#9'adc' + StackVariable1);
-                    asm65(#9'sta' + StackVariable1);
+                    //  writeln('* ',IdentifierAt(IdentIndex).DataType,',',IdentifierAt(IdentIndex).AllocElementType,',',IdentifierAt(IdentIndex).NumAllocElements,',',IdentifierAt(IdentIndex).PassMethod,',',IdentifierAt(IdentIndex).idType ,',',TokenAt(i + 1).Name);
+
+		    if IdentifierAt(IdentIndex).AllocElementType = TDataType.RECORDTOK then begin
+
+                     asm65(#9'lda ' + svar);
+                     asm65(#9'add' + StackVariable0);
+                     asm65(#9'sta :bp2');
+                     asm65(#9'lda ' + svar + '+1');
+                     asm65(#9'adc' + StackVariable1);
+                     asm65(#9'sta :bp2+1');
+
+                     asm65(#9'ldy #$00');
+                     asm65(#9'lda (:bp2),y');
+                     asm65(#9'sta' + StackVariable0);
+                     asm65(#9'iny');
+                     asm65(#9'lda (:bp2),y');
+                     asm65(#9'sta' + StackVariable1);
+
+		    end else begin
+
+                     asm65(#9'lda ' + svar);
+                     asm65(#9'add' + StackVariable0);
+                     asm65(#9'sta' + StackVariable0);
+                     asm65(#9'lda ' + svar + '+1');
+                     asm65(#9'adc' + StackVariable1);
+                     asm65(#9'sta' + StackVariable1);
+
+		    end;
 
                   end;
 
@@ -7346,6 +7393,7 @@ begin
                       begin    // var record^.field
 
                         //        DEREFERENCE := true;
+
 
                         CheckTok(i + 4, TTokenKind.IDENTTOK);
                         IdentTemp := RecordSize(IdentIndex, TokenAt(i + 4).Name);

@@ -432,7 +432,7 @@ begin
      end;
 
 
-    if (listing[i] = #9'lda #$FF') and							// lda #$FF				; 0
+    if lda_im_ff(i) and									// lda #$FF				; 0
        sub(i+1) and (sub_im(i+1) = false) and						// sub 					; 1
        ldy(i+2) and									// ldy					; 2
        sta_a(i+3) then									// sta					; 3
@@ -442,7 +442,7 @@ begin
      end;
 
 
-    if (listing[i] = #9'lda #$FF') and							// lda #$FF				; 0
+    if lda_im_ff(i) and									// lda #$FF				; 0
        sub(i+1) and (sub_im(i+1) = false) and						// sub 					; 1
        sta_a(i+2) and									// sta					; 2
 											//					; 3

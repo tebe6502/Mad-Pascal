@@ -1,5 +1,8 @@
+01.11.2026
+- issue #281 fixed
+
 30.10.2026
-- issue #282, #283 fixed
+- issue #282, #283, #286 fixed
 
 26.10.2026
 - WHILE, FOR, IF optimizations

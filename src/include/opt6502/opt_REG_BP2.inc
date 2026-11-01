@@ -1,6 +1,6 @@
 
 procedure opt_REG_BP2;
-var i, k,p: integer;
+var i, k: integer;
 begin
 
 // -------------------------------------------------------------------------- //

@@ -26,7 +26,7 @@
 
 
     if ldy_1(i) and										// ldy #1				; 0	ORA -> JEQ
-       (listing[i+1] = #9'and #$01') and							// and #$01				; 1
+       and_im_1(i+1) and									// and #$01				; 1
        beq(i+2) and										// beq @+				; 2
        dey(i+3) and										// dey					; 3
        lab_a(i+4) and										//@					; 4

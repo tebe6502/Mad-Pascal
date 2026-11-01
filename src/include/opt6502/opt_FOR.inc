@@ -158,7 +158,7 @@ begin
           lda_a(0) and (lda_im(0) = false) and
           sub_im(1) and
 	  svc(2) and
-          (listing[3] = #9'eor #$80') and
+          eor_im_80(3) and
           (listing[4] = #9'bpl *+5') and
 	  jmp_l(5) then
 	begin
@@ -322,16 +322,16 @@ begin
 
        if (l = 15) and
           lda_a(0) and
-          (listing[1] = #9'cmp #$FF') and
+          cmp_im_ff(1) and
 	  bne_a(2) and
           lda_a(3) and
-          (listing[4] = #9'cmp #$FF') and
+          cmp_im_ff(4) and
 	  bne_a(5) and
           lda_a(6) and
-          (listing[7] = #9'cmp #$FF') and
+          cmp_im_ff(7) and
 	  bne_a(8) and
           lda_a(9) and
-          (listing[10] = #9'cmp #$FF') and
+          cmp_im_ff(10) and
           lab_a(11) and
 	  (listing[12] = #9'bcc *+7') and
 	  (listing[13] = #9'beq *+5') and
@@ -364,13 +364,13 @@ begin
 	  cmp_im(5) and
           (listing[6] = 'L1'#9'beq L5') and
           (listing[7] = #9'bcs L3') and
-          (listing[8] = #9'lda #$FF') and
+          lda_im_ff(8) and
           bne_L5(9) and
           (listing[10] = 'L3'#9'lda #$01') and
           bne_L5(11) and
           (listing[12] = 'L4'#9'bvc L5') and
-          (listing[13] = #9'eor #$FF') and
-          (listing[14] = #9'ora #$01') and
+          eor_im_ff(13) and
+          ora_im_1(14) and
           (listing[15] = 'L5') and
           ENDL(16) and
           (listing[17] = #9'bmi *+7') and
@@ -414,13 +414,13 @@ begin
 	  cmp_im(5) and
           (listing[6] = 'L1'#9'beq L5') and
           (listing[7] = #9'bcs L3') and
-          (listing[8] = #9'lda #$FF') and
+          lda_im_ff(8) and
           bne_L5(9) and
           (listing[10] = 'L3'#9'lda #$01') and
           bne_L5(11) and
           (listing[12] = 'L4'#9'bvc L5') and
-          (listing[13] = #9'eor #$FF') and
-          (listing[14] = #9'ora #$01') and
+          eor_im_ff(13) and
+          ora_im_1(14) and
           (listing[15] = 'L5') and
           ENDL(16) and
           (listing[17] = #9'bpl *+5') and

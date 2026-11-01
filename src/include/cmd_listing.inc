@@ -455,6 +455,11 @@ begin
   Result := listing[i] = #9'lda #$00';
 end;
 
+function LDA_IM_FF(const i: Integer): Boolean;
+begin
+  Result := listing[i] = #9'lda #$FF';
+end;
+
 function LDY_IM_0(const i: Integer): Boolean;
 begin
   Result := listing[i] = #9'ldy #$00';
@@ -463,6 +468,21 @@ end;
 function CMP_IM_0(const i: Integer): Boolean;
 begin
   Result := listing[i] = #9'cmp #$00';
+end;
+
+function CMP_IM_1(const i: Integer): Boolean;
+begin
+  Result := listing[i] = #9'cmp #$01';
+end;
+
+function CMP_IM_80(const i: Integer): Boolean;
+begin
+  Result := listing[i] = #9'cmp #$80';
+end;
+
+function CMP_IM_FF(const i: Integer): Boolean;
+begin
+  Result := listing[i] = #9'cmp #$FF';
 end;
 
 function ADD_IM_0(const i: Integer): Boolean;
@@ -505,6 +525,16 @@ begin
   Result := listing[i] = #9'and #$00';
 end;
 
+function AND_IM_1(const i: Integer): Boolean;
+begin
+  Result := listing[i] = #9'and #$01';
+end;
+
+function AND_IM_80(const i: Integer): Boolean;
+begin
+  Result := listing[i] = #9'and #$80';
+end;
+
 function AND_IM_FF(const i: Integer): Boolean;
 begin
   Result := listing[i] = #9'and #$FF';
@@ -515,9 +545,29 @@ begin
   Result := listing[i] = #9'ora #$00';
 end;
 
+function ORA_IM_1(const i: Integer): Boolean;
+begin
+  Result := listing[i] = #9'ora #$01';
+end;
+
+function ORA_IM_FF(const i: Integer): Boolean;
+begin
+  Result := listing[i] = #9'ora #$FF';
+end;
+
 function EOR_IM_0(const i: Integer): Boolean;
 begin
   Result := listing[i] = #9'eor #$00';
+end;
+
+function EOR_IM_80(const i: Integer): Boolean;
+begin
+  Result := listing[i] = #9'eor #$80';
+end;
+
+function EOR_IM_FF(const i: Integer): Boolean;
+begin
+  Result := listing[i] = #9'eor #$FF';
 end;
 
 function MVA_IM_0(const i: Integer): Boolean;

@@ -20,10 +20,10 @@ begin
 // ===				      BRANCH.
 // -----------------------------------------------------------------------------
 
-    if (listing[i+1] = #9'cmp #$80') and							// cmp #$80		; 1
+    if cmp_im_80(i+1) and									// cmp #$80		; 1
 
        lda(i) and										// lda			; 0	>= 128
-//       (listing[i+1] = #9'cmp #$80') and							// cmp #$80		; 1
+//       cmp_im_80(i+1) and									// cmp #$80		; 1
        bcs_a(i+2) and										// bcs @+		; 2
        dey(i+3) then										// dey			; 3
      begin
@@ -34,10 +34,10 @@ begin
      end;
 
 
-    if (listing[i+1] = #9'cmp #$80') and							// cmp #$80		; 1
+    if cmp_im_80(i+1) and									// cmp #$80		; 1
 
        lda(i) and										// lda			; 0	< 128
-//       (listing[i+1] = #9'cmp #$80') and							// cmp #$80		; 1
+//       cmp_im_80(i+1) and									// cmp #$80		; 1
        bcc_a(i+2) and										// bcc @+		; 2
        dey(i+3) then										// dey			; 3
      begin
@@ -182,7 +182,7 @@ begin
      end;
 
 
-    if (listing[i] = #9'and #$80') and								// and #$80		; 0
+    if and_im_80(i) and										// and #$80		; 0
        (jeq(i+1) or jne(i+1)) then								// jeq|jne		; 1
      begin
 	listing[i] := '';
@@ -202,7 +202,7 @@ begin
 
        (SKIP(i-1) = false) and
        lda_a(i) and 										// lda			; 0
-       (listing[i+1] = #9'and #$80') and							// and #$80		; 1
+       and_im_80(i+1) and									// and #$80		; 1
        ldy_1(i+2) and										// ldy #1		; 2
 //       ora_im_0(i+3) and									// ora #$00		; 3
        sne(i+4) and										// sne			; 4
@@ -229,8 +229,8 @@ begin
 
        (SKIP(i-1) = false) and
        lda(i) and 										// lda			; 0
-       (listing[i+1] = #9'and #$80') and							// and #$80		; 1
-       (listing[i+2] = #9'cmp #$80') and							// cmp #$80		; 2
+       and_im_80(i+1) and									// and #$80		; 1
+       cmp_im_80(i+2) and									// cmp #$80		; 2
        bne(i+3) and										// bne			; 3
        lda_im_0(i+4) and									// lda #$00		; 4
 //       cmp_im_0(i+5) and									// cmp #$00		; 5
@@ -259,7 +259,7 @@ begin
 
        (SKIP(i-1) = false) and
        lda(i) and 										// lda			; 0
-       (listing[i+1] = #9'and #$80') and							// and #$80		; 1
+       and_im_80(i+1) and									// and #$80		; 1
        cmp_im_0(i+2) and									// cmp #$00		; 2
        bne(i+3) and										// bne			; 3
        lda_im_0(i+4) and									// lda #$00		; 4
@@ -283,7 +283,7 @@ begin
      end;
 
 
-    if (listing[i] = #9'cmp #$80') and								// cmp #$80		; 0
+    if cmp_im_80(i) and										// cmp #$80		; 0
        (jcc(i+1) or jcs(i+1)) then								// jcc|jcs		; 1
      begin
 	listing[i] := '';
@@ -333,12 +333,12 @@ begin
    begin
 
 
-    if (listing[i+3] = #9'cmp #$01') and							// cmp #$01		; 3
+    if cmp_im_1(i+3) and									// cmp #$01		; 3
 
        lda_val(i) and (lda_im(i) = false) and (iy(i) = false) and				// lda			; 0	~:STACKORIGIN
 //       ldy_1(i+1) and										// ldy #1		; 1
-       (listing[i+2] = #9'and #$01') then							// and #$01		; 2
-//       (listing[i+3] = #9'cmp #$01') and							// cmp #$01		; 3
+       and_im_1(i+2) then									// and #$01		; 2
+//       cmp_im_1(i+3) and									// cmp #$01		; 3
 //       beq(i+4) and										// beq @+		; 4
 //       dey(i+5) and										// dey			; 5
 //       lab_a(i+6) then									//@			; 6
@@ -480,12 +480,12 @@ begin
      end;
 
 
-    if (listing[i+3] = #9'cmp #$80') and							// cmp #$80		; 3
+    if cmp_im_80(i+3) and									// cmp #$80		; 3
 
        lda_a(i) and (iy(i) = false) and								// lda			; 0
 //       ldy_1(i+1) and										// ldy #1		; 1
-       (listing[i+2] = #9'and #$80') then							// and #$80		; 2
-//       (listing[i+3] = #9'cmp #$80') and							// cmp #$80		; 3
+       and_im_80(i+2) then									// and #$80		; 2
+//       cmp_im_80(i+3) and									// cmp #$80		; 3
 //       beq(i+4) and										// beq @+		; 4
 //       dey(i+5) and										// dey			; 5
 //       lab_a(i+6) then									//@			; 6

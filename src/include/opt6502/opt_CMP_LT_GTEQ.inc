@@ -106,6 +106,33 @@ begin
       end;
 
 
+    if lab_a(i+8) and										//@			; 8
+
+       cmp_im_0(i+1) and									// cmp #		; 1
+
+       (SKIP(i-1) = false) and
+       lda_a(i) and										// lda W+1		; 0	WORD < 128
+//       cmp_im_0(i+1) and									// cmp #$00		; 1
+       bne(i+2) and										// bne @+		; 2
+       lda_a(i+3) and										// lda W		; 3
+       cmp_im_80(i+4) and									// cmp #$80		; 4
+       lab_a(i+5) and										//@			; 5
+       bcc(i+6) and										// bcc @+		; 6
+       dey(i+7) then										// dey			; 7
+//       lab_a(i+8) then									//@			; 8
+      begin
+	listing[i+4] := #9'and #$80';
+	listing[i+5] := #9'ora ' + GetARG(i);
+        listing[i+6] := #9'bpl @+';
+
+        listing[i] := '';
+        listing[i+1] := '';
+        listing[i+2] := '';
+
+	exit(false);
+      end;
+
+
     if lab_a(i+5) and										//@			; 5
 
        cmp_im_0(i+1) and									// cmp #$00		; 1
@@ -122,17 +149,17 @@ begin
       begin
 
 	if cmp_im_0(i+4) then begin
-	listing[i]    := '';
-	listing[i+1]  := '';
-	listing[i+2]  := '';
-	listing[i+3]  := '';
-	listing[i+4]  := '';
-	listing[i+5]  := '';
+	 listing[i]    := '';
+	 listing[i+1]  := '';
+	 listing[i+2]  := '';
+	 listing[i+3]  := '';
+	 listing[i+4]  := '';
+	 listing[i+5]  := '';
 
-	if jcs(i+6) then
-	 listing[i+6] := #9'jmp ' + GetARG(i+6)
-	else
-	 listing[i+6] := '';
+	 if jcs(i+6) then
+	  listing[i+6] := #9'jmp ' + GetARG(i+6)
+	 else
+	  listing[i+6] := '';
 
 	end else
 	 if jcs(i+6) then begin
@@ -248,8 +275,8 @@ begin
        sub_im(i+2) and										// sub #		; 2
        (listing[i+3] = #9'beq L5') and								// beq L5		; 3
        (listing[i+4] = #9'bvc L5') and								// bvc L5		; 4
-       (listing[i+5] = #9'eor #$FF') and							// eor #$FF		; 5
-       (listing[i+6] = #9'ora #$01') and							// ora #$01		; 6
+       eor_im_ff(i+5) and									// eor #$FF		; 5
+       ora_im_1(i+6) and									// ora #$01		; 6
        (listing[i+7] = 'L5') then								//L5			; 7
       begin
  	p := shortint(GetBYTE(i+2));
@@ -303,8 +330,8 @@ begin
        sub(i+2) and (sub_im(i+2) = false) and							// sub 			; 2
        (listing[i+3] = #9'beq L5') and								// beq L5		; 3
        (listing[i+4] = #9'bvc L5') and								// bvc L5		; 4
-       (listing[i+5] = #9'eor #$FF') and							// eor #$FF		; 5
-       (listing[i+6] = #9'ora #$01') and							// ora #$01		; 6
+       eor_im_ff(i+5) and									// eor #$FF		; 5
+       ora_im_1(i+6) and									// ora #$01		; 6
        (listing[i+7] = 'L5') then								//L5			; 7
       begin
 	listing[i] := listing[i+1];
@@ -342,11 +369,11 @@ begin
        (listing[i+6] = #9'beq L5') and								// beq L5		; 6
        lda_im_0(i+7) and									// lda #$00		; 7
        (listing[i+8] = #9'adc #$FF') and							// adc #$FF		; 8
-       (listing[i+9] = #9'ora #$01') and							// ora #$01		; 9
+       ora_im_1(i+9) and									// ora #$01		; 9
        bne_L5(i+10) and										// bne L5		; 10
        (listing[i+11] = 'L4'#9'bvc L5') and							//L4 bvc L5		; 11
-       (listing[i+12] = #9'eor #$FF') and							// eor #$FF		; 12
-       (listing[i+13] = #9'ora #$01') and							// ora #$01		; 13
+       eor_im_ff(i+12) and									// eor #$FF		; 12
+       ora_im_1(i+13) and									// ora #$01		; 13
        (listing[i+14] = 'L5') then								//L5			; 14
       begin
         p := smallint(GetWORD(i+5, i+2));
@@ -406,11 +433,11 @@ begin
        (listing[i+6] = #9'beq L5') and								// beq L5		; 6
        lda_im_0(i+7) and									// lda #$00		; 7
        (listing[i+8] = #9'adc #$FF') and							// adc #$FF		; 8
-       (listing[i+9] = #9'ora #$01') and							// ora #$01		; 9
+       ora_im_1(i+9) and									// ora #$01		; 9
        bne_L5(i+10) and										// bne L5		; 10
        (listing[i+11] = 'L4'#9'bvc L5') and							//L4 bvc L5		; 11
-       (listing[i+12] = #9'eor #$FF') and							// eor #$FF		; 12
-       (listing[i+13] = #9'ora #$01') and							// ora #$01		; 13
+       eor_im_ff(i+12) and									// eor #$FF		; 12
+       ora_im_1(i+13) and									// ora #$01		; 13
        (listing[i+14] = 'L5') then								//L5			; 14
       begin
         p := smallint(GetWORD(i+5, i+2));
@@ -461,11 +488,11 @@ begin
        (listing[i+6] = #9'beq L5') and								// beq L5		; 6
        lda_im_0(i+7) and									// lda #$00		; 7
        (listing[i+8] = #9'adc #$FF') and							// adc #$FF		; 8
-       (listing[i+9] = #9'ora #$01') and							// ora #$01		; 9
+       ora_im_1(i+9) and									// ora #$01		; 9
        bne_L5(i+10) and										// bne L5		; 10
        (listing[i+11] = 'L4'#9'bvc L5') and							//L4 bvc L5		; 11
-       (listing[i+12] = #9'eor #$FF') and							// eor #$FF		; 12
-       (listing[i+13] = #9'ora #$01') and							// ora #$01		; 13
+       eor_im_ff(i+12) and									// eor #$FF		; 12
+       ora_im_1(i+13) and									// ora #$01		; 13
        (listing[i+14] = 'L5') then								//L5			; 14
       begin
 	listing[i+10] := listing[i+4];
@@ -514,13 +541,13 @@ begin
        cmp_im(i+11) and										// cmp #		; 11
        (listing[i+12] = 'L1'#9'beq L5') and							//L1 beq L5		; 12
        (listing[i+13] = #9'bcs L3') and								// bcs L3		; 13
-       (listing[i+14] = #9'lda #$FF') and							// lda #$FF		; 14
+       lda_im_ff(i+14) and									// lda #$FF		; 14
        bne_L5(i+15) and										// bne L5		; 15
        (listing[i+16] = 'L3'#9'lda #$01') and							//L3 lda #$01		; 16
        bne_L5(i+17) and										// bne L5		; 17
        (listing[i+18] = 'L4'#9'bvc L5') and							//L4 bvc L5		; 18
-       (listing[i+19] = #9'eor #$FF') and							// eor #$FF		; 19
-       (listing[i+20] = #9'ora #$01') and							// ora #$01		; 20
+       eor_im_ff(i+19) and									// eor #$FF		; 19
+       ora_im_1(i+20) and									// ora #$01		; 20
        (listing[i+21] = 'L5') then								//L5			; 21
       begin
         p := GetBYTE(i+11) + GetBYTE(i+8) shl 8 + GetBYTE(i+5) shl 16 + GetBYTE(i+2) shl 24;
@@ -638,13 +665,13 @@ begin
        cmp(i+11) and (cmp_im(i+11) = false) and							// cmp			; 11
        (listing[i+12] = 'L1'#9'beq L5') and							//L1 beq L5		; 12
        (listing[i+13] = #9'bcs L3') and								// bcs L3		; 13
-       (listing[i+14] = #9'lda #$FF') and							// lda #$FF		; 14
+       lda_im_ff(i+14) and									// lda #$FF		; 14
        bne_L5(i+15) and										// bne L5		; 15
        (listing[i+16] = 'L3'#9'lda #$01') and							//L3 lda #$01		; 16
        bne_L5(i+17) and										// bne L5		; 17
        (listing[i+18] = 'L4'#9'bvc L5') and							//L4 bvc L5		; 18
-       (listing[i+19] = #9'eor #$FF') and							// eor #$FF		; 19
-       (listing[i+20] = #9'ora #$01') and							// ora #$01		; 20
+       eor_im_ff(i+19) and									// eor #$FF		; 19
+       ora_im_1(i+20) and									// ora #$01		; 20
        (listing[i+21] = 'L5') then								//L5			; 21
       begin
 

@@ -112,6 +112,7 @@ var
   TempIdentIndex: TIdentIndex;
   TempIdentifier: TIdentifier;
 
+
   function Search(const X: TString; const SourceFile: TSourceFile): TIdentIndex;
   var
     block: TBlock;
@@ -121,8 +122,6 @@ var
   begin
 
     Result := 0;
-
-    // WriteLn('Parser.GetIdentIndex('+s+'): BlockStack='+BlockStack.ToString);
 
     // Search all nesting levels from the current one to the most outer one
     Block := BlockManager.BlockStack.Top;
@@ -1755,6 +1754,7 @@ begin
 
   Debugger.debugger.DefineIdent(tokenIndex, Name, Kind, DataType, NumAllocElements, AllocElementType, Data, IdType);
 
+
   identIndex := GetIdentIndex(Name);
 
   if (identIndex > 0) and (not (IdentifierAt(IdentIndex).Kind in [TTokenKind.PROCEDURETOK,
@@ -1811,7 +1811,8 @@ begin
     NumAllocElements := NumAllocElements and $FFFF;    // [xx,
 
 
-    //   if name = 'CH_EOL' then writeln( identifier.Block ,',', identifier.unitindex, ',',  identifier.Section,',', identifier.idType);
+//       if name = 'MD5' then writeln( Name,',',DataType,',',Kind,',',NumIdent_);
+
 
     if Name <> 'RESULT' then
       if (NumIdent_ > NumPredefIdent + 1) and (ActiveSourceFile.UnitIndex = 1) and (pass = TPass.CODE_GENERATION) then

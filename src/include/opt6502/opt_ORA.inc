@@ -199,7 +199,7 @@ begin
 
 
     if lda_a(i) and									// lda 			; 0
-       (listing[i+1] = #9'ora #$FF') and						// ora #$FF		; 1
+       ora_im_ff(i+1) and								// ora #$FF		; 1
        sta_a(i+2) then									// sta 			; 2
      begin
 	listing[i]   := '';

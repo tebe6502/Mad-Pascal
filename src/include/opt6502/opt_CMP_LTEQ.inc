@@ -402,8 +402,8 @@ begin
        sub_im(i+2) and										// sub #		; 2
        (listing[i+3] = #9'beq L5') and								// beq L5		; 3
        (listing[i+4] = #9'bvc L5') and								// bvc L5		; 4
-       (listing[i+5] = #9'eor #$FF') and							// eor #$FF		; 5
-       (listing[i+6] = #9'ora #$01') and							// ora #$01		; 6
+       eor_im_ff(i+5) and									// eor #$FF		; 5
+       ora_im_1(i+6) and									// ora #$01		; 6
        (listing[i+7] = 'L5') then								//L5			; 7
       begin
         p := shortint(GetBYTE(i+2));
@@ -458,8 +458,8 @@ begin
        sub(i+2) and (sub_im(i+2) = false) and							// sub B		; 2
        (listing[i+3] = #9'beq L5') and								// beq L5		; 3
        (listing[i+4] = #9'bvc L5') and								// bvc L5		; 4
-       (listing[i+5] = #9'eor #$FF') and							// eor #$FF		; 5
-       (listing[i+6] = #9'ora #$01') and							// ora #$01		; 6
+       eor_im_ff(i+5) and									// eor #$FF		; 5
+       ora_im_1(i+6) and									// ora #$01		; 6
        (listing[i+7] = 'L5') then								//L5			; 7
 
       begin
@@ -495,11 +495,11 @@ begin
        (listing[i+6] = #9'beq L5') and								// beq L5		; 6
        lda_im_0(i+7) and									// lda #$00		; 7
        (listing[i+8] = #9'adc #$FF') and							// adc #$FF		; 8
-       (listing[i+9] = #9'ora #$01') and							// ora #$01		; 9
+       ora_im_1(i+9) and									// ora #$01		; 9
        bne_L5(i+10) and										// bne L5		; 10
        (listing[i+11] = 'L4'#9'bvc L5') and							//L4 bvc L5		; 11
        (listing[i+12] = #9'eor #$FF') and							// eor #$FF		; 12
-       (listing[i+13] = #9'ora #$01') and							// ora #$01		; 13
+       ora_im_1(i+13) and									// ora #$01		; 13
        (listing[i+14] = 'L5') then								//L5			; 14
       begin
        p := GetWORD(i+5, i+2);
@@ -568,11 +568,11 @@ begin
        (listing[i+6] = #9'beq L5') and								// beq L5		; 6
        lda_im_0(i+7) and									// lda #$00		; 7
        (listing[i+8] = #9'adc #$FF') and							// adc #$FF		; 8
-       (listing[i+9] = #9'ora #$01') and							// ora #$01		; 9
+       ora_im_1(i+9) and									// ora #$01		; 9
        bne_L5(i+10) and										// bne L5		; 10
        (listing[i+11] = 'L4'#9'bvc L5') and							//L4 bvc L5		; 11
-       (listing[i+12] = #9'eor #$FF') and							// eor #$FF		; 12
-       (listing[i+13] = #9'ora #$01') and							// ora #$01		; 13
+       eor_im_ff(i+12) and									// eor #$FF		; 12
+       ora_im_1(i+13) and									// ora #$01		; 13
        (listing[i+14] = 'L5') then								//L5			; 14
       begin
 	listing[i+11] := #9'lda ' + GetARG(i+5);
@@ -624,13 +624,13 @@ begin
        cmp_im(i+11) and										// cmp #		; 11
        (listing[i+12] = 'L1'#9'beq L5') and							//L1 beq L5		; 12
        (listing[i+13] = #9'bcs L3') and								// bcs L3		; 13
-       (listing[i+14] = #9'lda #$FF') and							// lda #$FF		; 14
+       lda_im_ff(i+14) and									// lda #$FF		; 14
        bne_L5(i+15) and										// bne L5		; 15
        (listing[i+16] = 'L3'#9'lda #$01') and							//L3 lda #$01		; 16
        bne_L5(i+17) and										// bne L5		; 17
        (listing[i+18] = 'L4'#9'bvc L5') and							//L4 bvc L5		; 18
-       (listing[i+19] = #9'eor #$FF') and							// eor #$FF		; 19
-       (listing[i+20] = #9'ora #$01') and							// ora #$01		; 20
+       eor_im_ff(i+19) and									// eor #$FF		; 19
+       ora_im_1(i+20) and									// ora #$01		; 20
        (listing[i+21] = 'L5') then								//L5			; 21
       begin
 
@@ -714,13 +714,13 @@ begin
        cmp(i+11) and (cmp_im(i+11) = false) and							// cmp			; 11
        (listing[i+12] = 'L1'#9'beq L5') and							//L1 beq L5		; 12
        (listing[i+13] = #9'bcs L3') and								// bcs L3		; 13
-       (listing[i+14] = #9'lda #$FF') and							// lda #$FF		; 14
+       lda_im_ff(i+14) and									// lda #$FF		; 14
        bne_L5(i+15) and										// bne L5		; 15
        (listing[i+16] = 'L3'#9'lda #$01') and							//L3 lda #$01		; 16
        bne_L5(i+17) and										// bne L5		; 17
        (listing[i+18] = 'L4'#9'bvc L5') and							//L4 bvc L5		; 18
-       (listing[i+19] = #9'eor #$FF') and							// eor #$FF		; 19
-       (listing[i+20] = #9'ora #$01') and							// ora #$01		; 20
+       eor_im_ff(i+19) and									// eor #$FF		; 19
+       ora_im_1(i+20) and									// ora #$01		; 20
        (listing[i+21] = 'L5') then								//L5			; 21
       begin
 
