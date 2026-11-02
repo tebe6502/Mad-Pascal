@@ -204,13 +204,26 @@
             if TokenAt(i + 3).Kind = TTokenKind.DEREFERENCETOK then
             begin
 
-              asm65(#9'mwy ' + GetLocalName(GetIdentIndex(TokenAt(i + 2).Name)) + ' :bp2');
-              asm65(#9'ldy #$00');
-              asm65(#9'lda (:bp2),y');
-              asm65(#9'sta @move.src');
-              asm65(#9'iny');
-              asm65(#9'lda (:bp2),y');
-              asm65(#9'sta @move.src+1');
+	     IdentTemp := GetIdentIndex(TokenAt(i + 2).Name);
+
+	     if IdentifierAt(IdentTemp).NumAllocElements = 0 then begin
+
+//	writeln(TokenAt(i + 2).Kind,',',TokenAt(i + 2).Name,' > ',IdentifierAt(IdentTemp).DataType,',',IdentifierAt(IdentTemp).AllocElementType,',',IdentifierAt(IdentTemp).NumAllocElements);
+
+		asm65(#9'lda :STACKORIGIN,x');
+		asm65(#9'sta @move.src');
+		asm65(#9'lda :STACKORIGIN+STACKWIDTH,x');
+		asm65(#9'sta @move.src+1');
+	
+	      end else begin
+		asm65(#9'mwy ' + GetLocalName(IdentTemp) + ' :bp2');
+		asm65(#9'ldy #$00');
+		asm65(#9'lda (:bp2),y');
+		asm65(#9'sta @move.src');
+		asm65(#9'iny');
+		asm65(#9'lda (:bp2),y');
+		asm65(#9'sta @move.src+1');
+	      end;
 
               Inc(i);
 
