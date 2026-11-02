@@ -72,6 +72,14 @@ function imulCL_opt: Boolean;
     else
       k:=-1;
 
+    if (m > 0) and
+       lda_stack(m) and
+       sta_stack(m-1) and
+       argMatch(m-1, m) then
+    begin
+	listing[m-1] := #9'sta :bp2';
+	listing[m] := #9'lda :bp2';
+    end;
 
     if (k in [0, 1, 2, 4, 8, 16, 32]) and						// lda #				; 2
 

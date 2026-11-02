@@ -95,7 +95,7 @@ begin
 
 
    if jcs_l(10) and									// jcs			; 10	branch if C=1     											//			; 13	C=0
-      lda(11) and									// lda			; 11	C=0
+      (lda(11) or ldy(11)) and								// lda			; 11	C=0
       add(12) then									// add			; 12
     begin
 	TemporaryBuf[12] := #9'adc ' + GetARG(12);
