@@ -831,37 +831,29 @@ var
 
 function calcRegCode(x, y: smallint): byte;
 begin
+
    result := 0;
 
-   if (x < WIN_LEFT)   then result := (result or 1);
-   if (x > WIN_RIGHT)  then result := (result or 2);
+   if (x < WIN_LEFT)   then result := 1;
+   if (x > WIN_RIGHT)  then result := 2;
    if (y > WIN_BOTTOM) then result := (result or 4);
    if (y < WIN_TOP)    then result := (result or 8);
+
 end;
 
 
 begin
-
    // Algorytm Cohena-Sutherlanda
    // 1. Zakoduj końce odcinka zgodnie z kodami obszarów
    rcode1 := calcRegCode(x1, y1);
    rcode2 := calcRegCode(x2, y2);
+
    // 2. Jeżeli iloczyn logiczny (AND) tych kodów <>0,
-   // to odcinek może być pominięty (w całości poza
-   // oknem) - zaznacz go na czerwono
-//   if ((rcode1 and rcode2) <> 0) then
-//   begin
-//      Image1.Canvas.Pen.Color := clRed;
-//      Image1.Canvas.MoveTo(x1, y1);
-//      Image1.Canvas.LineTo(x2, y2);
-//   end
-   // 3. Jeżeli suma logiczna (OR)tych kodów = 0,
-   // to odcinek w całości mieści się w okienku
-   // - zaznacz go na zielono
-//   else
+   // to odcinek może być pominięty
+   if (rcode1 and rcode2) <> 0 then exit;
+
    if ((rcode1 or rcode2) = 0) then
    begin
-//      Image1.Canvas.Pen.Color := clGreen;
 
 	case GraphMode and $0f of
 	  7, 15: fLine(x1, y1, x2, y2)
@@ -871,93 +863,63 @@ begin
    end
    else
    begin
+
       // pozostale przypadki - przeciecie z krawedzia okna
       repeat
+
          if (rcode1 <> 0) then
             rcode := rcode1
          else
             rcode := rcode2;
 
+	 x := x2 - x1;
+	 y := y2 - y1;
+
          // pozostale przypadki - przeciecie z krawedzia okna
          if (rcode and 1) <> 0 then
          begin
-
-	    if smallint(x2-x1) = 0 then
-	     exit
-	    else
-             y := y1 + (smallint(y2-y1)*smallint(WIN_LEFT-x1)) div smallint(x2-x1);
-	     
+            y := y1 + (y * smallint(WIN_LEFT - x1)) div x;
             x := WIN_LEFT;
          end
          else if (rcode and 2) <> 0 then
          begin
-
-	    if smallint(x2-x1) = 0 then
-	     exit
-	    else
-             y := y1 + (smallint(y2-y1)*smallint(WIN_RIGHT-x1)) div smallint(x2-x1);
-
+            y := y1 + (y * smallint(WIN_RIGHT - x1)) div x;
             x := WIN_RIGHT;
          end
          else if (rcode and 4) <> 0 then
          begin
-
-	    if smallint(y2-y1) = 0 then
-	     exit
-	    else
-             x := x1 + (smallint(x2-x1)*smallint(WIN_BOTTOM-y1)) div smallint(y2-y1);
-
+            x := x1 + (x * smallint(WIN_BOTTOM - y1)) div y;
             y := WIN_BOTTOM;
          end
          else if (rcode and 8) <> 0 then
          begin
-
-	    if smallint(y2-y1) = 0 then
-	     exit
-	    else
-             x := x1 + (smallint(x2-x1)*smallint(WIN_TOP-y1)) div smallint(y2-y1);
-
+            x := x1 + (x * smallint(WIN_TOP - y1)) div y;
             y := WIN_TOP;
          end;
 
          if (rcode = rcode1) then
          begin
-//            Image1.Canvas.Pen.Color := clYellow;
-//            Image1.Canvas.MoveTo(x1, y1);
-//            Image1.Canvas.LineTo(x, y);
             x1 := x;
             y1 := y;
+
             rcode1 := calcRegCode(x1, y1);
          end
          else
          begin
-//            Image1.Canvas.Pen.Color := clYellow;
-//            Image1.Canvas.MoveTo(x2, y2);
-//            Image1.Canvas.LineTo(x, y);
             x2 := x;
             y2 := y;
+
             rcode2 := calcRegCode(x2, y2);
          end;
+
       until (((rcode1 and rcode2) <> 0) or ((rcode1 or rcode2) = 0));
 
-
-      if ((rcode1 or rcode2) = 0) then
-      begin
-//         Image1.Canvas.Pen.Color := clBlue;
-
-	 case GraphMode and $0f of
+      case GraphMode and $0f of
 	  7, 15: fLine(x1, y1, x2, y2)
 	 else
           Line(x1, y1, x2, y2);
-	 end;
+      end;
 
-      end
-//      else
-//      begin
-//         Image1.Canvas.Pen.Color := clYellow;
-//         Image1.Canvas.MoveTo(x1, y1);
-//         Image1.Canvas.LineTo(x2, y2);
-//      end;
    end;
 end;
 
