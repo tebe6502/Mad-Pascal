@@ -16,9 +16,9 @@ begin
       (TemporaryBuf[3] = '; --- ForToDoCondition') then					//; --- ForToDoCondition	; 3
     begin
 
-     yes:=true;
+     yes := true;
 
-     arg:=GetARG(0);
+     arg := GetARG(0);
 
 
      for p:=6 to High(TemporaryBuf) do

@@ -656,6 +656,25 @@ begin
     end;
 
 
+   if ldy(0) and									// ldy Y		; 0
+      lda(1) and									// lda			; 1
+      SKIP(2) and									// SKIP			; 2
+      lda(3) then									// lda			; 3
+    if argMatch(0, 3) then
+    begin
+     TemporaryBuf[3] := #9'tya';
+    end;
+
+
+   if lda(0) and									// lda			; 0
+      SKIP(1) and									// SKIP			; 1
+      lda(2) then									// lda			; 2
+    if argMatch(0, 2) then
+    begin
+     TemporaryBuf[2] := '~';
+    end;
+
+
    if lda(0) and									// lda N		; 0
       cmp(1) and									// cmp			; 1
       SKIP(2) and									// SKIP			; 2
