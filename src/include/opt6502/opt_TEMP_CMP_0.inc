@@ -160,7 +160,7 @@ begin
 
       cmp_im_0(4) and										// cmp #$00		; 4
 
-      lda(2) and										// lda			; 2
+      (lda(2) or sta(2)) and									// lda|sta		; 2
       sta(3) and										// sta			; 3
 //      cmp_im_0(4) and										// cmp #$00		; 4
       (beq_a(5) or bne_a(5)) and								// beq|bne		; 5

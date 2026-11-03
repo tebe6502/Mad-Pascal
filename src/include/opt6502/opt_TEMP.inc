@@ -933,7 +933,9 @@ begin
       lda(4) then									// lda PRIME		; 4
     if argMatch(0, 4) then
     begin
-     TemporaryBuf[4] := '~';
+     TemporaryBuf[4] := TemporaryBuf[0];
+
+     TemporaryBuf[0] := '~';
     end;
 
 
@@ -941,7 +943,9 @@ begin
       lda(1) then									// lda PRIME		; 1
     if argMatch(0, 1) then
     begin
-     TemporaryBuf[1] := '~';
+     TemporaryBuf[1] := TemporaryBuf[0];
+
+     TemporaryBuf[0] := '~';
     end;
 
 
@@ -956,7 +960,7 @@ begin
     end;
 
 
-   if sta(0) and									// sta PRIME		; 0
+   if sta(0) and (sta_stack(0) = false) and						// sta PRIME		; 0
       dex(1) and									// dex			; 1
       											//			; 2
       opti(3) and									//; optimize 		; 3
