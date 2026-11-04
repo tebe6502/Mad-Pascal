@@ -32,16 +32,29 @@ begin
 	   begin								// jmp l_00FB		// p
  	    TemporaryBuf[4] := TemporaryBuf[p-4];
 
-	    TemporaryBuf[p-4] := '~';
-
-	    TemporaryBuf[p-2] := '~';
-	    TemporaryBuf[p-1] := '~';
-
+	    TemporaryBuf[p-1] := TemporaryBuf[p-3];
      	    TemporaryBuf[p] := #9'jne ' + TemporaryBuf[2];
+
+	    TemporaryBuf[p-4] := '~';
+	    TemporaryBuf[p-3] := '~';
+	    TemporaryBuf[p-2] := '~';
 
 	    TemporaryBuf[1] := #9'jmp ' + TemporaryBuf[2] + 'f';
 
 	    TemporaryBuf[5] := TemporaryBuf[2] + 'f';
+
+	    if sty(0) and
+	       ldy(6) and
+	       argMatch(0, 6) then
+	    begin
+	     TemporaryBuf[p-1] := TemporaryBuf[6];
+
+	     TemporaryBuf[6] := TemporaryBuf[0];
+
+	     TemporaryBuf[4] := #9'dey';
+
+     	     TemporaryBuf[0] := '~';
+	    end;
 
 	    yes:=false;
 	   end;

@@ -666,7 +666,7 @@ begin
     end;
 
 
-   if lda(0) and									// lda			; 0
+   if (lda(0) or sta(0)) and								// lda|sta		; 0
       SKIP(1) and									// SKIP			; 1
       lda(2) then									// lda			; 2
     if argMatch(0, 2) then
