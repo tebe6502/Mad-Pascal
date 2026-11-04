@@ -1,7 +1,7 @@
 //PROFILE-NO
 procedure Syntax(ExitCode: Byte);
 begin
-  (* Keep in sync with https://mads.atari8.info/doc/en/usage/ *)
+  (* Keep in sync with https://github.com/tebe6502/mad-pascal-en-mkdocs/blob/master/docs/usage.md *)
   WriteLn('');
   WriteLn('Syntax: mp <inputfile>.pas [options]');
   WriteLn('');
