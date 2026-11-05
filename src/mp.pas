@@ -350,7 +350,7 @@ uses
                     if pos('-CPU:', parameterUpperCase) = 1 then
                     begin
 
-                      parameterValue := copy(parameter, 6, 255);
+                      parameterValue := AnsiUpperCase(copy(parameter, 6, 255));
                       cpu := ParseCPUParameter(i, parameterValue);
 
                     end
