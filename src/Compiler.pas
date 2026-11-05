@@ -5043,7 +5043,8 @@ end;
 // ----------------------------------------------------------------------------
 
 
-{$i targets/generate_program_prolog.inc}
+{$i targets/generate_target_prolog.inc}
+{$i targets/generate_target_epilog.inc}
 
 
 // ----------------------------------------------------------------------------
@@ -20243,6 +20244,10 @@ begin
 
     asm65;
     asm65('VARINITSIZE'#9'= *-DATAORIGIN');
+
+    if target.id = TTargetID.X65 then
+      asm65('PROGRAM_END');
+
     asm65('VARDATASIZE'#9'= ' + IntToStr(GetVarDataSize));
 
     asm65;
@@ -20509,11 +20514,12 @@ end;
   asm65;
 
 
-  if DATA_BASE > 0 then
+  if target.id = TTargetID.X65 then
+    asm65(#9'?old_adr = *')
+  else if DATA_BASE > 0 then
     asm65(#9'org ' + HexWord(DATA_BASE))
   else
   begin
-
     asm65(#9'?adr = *');
     asm65(#9'ift (?adr < ?old_adr) && (?old_adr - ?adr < $120)');
     asm65(#9'?adr = ?old_adr');
@@ -20521,7 +20527,6 @@ end;
     asm65;
     asm65(#9'org ?adr');
     asm65(#9'?old_adr = *');
-
   end;
 
   CompileDataOrigin;
@@ -20563,8 +20568,7 @@ end;
 
   CompileResources;
 
-  asm65;
-  asm65(#9'end');
+  GenerateTargetEpilog;
 
   optimization.Optimizer.Finalize;
 

@@ -18,3 +18,6 @@
 {$ifdef x16}
   {$i system_x16.inc}
 {$endif}
+{$ifdef x65}
+  {$i system_x65.inc}
+{$endif}

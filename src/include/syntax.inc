@@ -7,7 +7,7 @@ begin
   WriteLn('');
   Writeln('-ipath:<folder>    Add the folder <folder> to the unit include path');
   Writeln('-define:<symbol>   Define the symbol <symbol>');
-  Writeln('-target:<platform> Specify the target platform: a8 (default), c4p, c64, neo, raw, x16');
+  Writeln('-target:<platform> Specify the target platform: a8 (default), c4p, c64, neo, raw, x16, x65');
   Writeln('-cpu:<cpu>         Specify the CPU mode: 6502 (default), 65C02, 65816');
   WriteLn('-code:<address>    Specify the memory start address for the code');
   WriteLn('-data:<address>    Specify the memory start address for variables and arrays');
@@ -94,8 +94,9 @@ begin
       else if parameterValue = 'NEO' then Result := TTargetID.NEO
         else if parameterValue = 'RAW' then Result := TTargetID.RAW
           else if parameterValue = 'X16' then Result := TTargetID.X16
-            else
-              ParameterError(index, 'Invalid target ''' + parameterValue +
- '''. Use on of ''A8, C64, C4P, NEO, RAW, X16''.');
+            else if parameterValue = 'X65' then Result := TTargetID.X65
+              else
+                ParameterError(index, 'Invalid target ''' + parameterValue +
+ '''. Use on of ''A8, C64, C4P, NEO, RAW, X16, X65''.');
 end;
 //PROFILE-YES
