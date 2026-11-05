@@ -254,6 +254,15 @@ end;
 
    CODEORIGIN_BASE := target.codeorigin + 3;
 
+  end else if (target.id = TTargetID.X65) then begin
+   asm65;
+   asm65(#9'opt c+f-h-');
+   asm65;
+   asm65(#9'org [a($ffff), a($' + IntToHex(target.codeorigin, 4) + '), a(PROGRAM_END-1)], $' + IntToHex(target.codeorigin, 4));
+   asm65(#9'jmp START');
+   asm65;
+
+   CODEORIGIN_BASE := target.codeorigin + 3;
   end;
 
   asm65('CODEORIGIN');

@@ -6,7 +6,7 @@ interface
 
 type
 
-  TTargetID = (NONE, A8, C4P, C64, NEO, RAW, X16);
+  TTargetID = (NONE, A8, C4P, C64, NEO, RAW, X16, X65);
 
   TCPU = (NONE, CPU_6502, CPU_65C02, CPU_65816);
 
@@ -131,6 +131,18 @@ begin
       target.header[5] := 'org $900';
       target.header[6] := ''; // asm65;
       target.header[7] := 'END';
+
+    end;
+
+    TTargetID.X65: begin
+
+      // X65 binary target
+      target.cpu := TCPU.cpu_65c02;
+      target.Name := 'X65';
+      target.buf := $0200;
+      target.zpage := $0000;
+      target.eol := $0000000D;
+      target.codeorigin := $0300;
 
     end;
 
