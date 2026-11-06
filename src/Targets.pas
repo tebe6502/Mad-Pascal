@@ -143,6 +143,7 @@ begin
       target.zpage := $0000;
       target.eol := $0000000D;
       target.codeorigin := $0300;
+      target.header[0] := 'END';
 
     end;
 
