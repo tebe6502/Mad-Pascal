@@ -197,7 +197,7 @@ begin
 
        sta_stack(i) and										// sta :STACKORIGIN+STACKWIDTH	; 0
        lda_stack(i+1) and									// lda :STACKORIGIN		; 1
-       AND_ORA_EOR(i+2) and (and_ora_eor_stack(i+2) = false) and				// ora|and|eor			; 2
+       AND_ORA_EOR_VAL(i+2) and									// ora|and|eor			; 2	~:STACKORIGIN
        sta_stack(i+3) and									// sta :STACKORIGIN		; 3
        lda_stack(i+4) and									// lda :STACKORIGIN+STACKWIDTH	; 4
  //      bne(i+5) and										// bne @+			; 5

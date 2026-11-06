@@ -375,7 +375,7 @@ begin
        lda_a(i) and										// lda					; 0
        sta_stack(i+1) and									// sta :STACKORIGIN+STACKWIDTH		; 1
        lda_a(i+2) and										// lda					; 2
-       and_ora_eor(i+3) and (AND_ORA_EOR_STACK(i+3) = false) and				// and|ora|eor				; 3
+       AND_ORA_EOR_VAL(i+3) and									// and|ora|eor				; 3	~:STACKORIGIN
        sta_stack(i+4) and									// sta :STACKORIGIN			; 4
        lda_val(i+5) then									// lda					; 5	~:STACKORIGIN
 //       sta_stack(i+6) then									// sta :STACKORIGIN+STACKWIDTH		; 6
@@ -384,6 +384,24 @@ begin
 	argMatch(i+1, i+6) then
       begin
 	listing[i]   := '';
+	listing[i+1] := '';
+
+	exit(false);
+      end;
+
+
+    if lda_val(i) and										// lda					; 0	~:STACKORIGIN
+       sta_stack(i+1) and									// sta :STACKORIGIN			; 1
+       lda_val(i+2) and										// lda					; 2	~:STACKORIGIN
+       AND_ORA_EOR_VAL(i+3) and									// and|ora|eor				; 3	~:STACKORIGIN
+       AND_ORA_EOR_VAL(i+4) and									// and|ora|eor				; 4
+       sta_a(i+5) and										// sta					; 5
+       (lda_stack(i+6) or ldy_stack(i+6)) then							// lda|ldy :STACKORIGIN			; 6
+     if argMatch(i+1, i+6) then
+      begin
+	listing[i+6] := GetCMD(i+6) + GetARG(i);
+
+	listing[i] := '';
 	listing[i+1] := '';
 
 	exit(false);

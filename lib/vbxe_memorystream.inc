@@ -61,10 +61,10 @@ procedure TVBXEMemoryStream.SetBank;
 
 *)
 var bnk: byte;
-    adr: word;
+    //adr: word;
 begin
 	bnk:=Position shr 12 or $80;
-	adr:=Position and $0fff or VBXE_WINDOW;
+	//adr:=Position and $0fff or VBXE_WINDOW;
 
 	VBXEMemoryBank(bnk);
 end;

@@ -4,7 +4,7 @@ unit gif;
 @author: Bjarke Viksoe, Tomasz 'Tebe' Biela
 @name: GIF
 
-@version: 1.4
+@version: 1.5
 
 @description:
 
@@ -352,12 +352,12 @@ begin
 	{ valid code sizes 2-9 bits }
 	if not ((LZWCodeSize >= 2) and (LZWCodeSize <= 9)) then Error(geBadCodeSize);
 
-	CurrCodeSize := succ(LZWCodeSize); { set the initial code size }
-	ClearCode := 1 SHL LZWCodeSize;    { set the clear code }
-	EndingCode := succ(ClearCode);     { set the ending code }
-	HighCode := pred(ClearCode);       { set the highest code not needing decoding }
+	CurrCodeSize := succ(LZWCodeSize);  { set the initial code size }
+	ClearCode := BitShift[LZWCodeSize]; { set the clear code }
+	EndingCode := succ(ClearCode);      { set the ending code }
+	HighCode := pred(ClearCode);        { set the highest code not needing decoding }
 
-	BytesLeft := 0;                    { clear other variables }
+	BytesLeft := 0;                     { clear other variables }
 	BitsLeft := 0;
 	CurrentX := 0;
 	CurrentY := 0;
@@ -451,9 +451,9 @@ begin
 	 begin
 		  if C = ClearCode then { code is a clear code - so clear }
 		  begin
-				CurrCodeSize := LZWCodeSize + 1;{ reset the code size }
-				Slot := EndingCode + 1;         { set slot for next new code }
-				TopSlot := 1 shl CurrCodeSize;  { set max slot number }
+				CurrCodeSize := LZWCodeSize + 1;    { reset the code size }
+				Slot := EndingCode + 1;             { set slot for next new code }
+				TopSlot := BitShift[CurrCodeSize];  { set max slot number }
 
 				while C = ClearCode do C := NextCode; { read until all clear codes gone - shouldn't happen }
 

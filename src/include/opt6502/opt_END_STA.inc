@@ -278,12 +278,12 @@
 
      if	sta_stack(i+1) and								// sta :STACKORIGIN		; 1
 
-       ((lda_a(i) and (lda_stack(i) = false)) or					// lda				; 0
-         (and_ora_eor(i) and (and_ora_eor_stack(i) = false)) or				// and|ora|eor			; 0
-	 asl_a(i) or									// asl @			; 0
-	 rol_a(i) or									// rol @			; 0
-	 add_sub_val(i) or								// add|sub			; 0
-	 adc_sbc_val(i) ) then								// adc|sbc			; 0
+       (lda_val(i) or									// lda				; 0	~:STACKORIGIN
+        and_ora_eor_val(i) or								// and|ora|eor			; 0	~:STACKORIGIN
+	asl_a(i) or									// asl @			; 0
+	rol_a(i) or									// rol @			; 0
+	add_sub_val(i) or								// add|sub			; 0	~:STACKORIGIN
+	adc_sbc_val(i) ) then								// adc|sbc			; 0	~:STACKORIGIN
 
        begin
 

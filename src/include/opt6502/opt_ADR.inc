@@ -340,7 +340,7 @@ begin
 
     if (p > 1) and
        lda(p-2) and (lda_stack(p-2) = false) and					// lda					; p-2		+-WORD	[byte]
-       and_ora_eor(p-1) and (and_ora_eor_stack(p-1) = false) and 			// and|ora|eor				; p-1
+       and_ora_eor_val(p-1) and					 			// and|ora|eor				; p-1
 											// sta :STACKORIGIN			; p
        lda_a(p+1) and									// lda					; p+1
        asl_stack(p+2) and								// asl :STACKORIGIN			; p+2
@@ -1121,7 +1121,7 @@ begin
 
     if (p > 2) and
        lda_val(p-3) and (lda_im(p-3) = false) and					// lda					; p-3		+-BYTE
-       and_ora_eor(p-2) and (and_ora_eor_stack(p-2) = false) and 			// and|ora|eor				; p-2
+       and_ora_eor_val(p-2) and								// and|ora|eor				; p-2
        add_sub_val(p-1) and 								// add|sub				; p-1
 											// sta :STACKORIGIN			; p
        lda_a(p+1) and									// lda 					; p+1
