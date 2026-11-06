@@ -14,15 +14,12 @@ function ReadVBXEMemoryByte(var Position: cardinal): byte;
 @description:
 
 *)
-var bnk: byte;
-    adr: word;
 begin
-	bnk:=Position shr 12 or $80;
-	adr:=Position and $0fff or VBXE_WINDOW;
+	Result := Position shr 12 or $80;
 
-	VBXEMemoryBank(bnk);
+	VBXEMemoryBank(Result);
 
-	Result:=peek(adr);
+	Result := mem[Position and $0fff or VBXE_WINDOW];
 
 	inc(Position);
 end;
@@ -34,14 +31,12 @@ procedure WriteVBXEMemoryByte(var Position: cardinal; a: byte);
 
 *)
 var bnk: byte;
-    adr: word;
 begin
-	bnk:=Position shr 12 or $80;
-	adr:=Position and $0fff or VBXE_WINDOW;
+	bnk := Position shr 12 or $80;
 
 	VBXEMemoryBank(bnk);
 
-	poke(adr, a);
+	mem[Position and $0fff or VBXE_WINDOW] := a;
 
 	inc(Position);
 end;
