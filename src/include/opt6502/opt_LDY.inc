@@ -23,7 +23,7 @@ begin
     if iny(i) and										// iny					; 0
        lda_stack(i+1) and									// lda :STACKORIGIN			; 1
        and_ora_eor_im(i+2) and									// and|ora|eor #			; 2
-       sta_stack(i+3) then									// sta :STACKORIGIN			; 3
+       sta_a(i+3) and (iy(i+3) = false) then							// sta					; 3
      begin
 	listing[i] := listing[i+1];
 	listing[i+1] := listing[i+2];
@@ -36,7 +36,7 @@ begin
 
     if iny(i) and										// iny					; 0
        and_ora_eor_im(i+1) and									// and|ora|eor #			; 1
-       sta_stack(i+2) then									// sta :STACKORIGIN			; 2
+       sta_a(i+2) and (iy(+2) = false) then							// sta					; 2
      begin
 	listing[i] := listing[i+1];
 	listing[i+1] := listing[i+2];
@@ -163,7 +163,7 @@ begin
 
 
     if (iny(i) or dey(i)) and									// iny|dey				; 0
-       lda_a(i+1) and (iy(i+1) = false) and							// lda					; 1
+       (lda_a(i+1) or and_ora_eor(i+1)) and (iy(i+1) = false) and				// lda					; 1
        sta_a(i+2) and (iy(i+2) = false) and							// sta					; 2
        (ldy(i+3) or mwy(i+3) or mvy(i+3) or tay(i+3)) then					// ldy|mwy|mvy|tay			; 3
     begin

@@ -546,44 +546,6 @@ begin
        end;
 
 
-    if sbc_im_0(i+10) and								// sbc #$00				; 10
-
-       sbc_im_0(i+4) and								// sbc #$00				; 4
-
-       lda_val(i) and									// lda K				; 0	~:STACKORIGIN
-       sub_im_1(i+1) and								// sub #$01				; 1
-       sta_a(i+2) and									// sta K				; 2
-       lda_a(i+3) and									// lda K+1				; 3
-//       sbc_im_0(i+4) and								// sbc #$00				; 4
-       sta_a(i+5) and									// sta K+1				; 5
-       lda_a(i+6) and									// lda K+2				; 6
-       sbc_im_0(i+7) and								// sbc #$00				; 7
-       sta_a(i+8) and									// sta K+2				; 8
-       lda_a(i+9) and									// lda K+3				; 9
-//       sbc_im_0(i+10) and								// sbc #$00				; 10
-       sta_a(i+11) then									// sta K+3				; 11
-      if argMatch(i, i+2) and
-	 argMatch(i+3, i+5) and
-	 argMatch(i+6, i+8) and
-	 argMatch(i+9, i+11) then
-     begin
-
-	listing[i+1] := #9'bne @+1';
-	listing[i+2] := listing[i+3];
-	listing[i+3] := #9'bne @+';
-	listing[i+4] := listing[i+6];
-	listing[i+5] := #9'sne';
-	listing[i+6] := #9'dec ' + GetARG(i+9);
-	listing[i+7] := #9'dec ' + GetARG(i+4);
-	listing[i+8] := '@:';
-	listing[i+9] := #9'dec ' + GetARG(i+2);
-	listing[i+10] := '@:';
-	listing[i+11] := #9'dec ' + GetARG(i);
-
-	exit(false);
-    end;
-
-
     if (l = 6) and
        lda_val(i) and									// lda W				; 0	~:STACKORIGIN
        sub_im(i+1) and (sub_im_0(i+1) = false) and					// sub #$01..$ff			; 1
