@@ -20,6 +20,32 @@ begin
      end;
 
 
+    if iny(i) and										// iny					; 0
+       lda_stack(i+1) and									// lda :STACKORIGIN			; 1
+       and_ora_eor_im(i+2) and									// and|ora|eor #			; 2
+       sta_stack(i+3) then									// sta :STACKORIGIN			; 3
+     begin
+	listing[i] := listing[i+1];
+	listing[i+1] := listing[i+2];
+	listing[i+2] := listing[i+3];
+	listing[i+3] := #9'iny';
+
+      	exit(false);
+     end;
+
+
+    if iny(i) and										// iny					; 0
+       and_ora_eor_im(i+1) and									// and|ora|eor #			; 1
+       sta_stack(i+2) then									// sta :STACKORIGIN			; 2
+     begin
+	listing[i] := listing[i+1];
+	listing[i+1] := listing[i+2];
+	listing[i+2] := #9'iny';
+
+      	exit(false);
+     end;
+
+
     if ldy(i) and										// ldy					; 0
        lda_a(i+1) and										// lda					; 1
        sta_a(i+2) and										// sta					; 2
