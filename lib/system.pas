@@ -4,7 +4,7 @@ unit system;
  @author: Tomasz Biela (Tebe)
  @name: Standard supported functions of Mad Pascal
 
- @version: 1.7
+ @version: 1.8
 
  @description:
  <http://www.freepascal.org/docs-html/rtl/system/index-5.html>
@@ -2534,6 +2534,8 @@ begin
     result := 0;
 
     if s1len > s2len then exit;
+    
+    if (s1len = 0) or (s2len = 0) then exit;
 
     for i := 1 to s2len - s1len + 1 do
     begin
