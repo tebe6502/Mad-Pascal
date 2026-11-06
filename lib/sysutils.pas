@@ -431,7 +431,7 @@ begin
 
   Result[0]:=chr(j+1);
 
-  for k:=0 to j do Result[k+1]:=a[i+k];
+  for k:=0 to j do Result[k+1]:=a[byte(k+i)];
 
  end;
 
