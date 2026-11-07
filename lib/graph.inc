@@ -540,9 +540,10 @@ procedure FloodFillH(x,y: smallint; color: byte);
 @description:
 Horizontal flood fill
 *)
-var xStack: array [0..255] of word;
+var [striped] xStack: array [0..255] of word;
     yStack: array [0..255] of byte;
-    stackEntry, sx: word;
+    sx: word;
+    stackEntry: word;
     oldColor: byte;
     spanAbove: Boolean register;
     spanBelow: Boolean register;
@@ -572,7 +573,7 @@ begin
 
 				belowColor := GetPixel(x, y+1);
 
-				if (spanBelow=false) and (belowColor = oldColor) then begin
+				if (spanBelow = false) and (belowColor = oldColor) then begin
 
 					xStack[stackEntry]  := x;
 					yStack[stackEntry]  := y+1;
@@ -615,7 +616,7 @@ begin
 		x := xStack[stackEntry];
 		y := yStack[stackEntry];
 
-	until stackEntry=0;
+	until stackEntry = 0;
 
 end;
 

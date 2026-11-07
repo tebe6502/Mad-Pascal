@@ -6,6 +6,29 @@
 procedure opt_TEMP_EAX;
 begin
 
+
+  if lda_eax_1(0) and
+     (TemporaryBuf[1] = #9'add #$01') and
+     (TemporaryBuf[2] = #9'sta @REAL_MUL.A+1') and
+     lda_eax_2(3) and
+     adc_im_0(4) and
+     (TemporaryBuf[5] = #9'sta @REAL_MUL.A+2') and
+     lda_eax_3(6) and
+     adc_im_0(7) and
+     (TemporaryBuf[8] = #9'sta @REAL_MUL.A+3') then
+  begin
+   TemporaryBuf[0] := #9'inl @REAL_MUL.A+1';
+   TemporaryBuf[1] := '~';
+   TemporaryBuf[2] := '~';
+   TemporaryBuf[3] := '~';
+   TemporaryBuf[4] := '~';
+   TemporaryBuf[5] := '~';
+   TemporaryBuf[6] := '~';
+   TemporaryBuf[7] := '~';
+   TemporaryBuf[8] := '~';
+  end;
+
+
   if sta(1) and
      (sta(2) = false) then
   begin
