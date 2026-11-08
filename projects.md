@@ -516,6 +516,8 @@ Daniel Koźmiński
 
 [https://gitlab.com/bocianu/flob](https://gitlab.com/bocianu/flob)
 
+[FloB WEB](https://bocianu.gitlab.io/flob/)
+
 **Platform**  
 Atari 8-bit
 

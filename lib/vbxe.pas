@@ -331,10 +331,13 @@ procedure HLine(x1, x2: word; y1: byte);
 var x: word;
 begin
 
-      if x2 >= x1 then
-       for x := x1 to x2 do PutPixel(x, y1)
-      else
-       for x := x2 to x1 do PutPixel(x, y1);
+  if x1 > x2 then begin
+   x := x2;
+   x2 := x1;
+   x1 := x;  
+  end;
+
+  for x := x1 to x2 do PutPixel(x, y1);
 
 end;
 
@@ -344,13 +347,16 @@ procedure VLine(x1: word; y1, y2: byte);
 @description:
 
 *)
-var y: word;
+var y: byte;
 begin
 
-      if y2 >= y1 then
-       for y := y1 to y2 do PutPixel(x1, y)
-      else
-       for y := y2 to y1 do PutPixel(x1, y);
+  if y1 > y2 then begin
+   y := y2;
+   y2 := y1;
+   y1 := y;  
+  end;
+
+  for y := y1 to y2 do PutPixel(x1, y);
 
 end;
 

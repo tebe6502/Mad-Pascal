@@ -337,10 +337,14 @@ begin
        end;
 
 
-    if lda(i) and									// lda					; 0
-       adc_im_0(i+1) and								// adc #$00				; 1
-       sta_stack(i+2) and								// sta :STACKORIGIN			; 2
+    if adc_im_0(i+1) and								// adc #$00				; 1
+
        ldy(i+3) and									// ldy					; 3
+
+       lda(i) and									// lda					; 0
+//       adc_im_0(i+1) and								// adc #$00				; 1
+       sta_stack(i+2) and								// sta :STACKORIGIN			; 2
+//       ldy(i+3) and									// ldy					; 3
        lda_stack(i+4) and 								// lda :STACKORIGIN			; 4
        add(i+5) then									// add					; 5
      if argMatch(i+2, i+4) then

@@ -303,6 +303,30 @@ begin
     end;
 
 
+   if adc_im_0(3) and									// adc #$00			; 3
+
+      add(0) and									// add				; 0
+      sta(1) and									// sta :STACKORIGIN		; 1
+      lda(2) and (iy(2) = false) and							// lda :STACKORIGIN+STACKWIDTH	; 2
+//      adc_im_0(3) and									// adc #$00			; 3
+      sta(4) and									// sta :STACKORIGIN+STACKWIDTH	; 4
+      asl_stack(5) and									// asl :STACKORIGIN		; 5
+      rol_stack(6) and									// rol :STACKORIGIN+STACKWIDTH	; 6
+      lda_stack(7) then									// lda :STACKORIGIN		; 7
+    if argMatch(2, 4) and
+       argMatch(1, 5) and
+       argMatch(5, 7) then
+    begin
+     TemporaryBuf[1] := '~';
+     TemporaryBuf[2] := #9'scc';
+     TemporaryBuf[3] := #9'inc ' + GetARG(4);
+     TemporaryBuf[4] := '~';
+     TemporaryBuf[5] := #9'asl @';
+
+     TemporaryBuf[7] := '~';
+    end;
+
+
    if adc_im_0(3) and									// adc #$00		; 3
 
       add(0) and									// add			; 0
