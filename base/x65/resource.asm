@@ -4,13 +4,13 @@
 ; -----------------------------------------------------------------------
 ; X65 resources
 ;
-; Supported: RCDATA, RCASM, RELOC
+; Supported: RCDATA, RCASM
 ;
 ; Each resource becomes a separate XEX segment. This is required because
 ; X65 target uses `f-` (no gap fill) and `h-` (no auto headers) — every
 ; segment must be explicitly declared with:
 ;
-;     org [a($ffff), a(start), a(end-1)], start
+;     org [a(start), a(end-1)], start
 ;
 ; -----------------------------------------------------------------------
 
