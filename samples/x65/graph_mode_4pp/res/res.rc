@@ -1,0 +1,2 @@
+RES_BITMAP          rcdata 'res/mode1_bitmap_seed152.bin'
+RES_DISPLAYLIST     rcasm  'res/displaylist.asm'
