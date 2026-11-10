@@ -1,0 +1,13 @@
+	icl '..\inc\const.inc'
+
+DL_INS_LOAD_MEMORY            = $03;
+DL_INS_LM_MEMORY_SCAN         = %00010000;
+DL_MODE_PALETTE_BITMAP        = $09;
+DL_INS_JUMP                   = $02;
+DL_INS_DL_INTERRUPT           = %10000000;
+
+	.byte DL_INS_LOAD_MEMORY | DL_INS_LM_MEMORY_SCAN
+	.word RES_BITMAP
+    :ROWS .byte DL_MODE_PALETTE_BITMAP
+    .byte DL_INS_JUMP | DL_INS_DL_INTERRUPT
+    .word RES_DISPLAYLIST
