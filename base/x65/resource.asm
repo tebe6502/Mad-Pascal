@@ -24,14 +24,14 @@
 	 ert 'RCASM: Overlap memory with program code'
 	eif
 
-	; Forward reference — `len_%%lab` rozwiązane przez MADS w kolejnych passach
+	; Forward reference — `len_%%lab`
 	org [a(main.%%lab), a(main.%%lab + len_%%lab - 1)], main.%%lab
 
-	icl %%1
+	icl %%nam
 
 	len_%%lab = * - main.%%lab
 
-	.print '$R RCASM   ', main.%%lab, '..', main.%%lab + len_%%lab - 1, " %%1"
+	.print '$R RCASM   ', main.%%lab, '..', main.%%lab + len_%%lab - 1, " %%nam"
 
 .endm
 
@@ -45,13 +45,13 @@
 	 ert 'RCDATA: Overlap memory'
 	eif
 
-	len_%%lab = .filesize(%%1) - %%ofs
+	len_%%lab = .filesize(%%nam) - %%ofs
 
 	org [a(main.%%lab), a(main.%%lab + len_%%lab - 1)], main.%%lab
 
-	ins %%1, %%ofs
+	ins %%nam, %%ofs
 
-	.print '$R RCDATA  ', main.%%lab, '..', main.%%lab + len_%%lab - 1, " %%1"
+	.print '$R RCDATA  ', main.%%lab, '..', main.%%lab + len_%%lab - 1, " %%nam"
 
 .endm
 
