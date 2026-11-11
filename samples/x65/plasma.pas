@@ -146,7 +146,7 @@ begin
   InitDivision16;
 
   repeat
-    repeat until lo(cgia.raster) < 240;
+    repeat until lo(cgia.raster) = 239;
     doPlasma;
   until false;
 end.
