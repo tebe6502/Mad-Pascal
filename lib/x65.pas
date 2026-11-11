@@ -173,7 +173,7 @@ var
   //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   // Main access to the CGIA registers
   //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-  cgia: TCGIA_Regs absolute $FF00;
+  [volatile] cgia: TCGIA_Regs absolute $FF00;
 
   //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   // Plane mapping (equivalent to a C union)
@@ -182,28 +182,28 @@ var
   //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
   // Plane 0 ($FF40)
-  plane0_bckgnd : TCGIA_Plane_Bckgnd absolute $FF40;
-  plane0_ham    : TCGIA_Plane_Ham    absolute $FF40;
-  plane0_affine : TCGIA_Plane_Affine absolute $FF40;
-  plane0_sprite : TCGIA_Plane_Sprite absolute $FF40;
+  [volatile] plane0_bckgnd : TCGIA_Plane_Bckgnd absolute $FF40;
+  [volatile] plane0_ham    : TCGIA_Plane_Ham    absolute $FF40;
+  [volatile] plane0_affine : TCGIA_Plane_Affine absolute $FF40;
+  [volatile] plane0_sprite : TCGIA_Plane_Sprite absolute $FF40;
 
   // Plane 1 ($FF50)
-  plane1_bckgnd : TCGIA_Plane_Bckgnd absolute $FF50;
-  plane1_ham    : TCGIA_Plane_Ham    absolute $FF50;
-  plane1_affine : TCGIA_Plane_Affine absolute $FF50;
-  plane1_sprite : TCGIA_Plane_Sprite absolute $FF50;
+  [volatile] plane1_bckgnd : TCGIA_Plane_Bckgnd absolute $FF50;
+  [volatile] plane1_ham    : TCGIA_Plane_Ham    absolute $FF50;
+  [volatile] plane1_affine : TCGIA_Plane_Affine absolute $FF50;
+  [volatile] plane1_sprite : TCGIA_Plane_Sprite absolute $FF50;
 
   // Plane 2 ($FF60)
-  plane2_bckgnd : TCGIA_Plane_Bckgnd absolute $FF60;
-  plane2_ham    : TCGIA_Plane_Ham    absolute $FF60;
-  plane2_affine : TCGIA_Plane_Affine absolute $FF60;
-  plane2_sprite : TCGIA_Plane_Sprite absolute $FF60;
+  [volatile] plane2_bckgnd : TCGIA_Plane_Bckgnd absolute $FF60;
+  [volatile] plane2_ham    : TCGIA_Plane_Ham    absolute $FF60;
+  [volatile] plane2_affine : TCGIA_Plane_Affine absolute $FF60;
+  [volatile] plane2_sprite : TCGIA_Plane_Sprite absolute $FF60;
 
   // Plane 3 ($FF70)
-  plane3_bckgnd : TCGIA_Plane_Bckgnd absolute $FF70;
-  plane3_ham    : TCGIA_Plane_Ham    absolute $FF70;
-  plane3_affine : TCGIA_Plane_Affine absolute $FF70;
-  plane3_sprite : TCGIA_Plane_Sprite absolute $FF70;
+  [volatile] plane3_bckgnd : TCGIA_Plane_Bckgnd absolute $FF70;
+  [volatile] plane3_ham    : TCGIA_Plane_Ham    absolute $FF70;
+  [volatile] plane3_affine : TCGIA_Plane_Affine absolute $FF70;
+  [volatile] plane3_sprite : TCGIA_Plane_Sprite absolute $FF70;
 
 implementation
 
