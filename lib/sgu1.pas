@@ -5,7 +5,7 @@ unit sgu1;
   @author: zbyti
   @name: SGU-1 Sound Generation Unit (Corrected with X65 Memory Map)
   @version: 1.0
-  @description: Dokładne mapowanie rejestrów SGU-1 oparte na X65 Memory Map CSV.
+  @description: Exact SGU-1 register mapping based on the X65 Memory Map CSV.
   @see: https://docs.x65.zone/
 *)
 
@@ -36,7 +36,7 @@ const
   SGU_F1_CUT_SWEEP        = %01000000;
   SGU_F1_DIAG             = %10000000;
 
-  // WAVE (bity 0-2 w R7 operatora)
+  // WAVE (bits 0-2 in operator R7)
   SGU_WAVE_SINE     = 0;
   SGU_WAVE_TRIANGLE = 1;
   SGU_WAVE_SAW      = 2;
@@ -47,7 +47,7 @@ const
   SGU_WAVE_SAMPLE   = 7;
 
 type
-  // Struktura 8 rejestrów jednego Operatora (rozmiar: 8 bajtów)
+  // Structure of 8 registers of one Operator (size: 8 bytes)
   TOperatorRegs = record
     r0_mul_ksr_vib_trm: byte; // $x0: [7]TRM [6]VIB [5:4]KSR [3:0]MUL
     r1_tl_ksl         : byte; // $x1: [7:6]KSL [5:0]TL_lo6
@@ -59,7 +59,7 @@ type
     r7_out_ar_msb_dr_msb_wave: byte; // $x7: [7:5]OUT [4]AR_msb [3]DR_msb [2:0]WAVE
   end;
 
-  // Struktura sprzętowa Sweep (rozmiar: 4 bajty)
+  // Hardware Sweep structure (size: 4 bytes)
   TSweepRegs = record
     speed_lo: byte;
     speed_hi: byte;
@@ -67,15 +67,15 @@ type
     bound   : byte;
   end;
 
-  // Pełny 64-bajtowy rejestr kanału (zgodny z mapą pamięci CSV)
+  // Full 64-byte channel register (compatible with CSV memory map)
   TSGU_ChannelRegs = record
-    // 4 Operatory (32 bajty) - CSV nazywa je OP1..OP4, w docs to OP0..OP3
+    // 4 Operators (32 bytes) - CSV names them OP1..OP4, docs call them OP0..OP3
     op1: TOperatorRegs; // Offset $00-$07
     op2: TOperatorRegs; // Offset $08-$0F
     op3: TOperatorRegs; // Offset $10-$17
     op4: TOperatorRegs; // Offset $18-$1F
 
-    // Główne rejestry kanału (10 bajtów)
+    // Main channel registers (10 bytes)
     freq_lo: byte; // $20
     freq_hi: byte; // $21
     vol    : byte; // $22
@@ -87,7 +87,7 @@ type
     duty   : byte; // $28
     reson  : byte; // $29
 
-    // PCM (6 bajtów)
+    // PCM (6 bytes)
     pcmpos_lo: byte; // $2A
     pcmpos_hi: byte; // $2B
     pcmbnd_lo: byte; // $2C
@@ -95,29 +95,29 @@ type
     pcmrst_lo: byte; // $2E
     pcmrst_hi: byte; // $2F
 
-    // Sweeps (12 bajtów)
+    // Sweeps (12 bytes)
     sw_freq: TSweepRegs; // $30-$33
     sw_vol : TSweepRegs; // $34-$37
     sw_cut : TSweepRegs; // $38-$3B
 
-    // Misc (3 bajty)
+    // Misc (3 bytes)
     restimer_lo: byte; // $3C
     restimer_hi: byte; // $3D
     lfo_w      : byte; // $3E
 
-    // Selektor (1 bajt)
+    // Selector (1 byte)
     channel_select: byte; // $3F
   end;
 
 var
-  // Główny rekord mapowany na okno sprzętowe
+  // Main record mapped to the hardware window
   sgu: TSGU_ChannelRegs absolute SGU_BASE_ADDR;
   
-  // Bezpośredni dostęp do selektora
+  // Direct access to the selector
   sgu_selector: byte absolute SGU_SEL_ADDR;
   
-  // Sprytny trik: w trybie kanału offset $20 to freq_lo. 
-  // Ale gdy sgu_selector = SGU_BANK_SERVICE, offset $20 to Master Volume!
+  // Clever trick: in channel mode offset $20 is freq_lo.
+  // But when sgu_selector = SGU_BANK_SERVICE, offset $20 is Master Volume!
   sgu_master_vol: byte absolute SGU_BASE_ADDR + $20; 
 
 implementation
