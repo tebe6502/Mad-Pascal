@@ -25,6 +25,8 @@ _KRLChar:
 		bcc _KRLLoop
 		cmp #$7F
 		bcs _KRLLoop
+		cpy #$FF
+		beq _KRLLoop
 		sta @buf+1, Y
 		@putchar
 		iny
