@@ -111,14 +111,14 @@ type
 
 var
   // Main record mapped to the hardware window
-  sgu: TSGU_ChannelRegs absolute SGU_BASE_ADDR;
+  [volatile] sgu: TSGU_ChannelRegs absolute SGU_BASE_ADDR;
   
   // Direct access to the selector
-  sgu_selector: byte absolute SGU_SEL_ADDR;
+  [volatile] sgu_selector: byte absolute SGU_SEL_ADDR;
   
   // Clever trick: in channel mode offset $20 is freq_lo.
   // But when sgu_selector = SGU_BANK_SERVICE, offset $20 is Master Volume!
-  sgu_master_vol: byte absolute SGU_BASE_ADDR + $20; 
+  [volatile] sgu_master_vol: byte absolute SGU_BASE_ADDR + $20;
 
 implementation
 end.
