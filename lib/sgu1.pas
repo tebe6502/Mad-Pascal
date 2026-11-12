@@ -203,8 +203,6 @@ procedure SGU_Reset;
 
 implementation
 
-// Bring-up step 1: wipe every channel's registers (like a hardware reset).
-// Does not touch the selector byte itself or master volume — the chip stays muted.
 procedure SGU_Reset;
 var
   channelIndex: byte;
