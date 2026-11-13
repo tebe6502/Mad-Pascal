@@ -16,7 +16,11 @@ procedure CursorOff;
 @description: Hide cursor
 *)
 begin
-
+	asm
+		stz DParameters
+		@SendMessage
+		dta 2, 19
+	end;
 end;
 
 
@@ -25,7 +29,12 @@ procedure CursorOn;
 @description: Display cursor
 *)
 begin
-
+	asm
+		lda #1
+		sta DParameters
+		@SendMessage
+		dta 2, 19
+	end;
 end;
 
 procedure ClrScr;
