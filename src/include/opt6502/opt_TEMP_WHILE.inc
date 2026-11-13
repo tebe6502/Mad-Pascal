@@ -211,9 +211,6 @@ begin
 	       cmp(i-1) and 					// cmp		; -1
 	       (argMatch(i-3, i) = false) then begin yes := true; Break end;
 {
-	    else
-	    begin
-
 		writeln(TemporaryBuf[i-7]);
 		writeln(TemporaryBuf[i-6]);
 		writeln(TemporaryBuf[i-5]);
@@ -223,8 +220,6 @@ begin
 		writeln(TemporaryBuf[i-1]);
 		writeln(TemporaryBuf[i]);
 		writeln('----------');
-
-	    end;
 }
 
 	    Break;
@@ -277,6 +272,20 @@ begin
 	         TemporaryBuf[10] := #9'add ' + getARG(9);
 
                TemporaryBuf[9] := TemporaryBuf[8];
+	       TemporaryBuf[8] := '~';
+
+	       Break;
+	      end;
+
+
+            if ldy(8) and				// ldy			; 8
+	       lda(9) then				// lda			; 9
+	      if argMatch(i-2, 8) then
+	      begin
+
+               TemporaryBuf[i-2] := #9'ldy ' + GetARG(i-2);
+	       TemporaryBuf[i-1] := #9'cpy ' + GetARG(i-1);
+
 	       TemporaryBuf[8] := '~';
 
 	       Break;
