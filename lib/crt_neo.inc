@@ -19,7 +19,7 @@ begin
 	asm
 		stz DParameters
 		@SendMessage
-		dta 2, 19
+		dta 2,19
 	end;
 end;
 
@@ -33,7 +33,7 @@ begin
 		lda #1
 		sta DParameters
 		@SendMessage
-		dta 2, 19
+		dta 2,19
 	end;
 end;
 
