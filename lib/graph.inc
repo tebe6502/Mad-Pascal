@@ -641,7 +641,7 @@ var xr,yr: smallint;
 
 
  procedure testPixel;
- begin 
+ begin
 
    if GetPixel(xr,yr) = oldcolor then begin
 
@@ -653,9 +653,9 @@ var xr,yr: smallint;
 
    end;
 
- end;  
+ end;
 
-   
+
 begin
 
  xr:=a+1;
@@ -668,7 +668,7 @@ begin
  xr:=a;
  yr:=b+1;
  if yr < ScreenHeight then testPixel;
- 
+
  yr:=b-1;
  if yr >= 0 then testPixel;
 
@@ -704,7 +704,7 @@ begin
    stackEntry := stackEntry - stackPointer;
 
    if stackEntry > FILLSTACKSIZE shr 1 then exit;
-   
+
    inc(stackPointer);
 
    move(FloodFillStack[stackPointer], FloodFillStack[1], stackEntry * sizeof(cardinal) );
@@ -1039,7 +1039,7 @@ begin
             x1 := p1.x;
             y1 := p1.y;
 
-            if ( ((y0 < y) and (y1 >= y)) or ((y1 < y) and (y0 >= y)) ) then begin
+	    if ((y0 <= y) and (y1 > y)) or ((y1 <= y) and (y0 > y)) then begin
 
                 nodes[count] := x0 + trunc((y - y0) / (y1 - y0) * (x1 - x0));
 
@@ -1067,7 +1067,7 @@ begin
                 nodes[i] := nodes[i + 1];
                 nodes[i + 1] := swap;
 
-                if i<>0 then dec(i);
+                if i <> 0 then dec(i);
 
             end else
              inc(i);
