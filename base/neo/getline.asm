@@ -6,7 +6,7 @@ _KRLLoop:
 		@getkey
 		cmp #$0D							; Check for <CR>
 		bne _KRLCheckBS
-		sty @buffer							; Enter pressed -> save string length
+		sty @buf   							; Enter pressed -> save string length
 		@putchar							; Output line break
 		rts
 
