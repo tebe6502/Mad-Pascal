@@ -1,6 +1,7 @@
 
 function opt_LDA(i: integer): Boolean;
 var tmp: string;
+    p: integer;
 begin
 
     Result := true;
@@ -100,6 +101,20 @@ begin
 
 	listing[i+2] := '';
 	listing[i+3] := '';
+
+	exit(false);
+     end;
+
+
+    if sta_stack(i) and										// sta :STACKORIGIN+10			; 0
+       sta_val(i+1) and										// sta					; 1
+       sty(i+2) and (sty_stack(i+2) = false) and						// sty					; 2
+       lda_a(i+3) and										// lda					; 3
+       sta_stack(i+4) then									// sta :STACKORIGIN+10			; 4
+    if argMatch(i, i+4) and
+       (argMatch(i, i+3) = false) then
+     begin
+	listing[i] := '';
 
 	exit(false);
      end;
