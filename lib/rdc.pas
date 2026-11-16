@@ -68,7 +68,7 @@ Var
   gap         : Word;
   c           : Word;
   hash        : Word;
-  hashlen     : Word;
+//  hashlen     : Word;
   ctrl_idx    : PWord;
   ctrl_bits   : Word;
   ctrl_cnt    : Word;
@@ -99,7 +99,7 @@ Begin
   { adjust # hash entries so hash algorithm can
     use 'and' instead of 'mod' }
 
-  hashlen := HASH_LEN - 1;
+//  hashlen := HASH_LEN - 1;
 
   { scan thru inbuff }
 
@@ -175,7 +175,7 @@ Begin
 
         hash := ((((in_idxa[0] And 15) Shl 8) Or in_idxa[1]) Xor
                  ((in_idxa[0] Shr 4) Or byte(in_idxa[2] Shl 4)))
-                 And hashlen;
+                 And (HASH_LEN-1);
 
         pat_idx := in_idx;
         pat_idx^ := HashPtr[hash];

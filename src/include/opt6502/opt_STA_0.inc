@@ -67,10 +67,10 @@ begin
       end;
 
 
-    if (i = l - 3) and										// "samotna" instrukcja na koncu bloku
-       sta_stack(i) and
-       (jne(i+1) or jeq(i+1)) and
-       (lab_l(i+2) or lab_b(i+2)) then
+    if (i = l - 3) and
+       sta_stack(i) and										// sta :STACKORIGIN		; 0
+       (jeq(i+1) or jne(i+1)) and								// jeq|jne			; 1
+       (lab_l(i+2) or lab_b(i+2)) then								//l_|b_				; 2
       begin
   	listing[i] := '';
 
@@ -83,7 +83,18 @@ begin
        and_ora_eor(i+1) and (iy(i+1) = false) and						// and|ora|eor			; 1
        sta_a(i+2) and (iy(i+2) = false) then							// sta				; 2
       begin
-  	listing[i]   := '';
+  	listing[i] := '';
+
+  	exit(false);
+      end;
+
+
+    if (i = l - 3) and
+       lda_bp2_y(i) and										// lda (:bp2),y			; 0
+       iny(i+1) and										// iny				; 1
+       sta_a(i+2) and (iy(i+2) = false) then							// sta				; 2
+      begin
+  	listing[i+1] := '';
 
   	exit(false);
       end;

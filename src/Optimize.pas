@@ -422,9 +422,18 @@ var
 
     procedure update(const i: TListingIndex);
     begin
-      //Delete(listing[i], pos(',y', listing[i]), 2);
       SetLength(listing[i], length(listing[i])-2);
-      if q <> 0 then listing[i] := listing[i] + op + Hex(q, 2);
+
+      if q <> 0 then begin
+
+       if listing[i].EndsWith('+1') then begin
+        SetLength(listing[i], length(listing[i])-2);
+        listing[i] := listing[i] + op + Hex(q, 2) + '+1';
+       end else
+        listing[i] := listing[i] + op + Hex(q, 2);
+
+      end;
+
     end;
 
   begin
@@ -454,7 +463,6 @@ var
 
    procedure update(const i: TListingIndex);
    begin
-      //Delete(listing[i], pos(',y', listing[i]), 2);
       SetLength(listing[i], length(listing[i])-2);
       listing[i] := listing[i] + op + Hex(q, 2) + ',y';
    end;

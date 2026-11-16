@@ -1,7 +1,6 @@
 
 function opt_LDA(i: integer): Boolean;
 var tmp: string;
-    p: integer;
 begin
 
     Result := true;
@@ -34,12 +33,14 @@ begin
       end;
 
 
-    if ldy(i) and 										// ldy I				; 0
+    if sty(i+5) and										// sty					; 5
+
+       ldy(i) and 										// ldy I				; 0
        lda_a(i+1) and										// lda I				; 1
        sta_a(i+2) and										// sta					; 2
        sty(i+3) and										// sty					; 3
-       sty(i+4) and										// sty					; 4
-       sty(i+5) then										// sty					; 5
+       sty(i+4) then										// sty					; 4
+//       sty(i+5) then										// sty					; 5
      if argMatch(i, i+1) then
       begin
 	listing[i] := '';
@@ -130,9 +131,11 @@ begin
      end;
 
 
-    if ldy(i) and										// ldy					; 0
+    if sty(i+2) and										// sty					; 2
+
+       ldy(i) and										// ldy					; 0
        lda_a(i+1) and										// lda					; 1
-       sty(i+2) and										// sty					; 2
+//       sty(i+2) and										// sty					; 2
        sta_a(i+3) then										// sta					; 3
      begin
         tmp := listing[i+1];
@@ -144,9 +147,11 @@ begin
      end;
 
 
-    if ldy_im(i) and										// ldy #				; 0
+    if sty(i+2) and										// sty					; 2
+
+       ldy_im(i) and										// ldy #				; 0
        lda_im(i+1) and										// lda #				; 1
-       sty(i+2) and										// sty					; 2
+//       sty(i+2) and										// sty					; 2
        sta(i+3) then										// sta					; 3
      if argMatch(i, i+1) then
       begin
@@ -158,9 +163,11 @@ begin
       end;
 
 
-    if ldy_im(i) and										// ldy #				; 0
+    if sty_stack(i+2) and									// sty :STACKORIGIN			; 2
+
+       ldy_im(i) and										// ldy #				; 0
        lda_im(i+1) and										// lda #				; 1
-       sty_stack(i+2) and									// sty :STACKORIGIN			; 2
+//       sty_stack(i+2) and									// sty :STACKORIGIN			; 2
        sta_val(i+3) and										// sta					; 3
        lda_stack(i+4) and									// lda :STACKORIGIN			; 4
        sta_val(i+5) then									// sta					; 5

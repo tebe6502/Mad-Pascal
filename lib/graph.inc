@@ -996,10 +996,10 @@ begin
 
  if amount < 3 then exit;
 
+ k := amount - 1;
+
  miny := 255;
  maxy := 0;
-
- k := amount - 1;
 
  pc:=@vertices;
  p0:=PPoint(pc^);
@@ -1007,11 +1007,11 @@ begin
 
  for i := k downto 0 do begin
 
-   swap := p0.y;
+   count := p0.y;
 
-   if (miny > swap) then miny := swap;
+   if (miny > count) then miny := count;
 
-   if (maxy < swap) then maxy := swap;
+   if (maxy < count) then maxy := count;
 
    inc(p0);
 

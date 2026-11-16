@@ -1115,9 +1115,9 @@ begin
 
     if lsr_a(i+1) and										// lsr @				; 1
 
-       sta_stack(i) and										// sta :STACKORIGIN			; 0
+       sta_stack(i) and (listing[i] = listing[i+2]) then					// sta :STACKORIGIN			; 0
 //       lsr_a(i+1) and										// lsr @				; 1
-       sta_stack(i+2) then									// sta :STACKORIGIN			; 2
+//       sta_stack(i+2) then									// sta :STACKORIGIN			; 2
      if argMatch(i, i+2) then
      begin
 	listing[i] := '';
@@ -1128,11 +1128,42 @@ begin
 
     if lsr_a(i+1) and										// lsr @				; 1
 
-       sta_stack(i) and										// sta :STACKORIGIN			; 0
+       sta_stack(i) and	(listing[i] = listing[i+3]) and 					// sta :STACKORIGIN			; 0
+//       lsr_a(i+1) and										// lsr @				; 1
+       lsr_a(i+2) then										// lsr @				; 2
+//       sta_stack(i+3) then									// sta :STACKORIGIN			; 3
+     if argMatch(i, i+3) then
+     begin
+	listing[i] := '';
+
+	exit(false);
+     end;
+
+
+    if lsr_a(i+1) and										// lsr @				; 1
+
+       sta_stack(i) and	(listing[i] = listing[i+4]) and						// sta :STACKORIGIN			; 0
 //       lsr_a(i+1) and										// lsr @				; 1
        lsr_a(i+2) and										// lsr @				; 2
-       sta_stack(i+3) then									// sta :STACKORIGIN			; 3
-     if argMatch(i, i+3) then
+       lsr_a(i+3) then										// lsr @				; 3
+//       sta_stack(i+4) then									// sta :STACKORIGIN			; 4
+     if argMatch(i, i+4) then
+     begin
+	listing[i] := '';
+
+	exit(false);
+     end;
+
+
+    if lsr_a(i+1) and										// lsr @				; 1
+
+       sta_stack(i) and	(listing[i] = listing[i+5]) and						// sta :STACKORIGIN			; 0
+//       lsr_a(i+1) and										// lsr @				; 1
+       lsr_a(i+2) and										// lsr @				; 2
+       lsr_a(i+3) and										// lsr @				; 3
+       lsr_a(i+4) then										// lsr @				; 4
+//       sta_stack(i+5) then									// sta :STACKORIGIN			; 5
+     if argMatch(i, i+5) then
      begin
 	listing[i] := '';
 
