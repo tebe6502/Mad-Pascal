@@ -15,16 +15,17 @@ begin
        beq(i+2) and									// beq @+			; 2
        dey(i+3) and									// dey				; 3
 //       lab_a(i+4) and									//@				; 4
-       sty(i+5) and									// sty A			; 5
-       (tya(i+6) = false) and (sty(i+6) = false) then					//~tya|sty			; 6
-     if argMatch(i+1, i+5) then
+       tya(i+5) and									// tya				; 5
+       sta_a(i+6) then									// sta				; 6
+     if argMatch(i+1, i+6) then
        begin
-	listing[i] := '';
+	listing[i+3] := #9'lda #$00';
+	listing[i+4] := #9'cmp ' + GetARG(i+1);
+	listing[i+5] := #9'rol @';
 
+	listing[i]   := '';
+	listing[i+1] := '';
 	listing[i+2] := '';
-	listing[i+3] := '';
-	listing[i+4] := #9'eor #$01';
-	listing[i+5] := #9'sta ' + GetARG(i+5);
 
 	exit(false);
        end;
