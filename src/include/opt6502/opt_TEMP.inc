@@ -1091,6 +1091,26 @@ begin
     end;
 
 
+   if lda(0) and									// lda I		; 0
+      bne_a(1) and									// bne @+		; 1
+      dec_(2) and									// dec I+1		; 2
+      lab_a(3) and									//@			; 3
+      dec_(4) and									// dec I		; 4
+      											//			; 5
+      opti(6) and									//; optimize 		; 6
+      											//			; 7
+      ldy(8) then									// ldy I		; 8
+    if argMatch(0, 4) and
+       argMatch(4, 8) then
+    begin
+     TemporaryBuf[0] := #9'ldy ' + GetARG(0);
+
+     TemporaryBuf[4] := #9'dey';
+
+     TemporaryBuf[8] := #9'sty ' + GetARG(8);
+    end;
+
+
    if lda(0) and (TemporaryBuf[0] = TemporaryBuf[11]) and				// lda A		; 0
       add(1) and (TemporaryBuf[1] = TemporaryBuf[12]) and				// add B		; 1
       tay(2) and									// tay	 		; 2

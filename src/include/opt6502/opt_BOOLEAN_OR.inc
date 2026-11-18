@@ -23,7 +23,7 @@
 	   (listing[p+1] = listing[i+2]) and					// ora :STACKORIGIN	; 1
 	   (listing[p+2] = #9'sta ' + tmp) then					// sta :STACKORIGIN	; 2
 	 begin
-	   listing[p+1] := #9'jne l1_' + IntToHex(CodeSize, 4) + 's';
+	   listing[p+1] := #9'jne l_' + IntToHex(CodeSize, 4) + 's';
 	   listing[p+2] := '';
 	 end;
 

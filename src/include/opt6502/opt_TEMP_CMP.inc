@@ -7,6 +7,7 @@ procedure opt_TEMP_CMP;
 var p: integer;
 begin
 
+
    if lda(0) and									// lda I		; 0
       cmp(1) and									// cmp			; 1
       SKIP(2) and									// SKIP			; 2
@@ -585,6 +586,27 @@ begin
       TemporaryBuf[0] := '~';
 
       TemporaryBuf[2] := '~';
+
+    end;
+
+
+   if lab_l(10) and									//l_			; 10
+
+      inc_(0) and									// inc C		; 0
+      sne(1) and									// sne			; 1
+      inc_(2) and									// inc C+1		; 2
+											//			; 3
+      opti(4) and									//; optimize 		; 4
+											//			; 5
+      lda(6) and									// lda C+1		; 6
+      cmp(7) and									// cmp			; 7
+      SKIP(8) and									// SKIP			; 8
+      jmp(9) then									// jmp			; 9
+//      lab_l(10) then									//l_			; 10
+    if argMatch(2, 6) then
+    begin
+
+      TemporaryBuf[1] := #9'bne ' + TemporaryBuf[10];
 
     end;
 
