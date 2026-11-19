@@ -613,6 +613,33 @@ begin
      end;
 
 
+    if dex(i+8) and										// dex					; 8
+
+       ldy_1(i) and										// ldy #1				; 0
+       lda_val(i+1) and										// lda					; 1	~:STACKORIGIN
+       SKIP(i+2) and										// SKIP					; 2
+       and_ora_eor_val(i+3) and									// and|ora|eor				; 3	~:STACKORIGIN
+       sne(i+4) and										// sne					; 4
+       lab_a(i+5) and										//@					; 5
+       dey(i+6) and										// dey					; 6
+       lab_a(i+7) then										//@					; 7
+//     dex(i+8) then										// dex					; 8
+     begin
+       listing[i+8] := listing[i+7];
+       listing[i+7] := listing[i+6];
+       listing[i+6] := listing[i+5];
+       listing[i+5] := listing[i+4];
+       listing[i+4] := listing[i+3];
+       listing[i+3] := listing[i+2];
+       listing[i+2] := listing[i+1];
+       listing[i+1] := listing[i];
+
+       listing[i] := #9'dex';
+
+       exit(false);
+     end;
+
+
     if dex(i+7) and										// dex					; 7
 
        ldy_1(i) and										// ldy #1				; 0

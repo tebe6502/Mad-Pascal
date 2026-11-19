@@ -419,8 +419,10 @@ _3	lda (:bp2),y
 	jmp stop
 
 _0	lda (:bp2),y
-	and #$c0
-	:6 lsr @
+	asl @
+	rol @
+	rol @
+	and #3
 	jmp stop
 
 _1	lda (:bp2),y
@@ -452,7 +454,7 @@ _0	lda (:bp2),y
 
 _1	lda (:bp2),y
 	and #$0f
-	jmp stop
+;	jmp stop
 
 	.endl
 
