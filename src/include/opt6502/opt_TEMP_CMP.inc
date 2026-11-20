@@ -8,13 +8,13 @@ var p: integer;
 begin
 
 
-   if lda(0) and									// lda I		; 0
+   if lda(0) and cmpBuf(0, 6) and							// lda I		; 0
       cmp(1) and									// cmp			; 1
       SKIP(2) and									// SKIP			; 2
      											//			; 3
       opti(4) and									//; optimize 		; 4
      											//			; 5
-      (TemporaryBuf[6] = TemporaryBuf[0]) and						// lda I		; 6
+//      lda(6) and									// lda I		; 6
       (SKIP(7) = false) then
     begin
      TemporaryBuf[6] := '~';
@@ -23,7 +23,7 @@ begin
 
      while cmp(p) and								/// cmp			; 7
         SKIP(p+1) and								/// SKIP		; 8
-        (TemporaryBuf[p+2] = TemporaryBuf[0]) and				/// lda I		; 9
+        cmpBuf(p+2, 0) and							/// lda I		; 9
         (SKIP(p+3) = false) do
        begin
 	TemporaryBuf[p+2] := '~';
@@ -37,7 +37,7 @@ begin
    if lda(0) and									// lda I		; 0
       cmp(1) and									// cmp			; 1
       SKIP(2) and									// SKIP			; 2
-      (TemporaryBuf[3] = TemporaryBuf[0]) and						// lda I		; 3
+      cmpBuf(3, 0) and									// lda I		; 3
       (SKIP(4) = false) then
     begin
      TemporaryBuf[3] := '~';
@@ -46,7 +46,7 @@ begin
 
      while cmp(p) and								/// cmp			; 4
         SKIP(p+1) and								/// SKIP		; 5
-        (TemporaryBuf[p+2] = TemporaryBuf[0]) and				/// lda I		; 6
+        cmpBuf(p+2, 0) and							/// lda I		; 6
         (SKIP(p+3) = false) do
       begin
 	TemporaryBuf[p+2] := '~';
@@ -57,7 +57,7 @@ begin
     end;
 
 
-   if lda(0) and (TemporaryBuf[0] = TemporaryBuf[3]) and				// lda I		; 0
+   if lda(0) and cmpBuf(0, 3) and							// lda I		; 0
       cmp(1) and									// cmp			; 1
       SKIP(2) and									// SKIP			; 2
 //      lda(3) and									// lda I		; 3

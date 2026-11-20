@@ -531,7 +531,7 @@ begin
 
 
     if (TemporaryBuf[0] = #9'bcc *+7') and						// bcc *+7		; 0
-       (TemporaryBuf[1] = #9'beq *+5') and						// beq *+5		; 1
+       beq_5(1) and									// beq *+5		; 1
        jmp_l(2) then									// jmp l_		; 2
       begin
        TemporaryBuf[0] := #9'scc';
@@ -543,7 +543,7 @@ begin
     if lda(0) and									// lda X		; 0
        cmp(1) and									// cmp Y		; 1
        (TemporaryBuf[2] = #9'bcc *+7') and						// bcc *+7		; 2
-       (TemporaryBuf[3] = #9'beq *+5') and						// beq *+5		; 3
+       beq_5(3) and									// beq *+5		; 3
        jmp_l(4) then									// jmp l_		; 4
       begin
        TemporaryBuf[2] := #9'lda ' + GetARG(1);
@@ -560,7 +560,7 @@ begin
        svc(2) and									// svc			; 2
        (TemporaryBuf[3] = #9'eor #$80') and						// eor #$80		; 3
        (TemporaryBuf[4] = #9'bmi *+7') and						// bmi *+7		; 4
-       (TemporaryBuf[5] = #9'beq *+5') and						// beq *+5		; 5
+       beq_5(5) and									// beq *+5		; 5
        jmp_l(6) then									// jmp l_		; 6
       begin
        TemporaryBuf[2] := #9'lda ' + GetARG(1);
@@ -575,7 +575,7 @@ begin
 
 
    if (SKIP(0) = false) and								// beq *+5		; 1
-      (TemporaryBuf[1] = #9'beq *+5') and						// jmp l_xxxx		; 2
+      beq_5(1) and									// jmp l_xxxx		; 2
       jmp_l(2) then
     begin
      TemporaryBuf[1] := #9'jne ' + GetARG(2);
@@ -584,7 +584,7 @@ begin
 
 
    if (SKIP(0) = false) and								// bmi *+5		; 1
-      (TemporaryBuf[1] = #9'bmi *+5') and						// jmp l_xxxx		; 2
+      bmi_5(1) and									// jmp l_xxxx		; 2
       jmp_l(2) then
     begin
      TemporaryBuf[1] := #9'jpl ' + GetARG(2);
@@ -602,7 +602,7 @@ begin
 
     if ENDL(0) and									// .ENDL		; 0
        (TemporaryBuf[1] = #9'bmi *+7') and						// bmi *+7		; 1
-       (TemporaryBuf[2] = #9'beq *+5') and						// beq *+5		; 2
+       beq_5(2) and									// beq *+5		; 2
        jmp_l(3) then									// jmp l_		; 3
       begin
        TemporaryBuf[1] := #9'smi';

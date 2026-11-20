@@ -248,6 +248,11 @@ end;
     Result := pos1(#9'lda :STACK', i);
   end;
 
+  function LDY_STACK(const i: Integer): Boolean;
+  begin
+    Result := pos1(#9'ldy :STACK', i);
+  end;
+
   function AND_STACK(const i: Integer): Boolean;
   begin
     Result := pos1(#9'and :STACK', i);
@@ -441,6 +446,11 @@ end;
     Result := TemporaryBuf[i] = #9'beq @+'
   end;
 
+  function BEQ_5(const i: Integer): Boolean;
+  begin
+    Result := TemporaryBuf[i] = #9'beq *+5'
+  end;
+
   function BNE_A(const i: Integer): Boolean;
   begin
     Result := TemporaryBuf[i] = #9'bne @+'
@@ -464,6 +474,11 @@ end;
   function BMI_A(const i: Integer): Boolean;
   begin
     Result := TemporaryBuf[i] = #9'bmi @+'
+  end;
+
+  function BMI_5(const i: Integer): Boolean;
+  begin
+    Result := TemporaryBuf[i] = #9'bmi *+5'
   end;
 
 // -----------------------------------------------------------------------------

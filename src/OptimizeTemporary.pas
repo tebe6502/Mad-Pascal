@@ -69,6 +69,12 @@ var
   end;
 
 
+  function cmpBuf(const i, j: TTemporaryBufIndex): Boolean;
+  begin
+    Result := TemporaryBuf[i] = TemporaryBuf[j];
+  end;
+
+
   function fail(i: Integer): Boolean;
   begin
 

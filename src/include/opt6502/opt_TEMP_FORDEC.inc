@@ -77,7 +77,7 @@ begin
 	   (TemporaryBuf[p] = #9'jmp ' + TemporaryBuf[2]) and			// jmp l_00FB		// p
 	   (TemporaryBuf[p-3] = '; --- ForToDoEpilog') and			// ; --- ForToDoEpilog	// p-3
 	   (TemporaryBuf[p-2] = #9'dec ' + arg) and	// dec I		// p-2
-	   (TemporaryBuf[p-1] = #9'bmi *+5') and				// bmi *+5		// p-1
+	   bmi_5(p-1) and							// bmi *+5		// p-1
            lab_l(p+1) then							//l_			// p+1
 	  begin
 	   TemporaryBuf[p-2] := #9'dey';
@@ -124,7 +124,7 @@ begin
 	   (TemporaryBuf[p] = #9'jmp ' + TemporaryBuf[2]) and			// jmp l_00FB		// p
 	   (TemporaryBuf[p-3] = '; --- ForToDoEpilog') and			// ; --- ForToDoEpilog	// p-3
 	   (TemporaryBuf[p-2] = #9'dec ' + arg) and				// dec I		// p-2
-	   (TemporaryBuf[p-1] = #9'bmi *+5') and				// bmi *+5		// p-1
+	   bmi_5(p-1) and							// bmi *+5		// p-1
            lab_l(p+1) then							//l_			// p+1
 	  begin
 	   TemporaryBuf[p-2] := #9'dey';
@@ -172,7 +172,7 @@ begin
 	   (TemporaryBuf[p] = #9'jmp ' + TemporaryBuf[2]) and			// jmp l_00FB		// p
 	   (TemporaryBuf[p-3] = '; --- ForToDoEpilog') and			// ; --- ForToDoEpilog	// p-3
 	   (TemporaryBuf[p-2] = #9'dec ' + arg) and				// dec I		// p-2
-	   (TemporaryBuf[p-1] = #9'bmi *+5') and				// bmi *+5		// p-1
+	   bmi_5(p-1) and							// bmi *+5		// p-1
            lab_l(p+1) then							//l_			// p+1
 	  begin
 	   TemporaryBuf[p-2] := #9'dey';

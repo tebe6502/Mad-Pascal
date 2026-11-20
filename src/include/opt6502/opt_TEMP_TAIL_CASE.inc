@@ -35,13 +35,12 @@ begin
       yes := yes and (not (lab_a(i-3) and tya(i-2) and sta(i-1)));
 
       if yes then
-      if (TemporaryBuf[i-2] = TemporaryBuf[p-2]) and
-         (TemporaryBuf[i-1] = TemporaryBuf[p-1]) and
-
-         (sta(p-1) or jsr(p-1)) then
+      if (sta(p-1) or jsr(p-1)) and      
+         cmpBuf(i-1, p-1) and
+         cmpBuf(i-2, p-2) then
       begin
 
-	lab:=TemporaryBuf[p+1];				//s_xxxx
+	lab := TemporaryBuf[p+1];			//s_xxxx
 
 	TemporaryBuf[i] := #9'jmp ' + lab;
 
@@ -49,7 +48,7 @@ begin
 	TemporaryBuf[p+1] := tmp;
 
         for k:=1 to i-1 do
-         if (TemporaryBuf[i-k] = TemporaryBuf[p-k]) or
+         if cmpBuf(i-k, p-k) or
 	    (lab_l(i-k) and lab_l(p-k)) or
 	    (opti_(i-k) and opti_(p-k)) then
 	 begin
@@ -57,9 +56,9 @@ begin
 	  if eif(i-k) then exit;
 
 	  if lab_a(i-k) then
-	   if (TemporaryBuf[i-k-1] <> TemporaryBuf[p-k-1]) or (TemporaryBuf[i-k-2] <> TemporaryBuf[p-k-2]) then exit;
+	   if (cmpBuf(i-k-1, p-k-1) = false) or (cmpBuf(i-k-2, p-k-2) = false) then exit;
 
-	  if (TemporaryBuf[i-k] = TemporaryBuf[p-k]) then TemporaryBuf[i-k] := '~';
+	  if cmpBuf(i-k, p-k) then TemporaryBuf[i-k] := '~';
 
 	  tmp := TemporaryBuf[p-k];
 

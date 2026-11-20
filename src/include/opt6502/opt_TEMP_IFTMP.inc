@@ -22,7 +22,7 @@ begin
 
    if lab_l(1) and									//l_xxxx		; 1
       IFTMP(2) and									// lda IFTMP_xxxx	; 2
-      (TemporaryBuf[3] = #9'beq *+5') and						// beq *+5		; 3
+      beq_5(3) and									// beq *+5		; 3
       jmp_l(4) then									// jmp l_xxxx		; 4
     begin
      TemporaryBuf[2] := TemporaryBuf[1];

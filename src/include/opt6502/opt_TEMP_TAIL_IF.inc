@@ -27,14 +27,14 @@ begin
        (sta(ofs+19) or jsr(ofs+19)) and							// sta|jsr		; 19
        lab_l(ofs+20) and								//l_xxxx		; 20
        IFTMP(ofs+21) and								// lda IFTMP_xxxx	; 21
-       (TemporaryBuf[ofs+22] = #9'beq *+5') and						// beq *+5		; 22
+       beq_5(ofs+22) and								// beq *+5		; 22
        jmp_l(ofs+23)									// jmp l_xxxx		; 23
        ) then
     begin
 
-      lab:=GetARG(ofs+23);					// l_xxxx
+      lab := GetARG(ofs+23);					// l_xxxx
 
-      yes:=false;
+      yes := false;
 
       for p:=ofs+24 to High(TemporaryBuf) do
 	if TemporaryBuf[p] = lab then begin yes:=true; Break end;
@@ -52,16 +52,16 @@ begin
        end;
 
 
-       if (TemporaryBuf[ofs+22] = #9'beq *+5') then
-         i:=ofs+19
+       if beq_5(ofs+22) then
+         i := ofs + 19
        else
-         i:=ofs+20;
+         i := ofs + 20;
 
 
        if sta(i) or jsr(i) then begin
 
         for k:=0 to ofs+19 do
-         if (TemporaryBuf[i-k] = TemporaryBuf[p-k-1]) or
+         if cmpBuf(i-k, p-k-1) or
 	    (lab_l(i-k) and lab_l(p-k-1)) or
 	    (opti_(i-k) and opti_(p-k-1)) then
 	 begin
@@ -69,9 +69,9 @@ begin
 	  if eif(i-k) then exit;
 
 	  if lab_a(i-k) then
-	   if (TemporaryBuf[i-k-1] <> TemporaryBuf[p-k-2]) or (TemporaryBuf[i-k-2] <> TemporaryBuf[p-k-3]) then exit;
+	   if (cmpBuf(i-k-1, p-k-2) = false) or (cmpBuf(i-k-2, p-k-3) = false) then exit;
 
- 	  if (TemporaryBuf[i-k] = TemporaryBuf[p-k-1]) then TemporaryBuf[i-k] := '~';
+ 	  if cmpBuf(i-k, p-k-1) then TemporaryBuf[i-k] := '~';
 
 	  TemporaryBuf[p-k] := TemporaryBuf[p-k-1];
 	  TemporaryBuf[p-k-1] := lab;

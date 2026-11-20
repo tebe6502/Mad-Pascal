@@ -458,12 +458,12 @@ begin
        if (pos(TemporaryBuf[0], TemporaryBuf[p]) > 0) then begin
 
 	  if (TemporaryBuf[p] = #9'jmp ' + TemporaryBuf[0]) and
-	     (TemporaryBuf[p-1] = #9'bmi *+5') and
+	     bmi_5(p-1) and
 	     dec_(p-2) and
 	     (TemporaryBuf[p-3] = '; --- ForToDoEpilog') and
 	     (TemporaryBuf[p-4] = '') and
 	     (inc_(p-5) or dec_(p-5)) and
-	     ((TemporaryBuf[p-6] = #9'scc') or (TemporaryBuf[p-6] = #9'scs')) and
+	     (scc(p-6) or scs(p-6)) and
 	     sta(p-7) and
 
 

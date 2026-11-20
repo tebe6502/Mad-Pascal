@@ -17,7 +17,7 @@ begin
     begin
 
      for p:=5 to High(TemporaryBuf)-1 do
-      if (TemporaryBuf[p] = TemporaryBuf[0]) and					// sta K+1		; p
+      if cmpBuf(p, 0) and								// sta K+1		; p
          lab_l(p+1) and									//l_00FA		; p+1
 	 (TemporaryBuf[p+1] = GetARG(3)) then
        begin
