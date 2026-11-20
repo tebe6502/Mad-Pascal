@@ -21,7 +21,7 @@ begin
       textChar := charset + ord(txt[bi2]) * 8;
       tmp1 := tmp2 + bi2;
       for bi1 := 7 downto 0 do
-        Poke(tmp1 + 40 * bi1, Peek(textChar + bi1));
+        mem[tmp1 + 40 * bi1] := mem[textChar + bi1];
     end;
 end;
 

@@ -4176,7 +4176,7 @@ begin
     if sta_bp_1(i+5) and									// sta :bp+1				; 5
 
        lda_im(i) and										// lda #				; 0
-       add(i+1) and (add_stack(i+1) = false) and						// add					; 1
+       add(i+1) and (add_stack(i+1) = false) and (add_im(i+1) = false) and			// add					; 1
        tay(i+2) and										// tay					; 2
        lda_im(i+3) and										// lda #				; 3
        adc_im_0(i+4) and									// adc #$00				; 4

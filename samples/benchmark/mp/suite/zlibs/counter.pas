@@ -52,7 +52,7 @@ begin
   Move(pointer(charset), pointer(counterCharset), $400);
   Move(pointer(charset + $80), pointer(counterCharset), 80);
   for i := 0 to 7 do
-    poke(counterCharset + $400 - 8 + i, peek(charset + $80 + i) xor $ff);
+    mem[counterCharset + $400 - 8 + i] := mem[charset + $80 + i] xor $ff;
   FillChar(pointer(counterCharset + $400 - 16), 8, $ff);
 end;
 
@@ -76,10 +76,10 @@ begin
   printRow := position;
   Move(benchName[2], pointer(printRow), length(benchName)-1);
   inc(printRow, 26);
-  poke(printRow, byte(benchName[1]));
+  mem[printRow] := byte(benchName[1]);
   inc(printRow, 2);
   for i := 0 to 4 do
-    poke(printRow + i, peek(counterLms + i) + 16);
+    mem[printRow + i] := mem[counterLms + i] + 16;
   inc(position,40);
 end;
 

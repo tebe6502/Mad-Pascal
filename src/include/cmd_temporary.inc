@@ -461,6 +461,11 @@ end;
     Result := TemporaryBuf[i] = #9'bcc @+'
   end;
 
+  function BCC_7(const i: Integer): Boolean;
+  begin
+    Result := TemporaryBuf[i] = #9'bcc *+7'
+  end;
+
   function BCS_A(const i: Integer): Boolean;
   begin
     Result := TemporaryBuf[i] = #9'bcs @+'
@@ -479,6 +484,11 @@ end;
   function BMI_5(const i: Integer): Boolean;
   begin
     Result := TemporaryBuf[i] = #9'bmi *+5'
+  end;
+
+  function BMI_7(const i: Integer): Boolean;
+  begin
+    Result := TemporaryBuf[i] = #9'bmi *+7'
   end;
 
 // -----------------------------------------------------------------------------

@@ -530,7 +530,7 @@ begin
      end;
 
 
-    if (TemporaryBuf[0] = #9'bcc *+7') and						// bcc *+7		; 0
+    if bcc_7(0) and									// bcc *+7		; 0
        beq_5(1) and									// beq *+5		; 1
        jmp_l(2) then									// jmp l_		; 2
       begin
@@ -542,7 +542,7 @@ begin
 
     if lda(0) and									// lda X		; 0
        cmp(1) and									// cmp Y		; 1
-       (TemporaryBuf[2] = #9'bcc *+7') and						// bcc *+7		; 2
+       bcc_7(2) and									// bcc *+7		; 2
        beq_5(3) and									// beq *+5		; 3
        jmp_l(4) then									// jmp l_		; 4
       begin
@@ -559,7 +559,7 @@ begin
        sub(1) and									// sub Y		; 1
        svc(2) and									// svc			; 2
        (TemporaryBuf[3] = #9'eor #$80') and						// eor #$80		; 3
-       (TemporaryBuf[4] = #9'bmi *+7') and						// bmi *+7		; 4
+       bmi_7(4) and									// bmi *+7		; 4
        beq_5(5) and									// beq *+5		; 5
        jmp_l(6) then									// jmp l_		; 6
       begin
@@ -601,7 +601,7 @@ begin
 
 
     if ENDL(0) and									// .ENDL		; 0
-       (TemporaryBuf[1] = #9'bmi *+7') and						// bmi *+7		; 1
+       bmi_7(1) and									// bmi *+7		; 1
        beq_5(2) and									// beq *+5		; 2
        jmp_l(3) then									// jmp l_		; 3
       begin
@@ -804,16 +804,16 @@ begin
      TemporaryBuf[5] := #9'eor #$FF';
      TemporaryBuf[6] := #9'add #$01';
 
-     if TemporaryBuf[12] = TemporaryBuf[0] then TemporaryBuf[12] := '~';
+     if cmpBuf(12, 0) then TemporaryBuf[12] := '~';
     end;
 
 
-   if lda(0) and									// lda N		; 0
+   if lda(0) and cmpBuf(0, 5) and							// lda N		; 0
       SKIP(1) and									// SKIP			; 1
       											//			; 2
-      opti(3) and									//; optimize 		; 3
+      opti(3) then									//; optimize 		; 3
       											//			; 4
-      (TemporaryBuf[5] = TemporaryBuf[0]) then						// lda N		; 5
+//      lda(5) then									// lda N		; 5
     begin
      TemporaryBuf[5] := '~';
     end;
@@ -843,9 +843,9 @@ begin
     end;
 
 
-   if lda_im(0) and (TemporaryBuf[0] = TemporaryBuf[7]) and				// lda #XX		; 0
+   if lda_im(0) and cmpBuf(0, 7) and							// lda #XX		; 0
       sta(1) and									// sta			; 1
-      lda_im(2) and (TemporaryBuf[2] = TemporaryBuf[9]) and				// lda #YY 		; 2
+      lda_im(2) and cmpBuf(2, 9) and							// lda #YY 		; 2
       sta(3) and									// sta			; 3
       											//			; 4
       opti(5) and									//; optimize		; 5
@@ -870,14 +870,14 @@ begin
     end;
 
 
-   if lda_im(0) and (TemporaryBuf[0] <> TemporaryBuf[7]) and				// lda #AA		; 0
+   if lda_im(0) and (cmpBuf(0, 7) = false) and						// lda #AA		; 0
       sta(1) and									// sta			; 1
-      lda_im(2) and (TemporaryBuf[2] = TemporaryBuf[9]) and				// lda #YY 		; 2
+      lda_im(2) and cmpBuf(2, 9) and							// lda #YY 		; 2
       sta(3) and									// sta			; 3
       											//			; 4
       opti(5) and									//; optimize		; 5
       											//			; 6
-      lda_im(7) and (TemporaryBuf[7] <> TemporaryBuf[2]) and				// lda #BB		; 7
+      lda_im(7) and (cmpBuf(7, 2) = false) and						// lda #BB		; 7
       sta(8) and									// sta			; 8
 //      lda_im(9) and									// lda #YY 		; 9
       sta(10) and									// sta			; 10
@@ -1111,11 +1111,11 @@ begin
     end;
 
 
-   if lda(0) and (TemporaryBuf[0] = TemporaryBuf[11]) and				// lda A		; 0
-      add(1) and (TemporaryBuf[1] = TemporaryBuf[12]) and				// add B		; 1
+   if lda(0) and cmpBuf(0, 11) and							// lda A		; 0
+      add(1) and cmpBuf(1, 12) and							// add B		; 1
       tay(2) and									// tay	 		; 2
-      lda(3) and (TemporaryBuf[3] = TemporaryBuf[14]) and				// lda A+1		; 3
-      adc(4) and (TemporaryBuf[4] = TemporaryBuf[15]) and				// adc B+1		; 4
+      lda(3) and cmpBuf(3, 14) and							// lda A+1		; 3
+      adc(4) and cmpBuf(4, 15) and							// adc B+1		; 4
       sta_bp_1(5) and									// sta :bp+1		; 5
       lda(6) and (iy(6) = false) and							// lda			; 6
       sta_bp_y(7) and									// sta (:bp),y		; 7
@@ -1151,11 +1151,11 @@ begin
     end;
 
 
-   if lda(0) and (TemporaryBuf[0] = TemporaryBuf[11]) and				// lda A		; 0
-      add(1) and (TemporaryBuf[1] = TemporaryBuf[12]) and				// add B		; 1
+   if lda(0) and cmpBuf(0, 11) and							// lda A		; 0
+      add(1) and cmpBuf(1, 12) and							// add B		; 1
       tay(2) and									// tay	 		; 2
-      lda(3) and (TemporaryBuf[3] = TemporaryBuf[14]) and				// lda A+1		; 3
-      adc(4) and (TemporaryBuf[4] = TemporaryBuf[15]) and				// adc B+1		; 4
+      lda(3) and cmpBuf(3, 14) and							// lda A+1		; 3
+      adc(4) and cmpBuf(4, 15) and							// adc B+1		; 4
       sta_bp_1(5) and									// sta :bp+1		; 5
       lda_bp_y(6) and									// lda (:bp),y		; 6
       sta(7) and (iy(7) = false) and							// sta			; 7
@@ -1245,7 +1245,7 @@ begin
       											//			; 1
       opti(2) and									//; optimize 		; 2
       											//			; 3
-      lda(4) and (TemporaryBuf[4] = TemporaryBuf[12]) and				// lda K+1		; 4
+      lda(4) and cmpBuf(4, 12) and							// lda K+1		; 4
       SKIP(5) and									// SKIP			; 5
       											//			; 6
       opti(7) and									//; optimize 		; 7
@@ -1320,9 +1320,9 @@ begin
        end;
 
 
-    if lda(0) and (TemporaryBuf[0] = TemporaryBuf[4]) and				// lda A		; 0
+    if lda(0) and cmpBuf(0, 4) and							// lda A		; 0
        sta_ecx(1) and									// sta :ecx		; 1
-       lda(2) and (TemporaryBuf[2] = TemporaryBuf[6]) and				// lda A+1		; 2
+       lda(2) and cmpBuf(2, 6) and							// lda A+1		; 2
        sta_ecx_1(3) and									// sta :ecx+1		; 3
 //       lda(4) and									// lda A		; 4
        sta_eax(5) and									// sta :eax		; 5

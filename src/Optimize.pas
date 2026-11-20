@@ -559,7 +559,7 @@ var
 
           if lda_stack(k) and                        // sta :STACKORIGIN  ; k-1
              sta_stack(k - 1) and                    // lda :STACKORIGIN  ; k
-             (sta_a(i + 1) or add_sub(i + 1)) then   // sta|add|sub       ; i+1
+             sta_a(i + 1) then                       // sta               ; i+1
             if argMatch(k, k - 1) then
             begin
               listing[k - 1] := '';
