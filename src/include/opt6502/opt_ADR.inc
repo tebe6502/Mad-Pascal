@@ -749,6 +749,20 @@ begin
       end;
 
 
+    if (p > 1) and
+       lsr_stack(p-2) and								// lsr :STACKORIGIN+STACKWIDTH		; p-2		+-BYTE
+       ror_a(p-1) then									// ror @				; p-1
+											// sta :STACKORIGIN			; p
+     if argMatch(p-2, i+3) then
+      begin
+	listing[i+3] := '';
+	listing[i+4] := '';
+	listing[i+5] := '';
+
+	Result:=false; Break;
+      end;
+
+
     if (p > 2) and
        rol_stack(p-3) and								// rol :STACKORIGIN+STACKWIDTH		; p-3		+-BYTE
        add_sub_val(p-2) and (add_sub_im(p-2) = false) and 				// add|sub				; p-2
@@ -1716,7 +1730,7 @@ begin
     if LDA_STA_ADR(i+6) and								// lda adr.|				; 6
 											//         |sta adr.			; 7
 
-       (lda_im(i) = false) and lda_val(i) and 						// lda 					; 0		BYTE
+       (lda_im(i) = false) and lda_val(i) and 						//~lda #|lda				; 0		BYTE
        add(i+1) and (add_im(i+1) = false) and (add_stack(i+1) = false) and		// add 					; 1
        tay(i+2) and									// tay					; 2
        lda_a(i+3) and									// lda					; 3
@@ -2240,13 +2254,15 @@ begin
        end;
 
 
-    if //lda_a(i) and									// lda					; 0
+    if mwy(i+6) and									// mwy					; 6
+
+     //lda_a(i) and									// lda					; 0
       add_sub(i+1) and									// add|sub				; 1
       sta_stack(i+2) and								// sta :STACKORIGIN			; 2
       lda_a(i+3) and									// lda					; 3
       adc_sbc(i+4) and									// adc|sbc				; 4
       sta_stack(i+5) and								// sta :STACKORIGIN+STACKWIDTH		; 5
-      mwy(i+6) and									// mwy					; 6
+//      mwy(i+6) and									// mwy					; 6
       lda_stack(i+7) and								// lda :STACKORIGIN			; 7
       add_sub(i+8) and									// add|sub				; 8
       sta_stack(i+9) and								// sta :STACKORIGIN			; 9

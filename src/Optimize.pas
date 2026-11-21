@@ -1151,6 +1151,7 @@ end;
       for i := 0 to l - 1 do
       begin
 
+
 {
 if (pos('lda adr.ROW1+$20,y', listing[i]) > 0) then begin
 

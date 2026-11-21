@@ -1,9 +1,6 @@
 (*
 * Fire by koalka/bbsl/karzelki
 *)
-// 378
-// volatile psuje optymaslizacje o kilka bajtow
-
 
 program Fire;
 
@@ -36,14 +33,14 @@ begin
   tmp := 0;
 
   for b0i := 0 to $f do begin
-    for b1i := 7 downto 0 do poke(charset + b1i + b0i * 8, tmp);
+    for b1i := 7 downto 0 do mem[charset + b1i + b0i * 8] := tmp;
     inc(tmp,$11);
   end;
 
 //  FillChar(pointer(screen), $400, 0);
 
   for b0i := 3 downto 0 do
-   for b1i := 0 to 255 do poke(screen + b1i + b0i * 256, 0);
+   for b1i := 0 to 255 do mem[screen + b1i + b0i * 256] := 0;
 
 
   while true do begin

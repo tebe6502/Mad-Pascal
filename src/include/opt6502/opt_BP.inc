@@ -375,31 +375,6 @@ begin
        end;
 
 
-    if sta_bp_1(i+5) and									// sta :bp+1				; 5
-
-       lda_im_0(i+3) and									// lda #$00				; 3
-
-       lda_im_0(i) and										// lda #$00				; 0
-       add(i+1) and										// add					; 1
-       tay(i+2) and										// tay					; 2
-//       lda_im_0(i+3) and									// lda #$00				; 3
-       adc(i+4) then										// adc					; 4
-//       sta_bp_1(i+5) then									// sta :bp+1				; 5
-       begin
-	listing[i] := #9'ldy ' + GetARG(i+4);
-
-	listing[i+2] := #9'ldy ' + GetARG(i+1);
-
-	listing[i+1] := #9'sty :bp+1';
-
-        listing[i+3] := '';
-        listing[i+4] := '';
-        listing[i+5] := '';
-
-	exit(false);
-       end;
-
-
     if sta_bp_1(i+10) and									// sta :bp+1				; 10
 
        adc_im_0(i+3) and									// adc #$00				; 3
@@ -3476,27 +3451,6 @@ begin
       end;
 
 
-{ !!!!!!!!  dla [striped] nie dziala
-
-    if sta_bp2_1(i+3) and									// sta :bp2+1				; 3
-
-       lda_adr(i) and (iy(i) = false) and							// lda adr.				; 0
-       sta_bp2(i+1) and										// sta :bp2				; 1
-       lda_adr(i+2) and (iy(i+2) = false) and							// lda adr.  +1				; 2
-//       sta_bp2_1(i+3) and									// sta :bp2+1				; 3
-       ldy(i+4) then										// ldy					; 4
-//     if pos(listing[i], listing[i+2]) > 0 then
-      begin
-	listing[i] := #9'mwy ' + GetARG(i) + ' :bp2';
-	listing[i+1] := '';
-	listing[i+2] := '';
-	listing[i+3] := '';
-
-	exit(false);
-      end;
-}
-
-
     if lda_val(i) and (lda_im(i) = false) and (iy(i) = false) and				// lda TB				; 0
        sta_tmp(i+1) and										// sta :TMP				; 1
        (listing[i+2] = listing[i] + '+1') and							// lda TB+1				; 2
@@ -4198,6 +4152,31 @@ begin
 
 	exit(false);
       end;
+
+
+    if sta_bp_1(i+5) and									// sta :bp+1				; 5
+
+       lda_im_0(i+3) and									// lda #$00				; 3
+
+       lda_im_0(i) and										// lda #$00				; 0
+       add(i+1) and (add_im(i+1) = false) and							// add					; 1
+       tay(i+2) and										// tay					; 2
+//       lda_im_0(i+3) and									// lda #$00				; 3
+       adc(i+4) then										// adc					; 4
+//       sta_bp_1(i+5) then									// sta :bp+1				; 5
+       begin
+	listing[i] := #9'ldy ' + GetARG(i+4);
+
+	listing[i+2] := #9'ldy ' + GetARG(i+1);
+
+	listing[i+1] := #9'sty :bp+1';
+
+        listing[i+3] := '';
+        listing[i+4] := '';
+        listing[i+5] := '';
+
+	exit(false);
+       end;
 
 
     if sta_bp_1(i+2) and									// sta :bp+1				; 2

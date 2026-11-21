@@ -30,7 +30,7 @@ begin
   gprior := $40; sdmctl := $21;
 
   for b0i := 0 to $f do begin
-    for b1i := 0 to 7 do poke(charset + b1i + b0i * 8, tmp);
+    for b1i := 0 to 7 do mem[charset + b1i + b0i * 8] := tmp;
     inc(tmp,$11);
   end;
 
