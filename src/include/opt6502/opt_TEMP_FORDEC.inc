@@ -13,22 +13,21 @@ begin
       (sta(0) or sty(0) or stz(0)) and							// sta|sty|stz I		; 0
       (TemporaryBuf[1] = '') and							//				; 1
       lab_l(2) and									//l_00FB			; 2
-      (TemporaryBuf[3] = '; --- ForToDoCondition') then					//; --- ForToDoCondition	; 3
+      ForToDoCondition(3) then								//; --- ForToDoCondition	; 3
     begin
 
      yes := true;
 
      arg := GetARG(0);
 
-
      for p:=6 to High(TemporaryBuf) do
       if pos(TemporaryBuf[2], TemporaryBuf[p]) > 0 then begin
 
         if (TemporaryBuf[p] = #9'jmp ' + TemporaryBuf[2]) and			//; --- ForToDoEpilog	// p-5
-	   (TemporaryBuf[p-5] = '; --- ForToDoEpilog') and			// dec I		// p-4
+	   ForToDoEpilog(p-5) and						// dec I		// p-4
 	   dec_(p-4) and							// lda I		// p-3
 	   seq(p-1) and								// cmp #$FF		// p-2
-	   (TemporaryBuf[p-2] = #9'cmp #$FF') then				// seq			// p-1
+	   cmp_im_ff(p-2) then							// seq			// p-1
 	   begin								// jmp l_00FB		// p
  	    TemporaryBuf[4] := TemporaryBuf[p-4];
 
@@ -75,7 +74,7 @@ begin
 
         if yes and
 	   (TemporaryBuf[p] = #9'jmp ' + TemporaryBuf[2]) and			// jmp l_00FB		// p
-	   (TemporaryBuf[p-3] = '; --- ForToDoEpilog') and			// ; --- ForToDoEpilog	// p-3
+	   ForToDoEpilog(p-3) and						// ; --- ForToDoEpilog	// p-3
 	   (TemporaryBuf[p-2] = #9'dec ' + arg) and	// dec I		// p-2
 	   bmi_5(p-1) and							// bmi *+5		// p-1
            lab_l(p+1) then							//l_			// p+1
@@ -122,7 +121,7 @@ begin
 
         if yes and
 	   (TemporaryBuf[p] = #9'jmp ' + TemporaryBuf[2]) and			// jmp l_00FB		// p
-	   (TemporaryBuf[p-3] = '; --- ForToDoEpilog') and			// ; --- ForToDoEpilog	// p-3
+	   ForToDoEpilog(p-3) and						// ; --- ForToDoEpilog	// p-3
 	   (TemporaryBuf[p-2] = #9'dec ' + arg) and				// dec I		// p-2
 	   bmi_5(p-1) and							// bmi *+5		// p-1
            lab_l(p+1) then							//l_			// p+1
@@ -170,7 +169,7 @@ begin
            and_ora_eor_im(7) and							// and|ora|eor #	; 7
 
 	   (TemporaryBuf[p] = #9'jmp ' + TemporaryBuf[2]) and			// jmp l_00FB		// p
-	   (TemporaryBuf[p-3] = '; --- ForToDoEpilog') and			// ; --- ForToDoEpilog	// p-3
+	   ForToDoEpilog(p-3) and						// ; --- ForToDoEpilog	// p-3
 	   (TemporaryBuf[p-2] = #9'dec ' + arg) and				// dec I		// p-2
 	   bmi_5(p-1) and							// bmi *+5		// p-1
            lab_l(p+1) then							//l_			// p+1

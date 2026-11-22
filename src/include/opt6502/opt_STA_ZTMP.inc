@@ -88,6 +88,30 @@ begin
 	exit(false);
      end;
 
+
+    if lda_eax(i+9) and 							// lda :eax		; 9
+       add_sub(i+10) and		 					// add|sub		; 10
+       sta_a(i+11) and 								// sta			; 11
+       lda_eax_1(i+12) and 							// lda :eax+1		; 12
+       adc_sbc(i+13) and							// adc|sbc		; 13
+       sta_a(i+14) and 								// sta			; 14
+       (EAX(i+15) = false) and							//			; 15
+       (adc_sbc(i+16) = false) then 						//~adc|sbc		; 16
+     begin
+	listing[i]  := '';
+	listing[i+1]:= '';
+	listing[i+2]:= '';
+	listing[i+3]:= '';
+	listing[i+4]:= '';
+	listing[i+5]:= '';
+	listing[i+6]:= '';
+	listing[i+7]:= '';
+	listing[i+8]:= '';
+
+	exit(false);
+     end;
+
+
    end;
 
 

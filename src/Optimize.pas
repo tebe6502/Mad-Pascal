@@ -161,6 +161,7 @@ begin
   FreeAndNil(OptimizerStepList);
   OptimizeTemporary.Finalize;
   OptimizeTemporary := nil;
+
 end;
 
 
@@ -173,6 +174,7 @@ var
   p: Pchar;
   x: Cardinal;
 begin
+
   Result := 0;
   p := PChar(Value);
 
@@ -387,9 +389,7 @@ var
 
   function LDA_STA_BP(const i: TListingIndex): Boolean;
   begin
-
     Result := (lda_bp_y(i) and sta_a(i + 1)) or (lda_a(i) and sta_bp_y(i + 1));
-
   end;
 
 
@@ -2727,7 +2727,7 @@ begin        // OptimizeASM
       begin
 
         if (optyBP2 <> '') and (sta_a(i) or sty(i) or asl(i) or rol(i) or lsr(i) or ror(i) or inc_(i) or dec_(i)) then
-          if (pos('? ' + copy(listing[i], 6, 256) + ' ', optyBP2) > 0) or (pos(';' + copy(listing[i], 6, 256) + ';', optyBP2) > 0) then
+          if (pos('? ' + GetARG(i) + ' ', optyBP2) > 0) or (pos(';' + GetARG(i) + ';', optyBP2) > 0) then
           begin
             SetOptyBP2('');
             Break;

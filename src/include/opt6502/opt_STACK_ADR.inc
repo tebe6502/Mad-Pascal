@@ -62,6 +62,9 @@ begin
         listing[i+14] := '';
         listing[i+15] := '';
 
+	LDA_STA_ADR(i + 10, p, '-');
+
+{
 	if lda_adr_y(i+16) then begin
 	 delete(listing[i+16], pos(',y', listing[i+16]), 2);
 	 listing[i+16] := listing[i+16] + '-' + Hex(p, 2) + ',y';
@@ -81,6 +84,7 @@ begin
 	 delete(listing[i+19], pos(',y', listing[i+19]), 2);
 	 listing[i+19] := listing[i+19] + '-' + Hex(p, 2) + ',y';
 	end;
+}
 
 	exit(false);
      end;
@@ -121,6 +125,9 @@ begin
         listing[i+14] := '';
         listing[i+15] := '';
 
+	LDA_STA_ADR(i + 10, p, '+');
+
+{
 	if lda_adr_y(i+16) then begin
 	 delete(listing[i+16], pos(',y', listing[i+16]), 2);
 	 listing[i+16] := listing[i+16] + '+' + Hex(p, 2) + ',y';
@@ -140,6 +147,7 @@ begin
 	 delete(listing[i+19], pos(',y', listing[i+19]), 2);
 	 listing[i+19] := listing[i+19] + '+' + Hex(p, 2) + ',y';
 	end;
+}
 
 	exit(false);
      end;
@@ -212,6 +220,9 @@ begin
         listing[i+16] := '';
         listing[i+17] := '';
 
+	LDA_STA_ADR(i + 12, p, '-');
+
+{
 	if lda_adr_y(i+18) then begin
 	 delete(listing[i+18], pos(',y', listing[i+18]), 2);
 	 listing[i+18] := listing[i+18] + '-' + Hex(p, 2) + ',y';
@@ -251,6 +262,7 @@ begin
 	 delete(listing[i+25], pos(',y', listing[i+25]), 2);
 	 listing[i+25] := listing[i+25] + '-' + Hex(p, 2) + ',y';
 	end;
+}
 
 	exit(false);
      end;
@@ -293,6 +305,9 @@ begin
         listing[i+16] := '';
         listing[i+17] := '';
 
+	LDA_STA_ADR(i + 12, p, '+');
+
+{
 	if lda_adr_y(i+18) then begin
 	 delete(listing[i+18], pos(',y', listing[i+18]), 2);
 	 listing[i+18] := listing[i+18] + '+' + Hex(p, 2) + ',y';
@@ -332,6 +347,7 @@ begin
 	 delete(listing[i+25], pos(',y', listing[i+25]), 2);
 	 listing[i+25] := listing[i+25] + '+' + Hex(p, 2) + ',y';
 	end;
+}
 
 	exit(false);
      end;
@@ -408,7 +424,7 @@ begin
     if LDA_STA_ADR(i+8) and									// lda adr.|				; 8
        												// 	   |sta adr.			; 9
 
-       mva_im(i) and stack_0x(i) and								// mva #$   :STACKORIGIN,x		; 0
+       mva_im(i) and stack_0x(i) and								// mva #    :STACKORIGIN,x		; 0
        (mva(i+1) or sta(i+1)) and								// mva      :STACKORIGIN+STACKWIDTH,x	; 1
        lda_stack_0x(i+2) and									// lda :STACKORIGIN,x			; 2
        add_im_0(i+3) and									// add #$00				; 3
@@ -423,6 +439,9 @@ begin
        else
         p:=GetBYTE(i);
 
+       LDA_STA_ADR_0(i + 2, p, '+');
+
+{
        if lda_adr_y(i+8) then begin							// BYTE
 	 delete(listing[i+8], pos(',y', listing[i+8]), 2);
 	 listing[i+8] := listing[i+8] + '+' + Hex(p, 2);
@@ -474,7 +493,7 @@ begin
 	end;
 
        end;
-
+}
        listing[i]   := '';
        listing[i+1] := '';
        listing[i+2] := '';

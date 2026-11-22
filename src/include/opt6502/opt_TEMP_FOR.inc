@@ -27,7 +27,7 @@ begin
     if //(TemporaryBuf[0] = '; --- ForToDoEpilog') and					//; --- ForToDoEpilog	; 0
        dec_(1) and 									// dec W		; 1
        lda(2) and 									// lda W		; 2
-       (TemporaryBuf[3] = #9'cmp #$FF') and						// cmp #$FF		; 3
+       cmp_im_ff(3) and									// cmp #$FF		; 3
        seq(4) and									// seq			; 4
        jmp_l(5) and									// jmp l_xxxx		; 5
        lab_l(6) then									//l_yyyy		; 6
@@ -49,7 +49,7 @@ begin
        lab_a(4) and									//@			; 4
        dec_(5) and 									// dec W		; 5
        lda(6) and 									// lda W+1		; 6
-       (TemporaryBuf[7] = #9'cmp #$FF') and						// cmp #$FF		; 7
+       cmp_im_ff(7) and									// cmp #$FF		; 7
        seq(8) and									// seq			; 8
        jmp_l(9) and									// jmp l_xxxx		; 9
        lab_l(10) then									//l_yyyy		; 10
@@ -72,12 +72,12 @@ begin
       sta(1) and									// sta C		; 1
       (TemporaryBuf[2] = '') and							//			; 2
       lab_l(3) and									//l_2092		; 3
-      (TemporaryBuf[4] = '; --- ForToDoCondition') and					//; --- ForToDoCondition; 4
+      ForToDoCondition(4) and								//; --- ForToDoCondition; 4
       ldy(5) and									// ldy C		; 5
       lda(6) and									// lda 			; 6
       sta(7) and									// sta ( ),y		; 7
 											//			; 8
-      (TemporaryBuf[9] = '; --- ForToDoEpilog') and					//; --- ForToDoEpilog	; 9
+      ForToDoEpilog(9) and								//; --- ForToDoEpilog	; 9
       inc_(10) and									// inc C 		; 10
       seq(11) and									// seq 			; 11
       (TemporaryBuf[12] = #9'jmp ' + TemporaryBuf[3]) and				// jmp l_2092		; 12
@@ -116,7 +116,7 @@ begin
    if sta(0) and									// sta C		; 0
       (TemporaryBuf[1] = '') and							//			; 1
       lab_l(2) and									//l_2092		; 2
-      (TemporaryBuf[3] = '; --- ForToDoCondition') and					//; --- ForToDoCondition; 3
+      ForToDoCondition(3) and								//; --- ForToDoCondition; 3
       ldy(4) and									// ldy C		; 4
       lda(5) and									// lda Result		; 5
       add_sub(6) and									// add|sub		; 6
@@ -124,7 +124,7 @@ begin
       (scc(8) or scs(8)) and								// scc|scs		; 8
       (inc_(9) or dec_(9)) and								// inc|dec Result+1	; 9
 											//			; 10
-      (TemporaryBuf[11] = '; --- ForToDoEpilog') and					//; --- ForToDoEpilog	; 11
+      ForToDoEpilog(11) and								//; --- ForToDoEpilog	; 11
       inc_(12) and									// inc C 		; 12
       seq(13)and									// seq 			; 13
       (TemporaryBuf[14] = #9'jmp ' + TemporaryBuf[2]) and				// jmp l_2092		; 14
@@ -173,7 +173,7 @@ begin
    if sta(0) and									// sta C		; 0
       (TemporaryBuf[1] = '') and							//			; 1
       lab_l(2) and									//l_2092		; 2
-      (TemporaryBuf[3] = '; --- ForToDoCondition') and					//; --- ForToDoCondition; 3
+      ForToDoCondition(3) and								//; --- ForToDoCondition; 3
       ldy(4) and									// ldy C		; 4
       lda(5) and									// lda			; 5
       add_sub(6) and									// add|sub		; 6
@@ -181,7 +181,7 @@ begin
       lda(8) and									// lda			; 8
       sta_bp_y(9) and									// sta (:bp),y		; 9
 											//			; 10
-      (TemporaryBuf[11] = '; --- ForToDoEpilog') and					//; --- ForToDoEpilog	; 11
+      ForToDoEpilog(11) and								//; --- ForToDoEpilog	; 11
       inc_(12) and									// inc C 		; 12
       seq(13) and									// seq 			; 13
       (TemporaryBuf[14] = #9'jmp ' + TemporaryBuf[2]) and				// jmp l_2092		; 14
@@ -207,7 +207,7 @@ begin
 
    if ((TemporaryBuf[0] = '') or (ldy_im_0(0) and (TemporaryBuf[3] = '~'))) and		//			; 0
       lab_l(1) and									//l_2092		; 1
-      (TemporaryBuf[2] = '; --- ForToDoCondition') and					//; --- ForToDoCondition; 2
+      ForToDoCondition(2) and								//; --- ForToDoCondition; 2
       (ldy_im_0(3) or (TemporaryBuf[3] = '~')) and					// ldy #$00		; 3
       lda(4) and									// lda Result		; 4
       add_sub(5) and									// add|sub (P),y	; 5
@@ -215,7 +215,7 @@ begin
       (scc(7) or scs(7)) and								// scc|scs		; 7
       (inc_(8) or dec_(8)) and								// inc|dec Result+1	; 8
 											//			; 9
-      (TemporaryBuf[10] = '; --- ForToDoEpilog') and					//; --- ForToDoEpilog	; 10
+      ForToDoEpilog(10) and								//; --- ForToDoEpilog	; 10
       inc_(11) and									// inc P 		; 11
       sne(12) and									// sne 			; 12
       inc_(13) and									// inc P+1 		; 13
@@ -266,7 +266,7 @@ begin
    if sta(0) and									// sta C		; 0
       (TemporaryBuf[1] = '') and							//			; 1
       lab_l(2) and									//l_2092		; 2
-      (TemporaryBuf[3] = '; --- ForToDoCondition') and					//; --- ForToDoCondition; 3
+      ForToDoCondition(3) and								//; --- ForToDoCondition; 3
       lda(4) and									// lda C		; 4
       cmp(5) and									// cmp 			; 5
       SKIP(6) and									// SKIP			; 6
@@ -274,7 +274,7 @@ begin
       lda(8) and									// lda 			; 8
       sta(9) and									// sta 			; 9
 											//			; 10
-      (TemporaryBuf[11] = '; --- ForToDoEpilog') and					//; --- ForToDoEpilog	; 11
+      ForToDoEpilog(11) and								//; --- ForToDoEpilog	; 11
       inc_(12) and									// inc C 		; 12
       seq(13) and									// seq 			; 13
       (TemporaryBuf[14] = #9'jmp ' + TemporaryBuf[2]) and				// jmp l_2092		; 14
@@ -305,7 +305,7 @@ begin
    if sta(0) and									// sta C		; 0
       (TemporaryBuf[1] = '') and							//			; 1
       lab_l(2) and									//l_2092		; 2
-      (TemporaryBuf[3] = '; --- ForToDoCondition') and					//; --- ForToDoCondition; 3
+      ForToDoCondition(3) and								//; --- ForToDoCondition; 3
       lda(4) and									// lda C		; 4
       cmp(5) and									// cmp 			; 5
       SKIP(6) and									// SKIP			; 6
@@ -322,9 +322,9 @@ begin
          if (TemporaryBuf[p-6] = #9'ldy ' + GetARG(4)) and			// ldy C
             sta(p-5) and							// sta
             (TemporaryBuf[p-4] = '') and					//
-   	    (TemporaryBuf[p-3] = '; --- ForToDoEpilog') and			//; --- ForToDoEpilog
+   	    ForToDoEpilog(p-3) and						//; --- ForToDoEpilog
             (TemporaryBuf[p-2] = #9'inc ' + GetARG(4)) and			// inc C
-            (TemporaryBuf[p-1] = #9'seq') and					// seq
+            seq(p-1) and							// seq
             (TemporaryBuf[p] = #9'jmp ' + TemporaryBuf[2]) then			// jmp l_2092
 	  begin
 	   TemporaryBuf[0] := #9'tay';
@@ -345,7 +345,7 @@ begin
    if sta(0) and									// sta C		; 0
       (TemporaryBuf[1] = '') and							//			; 1
       lab_l(2) and									//l_2092		; 2
-      (TemporaryBuf[3] = '; --- ForToDoCondition') and					//; --- ForToDoCondition; 3
+      ForToDoCondition(3) and								//; --- ForToDoCondition; 3
       lda(4) and									// lda C		; 4
       cmp(5) and									// cmp 			; 5
       SKIP(6) and									// SKIP			; 6
@@ -362,9 +362,9 @@ begin
        if (pos(TemporaryBuf[2], TemporaryBuf[p]) > 0) then begin
 
          if yes and
-	    (TemporaryBuf[p-3] = '; --- ForToDoEpilog') and			//; --- ForToDoEpilog
+	    ForToDoEpilog(p-3) and						//; --- ForToDoEpilog
             (TemporaryBuf[p-2] = #9'inc ' + GetARG(4)) and			// inc C
-            (TemporaryBuf[p-1] = #9'seq') and					// seq
+            seq(p-1) and							// seq
             (TemporaryBuf[p] = #9'jmp ' + TemporaryBuf[2]) and			// jmp l_2092
             (TemporaryBuf[p+1] = GetARG(6)) then				//l_
 	  begin
@@ -405,7 +405,7 @@ begin
    if sta(0) and									// sta C		; 0
       (TemporaryBuf[1] = '') and							//			; 1
       lab_l(2) and									//l_2092		; 2
-      (TemporaryBuf[3] = '; --- ForToDoCondition') and					//; --- ForToDoCondition; 3
+      ForToDoCondition(3) and								//; --- ForToDoCondition; 3
       (TemporaryBuf[4] = #9'ldy ' + GetARG(0)) then					// ldy C		; 4
      begin
 
@@ -415,7 +415,7 @@ begin
        if (pos(TemporaryBuf[2], TemporaryBuf[p]) > 0) then begin
 
          if yes and
-	    (TemporaryBuf[p-3] = '; --- ForToDoEpilog') and			//; --- ForToDoEpilog
+	    ForToDoEpilog(p-3) and						//; --- ForToDoEpilog
             (TemporaryBuf[p-2] = #9'inc ' + GetARG(4)) and			// inc C
             seq(p-1) and							// seq
             (TemporaryBuf[p] = #9'jmp ' + TemporaryBuf[2]) and			// jmp l_2092
@@ -449,7 +449,7 @@ begin
 
 
    if lab_l(0) and									//l_2092		; 0
-      (TemporaryBuf[1] = '; --- ForToDoCondition') and					//; --- ForToDoCondition; 1
+      ForToDoCondition(1) and								//; --- ForToDoCondition; 1
       (lda(2) = false) and								// lda C		; 2
       (cmp(3) = false) then								// cmp 			; 3
      begin
@@ -460,7 +460,7 @@ begin
 	  if (TemporaryBuf[p] = #9'jmp ' + TemporaryBuf[0]) and
 	     bmi_5(p-1) and
 	     dec_(p-2) and
-	     (TemporaryBuf[p-3] = '; --- ForToDoEpilog') and
+	     ForToDoEpilog(p-3) and
 	     (TemporaryBuf[p-4] = '') and
 	     (inc_(p-5) or dec_(p-5)) and
 	     (scc(p-6) or scs(p-6)) and
@@ -484,7 +484,7 @@ begin
 
 
    if lab_l(0) and									//l_2092		; 0
-      (TemporaryBuf[1] = '; --- ForToDoCondition') and					//; --- ForToDoCondition; 1
+      ForToDoCondition(1) and								//; --- ForToDoCondition; 1
       lda(2) and (iy(2) = false) and							// lda C		; 2
       (TemporaryBuf[3] = #9'cmp #$40') and						// cmp #$40		; 3
       jcs_l(4) and									// jcs l_		; 4
@@ -497,7 +497,7 @@ begin
 
 
    if lab_l(0) and									//l_2092		; 0
-      (TemporaryBuf[1] = '; --- ForToDoCondition') and					//; --- ForToDoCondition; 1
+      ForToDoCondition(1) and								//; --- ForToDoCondition; 1
       lda(2) and (iy(2) = false) and							// lda C		; 2
       (TemporaryBuf[3] = #9'cmp #$40') and						// cmp #$40		; 3
       jcs_l(4) and									// jcs l_		; 4
@@ -513,7 +513,7 @@ begin
 
 
    if lab_l(0) and									//l_2092		; 0
-      (TemporaryBuf[1] = '; --- ForToDoCondition') and					//; --- ForToDoCondition; 1
+      ForToDoCondition(1) and								//; --- ForToDoCondition; 1
       lda(2) and									// lda			; 2
       cmp(3) and									// cmp			; 3
       bcc_a(4) and									// bcc @+		; 4

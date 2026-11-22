@@ -11,7 +11,7 @@ begin
     if (sta(0) or sty(0) or stz(0)) and							// sta|sty|stz			; 0
        ((TemporaryBuf[1] = '') or jmp_l(1)) and						//    |jmp l_			; 1
        lab_l(2) and									//l_xxxx			; 2
-       (TemporaryBuf[3] = '; --- ForToDoCondition') then				//; --- ForToDoCondition	; 3
+       ForToDoCondition(3) then								//; --- ForToDoCondition	; 3
      begin
 
       tmp := '';				// szukamy pierwszego 'ldy #'

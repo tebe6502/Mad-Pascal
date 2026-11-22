@@ -397,6 +397,33 @@ begin
      end;
 
 
+    if tya(10) and									// tya			; 10
+
+       eor_im_80(6) and									// eor #$80		; 6
+
+       ldy_1(0) and 									// ldy #1		; 0	SMALLINT > SMALLINT
+       lda(1) and									// lda A		; 1
+       cmp(2) and									// cmp B		; 2
+       lda(3) and									// lda A+1		; 3
+       sbc(4) and									// cmp B+1		; 4
+       svc(5) and									// svc			; 5
+//       eor_im_80(6) and								// eor #$80		; 6
+       bmi_a(7) and									// bmi @+		; 7
+       dey(8) and									// dey			; 8
+       lab_a(9) then									//@			; 9
+//       tya(10) then									// tya			; 10
+     begin
+
+	TemporaryBuf[0] := '~';
+
+	TemporaryBuf[7] := #9'asl @';
+	TemporaryBuf[8] := #9'lda #$00';
+	TemporaryBuf[9] := #9'rol @';
+	TemporaryBuf[10]:= '~';
+
+     end;
+
+
     if tya(8) and									// tya			; 8
 
        ldy_1(2) and 									// ldy #1		; 2
@@ -537,7 +564,8 @@ begin
        beq_a(5) and									// beq @+		; 5
        dey(6) and									// dey			; 6
 //       lab_a(7) and									//@			; 7
-       sty(8) then									// sty			; 8
+       sty(8) and									// sty			; 8
+       (sty(9) = false) and (tya(9) = false) then					//~sty|~tya		; 9
      begin
 
 	TemporaryBuf[5] := #9'lda #$00';

@@ -156,13 +156,14 @@ var
   // TODO: The functions below do not handle errors situations (-1) correctly
   function GetWORD(const i, j: TTemporaryBufIndex): Integer;
   begin
-    Result := GetVAL(copy(TemporaryBuf[i], 6, 4)) + GetVAL(copy(TemporaryBuf[j], 6, 4)) * 256;
+    Result := Byte(GetVAL(copy(TemporaryBuf[i], 6, 4))) +
+              Byte(GetVAL(copy(TemporaryBuf[j], 6, 4))) shl 8;
   end;
 
 
   function GetARG(const i: TTemporaryBufIndex): String;
   begin
-   Result := copy(TemporaryBuf[i], 6, 256);
+    Result := copy(TemporaryBuf[i], 6, 256);
   end;
 
 
@@ -214,8 +215,9 @@ var
 
 begin
 
+
 {
-if (pos('sta C', TemporaryBuf[10]) > 0) then begin
+if (pos('l_0141', TemporaryBuf[0]) > 0) then begin
 
       for p:=0 to 30 do writeln(TemporaryBuf[p]);
       writeln('-------');
@@ -272,10 +274,10 @@ end;
 
   // #asm
 
-  if TemporaryBuf[0].IndexOf('#asm:') = 0 then
+  if pos1('#asm:', 0) then
   begin
 
-    Writer.WriteLn(AsmBlockArray[StrToInt(copy(TemporaryBuf[0], 6, 256))]);
+    Writer.WriteLn(AsmBlockArray[StrToInt( GetARG(0) )]);
 
     TemporaryBuf[0] := '~';
 
@@ -284,8 +286,8 @@ end;
 
   // #lib:label
 
-  if TemporaryBuf[0].IndexOf('#lib:') = 0 then
-    TemporaryBuf[0] := #9'm@lib ' + copy(TemporaryBuf[0], 6, 256);
+  if pos1('#lib:', 0) then
+    TemporaryBuf[0] := #9'm@lib ' + GetARG(0);
 
 
   // @PARAM?
@@ -306,34 +308,31 @@ end;
     end else
     if cmp(0) then begin
 
-        if (pos('::#$00', TemporaryBuf[0]) = 0) then TemporaryBuf[0] := #9'cmp ' + fortmp(GetSTRING(0)) + '::#$00';
+      if (pos('::#$00', TemporaryBuf[0]) = 0) then TemporaryBuf[0] := #9'cmp ' + fortmp(GetSTRING(0)) + '::#$00';
 
     end else
     if sub(0) then begin
 
-          if (pos('::#$00', TemporaryBuf[0]) = 0) then TemporaryBuf[0] := #9'sub ' + fortmp(GetSTRING(0)) + '::#$00';
+      if (pos('::#$00', TemporaryBuf[0]) = 0) then TemporaryBuf[0] := #9'sub ' + fortmp(GetSTRING(0)) + '::#$00';
 
     end else
     if sbc(0) then begin
 
-            if (pos('::#$00', TemporaryBuf[0]) = 0) then TemporaryBuf[0] := #9'sbc ' + fortmp(GetSTRING(0)) + '::#$00';
+      if (pos('::#$00', TemporaryBuf[0]) = 0) then TemporaryBuf[0] := #9'sbc ' + fortmp(GetSTRING(0)) + '::#$00';
 
     end else
-            if sta(0) then
-              TemporaryBuf[0] := #9'sta ' + fortmp(GetSTRING(0))
-            else
-              if sty(0) then
-                TemporaryBuf[0] := #9'sty ' + fortmp(GetSTRING(0))
-              else
-    if mva(0) and (pos('mva @FORTMP_', TemporaryBuf[0]) = 0) then begin
-                  tmp := copy(TemporaryBuf[0], pos('@FORTMP_', TemporaryBuf[0]), 256);
+      if sta(0) then
+         TemporaryBuf[0] := #9'sta ' + fortmp(GetSTRING(0))
+      else
+      if sty(0) then
+         TemporaryBuf[0] := #9'sty ' + fortmp(GetSTRING(0))
+       else
+         if mva(0) and (pos('mva @FORTMP_', TemporaryBuf[0]) = 0) then begin
+            tmp := copy(TemporaryBuf[0], pos('@FORTMP_', TemporaryBuf[0]), 256);
 
-                  TemporaryBuf[0] := copy(TemporaryBuf[0], 1, pos(' @FORTMP_', TemporaryBuf[0])) + fortmp(tmp);
-    end else
-                  writeln('Unassigned: ' + TemporaryBuf[0]);
-
-  //  tmp:=copy(TemporaryBuf[0], pos('@FORTMP_', TemporaryBuf[0]), 256);
-  //   TemporaryBuf[0] := copy(TemporaryBuf[0], 1, pos(' @FORTMP_', TemporaryBuf[0]) ) + ':' + fortmp(tmp);
+            TemporaryBuf[0] := copy(TemporaryBuf[0], 1, pos(' @FORTMP_', TemporaryBuf[0])) + fortmp(tmp);
+         end else
+            writeln('Unassigned: ' + TemporaryBuf[0]);
 
 end;  //OptimizeTemporaryBuf
 

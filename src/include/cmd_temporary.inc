@@ -72,6 +72,16 @@ end;
     Result := TemporaryBuf[i] = #9'.ENDL'
   end;
 
+  function ForToDoCondition(const i: Integer): Boolean;
+  begin
+    Result := TemporaryBuf[i] = '; --- ForToDoCondition'
+  end;
+
+  function ForToDoEpilog(const i: Integer): Boolean;
+  begin
+    Result := TemporaryBuf[i] = '; --- ForToDoEpilog'
+  end;
+
   function LOCAL(const i: Integer): Boolean;
   begin
     Result := pos1(#9'.LOCAL ', i)
@@ -342,6 +352,16 @@ end;
   function CMP_IM_0(const i: Integer): Boolean;
   begin
     Result := TemporaryBuf[i] = #9'cmp #$00'
+  end;
+
+  function CMP_IM_FF(const i: Integer): Boolean;
+  begin
+    Result := TemporaryBuf[i] = #9'cmp #$FF'
+  end;
+
+  function EOR_IM_80(const i: Integer): Boolean;
+  begin
+    Result := TemporaryBuf[i] = #9'eor #$80'
   end;
 
   function LDY_1(const i: Integer): Boolean;

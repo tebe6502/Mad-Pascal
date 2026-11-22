@@ -776,13 +776,39 @@ begin
            argMatch(i+5, i+12) and
            argMatch(i+7, i+14) then
          begin
-	   listing[i+8]  := #9'lda ' + GetString(i);
+	   listing[i+8]  := #9'lda ' + GetARG(i);
 
-	   listing[i+10] := #9'lda ' + GetString(i+2);
+	   listing[i+10] := #9'lda ' + GetARG(i+2);
 
-	   listing[i+12] := #9'lda ' + GetString(i+4);
+	   listing[i+12] := #9'lda ' + GetARG(i+4);
 
-	   listing[i+14] := #9'lda ' + GetString(i+6);
+	   listing[i+14] := #9'lda ' + GetARG(i+6);
+
+	   listing[i]   := '';
+	   listing[i+1] := '';
+	   listing[i+2] := '';
+	   listing[i+3] := '';
+	   listing[i+4] := '';
+	   listing[i+5] := '';
+	   listing[i+6] := '';
+	   listing[i+7] := '';
+
+           exit(false);
+         end;
+
+
+       if ldy_stack(i+8) and									// ldy :STACKORIGIN-1,x			; 8
+          lda_stack(i+9) and									// lda :STACKORIGIN,x			; 9
+          sta_val(i+10) and									// sta					; 10	~:STACKORIGIN
+          lda_stack(i+11) and									// lda :STACKORIGIN+STACKWIDTH,x	; 11
+          sta_val(i+12) and									// sta					; 12	~:STACKORIGIN
+          dex(i+13) then									// dex					; 13
+        if argMatch(i+1, i+9) and
+           argMatch(i+3, i+11) then
+         begin
+	   listing[i+9]  := #9'lda ' + GetARG(i);
+
+	   listing[i+11] := #9'lda ' + GetARG(i+2);
 
 	   listing[i]   := '';
 	   listing[i+1] := '';
