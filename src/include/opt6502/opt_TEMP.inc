@@ -113,32 +113,6 @@ begin
     end;
 
 
-{ !!!
-
-   if jcs_l(10) and									// jcs			; 10	branch if C=1
-      											//			; 11
-      opti(12) and									//; optimize 		; 12
-      											//			; 13	C=0
-      asl_a(14) and									// asl @		; 14
-      add(15) then									// add			; 15
-    begin
-	TemporaryBuf[15] := #9'adc ' + GetARG(15);
-    end;
-
-
-   if jcs_l(10) and									// jcs			; 10	branch if C=1
-      											//			; 11
-      opti(12) and									//; optimize 		; 12
-      											//			; 13	C=0
-      asl_a(14) and									// asl @		; 14
-      asl_a(15) and									// asl @		; 15
-      add(16) then									// add			; 16
-    begin
-	TemporaryBuf[16] := #9'adc ' + GetARG(16);
-    end;
-}
-
-
    if scc(10) and									// scc			; 10	branch if C=0
       inc_(11) and									// inc			; 11
       											//			; 12
@@ -452,7 +426,7 @@ begin
       if (TemporaryBuf[p] = tmp) and
          mva(p-1) and											// mva ... I
          (TemporaryBuf[p-1] = #9'mva ' + GetString(p-1) + ' ' + GetARG(6)) and	//l_
-         (TemporaryBuf[p+1] = '') then
+         EMPTY(p+1) then
   	begin
 	 TemporaryBuf[p+1] := TemporaryBuf[6];
 	 TemporaryBuf[6] := '~';
@@ -865,7 +839,7 @@ begin
       sta(8) and									// sta			; 8
 //      lda_im(9) and									// lda #YY 		; 9
       sta(10) and									// sta			; 10
-      (TemporaryBuf[11] = '') then							//			; 11
+      EMPTY(11) then									//			; 11
     begin
      TemporaryBuf[2] := TemporaryBuf[8];
 
@@ -892,7 +866,7 @@ begin
       sta(8) and									// sta			; 8
 //      lda_im(9) and									// lda #YY 		; 9
       sta(10) and									// sta			; 10
-      (TemporaryBuf[11] = '') then							//			; 11
+      EMPTY(11) then									//			; 11
     begin
      TemporaryBuf[4] := TemporaryBuf[5];
      TemporaryBuf[5] := TemporaryBuf[6];
@@ -1040,7 +1014,7 @@ begin
 
 
    if sta_stack(0) and									// sta :STACKORIGIN	; 0
-      (TemporaryBuf[1] = '~') and							//~			; 1
+      TILDE(1) and									//~			; 1
       lda_stack(2) then									// lda :STACKORIGIN	; 2
     if argMatch(0, 2) then
     begin

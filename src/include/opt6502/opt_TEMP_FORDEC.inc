@@ -11,7 +11,7 @@ begin
       pos1(#9'#for:dec', 4) and								// #for:dec I			; 4
 
       (sta(0) or sty(0) or stz(0)) and							// sta|sty|stz I		; 0
-      (TemporaryBuf[1] = '') and							//				; 1
+      EMPTY(1) and									//				; 1
       lab_l(2) and									//l_00FB			; 2
       ForToDoCondition(3) then								//; --- ForToDoCondition	; 3
     begin

@@ -8,7 +8,7 @@ begin
 
 
    if sta(0) and									// sta A		; 0
-      (TemporaryBuf[1] = '') and							//			; 1
+      EMPTY(1) and									//			; 1
       jmp_l(2) and									// jmp l_xxxx		; 2
       lab_l(3) and									//l_xxxx		; 3
       											//			; 4
@@ -51,8 +51,8 @@ begin
       if jcc_l(1) then
         TemporaryBuf[1] := #9'jcs ' + GetARG(2)
       else
-        TemporaryBuf[1] := #9'jcc ' + GetARG(2);	
-      
+        TemporaryBuf[1] := #9'jcc ' + GetARG(2);
+
       TemporaryBuf[2] := '~';
      end;
 
@@ -125,7 +125,7 @@ begin
 
     if (SKIP(0) = false) and								//~SKIP			; 0
        (pos('jmp a_', TemporaryBuf[1]) > 0) and						// jmp a_xxxx		; 1
-       (TemporaryBuf[2] = '~') and							//~			; 2
+       TILDE(2) and									//~			; 2
        lab_l(3) and									//l_yyyy		; 3
        (TemporaryBuf[4] = GetARG(1)) then						//a_xxxx		; 4
       begin

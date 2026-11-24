@@ -34,7 +34,7 @@ begin
      TemporaryBuf[4] := '~';
 
      if jmp(0) and									// jmp			; 0
-        (TemporaryBuf[1] = '~') and							//~			; 1
+        TILDE(1) and									//~			; 1
         jmp(2) then									// jmp			; 2
       begin
        TemporaryBuf[2] := '~';

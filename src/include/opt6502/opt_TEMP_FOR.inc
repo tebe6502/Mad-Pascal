@@ -70,7 +70,7 @@ begin
 
    if lda(0) and									// lda			; 0
       sta(1) and									// sta C		; 1
-      (TemporaryBuf[2] = '') and							//			; 2
+      EMPTY(2) and									//			; 2
       lab_l(3) and									//l_2092		; 3
       ForToDoCondition(4) and								//; --- ForToDoCondition; 4
       ldy(5) and									// ldy C		; 5
@@ -114,7 +114,7 @@ begin
 
 
    if sta(0) and									// sta C		; 0
-      (TemporaryBuf[1] = '') and							//			; 1
+      EMPTY(1) and									//			; 1
       lab_l(2) and									//l_2092		; 2
       ForToDoCondition(3) and								//; --- ForToDoCondition; 3
       ldy(4) and									// ldy C		; 4
@@ -171,7 +171,7 @@ begin
 
 
    if sta(0) and									// sta C		; 0
-      (TemporaryBuf[1] = '') and							//			; 1
+      EMPTY(1) and									//			; 1
       lab_l(2) and									//l_2092		; 2
       ForToDoCondition(3) and								//; --- ForToDoCondition; 3
       ldy(4) and									// ldy C		; 4
@@ -205,10 +205,10 @@ begin
      end;
 
 
-   if ((TemporaryBuf[0] = '') or (ldy_im_0(0) and (TemporaryBuf[3] = '~'))) and		//			; 0
+   if (EMPTY(0) or (ldy_im_0(0) and TILDE(3))) and					//			; 0
       lab_l(1) and									//l_2092		; 1
       ForToDoCondition(2) and								//; --- ForToDoCondition; 2
-      (ldy_im_0(3) or (TemporaryBuf[3] = '~')) and					// ldy #$00		; 3
+      (ldy_im_0(3) or TILDE(3)) and							// ldy #$00		; 3
       lda(4) and									// lda Result		; 4
       add_sub(5) and									// add|sub (P),y	; 5
       sta(6) and									// sta Result		; 6
@@ -264,7 +264,7 @@ begin
 
 
    if sta(0) and									// sta C		; 0
-      (TemporaryBuf[1] = '') and							//			; 1
+      EMPTY(1) and									//			; 1
       lab_l(2) and									//l_2092		; 2
       ForToDoCondition(3) and								//; --- ForToDoCondition; 3
       lda(4) and									// lda C		; 4
@@ -303,7 +303,7 @@ begin
 
 
    if sta(0) and									// sta C		; 0
-      (TemporaryBuf[1] = '') and							//			; 1
+      EMPTY(1) and									//			; 1
       lab_l(2) and									//l_2092		; 2
       ForToDoCondition(3) and								//; --- ForToDoCondition; 3
       lda(4) and									// lda C		; 4
@@ -321,7 +321,7 @@ begin
 
          if (TemporaryBuf[p-6] = #9'ldy ' + GetARG(4)) and			// ldy C
             sta(p-5) and							// sta
-            (TemporaryBuf[p-4] = '') and					//
+            EMPTY(p-4) and							//
    	    ForToDoEpilog(p-3) and						//; --- ForToDoEpilog
             (TemporaryBuf[p-2] = #9'inc ' + GetARG(4)) and			// inc C
             seq(p-1) and							// seq
@@ -343,7 +343,7 @@ begin
 
 
    if sta(0) and									// sta C		; 0
-      (TemporaryBuf[1] = '') and							//			; 1
+      EMPTY(1) and									//			; 1
       lab_l(2) and									//l_2092		; 2
       ForToDoCondition(3) and								//; --- ForToDoCondition; 3
       lda(4) and									// lda C		; 4
@@ -403,7 +403,7 @@ begin
 
 
    if sta(0) and									// sta C		; 0
-      (TemporaryBuf[1] = '') and							//			; 1
+      EMPTY(1) and									//			; 1
       lab_l(2) and									//l_2092		; 2
       ForToDoCondition(3) and								//; --- ForToDoCondition; 3
       (TemporaryBuf[4] = #9'ldy ' + GetARG(0)) then					// ldy C		; 4
@@ -461,7 +461,7 @@ begin
 	     bmi_5(p-1) and
 	     dec_(p-2) and
 	     ForToDoEpilog(p-3) and
-	     (TemporaryBuf[p-4] = '') and
+	     EMPTY(p-4) and
 	     (inc_(p-5) or dec_(p-5)) and
 	     (scc(p-6) or scs(p-6)) and
 	     sta(p-7) and

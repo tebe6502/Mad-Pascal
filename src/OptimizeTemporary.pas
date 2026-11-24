@@ -29,29 +29,29 @@ uses SysUtils, Assembler;
 
 type
   TTemporaryBufIndex = Integer;
+  TTemporaryBuf = array [0..511] of String;
 
 var
   AsmBlockArray: TAsmBlockArray;
 var
   Writer: IWriter;
 var
-  TemporaryBuf: array [0..511] of String;
+  TemporaryBuf: TTemporaryBuf;
   TemporaryBufIndex: TTemporaryBufIndex;
   LastTempBuf0: TString;
 
+
 procedure TOptimizeTemporary.Initialize(const aAsmBlockArray: TAsmBlockArray; const aWriter: IWriter);
-var
-  i: TTemporaryBufIndex;
 begin
-  AsmBlockArray:=aAsmBlockArray;
+  AsmBlockArray := aAsmBlockArray;
   Writer:=aWriter;
 
-
-  for i := Low(TemporaryBuf) to High(TemporaryBuf) do TemporaryBuf[i] := '';
+  TemporaryBuf := Default(TTemporaryBuf);
   TemporaryBufIndex := -1;
   LastTempBuf0 := '';
 
 end;
+
 
 procedure OptimizeTemporaryBuf;
 var
@@ -344,6 +344,21 @@ end;  //OptimizeTemporaryBuf
 procedure TOptimizeTemporary.WriteOut(const a: String);
 var
   i: Integer;
+
+
+  function skipLine: Boolean;
+  begin
+
+    Result := false;
+
+    if (TemporaryBuf[TemporaryBufIndex] = '; --- ForToDoCondition') or
+       (pos(#9'#for', TemporaryBuf[TemporaryBufIndex]) > 0)
+    then
+      if (a = '') or (a = '~') or (pos('; optimize ', a) > 0) then Result := true;
+
+  end;
+
+
 begin
 
   // Debugger.debugger.WriteOut(a);
@@ -352,14 +367,7 @@ begin
   begin
 
     if (TemporaryBufIndex >= 0) and (TemporaryBuf[TemporaryBufIndex] <> '') then
-    begin
-
-      if TemporaryBuf[TemporaryBufIndex] = '; --- ForToDoCondition' then
-        if (a = '') or (pos('; optimize ', a) > 0) then exit;
-
-      if (pos(#9'#for', TemporaryBuf[TemporaryBufIndex]) > 0) then
-        if (a = '') or (pos('; optimize ', a) > 0) then exit;
-    end;
+      if skipLine then exit;
 
     Inc(TemporaryBufIndex);
     TemporaryBuf[TemporaryBufIndex] := a;
@@ -373,14 +381,7 @@ begin
     // DebugCall('OptimizeTemporaryBuf.After ', a+'/'+TemporaryBufToString);
 
     if TemporaryBuf[TemporaryBufIndex] <> '' then
-    begin
-
-      if TemporaryBuf[TemporaryBufIndex] = '; --- ForToDoCondition' then
-        if (a = '') or (pos('; optimize ', a) > 0) then exit;
-
-      if (pos(#9'#for', TemporaryBuf[TemporaryBufIndex]) > 0) then
-        if (a = '') or (pos('; optimize ', a) > 0) then exit;
-    end;
+      if skipLine then exit;
 
     if TemporaryBuf[0] <> '~' then
     begin
@@ -396,6 +397,7 @@ begin
   end;
 
 end;  //WriteOut
+
 
 procedure TOptimizeTemporary.Finalize;
 var

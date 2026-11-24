@@ -67,6 +67,16 @@ end;
     Result := pos1(#9'm@INLINE', i)
   end;
 
+  function TILDE(const i: Integer): Boolean;
+  begin
+    Result := TemporaryBuf[i] = '~'
+  end;
+
+  function EMPTY(const i: Integer): Boolean;
+  begin
+    Result := TemporaryBuf[i] = ''
+  end;
+
   function ENDL(const i: Integer): Boolean;
   begin
     Result := TemporaryBuf[i] = #9'.ENDL'
@@ -80,6 +90,11 @@ end;
   function ForToDoEpilog(const i: Integer): Boolean;
   begin
     Result := TemporaryBuf[i] = '; --- ForToDoEpilog'
+  end;
+
+  function WhileProlog(const i: Integer): Boolean;
+  begin
+    Result := TemporaryBuf[i] = '; --- WhileProlog'
   end;
 
   function LOCAL(const i: Integer): Boolean;

@@ -42,7 +42,7 @@ begin
 
   tmp := #9'ora ' + GetARG(6);
 
-  while (p < 512) and
+  while (p < High(TemporaryBuf)) and
         ldy_1(p) and									// ldy #1
         lda(p+1) and									// lda
         cmp(p+2) and									// cmp

@@ -63,6 +63,7 @@ begin
 	   tya(p) or
 	   _IF(p) or
            LOCAL(p) or
+	   TILDE(p) or
            pos1_lab(#9'@', p) then Break;
 
     end;
