@@ -352,8 +352,9 @@ begin
       											//			; 7
       opti(8) and									//; optimize 		; 8
      											//			; 9
-      (TemporaryBuf[10] = #9'ldy ' + GetARG(4)) then					// ldy C		; 10
-    if argMatch(0, 4) then
+      ldy(10) then									// ldy C		; 10
+    if argMatch(0, 4) and
+       argMatch(4, 10) then
      begin
 
       yes:=true;

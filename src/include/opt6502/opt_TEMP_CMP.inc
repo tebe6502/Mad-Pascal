@@ -405,7 +405,7 @@ begin
        lda(1) and									// lda A		; 1
        cmp(2) and									// cmp B		; 2
        lda(3) and									// lda A+1		; 3
-       sbc(4) and									// cmp B+1		; 4
+       sbc(4) and									// sbc B+1		; 4
        svc(5) and									// svc			; 5
 //       eor_im_80(6) and								// eor #$80		; 6
        bmi_a(7) and									// bmi @+		; 7
@@ -420,6 +420,27 @@ begin
 	TemporaryBuf[8] := #9'lda #$00';
 	TemporaryBuf[9] := #9'rol @';
 	TemporaryBuf[10]:= '~';
+
+     end;
+
+
+    if eor_im_80(5) and									// eor #$80		; 5
+
+       lda(0) and									// lda A		; 0
+       cmp(1) and									// cmp B		; 1
+       lda(2) and									// lda A+1		; 2
+       sbc(3) and									// sbc B+1		; 3
+       svc(4) and									// svc			; 4
+//       eor_im_80(5) and								// eor #$80		; 5
+       SKIP(6) and									// SKIP			; 6
+       ldy(7) then									// ldy A		; 7
+     if argMatch(0, 7) then
+     begin
+
+	TemporaryBuf[0] := #9'ldy ' + GetARG(0);
+	TemporaryBuf[1] := #9'cpy ' + GetARG(1);
+
+	TemporaryBuf[7] := '~';
 
      end;
 
