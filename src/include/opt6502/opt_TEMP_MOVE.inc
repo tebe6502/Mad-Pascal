@@ -10,6 +10,8 @@
 //
 
 procedure opt_TEMP_MOVE;
+var p, k, q: integer;
+    tmp: string;
 
 
   function LOCAL_SYSTEM_MOVE(i: byte): Boolean;

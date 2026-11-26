@@ -5,6 +5,7 @@
 
 procedure opt_TEMP_FOR;
 var p: integer;
+    yes: Boolean;
 begin
 
 

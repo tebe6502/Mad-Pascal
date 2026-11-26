@@ -10,6 +10,8 @@
 //
 
 procedure opt_TEMP_FILL;
+var q, k: integer;
+    yes: Boolean;
 
 
   function LOCAL_SYSTEM_FILL(i: byte): Boolean;

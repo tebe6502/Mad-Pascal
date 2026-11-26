@@ -6,6 +6,7 @@
 procedure opt_TEMP_WHILE;
 var i, p: integer;
     tmp: string;
+    yes: Boolean;
 begin
 
 

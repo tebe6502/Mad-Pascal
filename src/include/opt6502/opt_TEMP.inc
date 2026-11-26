@@ -1635,6 +1635,22 @@ begin
       end;
 
 
+    if ldy(0) and									// ldy A		; 0
+       and_ora_eor(1) and								// add|sub|and|ora|eor	; 1
+       sta(2) and									// sta			; 2
+      											//			; 3
+       opti(4) and									//; optimize 		; 4
+       											//			; 5
+       lda(6) then									// lda A		; 6
+      if argMatch(0, 6) and
+         (argMatch(2, 6) = false) then
+      begin
+
+	TemporaryBuf[6] := #9'tya';
+
+      end;
+
+
     if lda(0) and									// lda X		; 0
        sta(1) and									// sta A		; 1
        lda(2) and									// lda X+1		; 2
@@ -1652,6 +1668,7 @@ begin
          (argMatch(1, 8) = false) and
          (argMatch(3, 11) = false) then
       begin
+
         tmp := TemporaryBuf[3];
 
 	TemporaryBuf[2] := '~';

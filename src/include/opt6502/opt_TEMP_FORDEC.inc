@@ -5,6 +5,7 @@
 procedure opt_TEMP_FORDEC;
 var p: integer;
     arg: string;
+    yes: Boolean;
 begin
 
    if (TemporaryBuf[5] = #9'#for') and							// #for				; 5	for i:=N downto 0

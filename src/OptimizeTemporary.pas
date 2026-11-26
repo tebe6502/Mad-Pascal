@@ -55,9 +55,7 @@ end;
 
 procedure OptimizeTemporaryBuf;
 var
-  p, k, q: Integer;
   tmp: String;
-  yes: Boolean;
 
 
   {$i include\cmd_temporary.inc}
@@ -366,8 +364,7 @@ begin
   if TemporaryBufIndex < High(TemporaryBuf) then
   begin
 
-    if (TemporaryBufIndex >= 0) and (TemporaryBuf[TemporaryBufIndex] <> '') then
-      if skipLine then exit;
+    if (TemporaryBufIndex >= 0) and (TemporaryBuf[TemporaryBufIndex] <> '') and skipLine then exit;
 
     Inc(TemporaryBufIndex);
     TemporaryBuf[TemporaryBufIndex] := a;
@@ -380,8 +377,7 @@ begin
     OptimizeTemporaryBuf;
     // DebugCall('OptimizeTemporaryBuf.After ', a+'/'+TemporaryBufToString);
 
-    if TemporaryBuf[TemporaryBufIndex] <> '' then
-      if skipLine then exit;
+    if (TemporaryBuf[TemporaryBufIndex] <> '') and skipLine then exit;
 
     if TemporaryBuf[0] <> '~' then
     begin
