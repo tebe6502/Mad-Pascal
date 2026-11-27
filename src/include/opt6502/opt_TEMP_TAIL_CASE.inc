@@ -35,7 +35,7 @@ begin
       yes := yes and (not (lab_a(i-3) and tya(i-2) and sta(i-1)));
 
       if yes then
-      if (sta(p-1) or jsr(p-1)) and      
+      if (sta(p-1) or jsr(p-1)) and
          cmpBuf(i-1, p-1) and
          cmpBuf(i-2, p-2) then
       begin

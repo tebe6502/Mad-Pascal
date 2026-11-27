@@ -317,7 +317,7 @@ begin
     if argMatch(0, 4) then
      begin
 
-      for p:=11 to High(TemporaryBuf) do
+      for p := 11 to High(TemporaryBuf) do
        if (pos(TemporaryBuf[2], TemporaryBuf[p]) > 0) then begin
 
          if (TemporaryBuf[p-6] = #9'ldy ' + GetARG(4)) and			// ldy C
@@ -358,9 +358,9 @@ begin
        argMatch(4, 10) then
      begin
 
-      yes:=true;
+      yes := true;
 
-      for p:=11 to High(TemporaryBuf) do
+      for p := 11 to High(TemporaryBuf) do
        if (pos(TemporaryBuf[2], TemporaryBuf[p]) > 0) then begin
 
          if yes and
@@ -399,7 +399,7 @@ begin
            (TemporaryBuf[p] = #9'add ' + GetARG(4)) or
            (TemporaryBuf[p] = #9'sub ' + GetARG(4)) or
            (TemporaryBuf[p] = #9'adc ' + GetARG(4)) or
-           (TemporaryBuf[p] = #9'sbc ' + GetARG(4)) then yes:=false;
+           (TemporaryBuf[p] = #9'sbc ' + GetARG(4)) then yes := false;
 
      end;
 
@@ -411,9 +411,9 @@ begin
       (TemporaryBuf[4] = #9'ldy ' + GetARG(0)) then					// ldy C		; 4
      begin
 
-      yes:=true;
+      yes := true;
 
-      for p:=5 to High(TemporaryBuf) do
+      for p := 5 to High(TemporaryBuf) do
        if (pos(TemporaryBuf[2], TemporaryBuf[p]) > 0) then begin
 
          if yes and
@@ -445,7 +445,7 @@ begin
            (TemporaryBuf[p] = #9'add ' + GetARG(4)) or
            (TemporaryBuf[p] = #9'sub ' + GetARG(4)) or
            (TemporaryBuf[p] = #9'adc ' + GetARG(4)) or
-           (TemporaryBuf[p] = #9'sbc ' + GetARG(4)) then yes:=false;
+           (TemporaryBuf[p] = #9'sbc ' + GetARG(4)) then yes := false;
 
      end;
 
@@ -456,7 +456,7 @@ begin
       (cmp(3) = false) then								// cmp 			; 3
      begin
 
-      for p:=2 to High(TemporaryBuf) do
+      for p := 2 to High(TemporaryBuf) do
        if (pos(TemporaryBuf[0], TemporaryBuf[p]) > 0) then begin
 
 	  if (TemporaryBuf[p] = #9'jmp ' + TemporaryBuf[0]) and

@@ -43,7 +43,7 @@ begin
       if yes then begin
 
        while lab_l(p-1) do begin				// l_xxxx
-	tmp:=TemporaryBuf[p-1];					// l_yyyy
+	tmp := TemporaryBuf[p-1];				// l_yyyy
 								// l_zzzz
 	TemporaryBuf[p-1] := TemporaryBuf[p];
 	TemporaryBuf[p] := tmp;

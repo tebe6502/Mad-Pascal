@@ -4,7 +4,7 @@
 
 procedure opt_TEMP_FORDEC;
 var p: integer;
-    arg: string;
+    tmp: string;
     yes: Boolean;
 begin
 
@@ -19,9 +19,9 @@ begin
 
      yes := true;
 
-     arg := GetARG(0);
+     tmp := GetARG(0);
 
-     for p:=6 to High(TemporaryBuf) do
+     for p := 6 to High(TemporaryBuf) do
       if pos(TemporaryBuf[2], TemporaryBuf[p]) > 0 then begin
 
         if (TemporaryBuf[p] = #9'jmp ' + TemporaryBuf[2]) and			//; --- ForToDoEpilog	// p-5
@@ -69,14 +69,14 @@ begin
      end;
 
 
-     if yes and (TemporaryBuf[6] = #9'ldy ' + arg) and (TemporaryBuf[7] = #9'lda ' + arg) then
-      for p:=8 to High(TemporaryBuf) do
+     if yes and (TemporaryBuf[6] = #9'ldy ' + tmp) and (TemporaryBuf[7] = #9'lda ' + tmp) then
+      for p := 8 to High(TemporaryBuf) do
        if pos(TemporaryBuf[2], TemporaryBuf[p]) > 0 then begin
 
         if yes and
 	   (TemporaryBuf[p] = #9'jmp ' + TemporaryBuf[2]) and			// jmp l_00FB		// p
 	   ForToDoEpilog(p-3) and						// ; --- ForToDoEpilog	// p-3
-	   (TemporaryBuf[p-2] = #9'dec ' + arg) and	// dec I		// p-2
+	   (TemporaryBuf[p-2] = #9'dec ' + tmp) and	// dec I		// p-2
 	   bmi_5(p-1) and							// bmi *+5		// p-1
            lab_l(p+1) then							//l_			// p+1
 	  begin
@@ -86,10 +86,10 @@ begin
   	   if lab_b(p+2) then begin
 	    TemporaryBuf[p] := '~';//TemporaryBuf[p+1];
 	    TemporaryBuf[p+1] := TemporaryBuf[p+2];
-	    TemporaryBuf[p+2] := #9'sty ' + arg;
+	    TemporaryBuf[p+2] := #9'sty ' + tmp;
 	   end else begin
 	    TemporaryBuf[p] := '~';//TemporaryBuf[p+1];
-	    TemporaryBuf[p+1] := #9'sty ' + arg;
+	    TemporaryBuf[p+1] := #9'sty ' + tmp;
 	   end;
 
 	   TemporaryBuf[0] := #9'tay';
@@ -102,7 +102,7 @@ begin
 
 	 Break;
        end else
-        if ( (p-3 >= 8) and (GetARG(p-3) = arg) ) or fail(p) then yes:=false;
+        if ( (p-3 >= 8) and (GetARG(p-3) = tmp) ) or fail(p) then yes:=false;
 {
 	   ldy(p) or
 	   jsr(p) or
@@ -116,14 +116,14 @@ begin
            (pos(#9'@print', TemporaryBuf[p]) > 0) then yes:=false;
 }
 
-     if yes and (TemporaryBuf[6] = #9'ldy ' + arg) then
-      for p:=7 to High(TemporaryBuf) do
+     if yes and (TemporaryBuf[6] = #9'ldy ' + tmp) then
+      for p := 7 to High(TemporaryBuf) do
        if pos(TemporaryBuf[2], TemporaryBuf[p]) > 0 then begin
 
         if yes and
 	   (TemporaryBuf[p] = #9'jmp ' + TemporaryBuf[2]) and			// jmp l_00FB		// p
 	   ForToDoEpilog(p-3) and						// ; --- ForToDoEpilog	// p-3
-	   (TemporaryBuf[p-2] = #9'dec ' + arg) and				// dec I		// p-2
+	   (TemporaryBuf[p-2] = #9'dec ' + tmp) and				// dec I		// p-2
 	   bmi_5(p-1) and							// bmi *+5		// p-1
            lab_l(p+1) then							//l_			// p+1
 	  begin
@@ -133,10 +133,10 @@ begin
   	   if lab_b(p+2) then begin
 	    TemporaryBuf[p] := '~';//TemporaryBuf[p+1];
 	    TemporaryBuf[p+1] := TemporaryBuf[p+2];
-	    TemporaryBuf[p+2] := #9'sty ' + arg;
+	    TemporaryBuf[p+2] := #9'sty ' + tmp;
 	   end else begin
 	    TemporaryBuf[p] := '~';//TemporaryBuf[p+1];
-	    TemporaryBuf[p+1] := #9'sty ' + arg;
+	    TemporaryBuf[p+1] := #9'sty ' + tmp;
 	   end;
 
 	   TemporaryBuf[0] := #9'tay';
@@ -147,7 +147,7 @@ begin
 
 	 Break;
        end else
-        if ( (p-3 >= 7) and (GetARG(p-3) = arg) ) or fail(p) then yes:=false;
+        if ( (p-3 >= 7) and (GetARG(p-3) = tmp) ) or fail(p) then yes:=false;
 {
 	   ldy(p) or
 	   jsr(p) or
@@ -161,8 +161,8 @@ begin
            (pos(#9'@print', TemporaryBuf[p]) > 0) then yes:=false;
 }
 
-     if yes and (TemporaryBuf[8] = #9'ldy ' + arg) then
-      for p:=9 to High(TemporaryBuf) do
+     if yes and (TemporaryBuf[8] = #9'ldy ' + tmp) then
+      for p := 9 to High(TemporaryBuf) do
        if pos(TemporaryBuf[2], TemporaryBuf[p]) > 0 then begin
 
         if yes and
@@ -171,7 +171,7 @@ begin
 
 	   (TemporaryBuf[p] = #9'jmp ' + TemporaryBuf[2]) and			// jmp l_00FB		// p
 	   ForToDoEpilog(p-3) and						// ; --- ForToDoEpilog	// p-3
-	   (TemporaryBuf[p-2] = #9'dec ' + arg) and				// dec I		// p-2
+	   (TemporaryBuf[p-2] = #9'dec ' + tmp) and				// dec I		// p-2
 	   bmi_5(p-1) and							// bmi *+5		// p-1
            lab_l(p+1) then							//l_			// p+1
 	  begin
@@ -181,13 +181,13 @@ begin
   	   if lab_b(p+2) then begin
 	    TemporaryBuf[p] := '~';//TemporaryBuf[p+1];
 	    TemporaryBuf[p+1] := TemporaryBuf[p+2];
-	    TemporaryBuf[p+2] := #9'sty ' + arg;
+	    TemporaryBuf[p+2] := #9'sty ' + tmp;
 	   end else begin
 	    TemporaryBuf[p] := '~';//TemporaryBuf[p+1];
-	    TemporaryBuf[p+1] := #9'sty ' + arg;
+	    TemporaryBuf[p+1] := #9'sty ' + tmp;
 	   end;
 
-	   if GetARG(6) = arg then TemporaryBuf[6] := #9'tya';
+	   if GetARG(6) = tmp then TemporaryBuf[6] := #9'tya';
 
 	   TemporaryBuf[0] := #9'tay';
 
@@ -197,7 +197,7 @@ begin
 
 	 Break;
        end else
-        if ( (p-3 >= 9) and (GetARG(p-3) = arg) ) or fail(p) then yes:=false;
+        if ( (p-3 >= 9) and (GetARG(p-3) = tmp) ) or fail(p) then yes:=false;
 {
 	   ldy(p) or
 	   jsr(p) or

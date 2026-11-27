@@ -94,18 +94,18 @@ var
   function SKIP(i: integer): Boolean;
   begin
 
-      Result :=	seq(i) or sne(i) or
-		spl(i) or smi(i) or
-		scc(i) or scs(i) or
-		svc(i) or svs(i) or
-
-		jne(i) or jeq(i) or
+      Result :=	jne(i) or jeq(i) or
 		jcc(i) or jcs(i) or
 		jmi(i) or jpl(i) or
 
-		pos1(#9'bne ', i) or pos1(#9'beq ', i) or
-		pos1(#9'bcc ', i) or pos1(#9'bcs ', i) or
-		pos1(#9'bmi ', i) or pos1(#9'bpl ', i);
+		bne(i) or beq(i) or
+		bcs(i) or bcc(i) or
+		bmi(i) or bpl(i) or
+
+      		seq(i) or sne(i) or
+		spl(i) or smi(i) or
+		scc(i) or scs(i) or
+		svc(i) or svs(i);
   end;
 
 

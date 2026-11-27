@@ -476,6 +476,38 @@ end;
 
 // -----------------------------------------------------------------------------
 
+  function BEQ(const i: Integer): Boolean;
+  begin
+    Result := pos1(#9'beq ', i)
+  end;
+
+  function BNE(const i: Integer): Boolean;
+  begin
+    Result := pos1(#9'bne ', i)
+  end;
+
+  function BCC(const i: Integer): Boolean;
+  begin
+    Result := pos1(#9'bcc ', i)
+  end;
+
+  function BCS(const i: Integer): Boolean;
+  begin
+    Result := pos1(#9'bcs ', i)
+  end;
+
+  function BPL(const i: Integer): Boolean;
+  begin
+    Result := pos1(#9'bpl ', i)
+  end;
+
+  function BMI(const i: Integer): Boolean;
+  begin
+    Result := pos1(#9'bmi ', i)
+  end;
+
+// -----------------------------------------------------------------------------
+
   function BEQ_A(const i: Integer): Boolean;
   begin
     Result := TemporaryBuf[i] = #9'beq @+'
