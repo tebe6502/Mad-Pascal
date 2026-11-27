@@ -868,8 +868,6 @@
      begin
        listing[i+1] := '';
 
-       if (asl(i+2) = false) and (lsr(i+2) = false) then listing[i] := '';		// !!!
-
        Result:=false; Break;
      end;
 }
@@ -1608,6 +1606,20 @@
 	end;
 
 
+    if sta_stack(i) and									// sta :STACKORIGIN			; 0
+       (add_sub_val(i+1) or and_ora_eor_val(i+1)) and					// add|sub|and|ora|eor			; 1	~:STACKORIGIN
+       sta_val(i+2) and									// sta					; 2	~:STACKORIGIN
+       lda_stack(i+3) and								// lda :STACKORIGIN+STACKWIDTH		; 3
+       (adc_sbc_val(i+4) or and_ora_eor(i+4)) and					// adc|sbc|anc|ora|eor			; 4	~:STACKORIGIN
+       sta_val(i+5) then								// sta					; 5	~:STACKORIGIN
+     if (argMatch(i, i+3) = false) then
+	begin
+	  listing[i] := '';
+
+	  Result:=false; Break;
+	end;
+
+
     if UNUSED_A(i) and									// UNUSED_A				; 0
        lda_a(i+1) and									// lda :STACKORIGIN			; 1
        (add_sub(i+2) or and_ora_eor(i+2)) and						// add|sub|and|ora|eor			; 2
@@ -1818,7 +1830,7 @@
      if argMatch(i+1, i+4) then
        begin
 	listing[i+4] := listing[i];
-	
+
 	listing[i]  := '';
 	listing[i+1]:= '';
 

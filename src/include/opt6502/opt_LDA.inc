@@ -579,9 +579,8 @@ begin
        (add_im_0(i+3) = false) then								//~add #$00				; 3
      if argMatch(i+1, i+2) then
      begin
-       listing[i+2] := '';
 
-       if (asl(i+3) = false) and (lsr(i+3) = false) then listing[i+1] := '';					// !!!
+       listing[i+2] := '';
 
        exit(false);
      end;
@@ -592,9 +591,8 @@ begin
        (add_im_0(i+2) = false) and (cmp(i+2) = false) then					//~add #$00|~cmp			; 2
      if argMatch(i, i+1) then
      begin
-       listing[i+1] := '';
 
-       if (asl(i+2) = false) and (lsr(i+2) = false) and (SKIP(i+2) = false) then listing[i] := '';		// !!!
+       listing[i+1] := '';
 
        exit(false);
      end;
