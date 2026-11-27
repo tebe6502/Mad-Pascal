@@ -309,6 +309,11 @@ end;
       if (pos('::#$00', TemporaryBuf[0]) = 0) then TemporaryBuf[0] := #9'cmp ' + fortmp(GetSTRING(0)) + '::#$00';
 
     end else
+    if cpy(0) then begin
+
+      if (pos('::#$00', TemporaryBuf[0]) = 0) then TemporaryBuf[0] := #9'cpy ' + fortmp(GetSTRING(0)) + '::#$00';
+
+    end else
     if sub(0) then begin
 
       if (pos('::#$00', TemporaryBuf[0]) = 0) then TemporaryBuf[0] := #9'sub ' + fortmp(GetSTRING(0)) + '::#$00';

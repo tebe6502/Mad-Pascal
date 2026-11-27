@@ -196,6 +196,11 @@ end;
     Result := pos1(#9'cmp ', i)
   end;
 
+  function CPY(const i: Integer): Boolean;
+  begin
+    Result := pos1(#9'cpy ', i)
+  end;
+
   function LDA(const i: Integer): Boolean;
   begin
     Result := pos1(#9'lda ', i)
